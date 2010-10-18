@@ -1,6 +1,7 @@
 <?php
-namespace ringing;
-require( dirname(dirname(dirname(dirname(__FILE__)))).'/vendors/ringing/abbreviations.php' );
+namespace Utilities;
+require( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/abbreviations.php' );
+use \Helpers;
 
 date_default_timezone_set( 'UTC' );
 

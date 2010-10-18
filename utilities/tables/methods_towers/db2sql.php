@@ -1,12 +1,9 @@
 <?php
-namespace methods_towers;
-require( dirname(dirname(dirname(dirname(__FILE__)))).'/vendors/ringing/abbreviations.php' );
-use \PDO;
-use \ringing;
+namespace Utilities;
+require( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/abbreviations.php' );
+use \PDO, \Helpers;
 
-$type = 'mysql';
-$host = 'localhost';
-$database = 'blueline';
+$dsn = 'mysql:host=localhost;dbname=blueline';
 $username = 'blueline';
 $password = 'password';
 ?>
@@ -27,7 +24,7 @@ CREATE TABLE IF NOT EXISTS methods_towers_unmatched (
 
 <?php
 try {
-	$dbh = new PDO( $type.':host='.$host.';dbname='.$database, $username, $password );
+	$dbh = new PDO( $dsn, $username, $password );
 	
 	$methodSearch = $dbh->prepare( 'SELECT title, stage, firstTowerbellPeal_location as location from methods WHERE firstTowerbellPeal_location IS NOT NULL' );
 	$methodSearch->execute();

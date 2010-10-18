@@ -1,8 +1,8 @@
 <?php
-namespace ringing;
+namespace Helpers;
 
-class Classification {
-	protected static $_classifications = array(
+class Classifications {
+	private static $_classifications = array(
 		'Alliance',
 		'Bob',
 		'Delight',
@@ -15,7 +15,7 @@ class Classification {
 	);
 	
 	public static function isClass( $test ) {
-		return ( array_search( ucwords( strtolower( $test ) ), static::_classifications ) !== false );
+		return ( array_search( ucwords( strtolower( $test ) ), self::$_classifications ) !== false );
 	}
 };
 

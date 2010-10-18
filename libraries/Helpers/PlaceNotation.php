@@ -1,9 +1,9 @@
 <?php
-namespace Ringing;
+namespace Helpers;
 
 class PlaceNotation {
 	
-	protected static $notationOrder = '1234567890ETABCDFGHJKLMNPQRSUVWYZ';
+	private static $notationOrder = '1234567890ETABCDFGHJKLMNPQRSUVWYZ';
 	
 	public static function parse( $stage, $notation ) {	
 		// Tidy up letter cases
@@ -126,7 +126,7 @@ class PlaceNotation {
 		$notationFull = str_replace( array( '.x.', 'x.', '.x'), 'x', $notationFull );
 	
 		// Correct any ordering of bells in full notation that have arisen either from us mirroring things, or lazy input
-		$notationFull = static::order( $notationFull );
+		$notationFull = self::order( $notationFull );
 	
 		// Explode the notation into an array of changes
 		$notationExploded = array();
@@ -239,7 +239,7 @@ class PlaceNotation {
 	}
 	
 	// Corrects ordering of bells within (already parsed, expanded) notation
-	function order( $notation ) {
+	private static function order( $notation ) {
 		// Split notation on . or x
 		$splitNotation = preg_split( '/(x|\.)/', $notation, -1, PREG_SPLIT_NO_EMPTY );
 		$splitNotationOrdered = array();

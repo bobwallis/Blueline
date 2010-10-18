@@ -1,9 +1,9 @@
 <?php
-namespace ringing;
-require_once( dirname(__FILE__).'/stages.php' );
+namespace Helpers;
+require_once( dirname(__FILE__).'/Stages.php' );
 
-class LeadHead {
-	protected static $_leadHeadCodes = array(
+class LeadHeadCodes {
+	private static $_leadHeadCodes = array(
 		'a' => array(
 			4 => '1342',
 			5 => '12534',
@@ -191,7 +191,7 @@ class LeadHead {
 			16 => '12TB0D8C6A4E3957'
 		)
 	);
-	protected static $_leadHeadCodeConversion = array(
+	private static $_leadHeadCodeConversion = array(
 		'a' => 'g',
 		'b' => 'h',
 		'c' => 'j',
@@ -203,9 +203,9 @@ class LeadHead {
 	);
 	
 	public static function fromCode( $code, $stage ) {
-		$code = str_replace( array_values( static::$_leadHeadCodeConversion ), array_keys( static::$_leadHeadCodeConversion ), strtolower( $code ) );
-		$stage = Stage::fromEither( $stage );
-		return ( $stage !== false && isset( static::$_leadHeadCodes[$code][$stage['int']] ) )? static::$_leadHeadCodes[$code][$stage['int']] : false;
+		$code = str_replace( array_values( self::$_leadHeadCodeConversion ), array_keys( self::$_leadHeadCodeConversion ), strtolower( $code ) );
+		$stage = Stages::fromEither( $stage );
+		return ( $stage !== false && isset( self::$_leadHeadCodes[$code][$stage['int']] ) )? self::$_leadHeadCodes[$code][$stage['int']] : false;
 	}
 };
 ?>
