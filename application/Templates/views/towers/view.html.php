@@ -1,0 +1,137 @@
+<?php
+namespace Blueline;
+
+$title_for_layout = htmlspecialchars( \Helpers\Text::toList( array_map( function( $t ){ return $t['place']; }, $towers ) ) ) . ' | Towers | Blueline';
+$breadcrumb = array(
+	'<a href="/towers">Towers</a>'
+);
+$headerSearch = array( 
+	'action' => '/towers/search',
+	'placeholder' => 'Search towers'
+);
+$scripts_for_layout = array(
+	'http://maps.google.com/maps/api/js?sensor=false',
+	'/scripts/general.js',
+	'/scripts/towers.js'
+);
+$i = 0;
+?>
+<?php $i = 0; foreach( $towers as $tower ) : ?>
+<section class="tower">
+	<header>
+		<h1><?php echo implode( ', ', array_reverse( explode(  ', ', $tower['place'] ) ) ).(($tower['dedication']!='Unknown')?' <span class="normalweight">('.$tower['dedication'].')</span>':''); ?></h1>
+		<h2 class="sub"><?php echo implode( ', ', array_filter( array( $tower['county'], $tower['country'] ), function($i){return !empty($i);} ) ); ?></h2>
+		<ul class="tabBar">
+			<li id="tab_details<?php echo $i; ?>" class="active">Details</li>
+			<li id="tab_map<?php echo $i; ?>" class="normal_hide">Map</li>
+<?php if( count( $tower['firstPeals'] ) > 0 ) : ?>
+			<li id="tab_peals<?php echo $i; ?>">Methods First Pealed</li>
+<?php endif; ?>
+		</ul>
+	</header>
+	<section id="content_map<?php echo $i; ?>" class="towerMap">
+		<noscript><h2>Map</h2></noscript>
+		<div id="map<?php echo $i; ?>" class="map"><noscript><img width="600px" height="370px" src="http://maps.google.com/maps/api/staticmap?format=png&amp;size=600x370&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center=<?php echo $tower['latitude'].','.$tower['longitude'].'&amp;markers=size:small|color:red|'.$tower['latitude'].','.$tower['longitude']; ?>" /></noscript></div>
+	</section>
+	<script>
+	//<![CDATA[
+		if( typeof( towerMaps ) == 'undefined' ) { var towerMaps = new Array(); }
+		towerMaps.push( new TowerMap( {
+			id: <?php echo $i; ?>,
+			container: 'map<?php echo $i; ?>',
+			scrollwheel: false,
+			zoom: 15,
+			center: new google.maps.LatLng( <?php echo $tower['latitude']; ?>, <?php echo $tower['longitude']; ?> )
+		} ) );
+	//]]>
+	</script>
+	<section id="content_details<?php echo $i; ?>">
+		<noscript><h2>Details</h2></noscript>
+		<table class="horizontalDetails">
+			<tr class="bigDetails">
+				<th>Bells:</th>
+				<td><strong><?php echo $tower['bells']; ?></strong></td>
+			</tr>
+			<tr class="bigDetails">
+				<th>Tenor:</th>
+				<td><strong><?php echo (($tower['weightApprox'])?'~':'').$tower['weightText'] . '</strong> in ' . str_replace( array( '#', 'b' ), array( '&#x266f;', '&#x266d;' ), $tower['note'] ) . (($tower['hz'])?' ('.$tower['hz'].'Hz)':''); ?></td>
+			</tr>
+<?php if( count( $tower['affiliations'] ) > 0 ) : ?>
+			<tr>
+				<th>Affiliations:</th>
+				<td><?php echo implode( ', ', array_map( function( $a ) { return '<a href="/associations/view/'.htmlentities( $a['abbreviation'] ).'">'.htmlentities( $a['name'] ).'</a>'; }, $tower['affiliations'] ) ); ?></td>
+			</tr>
+<?php endif; ?>
+			<tr>
+				<th>Information:</th>
+				<td><?php
+			$information = array();
+			if( $tower['unringable'] == 1 && stripos( $tower['extraInfo'],'unringable' ) === false ) {
+				$information[] = 'Unringable. ';
+			}
+			if( !empty( $tower['extraInfo'] ) ) {
+				$tower['extraInfo'] = preg_replace( array( '/([0-9]+)b/', '/([0-9]+)#/' ), array( '${1}&#x266d;', '${1}&#x266f;' ), $tower['extraInfo'] );
+				if( isset( $information[0] ) ) {
+					$information[0] .= $tower['extraInfo'];
+				}
+				else {
+					$information[] = $tower['extraInfo'];
+				}
+			}
+			if( $tower['groundFloor'] == 1 ) {
+				$information[] = 'Ground floor.';
+			}
+			if( $tower['toilet'] == 1 ) {
+				$information[] = 'Toilet available.';
+			}
+			if( $tower['simulator'] == 1 ) {
+				$information[] = 'Has a simulator.';
+			}
+			if( !empty( $tower['overhaulYear'] ) ) {
+				$information[] = 'Overhauled in '.$tower['overhaulYear'].((!empty($tower['contractor']))?' by '.$tower['contractor'].'.':'').(($tower['tuned']===$tower['overhaulYear'])?' Also tuned in '.$tower['tuned'].'.':'');
+			}
+			if( !empty( $tower['tuned'] ) && $tower['overhaulYear'] != $tower['tuned'] ) {
+				$information[] = 'Tuned in '.$tower['tuned'].'.';
+			}
+			if( !empty( $tower['practiceNight'] ) || !empty( $tower['practiceNotes'] ) ) {
+				$days = array( '', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' );
+				$information[] = 'Practice: '.((!empty($tower['practiceNight']))?$days[intval($tower['practiceNight'])]:'').((!empty($tower['practiceStart']))?', '.$tower['practiceStart']:'').((!empty($tower['practiceNotes']))?' '.$tower['practiceNotes']:'');
+			}
+			$information[] = ((!empty($tower['webPage']))?'<a href="http://'.$tower['webPage'].'" class="external">Tower Website</a>, ':'') . '<a href="http://dove.cccbr.org.uk/detail.php?DoveID='.str_replace( '_', '&#43;', $tower['doveId']).'&showFrames=true" class="external">Dove Entry</a>';
+		
+			echo implode( '<br/>', $information );
+		?></td>
+			</tr>
+<?php if( !empty( $tower['postcode'] ) ) : ?>
+			<tr>
+				<th>Postcode:</th>
+				<td><?php echo $tower['postcode']; ?></td>
+			</tr>
+<?php endif; ?>
+<?php if( !empty( $tower['gridReference'] ) ) : ?>
+			<tr>
+				<th>Grid Reference:</th>
+				<td><?php echo $tower['gridReference']; ?></td>
+			</tr>
+<?php endif; ?>
+		</table>
+<?php if( isset( $tower['nearbyTowers'] ) && count( $tower['nearbyTowers'] ) > 0 ) : ?>
+		<h3>Nearby Towers:</h3>
+		<ol class="noliststyle">
+<?php foreach( $tower['nearbyTowers'] as $nTower ) : ?>
+			<li><?php echo '<a href="/towers/view/'.$nTower['doveID'].'">' . $nTower['place'].' <small>('.$nTower['dedication'].')</small></a> <small>'.round( $nTower['distance'], 1 ).' miles</small>'; ?></li>
+<?php endforeach; ?>
+		</ol>
+<?php endif; ?>
+	</section>
+	<section id="content_peals<?php echo $i; ?>" class="towerFirstPeals">
+<?php if( count( $tower['firstPeals'] ) > 0 ) : ?>
+		<ol class="noliststyle">
+<?php foreach( $tower['firstPeals']  as $method ) : ?>
+			<li><?php echo '<a href="/methods/view/'.str_replace( ' ', '_', $method['title'] ).'">' . $method['title']. '</a> <small>('.$method['firstTowerbellPeal_date'].')</small>'; ?></li>
+<?php endforeach; ?>
+		</ol>
+<?php endif; ?>
+	</section>
+</section>
+<?php ++$i; endforeach; ?>

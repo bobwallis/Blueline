@@ -1,0 +1,173 @@
+/* Specific */
+.normal_hide { display: none; }
+.small_hide { display: block; }
+
+/* Layout */
+#wrapper { margin: 0 auto -26px; }
+footer, #push { height: 25px; }
+
+#content {
+	padding: 0 0 10px 0;
+}
+
+/* Page header */
+#top {
+	height: 35px;
+	line-height: 35px;
+}
+	#top h1, #top h2, #top span.headerSep {
+		margin-left: 10px;
+		font-size: 18px;
+	}
+	#top h2, #top span.headerSep {
+		margin-left: 5px;
+	}
+
+form#topSearch {
+	display: block;
+	margin: 7.5px 0 7.5px 8px;
+	height: 19px;
+	width: 200px;
+}
+	form#topSearch input {
+		font-size: 11px;
+		width: 175px;
+		height: 15px;
+		padding: 2px;
+	}
+	form#topSearch button {
+		width: 19px;
+		height: 19px;
+	}
+
+/* User login section */
+div#topUser {
+	padding-right: 40px;
+	font-size: 10px;
+	height: 35px
+}
+
+/* Section header */
+section header {
+	margin-bottom: 8px;
+}
+	section header h1 {
+		font-size: 22px;
+		padding: 10px 5px 10px 10px;
+		line-height: 22px;
+	}
+	section header h2 {
+		font-size: 18px;
+		padding: 0 5px 10px 13px;
+		line-height: 20px;
+	}
+		section header h2.sub {
+			margin-top: -3px !important;
+		}
+ul.tabBar {
+	padding-left: 10px;
+	height: 21px;
+	font-size: 11px;
+}
+	ul.tabBar li {
+		margin-right: 3px;
+		line-height: 20px;
+		padding: 0 10px;
+	}
+
+/* Page content */
+#content {
+}
+	#content h3 {
+		font-size: 12px;
+		font-weight: normal;
+		line-height: 15px;
+		margin: 0 5px 2px 13px;
+	}
+	#content p {
+		margin: 0 15px 5px 15px;
+	}
+	#content blockquote {
+		margin: 0 15px 5px 20px;
+	}
+	#content ol {
+		margin: 0 20px 5px 20px;
+	}
+
+table.horizontalDetails {
+	line-height: 15px;
+	margin: 0 0 10px 13px;
+}
+	tr.bigDetails {
+		font-size: 14px;
+	}
+	table.horizontalDetails th {
+		padding: 2px 4px 2px 0;
+	}
+	table.horizontalDetails td {
+		padding: 2px 0 2px 4px;
+	}
+
+
+
+section.method {
+	padding-bottom: 15px;
+}
+	section.method:last-child { padding-bottom: 0; }
+.methodDetails {
+	padding: 5px;
+}
+	.methodDetails th { padding-left: 5px; }
+	.methodDetails td { padding-right: 5px; }
+div.methodLine {
+	margin: 0 10px 10px 10px;
+}
+	div.methodLine td {
+		vertical-align: top;
+		padding: 0 20px;
+	}
+.methodText, div.methodLine {
+	font-family: 'Droid Sans Mono', 'DejaVu Sans Mono', monospace;
+	font-size: 14px;
+	line-height: 15px;
+}
+
+.methodGrid {
+	margin-left: 10px;
+}
+td.notationCell {
+	line-height: 15px;
+	font-size: 10px;
+	color: #666;
+	text-align: right;
+	padding-right: 5px;
+}
+
+.fullMap {
+	top: 35px;
+	height: 600px;
+}
+.towerMap {
+	display: block;
+	float: right;
+	margin-top: -8px;
+	width: 60%;
+	height: 450px;
+	border-left: 1px solid #E0DED9;
+}
+	.towerMap .map {
+		position: relative;
+		right: 0;
+	}
+
+footer {
+	font-size: 11px;
+	line-height: 25px;
+}
+	footer p, footer nav {
+		clear: none;
+		padding: 0 5px;
+		color: #C7C2BC;
+	}
+	footer nav { float: left; }
+	footer p { float: right; }

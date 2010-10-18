@@ -1,0 +1,5 @@
+/* Hide UI elements that don't function without Javascript */
+ul.tabBar { display: none; }
+
+/* Show elements that would normally only be visible using javascript */
+.methodDetails, .methodLine, .methodGridg { display: block; }
