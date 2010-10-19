@@ -49,7 +49,7 @@ class Tower extends \Blueline\Model {
 	public static function nearbyTowersFromLocation( $latitude, $longitude ) {
 		if( empty( $latitude ) || empty( $longitude ) ) { return array(); }
 		$sth = Database::$dbh->prepare( '
-			SELECT doveID, place, dedication, bells, weightText, ( 6371 * acos( cos( radians(:latitude) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(:longitude) ) + sin( radians(:latitude) ) * sin( radians( latitude ) ) ) ) AS distance
+			SELECT doveId, place, dedication, bells, weightText, ( 6371 * acos( cos( radians(:latitude) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(:longitude) ) + sin( radians(:latitude) ) * sin( radians( latitude ) ) ) ) AS distance
 			FROM towers
 			WHERE latitude IS NOT NULL
 			HAVING distance < 20

@@ -95,6 +95,16 @@ var can = {
 					catch( no_getComputedStyle ) { if( tabs[i].currentStyle.display != 'none' ) { document.getElementById( tabs[i].id.replace( /tab_/, 'content_' ) ).style.display = 'none'; } }
 				}
 			}
+			// Fire a scroll event
+			try {
+				var scrollEvent = document.createEvent( 'HTMLEvents' );
+				scrollEvent.initEvent( 'scroll' );
+				window.dispatchEvent( scrollEvent );
+			}
+			catch( no_createEvent ) {
+				try { window.fireEvent( 'onscroll' ); }
+				catch( no_fireEvent ) {}
+			}
 	};
 	
 	// Ready/Load event
@@ -102,7 +112,11 @@ var can = {
 	baseReady = function() {
 		if( readyFired ) { return; } else { readyFired = true; }
 		var i;
-
+		
+		// Attach some handy shared variables to the window object
+		window.$top = document.getElementById( 'top' );
+		window.$bottom = document.getElementById( 'bottom' );
+		
 		// Attach click events to tab bars
 		try { window['tabBars'] = document.getElementsByClassName( 'tabBar' ); }
 		catch( no_getElementsByClassName ) {

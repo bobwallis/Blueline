@@ -3,7 +3,8 @@ namespace Models;
 use \Blueline\Database, \PDO;
 
 class Association extends \Blueline\Model {
-	public static function fullList() {
+
+	public static function index() {
 		$sth = Database::$dbh->prepare( '
 			SELECT name, abbreviation, link
 			FROM associations
@@ -14,6 +15,19 @@ class Association extends \Blueline\Model {
 	}
 	
 	public static function view( $abbreviation ) {
+		$associationData = self::getEverythingByAbbreviation( $abbreviation );
+		if( !empty( $associationData ) ) {
+			$associationData['affiliatedTowers'] = self::getTowersByAbbreviation( $abbreviation );
+			return $associationData;
+		}
+		else {
+			return array( 'name' => 'Not Found' );
+		}
+	}
+	
+	// get*By* functions
+	
+	public static function getEverythingByAbbreviation( $abbreviation ) {
 		$sth = Database::$dbh->prepare( '
 			SELECT name, abbreviation, link
 			FROM associations
@@ -31,9 +45,29 @@ class Association extends \Blueline\Model {
 			return array_merge( $associationData, $sth->fetch( PDO::FETCH_ASSOC ) );
 		}
 		else {
-			return array(
-				'name' => 'Not Found'
-			);
+			return array();
 		}
+	}
+	
+	public static function getLinkByAbbreviation( $abbreviation ) {
+		$sth = Database::$dbh->prepare( '
+			SELECT link
+			FROM associations
+			WHERE abbreviation = :abbreviation
+			LIMIT 1
+		' );
+		$sth->execute( array( ':abbreviation' => $abbreviation ) );
+		return ( $associationData = $sth->fetch( PDO::FETCH_ASSOC ) )? $associationData['link'] : '';
+	}
+	
+	public static function getTowersByAbbreviation( $abbreviation ) {
+		$sth = Database::$dbh->prepare( '
+			SELECT doveId, place, dedication
+			FROM towers
+			JOIN associations_towers ON (association_abbreviation = :abbreviation AND tower_doveId = doveId)
+			ORDER BY place ASC
+		' );
+		$sth->execute( array( ':abbreviation' => $abbreviation ) );
+		return ( $towersData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? $towersData : array();
 	}
 }

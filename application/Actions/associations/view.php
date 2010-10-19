@@ -9,11 +9,10 @@ if( !isset( $arguments[0] ) || empty( $arguments[0] ) ) {
 }
 
 // Try and find methods matching the argument
-$associationRequests = array_filter( explode( '|', $arguments[0] ) );
-$associationDetails = array();
-foreach( $associationRequests as $associationRequest ) {
-	$associationDetails[] = Association::view( $associationRequest );
-}
+$associationDetails = array_map(
+	function( $request ) { return Association::view( $request); },
+	array_filter( explode( '|', $arguments[0] ) )
+);
 
 // If only one method has been requested, and it hasn't been found, then 404
 if( count( $associationDetails ) == 1 && $associationDetails[0]['name'] == 'Not Found' ) {
@@ -21,14 +20,12 @@ if( count( $associationDetails ) == 1 && $associationDetails[0]['name'] == 'Not 
 	return;
 }
 // If the URL could be neater, then redirect to the neater version
-$tidyArgument = implode( '|', array_map( function( $a ) { return isset( $a['abbreviation'] )?$a['abbreviation']:''; }, $associationDetails ) );
+$tidyArgument = implode( '|', array_map( function( $a ) { return (isset( $a['abbreviation'] ) && !empty( $a['abbreviation'] ) )?$a['abbreviation']:''; }, $associationDetails ) );
 if( strcmp( $arguments[0], $tidyArgument ) != 0 ) {
 	Response::cacheType( 'dynamic' );
 	Response::redirect( '/associations/view/'.$tidyArgument.( (Response::extension() != 'html')?'.'.Response::extension():'' ) );
 }
 
-// Set caching method for successful requests
+// Export data to the view for a successful request
 Response::cacheType( 'static' );
-
-// Export data to the view
 View::set( 'associations', $associationDetails );

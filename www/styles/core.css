@@ -269,7 +269,7 @@ section.wallOfText {
 }
 
 /* Hidden  by default */
-.towerFirstPeals, .methodDetails, .methodGrid { display: none; }
+.towerFirstPeals, .methodDetails, .methodGrid, .associationAffiliations { display: none; }
 
 
 /* Footer */

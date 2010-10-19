@@ -10,16 +10,39 @@
 	
 		var pageWidth = window.innerWidth || document.documentElement.clientWidth,
 			pageHeight = window.innerHeight || document.documentElement.clientHeight,
-			$top = document.getElementById( 'top' ),
-			$bottom = document.getElementById( 'bottom' );
+			$top = window.$top,
+			$bottom = window.$bottom;
 		
 		// Resize and recenter all maps
-		window.towerMaps.forEach( function( towerMap ) {
-			var mapCenter = towerMap.map.getCenter(),
-				parent = towerMap.container.parentNode,
+		
+		if( window['towerMaps'].length == 1 ) {
+			var mapCenter = window.towerMaps[0].map.getCenter(),
+				parent = window.towerMaps[0].container.parentNode,
 				towerHeader = parent.parentNode.getElementsByTagName( 'header' )[0];
-			if( ! towerMap.big ) {
+			if( pageWidth > 480 ) {
+				towerHeader.style.width = '40%';
+				parent.style.display = 'block';
+				parent.style.position = 'fixed';
+				parent.style.marginTop = 0;
+				parent.style.width = (pageWidth*0.6)+'px';
+				parent.style.right = 0;
+			}
+			else {
+				towerHeader.style.width = '100%';
+				parent.style.display = 'none';
 				parent.style.position = 'relative';
+				parent.style.marginTop = '-8px';
+				parent.style.width = pageWidth+'px';
+				parent.style.height = '350px';
+			}
+			google.maps.event.trigger( window.towerMaps[0].map, 'resize' );
+			window.towerMaps[0].map.setCenter( mapCenter );
+		}
+		else {
+		window['towerMaps'].forEach( function( towerMap ) {
+				var mapCenter = towerMap.map.getCenter(),
+					parent = towerMap.container.parentNode,
+					towerHeader = parent.parentNode.getElementsByTagName( 'header' )[0];
 				if( pageWidth > 480 ) {
 					towerHeader.style.width = '40%';
 					parent.style.display = 'block';
@@ -33,16 +56,9 @@
 					parent.style.width = pageWidth+'px';
 					parent.style.height = '350px';
 				}
-			}
-			google.maps.event.trigger( towerMap.map, 'resize' );
-			towerMap.map.setCenter( mapCenter );
-		} );
-		
-		if( window.towerMaps.length == 1 ) {
-			var parent = window.towerMaps[0].container.parentNode;
-			if( pageWidth > 480 ) {
-				parent.style.height = ($bottom.offsetTop>pageHeight)? (pageHeight-$top.offsetHeight)+'px' : (pageHeight-($top.offsetHeight+$bottom.offsetHeight))+'px';
-			}
+				google.maps.event.trigger( towerMap.map, 'resize' );
+				towerMap.map.setCenter( mapCenter );
+			} );
 		}
 		
 		// Fix big map
@@ -57,10 +73,36 @@
 	
 	// Scroll event
 	var towersScroll = function() {
-	
+		if( window['towerMaps'].length == 1 ) {
+			var parent = window.towerMaps[0].container.parentNode,
+				mapCenter = window.towerMaps[0].map.getCenter(),
+				pageWidth = window.innerWidth || document.documentElement.clientWidth,
+				pageHeight = window.innerHeight || document.documentElement.clientHeight,
+				scrollTop = window.pageYOffset || document.documentElement.scrollTop,
+				topHeight = window.$top.offsetHeight,
+				topVisible = (scrollTop < topHeight)? topHeight - scrollTop : 0,
+				bottomHeight = window.$bottom.offsetHeight,
+				bottomTop = window.$bottom.offsetTop,
+				bottomVisible = ( (scrollTop+pageHeight) > bottomTop )? (scrollTop+pageHeight) - bottomTop : 0,
+				originalHeight = parent.offsetHeight,
+				newHeight = pageHeight - bottomVisible - topVisible;
+			if( pageWidth > 480 ) {
+				parent.style.top = topVisible+'px';
+				if( originalHeight != newHeight ) {
+					parent.style.height = newHeight+'px';
+					google.maps.event.trigger( window.towerMaps[0].map, 'resize' );
+					window.towerMaps[0].map.setCenter( mapCenter );
+				}
+			}
+		}
 	};
 	try { window.addEventListener( 'scroll', towersScroll, false ); }
 	catch( ie ) { window.attachEvent( 'onscroll', towersScroll ); }
+	// Fire a scroll event on resize and load too
+	try { window.addEventListener( 'resize', towersScroll, false ); }
+	catch( e ) { window.attachEvent( 'onresize', towersScroll ); }
+	try { document.addEventListener( 'DOMContentLoaded', towersScroll, false ); }
+	catch( e ) { window.attachEvent( 'onload', towersScroll ); }
 	
 } )( window );
 

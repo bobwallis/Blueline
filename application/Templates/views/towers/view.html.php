@@ -119,7 +119,7 @@ $i = 0;
 		<h3>Nearby Towers:</h3>
 		<ol class="noliststyle">
 <?php foreach( $tower['nearbyTowers'] as $nTower ) : ?>
-			<li><?php echo '<a href="/towers/view/'.$nTower['doveID'].'">' . $nTower['place'].' <small>('.$nTower['dedication'].')</small></a> <small>'.round( $nTower['distance'], 1 ).' miles</small>'; ?></li>
+			<li><?php echo '<a href="/towers/view/'.$nTower['doveId'].'">' . $nTower['place'].' <small>('.$nTower['dedication'].')</small></a> <small>'.round( $nTower['distance'], 1 ).' miles</small>'; ?></li>
 <?php endforeach; ?>
 		</ol>
 <?php endif; ?>

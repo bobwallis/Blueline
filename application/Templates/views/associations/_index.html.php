@@ -3,8 +3,8 @@ namespace Blueline;
 
 $title_for_layout = 'Associations | Blueline';
 $headerSearch = array( 
-	'action' => '/search',
-	'placeholder' => 'Search'
+	'action' => '/associations/search',
+	'placeholder' => 'Search associations'
 );
 ?>
 <header>
