@@ -65,12 +65,7 @@ class Action {
 	public static function arguments() {
 		if( self::$_arguments === false ) {
 			$action = self::action();
-			if( $action == '/error' ) {
-				self::$_arguments = array( 500 );
-			}
-			else {
-				self::$_arguments = explode( '/', trim( str_replace( $action, '', Request::path() ), '/' ) );
-			}
+			self::$_arguments = explode( '/', trim( str_replace( $action, '', Request::path() ), '/' ) );
 		}
 		return self::$_arguments;
 	}

@@ -18,7 +18,7 @@ class Request {
 	
 	/**
 	 * The domain used for the request
-	 * @return string www.exmaple.com
+	 * @return string www.example.com
 	 */
 	public static function domain() {
 		return $_SERVER['HTTP_HOST'];
@@ -30,11 +30,11 @@ class Request {
 	private static $_path = false;
 	/**
 	 * The path requested, not including extension or query string
-	 * @return string http://exmaple.com/path/example.html?q=eg -> /path/example
+	 * @return string http://example.com/path/example.html?q=eg -> /path/example
 	 */
 	public static function path() {
 		if( self::$_path === false ) {
-			self::$_path = ( isset( $_GET['url'] ) )?'/'.trim( preg_replace( '/\.[a-z]*$/', '', $_GET['url'] ), '/' ): '/';
+			self::$_path = '/'.trim( preg_replace( '/(\.[a-z]*|)(\?.*$|$)/', '', $_SERVER['REQUEST_URI'] ), '/' );
 		}
 		return self::$_path;
 	}
@@ -49,19 +49,7 @@ class Request {
 	 */
 	public static function extension() {
 		if( self::$_extension === false ) {
-			if( isset( $_GET['url'] ) ) {
-				$count = 0;
-				$extension = str_replace( self::path().'.', '', '/'.trim( $_GET['url'], '/' ), &$count );
-				if( $count == 1 ) {
-					self::$_extension = $extension;
-				}
-				else {
-					self::$_extension = '';
-				}
-			}
-			else {
-				self::$_extension = '';
-			}
+			self::$_extension = isset( $_SERVER['REQUEST_URI'] )? trim( str_replace( array( self::path(), self::queryString() ), '', $_SERVER['REQUEST_URI'] ), '?.' ) : '';
 		}
 		return self::$_extension;
 	}
@@ -76,7 +64,7 @@ class Request {
 	 */
 	public static function queryString() {
 		if( self::$_queryString === false ) {
-			self::$_queryString = implode( '&', array_map( function( $key ) { return $key.'='.$_GET[$key]; }, array_filter( array_keys( $_GET ), function( $key ) { return ( $key != 'url' ); } ) ) );
+			self::$_queryString = strpos( $_SERVER['REQUEST_URI'], '?' )? preg_replace( '/^.*\?/', '', $_SERVER['REQUEST_URI'] ) : '';
 		}
 		return self::$_queryString;
 	}

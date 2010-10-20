@@ -12,6 +12,6 @@ $headerSearch = array(
 </header>
 <ol id="associationsList">
 <?php foreach( $associations as $association ) : ?>
-	<li><a href="/associations/view/<?php echo htmlspecialchars( $association['abbreviation'] ); ?>"><?php echo htmlspecialchars( $association['name'] ); ?></a></li>
+	<li><a href="/associations/view/<?php echo urlencode( $association['abbreviation'] ); ?>"><?php echo htmlspecialchars( $association['name'] ); ?></a></li>
 <?php endforeach; ?>
 </ol>
