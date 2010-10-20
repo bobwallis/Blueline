@@ -64,7 +64,7 @@ class Action {
 	 */
 	public static function arguments() {
 		if( self::$_arguments === false ) {
-			$action = self::action();
+			$action = str_replace( '/_index', '', self::action() );
 			self::$_arguments = explode( '/', trim( str_replace( $action, '', Request::path() ), '/' ) );
 		}
 		return self::$_arguments;

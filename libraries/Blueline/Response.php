@@ -18,7 +18,7 @@ class Response {
 	 */
 	public static function id() {
 		if( self::$_id === false ) {
-			self::$_id = Action::action().'/'.implode( Action::arguments(), '/' ).'__'.Request::queryString().'__.'.self::extension();
+			self::$_id = Request::path().'__'.Request::queryString().'__.'.self::extension();
 		}
 		return self::$_id;
 	}
