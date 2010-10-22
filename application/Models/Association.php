@@ -25,6 +25,26 @@ class Association extends \Blueline\Model {
 		}
 	}
 	
+	public static function search() {		
+		$sth = Database::$dbh->prepare( '
+			SELECT name, abbreviation, link
+			FROM associations
+			WHERE '.self::GETtoWhere().'
+			LIMIT '.self::GETtoLimit().'
+		' );
+		$sth->execute( self::GETtoBindable() );
+		return ( $associationData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? $associationData : array();
+	}
+	public static function searchCount() {
+		$sth = Database::$dbh->prepare( '
+			SELECT COUNT(*) as count
+			FROM associations
+			WHERE '.self::GETtoWhere().'
+		' );
+		$sth->execute( self::GETtoBindable() );
+		return ( $countData = $sth->fetch( PDO::FETCH_ASSOC ) )? $countData['count'] : 0;
+	}
+	
 	// get*By* functions
 	
 	public static function getEverythingByAbbreviation( $abbreviation ) {
@@ -69,5 +89,25 @@ class Association extends \Blueline\Model {
 		' );
 		$sth->execute( array( ':abbreviation' => $abbreviation ) );
 		return ( $towersData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? $towersData : array();
+	}
+	
+	// Helper function to assemble search queries
+	private static $_conditions = false;
+	protected static function GETtoConditions() {
+		if( self::$_conditions === false ) {
+			$conditions = array();
+			// Name
+			if( isset( $_GET['q'] ) ) {
+				if( strpos( $_GET['q'], '/' ) === 0 && preg_match( '/^\/(.*)\/$/', $_GET['q'], $matches ) ) {
+					$conditions[':name REGEXP'] = $matches[1];
+				}
+				else {
+					$conditions[':name LIKE'] = isset( $_GET['q'] )? '%'.str_replace( array( ' ', '*', '?' ), array( '%', '%', '_' ), $_GET['q'] ).'%' : '';
+				}
+			}
+			
+			self::$_conditions = $conditions;
+		}
+		return self::$_conditions;
 	}
 }
