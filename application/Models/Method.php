@@ -48,10 +48,10 @@ class Method extends \Blueline\Model {
 			// Title
 			if( isset( $_GET['q'] ) ) {
 				if( strpos( $_GET['q'], '/' ) === 0 && preg_match( '/^\/(.*)\/$/', $_GET['q'], $matches ) ) {
-					$conditions[':title REGEXP'] = $matches[1];
+					$conditions['title REGEXP'] = $matches[1];
 				}
 				else {
-					$conditions[':title LIKE'] = isset( $_GET['q'] )? '%'.str_replace( array( ' ', '*', '?' ), array( '%', '%', '_' ), $_GET['q'] ).'%' : '';
+					$conditions['title LIKE'] = isset( $_GET['q'] )? '%'.str_replace( array( ' ', '*', '?' ), array( '%', '%', '_' ), $_GET['q'] ).'%' : '';
 				}
 			}
 			

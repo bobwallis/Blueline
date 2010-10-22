@@ -99,13 +99,31 @@ class Association extends \Blueline\Model {
 			// Name
 			if( isset( $_GET['q'] ) ) {
 				if( strpos( $_GET['q'], '/' ) === 0 && preg_match( '/^\/(.*)\/$/', $_GET['q'], $matches ) ) {
-					$conditions[':name REGEXP'] = $matches[1];
+					$conditions['name REGEXP'] = $matches[1];
 				}
 				else {
-					$conditions[':name LIKE'] = isset( $_GET['q'] )? '%'.str_replace( array( ' ', '*', '?' ), array( '%', '%', '_' ), $_GET['q'] ).'%' : '';
+					$conditions['name LIKE'] = '%'.str_replace( array( ' ', '*', '?' ), array( '%', '%', '_' ), $_GET['q'] ).'%';
+				}
+			}
+			// Abbreviation
+			if( isset( $_GET['abbreviation'] ) ) {
+				if( strpos( $_GET['abbreviation'], '/' ) === 0 && preg_match( '/^\/(.*)\/$/', $_GET['abbreviation'], $matches ) ) {
+					$conditions['abbreviation REGEXP'] = $matches[1];
+				}
+				else {
+					$conditions['abbreviation LIKE'] = '%'.str_replace( array( ' ', '*', '?' ), array( '%', '%', '_' ), $_GET['abbreviation'] ).'%';
 				}
 			}
 			
+			// If an abbreviation search isn't specified, then use the q value to also search by abbreviation
+			if( isset( $conditions['name LIKE'] ) && !isset( $_GET['abbreviation'] ) ) {
+				$conditions = array(
+					'OR' => array(
+						'name LIKE' => $conditions['name LIKE'],
+						'abbreviation LIKE' => $conditions['name LIKE']
+					)
+				);
+			}
 			self::$_conditions = $conditions;
 		}
 		return self::$_conditions;
