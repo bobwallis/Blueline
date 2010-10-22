@@ -4,27 +4,9 @@ use \Blueline\Database, \PDO;
 
 class Tower extends \Blueline\Model {
 
-	public static function search() {		
-		$sth = Database::$dbh->prepare( '
-			SELECT doveId, dedication, place, county, country, bells
-			FROM towers
-			WHERE '.self::GETtoWhere().'
-			LIMIT '.self::GETtoLimit().'
-		' );
-		$sth->execute( self::GETtoBindable() );
-		return ( $searchResults = $sth->fetchAll( PDO::FETCH_ASSOC ) )? $searchResults : array();
-	}
+	protected static $_table = 'towers';
 	
-	public static function searchCount() {
-		$sth = Database::$dbh->prepare( '
-			SELECT COUNT(*) as count
-			FROM towers
-			WHERE '.self::GETtoWhere().'
-		' );
-		$sth->execute( self::GETtoBindable() );
-		return ( $countData = $sth->fetch( PDO::FETCH_ASSOC ) )? $countData['count'] : 0;
-	}
-
+	protected static $_searchSelect = 'doveId, dedication, place, county, country, bells';
 
 	public static function view( $doveId ) {
 		$sth = Database::$dbh->prepare( '
@@ -95,7 +77,12 @@ class Tower extends \Blueline\Model {
 					$conditions['place REGEXP'] = $matches[1];
 				}
 				else {
-					$conditions['CONCAT(dedication,\' \',place,\' \',dedication) LIKE'] = isset( $_GET['q'] )? '%'.str_replace( array( '*', '?', ',', '.', ' ', '%%' ), array( '%', '_', ' ', ' ', '%', '%' ), $_GET['q'] ).'%' : '';
+					if( strpos( $_GET['q'], ' ' ) !== false ) {
+						$conditions['CONCAT(dedication,\' \',place,\' \',dedication) LIKE'] = '%'.self::prepareStringForLike( $_GET['q'] ).'%';
+					}
+					else {
+						$conditions['place LIKE'] = '%'.$_GET['q'].'%';
+					}
 				}
 			}
 			self::$_conditions = $conditions;

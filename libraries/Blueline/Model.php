@@ -1,5 +1,6 @@
 <?php
 namespace Blueline;
+use \PDO;
 
 /**
  * Model
@@ -8,7 +9,38 @@ namespace Blueline;
  * @license http://opensource.org/licenses/gpl-3.0.html GNU Public License
  */
 class Model {
+	
 
+	
+	public static function search() {		
+		$sth = Database::$dbh->prepare( '
+			SELECT '.static::$_searchSelect.'
+			FROM '.static::$_table.'
+			WHERE '.self::GETtoWhere().'
+			LIMIT '.self::GETtoLimit().'
+		' );
+		$sth->execute( self::GETtoBindable() );
+		return ( $searchData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? $searchData : array();
+	}
+	public static function searchCount() {
+		$sth = Database::$dbh->prepare( '
+			SELECT COUNT(*) as count
+			FROM '.static::$_table.'
+			WHERE '.self::GETtoWhere().'
+		' );
+		$sth->execute( self::GETtoBindable() );
+		return ( $countData = $sth->fetch( PDO::FETCH_ASSOC ) )? $countData['count'] : 0;
+	}
+	
+	
+	
+	protected static function prepareStringForLike( $string ) {
+		return str_replace(
+			array( '*', '?', ',', '.', ' ', '%%' ),
+			array( '%', '_', ' ', ' ', '%', '%' ),
+			$string
+		);
+	}
 	protected static function GETtoLimit() {
 		return isset( $_GET['from'] )? intval( $_GET['from'] ).','.(intval( $_GET['from'] )+30) : 30;
 	}

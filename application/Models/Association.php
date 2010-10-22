@@ -4,6 +4,10 @@ use \Blueline\Database, \PDO;
 
 class Association extends \Blueline\Model {
 
+	protected static $_table = 'associations';
+	
+	protected static $_searchSelect = 'abbreviation, name, link';
+
 	public static function index() {
 		$sth = Database::$dbh->prepare( '
 			SELECT name, abbreviation, link
@@ -23,26 +27,6 @@ class Association extends \Blueline\Model {
 		else {
 			return array( 'name' => 'Not Found' );
 		}
-	}
-	
-	public static function search() {		
-		$sth = Database::$dbh->prepare( '
-			SELECT name, abbreviation, link
-			FROM associations
-			WHERE '.self::GETtoWhere().'
-			LIMIT '.self::GETtoLimit().'
-		' );
-		$sth->execute( self::GETtoBindable() );
-		return ( $associationData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? $associationData : array();
-	}
-	public static function searchCount() {
-		$sth = Database::$dbh->prepare( '
-			SELECT COUNT(*) as count
-			FROM associations
-			WHERE '.self::GETtoWhere().'
-		' );
-		$sth->execute( self::GETtoBindable() );
-		return ( $countData = $sth->fetch( PDO::FETCH_ASSOC ) )? $countData['count'] : 0;
 	}
 	
 	// get*By* functions
@@ -102,7 +86,7 @@ class Association extends \Blueline\Model {
 					$conditions['name REGEXP'] = $matches[1];
 				}
 				else {
-					$conditions['name LIKE'] = '%'.str_replace( array( ' ', '*', '?' ), array( '%', '%', '_' ), $_GET['q'] ).'%';
+					$conditions['name LIKE'] = '%'.self::prepareStringForLike( $_GET['q'] ).'%';
 				}
 			}
 			// Abbreviation
@@ -111,7 +95,7 @@ class Association extends \Blueline\Model {
 					$conditions['abbreviation REGEXP'] = $matches[1];
 				}
 				else {
-					$conditions['abbreviation LIKE'] = '%'.str_replace( array( ' ', '*', '?' ), array( '%', '%', '_' ), $_GET['abbreviation'] ).'%';
+					$conditions['abbreviation LIKE'] = '%'.self::prepareStringForLike( $_GET['abbreviation'] ).'%';
 				}
 			}
 			
