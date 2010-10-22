@@ -24,7 +24,7 @@ class Method extends \Blueline\Model {
 			LIMIT '.self::GETtoLimit().'
 		' );
 		$sth->execute( self::GETtoBindable() );
-		return ( $methodData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? $methodData : array();
+		return ( $searchResults = $sth->fetchAll( PDO::FETCH_ASSOC ) )? $searchResults : array();
 	}
 	
 	public static function searchCount() {
@@ -41,10 +41,7 @@ class Method extends \Blueline\Model {
 	private static $_conditions = false;
 	protected static function GETtoConditions() {
 		if( self::$_conditions === false ) {
-			// Easy ones
-			$conditions = array(
-				
-			);
+			$conditions = array();
 			// Title
 			if( isset( $_GET['q'] ) ) {
 				if( strpos( $_GET['q'], '/' ) === 0 && preg_match( '/^\/(.*)\/$/', $_GET['q'], $matches ) ) {

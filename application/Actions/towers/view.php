@@ -11,7 +11,7 @@ if( !isset( $arguments[0] ) || empty( $arguments[0] ) ) {
 // Try and find methods matching the argument(s)
 $arguments[0] = urldecode( $arguments[0] );
 $towerDetails = array_map(
-	function( $request ) { return Tower::fullDetailsFromDoveId( $request ); },
+	function( $request ) { return Tower::view( $request ); },
 	array_filter( explode( '|', $arguments[0] ) )
 );
 

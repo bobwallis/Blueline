@@ -3,7 +3,30 @@ namespace Models;
 use \Blueline\Database, \PDO;
 
 class Tower extends \Blueline\Model {
-	public static function fullDetailsFromDoveId( $doveId ) {
+
+	public static function search() {		
+		$sth = Database::$dbh->prepare( '
+			SELECT doveId, dedication, place, county, country, bells
+			FROM towers
+			WHERE '.self::GETtoWhere().'
+			LIMIT '.self::GETtoLimit().'
+		' );
+		$sth->execute( self::GETtoBindable() );
+		return ( $searchResults = $sth->fetchAll( PDO::FETCH_ASSOC ) )? $searchResults : array();
+	}
+	
+	public static function searchCount() {
+		$sth = Database::$dbh->prepare( '
+			SELECT COUNT(*) as count
+			FROM towers
+			WHERE '.self::GETtoWhere().'
+		' );
+		$sth->execute( self::GETtoBindable() );
+		return ( $countData = $sth->fetch( PDO::FETCH_ASSOC ) )? $countData['count'] : 0;
+	}
+
+
+	public static function view( $doveId ) {
 		$sth = Database::$dbh->prepare( '
 			SELECT doveId, gridReference, latitude, longitude, latitudeSatNav, longitudeSatNav, postcode, country, county, diocese, place, altName, dedication, bells, weight, weightApprox, weightText, note, hz, practiceNight, practiceStart, practiceNotes, groundFloor, toilet, unringable, simulator, overhaulYear, contractor, tuned, extraInfo, webPage
 			FROM towers
@@ -54,9 +77,29 @@ class Tower extends \Blueline\Model {
 			WHERE latitude IS NOT NULL
 			HAVING distance < 20
 			ORDER BY distance ASC
-			LIMIT 1,6
+			LIMIT 1,7
 		' );
 		$sth->execute( array( ':latitude' => $latitude, ':longitude' => $longitude ) );
 		return $sth->fetchAll( PDO::FETCH_ASSOC );
+	}
+	
+	
+	
+	private static $_conditions = false;
+	protected static function GETtoConditions() {
+		if( self::$_conditions === false ) {
+			$conditions = array();
+			// Place/Dedication
+			if( isset( $_GET['q'] ) ) {
+				if( strpos( $_GET['q'], '/' ) === 0 && preg_match( '/^\/(.*)\/$/', $_GET['q'], $matches ) ) {
+					$conditions['place REGEXP'] = $matches[1];
+				}
+				else {
+					$conditions['CONCAT(dedication,\' \',place,\' \',dedication) LIKE'] = isset( $_GET['q'] )? '%'.str_replace( array( '*', '?', ',', '.', ' ', '%%' ), array( '%', '_', ' ', ' ', '%', '%' ), $_GET['q'] ).'%' : '';
+				}
+			}
+			self::$_conditions = $conditions;
+		}
+		return self::$_conditions;
 	}
 }
