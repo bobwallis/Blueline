@@ -1,6 +1,4 @@
 <?php
-namespace Blueline;
-
 $title_for_layout = htmlspecialchars( \Helpers\Text::toList( array_map( function( $m ){ return $m['title']; }, $methods ) ) ) . ' | Methods | Blueline';
 $breadcrumb = array(
 	'<a href="/methods">Methods</a>'

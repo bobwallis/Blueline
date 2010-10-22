@@ -1,7 +1,7 @@
 <?php
 namespace Blueline;
 
-$title_for_layout = htmlspecialchars( \Helpers\Text::toList( array_map( function( $t ){ return $t['place']; }, $towers ) ) ) . ' | Towers | Blueline';
+$title_for_layout = htmlspecialchars( \Helpers\Text::toList( array_map( function( $t ){ return implode( ', ', array_reverse( explode(  ', ', $t['place'] ) ) ).(($t['dedication']!='Unknown')?' ('.$t['dedication'].')':''); }, $towers ) ) ) . ' | Towers | Blueline';
 $breadcrumb = array(
 	'<a href="/towers">Towers</a>'
 );

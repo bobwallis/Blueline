@@ -9,11 +9,11 @@ if( !isset( $arguments[0] ) || empty( $arguments[0] ) ) {
 }
 
 // Try and find methods matching the argument(s)
-$methodRequests = explode( '|', $arguments[0] );
-$methodDetails = array();
-foreach( $methodRequests as $methodRequest ) {
-	$methodDetails[] = Method::view( $methodRequest );
-}
+$arguments[0] = urldecode( $arguments[0] );
+$methodDetails = array_map(
+	function( $request ) { return Method::view( $request ); },
+	array_filter( explode( '|', $arguments[0] ) )
+);
 
 // If only one method has been requested, and it hasn't been found, then 404
 if( count( $methodDetails ) == 1 && $methodDetails[0]['title'] == 'Not Found' ) {
@@ -28,8 +28,6 @@ if( strcmp( $arguments[0], $tidyArgument ) != 0 ) {
 	Response::redirect( '/methods/view/'.$tidyArgument );
 }
 
-// Set caching method for successful requests
+// Export data to the view for successful request
 Response::cacheType( 'static' );
-
-// Export data to the view
 View::set( 'methods', $methodDetails );

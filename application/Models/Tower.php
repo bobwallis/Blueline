@@ -5,7 +5,7 @@ use \Blueline\Database, \PDO;
 class Tower extends \Blueline\Model {
 	public static function fullDetailsFromDoveId( $doveId ) {
 		$sth = Database::$dbh->prepare( '
-			SELECT doveId, gridReference, latitude, longitude, latitudeSatNav, longitudeSatNav, postcode, country, county, diocese, place, altName, dedication, URL, bells, weight, weightApprox, weightText, note, hz, practiceNight, practiceStart, practiceNotes, groundFloor, toilet, unringable, simulator, overhaulYear, contractor, tuned, extraInfo, webPage
+			SELECT doveId, gridReference, latitude, longitude, latitudeSatNav, longitudeSatNav, postcode, country, county, diocese, place, altName, dedication, bells, weight, weightApprox, weightText, note, hz, practiceNight, practiceStart, practiceNotes, groundFloor, toilet, unringable, simulator, overhaulYear, contractor, tuned, extraInfo, webPage
 			FROM towers
 			LEFT OUTER JOIN tower_oldpks ON (tower_doveId = doveId)
 			WHERE ((doveId = :doveId) OR (oldpk = :doveId))

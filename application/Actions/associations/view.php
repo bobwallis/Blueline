@@ -8,9 +8,10 @@ if( !isset( $arguments[0] ) || empty( $arguments[0] ) ) {
 	return;
 }
 
-// Try and find methods matching the argument
+// Try and find methods matching the argument(s)
+$arguments[0] = urldecode( $arguments[0] );
 $associationDetails = array_map(
-	function( $request ) { return Association::view( $request); },
+	function( $request ) { return Association::view( $request ); },
 	array_filter( explode( '|', $arguments[0] ) )
 );
 
