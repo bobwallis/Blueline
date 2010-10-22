@@ -43,7 +43,7 @@ class Model {
 				$bindCount += count( $nestedConditions['bindable'] );
 			}
 			elseif( !empty( $value ) ) {
-				$lefts = explode( ' ', $key );
+				$lefts = str_split( $key, strrpos( $key, ' ' ) );
 				switch( count( $lefts ) ) {
 					case 1:
 						$where[] = $lefts[0].' =  :var'.$bindCount;
