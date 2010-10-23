@@ -7,6 +7,8 @@ class Method extends \Blueline\Model {
 	protected static $_table = 'methods';
 	
 	protected static $_searchSelect = 'title, stage, classification, notation';
+	protected static $_searchWhere = false;
+	protected static $_searchBindable = false;
 	
 	public static function view( $title ) {
 		$sth = Database::$dbh->prepare( '
@@ -27,14 +29,19 @@ class Method extends \Blueline\Model {
 			$conditions = array();
 			// Title
 			if( isset( $_GET['q'] ) ) {
-				if( strpos( $_GET['q'], '/' ) === 0 && preg_match( '/^\/(.*)\/$/', $_GET['q'], $matches ) ) {
+				$q = $_GET['q'];
+				if( strpos( $q, '/' ) === 0 && preg_match( '/^\/(.*)\/$/', $q, $matches ) ) {
 					$conditions['title REGEXP'] = $matches[1];
 				}
 				else {
-					$conditions['title LIKE'] = '%'.self::prepareStringForLike( $_GET['q'] ).'%';
+					// If the search ends in a number then use that to filter by stage
+					if( preg_match( '/ (\d{1,2})$/', $q, $matches ) && ($matches[1] > 2) && ($matches[1] < 23) ) {
+						$q = substr( $q, 0, -2 );
+						$conditions['stage ='] = intval( $matches[1] );
+					}
+					$conditions['title LIKE'] = '%'.self::prepareStringForLike( $q ).'%';
 				}
 			}
-			
 			self::$_conditions = $conditions;
 		}
 		return self::$_conditions;

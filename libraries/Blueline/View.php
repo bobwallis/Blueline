@@ -9,12 +9,22 @@ namespace Blueline;
  */
 class View {
 
+	/**
+	 * Converts the view for sending an error response (call Response::error() to ensure proper execution)
+	 */
 	public static function error( $code ) {
 		self::$_layout = 'default';
 		self::$_view = '/errors/error';
 	}
 	
+	/**
+	 * @access private
+	 */
 	private static $_layout = 'default';
+	/**
+	 * Which layout to render the view inside
+	 * @return string
+	 */
 	public static function layout( $set = null ) {
 		if( $set != null ) {
 			self::$_layout = $set;
@@ -22,7 +32,14 @@ class View {
 		return self::$_layout;
 	}
 	
+	/**
+	 * @access private
+	 */
 	private static $_view = 'default';
+	/**
+	 * Which view to render
+	 * @return string
+	 */
 	public static function view( $set = null ) {
 		if( $set != null ) {
 			self::$_view = $set;
@@ -33,11 +50,21 @@ class View {
 		return self::$_view;
 	}
 	
+	/**
+	 * @access private
+	 */
 	private static $_variables = array();
+	/**
+	 * Sets a varibale for use as the view renders
+	 * @return string
+	 */
 	public static function set( $variable, $value ) {
 		self::$_variables[$variable] = serialize( $value );
 	}
 	
+	/**
+	 * Builds the view, and sets the response body to display it
+	 */
 	public static function create() {
 		$viewPath = TEMPLATE_PATH.'/views'.self::view().'.'.Response::extension().'.php';
 		$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.Response::extension().'.php';

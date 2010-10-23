@@ -20,7 +20,7 @@ Config::set( 'caches', array(
 	),
 	array(
 		'name' => 'dynamic',
-		'type' => 'File',
+		'type' => 'Fail',
 		'options' => array(
 			'location' => __DIR__.'/../cache/dynamic',
 			'serialize' => false

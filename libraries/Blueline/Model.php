@@ -11,7 +11,11 @@ use \PDO;
 class Model {
 	
 
-	
+
+	/**
+	 * Performs a search
+	 * @return array
+	 */
 	public static function search() {		
 		$sth = Database::$dbh->prepare( '
 			SELECT '.static::$_searchSelect.'
@@ -22,6 +26,10 @@ class Model {
 		$sth->execute( self::GETtoBindable() );
 		return ( $searchData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? $searchData : array();
 	}
+	/**
+	 * Counts the number of rows returned by a search
+	 * @return integer
+	 */
 	public static function searchCount() {
 		$sth = Database::$dbh->prepare( '
 			SELECT COUNT(*) as count
@@ -33,7 +41,12 @@ class Model {
 	}
 	
 	
-	
+	/**
+	 * Prepares a string for use in a LIKE SQL query by removing punctuation and setting the correct wildcards
+	 * @access protected
+	 * @param string $string 
+	 * @return string
+	 */
 	protected static function prepareStringForLike( $string ) {
 		return str_replace(
 			array( '*', '?', ',', '.', ' ', '%%' ),
@@ -41,25 +54,30 @@ class Model {
 			$string
 		);
 	}
+	
+	
+	/**
+	 * Creates the content of the LIMIT part of an SQL request, either by using $_GET variables, or a default
+	 * @access protected
+	 * @return string
+	 */
 	protected static function GETtoLimit() {
-		return isset( $_GET['from'] )? intval( $_GET['from'] ).','.(intval( $_GET['from'] )+30) : 30;
+		return isset( $_GET['from'] )? intval( $_GET['from'] ).','.(intval( $_GET['from'] )+30) : '30';
 	}
-	private static $_where = false;
 	protected static function GETtoWhere() {
-		if( self::$_where === false ) {
+		if( static::$_searchWhere === false ) {
 			self::GETtoWhereandBindable();
 		}
-		return self::$_where;
+		return static::$_searchWhere;
 	}
-	private static $_bindable = false;
 	protected static function GETtoBindable() {
-		if( self::$_bindable === false ) {
-			self::GETtoWhereandBindable();
+		if( static::$_searchBindable === false ) {
+			self::GETtoWhereAndBindable();
 		}
-		return self::$_bindable;
+		return static::$_searchBindable;
 	}
 	
-	private static function GETtoWhereandBindable( $conditions = null, $join = 'AND', $bindCount = 0, $return = false ) {
+	private static function GETtoWhereAndBindable( $conditions = null, $join = 'AND', $bindCount = 0, $return = false ) {
 		// Set up variables to store results
 		if( $conditions == null ) { $conditions = static::GETtoConditions(); }
 		$where = array();
@@ -68,37 +86,26 @@ class Model {
 		foreach( $conditions as $key => $value ) {
 			if( is_array( $value ) ) {
 				$nestedConditions = array( 'where' => '', 'bindable' => array() );
-				if( strpos( 'AND', $key ) !== false ) { $nestedConditions = self::GETtoWhereandBindable( $value, 'AND', $bindCount, true ); }
-				elseif( strpos( 'OR', $key ) !== false ) { $nestedConditions = self::GETtoWhereandBindable( $value, 'OR', $bindCount, true ); }
+				if( strpos( 'AND', $key ) !== false ) { $nestedConditions = self::GETtoWhereAndBindable( $value, 'AND', $bindCount, true ); }
+				elseif( strpos( 'OR', $key ) !== false ) { $nestedConditions = self::GETtoWhereAndBindable( $value, 'OR', $bindCount, true ); }
 				$where[] = $nestedConditions['where'];
 				$bindable = array_merge( $bindable, $nestedConditions['bindable'] );
 				$bindCount += count( $nestedConditions['bindable'] );
 			}
-			elseif( !empty( $value ) ) {
-				$lefts = str_split( $key, strrpos( $key, ' ' ) );
-				switch( count( $lefts ) ) {
-					case 1:
-						$where[] = $lefts[0].' =  :var'.$bindCount;
-						break;
-					case 2:
-						$where[] = $lefts[0].' '.$lefts[1].' :var'.$bindCount;
-						break;
-					default;
-						break;
-				}
+			elseif( !empty( $value ) && preg_match( '/^(.*) (REGEXP|LIKE|=)$/', $key, $matches ) ) {
+				$where[] = $matches[1].' '.$matches[2].' :var'.$bindCount;
 				$bindable[':var'.$bindCount] = $value;
 				++$bindCount;
 			}
 		}
-		
 		$where = '('.implode( ' '.$join.' ', $where ).')';
 		
 		if( $return ) {
 			return array( 'where' => $where, 'bindable' => $bindable );
 		}
 		else {
-			self::$_where = $where;
-			self::$_bindable = $bindable;
+			static::$_searchWhere = $where;
+			static::$_searchBindable = $bindable;
 		}
 	}
 }

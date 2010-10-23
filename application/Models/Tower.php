@@ -7,6 +7,8 @@ class Tower extends \Blueline\Model {
 	protected static $_table = 'towers';
 	
 	protected static $_searchSelect = 'doveId, dedication, place, county, country, bells';
+	protected static $_searchWhere = false;
+	protected static $_searchBindable = false;
 
 	public static function view( $doveId ) {
 		$sth = Database::$dbh->prepare( '

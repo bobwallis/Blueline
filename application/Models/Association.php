@@ -7,6 +7,8 @@ class Association extends \Blueline\Model {
 	protected static $_table = 'associations';
 	
 	protected static $_searchSelect = 'abbreviation, name, link';
+	protected static $_searchWhere = false;
+	protected static $_searchBindable = false;
 
 	public static function index() {
 		$sth = Database::$dbh->prepare( '

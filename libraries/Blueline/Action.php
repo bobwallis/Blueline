@@ -10,6 +10,9 @@ use Blueline\Request;
  */
 class Action {
 
+	/**
+	 * Converts the action for sending an error response (call Response::error() to ensure proper execution)
+	 */
 	public static function error( $code ) {
 		self::$_action = '/error';
 		self::$_arguments = array( 404 );
@@ -69,7 +72,10 @@ class Action {
 		}
 		return self::$_arguments;
 	}
-	
+
+	/**
+	 * Executes the action
+	 */
 	public static function execute() {
 		$arguments = self::arguments();
 		include( ACTION_PATH.'/'.self::action().'.php' );

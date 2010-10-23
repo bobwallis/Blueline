@@ -9,8 +9,14 @@ use \PDO;
  * @license http://opensource.org/licenses/gpl-3.0.html GNU Public License
  */
 class Database {
+	/**
+	 * The database handler
+	 */
 	public static $dbh;
 	
+	/**
+	 * Sets up the database handler using configuration
+	 */
 	public static function initialise() {
 		$options = Config::get( 'database' );
 		if( !isset( $options['dsn'] ) ) { throw new \Exception( 'DSN not set' ); }
