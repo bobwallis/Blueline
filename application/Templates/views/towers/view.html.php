@@ -1,7 +1,7 @@
 <?php
 namespace Blueline;
 
-$title_for_layout = htmlspecialchars( \Helpers\Text::toList( array_map( function( $t ){ return implode( ', ', array_reverse( explode(  ', ', $t['place'] ) ) ).(($t['dedication']!='Unknown')?' ('.$t['dedication'].')':''); }, $towers ) ) ) . ' | Towers | Blueline';
+$title_for_layout = htmlspecialchars( \Helpers\Text::toList( array_map( function( $t ){ return $t['place'].(($t['dedication']!='Unknown')?' ('.$t['dedication'].')':''); }, $towers ) ) ) . ' | Towers | Blueline';
 $breadcrumb = array(
 	'<a href="/towers">Towers</a>'
 );
@@ -19,7 +19,7 @@ $i = 0;
 <?php $i = 0; foreach( $towers as $tower ) : ?>
 <section class="tower">
 	<header>
-		<h1><?php echo implode( ', ', array_reverse( explode(  ', ', $tower['place'] ) ) ).(($tower['dedication']!='Unknown')?' <span class="normalweight">('.$tower['dedication'].')</span>':''); ?></h1>
+		<h1><?php echo $tower['place'].(($tower['dedication']!='Unknown')?' <span class="normalweight">('.$tower['dedication'].')</span>':''); ?></h1>
 		<h2 class="sub"><?php echo implode( ', ', array_filter( array( $tower['county'], $tower['country'] ), function($i){return !empty($i);} ) ); ?></h2>
 		<ul class="tabBar">
 			<li id="tab_details<?php echo $i; ?>" class="active">Details</li>

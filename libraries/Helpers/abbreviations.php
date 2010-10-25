@@ -68,6 +68,7 @@ $scottishAreas = array(
 	'C Glas' => 'City of Glasgow',
 	'Clackman' => 'Clackmannanshire',
 	'E Loth' => 'East Lothian',
+	'Fife' => 'Fife',
 	'Highland' => 'Highland',
 	'PthKross' => 'Perth and Kinross',
 	'PerthKross' => 'Perth and Kinross',
@@ -208,6 +209,7 @@ $southAfricanAreas = array(
 	'WC' => 'Western Cape',
 	'KZN' => 'KwaZulu-Natal',
 	'EC' => 'Eastern Cape',
-	'Gaut' => 'Gauteng'
+	'Gaut' => 'Gauteng',
+	'North West' => 'North West'
 );
 ?>
