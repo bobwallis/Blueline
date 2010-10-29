@@ -10,9 +10,14 @@ define( 'ACTION_PATH', __DIR__.'/../application/Actions' );
 // Initialise a class autoloader
 require( LIBRARY_PATH.'/Blueline/ClassLoader.php' );
 $classLoader_Blueline = new ClassLoader( 'Blueline', LIBRARY_PATH );
+$classLoader_Models = new ClassLoader( 'Models', APPLICATION_PATH );
+$classLoader_Helpers = new ClassLoader( 'Helpers', LIBRARY_PATH );
 
 // Load application configuration
 require( APPLICATION_PATH.'/config.php' );
+
+// Initialise an Exception handler
+require( LIBRARY_PATH.'/Blueline/ExceptionHandler.php' );
 
 // Define caches
 Cache::initialise();
@@ -30,10 +35,6 @@ if( Cache::exists( 'dynamic', Response::id() ) ) {
 	eval( cache::read( 'dynamic', Response::id() ) );
 	exit();
 }
-
-// Define some more class autoloaders
-$classLoader_Models = new ClassLoader( 'Models', APPLICATION_PATH );
-$classLoader_Helpers = new ClassLoader( 'Helpers', LIBRARY_PATH );
 
 Database::initialise();
 Action::execute();

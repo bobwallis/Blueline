@@ -2,6 +2,9 @@
 namespace Blueline;
 
 $title_for_layout = 'Associations | Blueline';
+$breadcrumb = array(
+	'<a href="/associations">Associations</a>'
+);
 $headerSearch = array( 
 	'action' => '/associations/search',
 	'placeholder' => 'Search associations'
