@@ -69,7 +69,12 @@ class File implements Adaptor {
 		return ( $success )? $value-$step : false;
 	}
 	
-	public function clear() {
-		return true;
+	public function clear( $dir = null ) {
+		if( is_null( $dir ) ) { $dir = $this->_location; }
+		$success = true;
+		foreach( new \FilesystemIterator( $dir ) as $file ) {
+			$success = ( is_dir( $file )? $this->clear( $file ) && @rmdir( $file ) : unlink( $file ) ) && $success;
+		}
+		return $success;
 	}
 }
