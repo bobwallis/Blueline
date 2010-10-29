@@ -12,9 +12,10 @@ class View {
 	/**
 	 * Converts the view for sending an error response (call Response::error() to ensure proper execution)
 	 */
-	public static function error( $code ) {
+	public static function error( $code, $message ) {
 		self::$_layout = 'default';
 		self::$_view = '/errors/error';
+		if( $message ) { self::set( 'errorMessage', $message ); }
 	}
 	
 	/**
@@ -69,7 +70,7 @@ class View {
 		$viewPath = TEMPLATE_PATH.'/views'.self::view().'.'.Response::extension().'.php';
 		$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.Response::extension().'.php';
 		if( !file_exists( $viewPath ) || !file_exists( $layoutPath ) ) {
-			Response::error( 404 );
+			Response::error( 404, 'View or layout not found' );
 			self::create();
 		}
 		else {

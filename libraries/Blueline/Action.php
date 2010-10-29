@@ -15,7 +15,7 @@ class Action {
 	 */
 	public static function error( $code ) {
 		self::$_action = '/error';
-		self::$_arguments = array( 404 );
+		self::$_arguments = array( $code );
 	}
 	
 	/**
@@ -30,10 +30,10 @@ class Action {
 		if( self::$_action === false ) {
 			$pathRequest = ( Request::path() == '/' )? array( '' ) : explode( '/', Request::path() );
 			if( count( $pathRequest ) > 5 ) {
-				Response::error( 403 );
+				Response::error( 403, 'Too many arguments' );
 			}
 			elseif( strpos( Request::path(), '..' ) !== false ) {
-				Response::error( 403 );
+				Response::error( 403, 'Request contains \'..\'' );
 			}
 			else {
 				$testAction = implode( $pathRequest, '/' ).'/_index';
@@ -49,7 +49,7 @@ class Action {
 						}
 					}
 					if( self::$_action === false ) {
-						Response::error( 403 );
+						Response::error( 404, 'Action not found' );
 					}
 				}
 			}

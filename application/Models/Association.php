@@ -45,10 +45,10 @@ class Association extends \Blueline\Model {
 			$sth = Database::$dbh->prepare( '
 				SELECT COUNT(*) as towerCount, MAX(latitude) as lat_max, MIN(latitude) as lat_min, MAX(longitude) as long_max, MIN(longitude) as long_min
 				FROM towers
-				WHERE affiliations LIKE :abbreviation
+				JOIN associations_towers ON (association_abbreviation = :abbreviation AND tower_doveId = doveId)
 			' );
-			$sth->execute( array( ':abbreviation' => '%'.$abbreviation.'%' ) );
-			return array_merge( $associationData, $sth->fetch( PDO::FETCH_ASSOC ) );
+			$sth->execute( array( ':abbreviation' => $abbreviation ) );
+			return array_merge( $associationData, $sth->fetch( PDO::FETCH_ASSOC )?:array() );
 		}
 		else {
 			return array();

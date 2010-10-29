@@ -9,9 +9,9 @@ $scripts_for_layout = array(
 ?>
 <section class="search">
 	<header>
-		<form id="sectionSearch" action="search">
+		<form id="sectionSearch" action="/methods/search">
 			<div>
-				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search methods" value="<?php echo htmlentities( $q ); ?>" />
+				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search methods" value="<?php echo isset($q)?htmlentities( $q ):'';; ?>" />
 				<button type="submit" title="Search"><span class="hide">Search</span></button>
 			</div>
 			<p class="fleft"><?php echo $count; ?> methods</p>

@@ -7,7 +7,7 @@ switch( Response::code() ) {
 		break;
 	case 404:
 		$errorTitle = 'Not Found';
-		$errorText = 'The requested page either no longer exists, or never has.';
+		$errorSub = 'The requested page either no longer exists, or never has.';
 		break;
 	case 500:
 	default:
@@ -23,5 +23,6 @@ $headerSearch = array(
 <header>
 	<h1><?php echo $errorTitle; ?></h1>
 </header>
-<?php echo isset( $errorText )? '<p>'.$errorText.'</p>' : ''; ?>
+<?php echo isset( $errorSub )? '<p>'.$errorSub.'</p>' : ''; ?>
 <p>Try a search, or visit the homepage to find what you're looking for.</p>
+<?php echo isset( $errorMessage )? '<p>Internal message: '.$errorMessage.'</p>' : ''; ?>

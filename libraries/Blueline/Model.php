@@ -10,8 +10,6 @@ use \PDO;
  */
 class Model {
 	
-
-
 	/**
 	 * Performs a search
 	 * @return array
@@ -98,7 +96,7 @@ class Model {
 				++$bindCount;
 			}
 		}
-		$where = '('.implode( ' '.$join.' ', $where ).')';
+		$where = ( count( $where ) == 0) ? '1=1' : '('.implode( ' '.$join.' ', $where ).')';
 		
 		if( $return ) {
 			return array( 'where' => $where, 'bindable' => $bindable );

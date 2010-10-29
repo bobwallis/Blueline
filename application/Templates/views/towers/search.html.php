@@ -1,7 +1,7 @@
 <?php
 $title_for_layout = 'Search | Towers | Blueline';
 $breadcrumb = array(
-	'<a href="/methods">Towers</a>'
+	'<a href="/towers">Towers</a>'
 );
 $scripts_for_layout = array(
 	'/scripts/general.js'
@@ -9,7 +9,7 @@ $scripts_for_layout = array(
 ?>
 <section class="search">
 	<header>
-		<form id="sectionSearch" action="search">
+		<form id="sectionSearch" action="/towers/search">
 			<div>
 				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search methods" value="<?php echo htmlentities( $q ); ?>" />
 				<button type="submit" title="Search"><span class="hide">Search</span></button>
