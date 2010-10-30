@@ -25,4 +25,4 @@ $headerSearch = array(
 </header>
 <?php echo isset( $errorSub )? '<p>'.$errorSub.'</p>' : ''; ?>
 <p>Try a search, or visit the homepage to find what you're looking for.</p>
-<?php echo isset( $errorMessage )? '<p>'.$errorMessage.'</p>' : ''; ?>
+<?php echo ( DEVELOPMENT && isset( $errorMessage ) )? '<p>'.$errorMessage.'</p>' : ''; ?>

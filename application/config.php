@@ -1,6 +1,10 @@
 <?php
 namespace Blueline;
 
+// Obviously set this to false on servers to which the public have access to
+// prevent debug messages with passwords in being thrown everywhere.
+define( 'DEVELOPMENT', true );
+
 // Caches
 Config::set( 'caches', array(
 	array(
@@ -29,7 +33,7 @@ Config::set( 'caches', array(
 ) );
 
 Config::set( 'database', array(
-	'dsn' => 'mysql:host=localhost;dbname=blueline',
+	'dsn' => 'mysqll:host=localhost;dbname=blueline',
 	'username' => 'blueline',
 	'password' => 'password'
 ) );
