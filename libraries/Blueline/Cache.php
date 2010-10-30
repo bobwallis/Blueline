@@ -26,6 +26,10 @@ class Cache {
 		return array_key_exists( $cache, self::$_adaptors )? self::$_adaptors[$cache]->set( $key, $value ) : false;
 	}
 	
+	public static function delete( $cache, $key ) {
+		return array_key_exists( $cache, self::$_adaptors )? self::$_adaptors[$cache]->delete( $key ) : false;
+	}
+	
 	public static function clear( $cache ) {
 		return array_key_exists( $cache, self::$_adaptors )? self::$_adaptors[$cache]->clear() : false;
 	}

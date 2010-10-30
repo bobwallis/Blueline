@@ -29,7 +29,7 @@ class Action {
 	public static function action() {
 		if( self::$_action === false ) {
 			$pathRequest = ( Request::path() == '/' )? array( '' ) : explode( '/', Request::path() );
-			if( count( $pathRequest ) > 5 ) {
+			if( count( $pathRequest ) > 7 ) {
 				Response::error( 403, 'Too many arguments' );
 			}
 			elseif( strpos( Request::path(), '..' ) !== false ) {

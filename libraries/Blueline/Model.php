@@ -10,11 +10,26 @@ use \PDO;
  */
 class Model {
 	
+	
+	/**
+	 * Gets details of every entry
+	 * @return array
+	 */
+	public static function fullList() {
+		$sth = Database::$dbh->prepare( '
+			SELECT '.static::$_searchSelect.'
+			FROM '.static::$_table.'
+			WHERE 1=1
+		' );
+		$sth->execute();
+		return ( $fullList = $sth->fetchAll( PDO::FETCH_ASSOC ) )? $fullList : array();
+	}
+	
 	/**
 	 * Performs a search
 	 * @return array
 	 */
-	public static function search() {		
+	public static function search() {	
 		$sth = Database::$dbh->prepare( '
 			SELECT '.static::$_searchSelect.'
 			FROM '.static::$_table.'
