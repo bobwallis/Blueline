@@ -24,16 +24,6 @@ class Response {
 	}
 	
 	/**
-	 * Sets the response to a particular error
-	 * @return boolean
-	 */
-	public static function error( $code, $message = false ) {
-		self::code( $code );
-		Action::error( $code );
-		View::error( $code, $message );
-	}
-	
-	/**
 	 * Instantly sends a redirect response to the user
 	 * @return boolean
 	 */

@@ -1,7 +1,10 @@
 <?php
 
 function exception_handler( $e ) {
-	\Blueline\Response::error( 500, prettyException( $e ) );
+	$code = $e->getCode()?:500;
+	\Blueline\Response::code( $code );
+	\Blueline\Action::error( $code );
+	\Blueline\View::error( $code, prettyException( $e ) );
 	\Blueline\Action::execute();
 	\Blueline\View::create();
 	\Blueline\Response::send();

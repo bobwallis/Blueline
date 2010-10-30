@@ -1,5 +1,6 @@
 <?php
 namespace Blueline\Cache\Adaptors;
+use \Blueline\Exception;
 
 class File implements Adaptor {
 	
@@ -8,9 +9,9 @@ class File implements Adaptor {
 	private $_canSet;
 	
 	function __construct( $options ) {
-		if( !isset( $options['location'] ) ) { throw new \Exception( 'Cache location not set' ); }
+		if( !isset( $options['location'] ) ) { throw new Exception( 'Cache location not set' ); }
 		$location = rtrim( $options['location'], '/' );
-		if( !is_dir( $location ) ) { throw new \Exception( 'Cache location is not a directory' ); }
+		if( !is_dir( $location ) ) { throw new Exception( 'Cache location is not a directory' ); }
 
 		$this->_location = $location . '/';
 		$this->_serialize = ( isset( $options['serialize'] ) )? $options['serialize'] : true;

@@ -11,7 +11,7 @@ use Blueline\Request;
 class Action {
 
 	/**
-	 * Converts the action for sending an error response (call Response::error() to ensure proper execution)
+	 * Converts the action for sending an error response
 	 */
 	public static function error( $code ) {
 		self::$_action = '/error';
@@ -30,10 +30,10 @@ class Action {
 		if( self::$_action === false ) {
 			$pathRequest = ( Request::path() == '/' )? array( '' ) : explode( '/', Request::path() );
 			if( count( $pathRequest ) > 7 ) {
-				Response::error( 403, 'Too many arguments' );
+				throw new Exception( 'Too many arguments', 403 );
 			}
 			elseif( strpos( Request::path(), '..' ) !== false ) {
-				Response::error( 403, 'Request contains \'..\'' );
+				throw new Exception( 'Request contains \'..\'', 403 );
 			}
 			else {
 				$testAction = implode( $pathRequest, '/' ).'/_index';
@@ -49,7 +49,7 @@ class Action {
 						}
 					}
 					if( self::$_action === false ) {
-						Response::error( 404, 'Action not found' );
+						throw new Exception( 'Action not found', 404 );
 					}
 				}
 			}

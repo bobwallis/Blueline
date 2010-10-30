@@ -10,7 +10,7 @@ namespace Blueline;
 class View {
 
 	/**
-	 * Converts the view for sending an error response (call Response::error() to ensure proper execution)
+	 * Converts the view for sending an error response
 	 */
 	public static function error( $code, $message ) {
 		self::$_layout = 'default';
@@ -70,7 +70,7 @@ class View {
 		$viewPath = TEMPLATE_PATH.'/views'.self::view().'.'.Response::extension().'.php';
 		$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.Response::extension().'.php';
 		if( !file_exists( $viewPath ) || !file_exists( $layoutPath ) ) {
-			Response::error( 404, 'View or layout not found' );
+			throw new Exception( 'View or layout not found', 404 );
 			self::create();
 		}
 		else {
