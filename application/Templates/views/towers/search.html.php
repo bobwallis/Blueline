@@ -23,5 +23,6 @@ $scripts_for_layout = array(
 		<li><?php echo '<a href="/towers/view/'.$tower['doveId'].'">' . $tower['place'].' <small>('.$tower['dedication'].')</small></a>'; ?></li>
 <?php endforeach; ?>
 	</ol>
+<?php include( TEMPLATE_PATH.'/elements/paging.html.php' ); ?>
 </section>
 

@@ -1,17 +1,21 @@
-<?php require( 'phpcoord.php' ); ?>
+<?php
+namespace Utilities;
+require( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/phpcoord.php' );
+use \OSRef;
+?>
 -- Set up postcodes table
-DROP TABLE IF EXISTS `postcodes`;
-CREATE TABLE IF NOT EXISTS `postcodes` (
-  `postcode` varchar(7),
-  `gridReference` varchar(8),
-  `easting` int(6),
-  `northing` int(6),
-  `latitude_OSGB36` decimal(8,5),
-  `longitude_OSGB36` decimal(8,5),
-  `latitude_WGS84` decimal(8,5),
-  `longitude_WGS84` decimal(8,5),
+DROP TABLE IF EXISTS postcodes;
+CREATE TABLE IF NOT EXISTS postcodes (
+  postcode varchar(7),
+  gridReference varchar(8),
+  easting int(6),
+  northing int(6),
+  latitude_OSGB36 decimal(8,5),
+  longitude_OSGB36 decimal(8,5),
+  latitude_WGS84 decimal(8,5),
+  longitude_WGS84 decimal(8,5),
 
-  PRIMARY KEY (`postcode`)
+  PRIMARY KEY (postcode)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 <?php
@@ -57,7 +61,7 @@ foreach( $files as $file ) {
 			$rowData['latitude_WGS84'] = round( $latLong->lat, 5 );
 			$rowData['longitude_WGS84'] = round( $latLong->lng, 5 );
 			
-			echo 'INSERT INTO `postcodes` ('.implode( ', ', array_keys( $rowData ) ).') VALUES ('.implode( ', ', $rowData ).");\n";
+			echo 'INSERT INTO postcodes ('.implode( ', ', array_keys( $rowData ) ).') VALUES ('.implode( ', ', $rowData ).");\n";
 		}
 	}
 }

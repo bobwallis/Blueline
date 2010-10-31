@@ -33,7 +33,7 @@ Config::set( 'caches', array(
 ) );
 
 Config::set( 'database', array(
-	'dsn' => 'mysqll:host=localhost;dbname=blueline',
+	'dsn' => 'mysql:host=localhost;dbname=blueline',
 	'username' => 'blueline',
 	'password' => 'password'
 ) );

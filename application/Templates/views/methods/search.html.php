@@ -23,5 +23,6 @@ $scripts_for_layout = array(
 		<li><a href="/methods/view/<?php echo str_replace( ' ', '_', $method['title'] ); ?>"><?php echo $method['title']; ?></a></li>
 <?php endforeach; ?>
 	</ol>
+<?php include( TEMPLATE_PATH.'/elements/paging.html.php' ); ?>
 </section>
 

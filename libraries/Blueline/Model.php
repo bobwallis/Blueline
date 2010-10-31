@@ -10,7 +10,7 @@ use \PDO;
  */
 class Model {
 	
-	
+	public static $_searchLimit = 30;
 	/**
 	 * Gets details of every entry
 	 * @return array
@@ -74,8 +74,8 @@ class Model {
 	 * @access protected
 	 * @return string
 	 */
-	protected static function GETtoLimit() {
-		return isset( $_GET['from'] )? intval( $_GET['from'] ).','.(intval( $_GET['from'] )+30) : '30';
+	public static function GETtoLimit() {
+		return ( isset( $_GET['from'] )? intval( $_GET['from'] ) : '0' ) . ','.strval( self::$_searchLimit );
 	}
 	protected static function GETtoWhere() {
 		if( static::$_searchWhere === false ) {
