@@ -9,7 +9,7 @@ $scripts_for_layout = array(
 ?>
 <section class="search">
 	<header>
-		<form id="sectionSearch" action="/associations/search">
+		<form class="sectionSearch" action="/associations/search">
 			<div>
 				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search associations" value="<?php echo htmlentities( $q ); ?>" />
 				<button type="submit" title="Search"><span class="hide">Search</span></button>
