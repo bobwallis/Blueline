@@ -17,7 +17,7 @@ class Exception extends \Exception {
 			. $e->getLine().' of '.$e->getFile()
 			. "\nFunction: "
 			. ( !empty( $trace[0]['class'] )? $trace[0]['class'] . '->' : '' )
-			. $trace[0]['function'] . '( '. self::textArgumentList( $trace[0]['args'] ).' );';
+			. $trace[0]['function'] . '( '. self::textArgumentList( isset( $trace[0]['args'] )? $trace[0]['args'] : array() ).' );';
 	}
 
 	public static function textArgumentList( $args ) {

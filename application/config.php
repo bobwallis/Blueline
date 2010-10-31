@@ -17,7 +17,7 @@ Config::set( 'caches', array(
 	),
 	array(
 		'name' => 'data',
-		'type' => ( apc_cache_info( 'user', false ) !== false )? 'APC' : 'File',
+		'type' => ( function_exists( 'apc_cache_info' ) && apc_cache_info( 'user', false ) !== false )? 'APC' : 'File',
 		'options' => array(
 			'location' => __DIR__.'/../cache/data'
 		)

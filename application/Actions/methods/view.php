@@ -17,7 +17,7 @@ $methodDetails = array_map(
 
 // If only one method has been requested, and it hasn't been found, then 404
 if( count( $methodDetails ) == 1 && $methodDetails[0]['title'] == 'Not Found' ) {
-	Response::error( 404 );
+	throw new Exception( 'Method not found', 404 );
 	return;
 }
 

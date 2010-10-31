@@ -16,10 +16,10 @@ class Method extends \Blueline\Model {
 			FROM '.static::$_table.'
 			LEFT OUTER JOIN method_extras AS me ON (me.method_title = title)
 			LEFT OUTER JOIN methods_towers AS mt ON (mt.method_title = title)
-			WHERE title LIKE :title
+			WHERE title = :title
 			LIMIT 1
 		' );
-		$sth->execute( array( ':title' => $title ) );
+		$sth->execute( array( ':title' => str_replace( '_', ' ', $title ) ) );
 		return ( $methodData = $sth->fetch( PDO::FETCH_ASSOC ) )? $methodData : array( 'title' => 'Not Found' );
 	}
 	
