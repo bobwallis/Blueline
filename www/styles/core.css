@@ -160,6 +160,7 @@ form#sectionSearch {
 	margin: 10px 0 5px 10px;
 	width: 350px;
 }
+	h1 + form#sectionSearch { margin-top: 0; }
 	form#sectionSearch div {
 		height: 25px;
 		background-color: #FFF;
