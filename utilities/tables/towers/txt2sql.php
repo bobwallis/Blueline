@@ -237,7 +237,7 @@ foreach( $dove->data as $tower ) {
 	if( !empty( $tower['Place2'] ) ) {
 		$tower['Place'] .= ', '.$tower['Place2'];
 	}
-	$tower['Place'] = implode( ', ', array_reverse( explode(  ', ', $tower['Place'] ) ) );
+	$tower['Place'] = str_replace( 'The,', 'The', implode( ', ', array_reverse( explode(  ', ', $tower['Place'] ) ) ) );
 
 	// Escape values for SQL
 	$rowData = array();
