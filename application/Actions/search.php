@@ -19,4 +19,4 @@ View::set( 'towers', $towerSearchResults );
 View::set( 'towerCount', $towerSearchCount );
 
 View::set( 'q', isset( $_GET['q'] )? $_GET['q'] : '' );
-View::set( 'searchQuery', Request::queryString() );
+View::set( 'queryString', Request::queryString() );

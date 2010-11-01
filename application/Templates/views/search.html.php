@@ -3,66 +3,60 @@ namespace Blueline;
 use \Helpers\Text;
 
 $title_for_layout = 'Search | Blueline';
-$headerSearch = array( 
-	'action' => '/search',
-	'placeholder' => 'Search'
-);
 $scripts_for_layout = array(
 	'/scripts/general.js'
 );
 ?>
 <section class="search">
 	<header>
-		<h1>Associations</h1>
 <?php
 View::element( 'sectionSearch', array(
-	'action' => '/associations/search',
+	'action' => '/search',
 	'q' => $q,
-	'placeholder' => 'Search associations',
-	'extra' => Text::pluralise( $associationCount, 'association' )
+	'placeholder' => 'Search',
+	'extra' => Text::toList( array( Text::pluralise( $associationCount, 'association' ), Text::pluralise( $methodCount, 'method' ), Text::pluralise( $towerCount, 'tower' ) ) )
 ) );
 ?>
 	</header>
-	<ol class="searchResults">
+	<ul>
+<?php if( $associationCount > 0 ) : ?>
+		<li>
+			<h3>Associations:</h3>
+			<ol class="searchResults">
 <?php foreach( $associations as $association ) : ?>
-		<li><a href="/associations/view/<?php echo urlencode( $association['abbreviation'] ); ?>"><?php echo $association['name']; ?></a></li>
+				<li><a href="/associations/view/<?php echo urlencode( $association['abbreviation'] ); ?>"><?php echo $association['name']; ?></a></li>
 <?php endforeach; ?>
-	</ol>
-</section>
-<section class="search">
-	<header>
-		<h1>Methods</h1>
-<?php
-View::element( 'sectionSearch', array(
-	'action' => '/methods/search',
-	'q' => $q,
-	'placeholder' => 'Search methods',
-	'extra' => Text::pluralise( $methodCount, 'method' )
-) );
-?>
-	</header>
-	<ol class="searchResults">
+			</ol>
+<?php if( $associationCount > Model::$_searchLimit ) : ?>
+			<h4><a href="/associations/search?<?php echo $queryString; ?>">More associations &raquo;</a></h4>
+<?php endif; ?>
+		</li>
+<?php endif; ?>
+<?php if( $methodCount > 0 ) : ?>
+		<li>
+			<h3>Methods:</h3>
+			<ol class="searchResults">
 <?php foreach( $methods as $method ) : ?>
-		<li><a href="/methods/view/<?php echo str_replace( ' ', '_', $method['title'] ); ?>"><?php echo $method['title']; ?></a></li>
+				<li><a href="/methods/view/<?php echo str_replace( ' ', '_', $method['title'] ); ?>"><?php echo $method['title']; ?></a></li>
 <?php endforeach; ?>
-	</ol>
-</section>
-<section class="search">
-	<header>
-		<h1>Towers</h1>
-<?php
-View::element( 'sectionSearch', array(
-	'action' => '/towers/search',
-	'q' => $q,
-	'placeholder' => 'Search towers',
-	'extra' => Text::pluralise( $towerCount, 'tower' )
-) );
-?>
-	</header>
-	<ol class="searchResults">
+			</ol>
+<?php if( $methodCount > Model::$_searchLimit ) : ?>
+			<h4><a href="/methods/search?<?php echo $queryString; ?>">More methods &raquo;</a></h4>
+<?php endif; ?>
+		</li>
+<?php endif; ?>
+<?php if( $towerCount > 0 ) : ?>
+		<li>
+			<h3>Towers:</h3>
+			<ol class="searchResults">
 <?php foreach( $towers as $tower ) : ?>
-		<li><?php echo '<a href="/towers/view/'.$tower['doveId'].'">' . $tower['place'].' <small>('.$tower['dedication'].')</small></a>'; ?></li>
+				<li><?php echo '<a href="/towers/view/'.$tower['doveId'].'">' . $tower['place'].' <small>('.$tower['dedication'].')</small></a>'; ?></li>
 <?php endforeach; ?>
-	</ol>
+<?php if( $towerCount > Model::$_searchLimit ) : ?>
+			</ol><h4><a href="/towers/search?<?php echo $queryString; ?>">More towers &raquo;</a></h4>
+<?php endif; ?>
+		</li>
+<?php endif; ?>
+	</ul>
 </section>
 
