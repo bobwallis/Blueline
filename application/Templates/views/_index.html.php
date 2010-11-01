@@ -11,7 +11,7 @@ $title_for_layout = 'Blueline';
 				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search associations" value="" />
 				<button type="submit" title="Search"><span class="hide">Search</span></button>
 			</div>
-			<p class="fleft"><?php echo $associationCount; ?> associations</p>
+			<p class="fleft"><?php echo Text::pluralise( $associationCount, 'association' ); ?></p>
 			<br style="clear: both;" />
 		</form>
 	</header>
@@ -24,7 +24,7 @@ $title_for_layout = 'Blueline';
 				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search methods" value="" />
 				<button type="submit" title="Search"><span class="hide">Search</span></button>
 			</div>
-			<p class="fleft"><?php echo $methodCount; ?> methods</p>
+			<p class="fleft"><?php echo Text::pluralise( $methodCount, 'method' ); ?></p>
 			<br style="clear: both;" />
 		</form>
 	</header>
@@ -37,7 +37,7 @@ $title_for_layout = 'Blueline';
 				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search towers" value="" />
 				<button type="submit" title="Search"><span class="hide">Search</span></button>
 			</div>
-			<p class="fleft"><?php echo $towerCount; ?> towers</p>
+			<p class="fleft"><?php echo Text::pluralise( $towerCount, 'tower' ); ?></p>
 			<br style="clear: both;" />
 		</form>
 	</header>

@@ -26,6 +26,6 @@ $scripts_for_layout = array(
 		<li><a href="/associations/view/<?php echo urlencode( $association['abbreviation'] ); ?>"><?php echo $association['name']; ?></a></li>
 <?php endforeach; ?>
 	</ol>
-<?php include( TEMPLATE_PATH.'/elements/paging.html.php' ); ?>
+<?php View::element( 'paging', compact( 'limit' ) ); ?>
 </section>
 

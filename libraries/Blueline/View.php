@@ -71,7 +71,6 @@ class View {
 		$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.Response::extension().'.php';
 		if( !file_exists( $viewPath ) || !file_exists( $layoutPath ) ) {
 			throw new Exception( 'View or layout not found', 404 );
-			self::create();
 		}
 		else {
 			extract( array_map( 'unserialize', self::$_variables ), EXTR_SKIP );
@@ -85,5 +84,20 @@ class View {
 			Response::body( $fullContent );
 		}
 	}
-
+	
+	/**
+	 * Includes an element, meant to be called from a view template
+	 * @param string $name The element name
+	 * @param mixed $variables Variables to pass to the element
+	 */
+	public static function element( $name, $variables ) {
+		$elementPath = TEMPLATE_PATH.'/elements/'.$name.'.'.Response::extension().'.php';
+		if( !file_exists( $elementPath ) ) {
+			throw new Exception( 'Element \''.$name.'\' not found', 404 );
+		}
+		else {
+			extract( $variables, EXTR_SKIP );
+			include( $elementPath );
+		}
+	}
 }
