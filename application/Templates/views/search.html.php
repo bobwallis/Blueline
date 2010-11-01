@@ -14,14 +14,14 @@ $scripts_for_layout = array(
 <section class="search">
 	<header>
 		<h1>Associations</h1>
-		<form class="sectionSearch" action="/associations/search">
-			<div>
-				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search associations" value="<?php echo htmlentities( $q ); ?>" />
-				<button type="submit" title="Search"><span class="hide">Search</span></button>
-			</div>
-			<p class="fleft"><?php echo Text::pluralise( $associationCount, 'association' ) . ( ($associationCount > Model::$_searchLimit)? ' | <a href="/associations/search?'.$searchQuery.'">Show all &raquo;</a>' : '' ); ?></p>
-			<br style="clear: both;" />
-		</form>
+<?php
+View::element( 'sectionSearch', array(
+	'action' => '/associations/search',
+	'q' => $q,
+	'placeholder' => 'Search associations',
+	'extra' => Text::pluralise( $associationCount, 'association' )
+) );
+?>
 	</header>
 	<ol class="searchResults">
 <?php foreach( $associations as $association ) : ?>
@@ -32,14 +32,14 @@ $scripts_for_layout = array(
 <section class="search">
 	<header>
 		<h1>Methods</h1>
-		<form class="sectionSearch" action="/methods/search">
-			<div>
-				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search methods" value="<?php echo isset($q)?htmlentities( $q ):'';; ?>" />
-				<button type="submit" title="Search"><span class="hide">Search</span></button>
-			</div>
-			<p class="fleft"><?php echo Text::pluralise( $methodCount, 'method' ) . ( ($methodCount > Model::$_searchLimit)? ' | <a href="/methods/search?'.$searchQuery.'">Show all &raquo;</a>' : '' ); ?></p>
-			<br style="clear: both;" />
-		</form>
+<?php
+View::element( 'sectionSearch', array(
+	'action' => '/methods/search',
+	'q' => $q,
+	'placeholder' => 'Search methods',
+	'extra' => Text::pluralise( $methodCount, 'method' )
+) );
+?>
 	</header>
 	<ol class="searchResults">
 <?php foreach( $methods as $method ) : ?>
@@ -50,14 +50,14 @@ $scripts_for_layout = array(
 <section class="search">
 	<header>
 		<h1>Towers</h1>
-		<form class="sectionSearch" action="/towers/search">
-			<div>
-				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search methods" value="<?php echo htmlentities( $q ); ?>" />
-				<button type="submit" title="Search"><span class="hide">Search</span></button>
-			</div>
-			<p class="fleft"><?php echo Text::pluralise( $towerCount, 'tower' ) . ( ($towerCount > Model::$_searchLimit)? ' | <a href="/towers/search?'.$searchQuery.'">Show all &raquo;</a>' : '' ); ?></p>
-			<br style="clear: both;" />
-		</form>
+<?php
+View::element( 'sectionSearch', array(
+	'action' => '/towers/search',
+	'q' => $q,
+	'placeholder' => 'Search towers',
+	'extra' => Text::pluralise( $towerCount, 'tower' )
+) );
+?>
 	</header>
 	<ol class="searchResults">
 <?php foreach( $towers as $tower ) : ?>

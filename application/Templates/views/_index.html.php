@@ -1,43 +1,17 @@
 <?php
 namespace Blueline;
+use \Helpers\Text;
 
 $title_for_layout = 'Blueline';
 ?>
 <section class="search">
 	<header>
-		<h1><a href="associations">Associations</a></h1>
-		<form class="sectionSearch" action="/associations/search">
+		<form class="sectionSearch" action="/search">
 			<div>
-				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search associations" value="" />
+				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search" value="" />
 				<button type="submit" title="Search"><span class="hide">Search</span></button>
 			</div>
-			<p class="fleft"><?php echo Text::pluralise( $associationCount, 'association' ); ?></p>
-			<br style="clear: both;" />
-		</form>
-	</header>
-</section>
-<section class="search">
-	<header>
-		<h1><a href="/methods">Methods</a></h1>
-		<form class="sectionSearch" action="/methods/search">
-			<div>
-				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search methods" value="" />
-				<button type="submit" title="Search"><span class="hide">Search</span></button>
-			</div>
-			<p class="fleft"><?php echo Text::pluralise( $methodCount, 'method' ); ?></p>
-			<br style="clear: both;" />
-		</form>
-	</header>
-</section>
-<section class="search">
-	<header>
-		<h1><a href="/towers">Towers</a></h1>
-		<form class="sectionSearch" action="/towers/search">
-			<div>
-				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search towers" value="" />
-				<button type="submit" title="Search"><span class="hide">Search</span></button>
-			</div>
-			<p class="fleft"><?php echo Text::pluralise( $towerCount, 'tower' ); ?></p>
+			<p class="fleft"><?php echo Text::toList( array( Text::pluralise( $associationCount, 'association' ), Text::pluralise( $methodCount, 'method' ), Text::pluralise( $towerCount, 'tower' ) ) ); ?></p>
 			<br style="clear: both;" />
 		</form>
 	</header>

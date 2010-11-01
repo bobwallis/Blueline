@@ -12,14 +12,12 @@ $scripts_for_layout = array(
 ?>
 <section class="search">
 	<header>
-		<form class="sectionSearch" action="/towers/search">
-			<div>
-				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search methods" value="<?php echo htmlentities( $q ); ?>" />
-				<button type="submit" title="Search"><span class="hide">Search</span></button>
-			</div>
-			<p class="fleft"><?php echo Text::pluralise( $count, 'tower' ); ?></p>
-			<br style="clear: both;" />
-		</form>
+<?php View::element( 'sectionSearch', array(
+	'action' => '/towers/search',
+	'q' => $q,
+	'placeholder' => 'Search towers',
+	'extra' => Text::pluralise( $count, 'tower' )
+) ); ?>
 	</header>
 	<ol class="searchResults">
 <?php foreach( $towers as $tower ) : ?>
