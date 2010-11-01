@@ -1,4 +1,7 @@
 <?php
+namespace Blueline;
+use \Helpers\Text;
+
 $title_for_layout = 'Search | Associations | Blueline';
 $breadcrumb = array(
 	'<a href="/associations">Associations</a>'
@@ -14,7 +17,7 @@ $scripts_for_layout = array(
 				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search associations" value="<?php echo htmlentities( $q ); ?>" />
 				<button type="submit" title="Search"><span class="hide">Search</span></button>
 			</div>
-			<p class="fleft"><?php echo $count; ?> associations</p>
+			<p class="fleft"><?php echo Text::pluralise( $count, 'association' ); ?></p>
 			<br style="clear: both;" />
 		</form>
 	</header>

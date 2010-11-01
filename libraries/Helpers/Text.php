@@ -10,12 +10,23 @@ namespace Helpers;
 
 class Text {
 
-	public static function toList( array $list ) {
+	public static function toList( array $list, $glue = ', ', $last = ' and ' ) {
 		if( count( $list ) > 1 ) {
-			return implode( ', ', array_slice( $list, null, -1 ) ) . ' and ' . array_pop( $list );
+			return implode( $glue, array_slice( $list, null, -1 ) ) . $last . array_pop( $list );
 		}
 		else {
 			return array_pop( $list );
 		}
+	}
+	
+	/**
+	 * Returns a properly pluralised string
+	 * @param integer $count
+	 * @param string $singular
+	 * @param string $plural Optional, defaults to $singular.'s'
+	 * @return string
+	 */
+	public static function pluralise( $count, $singular, $plural = false ) {
+		return $count.' '.( ( $count == 1 )? $singular : ( $plural?:$singular.'s' ) );
 	}
 };

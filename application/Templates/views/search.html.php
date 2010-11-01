@@ -1,5 +1,6 @@
 <?php
 namespace Blueline;
+use \Helpers\Text;
 
 $title_for_layout = 'Search | Blueline';
 $headerSearch = array( 
@@ -18,7 +19,7 @@ $scripts_for_layout = array(
 				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search associations" value="<?php echo htmlentities( $q ); ?>" />
 				<button type="submit" title="Search"><span class="hide">Search</span></button>
 			</div>
-			<p class="fleft"><?php echo $associationCount; ?> associations<?php echo ($associationCount > Model::$_searchLimit)? ' | <a href="/associations/search?'.$searchQuery.'">Show all &raquo;</a>' : ''; ?></p>
+			<p class="fleft"><?php echo Text::pluralise( $associationCount, 'association' ) . ( ($associationCount > Model::$_searchLimit)? ' | <a href="/associations/search?'.$searchQuery.'">Show all &raquo;</a>' : '' ); ?></p>
 			<br style="clear: both;" />
 		</form>
 	</header>
@@ -36,7 +37,7 @@ $scripts_for_layout = array(
 				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search methods" value="<?php echo isset($q)?htmlentities( $q ):'';; ?>" />
 				<button type="submit" title="Search"><span class="hide">Search</span></button>
 			</div>
-			<p class="fleft"><?php echo $methodCount; ?> methods<?php echo ($methodCount > Model::$_searchLimit)? ' | <a href="/methods/search?'.$searchQuery.'">Show all &raquo;</a>' : ''; ?></p>
+			<p class="fleft"><?php echo Text::pluralise( $methodCount, 'method' ) . ( ($methodCount > Model::$_searchLimit)? ' | <a href="/methods/search?'.$searchQuery.'">Show all &raquo;</a>' : '' ); ?></p>
 			<br style="clear: both;" />
 		</form>
 	</header>
@@ -54,7 +55,7 @@ $scripts_for_layout = array(
 				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search methods" value="<?php echo htmlentities( $q ); ?>" />
 				<button type="submit" title="Search"><span class="hide">Search</span></button>
 			</div>
-			<p class="fleft"><?php echo $towerCount; ?> towers<?php echo ($towerCount > Model::$_searchLimit)? ' | <a href="/towers/search?'.$searchQuery.'">Show all &raquo;</a>' : ''; ?></p>
+			<p class="fleft"><?php echo Text::pluralise( $towerCount, 'tower' ) . ( ($towerCount > Model::$_searchLimit)? ' | <a href="/towers/search?'.$searchQuery.'">Show all &raquo;</a>' : '' ); ?></p>
 			<br style="clear: both;" />
 		</form>
 	</header>
