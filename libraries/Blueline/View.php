@@ -45,9 +45,17 @@ class View {
 		if( $set != null ) {
 			self::$_view = $set;
 		}
-		elseif( self::$_view == 'default' ) {
+		
+		// Default value
+		if( self::$_view == 'default' ) {
 			self::$_view = Action::action();
 		}
+		
+		// Sanity checking
+		if( strpos( '..', self::$_view ) !== false ) {
+			throw new Exception( '\'..\' in view name', 404 );
+		}
+		
 		return self::$_view;
 	}
 	
