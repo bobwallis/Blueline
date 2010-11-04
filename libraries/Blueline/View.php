@@ -67,8 +67,8 @@ class View {
 	 * Builds the view, and sets the response body to display it
 	 */
 	public static function create() {
-		$viewPath = TEMPLATE_PATH.'/views'.self::view().'.'.Response::extension().'.php';
-		$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.Response::extension().'.php';
+		$viewPath = TEMPLATE_PATH.'/views'.self::view().'.'.Response::contentType().'.php';
+		$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.Response::contentType().'.php';
 		if( !file_exists( $viewPath ) || !file_exists( $layoutPath ) ) {
 			throw new Exception( 'View or layout not found', 404 );
 		}
@@ -91,7 +91,7 @@ class View {
 	 * @param mixed $variables Variables to pass to the element
 	 */
 	public static function element( $name, $variables ) {
-		$elementPath = TEMPLATE_PATH.'/elements/'.$name.'.'.Response::extension().'.php';
+		$elementPath = TEMPLATE_PATH.'/elements/'.$name.'.'.Response::contentType().'.php';
 		if( !file_exists( $elementPath ) ) {
 			throw new Exception( 'Element \''.$name.'\' not found', 404 );
 		}

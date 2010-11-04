@@ -96,7 +96,8 @@ class Response {
 		'html' => 'text/html',
 		'xml' => 'text/xml',
 		'txt' => 'text/plain',
-		'json' => 'application/json'
+		'json' => 'application/json',
+		'opensearch' => 'application/opensearchdescription+xml'
 	);
 	/**
 	 * @access private
@@ -113,7 +114,7 @@ class Response {
 		}
 		elseif( self::$_contentType === false ) {
 			$extension = Response::extension();
-			self::$_contentType = array_key_exists( $extension, self::$_contentTypes )? self::$_contentTypes[$extension] : 'text/html';
+			self::$_contentType = array_key_exists( $extension, self::$_contentTypes )? $extension : 'html';
 		}
 		return self::$_contentType;
 	}
@@ -180,7 +181,7 @@ class Response {
 	 */
 	public static function sendHeaders() {
 		header( self::$_httpHeaders[self::code()] );
-		if( !empty( self::$_body ) ) { header( 'Content-Type: '.Response::contentType() ); }
+		if( !empty( self::$_body ) ) { header( 'Content-Type: '.self::$_contentTypes[Response::contentType()] ); }
    	foreach( self::headers() as $key=>$header ) {
    		header( $key.': '.$header );
    	}
