@@ -3,7 +3,7 @@ namespace Blueline;
 
 // Obviously set this to false on servers to which the public have access to
 // prevent debug messages with passwords in being thrown everywhere.
-define( 'DEVELOPMENT', true );
+Config::set( 'development', true );
 
 Config::set( 'site.baseURL', 'http://blueline.local' );
 
