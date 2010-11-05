@@ -7,6 +7,10 @@ Config::set( 'development', true );
 
 Config::set( 'site.baseURL', 'http://blueline.local' );
 
+// Google Analytics
+//Config::set( 'ga.trackingCode', 'UA-11877145-5' );
+Config::set( 'ga.trackingCode', false );
+
 // Caches
 Config::set( 'caches', array(
 	array(
