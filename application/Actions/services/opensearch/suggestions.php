@@ -2,21 +2,25 @@
 namespace Blueline;
 use \Models\Method, \Models\Tower, \Models\Association;
 
-Response::contentType( Request::extension()?:'opensearch_suggestions' );
+
+if( Request::extension() == '' ) {
+	Response::contentType( 'opensearch_suggestions' );
+	View::contentType( 'json' );
+}
 
 if( !isset( $arguments[0] ) ) {
-	View::set( 'opensearch_results', array() );
+	View::set( 'opensearch_suggestions', array() );
 }
 else {
 	switch( $arguments[0] ) {
 		case 'methods':
-			View::set( 'opensearch_results', Method::search_suggestions() );
+			View::set( 'opensearch_suggestions', Method::search_suggestions() );
 			break;
 		case 'towers':
-			View::set( 'opensearch_results', Tower::search_suggestions() );
+			View::set( 'opensearch_suggestions', Tower::search_suggestions() );
 			break;
 		case 'associations':
-			View::set( 'opensearch_results', Association::search_suggestions() );
+			View::set( 'opensearch_suggestions', Association::search_suggestions() );
 			break;
 		default:
 			throw new Exception( 'Suggestions not implemented for that type', 404 );

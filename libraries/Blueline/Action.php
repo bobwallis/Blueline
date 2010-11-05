@@ -36,21 +36,19 @@ class Action {
 				throw new Exception( 'Request contains \'..\'', 403 );
 			}
 			else {
-				$testAction = implode( $pathRequest, '/' ).'/_index';
-				if( file_exists( ACTION_PATH.$testAction.'.php' ) ) {
-					self::$_action = $testAction;
+				for( $i = count( $pathRequest ); $i > 0; $i-- ) {
+					$testAction = implode( array_slice( $pathRequest, 0, $i ), '/' );
+					if( file_exists( ACTION_PATH.$testAction.'.php' ) ) {
+						self::$_action = $testAction;
+						break;
+					}
+					elseif( file_exists( ACTION_PATH.$testAction.'/_index.php' ) ) {
+						self::$_action = $testAction.'/_index';
+						break;
+					}
 				}
-				else {
-					for( $i = count( $pathRequest ); $i > 0; $i-- ) {
-						$testAction = implode( array_slice( $pathRequest, 0, $i ), '/' );
-						if( file_exists( ACTION_PATH.$testAction.'.php' ) ) {
-							self::$_action = $testAction;
-							break;
-						}
-					}
-					if( self::$_action === false ) {
-						throw new Exception( 'Action not found', 404 );
-					}
+				if( self::$_action === false ) {
+					throw new Exception( 'Action not found', 404 );
 				}
 			}
 		}

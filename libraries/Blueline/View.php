@@ -62,6 +62,24 @@ class View {
 	/**
 	 * @access private
 	 */
+	private static $_contentType = false;
+	/**
+	 * Which layout to render the view inside
+	 * @return string
+	 */
+	public static function contentType( $set = null ) {
+		if( $set != null ) {
+			self::$_contentType = $set;
+		}
+		elseif( self::$_contentType === false ) {
+			self::$_contentType = Response::contentType();
+		}
+		return self::$_contentType;
+	}
+	
+	/**
+	 * @access private
+	 */
 	private static $_variables = array();
 	/**
 	 * Sets a varibale for use as the view renders
@@ -75,8 +93,8 @@ class View {
 	 * Builds the view, and sets the response body to display it
 	 */
 	public static function create() {
-		$viewPath = TEMPLATE_PATH.'/views'.self::view().'.'.Response::contentType().'.php';
-		$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.Response::contentType().'.php';
+		$viewPath = TEMPLATE_PATH.'/views'.self::view().'.'.self::contentType().'.php';
+		$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.self::contentType().'.php';
 		if( !file_exists( $viewPath ) ) {
 			throw new Exception( 'View not found', 404 );
 		}

@@ -7,6 +7,6 @@ $baseURL = Config::get( 'site.baseURL' );
 	<Description>Search the towers database</Description>
 	<Attribution>Central Council of Church Bellringers</Attribution>
 	<Url rel="results" type="text/html" indexOffset="0" template="<?php echo $baseURL; ?>/towers/search?q={searchTerms}&amp;count={count}&amp;from={startIndex}" />
-	<Url rel="suggestions" type="application/x-suggestions+json" indexOffset="0" template="<?php echo $baseURL; ?>/services/suggestions/towers?q={searchTerms}&amp;count={count}&amp;from={startIndex}" />
+	<Url rel="suggestions" type="application/x-suggestions+json" indexOffset="0" template="<?php echo $baseURL; ?>/services/opensearch/suggestions/towers?q={searchTerms}&amp;count={count}&amp;from={startIndex}" />
 	<Url rel="self" type="application/opensearchdescription+xml" template="<?php echo $baseURL; ?>/services/opensearch/towers.xml" />
 	<moz:SearchForm><?php echo $baseURL; ?>/towers/search</moz:SearchForm>
