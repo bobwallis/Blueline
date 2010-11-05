@@ -82,11 +82,38 @@ class View {
 	 */
 	private static $_variables = array();
 	/**
+	 * Returns an array of all variables
+	 * @return string
+	 */
+	public static function variables() {
+		return 	array_map( 'unserialize', self::$_variables );
+	}
+	/**
 	 * Sets a varibale for use as the view renders
 	 * @return string
 	 */
 	public static function set( $variable, $value ) {
 		self::$_variables[$variable] = serialize( $value );
+	}
+	
+	public static function cache() {
+		$viewPath = TEMPLATE_PATH.'/views'.self::view().'.'.self::contentType().'.php';
+		$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.self::contentType().'.php';
+		if( !file_exists( $viewPath ) ) {
+			throw new Exception( 'View not found', 404 );
+		}
+		elseif( !file_exists( $layoutPath ) ) {
+			throw new Exception( 'Layout not found', 404 );
+		}
+		else {
+			$viewContents = file_get_contents( $viewPath );
+			$layoutContents = file_get_contents( $layoutPath );
+			return "<?php\nextract( unserialize( '".serialize( self::variables() )."' ) );\n"
+				. "ob_start();\n?>"
+				. $viewContents
+				. "<?php\n".'$content_for_layout = ob_get_contents();'."\nob_end_clean();\n?>"
+				. $layoutContents;
+		}
 	}
 	
 	/**
@@ -102,7 +129,7 @@ class View {
 			throw new Exception( 'Layout not found', 404 );
 		}
 		else {
-			extract( array_map( 'unserialize', self::$_variables ), EXTR_SKIP );
+			extract( self::variables(), EXTR_SKIP );
 			ob_start();
 			include( $viewPath );
 			$content_for_layout = ob_get_contents();

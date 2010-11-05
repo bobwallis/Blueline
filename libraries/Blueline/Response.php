@@ -29,7 +29,8 @@ class Response {
 	 */
 	public static function redirect( $url, $code = 303 ) {
 		self::code( $code );
-		if( strpos( $url, '/' ) === 0 ) { $url = 'http://blueline.local'.$url; }
+		$site = Config::get( 'site' );
+		if( strpos( $url, '/' ) === 0 ) { $url = $site['baseURL'].$url; }
 		self::$_headers = array( 'Location' => $url );
 		self::send();
 		exit();
@@ -148,6 +149,16 @@ class Response {
 		}
 		return self::$_headers;
 	}
+	public static function headersSnippet() {
+		$snippet = "header( '".self::$_httpHeaders[self::code()]."' );\n";
+		if( !empty( self::$_body ) ) {
+			$snippet .= "header( 'Content-Type: ".self::$_contentTypes[Response::contentType()]."' );\n";
+		}
+   	foreach( self::headers() as $key=>$header ) {
+   		$snippet .= "header( '".$key.': '.$header."' );\n";
+   	}
+   	return $snippet;
+	}
 	
 	/**
 	 * @access private
@@ -208,8 +219,17 @@ class Response {
 					// If the cache is the static cache then just cache the response body
 					Cache::set( 'static', self::id(), self::body() );
 					break;
+				case 'dynamic':
+					// If it's dynamic then cache the headers and view as a PHP snipped
+					Cache::set( 'dynamic', self::id().'.php',
+						self::headersSnippet()
+						. ( !empty( self::$_body )?
+							"header( 'Content-Type: ".self::$_contentTypes[Response::contentType()]."' );"
+							. preg_replace( '/^<\?php/', '', View::cache() )
+						: '' )
+					);
+					break;
 				default:
-					// Otherwise cache the response as a PHP snippet
 					break;
 			}
 		}

@@ -31,9 +31,14 @@ if( Cache::exists( 'static', Response::id() ) ) {
 }
 
 // Check the dynamic cache for a response
-if( Cache::exists( 'dynamic', Response::id() ) ) {
-	eval( cache::read( 'dynamic', Response::id() ) );
-	exit();
+if( Cache::exists( 'dynamic', Response::id().'.php' ) ) {
+	if( eval( preg_replace( '/^<\?php/', '', Cache::get( 'dynamic', Response::id().'.php' ) ) ) === false ) {
+		if( Config::get( 'development' ) ) { throw new Exception( 'Error in dynamic cache: '.Response::id().'.php', 500 ); }
+		else { Cache::delete( 'dynamic', Response::id().'.php' ); }
+	}
+	else {
+		exit();
+	}
 }
 
 Database::initialise();

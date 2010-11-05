@@ -5,7 +5,11 @@ namespace Blueline;
 // prevent debug messages with passwords in being thrown everywhere.
 Config::set( 'development', true );
 
-Config::set( 'site.baseURL', 'http://blueline.local' );
+// These environment-type settings are passed to the View
+Config::set( 'site', array( 
+	'baseURL' => 'http://blueline.local',
+) );
+View::set( 'site', Config::get( 'site' ) );
 
 // Google Analytics
 //Config::set( 'ga.trackingCode', 'UA-11877145-5' );
