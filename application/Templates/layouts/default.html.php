@@ -12,8 +12,11 @@
 		<meta name="geo.position" content="<?php echo $ICBM['latitude']; ?>;<?php echo $ICBM['longitude']; ?>" />
 		<meta name="geo.placename" content="<?php echo $ICBM['placename']; ?>" />
 <?php endif; ?>
-		<!--[if lt IE 9]><script src="/scripts/html5.js"></script><![endif]-->
+		<link rel="search" type="application/opensearchdescription+xml" href="/services/opensearch/associations.xml" title="Associations | Blueline" />
+		<link rel="search" type="application/opensearchdescription+xml" href="/services/opensearch/methods.xml" title="Methods | Blueline" />
+		<link rel="search" type="application/opensearchdescription+xml" href="/services/opensearch/towers.xml" title="Towers | Blueline" />
 		<link rel="shortcut icon" href="/favicon.ico" sizes="16x16" />
+		<!--[if lt IE 9]><script src="/scripts/html5.js"></script><![endif]-->
 		<link rel="stylesheet" media="all" href="/styles/core.css" />
 		<link rel="stylesheet" media="print" href="/styles/print.css" />
 		<link rel="stylesheet" media="screen and (max-width:480px)" href="/styles/small-device.css" />

@@ -5,6 +5,8 @@ namespace Blueline;
 // prevent debug messages with passwords in being thrown everywhere.
 define( 'DEVELOPMENT', true );
 
+Config::set( 'site.baseURL', 'http://blueline.local' );
+
 // Caches
 Config::set( 'caches', array(
 	array(
@@ -32,6 +34,7 @@ Config::set( 'caches', array(
 	)
 ) );
 
+// Database
 Config::set( 'database', array(
 	'dsn' => 'mysql:host=localhost;dbname=blueline',
 	'username' => 'blueline',

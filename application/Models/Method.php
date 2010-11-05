@@ -1,6 +1,6 @@
 <?php
 namespace Models;
-use \Blueline\Database, \PDO;
+use \Blueline\Config, \Blueline\Database, \PDO;
 
 class Method extends \Blueline\Model {
 
@@ -21,6 +21,26 @@ class Method extends \Blueline\Model {
 		' );
 		$sth->execute( array( ':title' => str_replace( '_', ' ', $title ) ) );
 		return ( $methodData = $sth->fetch( PDO::FETCH_ASSOC ) )? $methodData : array( 'title' => 'Not Found' );
+	}
+	
+	
+	/**
+	 * Gets search suggestions
+	 * @return array
+	 */
+	public static function search_suggestions() {	
+		$sth = Database::$dbh->prepare( '
+			SELECT title
+			FROM '.static::$_table.'
+			WHERE '.self::GETtoWhere().'
+			LIMIT '.self::GETtoLimit().'
+		' );
+		$sth->execute( self::GETtoBindable() );
+		return ( $searchData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? array(
+			'queries' => array_map( function( $m ) { return $m['title']; } , $searchData ),
+			'readable' => array(),
+			'URLs' => array_map( function( $m ) { return Config::get( 'site.baseURL' ).'/methods/view/'.str_replace( ' ', '_', $m['title'] ); } , $searchData )
+		) : array();
 	}
 	
 	private static $_conditions = false;

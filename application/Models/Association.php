@@ -1,6 +1,6 @@
 <?php
 namespace Models;
-use \Blueline\Database, \PDO;
+use \Blueline\Config, \Blueline\Database, \PDO;
 
 class Association extends \Blueline\Model {
 
@@ -75,6 +75,25 @@ class Association extends \Blueline\Model {
 		' );
 		$sth->execute( array( ':abbreviation' => $abbreviation ) );
 		return ( $towersData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? $towersData : array();
+	}
+	
+	/**
+	 * Gets search suggestions
+	 * @return array
+	 */
+	public static function search_suggestions() {	
+		$sth = Database::$dbh->prepare( '
+			SELECT name, abbreviation
+			FROM '.static::$_table.'
+			WHERE '.self::GETtoWhere().'
+			LIMIT '.self::GETtoLimit().'
+		' );
+		$sth->execute( self::GETtoBindable() );
+		return ( $searchData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? array(
+			'queries' => array_map( function( $a ) { return $a['name']; } , $searchData ),
+			'readable' => array(),
+			'URLs' => array_map( function( $a ) { return Config::get( 'site.baseURL' ).'/associations/view/'.urlencode( $a['abbreviation'] ); } , $searchData )
+		) : array();
 	}
 	
 	// Helper function to assemble search queries

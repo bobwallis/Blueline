@@ -10,7 +10,7 @@ use \PDO;
  */
 class Model {
 	
-	public static $_searchLimit = 30;
+	public static $_searchLimit = false;
 	/**
 	 * Gets details of every entry
 	 * @return array
@@ -39,6 +39,7 @@ class Model {
 		$sth->execute( self::GETtoBindable() );
 		return ( $searchData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? $searchData : array();
 	}
+	
 	/**
 	 * Counts the number of rows returned by a search
 	 * @return integer
@@ -75,7 +76,8 @@ class Model {
 	 * @return string
 	 */
 	public static function GETtoLimit() {
-		return ( isset( $_GET['from'] )? intval( $_GET['from'] ) : '0' ) . ','.strval( self::$_searchLimit );
+		self::$_searchLimit = self::$_searchLimit?: ( isset( $_GET['count'] )? intval( $_GET['count'] ) : 30 );
+		return ( isset( $_GET['from'] )? intval( $_GET['from'] ) : '0' ) . ','.self::$_searchLimit;
 	}
 	protected static function GETtoWhere() {
 		if( static::$_searchWhere === false ) {

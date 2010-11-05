@@ -77,8 +77,11 @@ class View {
 	public static function create() {
 		$viewPath = TEMPLATE_PATH.'/views'.self::view().'.'.Response::contentType().'.php';
 		$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.Response::contentType().'.php';
-		if( !file_exists( $viewPath ) || !file_exists( $layoutPath ) ) {
-			throw new Exception( 'View or layout not found', 404 );
+		if( !file_exists( $viewPath ) ) {
+			throw new Exception( 'View not found', 404 );
+		}
+		elseif( !file_exists( $layoutPath ) ) {
+			throw new Exception( 'Layout not found', 404 );
 		}
 		else {
 			extract( array_map( 'unserialize', self::$_variables ), EXTR_SKIP );

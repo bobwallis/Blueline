@@ -1,6 +1,6 @@
 <?php
 namespace Models;
-use \Blueline\Database, \PDO;
+use \Blueline\Config, \Blueline\Database, \PDO;
 
 class Tower extends \Blueline\Model {
 
@@ -68,6 +68,25 @@ class Tower extends \Blueline\Model {
 	}
 	
 	
+	
+	/**
+	 * Gets search suggestions
+	 * @return array
+	 */
+	public static function search_suggestions() {	
+		$sth = Database::$dbh->prepare( '
+			SELECT doveId, place, dedication
+			FROM '.static::$_table.'
+			WHERE '.self::GETtoWhere().'
+			LIMIT '.self::GETtoLimit().'
+		' );
+		$sth->execute( self::GETtoBindable() );
+		return ( $searchData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? array(
+			'queries' => array_map( function( $t ) { return $t['place'].(($t['dedication']!='Unknown')?' ('.$tower['dedication'].')':''); } , $searchData ),
+			'readable' => array(),
+			'URLs' => array_map( function( $t ) { return Config::get( 'site.baseURL' ).'/towers/view/'.$t['doveId']; } , $searchData )
+		) : array();
+	}
 	
 	private static $_conditions = false;
 	protected static function GETtoConditions() {
