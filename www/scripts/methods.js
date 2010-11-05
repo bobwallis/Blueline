@@ -4,7 +4,7 @@
 		this.canvas = this.makeCanvas( options );
 	};
 	
-	if( window.can.SVG() ) {
+	if( can.SVG() ) {
 		SVGorVML.prototype = {
 			type: 'SVG',
 			ns: 'http://www.w3.org/2000/svg',
@@ -44,13 +44,16 @@
 		
 		};
 	}
-	else if( window.can.VML() ) {
-		SVG.prototype = {
-			type: 'VML'
+	else if( can.VML() ) {
+		SVGorVML.prototype = {
+			type: 'VML',
+			makeCanvas: function() { return false; },
+			add: function() { return false; },
+			toBase64DataURI: function() { return false; }
 		};
 	}
 	else {
-		SVG.prototype = {
+		SVGorVML.prototype = {
 			type: 'fail',
 			makeCanvas: function() { return false; },
 			add: function() { return false; },
@@ -64,8 +67,6 @@
 
 
 ( function( window, undefined ) {
-	var $head = document.getElementsByTagName( 'head' )[0];
-
 	// Helper functions
 	// Checks if two row arrays are equal
 	var rowsEqual = function( row1, row2 ) {
@@ -218,8 +219,9 @@
 		return i;
 	};
 
-	// Fonts
-	var placeStartFont = {
+	// Shared variable
+	var $head = document.getElementsByTagName( 'head' )[0],
+	placeStartFont = {
 		'small': [
 			'm0,2.75c-0.6,0,-1.044,-0.244,-1.356,-0.756c-0.311,-0.511,-0.466,-1.244,-0.466,-2.2c0,-1.955,0.622,-2.933,1.822,-2.933c0.6,0,1.044,0.245,1.356,0.756c0.311,0.511,0.466,1.222,0.466,2.177c0,1.956,-0.6,2.956,-1.822,2.956zm0,-0.622c0.378,0,0.667,-0.178,0.844,-0.534c0.178,-0.355,0.267,-0.977,0.267,-1.8c0,-0.822,-0.089,-1.422,-0.267,-1.777c-0.177,-0.356,-0.466,-0.556,-0.844,-0.556c-0.378,0,-0.667,0.2,-0.844,0.556c-0.178,0.355,-0.267,0.955,-0.267,1.777c0,0.823,0.089,1.445,0.267,1.8c0.177,0.356,0.466,0.534,0.844,0.534z',
 			'm0.5,2.75l-0.689,0l0,-3.556c0,-0.311,0.022,-0.8,0.045,-1.422c-0.112,0.111,-0.267,0.267,-0.489,0.445l-0.556,0.466l-0.378,-0.466l1.489,-1.178l0.578,0l0,5.711z',
@@ -679,6 +681,15 @@
 	};
 	MethodGrid.prototype = {
 		draw: function() {
+			// Create grid canvas
+			this.paper = new SVGorVML( {
+				id: 'methodGridCanvas_'+this.parent.id,
+				width: this.dimensions.row.x,
+				height: this.dimensions.row.y*( this.parent.notation.length+1 )
+			} );
+			this.drawGrid();
+		
+			// Either add the canvas to the page in a table with the place notation
 			if( this.options.notation === true ) {
 				var grid = document.createElement( 'table' ),
 					gridRow = document.createElement( 'tr' ),
@@ -687,26 +698,15 @@
 				grid.id = 'methodGrid_'+this.parent.id;
 				notationCell.className = 'notationCell';
 				notationCell.innerHTML = this.notationText();
-			}
-		
-			// Create grid canvas
-			this.paper = new SVGorVML( {
-				id: 'methodGridCanvas_'+this.parent.id,
-				width: this.dimensions.row.x,
-				height: this.dimensions.row.y*( this.parent.notation.length+1 )
-			} );
-		
-			this.drawGrid();
-		
-			// Finally add to page
-			if( this.options.notation === true ) {
 				paperCell.appendChild( this.paper.canvas );
 				gridRow.appendChild( notationCell );
 				gridRow.appendChild( paperCell );
 				grid.appendChild( gridRow );
 				this.container.appendChild( grid );
 			}
+			// Or just add the canvas to the page
 			else {
+				this.paper.canvas.id = 'methodGrid_'+this.parent.id;
 				this.container.appendChild( this.paper.canvas );
 			}
 		},

@@ -65,24 +65,24 @@
 		var fullMap = document.getElementById( 'fullMap' );
 		if( fullMap ) { fullMap.style.height = pageHeight - ( $top.offsetHeight + $bottom.offsetHeight ); }
 	};
-	try { window.addEventListener( 'resize', towersResize, false ); }
-	catch( ie ) { window.attachEvent( 'onresize', towersResize ); }
+	_.addEventListener( window, 'resize', towersResize );
 	// Fire a resize event on page load too
-	try { document.addEventListener( 'DOMContentLoaded', towersResize, false ); }
-	catch( e ) { window.attachEvent( 'onload', towersResize ); }
+	_.addReadyListener( towersResize );
 	
 	// Scroll event
 	var towersScroll = function() {
+		$top = document.getElementById( 'top' );
+		$bottom = document.getElementById( 'bottom' );
 		if( window['towerMaps'].length == 1 ) {
 			var parent = window.towerMaps[0].container.parentNode,
 				mapCenter = window.towerMaps[0].map.getCenter(),
 				pageWidth = window.innerWidth || document.documentElement.clientWidth,
 				pageHeight = window.innerHeight || document.documentElement.clientHeight,
 				scrollTop = window.pageYOffset || document.documentElement.scrollTop,
-				topHeight = window.$top.offsetHeight,
+				topHeight = $top.offsetHeight,
 				topVisible = (scrollTop < topHeight)? topHeight - scrollTop : 0,
-				bottomHeight = window.$bottom.offsetHeight,
-				bottomTop = window.$bottom.offsetTop,
+				bottomHeight = $bottom.offsetHeight,
+				bottomTop = $bottom.offsetTop,
 				bottomVisible = ( (scrollTop+pageHeight) > bottomTop )? (scrollTop+pageHeight) - bottomTop : 0,
 				originalHeight = parent.offsetHeight,
 				newHeight = pageHeight - bottomVisible - topVisible;
@@ -96,14 +96,10 @@
 			}
 		}
 	};
-	try { window.addEventListener( 'scroll', towersScroll, false ); }
-	catch( ie ) { window.attachEvent( 'onscroll', towersScroll ); }
+	_.addEventListener( window, 'scroll', towersScroll );
 	// Fire a scroll event on resize and load too
-	try { window.addEventListener( 'resize', towersScroll, false ); }
-	catch( e ) { window.attachEvent( 'onresize', towersScroll ); }
-	try { document.addEventListener( 'DOMContentLoaded', towersScroll, false ); }
-	catch( e ) { window.attachEvent( 'onload', towersScroll ); }
-	
+	_.addEventListener( window, 'resize', towersScroll );
+	_.addReadyListener( towersScroll );
 } )( window );
 
 ( function( window, undefined ) {
