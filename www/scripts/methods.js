@@ -362,7 +362,6 @@
 			newLineContainer.style.display = this.container.style.display;
 			this.container.parentNode.replaceChild( newLineContainer, this.container );
 			this.container = newLineContainer;
-			this.container.innerHTML = '<span class="methodText" id="testText_'+this.parent.id+'" style="font-size: 14px">'+this.parent.rounds.map( bellToChar ).join('')+'</span>';
 		},
 	
 		calculateSizing: function() {
@@ -376,10 +375,16 @@
 			}
 			this.options.columnPadding = columnPadding;
 			this.options.placeStartPadding = placeStartPadding;
-		
+			
+			// Add an element to the page whose width we can use to test font sizes
+			var testText = document.createElement( 'span' );
+			testText.className = 'methodText';
+			testText.style.fontSize = '14px';
+			testText.innerHTML = this.parent.rounds.map( bellToChar ).join('');
+			document.body.appendChild( testText );
+			
 			// Work out column/lead distribution and font size
-			var testText = document.getElementById( 'testText_'+this.parent.id ),
-				pageWidth = window.innerWidth || document.documentElement.clientWidth,
+			var pageWidth = window.innerWidth || document.documentElement.clientWidth,
 				testWidth = testText.offsetWidth,
 				testFontSize = 14,
 				leadsPerColumn = 1,
