@@ -46,14 +46,11 @@ class Config {
 		else {
 			$keys = explode( '.', $key );
 			$countKeys = count( $keys );
-			if( $countKeys > 1 ) {
-				$value = isset( self::$_store[$keys[0]] )? self::$_store[$keys[0]] : false;
-				for( $i = 1; $value !== false && $i < $countKeys; $i++ ) {
-					$value = isset( $value[$keys[$i]] )? $value[$keys[$i]] : false;
-				}
-				return $value;
+			$value = isset( self::$_store[$keys[0]] )? self::$_store[$keys[0]] : false;
+			for( $i = 1; $value !== false && $i < $countKeys; $i++ ) {
+				$value = isset( $value[$keys[$i]] )? $value[$keys[$i]] : false;
 			}
+			return $value;
 		}
-		return false;
 	}
 }
