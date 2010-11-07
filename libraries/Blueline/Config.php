@@ -20,7 +20,17 @@ class Config {
 	 * @return boolean Whether the set was succesful
 	 */
 	public static function set( $key, $value ) {
-		self::$_store[$key] = serialize( $value );
+		$keys = explode( '.', $key );
+		$countKeys = count( $keys );
+		if( $countKeys > 1 ) {
+			while( --$countKeys ) {
+				$value = array( $keys[$countKeys] => $value );
+			}
+			self::$_store[$keys[0]] = array_merge_recursive( self::get( $keys[0] )?:array(), $value );
+		}
+		else {
+			self::$_store[$key] = $value;
+		}
 		return true;
 	}
 	
@@ -30,6 +40,20 @@ class Config {
 	 * @return mixed
 	 */
 	public static function get( $key ) {
-		return isset( self::$_store[$key] )? unserialize( self::$_store[$key] ) : false;
+		if( isset( self::$_store[$key] ) ) {
+			return self::$_store[$key];
+		}
+		else {
+			$keys = explode( '.', $key );
+			$countKeys = count( $keys );
+			if( $countKeys > 1 ) {
+				$value = isset( self::$_store[$keys[0]] )? self::$_store[$keys[0]] : false;
+				for( $i = 1; $value !== false && $i < $countKeys; $i++ ) {
+					$value = isset( $value[$keys[$i]] )? $value[$keys[$i]] : false;
+				}
+				return $value;
+			}
+		}
+		return false;
 	}
 }
