@@ -98,22 +98,25 @@ class View {
 	
 	public static function cache() {
 		$viewPath = TEMPLATE_PATH.'/views'.self::view().'.'.self::contentType().'.php';
-		$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.self::contentType().'.php';
 		if( !file_exists( $viewPath ) ) {
 			throw new Exception( 'View not found', 404 );
 		}
-		elseif( !file_exists( $layoutPath ) ) {
-			throw new Exception( 'Layout not found', 404 );
+		$viewContents = file_get_contents( $viewPath );
+		if( self::layout() != 'blank' ) {
+			$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.self::contentType().'.php';
+			if( !file_exists( $layoutPath ) ) {
+				throw new Exception( 'Layout not found', 404 );
+			}
+			$layoutContents = file_get_contents( $layoutPath );
 		}
 		else {
-			$viewContents = file_get_contents( $viewPath );
-			$layoutContents = file_get_contents( $layoutPath );
-			return "<?php\nextract( unserialize( '".serialize( self::variables() )."' ), EXTR_SKIP );\n"
-				. "ob_start();\n?>"
-				. $viewContents
-				. "<?php\n".'$content_for_layout = ob_get_contents();'."\nob_end_clean();\n?>"
-				. $layoutContents;
+			$layoutContents = '';
 		}
+		return "<?php\nextract( unserialize( '".serialize( self::variables() )."' ), EXTR_SKIP );\n"
+			. "ob_start();\n?>"
+			. $viewContents
+			. "<?php\n".'$content_for_layout = ob_get_contents();'."\nob_end_clean();\n?>"
+			. $layoutContents;
 	}
 	
 	/**
@@ -121,23 +124,27 @@ class View {
 	 */
 	public static function create() {
 		$viewPath = TEMPLATE_PATH.'/views'.self::view().'.'.self::contentType().'.php';
-		$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.self::contentType().'.php';
 		if( !file_exists( $viewPath ) ) {
 			throw new Exception( 'View not found', 404 );
 		}
-		elseif( !file_exists( $layoutPath ) ) {
-			throw new Exception( 'Layout not found', 404 );
-		}
-		else {
-			extract( self::variables(), EXTR_SKIP );
-			ob_start();
-			include( $viewPath );
-			$content_for_layout = ob_get_contents();
+		extract( self::variables(), EXTR_SKIP );
+		ob_start();
+		include( $viewPath );
+		$content_for_layout = ob_get_contents();
+		if( self::layout() != 'blank' ) {
 			ob_clean();
+			$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.self::contentType().'.php';
+			if( !file_exists( $layoutPath ) ) {
+				throw new Exception( 'Layout not found', 404 );
+			}
 			include( $layoutPath );
 			$fullContent = ob_get_contents();
 			ob_end_clean();
 			Response::body( $fullContent );
+		}
+		else {
+			ob_end_clean();
+			Response::body( $content_for_layout );
 		}
 	}
 	
