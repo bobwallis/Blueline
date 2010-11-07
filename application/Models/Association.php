@@ -91,7 +91,6 @@ class Association extends \Blueline\Model {
 		$sth->execute( self::GETtoBindable() );
 		return ( $searchData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? array(
 			'queries' => array_map( function( $a ) { return $a['name']; } , $searchData ),
-			'readable' => array(),
 			'URLs' => array_map( function( $a ) { return Config::get( 'site.baseURL' ).'/associations/view/'.urlencode( $a['abbreviation'] ); } , $searchData )
 		) : array();
 	}

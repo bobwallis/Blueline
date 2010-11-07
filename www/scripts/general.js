@@ -1,4 +1,4 @@
-// Extend the array prototype for compatibility if needed
+// Extend the array prototype for compatibility if needed (compatibility code from MDC)
 if( typeof( Array.prototype.forEach ) == 'undefined' ) {
 	Array.prototype.forEach = function( fun /*, thisp*/ ) {
     var len = this.length >>> 0, thisp = arguments[1], i = 0;
@@ -71,32 +71,37 @@ if( typeof( Array.prototype.indexOf ) == 'undefined' ) {
 	
 	// A set of helper functions for making code writing easier
 	var helpers = {
+		// Returns the target of an event object e
 		eventTarget: function( e ) {
 			if( e.target ) { return e.target; }
 			else if( e.srcElement ) {
 				return ( e.srcElement.nodeType == 3 )? e.srcElement.parentNode : e.srcElement;
 			}
 		},
+		// Returns a boolean indicating whether elem has class className
 		hasClass: function( elem, className ) {
 			return elem.className.match( new RegExp( '(\\s|^)'+className+'(\\s|$)' ) );
 		},
+		// Adds the class className to elem
 		addClass: function( elem, className ) {
 			if( !_.hasClass( elem, className ) ) {
 				elem.className += ' ' + className;
 			}
 		},
+		// Removes the class className from elem
 		removeClass: function( elem, className ) {
 			if( _.hasClass( elem, className ) ) {
 				elem.className = elem.className.replace( new RegExp( '(\\s|^)'+className+'(\\s|$)' ),' ' );
 			}
 		},
-		getElementsByClassName: function( className, elem ) {
+		getElementsByClassName: function( className, elem, tag ) {
 			if( !elem ) { var elem = document; }
+			if( !tag ) { var tag = '*'; }
 			try {
 				return elem.getElementsByClassName( className );
 			}
 			catch( no_getElementsByClassName ) {
-				var get = document.getElementsByTagName( '*' ),
+				var get = document.getElementsByTagName( tag ),
 					collect = [];
 				for( i = 0; i < get.length; i++ ) { if( _.hasClass( get[i], className ) ) { collect.push( get[i] ); } }
 				return collect;

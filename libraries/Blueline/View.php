@@ -89,7 +89,7 @@ class View {
 		return 	array_map( 'unserialize', self::$_variables );
 	}
 	/**
-	 * Sets a varibale for use as the view renders
+	 * Sets a variable for use as the view renders
 	 * @return string
 	 */
 	public static function set( $variable, $value ) {
@@ -108,7 +108,7 @@ class View {
 		else {
 			$viewContents = file_get_contents( $viewPath );
 			$layoutContents = file_get_contents( $layoutPath );
-			return "<?php\nextract( unserialize( '".serialize( self::variables() )."' ) );\n"
+			return "<?php\nextract( unserialize( '".serialize( self::variables() )."' ), EXTR_SKIP );\n"
 				. "ob_start();\n?>"
 				. $viewContents
 				. "<?php\n".'$content_for_layout = ob_get_contents();'."\nob_end_clean();\n?>"

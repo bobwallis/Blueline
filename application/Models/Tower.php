@@ -83,7 +83,6 @@ class Tower extends \Blueline\Model {
 		$sth->execute( self::GETtoBindable() );
 		return ( $searchData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? array(
 			'queries' => array_map( function( $t ) { return $t['place'].(($t['dedication']!='Unknown')?' ('.$tower['dedication'].')':''); } , $searchData ),
-			'readable' => array(),
 			'URLs' => array_map( function( $t ) { return Config::get( 'site.baseURL' ).'/towers/view/'.$t['doveId']; } , $searchData )
 		) : array();
 	}

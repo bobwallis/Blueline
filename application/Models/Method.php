@@ -38,7 +38,6 @@ class Method extends \Blueline\Model {
 		$sth->execute( self::GETtoBindable() );
 		return ( $searchData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? array(
 			'queries' => array_map( function( $m ) { return $m['title']; } , $searchData ),
-			'readable' => array(),
 			'URLs' => array_map( function( $m ) { return Config::get( 'site.baseURL' ).'/methods/view/'.str_replace( ' ', '_', $m['title'] ); } , $searchData )
 		) : array();
 	}
