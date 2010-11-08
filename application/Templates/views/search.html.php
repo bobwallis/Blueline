@@ -2,10 +2,9 @@
 namespace Blueline;
 use \Helpers\Text;
 
-$title_for_layout = 'Search | Blueline';
-$scripts_for_layout = array(
-	'/scripts/general.js'
-);
+View::element( 'default.header', array(
+	'title' => 'Search | Blueline'
+) );
 ?>
 <section class="search">
 	<header>
@@ -59,4 +58,4 @@ View::element( 'sectionSearch', array(
 <?php endif; ?>
 	</ul>
 </section>
-
+<?php View::element( 'default.footer' ); ?>

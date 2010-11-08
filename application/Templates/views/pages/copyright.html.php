@@ -1,14 +1,16 @@
 <?php
 namespace Blueline;
 
-$title_for_layout = 'Copyright | Blueline';
-$headerSearch = array( 
-	'action' => '/search',
-	'placeholder' => 'Search'
-);
-$scripts_for_layout = array(
-	'/scripts/hyphenate.js'
-);
+View::element( 'default.header', array(
+	'title' => 'Copyright | Blueline',
+	'headerSearch' => array( 
+		'action' => '/search',
+		'placeholder' => 'Search'
+	),
+	'scripts' => array(
+		'/scripts/hyphenate.js'
+	)
+) );
 ?>
 <header>
 	<h1>Copyright</h1>
@@ -18,3 +20,4 @@ $scripts_for_layout = array(
 	<blockquote>These method collections are the copyright of the Central Council of Church Bell Ringers. You are welcome to make copies of the material for your own use. You may distribute copies to others <strong>provided that you do not do so for profit and provided that you include this copyright statement</strong>. If you modify the material before distributing it, you must include a <strong>clear</strong> notice that the material has been modified.</blockquote>
 	<p>Tower data (including Association affiliations) is derived from the <a href="http://dove.cccbr.org.uk/downloads.php" class="external">Dove data file</a>; also maintained by the Central Council of Church Bellringers.</p>
 </section>
+<?php View::element( 'default.footer' ); ?>

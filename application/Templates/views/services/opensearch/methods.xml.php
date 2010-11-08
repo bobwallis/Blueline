@@ -1,3 +1,4 @@
+<?php View::element( 'opensearch.header' ); ?>
 	<ShortName>Methods | Blueline</ShortName>
 	<Description>Search the methods database</Description>
 	<Attribution>Central Council of Church Bellringers</Attribution>
@@ -6,3 +7,4 @@
 	<Url rel="suggestions" type="application/x-suggestions+json" indexOffset="0" template="<?php echo $site['$baseURL']; ?>/services/suggest/methods?q={searchTerms}&amp;count={count}&amp;from={startIndex}" />
 	<Url rel="self" type="application/opensearchdescription+xml" template="<?php echo $site['baseURL']; ?>/services/opensearch/methods.xml" />
 	<moz:SearchForm><?php echo $site['baseURL']; ?>/methods/search</moz:SearchForm>
+<?php View::element( 'opensearch.footer', compact( 'site' ) ); ?>

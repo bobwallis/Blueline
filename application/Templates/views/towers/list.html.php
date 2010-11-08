@@ -1,15 +1,15 @@
 <?php
-$title_for_layout = 'Towers | Blueline';
-$breadcrumb = array(
-	'<a href="/towers">Towers</a>'
-);
-$headerSearch = array( 
-	'action' => '/towers/search',
-	'placeholder' => 'Search towers'
-);
-$scripts_for_layout = array(
-	'/scripts/general.js'
-);
+namespace Blueline;
+
+View::element( 'html.header', array(
+	'title' => 'Towers | Blueline',
+	'breadcrumb' => array(
+		'<a href="/towers">Towers</a>'
+	),
+	'scripts' => array(
+		'/scripts/general.js'
+	)
+) );
 ?>
 <section class="search">
 	<header>
@@ -21,4 +21,4 @@ $scripts_for_layout = array(
 <?php endforeach; ?>
 	</ol>
 </section>
-
+<?php View::element( 'html.footer' ); ?>

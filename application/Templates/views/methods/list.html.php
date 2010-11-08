@@ -1,15 +1,16 @@
 <?php
-$title_for_layout = 'Methods | Blueline';
-$breadcrumb = array(
-	'<a href="/methods">Methods</a>'
-);
-$headerSearch = array( 
-	'action' => '/methods/search',
-	'placeholder' => 'Search methods'
-);
-$scripts_for_layout = array(
-	'/scripts/general.js'
-);
+namespace Blueline;
+
+View::element( 'default.header', array(
+	'title' => 'Methods | Blueline',
+	'breadcrumb' => array(
+		'<a href="/methods">Methods</a>'
+	)
+	'headerSearch' => array( 
+		'action' => '/methods/search',
+		'placeholder' => 'Search methods'
+	),
+) );
 ?>
 <section class="search">
 	<header>
@@ -21,4 +22,4 @@ $scripts_for_layout = array(
 <?php endforeach; ?>
 	</ol>
 </section>
-
+<?php View::element( 'default.footer' ); ?>

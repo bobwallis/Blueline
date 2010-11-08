@@ -2,13 +2,12 @@
 namespace Blueline;
 use \Helpers\Text;
 
-$title_for_layout = 'Search | Associations | Blueline';
-$breadcrumb = array(
-	'<a href="/associations">Associations</a>'
-);
-$scripts_for_layout = array(
-	'/scripts/general.js'
-);
+View::element( 'default.header', array(
+	'title' => 'Search | Towers | Blueline',
+	'breadcrumb' => array(
+		'<a href="/associations">Associations</a>'
+	)
+) );
 ?>
 <section class="search">
 	<header>
@@ -28,4 +27,5 @@ View::element( 'sectionSearch', array(
 	</ol>
 <?php View::element( 'paging', compact( 'limit' ) ); ?>
 </section>
+<?php View::element( 'default.footer' ); ?>
 

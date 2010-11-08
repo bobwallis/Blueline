@@ -13,24 +13,8 @@ class View {
 	 * Converts the view for sending an error response
 	 */
 	public static function error( $code, $message ) {
-		self::$_layout = 'default';
 		self::$_view = '/errors/error';
 		if( $message ) { self::set( 'errorMessage', $message ); }
-	}
-	
-	/**
-	 * @access private
-	 */
-	private static $_layout = 'default';
-	/**
-	 * Which layout to render the view inside
-	 * @return string
-	 */
-	public static function layout( $set = null ) {
-		if( $set != null ) {
-			self::$_layout = $set;
-		}
-		return self::$_layout;
 	}
 	
 	/**
@@ -102,21 +86,8 @@ class View {
 			throw new Exception( 'View not found', 404 );
 		}
 		$viewContents = file_get_contents( $viewPath );
-		if( self::layout() != 'blank' ) {
-			$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.self::contentType().'.php';
-			if( !file_exists( $layoutPath ) ) {
-				throw new Exception( 'Layout not found', 404 );
-			}
-			$layoutContents = file_get_contents( $layoutPath );
-		}
-		else {
-			$layoutContents = '';
-		}
-		return "<?php\nextract( unserialize( '".serialize( self::variables() )."' ), EXTR_SKIP );\n"
-			. "ob_start();\n?>"
-			. $viewContents
-			. "<?php\n".'$content_for_layout = ob_get_contents();'."\nob_end_clean();\n?>"
-			. $layoutContents;
+		return "<?php\nextract( unserialize( '".serialize( self::variables() )."' ), EXTR_SKIP );\n?>"
+			. $viewContents;
 	}
 	
 	/**
@@ -130,22 +101,9 @@ class View {
 		extract( self::variables(), EXTR_SKIP );
 		ob_start();
 		include( $viewPath );
-		$content_for_layout = ob_get_contents();
-		if( self::layout() != 'blank' ) {
-			ob_clean();
-			$layoutPath = TEMPLATE_PATH.'/layouts/'.self::layout().'.'.self::contentType().'.php';
-			if( !file_exists( $layoutPath ) ) {
-				throw new Exception( 'Layout not found', 404 );
-			}
-			include( $layoutPath );
-			$fullContent = ob_get_contents();
-			ob_end_clean();
-			Response::body( $fullContent );
-		}
-		else {
-			ob_end_clean();
-			Response::body( $content_for_layout );
-		}
+		$content = ob_get_contents();
+		ob_end_clean();
+		Response::body( $content );
 	}
 	
 	/**
@@ -153,7 +111,7 @@ class View {
 	 * @param string $name The element name
 	 * @param mixed $variables Variables to pass to the element
 	 */
-	public static function element( $name, $variables ) {
+	public static function element( $name, $variables = array() ) {
 		$elementPath = TEMPLATE_PATH.'/elements/'.$name.'.'.Response::contentType().'.php';
 		if( !file_exists( $elementPath ) ) {
 			throw new Exception( 'Element \''.$name.'\' not found', 404 );

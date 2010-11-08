@@ -6,7 +6,7 @@ namespace Blueline;
 	<head>
 		<meta charset="utf-8" />
 		<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
-		<title><?php echo $title_for_layout; ?></title>
+		<title><?php echo isset( $title )? $title : 'Blueline'; ?></title>
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="application-name" content="Blueline"/>
@@ -26,7 +26,7 @@ namespace Blueline;
 		<link rel="stylesheet" media="screen and (min-width:481px)" href="/styles/normal.css" />
 		<!--[if lt IE 9]><link rel="stylesheet" media="screen" href="/styles/normal.css" /><![endif]-->
 		<noscript><link rel="stylesheet" media="all" href="/styles/noscript.css" /></noscript>
-<?php if( isset( $scripts_for_layout ) ): foreach( $scripts_for_layout as $script ) : ?>
+<?php if( isset( $scripts ) ): foreach( $scripts as $script ) : ?>
 		<script src="<?php echo $script; ?>"></script>
 <?php endforeach; endif; ?>
 <?php $gaTrackingCode = Config::get( 'ga.trackingCode' ); if( !empty( $gaTrackingCode ) ) : ?>
@@ -50,13 +50,4 @@ namespace Blueline;
 <?php endif; ?>
 			</header>
 			<section id="content">
-<?php echo $content_for_layout; ?>
-			</section>
-			<div id="push"></div>
-		</div>
-		<footer id="bottom">
-			<nav><a href="/">Home</a> | <a href="/associations">Associations</a> | 	<a href="/methods">Methods</a> | <a href="/towers">Towers</a></nav>
-			<p><a href="/copyright">Copyright</a> | Blueline &copy; MMX</p>
-		</footer>
-	</body>
-</html>
+

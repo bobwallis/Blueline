@@ -1,5 +1,6 @@
 <?php
 namespace Blueline;
+echo "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
 ?>
 <collection date="<?php echo date( 'Y-m-d' ); ?>">
 	<collectionName><?php echo htmlspecialchars( \Helpers\Text::toList( array_map( function( $m ){ return $m['title']; }, $methods ) ) ); ?></collectionName>

@@ -1,5 +1,6 @@
 <?php
 namespace Blueline;
+echo "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
 ?>
 <collection 
 	xmlns="http://www.cccbr.org.uk/methods/schemas/2007/05/methods"

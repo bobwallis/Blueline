@@ -1,19 +1,21 @@
 <?php
 namespace Blueline;
 
-$title_for_layout = htmlspecialchars( \Helpers\Text::toList( array_map( function( $t ){ return $t['place'].(($t['dedication']!='Unknown')?' ('.$t['dedication'].')':''); }, $towers ) ) ) . ' | Towers | Blueline';
-$breadcrumb = array(
-	'<a href="/towers">Towers</a>'
-);
-$headerSearch = array( 
-	'action' => '/towers/search',
-	'placeholder' => 'Search towers'
-);
-$scripts_for_layout = array(
-	'http://maps.google.com/maps/api/js?sensor=false',
-	'/scripts/general.js',
-	'/scripts/towers.js'
-);
+View::element( 'default.header', array(
+	'title' => htmlspecialchars( \Helpers\Text::toList( array_map( function( $t ){ return $t['place'].(($t['dedication']!='Unknown')?' ('.$t['dedication'].')':''); }, $towers ) ) ) . ' | Towers | Blueline',
+	'breadcrumb' => array(
+		'<a href="/towers">Towers</a>'
+	),
+	'headerSearch' => array( 
+		'action' => '/towers/search',
+		'placeholder' => 'Search towers'
+	),
+	'scripts' => array(
+		'http://maps.google.com/maps/api/js?sensor=false',
+		'/scripts/general.js',
+		'/scripts/towers.js'
+	)
+) );
 $i = 0;
 ?>
 <?php $i = 0; foreach( $towers as $tower ) : ?>
@@ -135,3 +137,4 @@ $i = 0;
 	</section>
 </section>
 <?php ++$i; endforeach; ?>
+<?php View::element( 'default.footer' ); ?>

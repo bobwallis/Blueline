@@ -14,5 +14,6 @@ switch( Response::code() ) {
 		$errorTitle = 'Internal Server Error';
 		break;
 }
+echo "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
 ?>
 <error code="<?php echo Response::code(); ?>" title="<?php echo $errorTitle; ?>"><?php echo isset( $errorText )? $errorText : ''; ?></error>

@@ -2,7 +2,7 @@
 namespace Blueline;
 use \Helpers\Text;
 
-$title_for_layout = 'Blueline';
+View::element( 'default.header' );
 ?>
 <section class="search">
 	<header>
@@ -16,3 +16,4 @@ $title_for_layout = 'Blueline';
 		</form>
 	</header>
 </section>
+<?php View::element( 'default.footer' ); ?>

@@ -1,16 +1,20 @@
 <?php
-$title_for_layout = htmlspecialchars( \Helpers\Text::toList( array_map( function( $m ){ return $m['title']; }, $methods ) ) ) . ' | Methods | Blueline';
-$breadcrumb = array(
-	'<a href="/methods">Methods</a>'
-);
-$headerSearch = array( 
-	'action' => '/methods/search',
-	'placeholder' => 'Search methods'
-);
-$scripts_for_layout = array(
-	'/scripts/general.js',
-	'/scripts/methods.js'
-);
+namespace Blueline;
+
+View::element( 'default.header', array(
+	'title' => htmlspecialchars( \Helpers\Text::toList( array_map( function( $m ){ return $m['title']; }, $methods ) ) ) . ' | Methods | Blueline',
+	'breadcrumb' => array(
+		'<a href="/methods">Methods</a>'
+	),
+	'headerSearch' => array( 
+		'action' => '/methods/search',
+		'placeholder' => 'Search methods'
+	),
+	'scripts' => array(
+		'/scripts/general.js',
+		'/scripts/methods.js'
+	)
+) );
 $i = 0;
 foreach( $methods as $method ) : ?>
 <section class="method" id="method_<?php echo $i; ?>">
@@ -102,4 +106,4 @@ foreach( $methods as $method ) : ?>
 <?php endif; ?>
 </section>
 <?php ++$i; endforeach; ?>
-
+<?php View::element( 'default.footer' ); ?>

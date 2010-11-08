@@ -2,13 +2,15 @@
 namespace Blueline;
 use \Helpers\Text;
 
-$title_for_layout = 'Towers | Blueline';
-$breadcrumb = array(
-	'<a href="/towers">Towers</a>'
-);
-$scripts_for_layout = array(
-	'/scripts/general.js'
-);
+View::element( 'default.header', array(
+	'title' => 'Towers | Blueline',
+	'breadcrumb' => array(
+		'<a href="/towers">Towers</a>'
+	),
+	'scripts' => array(
+		'/scripts/general.js'
+	)
+) );
 ?>
 <section class="search">
 	<header>
@@ -22,4 +24,4 @@ $scripts_for_layout = array(
 		</form>
 	</header>
 </section>
-
+<?php View::element( 'default.footer' ); ?>
