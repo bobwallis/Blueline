@@ -98,6 +98,7 @@ class Response {
 		'xml' => 'text/xml',
 		'txt' => 'text/plain',
 		'json' => 'application/json',
+		'svg' => 'image/svg+xml',
 		'opensearch' => 'application/opensearchdescription+xml',
 		'opensearch_suggestions' => 'application/x-suggestions+json'
 	);
