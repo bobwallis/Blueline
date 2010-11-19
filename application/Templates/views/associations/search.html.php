@@ -3,7 +3,7 @@ namespace Blueline;
 use \Helpers\Text;
 
 View::element( 'default.header', array(
-	'title' => 'Search | Towers | Blueline',
+	'title' => 'Search | Associations | Blueline',
 	'breadcrumb' => array(
 		'<a href="/associations">Associations</a>'
 	)
@@ -22,10 +22,10 @@ View::element( 'sectionSearch', array(
 	</header>
 	<ol class="searchResults">
 <?php foreach( $associations as $association ) : ?>
-		<li><a href="/associations/view/<?php echo urlencode( $association['abbreviation'] ); ?>"><?php echo $association['name']; ?></a></li>
+		<li><a href="<?php echo $association->href(); ?>"><?php echo $association->name(); ?></a></li>
 <?php endforeach; ?>
 	</ol>
-<?php View::element( 'paging', compact( 'limit' ) ); ?>
+<?php View::element( 'paging', compact( 'limit', 'count' ) ); ?>
 </section>
 <?php View::element( 'default.footer' ); ?>
 

@@ -1,46 +1,45 @@
 <?php
-foreach( $methods as $m ) {
+foreach( $methods as $method ) {
 	$references = array();
-	foreach( array( 'rwRef' => 'Ringing World', 'bnRef' => 'Bell News' ) as $key=>$journal ) {
-		if( !empty( $m[$key] ) ) { $references[] = $journal.' '.$m[$key]; }
-	}
+	if( $method->rwRef() ) { $references[] = 'Ringing World '.$method->rwRef(); }
+	if( $method->bnRef() ) { $references[] = 'Bell News '.$method->bnRef(); }
 	$performances = array();
-	if( !empty( $m['firstTowerbellPeal_date'] ) ) {
-		$performances[] = 'First tower bell peal: '.$m['firstTowerbellPeal_date'].((!empty($m['firstTowerbellPeal_location']))?' at '.$m['firstTowerbellPeal_location']:'');
+	if( $method->firstTowerbellPeal_date() ) {
+		$performances[] = 'First tower bell peal: '.$method->firstTowerbellPeal_date().($method->firstTowerbellPeal_location()?' at '.$method->firstTowerbellPeal_location():'');
 	}
-	if( !empty( $m['firstHandbellPeal_date'] ) ) {
-		$performances[] = 'First hand bell peal:  '.$m['firstHandbellPeal_date'].((!empty($m['firstHandbellPeal_location']))?' at '.$m['firstHandbellPeal_location']:'');
-	}
-
-	echo $m['title']."\n";
-
-	if( !empty( $m['pmmRef'] ) ) {
-		echo 'Plain Minor Method #'.$m['pmmRef']."\n";
-	}
-	if( !empty( $m['tdmmRef'] ) ) {
-		echo 'Treble-Dodging Minor Method #'.$m['tdmmRef']."\n";
+	if( $method->firstHandbellPeal_date() ) {
+		$performances[] = 'First hand bell peal:  '.$method->firstHandbellPeal_date().($method->firstHandbellPeal_location()?' at '.$method->firstHandbellPeal_location():'');
 	}
 
-	echo '       Notation: '.$m['notation']."\n";
+	echo $method->title()."\n";
 
-	if( !empty( $m['lengthOfLead'] ) ) {
-		echo ' Length of Lead: '.$m['lengthOfLead']."\n";
+	if( $method->pmmRef() ) {
+		echo 'Plain Minor Method #'.$method->pmmRef()."\n";
+	}
+	if( $method->tdmmRef() ) {
+		echo 'Treble-Dodging Minor Method #'.$method->tdmmRef()."\n";
 	}
 
-	if( !empty( $m['numberOfHunts'] ) ) {
-		echo 'Number of Hunts: '.$m['numberOfHunts']."\n";
+	echo '       Notation: '.$method->notation()."\n";
+
+	if( $method->lengthOfLead() ) {
+		echo ' Length of Lead: '.$method->lengthOfLead()."\n";
 	}
 
-	if( !empty( $m['palindromic'] ) || !empty( $m['doubleSym'] ) || !empty( $m['rotational'] ) ) {
-		echo '       Symmetry: ' . \Helpers\Text::toList( array_filter( array( (($m['palindromic']==1)?'Palindromic':''), (($m['doubleSym']==1)?'Double':''), (($m['rotational']==1)?'Rotational':'') ) ) )."\n";
+	if( $method->numberOfHunts() ) {
+		echo 'Number of Hunts: '.$method->numberOfHunts()."\n";
 	}
 
-	if( !empty( $m['leadHead'] ) ) {
-		echo '      Lead Head: '.$m['leadHead'].((!empty( $m['leadHeadCode'] ))?' (Code: '.$m['leadHeadCode'].')':'')."\n";
+	if( $method->palindromic() || $method->doubleSym() || $method->rotational() ) {
+		echo '       Symmetry: ' . \Helpers\Text::toList( array_filter( array( ($method->palindromic()?'Palindromic':''), ($method->doubleSym()?'Double':''), ($method->rotational()?'Rotational':'') ) ) )."\n";
 	}
 
-	if( !empty( $m['fchGroups'] ) ) {
-		echo '      Falseness: '.$m['fchGroups']."\n";
+	if( $method->leadHead() ) {
+		echo '      Lead Head: '.$method->leadHead().($method->leadHeadCode()?' (Code: '.$method->leadHeadCode().')':'')."\n";
+	}
+
+	if( $method->fchGroups() ) {
+		echo '      Falseness: '.$method->fchGroups()."\n";
 	}
 
 	if( count( $references ) > 0 ) {

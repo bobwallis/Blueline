@@ -3,11 +3,11 @@
 <?php
 foreach( $associations as $association ) {
 	echo "\t<association"
-		. (!empty( $association['abbreviation'] )?' abbreviation="'.htmlentities( $association['abbreviation'] ).'"':'')
-		. (!empty( $association['link'] )?' link="'.htmlentities( $association['link'] ).'"':'')
-		. (!empty( $association['towerCount'] )?' towerCount="'.intval( $association['towerCount'] ).'"':'')
+		. ($association->abbreviation()?' abbreviation="'.htmlentities( $association->abbreviation() ).'"':'')
+		. ($association->link()?' link="'.htmlentities( $association->link() ).'"':'')
+		. ($association->towerCount()?' towerCount="'.$association->towerCount().'"':'')
 		. '>'
-		. htmlentities( $association['name'] )
+		. htmlentities( $association->name() )
 		. "</association>\n";
 }
 ?>

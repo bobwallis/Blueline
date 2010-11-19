@@ -23,10 +23,10 @@ View::element( 'sectionSearch', array(
 			<h3>Associations:</h3>
 			<ol class="searchResults">
 <?php foreach( $associations as $association ) : ?>
-				<li><a href="/associations/view/<?php echo urlencode( $association['abbreviation'] ); ?>"><?php echo $association['name']; ?></a></li>
+				<li><a href="<?php echo $association->href(); ?>"><?php echo $association->name(); ?></a></li>
 <?php endforeach; ?>
 			</ol>
-<?php if( $associationCount > Model::$_searchLimit ) : ?>
+<?php if( $associationCount > $searchLimit ) : ?>
 			<h4><a href="/associations/search?<?php echo $queryString; ?>">More associations &raquo;</a></h4>
 <?php endif; ?>
 		</li>
@@ -36,10 +36,10 @@ View::element( 'sectionSearch', array(
 			<h3>Methods:</h3>
 			<ol class="searchResults">
 <?php foreach( $methods as $method ) : ?>
-				<li><a href="/methods/view/<?php echo str_replace( ' ', '_', $method['title'] ); ?>"><?php echo $method['title']; ?></a></li>
+				<li><a href="<?php echo $method->href(); ?>"><?php echo $method->title(); ?></a></li>
 <?php endforeach; ?>
 			</ol>
-<?php if( $methodCount > Model::$_searchLimit ) : ?>
+<?php if( $methodCount > $searchLimit ) : ?>
 			<h4><a href="/methods/search?<?php echo $queryString; ?>">More methods &raquo;</a></h4>
 <?php endif; ?>
 		</li>
@@ -49,9 +49,9 @@ View::element( 'sectionSearch', array(
 			<h3>Towers:</h3>
 			<ol class="searchResults">
 <?php foreach( $towers as $tower ) : ?>
-				<li><?php echo '<a href="/towers/view/'.$tower['doveId'].'">' . $tower['place'].' <small>('.$tower['dedication'].')</small></a>'; ?></li>
+				<li><?php echo "<a href=\"{$tower->href()}\">{$tower->place()} <small>({$tower->dedication()})</small></a>"; ?></li>
 <?php endforeach; ?>
-<?php if( $towerCount > Model::$_searchLimit ) : ?>
+<?php if( $towerCount > $searchLimit ) : ?>
 			</ol><h4><a href="/towers/search?<?php echo $queryString; ?>">More towers &raquo;</a></h4>
 <?php endif; ?>
 		</li>

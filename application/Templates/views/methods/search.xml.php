@@ -14,56 +14,12 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
 	<opensearch:totalResults><?php echo $count; ?></opensearch:totalResults>
 	<opensearch:startIndex><?php echo $limit['current']; ?></opensearch:startIndex>
 	<methodSet>
-<?php foreach( $methods as $m ) : ?>
+<?php foreach( $methods as $method ) : ?>
 		<method>
-			<stage><?php echo $m['stage']; ?></stage>
-			<notation><?php echo $m['notation']; ?></notation>
-			<title><?php echo $m['title']; ?></title>
-			<classification><?php echo $m['classification']; ?></classification>
-<?php if( !empty( $m['lengthOfLead'] ) ) : ?>
-			<lengthOfLead><?php echo $m['lengthOfLead']; ?></lengthOfLead>
-<?php endif; ?>
-<?php if( !empty( $m['numberOfHunts'] ) ) : ?>
-			<numberOfHunts><?php echo $m['numberOfHunts']; ?></numberOfHunts>
-<?php endif; ?>
-<?php if( !empty( $m['palindromic'] ) || !empty( $m['doubleSym'] ) || !empty( $m['rotational'] ) ) : ?>
-			<symmetry><?php echo trim( (($m['palindromic'])?'palindromic ':'').(($m['doubleSym'])?'double ':'').(($m['rotational'])?'rotational ':'') ); ?></symmetry>
-<?php endif; ?>
-<?php if( !empty( $m['leadHead'] ) ) : ?>
-			<leadHead><?php echo $m['leadHead']; ?></leadHead>
-<?php endif; ?>
-<?php if( !empty( $m['leadHeadCode'] ) ) : ?>
-			<leadHeadCode><?php echo $m['leadHeadCode']; ?></leadHeadCode>
-<?php endif; ?>
-<?php if( !empty( $m['fchGroups'] ) ) : ?>
-			<falseness><fchGroups><?php echo $m['fchGroups']; ?></fchGroups></falseness>
-<?php endif; ?>
-<?php if( !empty( $m['rwRef'] ) || !empty( $m['bnRef'] ) || !empty( $m['tdmmRef'] ) || !empty( $m['pmmRef'] ) ) : ?>
-			<references>
-<?php if( !empty( $m['rwRef'] ) ) : ?>
-				<rwRef><?php echo $m['rwRef']; ?></rwRef>
-<?php endif; ?>
-<?php if( !empty( $m['bnRef'] ) ) : ?>
-				<bnRef><?php echo $m['bnRef']; ?></bnRef>
-<?php endif; ?>
-<?php if( !empty( $m['tdmmRef'] ) ) : ?>
-				<tdmmRef><?php echo $m['tdmmRef']; ?></tdmmRef>
-<?php endif; ?>
-<?php if( !empty( $m['pmmRef'] ) ) : ?>
-				<pmmRef><?php echo $m['pmmRef']; ?></pmmRef>
-<?php endif; ?>
-			</references>
-<?php endif; ?>
-<?php if( !empty( $m['firstHandbellPeal_date'] ) || !empty( $m['firstTowerbellPeal_date'] ) ) : ?>
-			<performances>
-<?php if( !empty( $m['firstHandbellPeal_date'] ) ) : ?>
-				<firstHandbellPeal><date><?php echo $m['firstHandbellPeal_date']; ?></date></firstHandbellPeal>
-<?php endif; ?>
-<?php if( !empty( $m['firstTowerbellPeal_date'] ) ) : ?>
-				<firstTowerbellPeal><date><?php echo $m['firstTowerbellPeal_date']; ?></date><location><?php echo $m['firstTowerbellPeal_location']; ?></location></firstTowerbellPeal>
-<?php endif; ?>
-			</performances>
-<?php endif; ?>
+			<stage><?php echo $method->stage(); ?></stage>
+			<notation><?php echo $method->notation(); ?></notation>
+			<title><?php echo $method->title(); ?></title>
+			<classification><?php echo $method->classification(); ?></classification>
 		</method>
 <?php endforeach; ?>
 	</methodSet>

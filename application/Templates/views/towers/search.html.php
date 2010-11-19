@@ -20,9 +20,9 @@ View::element( 'default.header', array(
 	</header>
 	<ol class="searchResults">
 <?php foreach( $towers as $tower ) : ?>
-		<li><?php echo '<a href="/towers/view/'.$tower['doveId'].'">' . $tower['place'].' <small>('.$tower['dedication'].')</small></a>'; ?></li>
+		<li><?php echo "<a href=\"{$tower->href()}\">{$tower->place()} <small>({$tower->dedication()})</small></a>"; ?></li>
 <?php endforeach; ?>
 	</ol>
-<?php View::element( 'paging', compact( 'limit' ) ); ?>
+<?php View::element( 'paging', compact( 'limit', 'count' ) ); ?>
 </section>
 <?php View::element( 'default.footer' ); ?>

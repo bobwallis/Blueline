@@ -1,6 +1,6 @@
 <?php
 namespace Blueline;
-use \Models\Tower;
+use \Models\DataAccess\Towers;
 
 Response::cacheType( 'static' );
-View::set( 'count', Tower::searchCount() );
+View::set( 'count', Towers::findCount() );

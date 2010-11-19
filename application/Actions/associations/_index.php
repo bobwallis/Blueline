@@ -1,6 +1,6 @@
 <?php
 namespace Blueline;
-use \Models\Association;
+use \Models\DataAccess\Associations;
 
-View::set( 'associations', Association::index() );
+View::set( 'associations', Associations::find( array( 'order' => 'name ASC' ) ) );
 Response::cacheType( 'static' );

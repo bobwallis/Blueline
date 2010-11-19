@@ -1,6 +1,6 @@
 <?php
 namespace Blueline;
-use \Models\Method;
+use \Models\DataAccess\Methods;
 
 Response::cacheType( 'static' );
-View::set( 'count', Method::searchCount() );
+View::set( 'count', Methods::findCount() );

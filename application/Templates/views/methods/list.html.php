@@ -18,7 +18,7 @@ View::element( 'default.header', array(
 	</header>
 	<ol class="searchResults">
 <?php foreach( $methods as $method ) : ?>
-		<li><a href="/methods/view/<?php echo str_replace( ' ', '_', $method['title'] ); ?>"><?php echo $method['title']; ?></a></li>
+		<li><a href="<?php echo $method->href(); ?>"><?php echo $method->title(); ?></a></li>
 <?php endforeach; ?>
 	</ol>
 </section>

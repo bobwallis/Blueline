@@ -1,6 +1,5 @@
 <?php
 namespace Blueline;
-View::layout( 'blank' );
 ?>
 <ul>
 <?php

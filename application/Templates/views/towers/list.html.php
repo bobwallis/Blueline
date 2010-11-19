@@ -1,13 +1,10 @@
 <?php
 namespace Blueline;
 
-View::element( 'html.header', array(
+View::element( 'default.header', array(
 	'title' => 'Towers | Blueline',
 	'breadcrumb' => array(
 		'<a href="/towers">Towers</a>'
-	),
-	'scripts' => array(
-		'/scripts/general.js'
 	)
 ) );
 ?>
@@ -17,8 +14,8 @@ View::element( 'html.header', array(
 	</header>
 	<ol class="searchResults">
 <?php foreach( $towers as $tower ) : ?>
-		<li><?php echo '<a href="/towers/view/'.$tower['doveId'].'">' . $tower['place'].' <small>('.$tower['dedication'].')</small></a>'; ?></li>
+		<li><?php echo "<a href=\"{$tower->href()}\">{$tower->place()} <small>({$tower->dedication()})</small></a>"; ?></li>
 <?php endforeach; ?>
 	</ol>
 </section>
-<?php View::element( 'html.footer' ); ?>
+<?php View::element( 'default.footer' ); ?>

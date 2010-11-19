@@ -1,68 +1,121 @@
 <?php
 namespace Models;
-use \Blueline\Config, \Blueline\Database, \PDO;
+use \Blueline\Config;
 
 class Method extends \Blueline\Model {
-
-	protected static $_table = 'methods';
-	
-	protected static $_searchSelect = 'title, stage, classification, notation';
-	protected static $_searchWhere = false;
-	protected static $_searchBindable = false;
-	
-	public static function view( $title ) {
-		$sth = Database::$dbh->prepare( '
-			SELECT title, stage, classification, notation, notationExpanded, leadHeadCode, leadHead, fchGroups, rwRef, bnRef, tdmmRef, pmmRef, lengthOfLead, numberOfHunts, little, differential, plain, trebleDodging, palindromic, doubleSym, rotational, firstTowerbellPeal_date, firstTowerbellPeal_location, firstHandbellPeal_date, firstHandbellPeal_location, calls, ruleOffs, tower_id AS firstTowerbellPeal_location_doveId
-			FROM '.static::$_table.'
-			LEFT OUTER JOIN method_extras AS me ON (me.method_title = title)
-			LEFT OUTER JOIN methods_towers AS mt ON (mt.method_title = title)
-			WHERE title = :title
-			LIMIT 1
-		' );
-		$sth->execute( array( ':title' => str_replace( '_', ' ', $title ) ) );
-		return ( $methodData = $sth->fetch( PDO::FETCH_ASSOC ) )? $methodData : array( 'title' => 'Not Found' );
+	public function __toString() {
+		return $this->title();
 	}
 	
-	
-	/**
-	 * Gets search suggestions
-	 * @return array
-	 */
-	public static function search_suggestions() {	
-		$sth = Database::$dbh->prepare( '
-			SELECT title
-			FROM '.static::$_table.'
-			WHERE '.self::GETtoWhere().'
-			LIMIT '.self::GETtoLimit().'
-		' );
-		$sth->execute( self::GETtoBindable() );
-		return ( $searchData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? array(
-			'queries' => array_map( function( $m ) { return $m['title']; } , $searchData ),
-			'URLs' => array_map( function( $m ) { return Config::get( 'site.baseURL' ).'/methods/view/'.str_replace( ' ', '_', $m['title'] ); } , $searchData )
-		) : array();
+	function title() {
+		return $this->title? : '';
 	}
 	
-	private static $_conditions = false;
-	protected static function GETtoConditions() {
-		if( self::$_conditions === false ) {
-			$conditions = array();
-			// Title
-			if( isset( $_GET['q'] ) ) {
-				$q = $_GET['q'];
-				if( strpos( $q, '/' ) === 0 && preg_match( '/^\/(.*)\/$/', $q, $matches ) ) {
-					$conditions['title REGEXP'] = $matches[1];
-				}
-				else {
-					// If the search ends in a number then use that to filter by stage
-					if( preg_match( '/ (\d{1,2})$/', $q, $matches ) && ($matches[1] > 2) && ($matches[1] < 23) ) {
-						$q = substr( $q, 0, -2 );
-						$conditions['stage ='] = intval( $matches[1] );
-					}
-					$conditions['title LIKE'] = '%'.self::prepareStringForLike( $q ).'%';
-				}
-			}
-			self::$_conditions = $conditions;
-		}
-		return self::$_conditions;
+	function stage() {
+		return $this->stage? : 0;
+	}
+	
+	function classification() {
+		return $this->classification? : '';
+	}
+	
+	function notation() {
+		return $this->notation? : '';
+	}
+	
+	function notationExpanded() {
+		return $this->notationExpanded? : '';
+	}
+	
+	function leadHeadCode() {
+		return $this->leadHeadCode? : '';
+	}
+	
+	function leadHead() {
+		return $this->leadHead? : '';
+	}
+	
+	function fchGroups() {
+		return $this->fchGroups? : '';
+	}
+	
+	function rwRef() {
+		return $this->rwRef? : '';
+	}
+	
+	function bnRef() {
+		return $this->bnRef? : '';
+	}
+	
+	function tdmmRef() {
+		return $this->tdmmRef? : 0;
+	}
+	
+	function pmmRef() {
+		return $this->pmmRef? : 0;
+	}
+	
+	function lengthOfLead() {
+		return $this->lengthOfLead? : 0;
+	}
+	
+	function numberOfHunts() {
+		return $this->numberOfHunts? : 0;
+	}
+	
+	function little() {
+		return $this->little? true : false;
+	}
+	
+	function differential() {
+		return $this->differential? true : false;
+	}
+	
+	function plain() {
+		return $this->plain? true : false;
+	}
+	
+	function trebleDodging() {
+		return $this->trebleDodging? true : false;
+	}
+	
+	function palindromic() {
+		return $this->palindromic? true : false;
+	}
+	
+	function doubleSym() {
+		return $this->doubleSym? true : false;
+	}
+	
+	function rotational() {
+		return $this->rotational? true : false;
+	}
+	
+	function firstTowerbellPeal_date() {
+		return $this->firstTowerbellPeal_date? : 0;
+	}
+	
+	function firstTowerbellPeal_location() {
+		return $this->firstTowerbellPeal_location? : '';
+	}
+	
+	function firstTowerbellPeal_location_doveId() {
+		return $this->firstTowerbellPeal_location_doveId? : '';
+	}
+	
+	function firstHandbellPeal_date() {
+		return $this->firstHandbellPeal_date? : 0;
+	}
+	
+	function firstHandbellPeal_location() {
+		return $this->firstHandbellPeal_location? : '';
+	}
+	
+	function ruleOffs() {
+		return $this->ruleOffs? : '';
+	}
+	
+	public function href( $absolute = false ) {
+		return ($absolute?Config::get( 'site.baseURL' ):'').'/methods/view/'.urlencode( str_replace( ' ', '_', $this->title() ) );
 	}
 }

@@ -11,6 +11,10 @@ namespace Helpers;
 class Text {
 
 	public static function toList( array $list, $glue = ', ', $last = ' and ' ) {
+		$list = array_filter( $list );
+		if( empty( $list ) ) {
+			return '';
+		}
 		if( count( $list ) > 1 ) {
 			return implode( $glue, array_slice( $list, null, -1 ) ) . $last . array_pop( $list );
 		}

@@ -1,8 +1,8 @@
 <?php
 namespace Blueline;
-use \Models\Association, \Models\Method, \Models\Tower;
+use \Models\DataAccess\Associations, \Models\DataAccess\Methods, \Models\DataAccess\Towers;
 
 Response::cacheType( 'static' );
-View::set( 'associationCount', Association::searchCount() );
-View::set( 'methodCount', Method::searchCount() );
-View::set( 'towerCount', Tower::searchCount() );
+View::set( 'associationCount', Associations::findCount() );
+View::set( 'methodCount', Methods::findCount() );
+View::set( 'towerCount', Towers::findCount() );

@@ -1,112 +1,123 @@
 <?php
 namespace Models;
-use \Blueline\Config, \Blueline\Database, \PDO;
+use \Blueline\Config;
 
 class Tower extends \Blueline\Model {
-
-	protected static $_table = 'towers';
-	
-	protected static $_searchSelect = 'doveId, dedication, place, county, country, bells';
-	protected static $_searchWhere = false;
-	protected static $_searchBindable = false;
-
-	public static function view( $doveId ) {
-		$sth = Database::$dbh->prepare( '
-			SELECT doveId, gridReference, latitude, longitude, latitudeSatNav, longitudeSatNav, postcode, country, county, diocese, place, altName, dedication, bells, weight, weightApprox, weightText, note, hz, practiceNight, practiceStart, practiceNotes, groundFloor, toilet, unringable, simulator, overhaulYear, contractor, tuned, extraInfo, webPage
-			FROM towers
-			LEFT OUTER JOIN tower_oldpks ON (tower_doveId = doveId)
-			WHERE ((doveId = :doveId) OR (oldpk = :doveId))
-			LIMIT 1
-		' );
-		$sth->execute( array( ':doveId' => $doveId ) );
-		if( $towerData = $sth->fetch( PDO::FETCH_ASSOC ) ) {
-			$towerData['affiliations'] = self::affiliationsFromDoveId( $doveId );
-			$towerData['firstPeals'] = self::firstPealsFromDoveId( $doveId );
-			$towerData['nearbyTowers'] = self::nearbyTowersFromLocation( $towerData['latitude'], $towerData['longitude'] );
-			return $towerData;
-		}
-		else {
-			return array(
-				'doveId' => 'NONE'
-			);
-		}
+	public function __toString() {
+		return \Helpers\Text::toList( array( "{$this->place()} ({$this->dedication()})", $this->county(), $this->country() ), ', ', ', ' );
 	}
 	
-	public static function firstPealsFromDoveId( $doveId ) {
-			$sth = Database::$dbh->prepare( '
-				SELECT title, firstTowerbellPeal_date 
-				FROM methods
-				JOIN methods_towers ON (tower_id = :doveId AND method_title = title)
-				ORDER BY firstTowerbellPeal_date DESC
-		' );
-		$sth->execute( array( ':doveId' => $doveId ) );
-		return $sth->fetchAll( PDO::FETCH_ASSOC );
+	public function doveId() {
+		return $this->doveId? : '';
+	}
+	public function gridReference() {
+		return $this->gridReference? : '';
+	}
+	public function latitude() {
+		return $this->latitude? : 0;
+	}
+	public function longitude() {
+		return $this->longitude? : 0;
+	}
+	public function latitudeSatNav() {
+		return $this->latitudeSatNav? : 0;
+	}
+	public function longitudeSatNav() {
+		return $this->longitudeSatNav? : 0;
+	}
+	public function postcode() {
+		return $this->postcode? : '';
+	}
+	public function country() {
+		return $this->country? : '';
+	}
+	public function county() {
+		return $this->county? : '';
+	}
+	public function diocese() {
+		return $this->diocese? : '';
+	}
+	public function place() {
+		return $this->place? : '';
+	}
+	public function altName() {
+		return $this->altName? : '';
+	}
+	public function dedication() {
+		return $this->dedication? : 'Unknown';
+	}
+	public function bells() {
+		return $this->bells? intval( $this->bells ) : 0;
+	}
+	public function weight() {
+		return $this->weight? : 0;
+	}
+	public function weightApprox() {
+		return $this->weightApprox? true : false;
+	}
+	public function weightText() {
+		return $this->weightText? : 'Unknown';
+	}
+	public function note( $html = false ) {
+		return $this->note? str_replace( array( '#', 'b' ), array( '&#x266f;', '&#x266d;' ), $this->note ) : ''; 
+	}
+	public function hz() {
+		return $this->hz? : 0;
+	}
+	public function practiceNight() {
+		return $this->practiceNight? : 0;
+	}
+	public function practiceStart() {
+		return $this->practiceStart? : '';
+	}
+	public function practiceNotes() {
+		return $this->practiceNotes? : '';
+	}
+	public function groundFloor() {
+		return $this->groundFloor? true : false;
+	}
+	public function toilet() {
+		return $this->toilet? true : false;
+	}
+	public function unringable() {
+		return $this->unringable? true : false;
+	}
+	public function simulator() {
+		return $this->simulator? true : false;
+	}
+	public function overhaulYear() {
+		return $this->overhaulYear? : 0;
+	}
+	public function contractor() {
+		return $this->contractor? : '';
+	}
+	public function tuned() {
+		return $this->tuned? : 0;
+	}
+	public function extraInfo() {
+		return $this->extraInfo? : '';
+	}
+	public function webPage() {
+		return $this->webPage? : '';
 	}
 	
-	public static function affiliationsFromDoveId( $doveId ) {
-		$sth = Database::$dbh->prepare( '
-			SELECT abbreviation, name, link
-			FROM associations
-			JOIN associations_towers ON (association_abbreviation = abbreviation AND tower_doveId = :doveId)
-		' );
-		$sth->execute( array( ':doveId' => $doveId ) );
-		return $sth->fetchAll( PDO::FETCH_ASSOC );
+	public function distance() {
+		return $this->distance? : 0;
 	}
 	
-	public static function nearbyTowersFromLocation( $latitude, $longitude ) {
-		if( empty( $latitude ) || empty( $longitude ) ) { return array(); }
-		$sth = Database::$dbh->prepare( '
-			SELECT doveId, place, dedication, bells, weightText, ( 6371 * acos( cos( radians(:latitude) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(:longitude) ) + sin( radians(:latitude) ) * sin( radians( latitude ) ) ) ) AS distance
-			FROM towers
-			WHERE latitude IS NOT NULL
-			HAVING distance < 20
-			ORDER BY distance ASC
-			LIMIT 1,7
-		' );
-		$sth->execute( array( ':latitude' => $latitude, ':longitude' => $longitude ) );
-		return $sth->fetchAll( PDO::FETCH_ASSOC );
+	public function firstPeals() {
+		return $this->firstPeals? : array();
 	}
 	
-	
-	
-	/**
-	 * Gets search suggestions
-	 * @return array
-	 */
-	public static function search_suggestions() {	
-		$sth = Database::$dbh->prepare( '
-			SELECT doveId, place, dedication
-			FROM '.static::$_table.'
-			WHERE '.self::GETtoWhere().'
-			LIMIT '.self::GETtoLimit().'
-		' );
-		$sth->execute( self::GETtoBindable() );
-		return ( $searchData = $sth->fetchAll( PDO::FETCH_ASSOC ) )? array(
-			'queries' => array_map( function( $t ) { return $t['place'].(($t['dedication']!='Unknown')?' ('.$tower['dedication'].')':''); } , $searchData ),
-			'URLs' => array_map( function( $t ) { return Config::get( 'site.baseURL' ).'/towers/view/'.$t['doveId']; } , $searchData )
-		) : array();
+	public function affiliations() {
+		return $this->affiliations? : array();
 	}
 	
-	private static $_conditions = false;
-	protected static function GETtoConditions() {
-		if( self::$_conditions === false ) {
-			$conditions = array();
-			// Place/Dedication
-			if( isset( $_GET['q'] ) ) {
-				if( strpos( $_GET['q'], '/' ) === 0 && preg_match( '/^\/(.*)\/$/', $_GET['q'], $matches ) ) {
-					$conditions['place REGEXP'] = $matches[1];
-				}
-				else {
-					if( strpos( $_GET['q'], ' ' ) !== false ) {
-						$conditions['CONCAT(dedication,\' \',place,\' \',dedication) LIKE'] = '%'.self::prepareStringForLike( $_GET['q'] ).'%';
-					}
-					else {
-						$conditions['place LIKE'] = '%'.$_GET['q'].'%';
-					}
-				}
-			}
-			self::$_conditions = $conditions;
-		}
-		return self::$_conditions;
+	public function nearbyTowers() {
+		return $this->nearbyTowers? : array();
+	}
+	
+	public function href( $absolute = false ) {
+		return ($absolute?Config::get( 'site.baseURL' ):'').'/towers/view/'.urlencode( $this->doveId() );
 	}
 }

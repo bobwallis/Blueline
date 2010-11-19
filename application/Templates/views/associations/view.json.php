@@ -1,2 +1,2 @@
 <?php
-echo json_encode( $associations );
+include( __DIR__.'/_index.json.php' );

@@ -17,7 +17,7 @@ View::element( 'default.header', array(
 </header>
 <ol id="associationsList">
 <?php foreach( $associations as $association ) : ?>
-	<li><a href="/associations/view/<?php echo urlencode( $association['abbreviation'] ); ?>"><?php echo htmlspecialchars( $association['name'] ); ?></a></li>
+	<li><a href="<?php echo $association->href(); ?>"><?php echo htmlspecialchars( $association->name() ); ?></a></li>
 <?php endforeach; ?>
 </ol>
 <?php View::element( 'default.footer' ); ?>

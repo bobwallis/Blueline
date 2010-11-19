@@ -1,14 +1,19 @@
 <?php
 namespace Blueline;
-use \Models\Association;
+use \Models\DataAccess\Associations;
 
-$searchResults = Association::search();
-$searchCount = ( count( $searchResults ) > 0 )? Association::searchCount() : 0;
-$searchLimit = explode( ',', Association::GETtoLimit() );
+$searchOptions = array(
+	'fields' => array( 'abbreviation', 'name', 'link' ),
+	'where' => Associations::GETtoConditions(),
+	'limit' => Associations::GETtoLimit()
+);
+
+$searchResults = Associations::find( $searchOptions );
+$searchCount = ( count( $searchResults ) > 0 )? Associations::findCount( $searchOptions ) : 0;
 
 Response::cacheType( 'static' );
 View::set( 'associations', $searchResults );
 View::set( 'count', $searchCount );
-View::set( 'limit', array( 'current' => $searchLimit[0], 'of' => $searchCount, 'increase' => Association::$_searchLimit ) );
+View::set( 'limit', Associations::GETtoLimit() );
 View::set( 'q', isset( $_GET['q'] )? $_GET['q'] : '' );
 View::set( 'searchQuery', Request::queryString() );

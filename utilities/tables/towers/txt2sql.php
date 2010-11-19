@@ -196,25 +196,25 @@ foreach( $dove->data as $tower ) {
 	// Tidy up some abbreviated dioceses
 	switch( $tower['Diocese'] ) {
 		case 'PrivOwnership':
-			$diocese = 'Private Ownership';
+			$tower['Diocese'] = 'Private Ownership';
 			break;
 		case '(Not Anglican)':
-			$diocese = 'Non-Anglican';
+			$tower['Diocese'] = 'Non-Anglican';
 			break;
 		case 'AnglicanNonUK':
-			$diocese = 'Anglican (Non-UK)';
+			$tower['Diocese'] = 'Anglican (Non-UK)';
 			break;
 		case '(RC)':
-			$diocese = 'Roman Catholic';
+			$tower['Diocese'] = 'Roman Catholic';
 			break;
 		case '(Ireland)':
-			$diocese = 'Ireland';
+			$tower['Diocese'] = 'Ireland';
 			break;
 		case 'ChConsvnTrust':
-			$diocese = 'Churches Conservation Trust';
+			$tower['Diocese'] = 'Churches Conservation Trust';
 			break;
 		case 'St Eds and Ips':
-			$diocese = 'St Edmundsbury and Ipswich';
+			$tower['Diocese'] = 'St Edmundsbury and Ipswich';
 			break;
 	}
 	

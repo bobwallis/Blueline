@@ -6,9 +6,6 @@ View::element( 'default.header', array(
 	'title' => 'Towers | Blueline',
 	'breadcrumb' => array(
 		'<a href="/towers">Towers</a>'
-	),
-	'scripts' => array(
-		'/scripts/general.js'
 	)
 ) );
 ?>
