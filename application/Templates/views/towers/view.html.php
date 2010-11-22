@@ -62,7 +62,7 @@ $i = 0;
 <?php if( count( $tower->affiliations() ) > 0 ) : ?>
 			<tr>
 				<th>Affiliations:</th>
-				<td><?php echo Text::toList( array_map( function( $a ) { return '<a href="/associations/view/'.$a->href().'">'.htmlentities( $a->name() ).'</a>'; }, $tower->affiliations() ) ); ?></td>
+				<td><?php echo Text::toList( array_map( function( $a ) { return "<a href=\"{$a->href()}\">{$a->name()}</a>"; }, $tower->affiliations() ) ); ?></td>
 			</tr>
 <?php endif; ?>
 			<tr>
