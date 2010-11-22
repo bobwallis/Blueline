@@ -109,7 +109,7 @@ if( typeof( Array.prototype.indexOf ) == 'undefined' ) {
 		},
 		getComputedStyle: function( element, style ) {
 			try {
-				return window.getComputedStyle( element )[style];
+				return window.getComputedStyle( element, null )[style]; // 'null' required for Gecko <2.0
 			}
 			catch( no_getComputedStyle ) {
 				try {
@@ -151,7 +151,7 @@ if( typeof( Array.prototype.indexOf ) == 'undefined' ) {
 		var tabs = targetTab.parentNode.getElementsByTagName( 'li' );
 			for( var i = 0; i < tabs.length; i++ ) {
 				if( tabs[i].id == targetTab.id ) {
-					_.addClass( tabs[i], ' active' );
+					_.addClass( tabs[i], 'active' );
 					document.getElementById( tabs[i].id.replace( /tab_/, 'content_' ) ).style.display = 'block';
 				}
 				else {
