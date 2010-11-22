@@ -223,11 +223,9 @@ class Response {
 				case 'dynamic':
 					// If it's dynamic then cache the headers and view as a PHP snipped
 					Cache::set( 'dynamic', self::id().'.php',
-						self::headersSnippet()
-						. ( !empty( self::$_body )?
-							"header( 'Content-Type: ".self::$_contentTypes[Response::contentType()]."' );"
-							. preg_replace( '/^<\?php/', '', View::cache() )
-						: '' )
+						"namespace Blueline;\n"
+						. self::headersSnippet()
+						. ( !empty( self::$_body )? preg_replace( array( '/^<\?php/', 'namespace .*;' ), '', View::cache() ) : '' )
 					);
 					break;
 				default:
