@@ -130,21 +130,23 @@
 	// Permute a row array by a cycle permutation
 	var permute = function( row, permutation ) {
 		var i = permutation.length, permuted = new Array( i );
-		while( i-- ) { permuted[i] = row[permutation[i]]; }
+		while( i-- ) {
+			permuted[i] = row[permutation[i]];
+		}
 		return permuted;
 	};
 
 	// Returns a row containing rounds of a given stage
 	var roundsRow = function( stage ) {
 		var row = new Array( stage ), i = stage;
-		while( i-- ) { row[i] = i; }
+		while( i-- ) {
+			row[i] = i;
+		}
 		return row;
 	};
 
 	// Returns an array of all bells in the same position in two rows
 	var detectStationary = function( row1, row2 ) {
-		if( typeof( row1 ) == 'string' ) { row1 = makeRow( row1 ); }
-		if( typeof( row2 ) == 'string' ) { row2 = makeRow( row2 ); }
 		var stationary = [], i = row1.length;
 		while( i-- ) {
 			if( row1[i] === row2[i] ) { stationary.push( row1[i] ); }
@@ -155,20 +157,29 @@
 	// Parse place notation into an array of cycle permutations
 	var parseNotation = function( notation, stage ) {
 		var parsed = [],
-			exploded = notation.replace( /x/gi, '.x.' ).split( '.' ),
+			exploded = notation.replace( /x/gi, '.x.' ).split( '.' ).filter( function( e ) { return e !== ''; } ),
 			i,
 			xPermutation = new Array( stage );
+		
+		// Construct the X permutation for stage
 		for( i = 0; i < stage; i+=2 ) { xPermutation[i] = i+1; xPermutation[i+1] = i; }
 		if( i-1 == stage ) { xPermutation[i-1] = i-1; }
 		
-		exploded = exploded.filter( function( e ) { return e !== ''; } );
 		for( i = 0; i < exploded.length; i++ ) {
+			// For an x, push our pregenerated x permutation
 			if( exploded[i] == 'x' ) {
 				parsed.push( xPermutation );
 			}
+			// Otherwise calculate the permutation
 			else {
-				var stationary = exploded[i].split( '' ).map( charToBell ), permutation = new Array( stage ), j;
-				for( j = 0; j < stationary.length; j++ ) { permutation[stationary[j]] = stationary[j]; }
+				var stationary = exploded[i].split( '' ).map( charToBell ),
+					permutation = new Array( stage ),
+					j;
+				// First put in any stationary bells
+				for( j = 0; j < stationary.length; j++ ) {
+					permutation[stationary[j]] = stationary[j];
+				}
+				// Then 'x' what's left
 				for( j = 0; j < stage; j++ ) {
 					if( typeof( permutation[j] ) == 'undefined' ) {
 						if( typeof( permutation[j+1] ) == 'undefined' && j+1 < stage ) {
@@ -187,39 +198,32 @@
 		return parsed;
 	};
 
-	// Returns the first lead head on a method given notation, stage
+	// Returns the first lead head of a method given notation, stage
 	var getLeadHead = function( notation, stage ) {
-		var leadHead = rounds( stage ), i = 0, iLim = notation.length;
-		for( ; i < iLim; i++ ) { leadHead = permute( leadHead, notation[i] ); }
+		var leadHead = roundsRow( stage ), i = 0, iLim = notation.length;
+		while( i < iLim ) {
+			leadHead = permute( leadHead, notation[i++] );
+		}
 		return leadHead;
 	};
 
-	// Returns the groups of bells moved by a permutation's disjoint cycles
-	var getCycles = function( perm ) {
-		if( typeof( perm ) == 'string' ) { perm = makeRow( perm ); }
-		var groups = [], i = perm.length, rounds = roundsRow( i ), cycle, calcRow;
+	// Seperate a permutation into disjoint cycles
+	var getCycles = function( permutation ) {
+		var cycles = [], i = permutation.length, rounds = roundsRow( i ), cycle, calcRow;
 		while( i-- ) {
 			if( rounds[i] == -1 ) { continue; }
 			cycle = [rounds[i]];
-			calcRow = perm;
-			while( calcRow[i] != rounds[i] ) {
+			for( calcRow = permutation; calcRow[i] != rounds[i]; calcRow = permute( calcRow, permutation ) ) {
 				cycle.push( calcRow[i] );
 				rounds[calcRow[i]] = -1;
-				calcRow = permute( calcRow, perm );
 			}
 			rounds[i] = -1;
-			groups.push( cycle );
+			cycles.push( cycle );
 		}
-		return groups;
+		return cycles;
 	};
 
-	// Returns the number of applications of perm needed to reach dst from src
-	var permsToReach = function( src, dst, perm ) {
-		for( var i = 0; !rowsEqual( src, dst ); src = permute( src, perm ), ++i ) {}
-		return i;
-	};
-
-	// Shared variable
+	// Shared variables
 	var $head = document.getElementsByTagName( 'head' )[0],
 	placeStartFont = {
 		'small': [
@@ -261,11 +265,12 @@
 		this.stage = parseInt( options.stage, 10 );
 		this.rounds = roundsRow( this.stage );
 		this.notation = parseNotation( options.notation, this.stage );
-		this.leadHead = ( typeof( options.leadHead ) != 'undefined' )? makeRow( options.leadHead ) : getLeadHead( this.notation, this.stage );
+		this.leadHead = ( typeof( options.leadHead ) == 'string' )? makeRow( options.leadHead ) : getLeadHead( this.notation, this.stage );
 		this.workGroups = getCycles( this.leadHead );
-		this.leadHeads = [];
-			var tmp = this.rounds;
-			do { this.leadHeads.push( tmp ); tmp = permute( tmp, this.leadHead ); } while( !rowsEqual( tmp, this.rounds ) );
+		this.leadHeads = [this.rounds];
+			for( var tmp = permute( this.rounds, this.leadHead ); !rowsEqual( tmp, this.rounds ); tmp = permute( tmp, this.leadHead ) ) {
+				this.leadHeads.push( tmp );
+			}
 			this.leadHeads.push( this.rounds );
 		this.numberOfLeads = this.leadHeads.length - 1;
 		this.huntBells = this.workGroups.filter( function( e ) { return ( e.length == 1 ); } ).map( function( e ) { return e[0]; } );
@@ -273,50 +278,55 @@
 		// Create child classes
 		if( typeof( options.options_line.container ) != 'undefined' ) {
 			this.Line = new MethodLine( this, options.options_line );
+			this.Line.draw();
 		}
 		if( typeof( options.options_grid.container ) != 'undefined' ) {
 			this.Grid = new MethodGrid( this, options.options_grid );
+			this.Grid.draw();
 		}
-		this.Line.draw();
-		this.Grid.draw();
 	};
 	
 	var MethodLine = function( parent, options ) {
 		this.parent = parent;
 		this.options = options;
-		this.options_orig = {}; for( e in options ) { this.options_orig[e] = options[e]; } // Copying an object is such a mission. This method doesn't work properly in general, but does enough in this case
+		this.options_orig = {}; for( e in options ) { this.options_orig[e] = options[e]; } // Copying an object is such a mission in Javascript. This method doesn't work properly in general, but does enough in this case
 		this.cache = {};
 	
 		// Find container
 		if( typeof( options.container ) == 'undefined' ) { return false; }
 		this.container = ( typeof( options.container ) == 'string' )? document.getElementById( options.container ) : options.container;
+		if( typeof( this.container.nodeName ) == 'undefined' ) { return false; }
 
-		// Whether or not the text will be displayed
-		if( typeof( options.text ) == 'undefined' ) { this.options.text = true; }
-	
+		if( typeof( options.text ) == 'undefined' ) {
+			// Show text by default
+			this.options.text = true;
+		}
 		// Create text and SVG containers
 		this.initialiseContainers();
 		
-		// Line display options
-		if( typeof( options.lines ) == 'undefined' ) { this.options.lines = true; }
-	
-		// Rule off options
-		if( typeof( options.ruleOffs ) == 'undefined' ) { this.options.ruleOffs = { every: this.parent.notation.length, from: 0, color: '#999' }; }
-	
-		// Place start options
-		if( typeof( options.placeStarts ) == 'undefined' ) { this.options.placeStarts = { pathMarkers: true, alongside: true }; }
-	
-		// Some default colours
+		if( typeof( options.lines ) == 'undefined' ) {
+			// Show lines by default
+			this.options.lines = true;
+		}
+		if( typeof( options.ruleOffs ) == 'undefined' ) {
+			// Show rules offs as dashed grey, at the end of ever lead by default
+			this.options.ruleOffs = { every: this.parent.notation.length, from: 0, color: '#999' };
+		}
+		if( typeof( options.placeStarts ) == 'undefined' ) {
+			// Show both the dots on lines and the alongside numbers by default
+			this.options.placeStarts = { pathMarkers: true, alongside: true };
+		}
 		if( typeof( options.colours ) == 'undefined' ) {
+			// Some default colours. Red hunt bells; blue, green, purple... work bells. Transparent text for coloured lines
 			this.options.colours = {
 				lines: { hunt: '#D11', base: 'transparent', work: ['#11D','#1D1','#D1D', '#DD1', '#1DD'] },
 				text: ( this.options.lines === true )? { hunt: 'transparent', base: '#000', work: 'transparent' } : { hunt: '#D11', base: '#000', work: ['#11D','#1D1','#D1D', '#DD1', '#1DD'] }
 			};
 		}
-		// Assign colours to work groups
+		// Assign colours to bells
 		this.colours = this.parent.rounds.map( function( e ) {
-					return { line: this.options.colours.lines.base, text: this.options.colours.text.base };
-			}, this );
+			return { line: this.options.colours.lines.base, text: this.options.colours.text.base };
+		}, this );
 		for( var i = 0, iLim = this.parent.workGroups.length, colourOptionsTemp = this.options.colours; i < iLim; i++ ) {
 			if( this.parent.workGroups[i].length == 1 ) {
 				this.colours[this.parent.workGroups[i][0]] = { line: colourOptionsTemp.lines.hunt, text: colourOptionsTemp.text.hunt };
@@ -329,6 +339,8 @@
 		// Add the CSS for text styling to the page
 		if( this.options.text ) {
 			var cssString = '',
+				colorStyleSheet = document.createElement( 'style' ),
+				sizeStyleSheet = document.createElement( 'style' );
 				textContainerId = 'methodText_'+this.parent.id,
 				i = 0, iLim = this.colours.length;
 			for(; i < iLim; i++ ) {
@@ -341,9 +353,8 @@
 					}
 				}
 			}
-			var colorStyleSheet = document.createElement( 'style' ),
-				sizeStyleSheet = document.createElement( 'style' );
 			colorStyleSheet.innerHTML = cssString;
+			colorStyleSheet.id = 'colorStyle'+this.parent.id;
 			sizeStyleSheet.id = 'sizeStyle'+this.parent.id;
 			$head.appendChild( sizeStyleSheet );
 			$head.appendChild( colorStyleSheet );
@@ -356,6 +367,7 @@
 	MethodLine.prototype = {
 
 		initialiseContainers: function() {
+			// Empty the container by creating a new one with the same attributes, and replacing the old one with it. This is often faster than emptying the old one.
 			var newLineContainer = document.createElement( this.container.nodeName );
 			newLineContainer.id = this.container.id;
 			newLineContainer.className = this.container.className;
@@ -445,31 +457,37 @@
 		},
 	
 		draw: function() {
-			// Calculate method text
-			var textTable = this.textTable();
-			// Draw method lines
+			// Create the paper for drawing on
 			var paperHeight = this.dimensions.row.y*(this.parent.notation.length+1)*this.options.leadsPerColumn;
 			this.paper = new SVGorVML( {
 				id: 'methodLine_'+this.parent.id,
 				width: (this.dimensions.row.x+(this.options.columnPadding*2)+this.options.placeStartPadding)*(this.options.columns),
 				height: paperHeight
 			} );
-			if( this.options.text ) {
-				this.paper.canvas.style.marginBottom = ((-1)*paperHeight)+'px';
-			}
+			
+			// Draw rule offs?
 			if( this.options.ruleOffs !== false ) {
 				this.drawRuleOffs();
 			}
+			// Draw place starts?
 			if( this.options.placeStarts !== false ) {
 				this.drawPlaceStarts();
 			}
+			// Draw lines?
 			if( this.options.lines === true ) {
 				this.drawLines();
 			}
-			// Finally add to page
+			
+			// Add the paper to the page
 			this.container.appendChild( this.paper.canvas );
-			this.container.appendChild( textTable );
+			
+			// Draw method text?
+			if( this.options.text !== false ) {
+				this.paper.canvas.style.marginBottom = ((-1)*paperHeight)+'px';
+				this.container.appendChild( this.textTable() );
+			}
 		},
+		
 		reDraw: function() {
 			this.initialiseContainers();
 			this.calculateSizing();
@@ -578,14 +596,18 @@
 	
 		drawRuleOffs: function() {
 			if( this.options.ruleOffs.color == 'transparent' ) { return; }
-			var i = 0, iLim = this.options.columns,
+			// i will iterate over columns
+			var i = -1, iLim = this.options.columns,
+				// j will iterate over rule offs within a column
 				j, jLim = (this.options.leadsPerColumn*this.parent.notation.length)/this.options.ruleOffs.every,
+				// kLim will be a hard limit on the number of rule offs
 				k = 0, kLim = (this.parent.numberOfLeads*this.parent.notation.length)/this.options.ruleOffs.every,
 				path = '',
+				// h and vMultipler and Padding are for positioning the rule offs
 				hMultiplier = this.dimensions.row.x + (2*this.options.columnPadding) + this.options.placeStartPadding,
 				vMultiplier = this.options.ruleOffs.every*this.dimensions.row.y,
 				vPadding = 0.5 + (this.options.ruleOffs.from*this.dimensions.row.y);
-			for( ; i < iLim; i++ ) {
+			while( ++i < iLim ) {
 				for( j = 0; j < jLim && k < kLim; j++, k++ ) {
 					path += 'M'+(i*hMultiplier)+','+((j+1)*vMultiplier+vPadding)+'l'+this.dimensions.row.x+',0';
 				}
@@ -667,18 +689,30 @@
 		this.parent = parent;
 		this.options = options;
 	
-		// Find container
+		// Find container, allow an element or an ID string
 		if( typeof( options.container ) == 'undefined' ) { return false; }
 		this.container = ( typeof( options.container ) == 'string' )? document.getElementById( options.container ) : options.container;	
-	
+		if( typeof( this.container.nodeName ) == 'undefined' ) { return false; }
+		
 		// Set up options
-		if( typeof( options.notation ) == 'undefined' ) { this.options.notation = true; }
+		if( typeof( options.notation ) == 'undefined' ) {
+			// Show place notation by default
+			this.options.notation = true;
+		}
 		if( typeof( options.colours ) == 'undefined' ) {
+			// Default colours array
 			this.options.colours = ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'];
 		}
-		if( typeof( options.width ) == 'undefined' ) { this.options.width = this.parent.stage * 12; }
-		if( typeof( options.height ) == 'undefined' ) { this.options.height = this.parent.notation.length * 15; }
-	
+		if( typeof( options.width ) == 'undefined' ) {
+			// Default width of 12px per bell
+			this.options.width = this.parent.stage * 12;
+		}
+		if( typeof( options.height ) == 'undefined' ) {
+			// Default height of 15px per row
+			this.options.height = this.parent.notation.length * 15;
+		}
+		
+		// Calculate bell and row dimensions for use later
 		this.dimensions = {
 			bell: { x: this.options.width/this.parent.stage, y: this.options.height/this.parent.notation.length },
 			row: { x: this.options.width, y: this.options.height/this.parent.notation.length }
@@ -692,35 +726,39 @@
 				width: this.dimensions.row.x,
 				height: this.dimensions.row.y*( this.parent.notation.length+1 )
 			} );
-			this.drawGrid();
-		
-			// Either add the canvas to the page in a table with the place notation
-			if( this.options.notation === true ) {
-				var grid = document.createElement( 'table' ),
-					gridRow = document.createElement( 'tr' ),
-					notationCell = document.createElement( 'td' ),
-					paperCell = document.createElement( 'td' );
-				grid.id = 'methodGrid_'+this.parent.id;
-				notationCell.className = 'notationCell';
-				notationCell.innerHTML = this.notationText();
-				paperCell.appendChild( this.paper.canvas );
-				gridRow.appendChild( notationCell );
-				gridRow.appendChild( paperCell );
-				grid.appendChild( gridRow );
-				this.container.appendChild( grid );
-			}
-			// Or just add the canvas to the page
-			else {
-				this.paper.canvas.id = 'methodGrid_'+this.parent.id;
-				this.container.appendChild( this.paper.canvas );
+			if( this.paper.type != 'fail' ) {
+				this.drawGrid();
+				// Either add the canvas to the page in a table with the place notation
+				if( this.options.notation === true ) {
+					var grid = document.createElement( 'table' ),
+						gridRow = document.createElement( 'tr' );
+					grid.id = 'methodGrid_'+this.parent.id;
+					gridRow.appendChild( this.notationCell() );
+					gridRow.appendChild( this.paperCell() );
+					grid.appendChild( gridRow );
+					this.container.appendChild( grid );
+				}
+				// Or just add the canvas to the page
+				else {
+					this.paper.canvas.id = 'methodGrid_'+this.parent.id;
+					this.container.appendChild( this.paper.canvas );
+				}
 			}
 		},
 	
-		notationText: function() {
-			return this.parent.options.notation.replace( /\./g, '<br />' ).replace( /x/g, '<br />x<br />' ).replace( /^<br \/>/, '' );
+		notationCell: function() {
+			var notationCell = document.createElement( 'td' );
+			notationCell.className = 'notationCell';
+			notationCell.innerHTML = this.parent.options.notation.replace( /\./g, '<br />' ).replace( /x/g, '<br />x<br />' ).replace( /^<br \/>/, '' );
+			return notationCell;
+		},
+		paperCell: function() {
+			var paperCell = document.createElement( 'td' );
+			paperCell.appendChild( this.paper.canvas );
+			return paperCell;
 		},
 	
-		drawGrid: function() {
+		drawGrid: function( paper ) {
 			var i = this.parent.stage,
 				colour = -1;
 				colourMod = this.options.colours.length;
@@ -764,8 +802,9 @@
 		lastRedrawTime = nowTime;
 		
 		// Redraw all methods
-		window.methods.forEach( function( method ) { method.Line.reDraw(); } );
+		window.methods.forEach( function( method ) {
+			method.Line.reDraw();
+		} );
 	};
-	try { window.addEventListener( 'resize', methodsResize, false ); }
-	catch( ie ) { window.attachEvent( 'onresize', methodsResize ); }
+	_.addEventListener( window, 'resize', methodsResize );
 } )( window );
