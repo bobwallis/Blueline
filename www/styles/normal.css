@@ -2,13 +2,11 @@
 .normal_hide { display: none; }
 .small_hide { display: block; }
 
-/* Layout */
+
+/* Wrapper */
 #wrapper { margin: 0 auto -26px; }
 footer, #push { height: 25px; }
 
-#content {
-	padding: 0 0 10px 0;
-}
 
 /* Page header */
 #top {
@@ -23,6 +21,7 @@ footer, #push { height: 25px; }
 		margin-left: 5px;
 	}
 
+/* Header search */
 form#topSearch {
 	display: block;
 	margin: 7.5px 0 7.5px 8px;
@@ -40,12 +39,6 @@ form#topSearch {
 		height: 19px;
 	}
 
-/* User login section */
-div#topUser {
-	padding-right: 40px;
-	font-size: 10px;
-	height: 35px
-}
 
 /* Section header */
 section header {
@@ -64,6 +57,34 @@ section header {
 		section header h2.sub {
 			margin-top: -3px !important;
 		}
+
+
+/* Search header */
+form.sectionSearch {
+	margin: 10px 0 5px 10px;
+	width: 350px;
+}
+	h1 + form.sectionSearch { margin-top: 0; }
+	form.sectionSearch div {
+		height: 25px;
+	}
+	form.sectionSearch input {
+		font-size: 13px;
+		width: 310px;
+		height: 21px;
+		padding: 2px 5px;
+	}
+	form.sectionSearch button {
+		width: 25px;
+		height: 25px;
+	}
+	form.sectionSearch p {
+		font-size: 10px;
+		margin: 5px 0 0 7px !important;
+	}
+
+
+/* Tab bar */
 ul.tabBar {
 	padding-left: 10px;
 	height: 21px;
@@ -75,8 +96,10 @@ ul.tabBar {
 		padding: 0 10px;
 	}
 
+
 /* Page content */
 #content {
+	padding: 0 0 10px 0;
 }
 	#content h3 {
 		font-size: 12px;
@@ -108,10 +131,10 @@ table.horizontalDetails {
 		font-size: 14px;
 	}
 	table.horizontalDetails th {
-		padding: 2px 4px 2px 0;
+		padding: 2px 4px 2px 5px;
 	}
 	table.horizontalDetails td {
-		padding: 2px 0 2px 4px;
+		padding: 2px 5px 2px 4px;
 	}
 
 
@@ -120,24 +143,12 @@ section.method {
 	padding-bottom: 15px;
 }
 	section.method:last-child { padding-bottom: 0; }
-.methodDetails {
-	padding: 5px;
-}
-	.methodDetails th { padding-left: 5px; }
-	.methodDetails td { padding-right: 5px; }
 div.methodLine {
 	margin: 0 10px 10px 10px;
 }
 	div.methodLine td {
-		vertical-align: top;
 		padding: 0 20px;
 	}
-.methodText, div.methodLine {
-	font-family: 'Droid Sans Mono', 'DejaVu Sans Mono', monospace;
-	font-size: 14px;
-	line-height: 15px;
-}
-
 .methodGrid {
 	margin-left: 10px;
 }
@@ -166,14 +177,14 @@ td.notationCell {
 		right: 0;
 	}
 
+
+/* Footer */
 footer {
 	font-size: 11px;
 	line-height: 25px;
 }
 	footer p, footer nav {
-		clear: none;
 		padding: 0 5px;
-		color: #C7C2BC;
 	}
 	footer nav { float: left; }
 	footer p { float: right; }

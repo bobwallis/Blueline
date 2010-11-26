@@ -2,13 +2,11 @@
 .normal_hide { display: block; }
 .small_hide { display: none; }
 
-/* Layout */
+
+/* Wrapper */
 #wrapper { margin-bottom: -41px; }
 footer, #push { height: 40px; }
 
-#content {
-	padding: 0 0 10px 0;
-}
 
 /* Page header */
 #top {
@@ -19,7 +17,11 @@ footer, #push { height: 40px; }
 		margin-left: 4px;
 		font-size: 13px;
 	}
+
+
+/* Header search */
 form#topSearch { display: none; }
+
 
 /* Section header */
 section header {
@@ -38,6 +40,34 @@ section header {
 		section header h2.sub {
 			margin-top: -4px !important;
 		}
+
+
+/* Search header */
+form.sectionSearch {
+	margin: 8px 0 3px 8px;
+	width: 304px;
+}
+	h1 + form.sectionSearch { margin-top: 0; }
+	form.sectionSearch div {
+		height: 25px;
+	}
+	form.sectionSearch input {
+		font-size: 13px;
+		width: 264px;
+		height: 21px;
+		padding: 2px 5px;
+	}
+	form.sectionSearch button {
+		width: 25px;
+		height: 25px;
+	}
+	form.sectionSearch p {
+		font-size: 8px;
+		margin: 2px 0 0 5px !important;
+	}
+
+
+/* Tab bar */
 ul.tabBar {
 	padding-left: 10px;
 	height: 21px;
@@ -49,8 +79,10 @@ ul.tabBar {
 		padding: 0 10px;
 	}
 
+
 /* Page content */
 #content {
+	padding: 0 0 10px 0;
 }
 	#content h3 {
 		font-size: 12px;
@@ -89,6 +121,33 @@ table.horizontalDetails {
 
 
 
+section.method {
+	padding-bottom: 15px;
+}
+	section.method:last-child { padding-bottom: 0; }
+.methodDetails {
+	padding: 5px;
+}
+	.methodDetails th { padding-left: 5px; }
+	.methodDetails td { padding-right: 5px; }
+div.methodLine {
+	margin: 0 10px 10px 10px;
+}
+	div.methodLine td {
+		padding: 0 20px;
+	}
+.methodGrid {
+	margin: 0 auto;
+}
+td.notationCell {
+	line-height: 15px;
+	font-size: 10px;
+	color: #666;
+	text-align: right;
+	padding-right: 5px;
+}
+
+
 
 
 #content { padding: 0 0 5px 0; }
@@ -98,9 +157,6 @@ table.horizontalDetails {
 #associationsList {
 	-webkit-column-count: 1; column-count: 1;
 }
-	
-.methodGrid { margin: 0; }
-.methodGrid table { margin: 0 auto; }
 
 .towerMap {
 	display: none;
@@ -109,9 +165,16 @@ table.horizontalDetails {
 	height: 350px;
 }
 
+
+/* Footer */
 footer {
 	font-size: 10px;
 	line-height: 20px;
 }
-	footer nav { float: left; }
-	footer p { float: left; clear: both; }
+	footer p, footer nav {
+		padding: 0 5px;
+		float: left;
+	}
+	footer p {
+		clear: both;
+	}

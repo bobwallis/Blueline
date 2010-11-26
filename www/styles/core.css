@@ -25,14 +25,6 @@ h1, h2 {
 /* Other globals */
 abbr { border-bottom: 1px dotted #E0DED9; cursor: help; }
 .hide { display: none; }
-.fleft { float: left; }
-.fright { float: right; }
-.tcenter { text-align: center; }
-.noborder { border: 0 !important; }
-.nomargin { margin: 0 !important; }
-.nowrap { white-space: nowrap !important; }
-.normalweight { font-weight: normal !important; }
-.noliststyle { list-style: none; }
 .hyphenate { text-align: justify; }
 
 /* Links */
@@ -50,23 +42,21 @@ a {
 	a.external {
 		padding-right: 13px;
 		background: transparent url(../images/external_link.png) no-repeat center right;
-		
 	}
 
-/* Wrappers and basic layout */
+
+/* Wrapper */
 #wrapper {
 	min-height: 100%;
 	height: auto !important;
 	height: 100%;
 }
-#top {
-	display: block;
-	width: 100%;
-}
 
 
 /* Header */
 #top {
+	display: block;
+	width: 100%;
 	background: #002147;
 	color: #E0DED9;
 }
@@ -87,6 +77,7 @@ a {
 		font-weight: normal;
 		text-transform: none;
 	}
+
 
 /* Header search */
 form#topSearch {
@@ -111,14 +102,6 @@ form#topSearch {
 	}
 		form#topSearch button:hover { cursor: pointer; }
 
-/* User login section */
-div#topUser {
-	float: right;
-	background-repeat: no-repeat;
-	background-position: right center;
-	background-size: contain;
-	-moz-background-size: contain;
-}
 
 /* Section header */
 section header {
@@ -128,6 +111,39 @@ section header {
 	background-color: #FAFAFA;
 }
 	section#content section:first-child header { border-top: 0; }
+
+
+/* Search header */
+form.sectionSearch {
+	display: block;
+	overflow: hidden;
+}
+	h1 + form.sectionSearch { margin-top: 0; }
+	form.sectionSearch div {
+		background-color: #FFF;
+		-moz-border-radius: 3px;
+		border-radius: 3px;
+		border: 2px solid #DDD;
+	}
+	form.sectionSearch input {
+		display: block;
+		float: left;
+		background-color: #FFF;
+		border: 0;
+	}
+		form.sectionSearch input:focus { border: 0; outline-width: 0; }
+	form.sectionSearch button {
+		float: left;
+		background: #FFF url(../images/search.png) no-repeat center center;
+		border: 0;
+	}
+		form.sectionSearch button:hover { cursor: pointer; }
+	form.sectionSearch p {
+		color: #999;
+	}
+	
+
+/* Tab bar */
 ul.tabBar {
 	display: block;
 	clear: both;
@@ -154,56 +170,20 @@ ul.tabBar {
 		}
 
 
-/* Search header (includes search box) */
-form.sectionSearch {
-	display: block;
-	overflow: hidden;
-	margin: 10px 0 5px 10px;
-	width: 350px;
+/* Search results */
+.searchResults {
+	margin: 5px;
+	padding: 0;
+	color: #555;
+	list-style: none;
 }
-	h1 + form.sectionSearch { margin-top: 0; }
-	form.sectionSearch div {
-		height: 25px;
-		background-color: #FFF;
-		-moz-border-radius: 3px;
-		border-radius: 3px;
-		border: 2px solid #DDD;
-	}
-	form.sectionSearch input {
-		display: block;
-		float: left;
-		background-color: #FFF;
-		border: 0;
-		font-size: 13px;
-		width: 310px;
-		height: 21px;
-		padding: 2px 5px;
-	}
-		form.sectionSearch input:focus { border: 0; outline-width: 0; }
-	form.sectionSearch button {
-		float: left;
-		background: #FFF url(../images/search.png) no-repeat center center;
-		border: 0;
-		width: 25px;
-		height: 25px;
-	}
-		form.sectionSearch button:hover { cursor: pointer; }
-	form.sectionSearch p {
-		color: #999;
-		font-size: 10px;
-		margin: 5px 0 0 7px !important;
+	.searchResults li {
+		padding: 2px 0;
+		margin: 0;
 	}
 
-/* Reusabe content blocks */
-table.horizontalDetails {}
-	table.horizontalDetails th, table.horizontalDetails td {
-		vertical-align: top;
-	}
-	table.horizontalDetails th {
-		text-align: right;
-		font-weight: normal;
-	}
 
+/* Paging links */
 div.paging {
 	margin: 10px 0;
 }
@@ -217,47 +197,41 @@ div.paging {
 		color: #000;
 	}
 
-.searchResults {
-	margin: 5px;
-	padding: 0;
-	color: #555;
-}
-ol.searchResults {
-	list-style: none;
-}
-	ol.searchResults li {
-		padding: 2px 0;
-		margin: 0;
-	}
-	table.searchResults th {
-		background-color: #FCFCFC;
-		border: 1px solid #F0F0F0;
-		padding: 2px 4px;
-		text-align: left;
-		font-weight: bold;
-		color: #333;
-	}
-	table.searchResults td {
-		border: 1px solid #F0F0F0;
-		padding: 3px 5px;
-	}
-		table.searchResults td.title { width: 350px; }
 
-/* Specific content blocks */
+/* Reusabe content blocks */
+table.horizontalDetails {}
+	table.horizontalDetails th, table.horizontalDetails td {
+		vertical-align: top;
+	}
+	table.horizontalDetails th {
+		text-align: right;
+		font-weight: normal;
+	}
+
 section.wallOfText {
 	width: 100%;
 	max-width: 600px;
 }
 
-#associationsList {
-	list-style: none;
-	-webkit-column-count: 2; -webkit-column-gap: 20px; column-count: 2; column-gap: 20px;
-}
-	@media screen and (min-width: 850px) { #associationsList { -webkit-column-count: 3; column-count: 3; } }
-	#associationsList li {
-		padding: 2px 0;
-	}
 
+/* CSS for specific pages */
+
+/* Hidden  by default */
+.towerFirstPeals, .methodDetails, .methodGrid, .associationAffiliations { display: none; }
+
+
+/* Methods */
+div.methodLine td {
+	vertical-align: top;
+}
+.methodText, div.methodLine {
+	font-family: 'Droid Sans Mono', 'DejaVu Sans Mono', monospace;
+	font-size: 14px;
+	line-height: 15px;
+}
+
+
+/* Tower Maps */
 .map {
 	width: 100%;
 	height: 100%;
@@ -270,8 +244,16 @@ section.wallOfText {
 	height: 500px;
 }
 
-/* Hidden  by default */
-.towerFirstPeals, .methodDetails, .methodGrid, .associationAffiliations { display: none; }
+
+/* Associations list */
+#associationsList {
+	list-style: none;
+	-webkit-column-count: 2; -webkit-column-gap: 20px; column-count: 2; column-gap: 20px;
+}
+	@media screen and (min-width: 850px) { #associationsList { -webkit-column-count: 3; column-count: 3; } }
+	#associationsList li {
+		padding: 2px 0;
+	}
 
 
 /* Footer */
@@ -295,6 +277,5 @@ footer {
 	}
 	footer p, footer nav {
 		clear: none;
-		padding: 0 5px;
 		color: #C7C2BC;
 	}
