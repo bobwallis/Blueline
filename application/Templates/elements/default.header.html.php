@@ -19,7 +19,7 @@ namespace Blueline;
 		<link rel="search" type="application/opensearchdescription+xml" href="/services/opensearch/methods.xml" title="Methods | Blueline" />
 		<link rel="search" type="application/opensearchdescription+xml" href="/services/opensearch/towers.xml" title="Towers | Blueline" />
 		<link rel="shortcut icon" href="/favicon.ico" sizes="16x16" />
-		<!--[if lt IE 9]><script src="/scripts/html5.js"></script><![endif]-->
+		<!--[if lt IE 9]><script src="/scripts/ieCompat.js"></script><![endif]-->
 		<link rel="stylesheet" media="all" href="/styles/core.css" />
 		<link rel="stylesheet" media="print" href="/styles/print.css" />
 		<link rel="stylesheet" media="screen and (max-width:480px)" href="/styles/small-device.css" />
