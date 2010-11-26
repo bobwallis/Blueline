@@ -35,29 +35,78 @@
 					toAdd.setAttribute( attribute, attributes[attribute] );
 				}
 				return this.canvas.appendChild( toAdd );
-			},
-			
-			toBase64DataURI: function() {
-				var text = (new XMLSerializer()).serializeToString( this.canvas );
-				return 'data:image/svg+xml;base64,' + window.btoa( text );
 			}
-		
 		};
 	}
 	else if( can.VML() ) {
 		SVGorVML.prototype = {
 			type: 'VML',
-			makeCanvas: function() { return false; },
-			add: function() { return false; },
-			toBase64DataURI: function() { return false; }
+			ns: 'BluelineVML',
+			makeCanvas: function( options ) {
+				var canvas = document.createElement( this.ns+':group' );
+				canvas.setAttribute( 'id', options.id );
+				canvas.setAttribute( 'style', 'width: '+options.width+'px; height: '+options.height+'px;' );
+				canvas.setAttribute( 'coordorigin', '0,0' );
+				canvas.setAttribute( 'coordsize', options.width+','+options.height );
+				return canvas;
+			},
+			add: function( type, attributes ) {
+				var toAdd,
+					VMLAttributes = this.attributesConvert( attributes );
+				switch( type ) {
+					case 'path':
+						if( typeof( attributes.d ) == 'undefined' ) { return; }
+						toAdd = document.createElement( this.ns+':shape' );
+						break;
+					case 'circle':
+						toAdd = document.createElement( this.ns+':oval' );
+						break;
+					default:
+						return;
+				}
+				for( var attribute in VMLAttributes ) {
+					toAdd.setAttribute( attribute, attributes[attribute] );
+				}
+				return this.canvas.appendChild( toAdd );
+			},
+			attributesConvert: function( attributes ) {
+				var VMLAttributes = { style: '' };
+				if( typeof( attributes.fill ) != 'undefined' ) {
+					VMLAttributes.fillcolor = attributes.fill;
+				}
+				if( typeof( attributes.cx ) != 'undefined' && typeof( attributes.cy ) != 'undefined' && typeof( attributes.r ) != 'undefined' ) {
+					VMLAttributes.style += 'position: absolute; top: '+(cx-r)+'px; left: '+(cy-r)+'px; width: '+(r*2)+'px; height: '+(r*2)+'px;';
+				}
+				if( typeof( attributes.stroke ) != 'undefined' ) {
+					VMLAttributes.strokecolor = attributes.stroke;
+				}
+				if( typeof( attributes['stroke-width'] ) != 'undefined' ) {
+					VMLAttributes.strokeweight = attributes['stroke-width'];
+				}
+				if( typeof( attributes.d ) != 'undefined' ) {
+					VMLAttributes.path = attributes.d;
+				}
+				return VMLAttributes;
+			}
 		};
+		
+		// Add the VML namespace to the document
+		if( document.documentMode != 8 && document.namespaces && !document.namespaces[SVGorVML.prototype.ns] ) {
+			document.namespaces.add( SVGorVML.prototype.ns, 'urn:schemas-microsoft-com:vml' );
+		}
+		else if( document.documentMode == 8 ) {
+			document.writeln( '<?import namespace="'+SVGorVML.prototype.ns+'" implementation="#default#VML" ?>' );
+		}
+		// Add the VML behaviour rules to a stylesheet
+		var VMLStyle = document.createElement( 'style' );
+		document.documentElement.firstChild.insertBefore( VMLStyle, document.documentElement.firstChild.firstChild );
+		VMLStyle.styleSheet.addRule( SVGorVML.prototype.ns+'\\:*', '{ behavior: url(#default#VML); display:inline-block; }' );
 	}
 	else {
 		SVGorVML.prototype = {
 			type: 'fail',
 			makeCanvas: function() { return false; },
-			add: function() { return false; },
-			toBase64DataURI: function() { return false; }
+			add: function() { return false; }
 		};
 	}
 	
