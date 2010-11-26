@@ -12,7 +12,7 @@ if( isset( $limit ) ) :
 	}
 	$page = array(
 		'number' => max( 1, ceil( ($from+1)/$increment ) ),
-		'of' => ceil( $count / $increment )
+		'of' => max( 1, ceil( $count / $increment ) )
 	);
 	$queryString = trim( preg_replace( '/(&|^)from=.*?(&|$)/', '&', Request::queryString() ), '&' );
 ?>
