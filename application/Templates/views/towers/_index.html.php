@@ -11,14 +11,11 @@ View::element( 'default.header', array(
 ?>
 <section class="search">
 	<header>
-		<form class="sectionSearch" action="/towers/search">
-			<div>
-				<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" placeholder="Search towers" value="<?php echo isset($q)?htmlentities( $q ):''; ?>" />
-				<button type="submit" title="Search"><span class="hide">Search</span></button>
-			</div>
-			<p class="fleft"><?php echo Text::pluralise( $count, 'tower' ); ?></p>
-			<br style="clear: both;" />
-		</form>
+<?php View::element( 'sectionSearch', array(
+	'action' => '/towers/search',
+	'placeholder' => 'Search towers',
+	'extra' => Text::pluralise( $count, 'tower' )
+) ); ?>
 	</header>
 </section>
 <?php View::element( 'default.footer' ); ?>
