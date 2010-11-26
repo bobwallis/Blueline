@@ -17,7 +17,7 @@ View::element( 'sectionSearch', array(
 ) );
 ?>
 	</header>
-	<ul>
+	<ul class="searchResults">
 <?php if( $associationCount > 0 ) : ?>
 		<li>
 			<h3>Associations:</h3>
