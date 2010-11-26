@@ -455,7 +455,7 @@
 				numberOfColumns = ( pageWidth < 400 )? 1 : this.options_orig.columns;
 				leadsPerColumn = Math.ceil( this.parent.numberOfLeads/numberOfColumns );
 				var sizeTestBase = pageWidth - 30 - ( ((numberOfColumns-1) * columnPadding ) + ( numberOfColumns * columnPadding ) );
-				while( testFontSize > 9 && sizeTestBase - ( numberOfColumns * testWidth ) < 0 ) {
+				while( testFontSize > 10 && sizeTestBase - ( numberOfColumns * testWidth ) < 0 ) {
 					testText.style.fontSize = (--testFontSize)+'px';
 					testWidth = testText.offsetWidth;
 				}
@@ -465,7 +465,7 @@
 				leadsPerColumn = this.options_orig.leadsPerColumn;
 				numberOfColumns = Math.ceil( this.parent.numberOfLeads / leadsPerColumn );
 				var sizeTestBase = pageWidth - 30 - ( ((numberOfColumns-1) * columnPadding ) + ( numberOfColumns * columnPadding ) );
-				while( testFontSize > 9 && sizeTestBase - ( numberOfColumns * testWidth ) < 0 ) {
+				while( testFontSize > 10 && sizeTestBase - ( numberOfColumns * testWidth ) < 0 ) {
 					testText.style.fontSize = (--testFontSize)+'px';
 					testWidth = testText.offsetWidth;
 				}
@@ -474,11 +474,11 @@
 				// Calculate best text size/column settings by measuring the page
 				do {
 				var sizeTestBase = pageWidth - 30 - ( ((numberOfColumns-1) * columnPadding ) + ( numberOfColumns * columnPadding ) );
-					while( testFontSize > 9 && sizeTestBase - ( numberOfColumns * testWidth ) < 0 ) {
+					while( testFontSize > 10 && sizeTestBase - ( numberOfColumns * testWidth ) < 0 ) {
 						testText.style.fontSize = (--testFontSize)+'px';
 						testWidth = testText.offsetWidth;
 					}
-					if( testFontSize < 10 ) {
+					if( testFontSize < 11 ) {
 						testFontSize = 14;
 						testText.style.fontSize = '14px';
 						testWidth = testText.offsetWidth;
