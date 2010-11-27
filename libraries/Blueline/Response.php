@@ -131,6 +131,7 @@ class Response {
 		302 => 'HTTP/1.1 302 Found',
 		303 => 'HTTP/1.1 303 See Other',
 		307 => 'HTTP/1.1 307 Temporary Redirect',
+		400 => 'HTTP/1.1 400 Bad Request',
 		401 => 'HTTP/1.1 401 Unauthorized',
 		403 => 'HTTP/1.1 403 Forbidden',
 		404 => 'HTTP/1.1 404 Not Found',

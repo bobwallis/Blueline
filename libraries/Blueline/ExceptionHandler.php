@@ -2,7 +2,7 @@
 
 function exception_handler( $e ) {
 	$code = $e->getCode()?:500;
-	if( !in_array( $code, array( 403, 404, 500 ) ) ) { $code = 500; }
+	if( !in_array( $code, array( 400, 403, 404, 500 ) ) ) { $code = 500; }
 	
 	\Blueline\Response::code( $code );
 	\Blueline\Action::error( $code );
