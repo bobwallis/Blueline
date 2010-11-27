@@ -7,111 +7,123 @@ class Method extends \Blueline\Model {
 		return $this->title();
 	}
 	
-	function title() {
+	public function title() {
 		return $this->title? : '';
 	}
 	
-	function stage() {
+	public function stage() {
 		return $this->stage? : 0;
 	}
 	
-	function classification() {
+	public function stageText() {
+		return $this->stage? \Helpers\Stages::fromInt( $this->stage ) : '';
+	}
+	
+	public function classification() {
 		return $this->classification? : '';
 	}
 	
-	function notation() {
+	public function notation() {
 		return $this->notation? : '';
 	}
 	
-	function notationExpanded() {
+	public function notationExpanded() {
 		return $this->notationExpanded? : '';
 	}
 	
-	function leadHeadCode() {
+	public function leadHeadCode() {
 		return $this->leadHeadCode? : '';
 	}
 	
-	function leadHead() {
-		return $this->leadHead? : '';
+	public function leadHead() {
+		if( $this->leadHead ) {
+			return $this->leadHead;
+		}
+		elseif( $this->leadHeadCode && $this->stage ) {
+			return \Helpers\LeadHeadCodes::fromCode( $this->leadHeadCode, $this->stage )? : '';
+		}
+		else {
+			return '';
+		}
 	}
 	
-	function fchGroups() {
+	public function fchGroups() {
 		return $this->fchGroups? : '';
 	}
 	
-	function rwRef() {
+	public function rwRef() {
 		return $this->rwRef? : '';
 	}
 	
-	function bnRef() {
+	public function bnRef() {
 		return $this->bnRef? : '';
 	}
 	
-	function tdmmRef() {
+	public function tdmmRef() {
 		return $this->tdmmRef? : 0;
 	}
 	
-	function pmmRef() {
+	public function pmmRef() {
 		return $this->pmmRef? : 0;
 	}
 	
-	function lengthOfLead() {
+	public function lengthOfLead() {
 		return $this->lengthOfLead? : 0;
 	}
 	
-	function numberOfHunts() {
+	public function numberOfHunts() {
 		return $this->numberOfHunts? : 0;
 	}
 	
-	function little() {
+	public function little() {
 		return $this->little? true : false;
 	}
 	
-	function differential() {
+	public function differential() {
 		return $this->differential? true : false;
 	}
 	
-	function plain() {
+	public function plain() {
 		return $this->plain? true : false;
 	}
 	
-	function trebleDodging() {
+	public function trebleDodging() {
 		return $this->trebleDodging? true : false;
 	}
 	
-	function palindromic() {
+	public function palindromic() {
 		return $this->palindromic? true : false;
 	}
 	
-	function doubleSym() {
+	public function doubleSym() {
 		return $this->doubleSym? true : false;
 	}
 	
-	function rotational() {
+	public function rotational() {
 		return $this->rotational? true : false;
 	}
 	
-	function firstTowerbellPeal_date() {
+	public function firstTowerbellPeal_date() {
 		return $this->firstTowerbellPeal_date? : 0;
 	}
 	
-	function firstTowerbellPeal_location() {
+	public function firstTowerbellPeal_location() {
 		return $this->firstTowerbellPeal_location? : '';
 	}
 	
-	function firstTowerbellPeal_location_doveId() {
+	public function firstTowerbellPeal_location_doveId() {
 		return $this->firstTowerbellPeal_location_doveId? : '';
 	}
 	
-	function firstHandbellPeal_date() {
+	public function firstHandbellPeal_date() {
 		return $this->firstHandbellPeal_date? : 0;
 	}
 	
-	function firstHandbellPeal_location() {
+	public function firstHandbellPeal_location() {
 		return $this->firstHandbellPeal_location? : '';
 	}
 	
-	function ruleOffs() {
+	public function ruleOffs() {
 		return $this->ruleOffs? : '';
 	}
 	

@@ -32,7 +32,7 @@ foreach( $methods as $method ) : ?>
 		<table class="horizontalDetails">
 			<tr>
 				<th>Classification:</th>
-				<td><?php echo ($method->differential()?'Differential ':'') . ($method->little()?'Little ' :'') . $method->classification() .' '. Stages::fromInt( $method->stage() ); ?></td>
+				<td><?php echo ($method->differential()?'Differential ':'') . ($method->little()?'Little ' :'') . $method->classification() .' '. $method->stageText(); ?></td>
 			</tr>
 			<tr>
 				<th>Place&nbsp;Notation:</th>
