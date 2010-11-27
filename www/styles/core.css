@@ -87,6 +87,7 @@ form#topSearch {
 	-moz-border-radius: 3px;
 	border-radius: 3px;
 	border: 1px solid #E0DED9;
+	overflow: hidden;
 }
 	form#topSearch input {
 		display: block;
@@ -96,7 +97,8 @@ form#topSearch {
 	}
 		form#topSearch input:focus { border: 0; outline-width: 0; }
 	form#topSearch button {
-		float: left;
+		display: block;
+		float: right;
 		background: #FFF url(../images/search.png);
 		border: 0;
 	}

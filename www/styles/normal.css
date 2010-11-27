@@ -23,20 +23,20 @@ footer, #push { height: 25px; }
 
 /* Header search */
 form#topSearch {
-	display: block;
 	margin: 7.5px 0 7.5px 8px;
 	height: 19px;
 	width: 200px;
 }
 	form#topSearch input {
 		font-size: 11px;
-		width: 175px;
+		width: 165px;
 		height: 15px;
 		padding: 2px;
 	}
 	form#topSearch button {
 		width: 19px;
 		height: 19px;
+		margin-right: 2px;
 	}
 
 
