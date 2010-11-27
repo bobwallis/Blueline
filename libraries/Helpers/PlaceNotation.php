@@ -10,15 +10,15 @@ class PlaceNotation {
 		$notationFull = strtoupper( $notation );
 		$notationFull = str_replace( 'X', 'x', $notationFull );
 	
-		// Just in case people feel the need to use this kind of notation in their input, get rid of it here in case it causes errors later on (I'm not sure it actually will, but hey)
+		// Just in case people feel the need to use this kind of notation in their input, get rid of it here in case it causes errors later on
 		$notationFull = str_replace( array( '.x.', 'x.', '.x'), 'x', $notationFull );
 		$notationFull = str_replace( array( '.-.', '-.', '.-'), '-', $notationFull );
 	
-		// Remove anything inside brackets (arise when people copy notation from somewhere with extra information at the start or end)
-		$notationFull = preg_replace( '/[\(\[{\<].*[\)\]}\>]/', '', $notationFull );
-	
+		// Remove anything inside brackets, or appended fch details (arise when people copy notation from somewhere with extra information at the start or end)
+		$notationFull = preg_replace( array( '/[\(\[{\<].*[\)\]}\>]/', '/ FCH.*$/' ), '', $notationFull );
+		
 		// Deal with notation like 'x1x1x1-2' (After checking for this form we can assume - means x from thereafter)
-		if( preg_match_all( '/^[^-]+-[^-\.,x]+$/' , $notationFull, $match ) == 1 ) {
+		if( preg_match_all( '/^[^-]-[^-\.,x]+$/' , $notationFull, $match ) == 1 ) {
 		// if there's only one -, and it's got one change after it...
 			if( preg_match( '/([^-]+)-/', $notationFull, $match ) == 1 ) {
 				$notationFull = str_replace( $match[0], static::expandHalf( $match[1] ), $notationFull );

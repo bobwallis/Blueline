@@ -10,7 +10,7 @@ View::element( 'default.header' );
 View::element( 'sectionSearch', array(
 	'action' => '/search',
 	'placeholder' => 'Search',
-	'extra' => Text::toList( array( Text::pluralise( $associationCount, 'association' ) ), ', ', ', ' )
+	'extra' => Text::toList( array( Text::pluralise( $associationCount, 'association' ), Text::pluralise( $methodCount, 'method' ), Text::pluralise( $towerCount, 'tower' ) ) )
 ) );
 ?>
 	</header>
