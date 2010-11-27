@@ -26,9 +26,8 @@ $towers = array_map(
 );
 
 // If only one tower has been requested, and it hasn't been found, then 404
-if( count( $towers ) == 1 && $towers[0]->isEmpty() ) {
+if( count( $towers ) == 0 || empty( $towers[0] ) ) {
 	throw new Exception( 'Tower not found', 404 );
-	return;
 }
 // If the URL could be neater, then redirect to the neater version
 $tidyArgument = implode( '|', array_map( function( $t ) { return $t->doveId(); }, $towers ) );

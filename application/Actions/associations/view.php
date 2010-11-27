@@ -26,7 +26,7 @@ $associations = array_map(
 );
 
 // If only one method has been requested, and it hasn't been found, then 404
-if( count( $associations ) == 1 && $associations[0]->isEmpty() ) {
+if( count( $associations ) == 0 || empty( $associations[0] ) ) {
 	throw new Exception( 'Association not found', 404 );
 	return;
 }

@@ -10,7 +10,7 @@ if( !isset( $arguments[0] ) || empty( $arguments[0] ) ) {
 }
 // 404 if there are more than two arguments, or if the second argument is invalid
 if( isset( $arguments[2] ) || ( isset( $arguments[1] ) && !in_array( $arguments[1], array( 'grid' ) ) ) ) {
-	throw new Exception( 'Bad arguments', 404 );
+	throw new Exception( 'Bad arguments', 400 );
 }
 
 // Try and find methods matching the argument(s)
@@ -30,7 +30,7 @@ $methods = array_map(
 );
 
 // If only one method has been requested, and it hasn't been found, then 404
-if( count( $methods ) == 1 && $methods[0]->isEmpty() ) {
+if( count( $methods ) == 0 || empty( $methods[0] ) ) {
 	throw new Exception( 'Method not found', 404 );
 }
 // If the URL could be neater, then redirect to the neater version
