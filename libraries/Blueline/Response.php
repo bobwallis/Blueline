@@ -226,7 +226,7 @@ class Response {
 					Cache::set( 'dynamic', self::id().'.php',
 						"namespace Blueline;\n"
 						. self::headersSnippet()
-						. ( !empty( self::$_body )? preg_replace( array( '/^<\?php/', 'namespace .*;' ), '', View::cache() ) : '' )
+						. ( !empty( self::$_body )? preg_replace( array( '/^<\?php/', '/namespace .*;/' ), '', View::cache() ) : '' )
 					);
 					break;
 				default:

@@ -1,4 +1,7 @@
-<?php View::element( 'opensearch.header' ); ?>
+<?php
+namespace Blueline;
+
+View::element( 'opensearch.header' ); ?>
 	<ShortName>towers | Blueline</ShortName>
 	<Description>Search the towers database</Description>
 	<Attribution>Central Council of Church Bellringers</Attribution>

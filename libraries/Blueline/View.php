@@ -112,7 +112,7 @@ class View {
 	 * @param mixed $variables Variables to pass to the element
 	 */
 	public static function element( $name, $variables = array() ) {
-		$elementPath = TEMPLATE_PATH.'/elements/'.$name.'.'.Response::contentType().'.php';
+		$elementPath = TEMPLATE_PATH.'/elements/'.$name.'.'.View::contentType().'.php';
 		if( !file_exists( $elementPath ) ) {
 			throw new Exception( 'Element \''.$name.'\' not found', 404 );
 		}

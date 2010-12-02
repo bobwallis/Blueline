@@ -1,4 +1,7 @@
-<?php View::element( 'opensearch.header' ); ?>
+<?php
+namespace Blueline;
+
+View::element( 'opensearch.header' ); ?>
 	<ShortName>Associations | Blueline</ShortName>
 	<Description>Search the associations database</Description>
 	<Attribution>Central Council of Church Bellringers</Attribution>
