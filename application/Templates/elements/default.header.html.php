@@ -35,7 +35,7 @@ namespace Blueline;
 	</head>
 	<body>
 		<div id="wrapper">
-			<header id="top">
+			<header id="top" role="banner">
 				<h1><a href="/">Blueline</a></h1>
 <?php if( isset( $breadcrumb) ) : foreach( $breadcrumb as $b ) : ?>
 				<span class="headerSep">&raquo;</span>
@@ -43,11 +43,11 @@ namespace Blueline;
 <?php endforeach; endif; ?>
 <?php if( isset( $headerSearch ) ) : ?>
 				<span class="headerSep small_hide">&raquo;</span>
-				<form id="topSearch" action="<?php echo $headerSearch['action']; ?>">
+				<form id="topSearch" role="search" action="<?php echo $headerSearch['action']; ?>">
 					<input type="text" accesskey="/" name="q" spellcheck="false" autocomplete="off" <?php echo (isset($headerSearch['placeholder']))? 'placeholder="'.$headerSearch['placeholder'].'"':''; ?> />
 					<button type="submit" title="Search"><span class="hide">Search</span></button>
 				</form>
 <?php endif; ?>
 			</header>
-			<section id="content">
+			<section id="content" role="main">
 
