@@ -1,20 +1,45 @@
 <?php
 namespace Helpers;
 
+/**
+ * Functions to assist working with place notation
+ * @package Helpers
+ * @author Robert Wallis <bob.wallis@gmail.com>
+ * @license http://opensource.org/licenses/gpl-3.0.html GNU Public License
+ */
 class PlaceNotation {
 	
-	private static $notationOrder = '1234567890ETABCDFGHJKLMNPQRSUVWYZ';
+	/**
+	 * @access private
+	 */
+	private static $_notationOrder = '1234567890ETABCDFGHJKLMNPQRSUVWYZ';
 	
+	/**
+	 * Converts an integer into the bell character
+	 * @param integer $int
+	 * @return string|boolean The character on success, false if out of range
+	 */
 	public static function intToBell( $int ) {
-		if( $int < 1 || $int > strlen( self::$notationOrder ) ) { return false; }
-		return substr( self::$notationOrder, intval( $int ) - 1, 1 );
+		if( $int < 1 || $int > strlen( self::$_notationOrder ) ) { return false; }
+		return substr( self::$_notationOrder, intval( $int ) - 1, 1 );
 	}
 	
+	/**
+	 * Converts a bell character into an integer
+	 * @param string $bell
+	 * @return integer|boolean The integer on success, false if out of range
+	 */
 	public static function bellToInt( $bell ) {
-		if( !strpbrk( self::$notationOrder, $bell ) ) { return false; }
-		return strpos( self::$notationOrder, strval( $bell ) ) + 1;
+		if( strlen( $bell ) > 1 || !strpbrk( self::$_notationOrder, $bell ) ) { return false; }
+		return strpos( self::$_notationOrder, $bell ) + 1;
 	}
 	
+	/**
+	 * Trims external places from a piece of notation
+	 * @param string $piece The piece of notation
+	 * @param integer $stage The stage that the notation will be applied on
+	 * @return string The trimmed notation
+	 */
 	public static function trimExternalPlaces( $piece, $stage ) {
 		$stageIsEven = ( $stage%2 == 0 );
 		$stageNotation = self::intToBell( $stage );
@@ -28,6 +53,12 @@ class PlaceNotation {
 		return $piece;
 	}
 	
+	/**
+	 * Applies permutations successively to a start array
+	 * @param array $permutations
+	 * @param array $start
+	 * @return array All of the permutations of $start
+	 */
 	public static function apply( array $permutations, array $start ) {
 		if( !is_array( $permutations[0] ) ) {
 			return self::permute( $start, $permutations );
@@ -39,10 +70,22 @@ class PlaceNotation {
 		return $result;
 	}
 	
+	/**
+	 * Applies permutations successively to a start string
+	 * @param array $permutations
+	 * @param string $start
+	 * @return array All of the permutations of $start (as strings)
+	 */
 	public static function applyToString( array $permutations, $start ) {
 		return array_map( 'implode', self::apply( $permutations, str_split( $start ) ) );
 	}
 	
+	/**
+	 * Permutes an array by a permutation
+	 * @param array $start
+	 * @param array $permutation
+	 * @return array|boolean The new permutation, or false if the permutation fails
+	 */
 	public static function permute( array $start, array $permutation ) {
 		if( empty( $start ) || empty( $permutation ) ) {
 			return $start;
@@ -57,10 +100,22 @@ class PlaceNotation {
 		return $end;
 	}
 	
+	/**
+	 * Permutes a string by a permutation
+	 * @param string $start
+	 * @param array $permutation
+	 * @return string|boolean The new permutation, or false if the permutation fails
+	 */
 	public static function permuteString( $start, array $permutation ) {
 		return implode( self::permute( str_split( $start ), $permutation )?:array() )?:false;
 	}
 	
+	/**
+	 * Expands a shortened place notation format into a fully expanded one
+	 * @param integer $stage
+	 * @param string $notation
+	 * @return string
+	 */
 	public static function expand( $stage, $notation ) {	
 		// Tidy up letter cases
 		$notationFull = strtoupper( $notation );
@@ -111,24 +166,24 @@ class PlaceNotation {
 				}
 				// g to m is 1n
 				if( preg_match( '/^([G-M]{1})\s+(.*)$/', $notationFull, $match ) == 1 ) {
-					$notationFull = $match[2] . ' 1' . static::$notationOrder[$stage-1];
+					$notationFull = $match[2] . ' 1' . static::$_notationOrder[$stage-1];
 				}
 				// p, q is 3n post lead head (if 3n isn't the start of $match[2] then add it to the start)
 				if( preg_match( '/^([P-Q]{1})\s+(.*)$/', $notationFull, $match ) == 1 ) {
-					if( strpos( $match[2], '3' . static::$notationOrder[$stage-1] ) === 0 ) {
+					if( strpos( $match[2], '3' . static::$_notationOrder[$stage-1] ) === 0 ) {
 						$notationFull = $match[2];
 					}
 					else {
-						$notationFull = '3' . static::$notationOrder[$stage-1] . ' ' . $match[2];
+						$notationFull = '3' . static::$_notationOrder[$stage-1] . ' ' . $match[2];
 					}
 				}
 				// r, s is n post lead head (similar to above)
 				if( preg_match( '/^([R-S]{1})\s+(.*)$/', $notationFull, $match ) == 1 ) {
-					if( strpos( $match[2], static::$notationOrder[$stage-1] ) === 0 ) {
+					if( strpos( $match[2], static::$_notationOrder[$stage-1] ) === 0 ) {
 						$notationFull = $match[2];
 					}
 					else {
-						$notationFull = static::$notationOrder[$stage-1] . ' ' . $match[2];
+						$notationFull = static::$_notationOrder[$stage-1] . ' ' . $match[2];
 					}
 				}
 			}
@@ -145,16 +200,16 @@ class PlaceNotation {
 				}
 				// g to m is n post lead head (similar to above)
 				if( preg_match( '/^([G-M]{1})\s+(.*)$/', $notationFull, $match ) == 1 ) {
-					if( strpos( $match[2], static::$notationOrder[$stage-1] ) === 0 ) {
+					if( strpos( $match[2], static::$_notationOrder[$stage-1] ) === 0 ) {
 						$notationFull = $match[2];
 					}
 					else {
-						$notationFull = static::$notationOrder[$stage-1] . ' ' . $match[2];
+						$notationFull = static::$_notationOrder[$stage-1] . ' ' . $match[2];
 					}
 				}
 				// p, q is 12n
 				if( preg_match( '/^([P-Q]{1})\s+(.*)$/', $notationFull, $match ) == 1 ) {
-					$notationFull = $match[2] . ' 12' . static::$notationOrder[$stage-1];
+					$notationFull = $match[2] . ' 12' . static::$_notationOrder[$stage-1];
 				}
 				// r, s is 1
 				if( preg_match( '/^([R-S]{1})\s+(.*)$/', $notationFull, $match ) == 1 ) {
@@ -191,7 +246,7 @@ class PlaceNotation {
 		foreach( $notationExploded as &$split ) {
 			if( $stage%2 != 0 && $split == 'x' ) {
 				// If stage odd and we have an x, change to an n
-				$split = static::$notationOrder[$stage-1];
+				$split = static::$_notationOrder[$stage-1];
 			}  
 			elseif( $split == 'x' ) { continue; }
 			if( static::isEven( $split[0] ) ) {
@@ -200,7 +255,7 @@ class PlaceNotation {
 			}
 			if( ( $stage%2 != 0 && static::isEven( substr( $split, -1 ) ) ) || ( $stage%2 == 0 && !static::isEven( substr( $split, -1 ) ) ) ) {
 				// If stage odd and last bell even, or stage even and last bell odd, append an n
-				$split = $split . static::$notationOrder[$stage-1];
+				$split = $split . static::$_notationOrder[$stage-1];
 			}
 		}
 		unset( $split );
@@ -212,6 +267,11 @@ class PlaceNotation {
 		return $notationFull;
 	}
 	
+	/**
+	 * Explodes (expanded) place notation into an array of single changes (as strings)
+	 * @param string $notation
+	 * @return array
+	 */
 	public static function explode( $notation ) {
 		// Explode the notation into an array of changes
 		$notationExploded = array();
@@ -233,14 +293,20 @@ class PlaceNotation {
 		return $notationExploded;
 	}
 	
+	/**
+	 * Converts exploded place notation into an array of relation notation permutations
+	 * @param integer $stage
+	 * @param array $notationExploded
+	 * @return array
+	 */
 	public static function explodedToPermutations( $stage, $notationExploded ) {
-		// Parse the exploded form into relation notation permutations (Remembering that treble is 0, 10 is 9, and E is 10...)
+		// Remember that treble is 0, 10 is 9, and E is 10...
 		$permutations = array();
 		$i = 0;
 		foreach( $notationExploded as $piece ) {
 			// Mark all static bells
 			for( $j = 0; isset( $piece[$j] ) && $piece[$j] != 'x'; ++$j ) {
-				$pos = strpos( static::$notationOrder, $piece[$j] );
+				$pos = strpos( static::$_notationOrder, $piece[$j] );
 				$permutations[$i][$pos] = $pos;
 			}
 			// 'x' what's left
@@ -255,19 +321,31 @@ class PlaceNotation {
 	}
 	
 
-	// For ordering the numbers in place notation
-	private static function bellOrder( $a, $b ) {
+	/**
+	 * Determines ordering for $a, $b bell characters
+	 * @param string $a
+	 * @param string $b
+	 * @return integer -1, 0 or 1 as suitable for use in various PHP sorting functions
+	 */
+	public static function bellOrder( $a, $b ) {
+		$a = self::bellToInt( $a );
+		$b = self::bellToInt( $b );
 		if( $a == $b ) { return 0; }
-		elseif( strpos( static::$notationOrder, $a ) < strpos( static::$notationOrder, $b ) ) { return -1; }
+		elseif( $a < $b ) { return -1; }
 		else { return 1; }
 	}
 	
-	// For deciding if the given place is even or odd
-	private static function isEven( $place ) {
-		$stop = strlen( static::$notationOrder );
+	/**
+	 * Determines whether a $place is even
+	 * @param integer|string $place
+	 * @return boolean
+	 */
+	public static function isEven( $place ) {
+		if( is_int( $place ) ) { return ( $place%2 == 0 ); }
+		$stop = strlen( static::$_notationOrder );
 		for( $i = 0 ; $i < $stop ; $i += 2 ) {
 			// If odd return false
-			if( $place == static::$notationOrder[$i] ) {
+			if( $place == static::$_notationOrder[$i] ) {
 				return false;
 			}
 		}
@@ -275,7 +353,12 @@ class PlaceNotation {
 		return true;
 	}
 	
-	// Takes notation, and returns the long form made by rotating it about the 'half-lead' (last change). We don't worry about tidying up the ordering of bells in what we return
+	/**
+	 * Takes notation, and returns the long form made by rotating it about the 'half-lead' (last change). Doesn't do any sorting to tidy up the result
+	 * @access private
+	 * @param string $notation
+	 * @return string
+	 */
 	private static function expandHalf( $notation ) {
 		$notationReversed = strrev( $notation );
 	
@@ -298,16 +381,20 @@ class PlaceNotation {
 		return $expandNotation;
 	}
 	
-	// Corrects ordering of bells within (already parsed, expanded) notation
+	/**
+	 * Sorts the changes of $notation
+	 * @access private
+	 * @param string $notation
+	 * @return string
+	 */
 	private static function order( $notation ) {
 		// Split notation on . or x
 		$splitNotation = preg_split( '/(x|\.)/', $notation, -1, PREG_SPLIT_NO_EMPTY );
 		$splitNotationOrdered = array();
 		foreach( $splitNotation as &$section ) {
-			// Split each section into an array of characters and sort
-			$splitSection = preg_split( '//', $section, -1, PREG_SPLIT_NO_EMPTY );
+			$splitSection = str_split( $section );
 			usort( $splitSection, array( __CLASS__, 'bellOrder' ) );
-			$section = '/'.$section.'/'; // Slashes since we need to use preg_replace rather than str_replace to get a $limit parameter
+			$section = '/'.$section.'/'; // We need to use preg_replace rather than str_replace to get a $limit parameter
 			$splitNotationOrdered[] = implode( $splitSection );
 		}
 		return preg_replace( $splitNotation, $splitNotationOrdered, $notation, 1 );
