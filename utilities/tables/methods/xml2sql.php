@@ -1,8 +1,9 @@
 <?php
 // Converts the CCCBR provided XML files of method data into SQL INSERT statements, one per method
 namespace Utilities;
-require( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/LeadHeadCodes.php' );
-require( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/PlaceNotation.php' );
+
+require_once( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/LeadHeadCodes.php' );
+require_once( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/PlaceNotation.php' );
 use \Helpers\LeadHeadCodes, \Helpers\PlaceNotation;
 
 date_default_timezone_set( 'UTC' );
@@ -122,8 +123,7 @@ foreach( $files as $file ) {
 		if( $m['leadHead'] == 'NULL' && LeadHeadCodes::fromCode( trim( $m['leadHeadCode'], "'"), $m['stage'] ) !== false ) {  $m['leadHead'] = "'".sqlite_escape_string( LeadHeadCodes::fromCode( trim( $m['leadHeadCode'], "'" ), $m['stage'] ) )."'"; }
 		
 		// Parse the place notation from the format given into 'expanded' form
-		$notationHold = PlaceNotation::parse( $m['stage'], trim( $m['notation'], "'" ) );
-		$m['notationExpanded'] = "'".$notationHold['full']."'";
+		$m['notationExpanded'] = "'".PlaceNotation::expand( $m['stage'], trim( $m['notation'], "'" ) )."'";
 		
 		// Work out the title's metaphone string
 		$m['titleMetaphone'] = "'".sqlite_escape_string( metaphone( $methodData['title'][$i] ) )."'";
