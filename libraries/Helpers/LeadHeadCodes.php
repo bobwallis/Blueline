@@ -219,25 +219,27 @@ class LeadHeadCodes {
 	/**
 	 * Converts a code and stage into a lead head
 	 * @param string $code
-	 * @param integer $stage
+	 * @param integer|string $stage
 	 * @return string|boolean
 	 */
 	public static function fromCode( $code, $stage ) {
 		if( strlen( $code ) > 2 ) { return false; }
 		$code = str_replace( array_values( self::$_leadHeadCodeConversion ), array_keys( self::$_leadHeadCodeConversion ), strtolower( $code ) );
+		$stage = Stages::toInt( $stage );
 		return ( isset( self::$_leadHeadCodes[$code][$stage] ) )? self::$_leadHeadCodes[$code][$stage] : false;
 	}
 	
 	/**
 	 * Converts a lead head, stage, and lead end notation into a lead head code
 	 * @param string $leadHead
-	 * @param integer $stage
+	 * @param integer|string $stage
 	 * @param string $leadEndNotation
 	 * @param string $postLeadEndNotation
 	 * @return string|boolean
 	 */
 	public static function toCode( $leadHead, $stage, $leadEndNotation, $postLeadEndNotation = '' ) {
 		$leadHead = ( is_array( $leadHead ) )? implode( '', $leadHead ) : $leadHead;
+		$stage = Stages::toInt( $stage );
 		$stageIsEven = ( $stage%2 == 0 );
 		$stageNotation = PlaceNotation::intToBell( $stage );
 		

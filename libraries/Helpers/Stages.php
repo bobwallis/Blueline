@@ -9,6 +9,10 @@ namespace Helpers;
  */
 
 class Stages {
+
+	/**
+	 * @access private
+	 */
 	private static $_numberToStage = array(
 		3 =>	'Singles',
 		4 =>	'Minimus',
@@ -32,36 +36,36 @@ class Stages {
 		22 =>	'Twenty-two'
 	);
 	
-	public static function fromInt( $i ) {
+	/**
+	 * Converts an integer (or a valid string representation) into a string representation
+	 * @param integer|string $i
+	 * @return string|boolean
+	 */
+	public static function toString( $i ) {
 		if( is_int( $i ) || intval( $i ) != 0 ) {
 			$i = intval( $i );
-			if( isset( static::$_numberToStage[$i] ) ) { return static::$_numberToStage[$i]; }
+			if( isset( self::$_numberToStage[$i] ) ) { return self::$_numberToStage[$i]; }
+		}
+		elseif( is_string( $i ) && in_array( ucwords( strtolower( $i ) ), self::$_numberToStage ) ) {
+			return ucwords( strtolower( $i ) );
 		}
 		return false;
 	}
 	
-	public static function fromEither( $blob ) {
-		if( is_int( $blob ) || intval( $blob ) != 0 ) {
-			$blob = intval( $blob );
-			if( isset( static::$_numberToStage[$blob] ) ) {
-				return array( 'int' => $blob, 'string' => static::$_numberToStage[$blob] );
-			}
-		}
-		elseif( is_string( $blob ) ) {
-			$blob = ucwords( $blob );
-			if( array_search( $blob, static::$_numberToStage ) ) {
-				return array( 'int' => array_search( $blob, static::$_numberToStage ), 'string' => $blob );
-			}
-		}
-		return false;
-	}
-	
+	/**
+	 * Converts a string representation (or an integer) into an integer
+	 * @param string|integer $s
+	 * @return integer|boolean
+	 */
 	public static function toInt( $s ) {
 		if( is_string( $s ) ) {
-			$s = ucwords( $s );
-			if( array_search( $s, static::$_numberToStage ) ) {
-				return array_search( $s, static::$_numberToStage );
+			$s = ucwords( strtolower( $s ) );
+			if( array_search( $s, self::$_numberToStage ) ) {
+				return array_search( $s, self::$_numberToStage );
 			}
+		}
+		elseif( ( is_int( $s ) && isset( self::$_numberToStage[$s] ) ) || isset( self::$_numberToStage[intval($s)] ) ) {
+			return intval( $s );
 		}
 		return false;
 	}
