@@ -28,23 +28,52 @@ class Method extends \Blueline\Model {
 	}
 	
 	public function notationExpanded() {
+		if( !$this->notationExpanded ) {
+			$this->notationExpanded = \Helpers\PlaceNotation::expand( $this->stage, $this->notation );
+		}
 		return $this->notationExpanded? : '';
 	}
 	
+	public function notationExploded() {
+		if( !$this->notationExploded ) {
+			$this->notationExploded = \Helpers\PlaceNotation::explode( $this->notationExpanded() );
+		}
+		return $this->notationExploded? : array();
+	}
+	
+	public function notationPermutations() {
+		if( !$this->notationPermutations ) {
+			$this->notationPermutations = \Helpers\PlaceNotation::explodedToPermutations( $this->stage(), $this->notationExploded() );
+		}
+		return $this->notationPermutations? : array();
+	}
+	
+	public function firstLead() {
+		if( !$this->firstLead ) {
+			$this->firstLead = \Helpers\PlaceNotation::apply( $this->notationPermutations(), range( 1, $this->stage() ) );
+		}
+		return $this->firstLead? : array();
+	}
+	
 	public function leadHeadCode() {
+		if( !$this->leadHeadCode ) {
+			$placeNotation = $this->notationExploded();
+			$this->leadHeadCode = \Helpers\LeadHeadCodes::fromLeadHead( $this->leadHead(), $this->stage(), array_pop( $placeNotation ), array_shift( $placeNotation ) );
+		}
 		return $this->leadHeadCode? : '';
 	}
 	
 	public function leadHead() {
-		if( $this->leadHead ) {
-			return $this->leadHead;
+		if( !$this->leadHead ) {
+			if( $this->leadHeadCode && $this->stage ) {
+				$this->leadHead = \Helpers\LeadHeadCodes::fromCode( $this->leadHeadCode, $this->stage )? : '';
+			}
+			else {
+				$firstLead = $this->firstLead();
+				$this->leadHead = implode( array_pop( $firstLead ) );
+			}
 		}
-		elseif( $this->leadHeadCode && $this->stage ) {
-			return \Helpers\LeadHeadCodes::fromCode( $this->leadHeadCode, $this->stage )? : '';
-		}
-		else {
-			return '';
-		}
+		return $this->leadHead? : '';
 	}
 	
 	public function fchGroups() {
@@ -68,11 +97,29 @@ class Method extends \Blueline\Model {
 	}
 	
 	public function lengthOfLead() {
+		if( !$this->lengthOfLead ) {
+			$this->lengthOfLead = count( $this->notationExploded() );
+		}
 		return $this->lengthOfLead? : 0;
 	}
 	
 	public function numberOfHunts() {
+		if( !$this->numberOfHunts ) {
+			$this->numberOfHunts = count( $this->hunts() );
+		}
 		return $this->numberOfHunts? : 0;
+	}
+	
+	public function hunts() {
+		if( !$this->hunts ) {
+			$hunts = array();
+			$leadHead = array_map( function( $n ) { return \Helpers\PlaceNotation::bellToInt( $n ); }, str_split( $this->leadHead() ) );
+			for( $i = 0, $iLim = count( $leadHead ); $i < $iLim; ++$i ) {
+				if( ($i+1) == $leadHead[$i] ) { array_push( $hunts, $leadHead[$i] ); }
+			}
+			$this->hunts = $hunts;
+		}
+		return $this->hunts? : array();
 	}
 	
 	public function little() {

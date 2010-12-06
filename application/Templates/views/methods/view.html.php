@@ -58,7 +58,7 @@ foreach( $methods as $method ) : ?>
 <?php if( $method->numberOfHunts() ) : ?>
 			<tr>
 				<th>Hunt Bells:</th>
-				<td><?php echo $method->numberOfHunts(); ?></td>
+				<td><?php echo ( $method->numberOfHunts() > 0 )? implode( ', ', $method->hunts() ) : 'None'; ?></td>
 			</tr>
 <?php endif; ?>
 <?php if( $method->lengthOfLead() ) : ?>

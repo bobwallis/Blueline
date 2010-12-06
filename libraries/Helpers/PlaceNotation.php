@@ -5,7 +5,63 @@ class PlaceNotation {
 	
 	private static $notationOrder = '1234567890ETABCDFGHJKLMNPQRSUVWYZ';
 	
-	public static function parse( $stage, $notation ) {	
+	public static function intToBell( $int ) {
+		if( $int < 1 || $int > strlen( self::$notationOrder ) ) { return false; }
+		return substr( self::$notationOrder, intval( $int ) - 1, 1 );
+	}
+	
+	public static function bellToInt( $bell ) {
+		if( !strpbrk( self::$notationOrder, $bell ) ) { return false; }
+		return strpos( self::$notationOrder, strval( $bell ) ) + 1;
+	}
+	
+	public static function trimExternalPlaces( $piece, $stage ) {
+		$stageIsEven = ( $stage%2 == 0 );
+		$stageNotation = self::intToBell( $stage );
+		
+		if( substr( $piece, 0, 1 ) == '1' && self::isEven( substr( $piece, 1, 1 ) ) ) {
+			$piece = substr( $piece, 1 );
+		}
+		if( ( substr( $piece, -1 ) == $stageNotation ) && ( ( $stageIsEven && !self::isEven( substr( $piece, -2, 1 ) ) ) || ( !$stageIsEven && self::isEven( substr( $piece, -2, 1 ) ) ) ) ) {
+			$piece = substr( $piece, 0, -1 );
+		}
+		return $piece;
+	}
+	
+	public static function apply( array $permutations, array $start ) {
+		if( !is_array( $permutations[0] ) ) {
+			return self::permute( $start, $permutations );
+		}
+		$result = array( self::permute( $start, $permutations[0] ) );
+		for( $i = 1, $iLim = count( $permutations ); $i < $iLim; ++$i ) {
+			$result[$i] = self::permute( $result[$i-1], $permutations[$i] );
+		}
+		return $result;
+	}
+	
+	public static function applyToString( array $permutations, $start ) {
+		return array_map( 'implode', self::apply( $permutations, str_split( $start ) ) );
+	}
+	
+	public static function permute( array $start, array $permutation ) {
+		if( empty( $start ) || empty( $permutation ) ) {
+			return $start;
+		}
+		if( count( $start ) != count( $permutation ) ) {
+			return false;
+		}
+		$end = array();
+		for( $i = 0, $iLim = count( $permutation ); $i < $iLim; ++$i ) {
+			$end[$i] = $start[$permutation[$i]];
+		}
+		return $end;
+	}
+	
+	public static function permuteString( $start, array $permutation ) {
+		return implode( self::permute( str_split( $start ), $permutation )?:array() )?:false;
+	}
+	
+	public static function expand( $stage, $notation ) {	
 		// Tidy up letter cases
 		$notationFull = strtoupper( $notation );
 		$notationFull = str_replace( 'X', 'x', $notationFull );
@@ -125,13 +181,42 @@ class PlaceNotation {
 		$notationFull = preg_replace( '/\.+/', '.', $notationFull );
 		$notationFull = str_replace( array( '.x.', 'x.', '.x'), 'x', $notationFull );
 	
-		// Correct any ordering of bells in full notation that have arisen either from us mirroring things, or lazy input
+		// Correct any ordering of bells in the notation that have arisen either from us mirroring things, or lazy input
 		$notationFull = self::order( $notationFull );
+		
+		// Explode notation
+		$notationExploded = self::explode( $notationFull );
+		
+		// Add missing external places
+		foreach( $notationExploded as &$split ) {
+			if( $stage%2 != 0 && $split == 'x' ) {
+				// If stage odd and we have an x, change to an n
+				$split = static::$notationOrder[$stage-1];
+			}  
+			elseif( $split == 'x' ) { continue; }
+			if( static::isEven( $split[0] ) ) {
+				// If the first bell is even, prepend a 1
+				$split = '1' . $split;
+			}
+			if( ( $stage%2 != 0 && static::isEven( substr( $split, -1 ) ) ) || ( $stage%2 == 0 && !static::isEven( substr( $split, -1 ) ) ) ) {
+				// If stage odd and last bell even, or stage even and last bell odd, append an n
+				$split = $split . static::$notationOrder[$stage-1];
+			}
+		}
+		unset( $split );
 	
+		// Implode the exploded notation, with added external places, back into string form
+		$notationFull = implode( '.', $notationExploded );
+		$notationFull = str_replace( array( '.x.', 'x.', '.x'), 'x', $notationFull );
+	
+		return $notationFull;
+	}
+	
+	public static function explode( $notation ) {
 		// Explode the notation into an array of changes
 		$notationExploded = array();
-		$notationDotExploded = array_filter( explode( '.', $notationFull ), function( $e ) { return !empty( $e ); } );
-		if( strlen( $notationFull ) == 1 && count( $notationDotExploded ) == 1 ) { // Catch single change 'x' methods (Cross Major)
+		$notationDotExploded = array_filter( explode( '.', $notation ), function( $e ) { return !empty( $e ); } );
+		if( strlen( $notation ) == 1 && count( $notationDotExploded ) == 1 ) { // Catch single change 'x' methods (Cross Major)
 			$notationExploded = $notationDotExploded;
 		}
 		else {
@@ -145,29 +230,10 @@ class PlaceNotation {
 				if( substr( $dotSection, -1 ) != 'x' ) { array_pop( $notationExploded ); }
 			}
 		}
+		return $notationExploded;
+	}
 	
-		// Add missing external places
-		foreach( $notationExploded as &$split ) {
-			if( $stage%2 != 0 && $split == 'x' ) {
-				// If stage odd and we have an x, change to an n
-				$split = static::$notationOrder[$stage-1];
-			}  
-			elseif( $split == 'x' ) { continue; }
-			if( static::evenOdd( $split[0] ) == 1 ) {
-				// If the first bell is even, prepend a 1
-				$split = '1' . $split;
-			}
-			if( ( $stage%2 != 0 && static::evenOdd( substr( $split, -1 ) ) == 1 ) || ( $stage%2 == 0 && static::evenOdd( substr( $split, -1 ) ) == -1 ) ) {
-				// If stage odd and last bell even, or stage even and last bell odd, append an n
-				$split = $split . static::$notationOrder[$stage-1];
-			}
-		}
-		unset( $split );
-	
-		// Implode the exploded notation, with added external places, back into string form
-		$notationFull = implode( '.', $notationExploded );
-		$notationFull = str_replace( array( '.x.', 'x.', '.x'), 'x', $notationFull );
-	
+	public static function explodedToPermutations( $stage, $notationExploded ) {
 		// Parse the exploded form into relation notation permutations (Remembering that treble is 0, 10 is 9, and E is 10...)
 		$permutations = array();
 		$i = 0;
@@ -185,17 +251,9 @@ class PlaceNotation {
 			}
 			++$i;
 		}
-	
-		return array(
-			'original' => $notation,
-			'full' => $notationFull,
-			'exploded' => $notationExploded,
-			'permutations' => $permutations,
-			'length' => count( $permutations ),
-			'stage' => $stage
-		);
+		return $permutations;
 	}
-
+	
 
 	// For ordering the numbers in place notation
 	private static function bellOrder( $a, $b ) {
@@ -205,16 +263,18 @@ class PlaceNotation {
 	}
 	
 	// For deciding if the given place is even or odd
-	private static function evenOdd( $place ) {
+	private static function isEven( $place ) {
 		$stop = strlen( static::$notationOrder );
 		for( $i = 0 ; $i < $stop ; $i += 2 ) {
-			// If odd return -1
-			if( $place == static::$notationOrder[$i] ) { return -1; }
+			// If odd return false
+			if( $place == static::$notationOrder[$i] ) {
+				return false;
+			}
 		}
-		// If even return 1
-		return 1;
+		// If even return true
+		return true;
 	}
-
+	
 	// Takes notation, and returns the long form made by rotating it about the 'half-lead' (last change). We don't worry about tidying up the ordering of bells in what we return
 	private static function expandHalf( $notation ) {
 		$notationReversed = strrev( $notation );

@@ -203,9 +203,40 @@ class LeadHeadCodes {
 	);
 	
 	public static function fromCode( $code, $stage ) {
-		$code = str_replace( array_values( self::$_leadHeadCodeConversion ), array_keys( self::$_leadHeadCodeConversion ), strtolower( $code ) );
+		$code = str_replace( array_values( self::$_leadHeadCodeConversion ), array_keys( self::$_leadHeadCodeConversion ), strtolower( strval( $code ) ) );
 		$stage = Stages::fromEither( $stage );
 		return ( $stage !== false && isset( self::$_leadHeadCodes[$code][$stage['int']] ) )? self::$_leadHeadCodes[$code][$stage['int']] : false;
+	}
+	
+	public static function fromLeadHead( $leadHead, $stage, $leadEndNotation, $postLeadEndNotation = '' ) {
+		$leadHead = ( is_array( $leadHead ) )? implode( '', $leadHead ) : strval( $leadHead );
+		$stage = Stages::fromEither( $stage );
+		$stageIsEven = ( $stage['int']%2 == 0 );
+		$stageNotation = PlaceNotation::intToBell( $stage['int'] );
+		
+		$code = false;
+		foreach( array_keys( self::$_leadHeadCodes ) as $c ) {
+			if( $leadHead == self::$_leadHeadCodes[$c][$stage['int']] ) {
+				$code = $c;
+				break;
+			}
+		}
+		
+		if( ( $stageIsEven && ( $leadEndNotation == '12' || $postLeadEndNotation == '3'.$stageNotation ) ) 
+			|| ( !$stageIsEven && ( $leadEndNotation == '12'.$stageNotation || $postLeadEndNotation == '3' ) )
+			) {
+			return $code;
+		}
+		elseif( $postLeadEndNotation == $stageNotation
+			|| ( $stageIsEven && $leadEndNotation == '1'.$stageNotation )
+			|| ( !$stageIsEven && $leadEndNotation == '1' )
+			) {
+			return self::$_leadHeadCodeConversion[$code];
+		}
+		else {
+			// Irregular lead head
+			return PlaceNotation::trimExternalPlaces( $leadEndNotation, $stage['int'] ).'z';
+		}
 	}
 };
 ?>
