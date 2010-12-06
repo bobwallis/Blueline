@@ -16,7 +16,7 @@ class Method extends \Blueline\Model {
 	}
 	
 	public function stageText() {
-		return $this->stage? \Helpers\Stages::fromInt( $this->stage ) : '';
+		return $this->stage? \Helpers\Stages::toString( $this->stage ) : '';
 	}
 	
 	public function classification() {
