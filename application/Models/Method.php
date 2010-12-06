@@ -58,7 +58,7 @@ class Method extends \Blueline\Model {
 	public function leadHeadCode() {
 		if( !$this->leadHeadCode ) {
 			$placeNotation = $this->notationExploded();
-			$this->leadHeadCode = \Helpers\LeadHeadCodes::fromLeadHead( $this->leadHead(), $this->stage(), array_pop( $placeNotation ), array_shift( $placeNotation ) );
+			$this->leadHeadCode = \Helpers\LeadHeadCodes::toCode( $this->leadHead(), $this->stage(), array_pop( $placeNotation ), array_shift( $placeNotation ) );
 		}
 		return $this->leadHeadCode? : '';
 	}

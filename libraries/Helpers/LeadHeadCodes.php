@@ -1,8 +1,19 @@
 <?php
 namespace Helpers;
-require_once( dirname(__FILE__).'/Stages.php' );
+require_once( __DIR__.'/Stages.php' );
+require_once( __DIR__.'/PlaceNotation.php' );
 
+/**
+ * Functions to assist working with lead head codes
+ * @package Helpers
+ * @author Robert Wallis <bob.wallis@gmail.com>
+ * @license http://opensource.org/licenses/gpl-3.0.html GNU Public License
+ */
 class LeadHeadCodes {
+
+	/**
+	 * @access private
+	 */
 	private static $_leadHeadCodes = array(
 		'a' => array(
 			4 => '1342',
@@ -191,6 +202,9 @@ class LeadHeadCodes {
 			16 => '12TB0D8C6A4E3957'
 		)
 	);
+	/**
+	 * @access private
+	 */
 	private static $_leadHeadCodeConversion = array(
 		'a' => 'g',
 		'b' => 'h',
@@ -202,21 +216,34 @@ class LeadHeadCodes {
 		'q' => 's'
 	);
 	
+	/**
+	 * Converts a code and stage into a lead head
+	 * @param string $code
+	 * @param integer $stage
+	 * @return string|boolean
+	 */
 	public static function fromCode( $code, $stage ) {
-		$code = str_replace( array_values( self::$_leadHeadCodeConversion ), array_keys( self::$_leadHeadCodeConversion ), strtolower( strval( $code ) ) );
-		$stage = Stages::fromEither( $stage );
-		return ( $stage !== false && isset( self::$_leadHeadCodes[$code][$stage['int']] ) )? self::$_leadHeadCodes[$code][$stage['int']] : false;
+		if( strlen( $code ) > 2 ) { return false; }
+		$code = str_replace( array_values( self::$_leadHeadCodeConversion ), array_keys( self::$_leadHeadCodeConversion ), strtolower( $code ) );
+		return ( isset( self::$_leadHeadCodes[$code][$stage] ) )? self::$_leadHeadCodes[$code][$stage] : false;
 	}
 	
-	public static function fromLeadHead( $leadHead, $stage, $leadEndNotation, $postLeadEndNotation = '' ) {
-		$leadHead = ( is_array( $leadHead ) )? implode( '', $leadHead ) : strval( $leadHead );
-		$stage = Stages::fromEither( $stage );
-		$stageIsEven = ( $stage['int']%2 == 0 );
-		$stageNotation = PlaceNotation::intToBell( $stage['int'] );
+	/**
+	 * Converts a lead head, stage, and lead end notation into a lead head code
+	 * @param string $leadHead
+	 * @param integer $stage
+	 * @param string $leadEndNotation
+	 * @param string $postLeadEndNotation
+	 * @return string|boolean
+	 */
+	public static function toCode( $leadHead, $stage, $leadEndNotation, $postLeadEndNotation = '' ) {
+		$leadHead = ( is_array( $leadHead ) )? implode( '', $leadHead ) : $leadHead;
+		$stageIsEven = ( $stage%2 == 0 );
+		$stageNotation = PlaceNotation::intToBell( $stage );
 		
 		$code = false;
 		foreach( array_keys( self::$_leadHeadCodes ) as $c ) {
-			if( $leadHead == self::$_leadHeadCodes[$c][$stage['int']] ) {
+			if( isset( self::$_leadHeadCodes[$c][$stage] ) && $leadHead == self::$_leadHeadCodes[$c][$stage] ) {
 				$code = $c;
 				break;
 			}
