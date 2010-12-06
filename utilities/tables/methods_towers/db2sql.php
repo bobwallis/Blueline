@@ -14,7 +14,7 @@ $password = 'password';
 DROP TABLE IF EXISTS methods_towers;
 CREATE TABLE IF NOT EXISTS methods_towers (
   method_title varchar(255) NOT NULL UNIQUE,
-  tower_id varchar(10) NOT NULL, INDEX (tower_id)
+  tower_doveId varchar(10) NOT NULL, INDEX (tower_id)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 DROP TABLE IF EXISTS methods_towers_unmatched;
 CREATE TABLE IF NOT EXISTS methods_towers_unmatched (
@@ -143,7 +143,7 @@ try {
 		}
 		
 		if( !empty( $doveId ) ) {
-			echo 'INSERT IGNORE INTO methods_towers (method_title,tower_id) VALUES (\''.sqlite_escape_string( $method ).'\', \''.sqlite_escape_string( $doveId ).'\');'."\n";
+			echo 'INSERT IGNORE INTO methods_towers (method_title,tower_doveId) VALUES (\''.sqlite_escape_string( $method ).'\', \''.sqlite_escape_string( $doveId ).'\');'."\n";
 		}
 	}
 	$dbh = null;
