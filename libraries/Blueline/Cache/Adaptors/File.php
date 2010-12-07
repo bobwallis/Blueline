@@ -1,7 +1,12 @@
 <?php
 namespace Blueline\Cache\Adaptors;
-use \Blueline\Exception;
 
+/**
+ * An adaptor that caches using the filesystem
+ * @package Blueline
+ * @author Robert Wallis <bob.wallis@gmail.com>
+ * @license http://opensource.org/licenses/gpl-3.0.html GNU Public License
+ */
 class File implements Adaptor {
 	
 	private $_location;
@@ -9,9 +14,9 @@ class File implements Adaptor {
 	private $_canSet;
 	
 	function __construct( $options ) {
-		if( !isset( $options['location'] ) ) { throw new Exception( 'Cache location not set' ); }
+		if( !isset( $options['location'] ) ) { throw new Exception( 500, 'Cache location not set' ); }
 		$location = rtrim( $options['location'], '/' );
-		if( !is_dir( $location ) ) { throw new Exception( 'Cache location is not a directory' ); }
+		if( !is_dir( $location ) ) { throw new Exception( 500, 'Cache location is not a directory' ); }
 
 		$this->_location = $location . '/';
 		$this->_serialize = ( isset( $options['serialize'] ) )? $options['serialize'] : true;
