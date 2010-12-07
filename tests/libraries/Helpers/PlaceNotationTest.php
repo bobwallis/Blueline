@@ -50,6 +50,9 @@ class PlaceNotationTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals( '2', $this->object->trimExternalPlaces( '12', 4 ) );
 		$this->assertEquals( '3', $this->object->trimExternalPlaces( '34', 4 ) );
 		$this->assertEquals( '23', $this->object->trimExternalPlaces( '1234', 4 ) );
+		$this->assertEquals( '2', $this->object->trimExternalPlaces( '12', 6 ) );
+		$this->assertEquals( '5', $this->object->trimExternalPlaces( '56', 6 ) );
+		$this->assertEquals( '234', $this->object->trimExternalPlaces( '1234', 6 ) );
 	}
 	
 	public function testApply() {

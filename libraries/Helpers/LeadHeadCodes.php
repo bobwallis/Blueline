@@ -256,16 +256,17 @@ class LeadHeadCodes {
 			) {
 			return $code;
 		}
-		elseif( $postLeadEndNotation == $stageNotation
+		if( $postLeadEndNotation == $stageNotation
 			|| ( $stageIsEven && $leadEndNotation == '1'.$stageNotation )
 			|| ( !$stageIsEven && $leadEndNotation == '1' )
 			) {
-			return self::$_leadHeadCodeConversion[$code];
+				$code = str_replace( array_values( self::$_leadHeadCodeConversion ), array_keys( self::$_leadHeadCodeConversion ), strtolower( $code ) );
+				if( isset( self::$_leadHeadCodes[$c][$stage] ) ) {
+					return self::$_leadHeadCodeConversion[$code];
+				}
 		}
-		else {
-			// Irregular lead head
-			return PlaceNotation::trimExternalPlaces( $leadEndNotation, $stage['int'] ).'z';
-		}
+		// Irregular lead head
+		return PlaceNotation::trimExternalPlaces( $leadEndNotation, $stage ).'z';
 	}
 };
 ?>

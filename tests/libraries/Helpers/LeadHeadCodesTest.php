@@ -48,7 +48,9 @@ class LeadHeadCodesTest extends \PHPUnit_Framework_TestCase {
 			array( 'code' => 'g', 'leadHead' => '13527486', 'stage' => 8, 'leadEnd' => '18' ),
 			array( 'code' => 'q', 'leadHead' => '1426375', 'stage' => 7, 'leadEnd' => '127' ),
 			array( 'code' => 'a', 'leadHead' => '1253746', 'stage' => 7, 'leadEnd' => '1', 'postLeadEnd' => '3' ),
-			array( 'code' => 'p', 'leadHead' => '1253749608', 'stage' => 10, 'leadEnd' => 'x', 'postLeadEnd' => '30' )
+			array( 'code' => 'p', 'leadHead' => '1253749608', 'stage' => 10, 'leadEnd' => 'x', 'postLeadEnd' => '30' ),
+			array( 'code' => '5z', 'leadHead' => '256413', 'stage' => 6, 'leadEnd' => '56' ),
+			array( 'code' => 'Tz', 'leadHead' => '14523ET90786', 'stage' => 12, 'leadEnd' => '1T' )
 		) as $test ) {
 			$this->assertEquals( $test['code'], $this->object->toCode( $test['leadHead'], $test['stage'], $test['leadEnd'], isset($test['postLeadEnd'])?$test['postLeadEnd']:'' ) );
 		}
