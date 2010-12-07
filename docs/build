@@ -1,0 +1,3 @@
+#!/bin/bash
+
+phpdoc -t ./phpdoc -d ../libraries/Blueline,../libraries/Helpers -i *Test.php -dn Unpackaged -o HTML:frames:default -s -ti "Blueline Documentation" 
