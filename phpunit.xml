@@ -1,7 +1,0 @@
-<phpunit>
-  <testsuites>
-    <testsuite name="Helpers">
-      <directory>libraries/Helpers/tests</directory>
-    </testsuite>
-  </testsuites>
-</phpunit>
