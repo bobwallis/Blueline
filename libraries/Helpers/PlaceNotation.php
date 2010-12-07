@@ -129,11 +129,9 @@ class PlaceNotation {
 		$notationFull = preg_replace( array( '/[\(\[{\<].*[\)\]}\>]/', '/ FCH.*$/' ), '', $notationFull );
 		
 		// Deal with notation like 'x1x1x1-2' (After checking for this form we can assume - means x from thereafter)
-		if( preg_match_all( '/^[^-]-[^-\.,x]+$/' , $notationFull, $match ) == 1 ) {
+		if( preg_match( '/^([^-]+)-([^-\.,x]+)$/' , $notationFull, $match ) == 1 ) {
 		// if there's only one -, and it's got one change after it...
-			if( preg_match( '/([^-]+)-/', $notationFull, $match ) == 1 ) {
-				$notationFull = str_replace( $match[0], self::expandHalf( $match[1] ), $notationFull );
-			}
+			$notationFull = self::expandHalf( $match[1] ).'.'.$match[2];
 		}
 		$notationFull = str_replace( '-', 'x', $notationFull );
 	

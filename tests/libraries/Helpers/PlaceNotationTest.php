@@ -97,6 +97,7 @@ class PlaceNotationTest extends \PHPUnit_Framework_TestCase {
 		foreach( array(
 			array( 'stage' => 4, 'short' => 'x', 'expand' => 'x' ),
 			array( 'stage' => 4, 'short' => '-', 'expand' => 'x' ),
+			array( 'stage' => 6, 'short' => 'x1x1x1-2', 'expand' => 'x16x16x16x16x16x12' ),
 			array( 'stage' => 6, 'short' => '-1-1-1LH2', 'expand' => 'x16x16x16x16x16x12' ),
 			array( 'stage' => 6, 'short' => '-1-1-1 le2', 'expand' => 'x16x16x16x16x16x12' ),
 			array( 'stage' => 6, 'short' => '-1-1-1,2', 'expand' => 'x16x16x16x16x16x12' ),
