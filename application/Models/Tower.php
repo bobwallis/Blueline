@@ -44,10 +44,10 @@ class Tower extends \Blueline\Model {
 		return $this->altName? : '';
 	}
 	public function dedication() {
-		return $this->dedication? : 'Unknown';
+		return $this->dedication? : '';
 	}
 	public function bells() {
-		return $this->bells? intval( $this->bells ) : 0;
+		return $this->bells? $this->bells : 0;
 	}
 	public function weight() {
 		return $this->weight? : 0;
@@ -56,7 +56,7 @@ class Tower extends \Blueline\Model {
 		return $this->weightApprox? true : false;
 	}
 	public function weightText() {
-		return $this->weightText? : 'Unknown';
+		return $this->weightText? : '';
 	}
 	public function note( $html = false ) {
 		return $this->note? str_replace( array( '#', 'b' ), array( '&#x266f;', '&#x266d;' ), $this->note ) : ''; 
