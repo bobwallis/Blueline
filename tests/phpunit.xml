@@ -3,7 +3,6 @@
      <directory>./</directory>
    </testsuite>
   <logging>
-  	<log type="coverage-html" target="./logs/report" charset="UTF-8" yui="true" highlight="true" lowUpperBound="50" highLowerBound="80" />
-  	<log type="testdox-html" target ="./logs/testdox.html" />
+  	<log type="coverage-html" target="./report" charset="UTF-8" yui="true" highlight="true" lowUpperBound="50" highLowerBound="80" />
   </logging>
 </phpunit>
