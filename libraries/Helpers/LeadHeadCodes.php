@@ -1,7 +1,5 @@
 <?php
 namespace Helpers;
-require_once( __DIR__.'/Stages.php' );
-require_once( __DIR__.'/PlaceNotation.php' );
 
 /**
  * Functions to assist working with lead head codes
