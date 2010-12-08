@@ -1,6 +1,5 @@
 <?php
 namespace Helpers;
-require_once( '/home/bob/Projects/Blueline/libraries/Helpers/PlaceNotation.php' );
 
 /**
  * Test class for PlaceNotation.

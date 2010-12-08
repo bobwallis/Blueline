@@ -1,6 +1,5 @@
 <?php
 namespace Helpers;
-require_once( '/home/bob/Projects/Blueline/libraries/Helpers/Classifications.php' );
 
 /**
  * Test class for Classifications.
