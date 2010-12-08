@@ -12,6 +12,7 @@ class AssociationTest extends ModelHelper {
 	protected $_stringSetters = array( 'abbreviation', 'name', 'link' );
 	protected $_integerSetters = array( 'towerCount' );
 	protected $_arraySetters = array( 'affiliatedTowers' );
+	protected $_trueSetters = false;
 	
 	public function test__toString() {
 		$object = new Association;
