@@ -20,7 +20,12 @@ class Association extends \Blueline\Model {
 	}
 	
 	public function towerCount() {
-		return $this->towerCount? intval( $this->towerCount ) : 0;
+		if( !$this->towerCount ) {
+			if( $this->affiliatedTowers && ( is_array( $this->affiliatedTowers ) || $this->affiliatedTowers instanceof Countable ) ) {
+				$this->towerCount = count( $this->affiliatedTowers );
+			}
+		}
+		return $this->towerCount? : 0;
 	}
 	
 	public function affiliatedTowers() {
@@ -28,7 +33,12 @@ class Association extends \Blueline\Model {
 	}
 	
 	public function bbox() {
-		return array( 'lat_max' => $this->lat_max, 'lat_min' => $this->lat_min, 'long_max' => $this->long_max, 'long_min' => $this->long_min );
+		return array(
+			'lat_max' => $this->lat_max?:false,
+			'lat_min' => $this->lat_min?:false,
+			'long_max' => $this->long_max?:false,
+			'long_min' => $this->long_min?:false
+		);
 	}
 	
 	public function href( $absolute = false ) {
