@@ -30,9 +30,9 @@ DROP TABLE IF EXISTS methods;
 CREATE TABLE IF NOT EXISTS methods (
   stage tinyint NOT NULL, INDEX (stage),
   classification varchar(15), INDEX (classification),
-  title varchar(255) UNIQUE,
+  title varchar(511) UNIQUE,
   titleMetaphone varchar(255), INDEX (titleMetaphone),
-  notation varchar(255),
+  notation varchar(511),
   notationExpanded text,
   leadHeadCode varchar(3),
   leadHead varchar(25),
