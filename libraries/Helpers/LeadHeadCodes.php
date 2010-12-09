@@ -260,10 +260,8 @@ class LeadHeadCodes {
 					return str_replace( array_keys( self::$_leadHeadCodeConversion ), array_values( self::$_leadHeadCodeConversion ), $code );
 			}
 		}
-		else {
-			// Irregular lead head
-			return PlaceNotation::trimExternalPlaces( $leadEndNotation, $stage ).'z';
-		}
+		// Irregular lead head
+		return PlaceNotation::trimExternalPlaces( $leadEndNotation, $stage ).'z';
 	}
 };
 ?>
