@@ -58,14 +58,14 @@ class Stages {
 	 * @return integer|boolean
 	 */
 	public static function toInt( $s ) {
-		if( is_string( $s ) ) {
+		if( ( is_int( $s ) && isset( self::$_numberToStage[$s] ) ) || isset( self::$_numberToStage[intval($s)] ) ) {
+			return intval( $s );
+		}
+		elseif( is_string( $s ) ) {
 			$s = ucwords( strtolower( $s ) );
 			if( array_search( $s, self::$_numberToStage ) ) {
 				return array_search( $s, self::$_numberToStage );
 			}
-		}
-		elseif( ( is_int( $s ) && isset( self::$_numberToStage[$s] ) ) || isset( self::$_numberToStage[intval($s)] ) ) {
-			return intval( $s );
 		}
 		return false;
 	}

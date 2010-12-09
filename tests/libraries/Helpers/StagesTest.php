@@ -51,6 +51,7 @@ class StagesTest extends \PHPUnit_Framework_TestCase {
 		foreach( range( 3, 22 ) as $test ) {
 			$this->assertEquals( $test, $this->object->toInt( $this->_stages[$test] ) );
 			$this->assertEquals( $test, $this->object->toInt( $test ) );
+			$this->assertEquals( strval( $test ), $this->object->toInt( $test ) );
 		}
 		$this->assertFalse( $this->object->toInt( 'Failius' ) );
 		$this->assertFalse( $this->object->toInt( 2 ) );
@@ -59,6 +60,7 @@ class StagesTest extends \PHPUnit_Framework_TestCase {
 	public function testToString() {
 		foreach( range( 3, 22 ) as $test ) {
 			$this->assertEquals( $this->_stages[$test], $this->object->toString( $test ) );
+			$this->assertEquals( $this->_stages[$test], $this->object->toString( strval( $test ) ) );
 			$this->assertEquals( $this->_stages[$test], $this->object->toString( $this->_stages[$test] ) );
 		}
 		$this->assertFalse( $this->object->toString( 2 ) );

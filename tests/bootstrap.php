@@ -13,3 +13,15 @@ $classLoader_Blueline = new ClassLoader( 'Blueline', LIBRARY_PATH );
 $classLoader_Models = new ClassLoader( 'Models', APPLICATION_PATH );
 $classLoader_Helpers = new ClassLoader( 'Helpers', LIBRARY_PATH );
 
+// Set some configuration options
+Config::set( 'site', array( 
+	'baseURL' => 'http://testing',
+) );
+
+Config::set( 'database', array(
+	'dsn' => 'mysql:host=localhost;dbname=blueline',
+	'username' => 'blueline',
+	'password' => 'password'
+) );
+
+Database::initialise();

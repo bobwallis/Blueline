@@ -145,7 +145,7 @@ class LeadHeadCodes {
 			5 => '13524',
 			6 => '125364',
 			7 => '1352746',
-			8 => '75816243',
+			8 => '12537486',
 			9 => '135274968',
 			10 => '1253749608',
 			11 => '13527496E80',
@@ -174,7 +174,7 @@ class LeadHeadCodes {
 			5 => '14253',
 			6 => '124635',
 			7 => '1426375',
-			8 => '46872513',
+			8 => '12463857',
 			9 => '142638597',
 			10 => '1246385079',
 			11 => '142638507E9',
@@ -224,7 +224,7 @@ class LeadHeadCodes {
 		if( strlen( $code ) > 2 ) { return false; }
 		$code = str_replace( array_values( self::$_leadHeadCodeConversion ), array_keys( self::$_leadHeadCodeConversion ), strtolower( $code ) );
 		$stage = Stages::toInt( $stage );
-		return ( isset( self::$_leadHeadCodes[$code][$stage] ) )? self::$_leadHeadCodes[$code][$stage] : false;
+		return isset( self::$_leadHeadCodes[$code][$stage] )? self::$_leadHeadCodes[$code][$stage] : false;
 	}
 	
 	/**
@@ -235,7 +235,7 @@ class LeadHeadCodes {
 	 * @param string $postLeadEndNotation
 	 * @return string|boolean
 	 */
-	public static function toCode( $leadHead, $stage, $leadEndNotation, $postLeadEndNotation = '' ) {
+	public static function toCode( $leadHead, $stage, $numberOfHunts, $leadEndNotation, $postLeadEndNotation = '' ) {
 		$leadHead = ( is_array( $leadHead ) )? implode( '', $leadHead ) : $leadHead;
 		$stage = Stages::toInt( $stage );
 		$stageIsEven = ( $stage%2 == 0 );
@@ -248,23 +248,22 @@ class LeadHeadCodes {
 				break;
 			}
 		}
-		
-		if( ( $stageIsEven && ( $leadEndNotation == '12' || $postLeadEndNotation == '3'.$stageNotation ) ) 
-			|| ( !$stageIsEven && ( $leadEndNotation == '12'.$stageNotation || $postLeadEndNotation == '3' ) )
-			) {
-			return $code;
+		if( $code ) {
+			if( ( $stageIsEven && ( ( $numberOfHunts == 1 && $leadEndNotation == '12' ) || ( $numberOfHunts == 2 && $postLeadEndNotation == '3'.$stageNotation ) ) ) 
+				|| ( !$stageIsEven && ( ( $numberOfHunts == 1 && $leadEndNotation == '12'.$stageNotation ) || ( $numberOfHunts == 2 && $postLeadEndNotation == '3' ) ) )
+				) {
+				return $code;
+			}
+			elseif( ( $stageIsEven && ( ( $numberOfHunts == 1 && $leadEndNotation == '1'.$stageNotation ) || ( $numberOfHunts == 2 && $postLeadEndNotation == 'x' ) ) ) 
+				|| ( !$stageIsEven && ( ( $numberOfHunts == 1 && $leadEndNotation == '1' ) || ( $numberOfHunts == 2 && $postLeadEndNotation == $stageNotation ) ) )
+				) {
+					return str_replace( array_keys( self::$_leadHeadCodeConversion ), array_values( self::$_leadHeadCodeConversion ), $code );
+			}
 		}
-		if( $postLeadEndNotation == $stageNotation
-			|| ( $stageIsEven && $leadEndNotation == '1'.$stageNotation )
-			|| ( !$stageIsEven && $leadEndNotation == '1' )
-			) {
-				$code = str_replace( array_values( self::$_leadHeadCodeConversion ), array_keys( self::$_leadHeadCodeConversion ), strtolower( $code ) );
-				if( isset( self::$_leadHeadCodes[$c][$stage] ) ) {
-					return self::$_leadHeadCodeConversion[$code];
-				}
+		else {
+			// Irregular lead head
+			return PlaceNotation::trimExternalPlaces( $leadEndNotation, $stage ).'z';
 		}
-		// Irregular lead head
-		return PlaceNotation::trimExternalPlaces( $leadEndNotation, $stage ).'z';
 	}
 };
 ?>

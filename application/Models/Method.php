@@ -16,7 +16,12 @@ class Method extends \Blueline\Model {
 	}
 	
 	public function stageText() {
-		return $this->stage? \Helpers\Stages::toString( $this->stage ) : '';
+		if( !$this->stageText ) {
+			if( $this->stage() ) {
+				$this->stageText = \Helpers\Stages::toString( $this->stage() );
+			}
+		}
+		return $this->stageText? : '';
 	}
 	
 	public function classification() {
@@ -29,28 +34,36 @@ class Method extends \Blueline\Model {
 	
 	public function notationExpanded() {
 		if( !$this->notationExpanded ) {
-			$this->notationExpanded = \Helpers\PlaceNotation::expand( $this->stage, $this->notation );
+			if( $this->stage() && $this->notation() ) {
+				$this->notationExpanded = \Helpers\PlaceNotation::expand( $this->stage, $this->notation );
+			}
 		}
 		return $this->notationExpanded? : '';
 	}
 	
 	public function notationExploded() {
 		if( !$this->notationExploded ) {
-			$this->notationExploded = \Helpers\PlaceNotation::explode( $this->notationExpanded() );
+			if( $this->notationExpanded() ) {
+				$this->notationExploded = \Helpers\PlaceNotation::explode( $this->notationExpanded() );
+			}
 		}
 		return $this->notationExploded? : array();
 	}
 	
 	public function notationPermutations() {
 		if( !$this->notationPermutations ) {
-			$this->notationPermutations = \Helpers\PlaceNotation::explodedToPermutations( $this->stage(), $this->notationExploded() );
+			if( $this->stage() && $this->notationExploded() ) {
+				$this->notationPermutations = \Helpers\PlaceNotation::explodedToPermutations( $this->stage(), $this->notationExploded() );
+			}
 		}
 		return $this->notationPermutations? : array();
 	}
 	
 	public function firstLead() {
 		if( !$this->firstLead ) {
-			$this->firstLead = \Helpers\PlaceNotation::apply( $this->notationPermutations(), range( 1, $this->stage() ) );
+			if( $this->notation() && $this->stage() ) {
+				$this->firstLead = \Helpers\PlaceNotation::apply( $this->notationPermutations(), array_map( array( 'Helpers\PlaceNotation', 'intToBell' ), range( 1, $this->stage() ) ) );
+			}
 		}
 		return $this->firstLead? : array();
 	}
@@ -58,19 +71,23 @@ class Method extends \Blueline\Model {
 	public function leadHeadCode() {
 		if( !$this->leadHeadCode ) {
 			$placeNotation = $this->notationExploded();
-			$this->leadHeadCode = \Helpers\LeadHeadCodes::toCode( $this->leadHead(), $this->stage(), array_pop( $placeNotation ), array_shift( $placeNotation ) );
+			if( $this->leadHead() && $this->stage() && $placeNotation ) {
+				$this->leadHeadCode = \Helpers\LeadHeadCodes::toCode( $this->leadHead(), $this->stage(), $this->numberOfHunts(), array_pop( $placeNotation ), array_shift( $placeNotation ) );
+			}
 		}
 		return $this->leadHeadCode? : '';
 	}
 	
 	public function leadHead() {
 		if( !$this->leadHead ) {
-			if( $this->leadHeadCode && $this->stage ) {
-				$this->leadHead = \Helpers\LeadHeadCodes::fromCode( $this->leadHeadCode, $this->stage )? : '';
+			if( $this->leadHeadCode && $this->stage() ) { // Using leadHeadCode() could result in infinte recursion
+				$this->leadHead = \Helpers\LeadHeadCodes::fromCode( $this->leadHeadCode, $this->stage() )? : '';
 			}
 			else {
 				$firstLead = $this->firstLead();
-				$this->leadHead = implode( array_pop( $firstLead ) );
+				if( $firstLead ) {
+					$this->leadHead = implode( array_pop( $firstLead ) );
+				}
 			}
 		}
 		return $this->leadHead? : '';
@@ -98,26 +115,32 @@ class Method extends \Blueline\Model {
 	
 	public function lengthOfLead() {
 		if( !$this->lengthOfLead ) {
-			$this->lengthOfLead = count( $this->notationExploded() );
+			if( $this->notationExploded() ) {
+				$this->lengthOfLead = count( $this->notationExploded() );
+			}
 		}
 		return $this->lengthOfLead? : 0;
 	}
 	
 	public function numberOfHunts() {
 		if( !$this->numberOfHunts ) {
-			$this->numberOfHunts = count( $this->hunts() );
+			if( $this->hunts() ) {
+				$this->numberOfHunts = count( $this->hunts() );
+			}
 		}
 		return $this->numberOfHunts? : 0;
 	}
 	
 	public function hunts() {
 		if( !$this->hunts ) {
-			$hunts = array();
-			$leadHead = array_map( function( $n ) { return \Helpers\PlaceNotation::bellToInt( $n ); }, str_split( $this->leadHead() ) );
-			for( $i = 0, $iLim = count( $leadHead ); $i < $iLim; ++$i ) {
-				if( ($i+1) == $leadHead[$i] ) { array_push( $hunts, $leadHead[$i] ); }
+			if( $this->leadHead() ) {
+				$hunts = array();
+				$leadHead = array_map( function( $n ) { return \Helpers\PlaceNotation::bellToInt( $n ); }, str_split( $this->leadHead() ) );
+				for( $i = 0, $iLim = count( $leadHead ); $i < $iLim; ++$i ) {
+					if( ($i+1) == $leadHead[$i] ) { array_push( $hunts, $leadHead[$i] ); }
+				}
+				$this->hunts = $hunts;
 			}
-			$this->hunts = $hunts;
 		}
 		return $this->hunts? : array();
 	}
@@ -151,7 +174,7 @@ class Method extends \Blueline\Model {
 	}
 	
 	public function firstTowerbellPeal_date() {
-		return $this->firstTowerbellPeal_date? : 0;
+		return $this->firstTowerbellPeal_date? : '';
 	}
 	
 	public function firstTowerbellPeal_location() {
@@ -163,7 +186,7 @@ class Method extends \Blueline\Model {
 	}
 	
 	public function firstHandbellPeal_date() {
-		return $this->firstHandbellPeal_date? : 0;
+		return $this->firstHandbellPeal_date? : '';
 	}
 	
 	public function firstHandbellPeal_location() {
