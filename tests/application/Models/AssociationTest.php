@@ -40,4 +40,11 @@ class AssociationTest extends ModelHelper {
 		$object->long_min = 4;
 		$this->assertEquals( array( 'lat_max' => 1, 'lat_min' => 2, 'long_max' => 3, 'long_min' => 4 ), $object->bbox() );
 	}
+	
+	public function testHref() {
+		$object = new Association;
+		$object->abbreviation = 'test';
+		$this->assertEquals( '/associations/view/test', $object->href() );
+		$this->assertEquals( 'http://testing/associations/view/test', $object->href( true ) );
+	}
 }

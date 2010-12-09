@@ -17,4 +17,11 @@ class TowerTest extends ModelHelper {
 	public function test__toString() {
 		;
 	}
+	
+	public function testHref() {
+		$object = new Tower;
+		$object->doveId = 'test';
+		$this->assertEquals( '/towers/view/test', $object->href() );
+		$this->assertEquals( 'http://testing/towers/view/test', $object->href( true ) );
+	}
 }
