@@ -26,6 +26,7 @@ h1, h2 {
 abbr { border-bottom: 1px dotted #E0DED9; cursor: help; }
 .hide { display: none; }
 .hyphenate { text-align: justify; }
+.noliststyle { list-style: none; }
 
 /* Links */
 a {	
