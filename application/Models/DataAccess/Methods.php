@@ -18,9 +18,9 @@ class Methods extends \Blueline\DataAccess {
 				}
 				else {
 					// If the search ends in a number then use that to filter by stage
-					if( preg_match( '/ (\d{1,2})$/', $q, $matches ) && ($matches[1] > 2) && ($matches[1] < 23) ) {
-						$q = substr( $q, 0, -2 );
-						$conditions['stage ='] = intval( $matches[1] );
+					if( preg_match( '/^(.*) (\d{1,2})\s*$/', $q, $matches ) && \Helpers\Stages::toInt( $matches[2] ) != false ) {
+						$q = $matches[1];
+						$conditions['stage ='] = \Helpers\Stages::toInt( $matches[2] );
 					}
 					$conditions['title LIKE'] = '%'.self::prepareStringForLike( $q ).'%';
 				}
