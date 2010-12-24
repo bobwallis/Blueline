@@ -12,17 +12,54 @@ class Methods extends \Blueline\DataAccess {
 			$conditions = array();
 			// Title
 			if( isset( $_GET['q'] ) ) {
-				$q = $_GET['q'];
+				$q = trim( preg_replace( '/\s+/', ' ', $_GET['q'] ) );
 				if( strpos( $q, '/' ) === 0 && preg_match( '/^\/(.*)\/$/', $q, $matches ) ) {
 					$conditions['title REGEXP'] = $matches[1];
 				}
 				else {
-					// If the search ends in a number then use that to filter by stage
-					if( preg_match( '/^(.*) (\d{1,2})\s*$/', $q, $matches ) && \Helpers\Stages::toInt( $matches[2] ) != false ) {
-						$q = $matches[1];
-						$conditions['stage ='] = \Helpers\Stages::toInt( $matches[2] );
+					$qExplode = explode( ' ', $q );
+					if( count( $qExplode ) > 1 ) {
+						$last = array_pop( $qExplode );
+						// If the search ends in a number then use that to filter by stage
+						if( \Helpers\Stages::toInt( $last ) ) {
+							$conditions['stage ='] = \Helpers\Stages::toInt( $last );
+							$last = array_pop( $qExplode );
+						}
+						
+						// This will be used to test against the title
+						$q = implode( ' ', $qExplode ).($last?' '.$last:'');
+						
+						// Remove non-name parts of the search to test against nameMetaphone
+						if( \Helpers\Classifications::isClass( $last ) ) {
+							$last = array_pop( $qExplode );
+						}
+						while( 1 ) {
+							switch( $last ) {
+								case 'Little':
+									$last = array_pop( $qExplode );
+									break;
+								case 'Differential':
+									$last = array_pop( $qExplode );
+									break;
+								default:
+									break 2;
+							}
+						}
+						 // This will be used to test against nameMetaphone
+						$nameMetaphone = metaphone( implode( ' ', $qExplode ).($last?' '.$last:'') );
 					}
-					$conditions['title LIKE'] = '%'.self::prepareStringForLike( $q ).'%';
+					else {
+						$nameMetaphone = metaphone( $q );
+					}
+					if( $nameMetaphone ) {
+						$conditions['OR'] = array(
+							'title LIKE' => '%'.self::prepareStringForLike( $q ).'%',
+							'levenshteinRatio("'.$nameMetaphone.'",nameMetaphone) > 90' => null
+						);
+					}
+					else {
+						$conditions['title LIKE'] = '%'.self::prepareStringForLike( $q ).'%';
+					}
 				}
 			}
 			self::$_GETConditions = $conditions;

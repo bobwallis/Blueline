@@ -4,6 +4,7 @@ namespace Utilities;
 
 require_once( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/LeadHeadCodes.php' );
 require_once( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/PlaceNotation.php' );
+require_once( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/Stages.php' );
 use \Helpers\LeadHeadCodes, \Helpers\PlaceNotation;
 
 date_default_timezone_set( 'UTC' );
@@ -30,9 +31,9 @@ DROP TABLE IF EXISTS methods;
 CREATE TABLE IF NOT EXISTS methods (
   stage tinyint NOT NULL, INDEX (stage),
   classification varchar(15), INDEX (classification),
-  title varchar(511) UNIQUE,
-  titleMetaphone varchar(255), INDEX (titleMetaphone),
-  notation varchar(511),
+  title varchar(255) UNIQUE,
+  nameMetaphone varchar(255), INDEX (nameMetaphone),
+  notation varchar(300),
   notationExpanded text,
   leadHeadCode varchar(3),
   leadHead varchar(25),
@@ -125,8 +126,8 @@ foreach( $files as $file ) {
 		// Parse the place notation from the format given into 'expanded' form
 		$m['notationExpanded'] = "'".PlaceNotation::expand( $m['stage'], trim( $m['notation'], "'" ) )."'";
 		
-		// Work out the title's metaphone string
-		$m['titleMetaphone'] = "'".sqlite_escape_string( metaphone( $methodData['title'][$i] ) )."'";
+		// Work out the name's metaphone string
+		$m['nameMetaphone'] = isset( $methodData['name'][$i] )? "'".sqlite_escape_string( metaphone( $methodData['name'][$i] ) )."'" : 'NULL';
 		
 		// Read off the method's symmetry
 		$symmetryCheck = ( isset( $methodData['symmetry'][$i] ) )? $methodData['symmetry'][$i] : '';
@@ -172,6 +173,9 @@ function startElement( $parser, $name, $attributes ) {
 		if( $insideMethodSet && isset( $methodSetData[0] ) ) {
 			foreach( $methodSetData as $data ) { $methodData[$data[0]][$methodIndex] = $data[1]; }
 		}
+		break;
+	case 'NAME':
+		$pushTo = 'name';
 		break;
 	case 'TITLE':
 		$pushTo = 'title';
