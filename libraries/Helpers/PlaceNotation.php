@@ -63,8 +63,14 @@ class PlaceNotation {
 		if( !is_array( $permutations[0] ) ) {
 			return self::permute( $start, $permutations );
 		}
+		if( count( $permutations[0] ) != count( $start ) ) {
+			return array();
+		}
 		$result = array( self::permute( $start, $permutations[0] ) );
 		for( $i = 1, $iLim = count( $permutations ); $i < $iLim; ++$i ) {
+			if( count( $permutations[$i] ) != count( $result[$i-1] ) ) {
+				return array();
+			}
 			$result[$i] = self::permute( $result[$i-1], $permutations[$i] );
 		}
 		return $result;
@@ -155,19 +161,19 @@ class PlaceNotation {
 		$notationFull = str_replace( '+', ' ', $notationFull );
 	
 		// Convert 'a &-1-1-1' type notation into '&x1x1x1 2' type
-		if( preg_match( '/^[A-S]{1}\s/', $notationFull ) == 1 ) {
+		if( preg_match( '/^[A-S]{1}[1-9]?\s/', $notationFull ) == 1 ) {
 			// For even bell methods
-			if( ( $stage % 2 ) == 0 ) {
+			if( $stage % 2 == 0 ) {
 				// a to f is 12
-				if( preg_match( '/^([A-F]{1})\s+(.*)$/', $notationFull, $match ) == 1 ) {
+				if( preg_match( '/^([A-F]{1}[1-9]?)\s+(.*)$/', $notationFull, $match ) == 1 ) {
 					$notationFull = $match[2] . ' 12';
 				}
 				// g to m is 1n
-				if( preg_match( '/^([G-M]{1})\s+(.*)$/', $notationFull, $match ) == 1 ) {
+				elseif( preg_match( '/^([G-M]{1}[1-9]?)\s+(.*)$/', $notationFull, $match ) == 1 ) {
 					$notationFull = $match[2] . ' 1' . self::$_notationOrder[$stage-1];
 				}
 				// p, q is 3n post lead head (if 3n isn't the start of $match[2] then add it to the start)
-				if( preg_match( '/^([P-Q]{1})\s+(.*)$/', $notationFull, $match ) == 1 ) {
+				elseif( preg_match( '/^([P-Q]{1}[1-9]?)\s+(.*)$/', $notationFull, $match ) == 1 ) {
 					if( strpos( $match[2], '3' . self::$_notationOrder[$stage-1] ) === 0 ) {
 						$notationFull = $match[2];
 					}
@@ -176,7 +182,7 @@ class PlaceNotation {
 					}
 				}
 				// r, s is n post lead head (similar to above)
-				if( preg_match( '/^([R-S]{1})\s+(.*)$/', $notationFull, $match ) == 1 ) {
+				elseif( preg_match( '/^([R-S]{1}[1-9]?)\s+(.*)$/', $notationFull, $match ) == 1 ) {
 					if( strpos( $match[2], self::$_notationOrder[$stage-1] ) === 0 ) {
 						$notationFull = $match[2];
 					}
@@ -188,7 +194,7 @@ class PlaceNotation {
 			// For odd bell methods
 			else {
 				// a to f is 3 post lead head (if 3 isn't the start of $match[2] then add it to the start)
-				if( preg_match( '/^([A-F]{1})\s+(.*)$/', $notationFull, $match ) == 1 ) {
+				if( preg_match( '/^([A-F]{1}[1-9]?)\s+(.*)$/', $notationFull, $match ) == 1 ) {
 					if( strpos( $match[2], '3' ) === 0 ) {
 						$notationFull = $match[2];
 					}
@@ -197,7 +203,7 @@ class PlaceNotation {
 					}
 				}
 				// g to m is n post lead head (similar to above)
-				if( preg_match( '/^([G-M]{1})\s+(.*)$/', $notationFull, $match ) == 1 ) {
+				elseif( preg_match( '/^([G-M]{1}[1-9]?)\s+(.*)$/', $notationFull, $match ) == 1 ) {
 					if( strpos( $match[2], self::$_notationOrder[$stage-1] ) === 0 ) {
 						$notationFull = $match[2];
 					}
@@ -206,11 +212,11 @@ class PlaceNotation {
 					}
 				}
 				// p, q is 12n
-				if( preg_match( '/^([P-Q]{1})\s+(.*)$/', $notationFull, $match ) == 1 ) {
+				elseif( preg_match( '/^([P-Q]{1}[1-9]?)\s+(.*)$/', $notationFull, $match ) == 1 ) {
 					$notationFull = $match[2] . ' 12' . self::$_notationOrder[$stage-1];
 				}
 				// r, s is 1
-				if( preg_match( '/^([R-S]{1})\s+(.*)$/', $notationFull, $match ) == 1 ) {
+				elseif( preg_match( '/^([R-S]{1}[1-9]?)\s+(.*)$/', $notationFull, $match ) == 1 ) {
 					$notationFull = $match[2] . ' 1';
 				}
 			}
@@ -221,19 +227,20 @@ class PlaceNotation {
 		}
 	
 		// Deal with, '&x1x1x1 2' type notation
-		if( preg_match( '/^&(.*)\s+([^x.]*)$/', $notationFull, $match ) == 1 ) {
+		if( preg_match( '/^&(.*)\s+([^x.]+)$/', $notationFull, $match ) == 1 ) {
 			$notationFull = self::expandHalf( $match[1] ) . ' ' . $match[2];
 		}
-	
-	
+		
 		// Replace any remaining whitespace with dots
 		$notationFull = preg_replace( '/\s+/', '.', $notationFull );
+		
 		// Trim any trailing or preceding dots
 		$notationFull = trim( $notationFull, '.' );
+		
 		// Remove any unecessary doubling up of dots and x
 		$notationFull = preg_replace( '/\.+/', '.', $notationFull );
 		$notationFull = str_replace( array( '.x.', 'x.', '.x'), 'x', $notationFull );
-	
+		
 		// Correct any ordering of bells in the notation that have arisen either from us mirroring things, or lazy input
 		$notationFull = self::order( $notationFull );
 		
@@ -242,27 +249,25 @@ class PlaceNotation {
 		
 		// Add missing external places
 		foreach( $notationExploded as &$split ) {
-			if( $stage%2 != 0 && $split == 'x' ) {
-				// If stage odd and we have an x, change to an n
-				$split = self::$_notationOrder[$stage-1];
-			}  
-			elseif( $split == 'x' ) { continue; }
-			if( self::isEven( $split[0] ) ) {
+			if( $split == 'x' ) {
+				if( $stage%2 != 0 ) {
+					// If stage odd and we have an x, change to an n
+					$split = self::$_notationOrder[$stage-1];
+				}
+				continue;
+			}
+			if( self::isEven( substr( $split, 0, 1 ) ) ) {
 				// If the first bell is even, prepend a 1
 				$split = '1' . $split;
 			}
 			if( ( $stage%2 != 0 && self::isEven( substr( $split, -1 ) ) ) || ( $stage%2 == 0 && !self::isEven( substr( $split, -1 ) ) ) ) {
 				// If stage odd and last bell even, or stage even and last bell odd, append an n
-				$split = $split . self::$_notationOrder[$stage-1];
+				$split = $split . self::intToBell( $stage );
 			}
 		}
-		unset( $split );
 	
 		// Implode the exploded notation, with added external places, back into string form
-		$notationFull = implode( '.', $notationExploded );
-		$notationFull = str_replace( array( '.x.', 'x.', '.x'), 'x', $notationFull );
-	
-		return $notationFull;
+		return self::implode( $notationExploded );
 	}
 	
 	/**
@@ -271,24 +276,16 @@ class PlaceNotation {
 	 * @return array
 	 */
 	public static function explode( $notation ) {
-		// Explode the notation into an array of changes
-		$notationExploded = array();
-		$notationDotExploded = array_filter( explode( '.', $notation ), function( $e ) { return !empty( $e ); } );
-		if( strlen( $notation ) == 1 && count( $notationDotExploded ) == 1 ) { // Catch single change 'x' methods (Cross Major)
-			$notationExploded = $notationDotExploded;
-		}
-		else {
-			foreach( $notationDotExploded as $dotSection ) {
-				$notationXExploded = explode( 'x', $dotSection );
-				while( !empty( $notationXExploded ) and strlen( end( $notationXExploded ) ) === 0 ) { array_pop( $notationXExploded );} // Trim empty values from end
-				foreach( $notationXExploded as $xSection ) {
-					if( !empty( $xSection ) ) { $notationExploded[] = $xSection; }
-					$notationExploded[] = 'x';
-				}
-				if( substr( $dotSection, -1 ) != 'x' ) { array_pop( $notationExploded ); }
-			}
-		}
-		return $notationExploded;
+		return array_filter( explode( '.', str_replace( 'x', '.x.', $notation ) ) );
+	}
+	
+	/**
+	 * Implodes an array of place notation chunks into a single string
+	 * @param array $notation
+	 * @return string
+	 */
+	public static function implode( array $notation ) {
+		return str_replace( array( '.x.', 'x.', '.x'), 'x', implode( '.', $notation ) );
 	}
 	
 	/**
@@ -318,7 +315,6 @@ class PlaceNotation {
 		return $permutations;
 	}
 	
-
 	/**
 	 * Determines ordering for $a, $b bell characters
 	 * @param string $a
@@ -362,21 +358,14 @@ class PlaceNotation {
 	
 		$firstDot = ( strpos( $notationReversed, '.' ) !== FALSE )? strpos( $notationReversed, '.' ): 99999;
 		$firstX = ( strpos( $notationReversed, 'x' ) !== FALSE )? strpos( $notationReversed, 'x' ): 99999;
-		$firstDash = ( strpos( $notationReversed, '-' ) !== FALSE )? strpos( $notationReversed, '-' ): 99999;
-	
-		$firstX = min( $firstX, $firstDash );
 		$trim = 0;
-	
 		if( $firstDot < $firstX ) {
 			$trim = $firstDot + 1;
 		}
 		else {
 			$trim = ( $firstX == 0 )? 1: $firstX;
 		}
-		$expandNotation = $notation . '.' . substr( $notationReversed, $trim );
-		$expandNotation = str_replace( array( '.x.', 'x.', '.x'), 'x', $expandNotation );
-		$expandNotation =trim( $expandNotation, '.' );
-		return $expandNotation;
+		return trim( str_replace( array( '.x.', 'x.', '.x'), 'x', $notation . '.' . substr( $notationReversed, $trim ) ), '.' );
 	}
 	
 	/**
@@ -386,16 +375,15 @@ class PlaceNotation {
 	 * @return string
 	 */
 	private static function order( $notation ) {
-		// Split notation on . or x
-		$splitNotation = preg_split( '/(x|\.)/', $notation, -1, PREG_SPLIT_NO_EMPTY );
-		$splitNotationOrdered = array();
+		$splitNotation = self::explode( $notation );
 		foreach( $splitNotation as &$section ) {
-			$splitSection = str_split( $section );
-			usort( $splitSection, array( __CLASS__, 'bellOrder' ) );
-			$section = '/'.$section.'/'; // We need to use preg_replace rather than str_replace to get a $limit parameter
-			$splitNotationOrdered[] = implode( $splitSection );
+			if( $section != 'x' ) {
+				$splitSection = str_split( $section );
+				usort( $splitSection, array( __CLASS__, 'bellOrder' ) );
+				$section = implode( $splitSection );
+			}
 		}
-		return preg_replace( $splitNotation, $splitNotationOrdered, $notation, 1 );
+		return self::implode( $splitNotation );
 	}
 };
 

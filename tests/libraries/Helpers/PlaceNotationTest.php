@@ -55,7 +55,7 @@ class PlaceNotationTest extends \PHPUnit_Framework_TestCase {
 	}
 	
 	public function testApply() {
-	
+		$this->assertEquals( array( 1, 0, 3, 2 ), $this->object->apply( array( 1, 0, 3, 2 ), array( 0, 1, 2, 3 ) ) );
 	}
 	
 	public function testPermute() {
@@ -96,9 +96,11 @@ class PlaceNotationTest extends \PHPUnit_Framework_TestCase {
 		foreach( array(
 			array( 'stage' => 4, 'short' => 'x', 'expand' => 'x' ),
 			array( 'stage' => 4, 'short' => '-', 'expand' => 'x' ),
+			array( 'stage' => 5, 'short' => '3,123.1.123.5.123.1.123.5.123.1', 'expand' => '3.123.1.123.5.123.1.123.5.123.1.123.5.123.1.123.5.123.1.123' ),
 			array( 'stage' => 6, 'short' => 'x1x1x1-2', 'expand' => 'x16x16x16x16x16x12' ),
 			array( 'stage' => 6, 'short' => '-1-1-1LH2', 'expand' => 'x16x16x16x16x16x12' ),
 			array( 'stage' => 6, 'short' => '-1-1-1 le2', 'expand' => 'x16x16x16x16x16x12' ),
+			array( 'stage' => 6, 'short' => '-1-1- hl 1 le 2', 'expand' => 'x16x16x16x16x16x12' ),
 			array( 'stage' => 6, 'short' => '-1-1-1,2', 'expand' => 'x16x16x16x16x16x12' ),
 			array( 'stage' => 6, 'short' => '&x1x1x1 2', 'expand' => 'x16x16x16x16x16x12' ),
 			array( 'stage' => 6, 'short' => 'a &-1-1-1', 'expand' => 'x16x16x16x16x16x12' ),
@@ -109,7 +111,11 @@ class PlaceNotationTest extends \PHPUnit_Framework_TestCase {
 	}
 	
 	public function testExplode() {
+		$this->assertEquals( array( '12', '14', 'x', '16' ), $this->object->explode( '12.14x16' ) );
+	}
 	
+	public function testImplode() {
+		$this->assertEquals( '12.14x16', $this->object->implode( array( '12', '14', 'x', '16' ) ) );
 	}
 	
 	public function testExplodedToPermutations() {

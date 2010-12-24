@@ -4,8 +4,9 @@ table { border-collapse: collapse; border-spacing: 0; border: 0; }
 fieldset, img { border: 0; }
 input, textarea, select { font-family: inherit; font-size: inherit; font-weight: inherit; }
 input,textarea,select { *font-size: 100%; }
-button{ width:auto; overflow:visible; }
-header, footer, section, svg{ display: block; }
+input[type="search"] { -webkit-appearance: textfield; }
+button { width: auto; overflow: visible; }
+header, footer, section, svg { display: block; }
 
 /* Basic color and font definitions */
 html, body {
@@ -200,8 +201,41 @@ div.paging {
 		color: #000;
 	}
 
+/* Form elements */
+section form {
+	margin: 0 0 15px 15px;
+}
+table.formTable {
 
-/* Reusabe content blocks */
+}
+	table.formTable th, table.formTable td {
+		vertical-align: middle;
+		padding: 2px 5px;
+	}
+	table.formTable th {
+		text-align: right;
+		font-weight: normal;
+	}
+input.longText, input.tinyText {
+	border: 1px solid #CCC;
+	border-radius: 3px;
+	padding: 2px;
+}
+input.longText {
+	width: 250px;
+}
+input.tinyText {
+	width: 40px;
+}
+	input.longText:focus, input.tinyText:focus {
+		border-color: #F60;
+	}
+input.submit {
+	padding: 1px 3px;
+}
+
+
+/* A table with data in rows, titles on left and right aligned */
 table.horizontalDetails {}
 	table.horizontalDetails th, table.horizontalDetails td {
 		vertical-align: top;
