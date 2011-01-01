@@ -197,6 +197,36 @@ class Method extends \Blueline\Model {
 		return $this->ruleOffs? : '';
 	}
 	
+	public function calls() {
+		if( !$this->calls ) {
+			if( !$this->differential() && $this->stage() > 4 ) {
+				$leadEndChange = array_pop( $this->notationExploded() );
+				$postLeadEndChange = array_shift( $this->notationExploded() );
+				switch( $this->numberOfHunts() ) {
+				case 1:
+					if( $leadEndChange == '12' ) {
+						$this->calls = serialize( array( 'Bob' => '14::', 'Single' => '1234::' ) );
+					}
+					elseif( $leadEndChange == '1'.\Helpers\PlaceNotation::intToBell( $this->stage() ) ) {
+						if( $this->leadHeadCode() == 'm' ) {
+							$this->calls = serialize( array( 'Bob' => '14::', 'Single' => '1234::' ) );
+						}
+						else {
+							$this->calls = serialize( array( 'Bob' => '1'.\Helpers\PlaceNotation::intToBell( $this->stage() - 2 ).'::', 'Single' => '1'.\Helpers\PlaceNotation::intToBell( $this->stage() - 2 ).\Helpers\PlaceNotation::intToBell( $this->stage() - 1 ).\Helpers\PlaceNotation::intToBell( $this->stage() ).'::' ) );
+						}
+					}
+					break;
+				case 2:
+					// If it looks like Grandsire, give it Grandsire bobs and singles
+					if( $leadEndChange == '1' && $postLeadEndChange == '3' ) {
+						$this->calls = serialize( array( 'Bob' => '3::-1', 'Single' => '3.23::-1' ) );
+					}
+				}
+			}
+		}
+		return unserialize( $this->calls )? : array();
+	}
+	
 	public function href( $absolute = false ) {
 		return ($absolute?Config::get( 'site.baseURL' ):'').'/methods/view/'.urlencode( str_replace( ' ', '_', $this->title() ) );
 	}
