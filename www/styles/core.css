@@ -267,6 +267,10 @@ div.methodLine td {
 	line-height: 15px;
 }
 
+.methodGrid table {
+	float: left;
+	margin: 0 20px 0 10px;
+}
 
 /* Tower Maps */
 .map {

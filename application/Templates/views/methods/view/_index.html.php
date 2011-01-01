@@ -91,6 +91,7 @@ foreach( $methods as $method ) : ?>
 			stage: <?php echo intval( $method->stage() ); ?>,
 			notation: <?php echo json_encode( $method->notationExpanded() ); ?>,
 			leadHead: <?php echo json_encode( $method->leadHead() ); ?>,
+			calls: <?php echo json_encode( $method->calls() ); ?>,
 			options_line: {
 				container: 'content_line<?php echo $i; ?>'
 <?php if( $method->ruleOffs() ) : $ruleOffs = explode( ':', $method->ruleOffs() ); ?>

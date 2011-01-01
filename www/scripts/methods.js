@@ -271,6 +271,25 @@
 		}
 		return cycles;
 	};
+	
+	
+	var pathString = function( position, notation, xPlus, yPlus, repeats, flicks ) {
+		if( !xPlus ) { xPlus = 1; }
+		if( !yPlus ) { yPlus = 1; }
+		var newPosition,
+			path = 'm'+((position*xPlus)+(xPlus/2))+','+(yPlus/2)+'l',
+			i = 0, iMod = notation.length, iLim = repeats*iMod;
+		for( ; i < iLim; i++ ) {
+			newPosition = notation[i%iMod].indexOf( position );
+			path += ((newPosition-position)*xPlus)+','+yPlus+' ';
+			position = newPosition;
+		}
+		newPosition = notation[i%iMod].indexOf( position );
+		if( flicks ) {
+			path += (((newPosition-position)*xPlus)/4)+','+(yPlus/4)+' ';
+		}
+		return path;
+	};
 
 	// Shared variables
 	var $head = document.getElementsByTagName( 'head' )[0],
@@ -314,6 +333,8 @@
 		this.stage = parseInt( options.stage, 10 );
 		this.rounds = roundsRow( this.stage );
 		this.notation = parseNotation( options.notation, this.stage );
+		this.notationText = options.notation;
+		this.notationExploded = this.notationText.replace( /x/g, '.x.' ).split( '.' ).filter( function( e ) { return e; } );
 		this.leadHead = ( typeof( options.leadHead ) == 'string' )? makeRow( options.leadHead ) : getLeadHead( this.notation, this.stage );
 		this.workGroups = getCycles( this.leadHead );
 		this.leadHeads = [this.rounds];
@@ -579,9 +600,7 @@
 				i = 0, iLim = this.options.columns,
 				upTo, leadsToDraw,
 				j = 0, jLim = this.parent.stage,
-				hMultiplier = this.dimensions.row.x + (2*this.options.columnPadding) + this.options.placeStartPadding,
-				hPadding = this.dimensions.bell.x / 2,
-				vPadding = this.dimensions.row.y / 2;
+				hMultiplier = this.dimensions.row.x + (2*this.options.columnPadding) + this.options.placeStartPadding;
 			// We'll build a single long path for each different path style
 			for( ; j < jLim; ++j ) {
 				if( typeof( paths[this.colours[j].line] ) == 'undefined' ) {
@@ -595,7 +614,7 @@
 				leadsToDraw = (upTo%this.options.leadsPerColumn == 0)? this.options.leadsPerColumn : upTo%this.options.leadsPerColumn;
 				for( j = 0; j < jLim; ++j ) {
 					if( this.colours[j].line != 'transparent' ) {
-						paths[this.colours[j].line] += 'M'+((i*hMultiplier)+hPadding)+','+vPadding+' '+this.pathString( this.parent.leadHeads[i*this.options.leadsPerColumn].indexOf( j ), leadsToDraw, this.parent.notation );
+						paths[this.colours[j].line] += 'M'+(i*hMultiplier)+',0' + pathString( this.parent.leadHeads[i*this.options.leadsPerColumn].indexOf( j ), this.parent.notation, this.dimensions.bell.x, this.dimensions.bell.y, leadsToDraw, true );
 					}
 				}
 			}
@@ -626,21 +645,6 @@
 					} );
 				}
 			}
-		},
-		pathString: function( position, leads, notation ) {
-			var xPlus = this.dimensions.bell.x,
-				yPlus = this.dimensions.row.y,
-				newPosition,
-				path = 'm'+(position*xPlus)+',0l',
-				i = 0, iMod = notation.length, iLim = leads*iMod;
-			for( ; i < iLim; i++ ) {
-				newPosition = notation[i%iMod].indexOf( position );
-				path += ((newPosition-position)*xPlus)+','+yPlus+' ';
-				position = newPosition;
-			}
-			newPosition = notation[i%iMod].indexOf( position );
-			path += (((newPosition-position)*xPlus)/4)+','+(yPlus/4)+' ';
-			return path;
 		},
 	
 		drawRuleOffs: function() {
@@ -734,6 +738,10 @@
 		}
 	};
 	
+	
+	
+	
+	
 	var MethodGrid = function( parent, options ) {
 		this.parent = parent;
 		this.options = options;
@@ -744,95 +752,154 @@
 		if( typeof( this.container.nodeName ) == 'undefined' ) { return false; }
 		
 		// Set up options
-		if( typeof( options.notation ) == 'undefined' ) {
+		if( typeof( options.showNotation ) == 'undefined' ) {
 			// Show place notation by default
-			this.options.notation = true;
+			this.options.showNotation = true;
 		}
 		if( typeof( options.colours ) == 'undefined' ) {
 			// Default colours array
 			this.options.colours = ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'];
 		}
-		if( typeof( options.width ) == 'undefined' ) {
-			// Default width of 12px per bell
-			this.options.width = this.parent.stage * 12;
-		}
-		if( typeof( options.height ) == 'undefined' ) {
-			// Default height of 15px per row
-			this.options.height = this.parent.notation.length * 15;
+		
+		// Calculate new notation for calls
+		this.calls = [];
+		if( typeof( this.parent.options.calls ) != 'undefined' && this.parent.options.calls.length !== 0 && !_.isEmpty( this.parent.options.calls ) ) {
+			for( var call in this.parent.options.calls ) {
+				var callInfo = this.parent.options.calls[call].split( ':', 3 );
+				if( callInfo[1] == '' ) { callInfo[1] = this.parent.notation.length; } else { callInfo[1] = parseInt( callInfo[1], 10 ); }
+				if( callInfo[2] == '' ) { callInfo[2] = 0; } else { callInfo[2] = parseInt( callInfo[2], 10 ); }
+				// Get a block of notation to work with
+				for( var notationExploded = []; notationExploded.length < callInfo[1]*2 || notationExploded.length < 8; notationExploded = notationExploded.concat( this.parent.notationExploded ) );
+				// Explode the call notation (Grandsire singles, for example, span more than one change)
+				var justCallNotationExploded = callInfo[0].replace( /x/g, '.x.' ).split( '.' ).filter( function( e ) { return e; } );
+				// Insert the call notation into the first avaliable slot in the notation block
+				for( var i = 0; i < justCallNotationExploded.length; i++ ) {
+					notationExploded[(callInfo[1]-1)+callInfo[2]+i] = justCallNotationExploded[i];
+				}
+				// Add more notation to the block to make sure there's enough there to slice out a large section
+				for( var padding = 0; (callInfo[1]+callInfo[2]+padding)-6 < 0; notationExploded = this.parent.notationExploded.concat( notationExploded ), padding += this.parent.notationExploded.length );
+				// Slice out a section to display
+				var callNotationExploded = notationExploded.slice( (callInfo[1]+callInfo[2]+padding)-6, (callInfo[1]+callInfo[2]+padding)+5 );
+				// Implode the notation back again
+				var callNotation = callNotationExploded.join( '.' ).replace( /\.?x\.?/g, 'x' );
+				this.calls.push( {
+					id: call.replace( ' ', '_' ).replace( /[^A-Za-z0-9_]/, '' ).toLowerCase(),
+					title: call,
+					notation: parseNotation( callNotation, this.parent.stage ),
+					notationText: callNotation,
+					highlight: { from: 6, to: 5+justCallNotationExploded.length }
+				} );
+			}
 		}
 		
 		// Calculate bell and row dimensions for use later
 		this.dimensions = {
-			bell: { x: this.options.width/this.parent.stage, y: this.options.height/this.parent.notation.length },
-			row: { x: this.options.width, y: this.options.height/this.parent.notation.length }
+			bell: { x: 12, y: 15 },
+			row: { x: 12*this.parent.stage, y: 15 }
 		};
 	};
+	
+	// Private methods for MethodGrid
+	var gridTable = function( id, paper, notation, highlightRows, title ) {
+		var grid = document.createElement( 'table' ),
+			titleRow = document.createElement( 'tr' )
+			gridRow = document.createElement( 'tr' );
+		grid.id = id;
+		if( typeof( notation ) == 'string' ) {
+			gridRow.appendChild( notationCell( notation, highlightRows ) );
+		}
+		gridRow.appendChild( paperCell( paper ) );
+		if( typeof( title ) == 'string' ) {
+			titleRow.appendChild( titleCell( title ) );
+			grid.appendChild( titleRow );
+		}
+		grid.appendChild( gridRow );
+		return grid;
+	};
+	var titleCell = function( title ) {
+		var cell = document.createElement( 'td' );
+		cell.className = 'titleCell';
+		cell.colSpan = 2;
+		cell.innerHTML = title+':';
+		return cell;
+	};
+	var notationCell = function( notation, highlight ) {
+		var notationExploded = notation.replace( /x/g, '.x.' ).split( '.' ).filter( function( e ) { return e; } );
+		if( typeof( highlight ) != 'undefined' ) {
+			if( typeof( highlight ) == 'number' ) {
+				notationExploded[highlight-1] = '<strong>'+notationExploded[highlight-1]+'</strong>';
+			}
+			else if( typeof( highlight.from ) == 'number' && typeof( highlight.to ) == 'number' ) {
+				for( var i = highlight.from; i <= highlight.to; ++i ) {
+				notationExploded[i-1] = '<strong>'+notationExploded[i-1]+'</strong>';
+				}
+			}
+		}
+		var cell = document.createElement( 'td' );
+		cell.className = 'notationCell';
+		cell.innerHTML = notationExploded.join( '<br />' );
+		return cell;
+	};
+	var paperCell = function( paper ) {
+		var cell = document.createElement( 'td' );
+		cell.className = 'paperCell';
+		cell.appendChild( paper.canvas );
+		return cell;
+	}
+	
+	// Public methods for MethodGrid
 	MethodGrid.prototype = {
 		draw: function() {
-			// Create grid canvas
-			this.paper = new SVGorVML( {
-				id: 'methodGridCanvas_'+this.parent.id,
-				width: this.dimensions.row.x,
-				height: this.dimensions.row.y*( this.parent.notation.length+1 )
+			// Create a grid for the whole lead
+			this.leadGrid = this.createGrid( {
+				id: 'methodGrid_'+this.parent.id+'_lead',
+				notation: this.parent.notation,
+				notationText: this.parent.options.notation,
+				showNotation: this.options.showNotation,
+				huntPositions: this.parent.huntBells
 			} );
-			if( this.paper.type != 'fail' ) {
-				this.drawGrid();
-				// Either add the canvas to the page in a table with the place notation
-				if( this.options.notation === true ) {
-					var grid = document.createElement( 'table' ),
-						gridRow = document.createElement( 'tr' );
-					grid.id = 'methodGrid_'+this.parent.id;
-					gridRow.appendChild( this.notationCell() );
-					gridRow.appendChild( this.paperCell() );
-					grid.appendChild( gridRow );
-					this.container.appendChild( grid );
-				}
-				// Or just add the canvas to the page
-				else {
-					this.paper.canvas.id = 'methodGrid_'+this.parent.id;
-					this.container.appendChild( this.paper.canvas );
-				}
-			}
-		},
-	
-		notationCell: function() {
-			var notationCell = document.createElement( 'td' );
-			notationCell.className = 'notationCell';
-			notationCell.innerHTML = this.parent.options.notation.replace( /\./g, '<br />' ).replace( /x/g, '<br />x<br />' ).replace( /^<br \/>/, '' );
-			return notationCell;
-		},
-		paperCell: function() {
-			var paperCell = document.createElement( 'td' );
-			paperCell.appendChild( this.paper.canvas );
-			return paperCell;
-		},
-	
-		drawGrid: function( paper ) {
-			var i = this.parent.stage,
-				colour = -1;
-				colourMod = this.options.colours.length;
-			while( i-- ) {
-				this.paper.add( 'path', {
-					'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', fill: 'none',
-					stroke: ( this.parent.huntBells.indexOf( i ) != -1 )? '#D11' : this.options.colours[(++colour)%colourMod],
-					d: this.pathString( i )
+			this.container.appendChild( this.leadGrid );
+			
+			// Create grids for calls
+			this.callGrids = [];
+			this.calls.forEach( function( call ) {
+				var callGrid = this.createGrid( {
+					id: 'methodGrid_'+this.parent.id+'_'+call.id,
+					title: call.title,
+					notation: call.notation,
+					notationText: call.notationText,
+					highlight: call.highlight,
+					showNotation: this.options.showNotation
 				} );
-			}
+				this.container.appendChild( callGrid );
+				this.callGrids.push( callGrid );
+			}, this );
 		},
-	
-		pathString: function( position ) {
-			var notation = this.parent.notation,
-				xPlus = this.dimensions.bell.x,
-				yPlus = this.dimensions.row.y,
-				newPosition,
-				path = 'M'+((position*this.dimensions.bell.x)+(this.dimensions.bell.x/2))+','+(this.dimensions.row.y/2)+'l',
-				i = 0, iLim = notation.length;
-			for( ; i < iLim; i++ ) {
-				newPosition = notation[i].indexOf( position );
-				path += ((newPosition-position)*xPlus)+','+yPlus+' ';
-				position = newPosition;
+		
+		createGrid: function( options ) {
+			var paper = new SVGorVML( {
+				id: options.id+'_paper',
+				width: this.dimensions.row.x,
+				height: this.dimensions.row.y*( options.notation.length+1 )
+			} ),
+				huntPositions = ( typeof( options.huntPositions ) != 'undefined' )? options.huntPositions : [];
+			
+			if( paper.type != 'fail' ) {
+				var i = this.parent.stage,
+					colour = -1;
+					colourMod = this.options.colours.length;
+				while( i-- ) {
+					paper.add( 'path', {
+						'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', fill: 'none',
+						stroke: (huntPositions.indexOf( i ) != -1)? '#D11' : this.options.colours[(++colour)%colourMod],
+						d: 'M0,0' + pathString( i, options.notation, this.dimensions.bell.x, this.dimensions.bell.y, 1, false )
+					} );
+				}
+				return gridTable( options.id, paper, ( typeof( options.showNotation ) != 'undefined' && options.showNotation === true )? options.notationText : null, options.highlight, ( typeof( options.title ) == 'string' )? options.title : null );
 			}
-			return path;
+			else {
+				return false;
+			}
 		}
 	};
 

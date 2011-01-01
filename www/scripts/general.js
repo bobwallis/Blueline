@@ -23,6 +23,15 @@
 	
 	// A set of helper functions for making code writing easier
 	var helpers = {
+		// Test whether an object is empty
+		isEmpty: function( e ) {
+			for( var prop in e ) {
+				if( e.hasOwnProperty( prop ) ) {
+					return false;
+				}
+			}
+			return true;
+		},
 		// Returns the target of an event object e
 		eventTarget: function( e ) {
 			if( e.target ) { return e.target; }
