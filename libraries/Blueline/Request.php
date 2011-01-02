@@ -34,7 +34,7 @@ class Request {
 	 */
 	public static function path() {
 		if( self::$_path === false ) {
-			self::$_path = preg_replace( '/\..+$/', '', parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ) );
+			self::$_path = preg_replace( '/'.self::extension().'$/', '', parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ) );
 		}
 		return self::$_path;
 	}
@@ -49,7 +49,14 @@ class Request {
 	 */
 	public static function extension() {
 		if( self::$_extension === false ) {
-			self::$_extension = preg_replace( '/^.+?(\.|$)/', '', parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ) );
+			$urlPath = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+			$lastDot = strrpos( $urlPath, '.' );
+			if( $lastDot !== false ) {
+				$extension = substr( $urlPath, $lastDot + 1 );
+				if( preg_match( '/^[a-z0-9]+$/', $extension ) ) {
+					self::$_extension = $extension;
+				}
+			}
 		}
 		return self::$_extension;
 	}
