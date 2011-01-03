@@ -21,10 +21,10 @@ namespace Blueline;
 		<link rel="shortcut icon" href="/favicon.ico" sizes="16x16" />
 		<!--[if lt IE 9]><script src="/scripts/ieCompat.js"></script><![endif]-->
 		<link rel="stylesheet" media="all" href="/styles/core.css" />
-		<link rel="stylesheet" media="print" href="/styles/print.css" />
-		<link rel="stylesheet" media="screen" href="/styles/normal.css" />
 		<link rel="stylesheet" media="handheld, screen and (max-width:480px)" href="/styles/small-device.css" />
+		<link rel="stylesheet" media="screen" href="/styles/normal.css" />
 		<!--[if lt IE 9]><link rel="stylesheet" media="screen" href="/styles/normal.css" /><![endif]-->
+		<link rel="stylesheet" media="print" href="/styles/print.css" />
 		<noscript><link rel="stylesheet" media="all" href="/styles/noscript.css" /></noscript>
 <?php if( isset( $scripts ) ): foreach( $scripts as $script ) : ?>
 		<script src="<?php echo $script; ?>"></script>
