@@ -92,11 +92,11 @@ foreach( $methods as $method ) : ?>
 			notation: <?php echo json_encode( $method->notationExpanded() ); ?>,
 			leadHead: <?php echo json_encode( $method->leadHead() ); ?>,
 			calls: <?php echo json_encode( $method->calls() ); ?>,
+<?php if( $method->ruleOffs() ) : ?>
+			ruleOffs: <?php echo json_encode( $method->ruleOffs() ); ?>,
+<?php endif; ?>
 			options_line: {
 				container: 'content_line<?php echo $i; ?>'
-<?php if( $method->ruleOffs() ) : $ruleOffs = explode( ':', $method->ruleOffs() ); ?>
-				,ruleOffs: { every: <?php echo $ruleOffs[0]; ?>, from: <?php echo $ruleOffs[1]; ?>, color: '#999' }
-<?php endif; ?>
 			},
 			options_grid: {
 				container: 'content_grid<?php echo $i; ?>'

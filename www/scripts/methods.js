@@ -117,6 +117,18 @@
 
 ( function( window, undefined ) {
 	// Helper functions
+	
+	// Repeats an array to make an array of a given length
+	var repeatArrayToLength = function( array, length ) {
+		var array2 = new Array( length ),
+			i = -1,
+			iMod = array.length;
+		while( ++i < length ) {
+			array2[i] = array[i%iMod];
+		}
+		return array2;
+	};
+	
 	// Checks if two row arrays are equal
 	var rowsEqual = function( row1, row2 ) {
 		var i = row1.length;
@@ -178,13 +190,27 @@
 
 	// Permute a row array by a cycle permutation
 	var permute = function( row, permutation ) {
-		var i = permutation.length, permuted = new Array( i );
-		while( i-- ) {
-			permuted[i] = row[permutation[i]];
+		var i = permutation.length,
+			j = row.length,
+			permuted = new Array( j );
+		while( j-- > i ) {
+			permuted[j] = row[j];
 		}
+		do {
+			permuted[j] = row[permutation[j]];
+		} while( j-- );
 		return permuted;
 	};
-
+	
+	// Returns the position of bell after applying the given permutations to start
+	var permutes = function( start, permutations ) {
+		var row = start;
+		for( var i = 0, iLim = permutations.length; i < iLim; ++i ) {
+			row = permute( row, permutations[i] );
+		}
+		return row;
+	};
+	
 	// Returns a row containing rounds of a given stage
 	var roundsRow = function( stage ) {
 		var row = new Array( stage ), i = stage;
@@ -202,11 +228,21 @@
 		}
 		return stationary;
 	};
-
+	
+	// Explodes notation into an array
+	var explodeNotation = function( notation ) {
+		return ( typeof( notation ) == 'string' )? notation.replace( /x/gi, '.x.' ).split( '.' ).filter( function( e ) { return e !== ''; } ) : notation;
+	};
+	
+	// Implodes a notation array to a string
+	var implodeNotation = function( notationArray ) {
+		return ( typeof( notationArray.join ) == 'function' )? notationArray.join( '.' ).replace( /\.?x\.?/g, 'x' ) : notationArray;
+	};
+	
 	// Parse place notation into an array of cycle permutations
 	var parseNotation = function( notation, stage ) {
 		var parsed = [],
-			exploded = notation.replace( /x/gi, '.x.' ).split( '.' ).filter( function( e ) { return e !== ''; } ),
+			exploded = explodeNotation( notation ),
 			i,
 			xPermutation = new Array( stage );
 		
@@ -334,7 +370,7 @@
 		this.rounds = roundsRow( this.stage );
 		this.notation = parseNotation( options.notation, this.stage );
 		this.notationText = options.notation;
-		this.notationExploded = this.notationText.replace( /x/g, '.x.' ).split( '.' ).filter( function( e ) { return e; } );
+		this.notationExploded = explodeNotation( this.notationText );
 		this.leadHead = ( typeof( options.leadHead ) == 'string' )? makeRow( options.leadHead ) : getLeadHead( this.notation, this.stage );
 		this.workGroups = getCycles( this.leadHead );
 		this.leadHeads = [this.rounds];
@@ -344,7 +380,66 @@
 			this.leadHeads.push( this.rounds );
 		this.numberOfLeads = this.leadHeads.length - 1;
 		this.huntBells = this.workGroups.filter( function( e ) { return ( e.length == 1 ); } ).map( function( e ) { return e[0]; } );
-	
+		
+		this.ruleOffs = { every: this.notation.length, from: 0 };
+		if( typeof( options.ruleOffs ) == 'string' ) {
+			var ruleOffsExplode = options.ruleOffs.split( ':' ).map( function( e ) { return parseInt( e, 10 ); } );
+			this.ruleOffs.every = ( ruleOffsExplode[0] == NaN )? this.notation.length : ruleOffsExplode[0];
+			this.ruleOffs.from = ( ruleOffsExplode[1] == NaN )? 0 : ruleOffsExplode[1];
+		}
+		
+		// Calculate new notation, and other details for calls
+		this.calls = [];
+		if( typeof( this.options.calls ) != 'undefined' && this.options.calls.length !== 0 && !_.isEmpty( this.options.calls ) ) {
+			for( var call in this.options.calls ) {
+				// Parse the information given
+				var callInfo = this.options.calls[call].split( ':', 3 );
+				if( callInfo[1] == '' ) { callInfo[1] = this.notation.length; } else { callInfo[1] = parseInt( callInfo[1], 10 ); }
+				if( callInfo[2] == '' ) { callInfo[2] = 0; } else { callInfo[2] = parseInt( callInfo[2], 10 ); }
+				// Get a block of notation to work with
+				var callNotationExploded = repeatArrayToLength( this.notationExploded, Math.max( callInfo[1]*2, 8 ) ),
+					plainNotationExploded =  callNotationExploded.slice( 0 ); // Keep track of a plain lead to so we can tell which bells are affected
+				// Explode the call notation (Grandsire singles, for example, span more than one change)
+				var justCallNotationExploded = explodeNotation( callInfo[0] );
+				// Insert the call notation into the first avaliable slot in the notation block
+				for( var i = 0; i < justCallNotationExploded.length; i++ ) {
+					callNotationExploded[(callInfo[1]-1)+callInfo[2]+i] = justCallNotationExploded[i];
+				}
+				// Decide how many rows of the call to display
+				var rowsToDisplay = Math.max( justCallNotationExploded.length + 6, Math.floor( this.notationExploded.length / 2 ) ),
+					rowsToDisplayBefore = Math.ceil( ( rowsToDisplay - justCallNotationExploded.length ) / 2 )+1,
+					rowsToDisplayAfter = Math.floor( ( rowsToDisplay - justCallNotationExploded.length ) / 2 )-1;
+				// Add more notation to the block to make sure there's enough there to slice out a big enough piece
+				for( var padding = 0;
+					(callInfo[1]+callInfo[2]+padding)-rowsToDisplayBefore < 0;
+					callNotationExploded = this.notationExploded.concat( callNotationExploded ), plainNotationExploded = this.notationExploded.concat( plainNotationExploded ), padding += this.notationExploded.length );
+				// Slice out a section to display
+				var preSlice = (callInfo[1]+callInfo[2]+padding)-rowsToDisplayBefore,
+					postSlice = callInfo[1]+callInfo[2]+padding+rowsToDisplayAfter+justCallNotationExploded.length,
+					preCallNotationExploded = callNotationExploded.slice( 0, preSlice ),
+					callNotationExploded = callNotationExploded.slice( preSlice, postSlice ),
+					plainNotationExploded = plainNotationExploded.slice( preSlice, postSlice ),
+				// Implode the notation back again
+					callNotation = implodeNotation( callNotationExploded ),
+				// Calculate some important rows
+					startRow = permutes( this.rounds, parseNotation( preCallNotationExploded, this.stage ) ),
+					endCallRow = permutes( startRow, parseNotation( callNotationExploded, this.stage ) ),
+					endPlainRow = permutes( startRow, parseNotation( plainNotationExploded, this.stage ) );
+				// Save the call's details
+				this.calls.push( {
+					id: call.replace( ' ', '_' ).replace( /[^A-Za-z0-9_]/, '' ).toLowerCase(),
+					title: call,
+					startRow: startRow,
+					notation: parseNotation( callNotation, this.stage ),
+					notationText: callNotation,
+					highlight: { from: rowsToDisplayBefore, to: (rowsToDisplayBefore-1)+justCallNotationExploded.length },
+					huntBellStartPositions: this.huntBells.map( function( e ) { return startRow.indexOf( e ); }, this ),
+					affectedBellStartPositions: this.rounds.filter( function( e ) { return endCallRow.indexOf( startRow[e] ) != endPlainRow.indexOf( startRow[e] ) }, this ),
+					ruleOffs: { every: this.ruleOffs.every, from: this.ruleOffs.from-preSlice }
+				} );
+			}
+		}
+		
 		// Create child classes
 		if( typeof( options.options_line.container ) != 'undefined' ) {
 			this.Line = new MethodLine( this, options.options_line );
@@ -378,19 +473,20 @@
 			// Show lines by default
 			this.options.lines = true;
 		}
-		if( typeof( options.ruleOffs ) == 'undefined' ) {
-			// Show rules offs as dashed grey, at the end of ever lead by default
-			this.options.ruleOffs = { every: this.parent.notation.length, from: 0, color: '#999' };
-		}
 		if( typeof( options.placeStarts ) == 'undefined' ) {
 			// Show both the dots on lines and the alongside numbers by default
 			this.options.placeStarts = { pathMarkers: true, alongside: true };
+		}
+		if( typeof( options.calls ) == 'undefined' ) {
+			// Display calls if given by default
+			this.options.calls = ( this.parent.calls.length > 0 )? true : false;
 		}
 		if( typeof( options.colours ) == 'undefined' ) {
 			// Some default colours. Red hunt bells; blue, green, purple... work bells. Transparent text for coloured lines
 			this.options.colours = {
 				lines: { hunt: '#D11', base: 'transparent', work: ['#11D','#1D1','#D1D', '#DD1', '#1DD'] },
-				text: ( this.options.lines === true )? { hunt: 'transparent', base: '#000', work: 'transparent' } : { hunt: '#D11', base: '#000', work: ['#11D','#1D1','#D1D', '#DD1', '#1DD'] }
+				text: ( this.options.lines === true )? { hunt: 'transparent', base: '#000', work: 'transparent' } : { hunt: '#D11', base: '#000', work: ['#11D','#1D1','#D1D', '#DD1', '#1DD'] },
+				ruleOffs: '#999'
 			};
 		}
 		// Assign colours to bells
@@ -458,6 +554,9 @@
 			this.options.columnPadding = columnPadding;
 			this.options.placeStartPadding = placeStartPadding;
 			
+			// How many columns to include for calls
+			var callColumns =  this.options.calls? 1 : 0;
+			
 			// Add an element to the page whose width we can use to test font sizes
 			var testText = document.createElement( 'span' );
 			testText.className = 'methodText';
@@ -475,8 +574,8 @@
 			if( typeof( this.options_orig.columns ) != 'undefined' || pageWidth < 400 ) {
 				numberOfColumns = ( pageWidth < 400 )? 1 : this.options_orig.columns;
 				leadsPerColumn = Math.ceil( this.parent.numberOfLeads/numberOfColumns );
-				var sizeTestBase = pageWidth - 30 - ( ((2*numberOfColumns-1) * columnPadding ) + ( numberOfColumns * placeStartPadding ) );
-				while( testFontSize > 10 && sizeTestBase - ( numberOfColumns * testWidth ) < 0 ) {
+				var sizeTestBase = pageWidth - 30 - ( ((2*numberOfColumns+callColumns-1) * columnPadding ) + ( numberOfColumns * placeStartPadding ) );
+				while( testFontSize > 10 && sizeTestBase - ( (numberOfColumns+callColumns) * testWidth ) < 0 ) {
 					testText.style.fontSize = (--testFontSize)+'px';
 					testWidth = testText.offsetWidth;
 				}
@@ -485,8 +584,8 @@
 			else if( typeof( this.options_orig.leadsPerColumn ) != 'undefined' ) {
 				leadsPerColumn = this.options_orig.leadsPerColumn;
 				numberOfColumns = Math.ceil( this.parent.numberOfLeads / leadsPerColumn );
-				var sizeTestBase = pageWidth - 30 - ( ((2*numberOfColumns-1) * columnPadding ) + ( numberOfColumns * placeStartPadding ) );
-				while( testFontSize > 10 && sizeTestBase - ( numberOfColumns * testWidth ) < 0 ) {
+				var sizeTestBase = pageWidth - 30 - ( ((2*numberOfColumns+callColumns-1) * columnPadding ) + ( numberOfColumns * placeStartPadding ) );
+				while( testFontSize > 10 && sizeTestBase - ( (numberOfColumns+callColumns) * testWidth ) < 0 ) {
 					testText.style.fontSize = (--testFontSize)+'px';
 					testWidth = testText.offsetWidth;
 				}
@@ -494,8 +593,8 @@
 			else {
 				// Calculate best text size/column settings by measuring the page
 				do {
-				var sizeTestBase = pageWidth - 30 - ( ((2*numberOfColumns-1) * columnPadding ) + ( numberOfColumns * placeStartPadding ) );
-					while( testFontSize > 10 && sizeTestBase - ( numberOfColumns * testWidth ) < 0 ) {
+				var sizeTestBase = pageWidth - 30 - ( ((2*numberOfColumns+callColumns-1) * columnPadding ) + ( numberOfColumns * placeStartPadding ) );
+					while( testFontSize > 10 && sizeTestBase - ( (numberOfColumns+callColumns) * testWidth ) < 0 ) {
 						testText.style.fontSize = (--testFontSize)+'px';
 						testWidth = testText.offsetWidth;
 					}
@@ -511,6 +610,7 @@
 			}
 			this.options.fontSize = testFontSize;
 			this.options.columns = numberOfColumns;
+			this.options.callColumns = callColumns;
 			this.options.leadsPerColumn = leadsPerColumn;
 			this.dimensions = {
 				row: { x: testWidth, y: testFontSize+1 },
@@ -531,7 +631,7 @@
 			var paperHeight = this.dimensions.row.y*(this.parent.notation.length+1)*this.options.leadsPerColumn;
 			this.paper = new SVGorVML( {
 				id: 'methodLine_'+this.parent.id,
-				width: (this.dimensions.row.x+(this.options.columnPadding*2)+this.options.placeStartPadding)*(this.options.columns),
+				width: (this.dimensions.row.x+(this.options.columnPadding*2)+this.options.placeStartPadding)*(this.options.columns+this.options.callColumns),
 				height: paperHeight
 			} );
 			
@@ -547,6 +647,7 @@
 			if( this.options.lines === true ) {
 				this.drawLines();
 			}
+			// 
 			
 			// Add the paper to the page
 			this.container.appendChild( this.paper.canvas );
@@ -565,6 +666,7 @@
 		},
 
 		textTable: function() {
+			// Write out the plain course
 			var textSource = this.parent.rounds.map( function( e ) {
 				var bellText = bellToChar( e );
 				return ( this.colours[e].text != this.options.colours.text.base )? '<span class="b'+bellToChar( e )+'">'+bellText+'</span>' : bellText;
@@ -578,17 +680,28 @@
 				for( upTo = (i+1)*this.options.leadsPerColumn; typeof(this.parent.leadHeads[upTo]) == 'undefined'; --upTo ) {}
 				methodTextInnerHTML += '<td'+((i==0)?' class="first"':'')+'>' + this.textSegment( this.parent.leadHeads[i*this.options.leadsPerColumn], this.parent.leadHeads[upTo], this.parent.notation, textSource ) + '</td>';
 			}
+			
+			// Write out any calls
+			if( this.options.calls ) {
+				methodTextInnerHTML += '<td class="calls">';
+				this.parent.calls.forEach( function( call ) {
+					methodTextInnerHTML += '<div class="call" id="methodText_call_'+call.id+'"><p>'+call.title+':</p>'+''+'</div>';
+				}, this );
+				methodTextInnerHTML += '</td>';
+			}
+			
 			methodText.innerHTML = '<tr>' + methodTextInnerHTML + '</tr>';
 			return methodText;
 		},
 	
 		textSegment: function( src, dst, notation, textSource ) {
 			var j = 0, jLim = src.length, i = 0, iMod = notation.length, segmentText = '';
-			for( ; j < jLim; j++ ) { segmentText += textSource[src[j]]; }
-			for( ; !rowsEqual( src, dst ) || ( i === 0 && rowsEqual( src, dst ) ); i++ ) {
+			while( j < jLim ) { segmentText += textSource[src[j++]]; }
+			for( ; !rowsEqual( src, dst ) || ( i == 0 && rowsEqual( src, dst ) ); i++ ) {
 				src = permute( src, notation[i%iMod] );
 				segmentText += '<br/>';
-				for( j = 0; j < jLim; j++ ) { segmentText += textSource[src[j]]; }
+				j = 0;
+				while( j < jLim ) { segmentText += textSource[src[j++]]; }
 			}
 			return segmentText;
 		},
@@ -648,24 +761,24 @@
 		},
 	
 		drawRuleOffs: function() {
-			if( this.options.ruleOffs.color == 'transparent' ) { return; }
+			if( this.options.colours.ruleOffs == 'transparent' ) { return; }
 			// i will iterate over columns
 			var i = -1, iLim = this.options.columns,
 				// j will iterate over rule offs within a column
-				j, jLim = (this.options.leadsPerColumn*this.parent.notation.length)/this.options.ruleOffs.every,
+				j, jLim = (this.options.leadsPerColumn*this.parent.notation.length)/this.parent.ruleOffs.every,
 				// kLim will be a hard limit on the number of rule offs
-				k = 0, kLim = (this.parent.numberOfLeads*this.parent.notation.length)/this.options.ruleOffs.every,
+				k = 0, kLim = (this.parent.numberOfLeads*this.parent.notation.length)/this.parent.ruleOffs.every,
 				path = '',
 				// h and vMultipler and Padding are for positioning the rule offs
 				hMultiplier = this.dimensions.row.x + (2*this.options.columnPadding) + this.options.placeStartPadding,
-				vMultiplier = this.options.ruleOffs.every*this.dimensions.row.y,
-				vPadding = 0.5 + (this.options.ruleOffs.from*this.dimensions.row.y);
+				vMultiplier = this.parent.ruleOffs.every*this.dimensions.row.y,
+				vPadding = 0.5 + (this.parent.ruleOffs.from*this.dimensions.row.y);
 			while( ++i < iLim ) {
 				for( j = 0; j < jLim && k < kLim; j++, k++ ) {
 					path += 'M'+(i*hMultiplier)+','+((j+1)*vMultiplier+vPadding)+'l'+this.dimensions.row.x+',0';
 				}
 			}
-			this.paper.add( 'path', { 'stroke-width': 1, 'stroke-linecap': 'round', 'stroke-dasharray': '4,2', 'stroke': this.options.ruleOffs.color, 'd': path } );
+			this.paper.add( 'path', { 'stroke-width': 1, 'stroke-linecap': 'round', 'stroke-dasharray': '4,2', 'stroke': this.options.colours.ruleOffs, 'd': path } );
 		},
 	
 		drawPlaceStarts: function() {
@@ -756,50 +869,36 @@
 			// Show place notation by default
 			this.options.showNotation = true;
 		}
-		if( typeof( options.colours ) == 'undefined' ) {
+		if( typeof( options.colors ) == 'undefined' ) {
 			// Default colours array
-			this.options.colours = ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'];
-		}
-		
-		// Calculate new notation for calls
-		this.calls = [];
-		if( typeof( this.parent.options.calls ) != 'undefined' && this.parent.options.calls.length !== 0 && !_.isEmpty( this.parent.options.calls ) ) {
-			for( var call in this.parent.options.calls ) {
-				var callInfo = this.parent.options.calls[call].split( ':', 3 );
-				if( callInfo[1] == '' ) { callInfo[1] = this.parent.notation.length; } else { callInfo[1] = parseInt( callInfo[1], 10 ); }
-				if( callInfo[2] == '' ) { callInfo[2] = 0; } else { callInfo[2] = parseInt( callInfo[2], 10 ); }
-				// Get a block of notation to work with
-				for( var notationExploded = []; notationExploded.length < callInfo[1]*2 || notationExploded.length < 8; notationExploded = notationExploded.concat( this.parent.notationExploded ) );
-				// Explode the call notation (Grandsire singles, for example, span more than one change)
-				var justCallNotationExploded = callInfo[0].replace( /x/g, '.x.' ).split( '.' ).filter( function( e ) { return e; } );
-				// Insert the call notation into the first avaliable slot in the notation block
-				for( var i = 0; i < justCallNotationExploded.length; i++ ) {
-					notationExploded[(callInfo[1]-1)+callInfo[2]+i] = justCallNotationExploded[i];
-				}
-				// Add more notation to the block to make sure there's enough there to slice out a large section
-				for( var padding = 0; (callInfo[1]+callInfo[2]+padding)-6 < 0; notationExploded = this.parent.notationExploded.concat( notationExploded ), padding += this.parent.notationExploded.length );
-				// Slice out a section to display
-				var callNotationExploded = notationExploded.slice( (callInfo[1]+callInfo[2]+padding)-6, (callInfo[1]+callInfo[2]+padding)+5 );
-				// Implode the notation back again
-				var callNotation = callNotationExploded.join( '.' ).replace( /\.?x\.?/g, 'x' );
-				this.calls.push( {
-					id: call.replace( ' ', '_' ).replace( /[^A-Za-z0-9_]/, '' ).toLowerCase(),
-					title: call,
-					notation: parseNotation( callNotation, this.parent.stage ),
-					notationText: callNotation,
-					highlight: { from: 6, to: 5+justCallNotationExploded.length }
-				} );
+			this.options.colors = {
+				lines: repeatArrayToLength( ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'], parent.stage ).map( function( e, i ) { return ( parent.huntBells.indexOf( i ) != -1 )? '#D11' : e; }, this ),
+				ruleOffs: '#999'
 			}
 		}
+		
+		// Collect information from the parent to provide options for drawing the plain lead
+		this.options.plainLeadGridOptions = {
+			id: 'methodGrid_'+parent.id+'_lead',
+			title: 'Plain Lead',
+			notation: parent.notation,
+			notationText: parent.options.notation,
+			showNotation: options.showNotation,
+			huntBellStartPositions: parent.huntBells,
+			ruleOffs: parent.ruleOffs,
+			colors: this.options.colors
+		};
 		
 		// Calculate bell and row dimensions for use later
 		this.dimensions = {
 			bell: { x: 12, y: 15 },
-			row: { x: 12*this.parent.stage, y: 15 }
+			row: { x: 12*parent.stage, y: 15 }
 		};
 	};
 	
 	// Private methods for MethodGrid
+	
+	// Creates the table containing all the relavant information
 	var gridTable = function( id, paper, notation, highlightRows, title ) {
 		var grid = document.createElement( 'table' ),
 			titleRow = document.createElement( 'tr' )
@@ -816,6 +915,7 @@
 		grid.appendChild( gridRow );
 		return grid;
 	};
+	// Build a cell containing the title
 	var titleCell = function( title ) {
 		var cell = document.createElement( 'td' );
 		cell.className = 'titleCell';
@@ -823,8 +923,9 @@
 		cell.innerHTML = title+':';
 		return cell;
 	};
+	// Build a cell containing the place notation
 	var notationCell = function( notation, highlight ) {
-		var notationExploded = notation.replace( /x/g, '.x.' ).split( '.' ).filter( function( e ) { return e; } );
+		var notationExploded = explodeNotation( notation );
 		if( typeof( highlight ) != 'undefined' ) {
 			if( typeof( highlight ) == 'number' ) {
 				notationExploded[highlight-1] = '<strong>'+notationExploded[highlight-1]+'</strong>';
@@ -840,6 +941,7 @@
 		cell.innerHTML = notationExploded.join( '<br />' );
 		return cell;
 	};
+	// Build a cell containing the SVG grid
 	var paperCell = function( paper ) {
 		var cell = document.createElement( 'td' );
 		cell.className = 'paperCell';
@@ -851,26 +953,19 @@
 	MethodGrid.prototype = {
 		draw: function() {
 			// Create a grid for the whole lead
-			this.leadGrid = this.createGrid( {
-				id: 'methodGrid_'+this.parent.id+'_lead',
-				notation: this.parent.notation,
-				notationText: this.parent.options.notation,
-				showNotation: this.options.showNotation,
-				huntPositions: this.parent.huntBells
-			} );
+			this.leadGrid = this.createGrid( this.options.plainLeadGridOptions );
 			this.container.appendChild( this.leadGrid );
 			
 			// Create grids for calls
 			this.callGrids = [];
-			this.calls.forEach( function( call ) {
-				var callGrid = this.createGrid( {
-					id: 'methodGrid_'+this.parent.id+'_'+call.id,
-					title: call.title,
-					notation: call.notation,
-					notationText: call.notationText,
-					highlight: call.highlight,
-					showNotation: this.options.showNotation
-				} );
+			this.parent.calls.forEach( function( call ) {
+				call.id = 'methodGrid_'+this.parent.id+'_'+call.id;
+				call.showNotation = this.options.showNotation;
+				call.colors = {
+					lines: permute( this.options.plainLeadGridOptions.colors.lines, call.startRow ),
+					ruleOffs: this.options.plainLeadGridOptions.colors.ruleOffs
+				};
+				var callGrid = this.createGrid( call );
 				this.container.appendChild( callGrid );
 				this.callGrids.push( callGrid );
 			}, this );
@@ -878,24 +973,41 @@
 		
 		createGrid: function( options ) {
 			var paper = new SVGorVML( {
-				id: options.id+'_paper',
-				width: this.dimensions.row.x,
-				height: this.dimensions.row.y*( options.notation.length+1 )
-			} ),
-				huntPositions = ( typeof( options.huntPositions ) != 'undefined' )? options.huntPositions : [];
+					id: options.id+'_paper',
+					width: this.dimensions.row.x,
+					height: this.dimensions.row.y*( options.notation.length+1 )
+				} ),
+				huntBellStartPositions = ( typeof( options.huntBellStartPositions ) != 'undefined' )? options.huntBellStartPositions : [];
 			
 			if( paper.type != 'fail' ) {
-				var i = this.parent.stage,
-					colour = -1;
-					colourMod = this.options.colours.length;
+				// Draw rule offs
+				if( options.colors.ruleOffs != 'transparent' ) {
+					var i = options.ruleOffs.from, iLim = options.notation.length,
+						path = '';
+
+					while( i <= iLim ) {
+						if( i > 0 ) {
+							path += 'M0,'+(i*this.dimensions.row.y)+'l'+this.dimensions.row.x+',0';
+						}
+						i += options.ruleOffs.every;
+					}
+					if( path != '' ) {
+						paper.add( 'path', { 'stroke-width': 1, 'stroke-linecap': 'round', 'stroke-dasharray': '4,2', 'stroke': options.colors.ruleOffs, 'd': path } );
+					}
+				}
+				// Draw lines
+				var i = this.parent.stage;
 				while( i-- ) {
+					var isHuntBell = huntBellStartPositions.indexOf( i ) != -1;
 					paper.add( 'path', {
-						'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', fill: 'none',
-						stroke: (huntPositions.indexOf( i ) != -1)? '#D11' : this.options.colours[(++colour)%colourMod],
+						'stroke-linejoin': 'round', 'stroke-linecap': 'round', fill: 'none',
+						'stroke-width': isHuntBell? 1 : 2,
+						stroke: options.colors.lines[i],
 						d: 'M0,0' + pathString( i, options.notation, this.dimensions.bell.x, this.dimensions.bell.y, 1, false )
 					} );
 				}
-				return gridTable( options.id, paper, ( typeof( options.showNotation ) != 'undefined' && options.showNotation === true )? options.notationText : null, options.highlight, ( typeof( options.title ) == 'string' )? options.title : null );
+				
+				return gridTable( options.id, paper, options.showNotation? options.notationText : null, options.highlight, ( typeof( options.title ) == 'string' )? options.title : null );
 			}
 			else {
 				return false;
