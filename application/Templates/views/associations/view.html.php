@@ -35,7 +35,6 @@ foreach( $associations as $association ) : ?>
 	</section>
 	<script>
 	//<![CDATA[
-		if( typeof( window['towerMaps'] ) == 'undefined' ) { window['towerMaps'] = new Array(); }
 		window['towerMaps'].push( new TowerMap( {
 			id: <?php echo $i; ?>,
 			container: 'map<?php echo $i; ?>',

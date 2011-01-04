@@ -13,7 +13,6 @@ View::element( 'default.header', array(
 	),
 	'scripts' => array(
 		'http://maps.google.com/maps/api/js?sensor=false',
-		'/scripts/general.js',
 		'/scripts/towers.js'
 	)
 ) );
@@ -38,7 +37,6 @@ $i = 0;
 	</section>
 	<script>
 	//<![CDATA[
-		if( typeof( towerMaps ) == 'undefined' ) { var towerMaps = new Array(); }
 		towerMaps.push( new TowerMap( {
 			id: <?php echo $i; ?>,
 			container: 'map<?php echo $i; ?>',

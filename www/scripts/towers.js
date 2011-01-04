@@ -1,4 +1,7 @@
-( function( window, undefined ) {
+( function( window, document, google, undefined ) {
+	// Set up some global objects
+	window['towerMaps'] = [];
+	
 	// Attach events
 	// Resize
 	var towersResizedLastFired = 0,
@@ -9,9 +12,7 @@
 		else { towersResizedLastFired = nowTime; }
 	
 		var pageWidth = window.innerWidth || document.documentElement.clientWidth,
-			pageHeight = window.innerHeight || document.documentElement.clientHeight,
-			$top = window.$top,
-			$bottom = window.$bottom;
+			pageHeight = window.innerHeight || document.documentElement.clientHeight;
 		
 		// Resize and recenter all maps
 		
@@ -73,7 +74,7 @@
 	var towersScroll = function() {
 		$top = document.getElementById( 'top' );
 		$bottom = document.getElementById( 'bottom' );
-		if( window['towerMaps'].length == 1 ) {
+		if( window.towerMaps.length == 1 ) {
 			var parent = window.towerMaps[0].container.parentNode,
 				mapCenter = window.towerMaps[0].map.getCenter(),
 				pageWidth = window.innerWidth || document.documentElement.clientWidth,
@@ -100,9 +101,7 @@
 	// Fire a scroll event on resize and load too
 	_.addEventListener( window, 'resize', towersScroll );
 	_.addReadyListener( towersScroll );
-} )( window );
-
-( function( window, undefined ) {
+	
 	// Define TowerMap
 	var TowerMap = function( options ) {
 		this.id = options.id;
@@ -177,7 +176,6 @@
 			isPng: true
 		}
 	};
-	
 	// Expose global objects
 	window['TowerMap'] = TowerMap;
-} )( window );
+} )( window, document, window.google );

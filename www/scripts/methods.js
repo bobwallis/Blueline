@@ -1,5 +1,5 @@
 // A lightweight SVG/VML wrapper
-( function( window, undefined ) {
+( function( window, document, undefined ) {
 	var SVGorVML = function( options ) {
 		this.canvas = this.makeCanvas( options );
 	};
@@ -112,12 +112,14 @@
 	
 	// Expose global objects
 	window['SVGorVML'] = SVGorVML;
-} )( window );
+} )( window, document );
 
 
 ( function( window, undefined ) {
-	// Helper functions
+	// Set up global objects
+	window['methods'] = [];
 	
+	// Helper functions
 	// Repeats an array to make an array of a given length
 	var repeatArrayToLength = function( array, length ) {
 		var array2 = new Array( length ),
@@ -1017,10 +1019,7 @@
 
 	// Export globals
 	window['MethodView'] = MethodView;
-} )( window );
-
-// Page events
-( function( window, undefined ) {
+	
 	// Resize
 	var lastRedrawTime = (new Date()).getTime(),
 	methodsResize = function() {

@@ -85,7 +85,6 @@ foreach( $methods as $method ) : ?>
 	<div id="content_grid<?php echo $i; ?>" class="methodGrid"></div>
 	<script>
 	//<![CDATA[
-		if( typeof( methods ) == 'undefined' ) { var methods = new Array(); }
 		methods.push( new MethodView( {
 			id: <?php echo $i; ?>,
 			stage: <?php echo intval( $method->stage() ); ?>,

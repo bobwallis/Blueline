@@ -3,7 +3,7 @@ namespace Blueline;
 if( !Response::snippet() ) :
 ?>
 <!doctype html>
-<html lang="en-gb" manifest="site.manifest">
+<html lang="en-gb" manifest="/site.manifest">
 	<head>
 		<meta charset="utf-8" />
 		<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->

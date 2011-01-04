@@ -26,6 +26,16 @@
 	
 	// A set of helper functions for making code writing easier
 	var helpers = {
+		// Convert some iterable collection into an array
+		toArray: function( iter ) {
+			var array = new Array(),
+				i = 0, iLim = iter.length;
+			while( i < iLim ) {
+				array[i] = iter[i];
+				++i;
+			}
+			return array;
+		},
 		// Test whether an object is empty
 		isEmpty: function( e ) {
 			for( var prop in e ) {
@@ -41,6 +51,24 @@
 			else if( e.srcElement ) {
 				return ( e.srcElement.nodeType == 3 )? e.srcElement.parentNode : e.srcElement;
 			}
+		},
+		// Creates a query string from a form's elements
+		formToQueryString: function( form ) {
+			var elements = this.toArray( form.elements );
+			elements = elements.map( function( e ) {
+				var type  = e.getAttribute( 'type' ),
+					encoded = encodeURIComponent( e.getAttribute( 'name' ) )+'='+encodeURIComponent( e.value );
+				switch( type ) {
+					case 'submit':
+						return false;
+					case 'radio':
+					case 'checkbox':
+						return e.checked ? encoded : false;
+					default:
+						return encoded;
+				}
+			} ).filter( function( e ) { return e !== false; } );
+			return elements.join( '&' );
 		},
 		// Returns a boolean indicating whether elem has class className
 		hasClass: function( elem, className ) {
@@ -96,6 +124,7 @@
 			}
 		},
 		addEventListener: function( element, type, func ) {
+			if( typeof( element ) == 'string' ) { element = document.getElementById( element ); }
 			try { element.addEventListener( type, func, false ); }
 			catch( no_addEventListener ) { element.attachEvent( 'on'+type, func ); }
 		},
@@ -107,12 +136,21 @@
 		
 		// Loads a script
 		loadScript: function( src ) {
-			var script = document.createElement( 'script' ),
-				existingScript = document.getElementsByTagName( 'script' )[0];
-			script.type = 'text/javascript';
-			script.async = true;
-			script.src = src;
-			existingScript.parentNode.insertBefore( script, existingScript );
+			if( src ) {
+				var script = document.createElement( 'script' );
+				script.src = src;
+				script.type = 'text/javascript';
+				document.body.appendChild( script );
+			}
+		},
+		loadScriptAsync: function( src ) {
+			if( src ) {
+				var script = document.createElement( 'script' );
+				script.async = true;
+				script.src = src;
+				script.type = 'text/javascript';
+				document.body.appendChild( script );
+			}
 		},
 		
 		// Clears the content of an element
@@ -165,7 +203,7 @@
 			}
 			else {
 				topSearchContainer.style.display = 'block';
-				smallQ.setAttribute( 'value', '' );
+				smallQ.value = '';
 				if( typeof( search.placeholder ) == 'string' ) {
 					smallQ.setAttribute( 'placeholder', search.placeholder );
 				}
@@ -203,7 +241,7 @@
 			}
 			else {
 				bigSearchContainer.style.display = 'block';
-				bigQ.setAttribute( 'value', '' );
+				bigQ.value = (window.location.search.match( /q=./ ))? decodeURIComponent( window.location.search.replace( /.*q=(.*?)(&|$).*/, '$1' ) ) : '' ;
 				if( typeof( options.placeholder ) == 'string' ) {
 					bigQ.setAttribute( 'placeholder', options.placeholder );
 				}

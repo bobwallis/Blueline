@@ -1,9 +1,10 @@
 <?php namespace Blueline; ?>
 CACHE MANIFEST
-# 20110104
+# 20110104 1404
 NETWORK:
 *
 CACHE:
+/
 /favicon.ico
 /images/external_link.png
 /images/search.png

@@ -3,7 +3,6 @@
 	if( can.history() ) {
 		// The click handler
 		var historyClick = function( e ) {
-			if( !e ) { var e = window.event; }
 			var target = _.eventTarget( e );
 			if( target.nodeName == 'A' ) {
 				var href = target.href.replace( new RegExp( '^'+window.baseURL ), '' ),
@@ -15,6 +14,17 @@
 				}
 			}
 		};
+		
+		var historySubmit = function( e ) {
+			var form = _.eventTarget( e ),
+				href = form.getAttribute( 'action' ) + '?' + _.formToQueryString( form ),
+				handler = historyMatch( href );
+				if( typeof( historyEvents[handler] ) == 'function' ) {
+					e.preventDefault();
+					history.pushState( { exec: handler, href: href }, '', href );
+					historyEvents[handler]( { href: href } );
+				}
+		}
 		
 		// The popstate handler
 		var historyPopstate = function( e ) {
@@ -86,9 +96,14 @@
 		var setContent = function( state, url ) {
 			if( !url ) { url = state.href+'?snippet=1'; }
 			if( typeof( state.content ) != 'string' ) {
-				_.AJAXReplaceContent( 'content', url, {
-					after: replaceState
-				} );
+				if( navigator.onLine ) {
+					_.AJAXReplaceContent( 'content', url, {
+						after: replaceState
+					} );
+				}
+				else {
+					location.href = state.href;
+				}
 			}
 			else {
 				_.replaceContent( 'content', state.content );
@@ -162,11 +177,39 @@
 		// Ready/Load event
 		var readyFired = false,
 		historyReady = function() {
-			// Store current state so the back button isn't broken
+			// Store current state so the back button doesn't break
 			replaceState();
-			// Attach HTML5 history API click event
+			
+			// Attach to click events
 			_.addEventListener( document.body, 'click', historyClick );
+			
+			// Attach to the big and little search form's submit events
+			_.addEventListener( 'topSearch', 'submit', historySubmit );
+			_.addEventListener( 'bigSearch', 'submit', historySubmit );
 		};
 		_.addReadyListener( historyReady );
+		
+		// Lazily load all the application's scripts after the page has loaded
+		var lazyLoadScripts = function() {
+			var scripts = _.toArray( document.getElementsByTagName( 'head' )[0].getElementsByTagName( 'script' ) ).map( function( s ) { return s.src; } ).filter( function( e ) { return e; } ),
+				scriptsToLoad = [ 'http://maps.google.com/maps/api/js?sensor=false&callback=isNaN' ].concat( [ 'general', 'towers' ].map( function( s ) { return window.baseURL+'/scripts/'+s+'.js'; } ) ),
+				scriptsToLoadAsync = [ 'methods' ].map( function( s ) { return window.baseURL+'/scripts/'+s+'.js'; } ),
+				i = 0, iLim = scriptsToLoad.length,
+				j = 0, jLim = scriptsToLoadAsync.length;
+			
+			while( i < iLim ) {
+				if( scripts.indexOf( scriptsToLoad[i] ) == -1 ) {
+					_.loadScript( scriptsToLoad[i] );
+				}
+				++i;
+			}
+			while( j < jLim ) {
+				if( scripts.indexOf( scriptsToLoadAsync[j] ) == -1 ) {
+					_.loadScriptAsync( scriptsToLoadAsync[j] );
+				}
+				++j;
+			}
+		};
+		_.addEventListener( window, 'load', lazyLoadScripts );
 	}
 } )( window, window.history, window._, window.can, document );
