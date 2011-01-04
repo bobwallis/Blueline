@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Compresses files and creates gzipped versions as appropriate
+
+# Required files
+yuicompressor=$(pwd)/jar/yuicompressor.jar
+closure=$(pwd)/jar/compiler.jar
+
+# Change to top level directory
+cd ../../
+
+# Strips whitespace from all PHP files except applcation/config.php to reduce their size
+find . -type f -name "*.php" ! -name "config.php" -print | parallel -j +0 "php -w {} > {}.tmp && mv {}.tmp {} && echo \"Done {}\""
+
+# Crush all png images
+find . -type f -name "*.png" -print | parallel -j +0 "pngcrush -brute -q {} {}.tmp && mv {}.tmp {} && echo \"Done {}\""
+
+# Minify all CSS
+find . -type f -name "*.css" -print | parallel -j +0 "java -jar '${yuicompressor}' --type css {} > {}.tmp && mv {}.tmp {} && echo \"Done {}\""
+
+# Compile all javascript
+find . -type f -name "*.js" -print | parallel -j +0 "java -jar '${closure}' --warning_level QUIET --js {} > {}.tmp && mv {}.tmp {} && echo \"Done {}\""
+
+# Create GZipped versions of CSS and Javascript
+find . -type f -name "*.js" -print | parallel -j +0 "gzip -9c {} > {}.gz"
+find . -type f -name "*.css" -print | parallel -j +0 "gzip -9c {} > {}.gz"
+
