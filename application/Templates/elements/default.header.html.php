@@ -3,7 +3,7 @@ namespace Blueline;
 if( !Response::snippet() ) :
 ?>
 <!doctype html>
-<html lang="en-gb" manifest="/site.manifest">
+<html lang="en-gb">
 	<head>
 		<meta charset="utf-8" />
 		<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
@@ -26,9 +26,8 @@ if( !Response::snippet() ) :
 		<link rel="stylesheet" media="handheld, screen and (max-width:480px)" href="/styles/small-device.css" />
 		<link rel="stylesheet" media="print" href="/styles/print.css" />
 		<noscript><link rel="stylesheet" media="all" href="/styles/noscript.css" /></noscript>
-		<script>window.baseURL = <?php echo json_encode( Config::get( 'site.baseURL' ) ); ?>;</script>
 		<script src="/scripts/general.js"></script>
-		<script src="/scripts/history.js"></script>
+		<script>window.baseURL = <?php echo json_encode( Config::get( 'site.baseURL' ) ); ?>;if(can.history()){document.write("<script src=\"\/scripts\/history.js\"><\/script>");}</script>
 <?php if( isset( $scripts ) ): foreach( $scripts as $script ) : ?>
 		<script src="<?php echo $script; ?>"></script>
 <?php endforeach; endif; ?>

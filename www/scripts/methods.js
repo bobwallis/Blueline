@@ -414,7 +414,7 @@
 				// Add more notation to the block to make sure there's enough there to slice out a big enough piece
 				for( var padding = 0;
 					(callInfo[1]+callInfo[2]+padding)-rowsToDisplayBefore < 0;
-					callNotationExploded = this.notationExploded.concat( callNotationExploded ), plainNotationExploded = this.notationExploded.concat( plainNotationExploded ), padding += this.notationExploded.length );
+					callNotationExploded = this.notationExploded.concat( callNotationExploded ), plainNotationExploded = this.notationExploded.concat( plainNotationExploded ), padding += this.notationExploded.length ) {}
 				// Slice out a section to display
 				var preSlice = (callInfo[1]+callInfo[2]+padding)-rowsToDisplayBefore,
 					postSlice = callInfo[1]+callInfo[2]+padding+rowsToDisplayAfter+justCallNotationExploded.length,

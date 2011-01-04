@@ -87,8 +87,8 @@
 			}
 		},
 		getElementsByClassName: function( className, elem, tag ) {
-			if( !elem ) { var elem = document; }
-			if( !tag ) { var tag = '*'; }
+			if( !elem ) { elem = document; }
+			if( !tag ) { tag = '*'; }
 			try {
 				return elem.getElementsByClassName( className );
 			}
@@ -255,7 +255,7 @@
 	
 	// Tab bar click event
 	var tabBarClick = function( e ) {
-		if( !e ) { var e = window.event; }
+		if( !e ) { e = window.event; }
 		var targetTab = _.eventTarget( e );
 		if( targetTab.nodeName != 'LI' ) { return; }
 		var tabs = targetTab.parentNode.getElementsByTagName( 'li' );
