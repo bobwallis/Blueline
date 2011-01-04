@@ -192,7 +192,7 @@
 		// Lazily load all the application's scripts after the page has loaded
 		var lazyLoadScripts = function() {
 			var scripts = _.toArray( document.getElementsByTagName( 'head' )[0].getElementsByTagName( 'script' ) ).map( function( s ) { return s.src; } ).filter( function( e ) { return e; } ),
-				scriptsToLoad = [ 'http://maps.google.com/maps/api/js?sensor=false&callback=isNaN' ].concat( [ 'general', 'towers' ].map( function( s ) { return window.baseURL+'/scripts/'+s+'.js'; } ) ),
+				scriptsToLoad = [ (scripts.indexOf( 'http://maps.google.com/maps/api/js?sensor=false' ) == -1)?'http://maps.google.com/maps/api/js?sensor=false&callback=isNaN':'' ].concat( [ 'general', 'towers' ].map( function( s ) { return window.baseURL+'/scripts/'+s+'.js'; } ) ),
 				scriptsToLoadAsync = [ 'methods' ].map( function( s ) { return window.baseURL+'/scripts/'+s+'.js'; } ),
 				i = 0, iLim = scriptsToLoad.length,
 				j = 0, jLim = scriptsToLoadAsync.length;

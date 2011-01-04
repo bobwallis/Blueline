@@ -166,6 +166,7 @@
 			window.setTimeout( googleTitle, 500 ); window.setTimeout( googleTitle, 1000 ); window.setTimeout( googleTitle, 1500 );
 		}
 	};
+	
 	TowerMap.prototype = {
 		OpenStreetMapOptions: {
 			name: 'OSM',
