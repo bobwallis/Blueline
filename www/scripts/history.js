@@ -1,4 +1,4 @@
-( function( window, history, _, can, document, undefined ) {
+( function( window, history, _, can, document ) {
 	// Functions for using the HTML5 history API to update page contents
 	if( can.history() ) {
 		// The click handler
@@ -212,4 +212,4 @@
 		};
 		_.addEventListener( window, 'load', lazyLoadScripts );
 	}
-} )( window, window.history, window._, window.can, document );
+} )( window, window['history'], window['_'], window['can'], document );

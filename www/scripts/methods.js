@@ -1,5 +1,5 @@
 // A lightweight SVG/VML wrapper
-( function( window, document, undefined ) {
+( function( window, document ) {
 	var SVGorVML = function( options ) {
 		this.canvas = this.makeCanvas( options );
 	};

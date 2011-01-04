@@ -1,4 +1,4 @@
-( function( window, document, undefined ) {
+( function( window, document ) {
 	// can will be a set of functions to detect browser capabilities.
 	// Largely borrowed from Modernizer <http://www.modernizer.com>
 	var can = {

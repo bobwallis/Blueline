@@ -1,4 +1,4 @@
-( function( window, document, google, undefined ) {
+( function( window, document, google ) {
 	// Set up some global objects
 	window['towerMaps'] = [];
 	
