@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS associations_towers (
 
 // tower_oldpks data from data/newpks.txt
 $newpks = new parseCSV();
-$newpks->auto( 'data/newpks.txt' );
+$newpks->auto( __DIR__.'/data/newpks.txt' );
 echo "INSERT INTO tower_oldpks (oldpk,tower_doveId) VALUES\n" .
 	implode( ",\n", array_map( function( $row ) {
 		return "\t('".sqlite_escape_string( str_replace( ' ', '_', trim( $row['OldID'] ) ) )."','".sqlite_escape_string( str_replace( ' ', '_', trim( $row['NewID'] ) ) ).'\')';
@@ -120,7 +120,7 @@ unset( $newpks );
 
 // Other data from data/dove.txt
 $dove = new parseCSV();
-$dove->auto( 'data/dove.txt' );
+$dove->auto( __DIR__.'/data/dove.txt' );
 foreach( $dove->data as $tower ) {
 	// Tidy up data values
 	// Expand shortened county/region names

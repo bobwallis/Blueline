@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS methods (
 <?php
 // Get a list of all .xml files in the ./ directory
 $files = array();
-if( $handle = opendir( './data' ) ) {
+if( $handle = opendir( __DIR__.'/data' ) ) {
 	while( ( $file = readdir( $handle ) ) !== FALSE ) {
 		if( strpos( $file, '.xml' ) ) {
 			$files[] = $file;
@@ -71,7 +71,7 @@ if( $handle = opendir( './data' ) ) {
 else { die( 'Cannot open ./data directory' ); }
 
 foreach( $files as $file ) {
-	$file = './data/'.$file;
+	$file = __DIR__.'/data/'.$file;
 	
 	// Some variables to collect data in
 	$methodIndex = 0;

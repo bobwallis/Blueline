@@ -1,3 +1,2 @@
 Build with: g++ -I /usr/include/mysql/ -o levenshteinRatio.so -fPIC -shared levenshteinRatio.cc 
 or similar, and install.
-Add to MySQL using: CREATE FUNCTION levenshteinRatio RETURNS INT SONAME 'levenshteinRatio.so';

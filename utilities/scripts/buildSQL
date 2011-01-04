@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Change to top-level directory
+cd ../../
+
+# Make a folder to store the SQL in
+mkdir -p sql
+
+# Create UDFs
+g++ -I /usr/include/mysql/ -o ./sql/levenshteinRatio.so -fPIC -shared ./utilities/UDFs/levenshteinRatio.cc
+cp ./utilities/UDFs/levenshteinRatio.sql ./sql/
+echo -e "Created levenshteinRatio function SQL\n"
+
+# associations table
+cp ./utilities/tables/associations.sql ./sql
+echo -e "Created associations table SQL \n"
+
+# methods table
+echo "Downloading new method data"
+curl --progress-bar -o ./utilities/tables/methods/data/allmeths-xml.zip http://methods.org.uk/method-collections/xml-zip-files/allmeths-xml.zip
+unzip -d ./utilities/tables/methods/data -o ./utilities/tables/methods/data/allmeths-xml.zip
+php ./utilities/tables/methods/xml2sql.php > ./sql/methods.sql
+echo -e "Created method table SQL\n"
+
+# method_extras table
+cp ./utilities/tables/method_extras.sql ./sql
+echo -e "Created method_extras table SQL\n"
+
+# towers table
+echo "Downloading new tower data"
+curl --progress-bar --referer "http://dove.cccbr.org.uk" --user-agent "Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.224 Safari/534.10" -o ./utilities/tables/towers/data/dove.txt "http://dove.cccbr.org.uk/downloads.php?download=dove.txt"
+curl --progress-bar --referer "http://dove.cccbr.org.uk" --user-agent "Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.224 Safari/534.10" -o ./utilities/tables/towers/data/newpks.txt "http://dove.cccbr.org.uk/downloads.php?download=newpks.txt"
+php ./utilities/tables/towers/txt2sql.php > ./sql/towers.sql
+echo -e "Created tower table SQL\n"
+
+# GZip all SQL files
+gzip -f ./sql/*.sql
