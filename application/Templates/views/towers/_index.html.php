@@ -6,16 +6,12 @@ View::element( 'default.header', array(
 	'title' => 'Towers | Blueline',
 	'breadcrumb' => array(
 		'<a href="/towers">Towers</a>'
+	),
+	'bigSearch' => array(
+		'action' => '/towers/search',
+		'placeholder' => 'Search towers'
 	)
 ) );
+
+View::element( 'default.footer' );
 ?>
-<section class="search">
-	<header>
-<?php View::element( 'sectionSearch', array(
-	'action' => '/towers/search',
-	'placeholder' => 'Search towers',
-	'extra' => Text::pluralise( $count, 'tower' )
-) ); ?>
-	</header>
-</section>
-<?php View::element( 'default.footer' ); ?>

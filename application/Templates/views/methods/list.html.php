@@ -5,11 +5,12 @@ View::element( 'default.header', array(
 	'title' => 'Methods | Blueline',
 	'breadcrumb' => array(
 		'<a href="/methods">Methods</a>'
-	)
+	),
 	'headerSearch' => array( 
 		'action' => '/methods/search',
 		'placeholder' => 'Search methods'
 	),
+	'bigSearch' => false
 ) );
 ?>
 <section class="search">

@@ -1,3 +1,7 @@
+<?php 
+namespace Blueline;
+if( !Response::snippet() ) :
+?>
 			</section>
 			<div id="push"></div>
 		</div>
@@ -7,3 +11,4 @@
 		</footer>
 	</body>
 </html>
+<?php endif; ?>

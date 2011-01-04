@@ -6,18 +6,12 @@ View::element( 'default.header', array(
 	'title' => 'Methods | Blueline',
 	'breadcrumb' => array(
 		'<a href="/methods">Methods</a>'
+	),
+	'bigSearch' => array(
+		'action' => '/methods/search',
+		'placeholder' => 'Search methods'
 	)
 ) );
+
+View::element( 'default.footer' );
 ?>
-<section class="search">
-	<header>
-<?php
-		View::element( 'sectionSearch', array(
-			'action' => '/methods/search',
-			'placeholder' => 'Search methods',
-			'extra' => Text::pluralise( $count, 'method' )
-		) );
-?>
-	</header>
-</section>
-<?php View::element( 'default.footer' ); ?>

@@ -6,20 +6,14 @@ View::element( 'default.header', array(
 	'title' => 'Search | Associations | Blueline',
 	'breadcrumb' => array(
 		'<a href="/associations">Associations</a>'
+	),
+	'bigSearch' => array(
+		'action' => '/associations/search',
+		'placeholder' => 'Search associations'
 	)
 ) );
 ?>
 <section class="search">
-	<header>
-<?php
-View::element( 'sectionSearch', array(
-	'action' => '/associations/search',
-	'q' => $q,
-	'placeholder' => 'Search associations',
-	'extra' => Text::pluralise( $count, 'association' )
-) );
-?>
-	</header>
 	<ol class="searchResults">
 <?php foreach( $associations as $association ) : ?>
 		<li><a href="<?php echo $association->href(); ?>"><?php echo $association->name(); ?></a></li>

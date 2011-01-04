@@ -1,4 +1,4 @@
-( function( window, undefined ) {
+( function( window, document, undefined ) {
 	// can will be a set of functions to detect browser capabilities.
 	// Largely borrowed from Modernizer <http://www.modernizer.com>
 	var can = {
@@ -17,6 +17,9 @@
 			var canVML = ( b && typeof( b.adj ) == 'object' );
 			d = b = null;
 			return canVML;
+		},
+		history: function() {
+			return !!( window.history && history.pushState );
 		}
 	};
 	window['can'] = can;
@@ -45,13 +48,13 @@
 		},
 		// Adds the class className to elem
 		addClass: function( elem, className ) {
-			if( !_.hasClass( elem, className ) ) {
+			if( !this.hasClass( elem, className ) ) {
 				elem.className += ' ' + className;
 			}
 		},
 		// Removes the class className from elem
 		removeClass: function( elem, className ) {
-			if( _.hasClass( elem, className ) ) {
+			if( this.hasClass( elem, className ) ) {
 				elem.className = elem.className.replace( new RegExp( '(\\s|^)'+className+'(\\s|$)' ),' ' );
 			}
 		},
@@ -64,7 +67,7 @@
 			catch( no_getElementsByClassName ) {
 				var get = document.getElementsByTagName( tag ),
 					collect = [];
-				for( i = 0; i < get.length; i++ ) { if( _.hasClass( get[i], className ) ) { collect.push( get[i] ); } }
+				for( i = 0; i < get.length; i++ ) { if( this.hasClass( get[i], className ) ) { collect.push( get[i] ); } }
 				return collect;
 			}
 		},
@@ -100,6 +103,114 @@
 			try { document.addEventListener( 'DOMContentLoaded', func, false ); }
 			catch( no_addEventListener ) { window.attachEvent( 'onload', func ); }
 			window.onload = func;
+		},
+		
+		// Loads a script
+		loadScript: function( src ) {
+			var script = document.createElement( 'script' ),
+				existingScript = document.getElementsByTagName( 'script' )[0];
+			script.type = 'text/javascript';
+			script.async = true;
+			script.src = src;
+			existingScript.parentNode.insertBefore( script, existingScript );
+		},
+		
+		// Clears the content of an element
+		clear: function( element ) {
+			var el = ( typeof( element ) == 'string' )? document.getElementById( element ) : element;
+			while( el.firstChild ) { el.removeChild( el.firstChild ); }
+			return el;
+		},
+		
+		// Replaces the content of an element
+		replaceContent: function( element, content ) {
+			var el = this.clear( element );
+			el.innerHTML = content;
+			return el;
+		},
+		
+		// Replaces the content of an element with the result of an AJAX call
+		AJAXReplaceContentRequests: {},
+		AJAXReplaceContent: function( element, url, callbacks ) {
+			if( !callbacks ) { callbacks = {}; }
+			if( typeof( callbacks.before ) == 'function' ) { callbacks.before(); }
+			var el = this.clear( element ),
+				id = el.getAttribute( 'id' );
+			if( typeof( this.AJAXReplaceContentRequests[id] ) == 'object' ) {
+				this.AJAXReplaceContentRequests[id].abort();
+			}
+			var req = new XMLHttpRequest();
+			this.AJAXReplaceContentRequests[id] = req;
+			req.open( 'GET', url, true );
+			req.onreadystatechange = function() {
+				if( req.readyState == 4 ) {
+					el.innerHTML = req.responseText;
+					if( typeof( callbacks.after ) == 'function' ) { callbacks.after(); }
+					_.AJAXReplaceContentRequests[id] = false;
+				}
+			};
+			req.send();
+			return el;
+		},
+		
+		// Some Blueline specific helpers
+		// Sets the content of the breadcrumb
+		setBreadcrumb: function( breadcrumb, search ) {
+			// Set the header search attributes
+			var topSearchContainer = document.getElementById( 'topSearchContainer' ),
+				topSearch = document.getElementById( 'topSearch' ),
+				smallQ = document.getElementById( 'smallQ' );
+			if( !search ) {
+				topSearchContainer.style.display = 'none';
+			}
+			else {
+				topSearchContainer.style.display = 'block';
+				smallQ.setAttribute( 'value', '' );
+				if( typeof( search.placeholder ) == 'string' ) {
+					smallQ.setAttribute( 'placeholder', search.placeholder );
+				}
+				if( typeof( search.action ) == 'string' ) {
+					topSearch.setAttribute( 'action', search.action );
+				}
+			}
+			
+			var breadcrumbContainer = document.getElementById( 'breadcrumbContainer' );
+			this.clear( breadcrumbContainer );
+			if( breadcrumb ) {
+				for( var i = 0; i < breadcrumb.length; ++i ) {
+					breadcrumbContainer.innerHTML += '<span class="headerSep">&raquo;</span><h2><a href="'+breadcrumb[i].href+'">'+breadcrumb[i].title+'</a></h2>';
+				}
+			}
+		},
+		
+		// Sets the window title
+		setWindowTitle: function( title ) {
+			if( !title ) {
+				document.title = 'Blueline';
+			}
+			else {
+				document.title = title + ' | Blueline';
+			}
+		},
+		
+		// Set big search parameter
+		setBigSearch: function( options ) {
+			var bigSearchContainer = document.getElementById( 'bigSearchContainer' ),
+				bigSearch = document.getElementById( 'bigSearch' ),
+				bigQ = document.getElementById( 'bigQ' );
+			if( !options ) {
+				bigSearchContainer.style.display = 'none';
+			}
+			else {
+				bigSearchContainer.style.display = 'block';
+				bigQ.setAttribute( 'value', '' );
+				if( typeof( options.placeholder ) == 'string' ) {
+					bigQ.setAttribute( 'placeholder', options.placeholder );
+				}
+				if( typeof( options.action ) == 'string' ) {
+					bigSearch.setAttribute( 'action', options.action );
+				}
+			}
 		}
 	};
 	window['_'] = helpers;
@@ -128,15 +239,12 @@
 	var readyFired = false,
 	baseReady = function() {
 		if( readyFired ) { return; } else { readyFired = true; }
-		var i;
 		
 		// Attach click events to tab bars
 		window['tabBars'] = _.getElementsByClassName( 'tabBar' );
-		for( i = 0; i < window['tabBars'].length; i++ ) {
+		for( var i = 0; i < window['tabBars'].length; i++ ) {
 			_.addEventListener( window['tabBars'][i], 'click', tabBarClick );
 		}
 	};
-	
-	// Attach events
 	_.addReadyListener( baseReady );
-} )( window );
+} )( window, document );

@@ -4,20 +4,17 @@ use \Helpers\Text;
 
 View::element( 'default.header', array(
 	'title' => 'Search | Towers | Blueline',
+	'q' => $q,
 	'breadcrumb' => array(
 		'<a href="/towers">Towers</a>'
+	),
+	'bigSearch' => array(
+		'action' => '/towers/search',
+		'placeholder' => 'Search towers'
 	)
 ) );
 ?>
 <section class="search">
-	<header>
-<?php View::element( 'sectionSearch', array(
-	'action' => '/towers/search',
-	'q' => $q,
-	'placeholder' => 'Search towers',
-	'extra' => Text::pluralise( $count, 'tower' )
-) ); ?>
-	</header>
 	<ol class="searchResults">
 <?php foreach( $towers as $tower ) : ?>
 		<li><?php echo "<a href=\"{$tower->href()}\">{$tower->place()} <small>({$tower->dedication()})</small></a>"; ?></li>

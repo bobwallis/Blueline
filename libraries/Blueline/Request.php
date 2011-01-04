@@ -34,7 +34,7 @@ class Request {
 	 */
 	public static function path() {
 		if( self::$_path === false ) {
-			self::$_path = preg_replace( '/'.self::extension().'$/', '', parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ) );
+			self::$_path = preg_replace( '/\.'.self::extension().'$/', '', parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ) );
 		}
 		return self::$_path;
 	}
@@ -71,7 +71,7 @@ class Request {
 	 */
 	public static function queryString() {
 		if( self::$_queryString === false ) {
-			self::$_queryString = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_QUERY );
+			self::$_queryString = preg_replace( '/&?snippet=1&?/', '', parse_url( $_SERVER['REQUEST_URI'], PHP_URL_QUERY ) );
 		}
 		return self::$_queryString;
 	}

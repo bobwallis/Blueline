@@ -4,22 +4,17 @@ use \Helpers\Text;
 
 View::element( 'default.header', array(
 	'title' => 'Search | Methods | Blueline',
+	'q' => $q,
 	'breadcrumb' => array(
 		'<a href="/methods">Methods</a>'
+	),
+	'bigSearch' => array(
+		'action' => '/methods/search',
+		'placeholder' => 'Search methods'
 	)
 ) );
 ?>
 <section class="search">
-	<header>
-<?php
-		View::element( 'sectionSearch', array(
-			'action' => '/methods/search',
-			'q' => $q,
-			'placeholder' => 'Search methods',
-			'extra' => Text::pluralise( $count, 'method' )
-		) );
-?>
-	</header>
 	<ol class="searchResults">
 <?php foreach( $methods as $method ) : ?>
 		<li><a href="<?php echo $method->href(); ?>"><?php echo $method->title(); ?></a></li>

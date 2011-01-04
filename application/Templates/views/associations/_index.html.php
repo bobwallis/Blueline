@@ -9,6 +9,9 @@ View::element( 'default.header', array(
 	'headerSearch' => array( 
 		'action' => '/associations/search',
 		'placeholder' => 'Search associations'
+	),
+	'scripts' => array(
+		'/scripts/general.js'
 	)
 ) );
 ?>

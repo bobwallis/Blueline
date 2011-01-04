@@ -22,6 +22,27 @@ footer, #push { height: 40px; }
 /* Header search */
 form#topSearch { display: none; }
 
+/* Big search */
+div#bigSearchContainer {
+	margin-bottom: 10px;
+}
+form#bigSearch {
+	margin: 5px;
+	width: 304px;
+}
+	form#bigSearch div {
+		height: 25px;
+	}
+	form#bigSearch input {
+		font-size: 13px;
+		width: 264px;
+		height: 21px;
+		padding: 2px 5px;
+	}
+	form#bigSearch button {
+		width: 25px;
+		height: 25px;
+	}
 
 /* Section header */
 section header {
@@ -40,31 +61,6 @@ section header {
 		section header h2.sub {
 			margin-top: -4px !important;
 		}
-
-
-/* Search header */
-form.sectionSearch {
-	margin: 8px 0 3px 8px;
-	width: 304px;
-}
-	h1 + form.sectionSearch { margin-top: 0; }
-	form.sectionSearch div {
-		height: 25px;
-	}
-	form.sectionSearch input {
-		font-size: 13px;
-		width: 264px;
-		height: 21px;
-		padding: 2px 5px;
-	}
-	form.sectionSearch button {
-		width: 25px;
-		height: 25px;
-	}
-	form.sectionSearch p {
-		font-size: 8px;
-		margin: 2px 0 0 5px !important;
-	}
 
 
 /* Tab bar */

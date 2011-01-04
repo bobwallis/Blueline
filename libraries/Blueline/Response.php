@@ -99,6 +99,7 @@ class Response {
 		'txt' => 'text/plain',
 		'json' => 'application/json',
 		'svg' => 'image/svg+xml',
+		'manifest' => 'text/cache-manifest',
 		'opensearch' => 'application/opensearchdescription+xml',
 		'opensearch_suggestions' => 'application/x-suggestions+json'
 	);
@@ -120,6 +121,14 @@ class Response {
 			self::$_contentType = array_key_exists( $extension, self::$_contentTypes )? $extension : 'html';
 		}
 		return self::$_contentType;
+	}
+	
+	/**
+	 * Whether or not the response should contain only a 'snippet' rather than full content
+	 * @return boolean
+	 */
+	public static function snippet() {
+		return ( isset( $_GET['snippet'] ) && intval( $_GET['snippet'] ) == 1 );
 	}
 	
 	/**

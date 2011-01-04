@@ -3,20 +3,15 @@ namespace Blueline;
 use \Helpers\Text;
 
 View::element( 'default.header', array(
-	'title' => 'Search | Blueline'
+	'title' => 'Search | Blueline',
+	'q' => $q,
+	'bigSearch' => array(
+		'action' => '/search',
+		'placeholder' => 'Search'
+	)
 ) );
 ?>
 <section class="search">
-	<header>
-<?php
-View::element( 'sectionSearch', array(
-	'action' => '/search',
-	'q' => $q,
-	'placeholder' => 'Search',
-	'extra' => Text::toList( array( Text::pluralise( $associationCount, 'association' ), Text::pluralise( $methodCount, 'method' ), Text::pluralise( $towerCount, 'tower' ) ) )
-) );
-?>
-	</header>
 	<ul class="searchResults">
 <?php if( $associationCount > 0 ) : ?>
 		<li>
