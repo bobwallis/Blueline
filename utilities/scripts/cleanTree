@@ -10,3 +10,5 @@ rm -rf .git
 rm .gitignore
 rm ./libraries/parsecsv.lib.php
 rm ./libraries/phpcoord.php
+
+echo "Cleaned unneeded files"
