@@ -112,7 +112,7 @@
 			zoom: ( typeof( options.zoom ) != 'undefined' )? options.zoom : 10,
 			center: ( typeof( options.center ) != 'undefined' )? options.center : ( (typeof( options.fitBounds ) != 'undefined' )? options.fitBounds.getCenter() : new google.maps.LatLng( 51.75015, -1.25436 ) ),
 			mapTypeControlOptions: {
-				mapTypeIds: [google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID, 'openStreetMap', google.maps.MapTypeId.ROADMAP]
+				mapTypeIds: [google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID, 'openStreetMap', 'osMap', google.maps.MapTypeId.ROADMAP]
 			},
 			mapTypeId: google.maps.MapTypeId.ROADMAP,
 			noClear: true,
@@ -141,6 +141,7 @@
 		} );
 	
 		this.map.mapTypes.set( 'openStreetMap', new google.maps.ImageMapType( this.OpenStreetMapOptions ) );
+		this.map.mapTypes.set( 'osMap', new google.maps.ImageMapType( this.OSMapOptions ) );
 		this.fusionTableLayer.setMap( this.map );
 
 		if( typeof( options.fitBounds ) != 'undefined' ) {
@@ -162,7 +163,7 @@
 		}
 	
 		if( typeof( document.querySelector ) != 'undefined' ) {
-			var googleTitle = function() { try { document.querySelector( 'div#map'+this.id+' div[title="Show street map"]' ).innerHTML = 'Google'; } catch(e){} };
+			var googleTitle = function() { try { document.querySelector( 'div.map div[title="Show street map"]' ).innerHTML = 'Google'; } catch(e){} };
 			window.setTimeout( googleTitle, 500 ); window.setTimeout( googleTitle, 1000 ); window.setTimeout( googleTitle, 1500 );
 		}
 	};
@@ -174,6 +175,29 @@
 			getTileUrl: function( coord, zoom ) { return 'http://tile.openstreetmap.org/'+zoom+'/'+coord.x+'/'+coord.y+'.png'; },
 			tileSize: new google.maps.Size( 256, 256 ),
 			maxZoom: 18,
+			isPng: true
+		},
+		OSMapOptions: {
+			name: 'OS',
+			alt: 'Ordanance Survey map',
+			getTileUrl: function( coord, zoom ) {
+				var quadkey = '';
+				while( zoom-- ) {
+					var digit = 0,
+						mask = 1 << zoom;
+					if( ( coord.x & mask ) != 0 ) {
+						digit++;
+					}
+					if( ( coord.y & mask ) != 0 ) {
+						digit += 2;
+					}
+					quadkey += digit.toString();
+				}
+				return 'http://ecn.t'+[0,1,2,3,4][Math.floor(Math.random()*5)]+'.tiles.virtualearth.net/tiles/r'+quadkey+'.png?g=604&productSet=mmOS';
+			},
+			tileSize: new google.maps.Size( 256, 256 ),
+			minZoom: 1,
+			maxZoom: 15,
 			isPng: true
 		}
 	};
