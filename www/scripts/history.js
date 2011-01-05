@@ -1,6 +1,6 @@
-( function( window, history, _, can, document ) {
+( function( window, history, document ) {
 	// Functions for using the HTML5 history API to update page contents
-	if( can.history() ) {
+	if( window.can.history() ) {
 		// The click handler
 		var historyClick = function( e ) {
 			var target = _.eventTarget( e );
@@ -191,17 +191,38 @@
 		
 		// Lazily load all the application's scripts after the page has loaded
 		var lazyLoadScripts = function() {
+			// Loads a script
+			var loadScript = function( src, async, callback ) {
+				if( src ) {
+					var script = document.createElement( 'script' );
+					if( typeof( callback ) == 'function' ) {
+						var done = false;
+						script.onload = script.onreadystatechange = function () {
+		          if( ( script.readyState && script.readyState !== 'complete' && script.readyState !== 'loaded' ) || done ) {
+		              return false;
+		          }
+		          script.onload = script.onreadystatechange = null;
+		          done = true;
+		          callback();
+		      	};
+					}
+					script.async = async? true : false;
+					script.src = src;
+					script.type = 'text/javascript';
+					document.body.appendChild( script );
+				}
+			};
 			// Load Google maps API and towers.js if needed
 			if( typeof( window.google ) == 'undefined' || typeof( window.google.maps ) == 'undefined' ) {
-				_.loadScript( 'http://maps.google.com/maps/api/js?sensor=false&callback=isNaN', false, function() {
-					_.loadScript( '/scripts/towers.js' );
+				loadScript( 'http://maps.google.com/maps/api/js?sensor=false&callback=isNaN', false, function() {
+					loadScript( '/scripts/towers.js' );
 				} )
 			}
 			// Load methods.js if needed
 			if( typeof( window.MethodView ) == 'undefined' ) {
-				_.loadScript( '/scripts/methods.js', true );
+				loadScript( '/scripts/methods.js', true );
 			}
 		};
 		_.addEventListener( window, 'load', lazyLoadScripts );
 	}
-} )( window, window['history'], window['_'], window['can'], document );
+} )( window, window['history'], document );

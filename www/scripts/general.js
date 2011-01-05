@@ -134,28 +134,6 @@
 			window.onload = func;
 		},
 		
-		// Loads a script
-		loadScript: function( src, async, callback ) {
-			if( src ) {
-				var script = document.createElement( 'script' );
-				if( typeof( callback ) == 'function' ) {
-					var done = false;
-					script.onload = script.onreadystatechange = function () {
-            if( ( script.readyState && script.readyState !== 'complete' && script.readyState !== 'loaded' ) || done ) {
-                return false;
-            }
-            script.onload = script.onreadystatechange = null;
-            done = true;
-            callback();
-        	};
-				}
-				script.async = async? true : false;
-				script.src = src;
-				script.type = 'text/javascript';
-				document.body.appendChild( script );
-			}
-		},
-		
 		// Clears the content of an element
 		clear: function( element ) {
 			var el = ( typeof( element ) == 'string' )? document.getElementById( element ) : element;
@@ -226,15 +204,10 @@
 		
 		// Sets the window title
 		setWindowTitle: function( title ) {
-			if( !title ) {
-				document.title = 'Blueline';
-			}
-			else {
-				document.title = title + ' | Blueline';
-			}
+			document.title = ( !title )? 'Blueline' : title+' | Blueline';
 		},
 		
-		// Set big search parameter
+		// Set big search parameters
 		setBigSearch: function( options ) {
 			var bigSearchContainer = document.getElementById( 'bigSearchContainer' ),
 				bigSearch = document.getElementById( 'bigSearch' ),
