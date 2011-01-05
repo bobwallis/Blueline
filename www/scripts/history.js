@@ -191,24 +191,15 @@
 		
 		// Lazily load all the application's scripts after the page has loaded
 		var lazyLoadScripts = function() {
-			var head = document.head || document.getElementsByTagName( 'head' )[0],
-				scripts = _.toArray( head.getElementsByTagName( 'script' ) ).map( function( s ) { return s.src; } ).filter( function( e ) { return e; } ),
-				scriptsToLoad = [ (scripts.indexOf( 'http://maps.google.com/maps/api/js?sensor=false' ) == -1)?'http://maps.google.com/maps/api/js?sensor=false&callback=isNaN':'' ].concat( [ 'general', 'towers' ].map( function( s ) { return window.baseURL+'/scripts/'+s+'.js'; } ) ),
-				scriptsToLoadAsync = [ 'methods' ].map( function( s ) { return window.baseURL+'/scripts/'+s+'.js'; } ),
-				i = 0, iLim = scriptsToLoad.length,
-				j = 0, jLim = scriptsToLoadAsync.length;
-			
-			while( i < iLim ) {
-				if( scripts.indexOf( scriptsToLoad[i] ) == -1 ) {
-					_.loadScript( scriptsToLoad[i] );
-				}
-				++i;
+			// Load Google maps API and towers.js if needed
+			if( typeof( window.google ) == 'undefined' || typeof( window.google.maps ) == 'undefined' ) {
+				_.loadScript( 'http://maps.google.com/maps/api/js?sensor=false&callback=isNaN', false, function() {
+					_.loadScript( '/scripts/towers.js' );
+				} )
 			}
-			while( j < jLim ) {
-				if( scripts.indexOf( scriptsToLoadAsync[j] ) == -1 ) {
-					_.loadScriptAsync( scriptsToLoadAsync[j] );
-				}
-				++j;
+			// Load methods.js if needed
+			if( typeof( window.MethodView ) == 'undefined' ) {
+				_.loadScript( '/scripts/methods.js', true );
 			}
 		};
 		_.addEventListener( window, 'load', lazyLoadScripts );

@@ -135,18 +135,21 @@
 		},
 		
 		// Loads a script
-		loadScript: function( src ) {
+		loadScript: function( src, async, callback ) {
 			if( src ) {
 				var script = document.createElement( 'script' );
-				script.src = src;
-				script.type = 'text/javascript';
-				document.body.appendChild( script );
-			}
-		},
-		loadScriptAsync: function( src ) {
-			if( src ) {
-				var script = document.createElement( 'script' );
-				script.async = true;
+				if( typeof( callback ) == 'function' ) {
+					var done = false;
+					script.onload = script.onreadystatechange = function () {
+            if( ( script.readyState && script.readyState !== 'complete' && script.readyState !== 'loaded' ) || done ) {
+                return false;
+            }
+            script.onload = script.onreadystatechange = null;
+            done = true;
+            callback();
+        	};
+				}
+				script.async = async? true : false;
 				script.src = src;
 				script.type = 'text/javascript';
 				document.body.appendChild( script );
