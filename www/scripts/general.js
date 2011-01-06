@@ -19,7 +19,7 @@
 			return canVML;
 		},
 		history: function() {
-			return !!( window.history && history.pushState );
+			return !!( window.history && window.history.pushState );
 		}
 	};
 	window['can'] = can;
@@ -95,7 +95,7 @@
 			catch( no_getElementsByClassName ) {
 				var get = document.getElementsByTagName( tag ),
 					collect = [];
-				for( i = 0; i < get.length; i++ ) { if( this.hasClass( get[i], className ) ) { collect.push( get[i] ); } }
+				for( var i = 0; i < get.length; i++ ) { if( this.hasClass( get[i], className ) ) { collect.push( get[i] ); } }
 				return collect;
 			}
 		},
@@ -132,103 +132,31 @@
 			try { document.addEventListener( 'DOMContentLoaded', func, false ); }
 			catch( no_addEventListener ) { window.attachEvent( 'onload', func ); }
 			window.onload = func;
-		},
-		
-		// Clears the content of an element
-		clear: function( element ) {
-			var el = ( typeof( element ) == 'string' )? document.getElementById( element ) : element;
-			while( el.firstChild ) { el.removeChild( el.firstChild ); }
-			return el;
-		},
-		
-		// Replaces the content of an element
-		replaceContent: function( element, content ) {
-			var el = this.clear( element );
-			el.innerHTML = content;
-			return el;
-		},
-		
-		// Replaces the content of an element with the result of an AJAX call
-		AJAXReplaceContentRequests: {},
-		AJAXReplaceContent: function( element, url, callbacks ) {
-			if( !callbacks ) { callbacks = {}; }
-			if( typeof( callbacks.before ) == 'function' ) { callbacks.before(); }
-			var el = this.clear( element ),
-				id = el.getAttribute( 'id' );
-			if( typeof( this.AJAXReplaceContentRequests[id] ) == 'object' ) {
-				this.AJAXReplaceContentRequests[id].abort();
-			}
-			var req = new XMLHttpRequest();
-			this.AJAXReplaceContentRequests[id] = req;
-			req.open( 'GET', url, true );
-			req.onreadystatechange = function() {
-				if( req.readyState == 4 ) {
-					el.innerHTML = req.responseText;
-					if( typeof( callbacks.after ) == 'function' ) { callbacks.after(); }
-					_.AJAXReplaceContentRequests[id] = false;
-				}
-			};
-			req.send();
-			return el;
-		},
-		
-		// Some Blueline specific helpers
-		// Sets the content of the breadcrumb
-		setBreadcrumb: function( breadcrumb, search ) {
-			// Set the header search attributes
-			var topSearchContainer = document.getElementById( 'topSearchContainer' ),
-				topSearch = document.getElementById( 'topSearch' ),
-				smallQ = document.getElementById( 'smallQ' );
-			if( !search ) {
-				topSearchContainer.style.display = 'none';
-			}
-			else {
-				topSearchContainer.style.display = 'block';
-				smallQ.value = '';
-				if( typeof( search.placeholder ) == 'string' ) {
-					smallQ.setAttribute( 'placeholder', search.placeholder );
-				}
-				if( typeof( search.action ) == 'string' ) {
-					topSearch.setAttribute( 'action', search.action );
-				}
-			}
-			
-			var breadcrumbContainer = document.getElementById( 'breadcrumbContainer' );
-			this.clear( breadcrumbContainer );
-			if( breadcrumb ) {
-				for( var i = 0; i < breadcrumb.length; ++i ) {
-					breadcrumbContainer.innerHTML += '<span class="headerSep">&raquo;</span><h2><a href="'+breadcrumb[i].href+'">'+breadcrumb[i].title+'</a></h2>';
-				}
-			}
-		},
-		
-		// Sets the window title
-		setWindowTitle: function( title ) {
-			document.title = ( !title )? 'Blueline' : title+' | Blueline';
-		},
-		
-		// Set big search parameters
-		setBigSearch: function( options ) {
-			var bigSearchContainer = document.getElementById( 'bigSearchContainer' ),
-				bigSearch = document.getElementById( 'bigSearch' ),
-				bigQ = document.getElementById( 'bigQ' );
-			if( !options ) {
-				bigSearchContainer.style.display = 'none';
-			}
-			else {
-				bigSearchContainer.style.display = 'block';
-				bigQ.value = (window.location.search.match( /q=./ ))? decodeURIComponent( window.location.search.replace( /.*q=(.*?)(&|$).*/, '$1' ) ) : '' ;
-				if( typeof( options.placeholder ) == 'string' ) {
-					bigQ.setAttribute( 'placeholder', options.placeholder );
-				}
-				if( typeof( options.action ) == 'string' ) {
-					bigSearch.setAttribute( 'action', options.action );
-				}
-			}
 		}
 	};
 	window['_'] = helpers;
 	
+	// Tab bar creation
+	window['tabBars'] = [];
+	var TabBar = function( options ) {
+		var landmark = document.getElementById( options.landmark ),
+			container = document.createElement( 'ul' ),
+			tabs = options.tabs.map( function( t ) {
+				var tab = document.createElement( 'li' );
+				tab.id = 'tab_'+t.id;
+				tab.innerHTML = t.title;
+				tab.className = t.className? t.className : '';
+				return tab;
+			} );
+		container.className = 'tabBar';
+		container.id = landmark.id+'_';
+		_.addClass( tabs[(typeof( options.active ) == 'number' )?options.active:0], 'active' );
+		tabs.forEach( function( t ) { container.appendChild( t ); } );
+		_.addEventListener( container, 'click', tabBarClick );
+		landmark.parentNode.insertBefore( container, landmark );
+		this.container = container;
+	};
+	window['TabBar'] = TabBar;
 	// Tab bar click event
 	var tabBarClick = function( e ) {
 		if( !e ) { e = window.event; }
@@ -248,17 +176,4 @@
 			// Fire a scroll event
 			_.fireEvent( 'scroll' );
 	};
-	
-	// Ready/Load event
-	var readyFired = false,
-	baseReady = function() {
-		if( readyFired ) { return; } else { readyFired = true; }
-		
-		// Attach click events to tab bars
-		window['tabBars'] = _.getElementsByClassName( 'tabBar' );
-		for( var i = 0; i < window['tabBars'].length; i++ ) {
-			_.addEventListener( window['tabBars'][i], 'click', tabBarClick );
-		}
-	};
-	_.addReadyListener( baseReady );
 } )( window, document );

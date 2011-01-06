@@ -21,13 +21,21 @@ foreach( $associations as $association ) : ?>
 <section class="association" id="association_<?php echo $i; ?>">
 	<header>
 		<h1><?php echo htmlspecialchars( $association->name() ); ?></h1>
-		<ul class="tabBar">
-			<li id="tab_details<?php echo $i; ?>" class="active">Details</li>
-			<li id="tab_map<?php echo $i; ?>" class="normal_hide">Map</li>
+		<span id="association_<?php echo $i; ?>_tabBar"></span>
+		<script>
+		//<![CDATA[
+			window.tabBars.push( new TabBar( {
+				landmark: 'association_<?php echo $i; ?>_tabBar',
+				tabs: [
+					{ id: 'details<?php echo $i; ?>', title: 'Details' },
+					{ id: 'map<?php echo $i; ?>', title: 'Map', className: 'normal_hide' }
 <?php if( $association->towerCount() > 0 ) : ?>
-			<li id="tab_towers<?php echo $i; ?>">Towers</li>
+					,{ id: 'towers<?php echo $i; ?>', title: 'Towers' }
 <?php endif; ?>
-		</ul>
+				]
+			} ) );
+		//]]>
+		</script>
 	</header>
 	<section id="content_map<?php echo $i; ?>" class="towerMap">
 		<noscript><h2>Map</h2></noscript>
@@ -35,7 +43,7 @@ foreach( $associations as $association ) : ?>
 	</section>
 	<script>
 	//<![CDATA[
-		window['towerMaps'].push( new TowerMap( {
+		window.towerMaps.push( new TowerMap( {
 			id: <?php echo $i; ?>,
 			container: 'map<?php echo $i; ?>',
 			scrollwheel: false,

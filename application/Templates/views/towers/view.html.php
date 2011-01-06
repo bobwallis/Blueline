@@ -23,13 +23,21 @@ $i = 0;
 	<header>
 		<h1><?php echo $tower->place().(($tower->dedication()!='Unknown')?' <span class="normalweight">('.$tower->dedication().')</span>':''); ?></h1>
 		<h2 class="sub"><?php echo Text::toList( array( $tower->county(), $tower->country() ), ', ', ', ' ); ?></h2>
-		<ul class="tabBar">
-			<li id="tab_details<?php echo $i; ?>" class="active">Details</li>
-			<li id="tab_map<?php echo $i; ?>" class="normal_hide">Map</li>
+		<span id="tower_<?php echo $i; ?>_tabBar"></span>
+		<script>
+		//<![CDATA[
+			window.tabBars.push( new TabBar( {
+				landmark: 'tower_<?php echo $i; ?>_tabBar',
+				tabs: [
+					{ id: 'details<?php echo $i; ?>', title: 'Details' },
+					{ id: 'map<?php echo $i; ?>', title: 'Map', className: 'normal_hide' }
 <?php if( count( $tower->firstPeals() ) > 0 ) : ?>
-			<li id="tab_peals<?php echo $i; ?>">Methods First Pealed</li>
+					,{ id: 'peals<?php echo $i; ?>', title: 'Methods First Pealed' }
 <?php endif; ?>
-		</ul>
+				]
+			} ) );
+		//]]>
+		</script>
 	</header>
 	<section id="content_map<?php echo $i; ?>" class="towerMap">
 		<noscript><h2>Map</h2></noscript>
@@ -37,7 +45,7 @@ $i = 0;
 	</section>
 	<script>
 	//<![CDATA[
-		towerMaps.push( new TowerMap( {
+		window.towerMaps.push( new TowerMap( {
 			id: <?php echo $i; ?>,
 			container: 'map<?php echo $i; ?>',
 			scrollwheel: false,

@@ -21,11 +21,20 @@ foreach( $methods as $method ) : ?>
 <section class="method" id="method_<?php echo $i; ?>">
 	<header>
 		<h1><?php echo $method->title(); ?></h1>
-		<ul class="tabBar">
-			<li id="tab_details<?php echo $i; ?>">Details</li>
-			<li id="tab_line<?php echo $i; ?>" class="active">Line</li>
-			<li id="tab_grid<?php echo $i; ?>">Grid</li>
-		</ul>
+		<span id="method_<?php echo $i; ?>_tabBar"></span>
+		<script>
+		//<![CDATA[
+			window.tabBars.push( new TabBar( {
+				landmark: 'method_<?php echo $i; ?>_tabBar',
+				tabs: [
+					{ id: 'details<?php echo $i; ?>', title: 'Details' },
+					{ id: 'line<?php echo $i; ?>', title: 'Line' },
+					{ id: 'grid<?php echo $i; ?>', title: 'Grid' }
+				],
+				active: 1
+			} ) );
+		//]]>
+		</script>
 	</header>
 	<div id="content_details<?php echo $i; ?>" class="methodDetails">
 		<noscript><h2>Details</h2></noscript>
@@ -85,7 +94,7 @@ foreach( $methods as $method ) : ?>
 	<div id="content_grid<?php echo $i; ?>" class="methodGrid"></div>
 	<script>
 	//<![CDATA[
-		methods.push( new MethodView( {
+		window.methods.push( new MethodView( {
 			id: <?php echo $i; ?>,
 			stage: <?php echo intval( $method->stage() ); ?>,
 			notation: <?php echo json_encode( $method->notationExpanded() ); ?>,
