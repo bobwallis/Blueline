@@ -25,7 +25,7 @@
 				while( $breadcrumbContainer.firstChild ) { $breadcrumbContainer.removeChild( $breadcrumbContainer.firstChild ); }
 				if( breadcrumb ) {
 					for( var i = 0; i < breadcrumb.length; ++i ) {
-						$breadcrumbContainer.innerHTML += '<span class="headerSep">&raquo;</span><h2><a href="'+breadcrumb[i].href+'">'+breadcrumb[i].title+'</a></h2>';
+						$breadcrumbContainer.innerHTML += '<span class="headerSep">&raquo;</span><h2><a href="'+breadcrumb[i].url+'">'+breadcrumb[i].title+'</a></h2>';
 					}
 				}
 				// Set the header search attributes
