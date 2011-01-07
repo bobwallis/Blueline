@@ -641,10 +641,10 @@
 				leadsPerColumn = 1,
 				numberOfColumns = this.parent.numberOfLeads;
 			// If the number of columns is fixed
-			if( typeof( this.options_orig.columns ) != 'undefined' || pageWidth < 400 ) {
-				numberOfColumns = ( pageWidth < 400 )? 1 : this.options_orig.columns;
+			if( typeof( this.options_orig.columns ) != 'undefined' ) {
+				numberOfColumns = this.options_orig.columns;
 				leadsPerColumn = Math.ceil( this.parent.numberOfLeads/numberOfColumns );
-				var sizeTestBase = pageWidth - 30 - ( ((2*numberOfColumns+callColumns-1) * columnPadding ) + ( numberOfColumns * placeStartPadding ) );
+				var sizeTestBase = pageWidth - 30 - ( ((2*(numberOfColumns+callColumns)-1) * columnPadding ) + ( numberOfColumns * placeStartPadding ) );
 				while( testFontSize > 10 && sizeTestBase - ( (numberOfColumns+callColumns) * testWidth ) < 0 ) {
 					testText.style.fontSize = (--testFontSize)+'px';
 					testWidth = testText.offsetWidth;
@@ -654,7 +654,7 @@
 			else if( typeof( this.options_orig.leadsPerColumn ) != 'undefined' ) {
 				leadsPerColumn = this.options_orig.leadsPerColumn;
 				numberOfColumns = Math.ceil( this.parent.numberOfLeads / leadsPerColumn );
-				var sizeTestBase = pageWidth - 30 - ( ((2*numberOfColumns+callColumns-1) * columnPadding ) + ( numberOfColumns * placeStartPadding ) );
+				var sizeTestBase = pageWidth - 30 - ( ((2*(numberOfColumns+callColumns)-1) * columnPadding ) + ( numberOfColumns * placeStartPadding ) );
 				while( testFontSize > 10 && sizeTestBase - ( (numberOfColumns+callColumns) * testWidth ) < 0 ) {
 					testText.style.fontSize = (--testFontSize)+'px';
 					testWidth = testText.offsetWidth;
@@ -663,12 +663,12 @@
 			else {
 				// Calculate best text size/column settings by measuring the page
 				do {
-				var sizeTestBase = pageWidth - 30 - ( ((2*numberOfColumns+callColumns-1) * columnPadding ) + ( numberOfColumns * placeStartPadding ) );
+				var sizeTestBase = pageWidth - 30 - ( ((2*(numberOfColumns+callColumns)-1) * columnPadding ) + ( numberOfColumns * placeStartPadding ) );
 					while( testFontSize > 10 && sizeTestBase - ( (numberOfColumns+callColumns) * testWidth ) < 0 ) {
 						testText.style.fontSize = (--testFontSize)+'px';
 						testWidth = testText.offsetWidth;
 					}
-					if( testFontSize < 11 ) {
+					if( testFontSize < 11 && leadsPerColumn < this.parent.numberOfLeads) {
 						testFontSize = 14;
 						testText.style.fontSize = '14px';
 						testWidth = testText.offsetWidth;
@@ -692,8 +692,7 @@
 			var textContainerId = 'methodText_'+this.parent.id;
 			this.sizeStyleSheet.innerHTML = '#' + textContainerId + ' td{padding:0 '+(this.options.columnPadding+this.options.placeStartPadding)+'px 0 '+this.options.columnPadding+'px !important;}' +
 				'#' + textContainerId + ' td.first{padding-left:0 !important;}' +
-				'#' + textContainerId + '{font-size:' + this.options.fontSize + 'px !important;line-height:' + (this.options.fontSize+1) + 'px !important;}' +
-				( (pageWidth<400)? '#methodLine_'+this.parent.id+', #'+textContainerId+'{margin-left:'+(((pageWidth-this.dimensions.row.x)/2)-this.options.columnPadding)+'px;}' : '' );
+				'#' + textContainerId + '{font-size:' + this.options.fontSize + 'px !important;line-height:' + (this.options.fontSize+1) + 'px !important;}';
 		},
 	
 		draw: function() {
