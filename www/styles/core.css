@@ -269,6 +269,13 @@ div.methodLine td {
 	float: left;
 	margin: 0 20px 0 10px;
 }
+td.call p {
+	display: block;
+	margin: 0 0 3px -2px !important;
+	padding: 0;
+	text-align: left;
+	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+}
 
 /* Tower Maps */
 .map {

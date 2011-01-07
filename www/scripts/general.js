@@ -140,21 +140,28 @@
 	window['tabBars'] = [];
 	var TabBar = function( options ) {
 		var landmark = document.getElementById( options.landmark ),
-			container = document.createElement( 'ul' ),
-			tabs = options.tabs.map( function( t ) {
-				var tab = document.createElement( 'li' );
-				tab.id = 'tab_'+t.id;
-				tab.innerHTML = t.title;
-				tab.className = t.className? t.className : '';
-				return tab;
-			} );
-		container.className = 'tabBar';
-		container.id = landmark.id+'_';
-		_.addClass( tabs[(typeof( options.active ) == 'number' )?options.active:0], 'active' );
-		tabs.forEach( function( t ) { container.appendChild( t ); } );
-		_.addEventListener( container, 'click', tabBarClick );
-		landmark.parentNode.insertBefore( container, landmark );
-		this.container = container;
+			container = document.getElementById( landmark.id+'_' );
+		if( container ) {
+			_.addEventListener( container, 'click', tabBarClick );
+			return;
+		}
+		else {
+			container = document.createElement( 'ul' );
+			var tabs = options.tabs.map( function( t ) {
+					var tab = document.createElement( 'li' );
+					tab.id = 'tab_'+t.id;
+					tab.innerHTML = t.title;
+					tab.className = t.className? t.className : '';
+					return tab;
+				} );
+			container.className = 'tabBar';
+			container.id = landmark.id+'_';
+			_.addClass( tabs[(typeof( options.active ) == 'number' )?options.active:0], 'active' );
+			tabs.forEach( function( t ) { container.appendChild( t ); } );
+			_.addEventListener( container, 'click', tabBarClick );
+			landmark.parentNode.insertBefore( container, landmark );
+			this.container = container;
+		}
 	};
 	window['TabBar'] = TabBar;
 	// Tab bar click event

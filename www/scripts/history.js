@@ -63,6 +63,9 @@
 				// Wipe HTML
 				while( $content.firstChild ) { $content.removeChild( $content.firstChild ); }
 				// Clear global variables
+				window['methods'].forEach( function( method ) {
+					method.destroy();
+				} );
 				window['methods'] = [];
 				window['towerMaps'] = [];
 			},

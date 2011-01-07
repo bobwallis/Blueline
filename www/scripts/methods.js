@@ -122,6 +122,7 @@
 	// Helper functions
 	// Repeats an array to make an array of a given length
 	var repeatArrayToLength = function( array, length ) {
+		if( typeof( array.push ) == 'undefined' ) { array = [array]; }
 		var array2 = new Array( length ),
 			i = -1,
 			iMod = array.length;
@@ -314,6 +315,8 @@
 	var pathString = function( position, notation, xPlus, yPlus, repeats, flicks ) {
 		if( !xPlus ) { xPlus = 1; }
 		if( !yPlus ) { yPlus = 1; }
+		if( !repeats ) { repeats = 1; }
+		if( !flicks ) { flicks = false; }
 		var newPosition,
 			path = 'm'+((position*xPlus)+(xPlus/2))+','+(yPlus/2)+'l',
 			i = 0, iMod = notation.length, iLim = repeats*iMod;
@@ -327,6 +330,23 @@
 			path += (((newPosition-position)*xPlus)/4)+','+(yPlus/4)+' ';
 		}
 		return path;
+	};
+	
+	var textSegment = function( start, notation, textSource, repeats ) {
+		if( !textSource ) { textSource = start; }
+		if( !repeats ) { repeats = 1; }
+		var j = 0, jLim = start.length,
+			i = 0, iLim = notation.length*repeats, iMod = notation.length,
+			row = start,
+			segmentText = '';
+		while( j < jLim ) { segmentText += textSource[row[j++]]; }
+		while( i < iLim ) {
+			row = permute( row, notation[(i++)%iMod] );
+			segmentText += '<br/>';
+			j = 0;
+			while( j < jLim ) { segmentText += textSource[row[j++]]; }
+		}
+		return segmentText;
 	};
 
 	// Shared variables
@@ -452,6 +472,12 @@
 			this.Grid.draw();
 		}
 	};
+	MethodView.prototype = {
+		destroy: function() {
+			this.Line.destroy();
+			this.Grid.destroy();
+		}
+	};
 	
 	var MethodLine = function( parent, options ) {
 		this.parent = parent;
@@ -483,43 +509,79 @@
 			// Display calls if given by default
 			this.options.calls = ( this.parent.calls.length > 0 )? true : false;
 		}
-		if( typeof( options.colours ) == 'undefined' ) {
-			// Some default colours. Red hunt bells; blue, green, purple... work bells. Transparent text for coloured lines
-			this.options.colours = {
+		if( typeof( options.colors ) == 'undefined' ) {
+			// Some default colors. Red hunt bells; blue, green, purple... work bells. Transparent text for colored lines
+			this.options.colors = {
 				lines: { hunt: '#D11', base: 'transparent', work: ['#11D','#1D1','#D1D', '#DD1', '#1DD'] },
 				text: ( this.options.lines === true )? { hunt: 'transparent', base: '#000', work: 'transparent' } : { hunt: '#D11', base: '#000', work: ['#11D','#1D1','#D1D', '#DD1', '#1DD'] },
 				ruleOffs: '#999'
 			};
 		}
-		// Assign colours to bells
-		this.colours = this.parent.rounds.map( function( e ) {
-			return { line: this.options.colours.lines.base, text: this.options.colours.text.base };
+		
+		// Assign colors to bells
+		this.courseColors = this.parent.rounds.map( function( e ) {
+			return { line: this.options.colors.lines.base, text: this.options.colors.text.base };
+		}, this ),
+			workColorSource = {
+				lines: repeatArrayToLength( this.options.colors.lines.work, this.parent.workGroups.length ),
+				text: repeatArrayToLength( this.options.colors.text.work, this.parent.workGroups.length )
+			};
+		this.parent.huntBells.forEach( function( pos ) {
+			this.courseColors[pos] = { line: this.options.colors.lines.hunt, text: this.options.colors.text.hunt };
 		}, this );
-		for( var i = 0, iLim = this.parent.workGroups.length, colourOptionsTemp = this.options.colours; i < iLim; i++ ) {
-			if( this.parent.workGroups[i].length == 1 ) {
-				this.colours[this.parent.workGroups[i][0]] = { line: colourOptionsTemp.lines.hunt, text: colourOptionsTemp.text.hunt };
+		this.parent.workGroups.forEach( function( group ) {
+			if( group.length > 1 ) {
+				this.courseColors[group[0]] = { line: workColorSource.lines.shift(), text: workColorSource.text.shift() };
 			}
-			else {
-				this.colours[this.parent.workGroups[i][0]] = { line: ((typeof(colourOptionsTemp.lines.work)=='string')? colourOptionsTemp.lines.work : colourOptionsTemp.lines.work.shift() ), text: ((typeof(colourOptionsTemp.text.work)=='string')? colourOptionsTemp.text.work : colourOptionsTemp.text.work.shift()) };
-			}
-		}
-	
+		}, this );
+		
+		this.callColors = {};
+		this.parent.calls.forEach( function( call ) {
+			var colors = this.parent.rounds.map( function( e ) {
+				return { line: this.options.colors.lines.base, text: this.options.colors.text.base };
+			}, this ),
+				affectedColorSource = {
+					lines: repeatArrayToLength( this.options.colors.lines.work, call.affectedBellStartPositions.length ),
+					text: repeatArrayToLength( this.options.colors.text.work, call.affectedBellStartPositions.length )
+				};
+			call.huntBellStartPositions.forEach( function( pos ) {
+				colors[call.startRow[pos]] = { line: this.options.colors.lines.hunt, text: this.options.colors.text.hunt };
+			}, this );
+			call.affectedBellStartPositions.forEach( function( pos ) {
+				colors[call.startRow[pos]] = { line: affectedColorSource.lines.shift(), text: affectedColorSource.text.shift() };
+			}, this );
+			this.callColors[call.id] = colors;
+		}, this );
+		
 		// Add the CSS for text styling to the page
 		if( this.options.text ) {
 			var cssString = '',
 				colorStyleSheet = document.createElement( 'style' ),
 				sizeStyleSheet = document.createElement( 'style' );
 				textContainerId = 'methodText_'+this.parent.id,
-				i = 0, iLim = this.colours.length;
-			for(; i < iLim; i++ ) {
-				if( this.colours[i].text != this.options.colours.text.base ) {
-					if( this.colours[i].text == 'transparent' ) {
-						cssString += '#' + textContainerId + ' span.b' + bellToChar( i ) + ' { color: ' + this.colours[i].text + ' !important; } * html #' + textContainerId + ' span.b' + bellToChar( i ) + ', *+html #' + textContainerId + ' span.b' + bellToChar( i ) + ' { visibility: hidden; } #' + textContainerId + ' span.b' + bellToChar( i ) + ' { visibility: hidden\\0/ !important; }';
+				i = 0, iLim = this.courseColors.length;
+			this.courseColors.forEach( function( color, i ) {
+				if( color.text != this.options.colors.text.base ) {
+					if( color.text == 'transparent' ) {
+						cssString += '#' + textContainerId + ' span.b' + bellToChar( i ) + ' {color:transparent !important;} * html #' + textContainerId + ' span.b' + bellToChar( i ) + ', *+html #' + textContainerId + ' span.b' + bellToChar( i ) + ' { visibility: hidden; } #' + textContainerId + ' span.b' + bellToChar( i ) + ' { visibility: hidden\\0/ !important; }';
 					}
 					else {
-						cssString += '#' + textContainerId + ' span.b' + bellToChar( i ) + ' { color: ' + this.colours[i].text + ' !important; }';
+						cssString += '#' + textContainerId + ' span.b' + bellToChar( i ) + ' {color:' + color.text + ' !important;}';
 					}
 				}
+			}, this );
+			for( var call in this.callColors ) {
+				var colors = this.callColors[call];
+				colors.forEach( function( color, i ) {
+					if( color.text != this.options.colors.text.base ) {
+						if( color.text == 'transparent' ) {
+							cssString += '#' + textContainerId + ' span.'+call+'_b' + bellToChar( i ) + ' {color:transparent !important;} * html #' + textContainerId + ' span.'+call+'_b' + bellToChar( i ) + ', *+html #' + textContainerId + ' span.'+call+'_b' + bellToChar( i ) + ' {visibility:hidden;} #' + textContainerId + ' span.'+call+'_b' + bellToChar( i ) + ' {visibility:hidden\\0/ !important;}';
+						}
+						else {
+							cssString += '#' + textContainerId + ' span.'+call+'_b' + bellToChar( i ) + ' {color:' + color.text + ' !important;}';
+						}
+					}
+				}, this );
 			}
 			colorStyleSheet.innerHTML = cssString;
 			colorStyleSheet.id = 'colorStyle'+this.parent.id;
@@ -527,13 +589,19 @@
 			$head.appendChild( sizeStyleSheet );
 			$head.appendChild( colorStyleSheet );
 			this.sizeStyleSheet = sizeStyleSheet;
+			this.colorStyleSheet = colorStyleSheet;
 		}
 	
 		// Calculate font size, lead distribution across columns
 		this.calculateSizing();
 	};
 	MethodLine.prototype = {
-
+		destroy: function() {
+			while( this.container.firstChild ) { this.container.removeChild( this.container.firstChild ); }
+			$head.removeChild( this.sizeStyleSheet );
+			$head.removeChild( this.colorStyleSheet );
+		},
+		
 		initialiseContainers: function() {
 			// Empty the container by creating a new one with the same attributes, and replacing the old one with it. This is often faster than emptying the old one.
 			var newLineContainer = document.createElement( this.container.nodeName );
@@ -550,14 +618,14 @@
 				placeStartPadding = 0;
 			if( this.options.placeStarts.alongside ) {
 				placeStartPadding += ( 12 * ( this.parent.rounds.filter( function( e ) {
-					return ( this.colours[e].line != this.options.colours.lines.base && this.colours[e].line != this.options.colours.lines.hunt );
+					return ( this.courseColors[e].line != this.options.colors.lines.base && this.courseColors[e].line != this.options.colors.lines.hunt );
 				}, this ).length - 1) );
 			}
 			this.options.columnPadding = columnPadding;
 			this.options.placeStartPadding = placeStartPadding;
 			
 			// How many columns to include for calls
-			var callColumns =  this.options.calls? 1 : 0;
+			var callColumns =  this.options.calls? this.parent.calls.length : 0;
 			
 			// Add an element to the page whose width we can use to test font sizes
 			var testText = document.createElement( 'span' );
@@ -649,7 +717,6 @@
 			if( this.options.lines === true ) {
 				this.drawLines();
 			}
-			// 
 			
 			// Add the paper to the page
 			this.container.appendChild( this.paper.canvas );
@@ -671,56 +738,46 @@
 			// Write out the plain course
 			var textSource = this.parent.rounds.map( function( e ) {
 				var bellText = bellToChar( e );
-				return ( this.colours[e].text != this.options.colours.text.base )? '<span class="b'+bellToChar( e )+'">'+bellText+'</span>' : bellText;
+				return ( this.courseColors[e].text != this.options.colors.text.base )? '<span class="b'+bellToChar( e )+'">'+bellText+'</span>' : bellText;
 			}, this ),
 				methodText = document.createElement( 'table' ),
 				methodTextInnerHTML = '',
-				i = 0, iLim = this.options.columns,
-				upTo;
+				leadsPerColumn = this.options.leadsPerColumn,
+				i = 0, iLim = this.options.columns;
 			methodText.id = 'methodText_'+this.parent.id;
-			for( ; i < iLim; ++i ) {
-				for( upTo = (i+1)*this.options.leadsPerColumn; typeof(this.parent.leadHeads[upTo]) == 'undefined'; --upTo ) {}
-				methodTextInnerHTML += '<td'+((i==0)?' class="first"':'')+'>' + this.textSegment( this.parent.leadHeads[i*this.options.leadsPerColumn], this.parent.leadHeads[upTo], this.parent.notation, textSource ) + '</td>';
+			while( i < iLim ) {
+				var repeats = (((i+1)*leadsPerColumn)%this.parent.numberOfLeads)%leadsPerColumn;
+				methodTextInnerHTML += '<td'+((i==0)?' class="first"':'')+'>' + textSegment( this.parent.leadHeads[i*leadsPerColumn], this.parent.notation, textSource, repeats?repeats:leadsPerColumn ) + '</td>';
+				++i;
 			}
 			
 			// Write out any calls
 			if( this.options.calls ) {
-				methodTextInnerHTML += '<td class="calls">';
 				this.parent.calls.forEach( function( call ) {
-					methodTextInnerHTML += '<div class="call" id="methodText_call_'+call.id+'"><p>'+call.title+':</p>'+''+'</div>';
+					var textSource = this.parent.rounds.map( function( e ) {
+						var bellText = bellToChar( e );
+						return ( this.callColors[call.id][e].text != this.options.colors.text.base )? '<span class="'+call.id+'_b'+bellToChar( e )+'">'+bellText+'</span>' : bellText;
+					}, this )
+					methodTextInnerHTML += '<td class="call" id="methodText_call_'+call.id+'"><p class="callTitle">'+call.title+':</p>'+textSegment( call.startRow, call.notation, textSource )+'</td>';
 				}, this );
-				methodTextInnerHTML += '</td>';
 			}
 			
 			methodText.innerHTML = '<tr>' + methodTextInnerHTML + '</tr>';
 			return methodText;
 		},
-	
-		textSegment: function( src, dst, notation, textSource ) {
-			var j = 0, jLim = src.length, i = 0, iMod = notation.length, segmentText = '';
-			while( j < jLim ) { segmentText += textSource[src[j++]]; }
-			for( ; !rowsEqual( src, dst ) || ( i == 0 && rowsEqual( src, dst ) ); i++ ) {
-				src = permute( src, notation[i%iMod] );
-				segmentText += '<br/>';
-				j = 0;
-				while( j < jLim ) { segmentText += textSource[src[j++]]; }
-			}
-			return segmentText;
-		},
-
-
+		
 		drawLines: function() {
 			var paths = {},
-				pathColours = [],
+				pathcolors = [],
 				i = 0, iLim = this.options.columns,
 				upTo, leadsToDraw,
 				j = 0, jLim = this.parent.stage,
 				hMultiplier = this.dimensions.row.x + (2*this.options.columnPadding) + this.options.placeStartPadding;
 			// We'll build a single long path for each different path style
 			for( ; j < jLim; ++j ) {
-				if( typeof( paths[this.colours[j].line] ) == 'undefined' ) {
-					paths[this.colours[j].line] = '';
-					pathColours.push( this.colours[j].line );
+				if( typeof( paths[this.courseColors[j].line] ) == 'undefined' ) {
+					paths[this.courseColors[j].line] = '';
+					pathcolors.push( this.courseColors[j].line );
 				}
 			}
 			// Calculate paths
@@ -728,42 +785,42 @@
 				for( upTo = (i+1)*this.options.leadsPerColumn; typeof( this.parent.leadHeads[upTo]) == 'undefined'; --upTo ) {}
 				leadsToDraw = (upTo%this.options.leadsPerColumn == 0)? this.options.leadsPerColumn : upTo%this.options.leadsPerColumn;
 				for( j = 0; j < jLim; ++j ) {
-					if( this.colours[j].line != 'transparent' ) {
-						paths[this.colours[j].line] += 'M'+(i*hMultiplier)+',0' + pathString( this.parent.leadHeads[i*this.options.leadsPerColumn].indexOf( j ), this.parent.notation, this.dimensions.bell.x, this.dimensions.bell.y, leadsToDraw, true );
+					if( this.courseColors[j].line != 'transparent' ) {
+						paths[this.courseColors[j].line] += 'M'+(i*hMultiplier)+',0' + pathString( this.parent.leadHeads[i*this.options.leadsPerColumn].indexOf( j ), this.parent.notation, this.dimensions.bell.x, this.dimensions.bell.y, leadsToDraw, true );
 					}
 				}
 			}
 			// Draw paths
 			// Base
-			if( typeof( paths[this.options.colours.lines.base] ) != 'undefined' && this.options.colours.lines.base != 'transparent' ) {
+			if( typeof( paths[this.options.colors.lines.base] ) != 'undefined' && this.options.colors.lines.base != 'transparent' ) {
 				this.paper.add( 'path', {
 					'stroke-width': 1, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', fill: 'none',
-					stroke: this.options.colours.lines.base,
-					d: paths[this.options.colours.lines.base]
+					stroke: this.options.colors.lines.base,
+					d: paths[this.options.colors.lines.base]
 				} );
 			}
 			// Hunts
-			if( typeof( paths[this.options.colours.lines.hunt] ) != 'undefined' && this.options.colours.lines.hunt != 'transparent' ) {
+			if( typeof( paths[this.options.colors.lines.hunt] ) != 'undefined' && this.options.colors.lines.hunt != 'transparent' ) {
 				this.paper.add( 'path', {
 					'stroke-width': 1, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', fill: 'none',
-					stroke: this.options.colours.lines.hunt,
-					d: paths[this.options.colours.lines.hunt]
+					stroke: this.options.colors.lines.hunt,
+					d: paths[this.options.colors.lines.hunt]
 				} );
 			}
 			// Working
-			for( i = 0, iLim = pathColours.length; i < iLim; ++i ) {
-				if( pathColours[i] != this.options.colours.lines.base && pathColours[i] != this.options.colours.lines.hunt && pathColours[i] != 'transparent' ) {
+			for( i = 0, iLim = pathcolors.length; i < iLim; ++i ) {
+				if( pathcolors[i] != this.options.colors.lines.base && pathcolors[i] != this.options.colors.lines.hunt && pathcolors[i] != 'transparent' ) {
 					this.paper.add( 'path', {
 						'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', fill: 'none',
-						stroke: pathColours[i],
-						d: paths[pathColours[i]]
+						stroke: pathcolors[i],
+						d: paths[pathcolors[i]]
 					} );
 				}
 			}
 		},
 	
 		drawRuleOffs: function() {
-			if( this.options.colours.ruleOffs == 'transparent' ) { return; }
+			if( this.options.colors.ruleOffs == 'transparent' ) { return; }
 			// i will iterate over columns
 			var i = -1, iLim = this.options.columns,
 				// j will iterate over rule offs within a column
@@ -780,12 +837,12 @@
 					path += 'M'+(i*hMultiplier)+','+((j+1)*vMultiplier+vPadding)+'l'+this.dimensions.row.x+',0';
 				}
 			}
-			this.paper.add( 'path', { 'stroke-width': 1, 'stroke-linecap': 'round', 'stroke-dasharray': '4,2', 'stroke': this.options.colours.ruleOffs, 'd': path } );
+			this.paper.add( 'path', { 'stroke-width': 1, 'stroke-linecap': 'round', 'stroke-dasharray': '4,2', 'stroke': this.options.colors.ruleOffs, 'd': path } );
 		},
 	
 		drawPlaceStarts: function() {
 			var toDraw = this.parent.rounds.filter( function( e ) {
-				return ( this.colours[e].line != this.options.colours.lines.base && this.colours[e].line != this.options.colours.lines.hunt );
+				return ( this.courseColors[e].line != this.options.colors.lines.base && this.courseColors[e].line != this.options.colors.lines.hunt );
 			}, this ),
 				jLim = toDraw.length,
 				hMultiplier = this.dimensions.row.x + (2*this.options.columnPadding) + this.options.placeStartPadding,
@@ -801,9 +858,9 @@
 							cx: (Math.floor(i/this.options.leadsPerColumn)*hMultiplier)+((this.parent.leadHeads[i].indexOf(toDraw[j])+0.5)*this.dimensions.bell.x)+hPadding,
 							cy: ((i%this.options.leadsPerColumn)*vMultiplier)+vPadding,
 							r: 2,
-							fill: this.colours[toDraw[j]].line,
+							fill: this.courseColors[toDraw[j]].line,
 							'stroke-width': 0,
-							stroke: this.colours[toDraw[j]].line
+							stroke: this.courseColors[toDraw[j]].line
 						} );
 					}
 				}
@@ -825,7 +882,7 @@
 							r: 6,
 							fill: 'none',
 							'stroke-width': 1,
-							stroke: this.colours[toDraw[j]].line,
+							stroke: this.courseColors[toDraw[j]].line,
 							opacity: 0.8
 						} );
 						if( place < 10 ) {
@@ -872,7 +929,7 @@
 			this.options.showNotation = true;
 		}
 		if( typeof( options.colors ) == 'undefined' ) {
-			// Default colours array
+			// Default colors array
 			this.options.colors = {
 				lines: repeatArrayToLength( ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'], parent.stage ).map( function( e, i ) { return ( parent.huntBells.indexOf( i ) != -1 )? '#D11' : e; }, this ),
 				ruleOffs: '#999'
@@ -953,6 +1010,10 @@
 	
 	// Public methods for MethodGrid
 	MethodGrid.prototype = {
+		destroy: function() {
+			while( this.container.firstChild ) { this.container.removeChild( this.container.firstChild ); }
+		},
+		
 		draw: function() {
 			// Create a grid for the whole lead
 			this.leadGrid = this.createGrid( this.options.plainLeadGridOptions );
@@ -961,13 +1022,14 @@
 			// Create grids for calls
 			this.callGrids = [];
 			this.parent.calls.forEach( function( call ) {
-				call.id = 'methodGrid_'+this.parent.id+'_'+call.id;
-				call.showNotation = this.options.showNotation;
-				call.colors = {
+				var gridOptions = {}; for( e in call ) { gridOptions[e] = call[e]; }
+				gridOptions.id = 'methodGrid_'+this.parent.id+'_'+call.id;
+				gridOptions.showNotation = this.options.showNotation;
+				gridOptions.colors = {
 					lines: permute( this.options.plainLeadGridOptions.colors.lines, call.startRow ),
 					ruleOffs: this.options.plainLeadGridOptions.colors.ruleOffs
 				};
-				var callGrid = this.createGrid( call );
+				var callGrid = this.createGrid( gridOptions );
 				this.container.appendChild( callGrid );
 				this.callGrids.push( callGrid );
 			}, this );
