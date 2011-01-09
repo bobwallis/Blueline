@@ -751,7 +751,7 @@
 				repeats;
 			methodText.id = 'methodText_'+this.parent.id;
 			while( i < iLim ) {
-				repeats = (((i+1)*leadsPerColumn)%this.parent.numberOfLeads)%leadsPerColumn;
+				repeats = ( (i+1)*leadsPerColumn < this.parent.numberOfLeads )? leadsPerColumn : this.parent.numberOfLeads%leadsPerColumn;
 				methodTextInnerHTML += '<td'+((i===0)?' class="first"':'')+'>' + textSegment( this.parent.leadHeads[i*leadsPerColumn], this.parent.notation, textSource, repeats?repeats:leadsPerColumn ) + '</td>';
 				++i;
 			}
