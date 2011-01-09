@@ -4,7 +4,7 @@
 		this.canvas = this.makeCanvas( options );
 	};
 	
-	if( can.SVG() ) {
+	if( window.can.SVG() ) {
 		SVGorVML.prototype = {
 			type: 'SVG',
 			ns: 'http://www.w3.org/2000/svg',
@@ -19,10 +19,10 @@
 			},
 			
 			add: function( type, attributes ) {
-				var toAdd;
+				var toAdd, attribute;
 				switch( type ) {
 					case 'path':
-						if( typeof( attributes.d ) == 'undefined' ) { return; }
+						if( typeof attributes.d === 'undefined' ) { return; }
 						toAdd = document.createElementNS( this.ns, 'svg:path' );
 						break;
 					case 'circle':
@@ -31,14 +31,14 @@
 					default:
 						return;
 				}
-				for( var attribute in attributes ) {
+				for( attribute in attributes ) {
 					toAdd.setAttribute( attribute, attributes[attribute] );
 				}
 				return this.canvas.appendChild( toAdd );
 			}
 		};
 	}
-	else if( can.VML() ) {
+	else if( window.can.VML() ) {
 		SVGorVML.prototype = {
 			type: 'VML',
 			ns: 'BluelineVML',
@@ -52,10 +52,11 @@
 			},
 			add: function( type, attributes ) {
 				var toAdd,
+					attribute,
 					VMLAttributes = this.attributesConvert( attributes );
 				switch( type ) {
 					case 'path':
-						if( typeof( attributes.d ) == 'undefined' ) { return; }
+						if( typeof attributes.d === 'undefined' ) { return; }
 						toAdd = document.createElement( this.ns+':shape' );
 						break;
 					case 'circle':
@@ -64,26 +65,26 @@
 					default:
 						return;
 				}
-				for( var attribute in VMLAttributes ) {
+				for( attribute in VMLAttributes ) {
 					toAdd.setAttribute( attribute, attributes[attribute] );
 				}
 				return this.canvas.appendChild( toAdd );
 			},
 			attributesConvert: function( attributes ) {
 				var VMLAttributes = { style: '' };
-				if( typeof( attributes.fill ) != 'undefined' ) {
+				if( typeof attributes.fill !== 'undefined' ) {
 					VMLAttributes.fillcolor = attributes.fill;
 				}
-				if( typeof( attributes.cx ) != 'undefined' && typeof( attributes.cy ) != 'undefined' && typeof( attributes.r ) != 'undefined' ) {
-					VMLAttributes.style += 'position: absolute; top: '+(cx-r)+'px; left: '+(cy-r)+'px; width: '+(r*2)+'px; height: '+(r*2)+'px;';
+				if( typeof attributes.cx !== 'undefined' && typeof attributes.cy !== 'undefined' && typeof attributes.r !== 'undefined' ) {
+					VMLAttributes.style += 'position: absolute; top: '+(attributes.cx-attributes.r)+'px; left: '+(attributes.cy-attributes.r)+'px; width: '+(attributes.r*2)+'px; height: '+(attributes.r*2)+'px;';
 				}
-				if( typeof( attributes.stroke ) != 'undefined' ) {
+				if( typeof attributes.stroke !== 'undefined' ) {
 					VMLAttributes.strokecolor = attributes.stroke;
 				}
-				if( typeof( attributes['stroke-width'] ) != 'undefined' ) {
+				if( typeof attributes['stroke-width'] !== 'undefined' ) {
 					VMLAttributes.strokeweight = attributes['stroke-width'];
 				}
-				if( typeof( attributes.d ) != 'undefined' ) {
+				if( typeof attributes.d !== 'undefined' ) {
 					VMLAttributes.path = attributes.d;
 				}
 				return VMLAttributes;
@@ -91,10 +92,10 @@
 		};
 		
 		// Add the VML namespace to the document
-		if( document.documentMode != 8 && document.namespaces && !document.namespaces[SVGorVML.prototype.ns] ) {
+		if( document.documentMode !== 8 && document.namespaces && !document.namespaces[SVGorVML.prototype.ns] ) {
 			document.namespaces.add( SVGorVML.prototype.ns, 'urn:schemas-microsoft-com:vml' );
 		}
-		else if( document.documentMode == 8 ) {
+		else if( document.documentMode === 8 ) {
 			document.writeln( '<?import namespace="'+SVGorVML.prototype.ns+'" implementation="#default#VML" ?>' );
 		}
 		// Add the VML behaviour rules to a stylesheet
@@ -115,14 +116,14 @@
 } )( window, document );
 
 
-( function( window, undefined ) {
+( function( window ) {
 	// Set up global objects
 	window['methods'] = [];
 	
 	// Helper functions
 	// Repeats an array to make an array of a given length
 	var repeatArrayToLength = function( array, length ) {
-		if( typeof( array.push ) == 'undefined' ) { array = [array]; }
+		if( typeof array.push === 'undefined' ) { array = [array]; }
 		var array2 = new Array( length ),
 			i = -1,
 			iMod = array.length;
@@ -136,7 +137,7 @@
 	var rowsEqual = function( row1, row2 ) {
 		var i = row1.length;
 		if( i != row2.length) { return false; }
-		while( i-- ) { if( row1[i] != row2[i] ) { return false; } }
+		while( i-- ) { if( row1[i] !== row2[i] ) { return false; } }
 		return true;
 	};
 
@@ -188,7 +189,7 @@
 
 	// Turns a string into a row array
 	var makeRow = function( string ) {
-		return ( typeof( string ) == 'string' )? string.split( '' ).map( charToBell ) : string;
+		return ( typeof string === 'string' )? string.split( '' ).map( charToBell ) : string;
 	};
 
 	// Permute a row array by a cycle permutation
@@ -205,11 +206,12 @@
 		return permuted;
 	};
 	
-	// Returns the position of bell after applying the given permutations to start
+	// Returns the row after applying the given permutations to start
 	var permutes = function( start, permutations ) {
-		var row = start;
-		for( var i = 0, iLim = permutations.length; i < iLim; ++i ) {
-			row = permute( row, permutations[i] );
+		var row = start,
+			i = 0, iLim = permutations.length;
+		while( i < iLim ) {
+			row = permute( row, permutations[i++] );
 		}
 		return row;
 	};
@@ -234,12 +236,12 @@
 	
 	// Explodes notation into an array
 	var explodeNotation = function( notation ) {
-		return ( typeof( notation ) == 'string' )? notation.replace( /x/gi, '.x.' ).split( '.' ).filter( function( e ) { return e !== ''; } ) : notation;
+		return ( typeof notation === 'string' )? notation.replace( /x/gi, '.x.' ).split( '.' ).filter( function( e ) { return e !== ''; } ) : notation;
 	};
 	
 	// Implodes a notation array to a string
 	var implodeNotation = function( notationArray ) {
-		return ( typeof( notationArray.join ) == 'function' )? notationArray.join( '.' ).replace( /\.?x\.?/g, 'x' ) : notationArray;
+		return ( typeof notationArray.join === 'function' )? notationArray.join( '.' ).replace( /\.?x\.?/g, 'x' ) : notationArray;
 	};
 	
 	// Parse place notation into an array of cycle permutations
@@ -288,7 +290,8 @@
 
 	// Returns the first lead head of a method given notation, stage
 	var getLeadHead = function( notation, stage ) {
-		var leadHead = roundsRow( stage ), i = 0, iLim = notation.length;
+		var leadHead = roundsRow( stage ),
+			i = 0, iLim = notation.length;
 		while( i < iLim ) {
 			leadHead = permute( leadHead, notation[i++] );
 		}
@@ -480,36 +483,38 @@
 	};
 	
 	var MethodLine = function( parent, options ) {
+		var e, workColorSource;
+		
 		this.parent = parent;
 		this.options = options;
 		this.options_orig = {}; for( e in options ) { this.options_orig[e] = options[e]; } // Copying an object is such a mission in Javascript. This method doesn't work properly in general, but does enough in this case
 		this.cache = {};
 	
 		// Find container
-		if( typeof( options.container ) == 'undefined' ) { return false; }
-		this.container = ( typeof( options.container ) == 'string' )? document.getElementById( options.container ) : options.container;
-		if( typeof( this.container.nodeName ) == 'undefined' ) { return false; }
+		if( typeof options.container === 'undefined' ) { return false; }
+		this.container = ( typeof options.container === 'string' )? document.getElementById( options.container ) : options.container;
+		if( typeof this.container.nodeName === 'undefined' ) { return false; }
 
-		if( typeof( options.text ) == 'undefined' ) {
+		if( typeof options.text === 'undefined' ) {
 			// Show text by default
 			this.options.text = true;
 		}
 		// Create text and SVG containers
 		this.initialiseContainers();
 		
-		if( typeof( options.lines ) == 'undefined' ) {
+		if( typeof options.lines === 'undefined' ) {
 			// Show lines by default
 			this.options.lines = true;
 		}
-		if( typeof( options.placeStarts ) == 'undefined' ) {
+		if( typeof options.placeStarts === 'undefined' ) {
 			// Show both the dots on lines and the alongside numbers by default
 			this.options.placeStarts = { pathMarkers: true, alongside: true };
 		}
-		if( typeof( options.calls ) == 'undefined' ) {
+		if( typeof options.calls === 'undefined' ) {
 			// Display calls if given by default
 			this.options.calls = ( this.parent.calls.length > 0 )? true : false;
 		}
-		if( typeof( options.colors ) == 'undefined' ) {
+		if( typeof options.colors === 'undefined' ) {
 			// Some default colors. Red hunt bells; blue, green, purple... work bells. Transparent text for colored lines
 			this.options.colors = {
 				lines: { hunt: '#D11', base: 'transparent', work: ['#11D','#1D1','#D1D', '#DD1', '#1DD'] },
@@ -521,11 +526,11 @@
 		// Assign colors to bells
 		this.courseColors = this.parent.rounds.map( function( e ) {
 			return { line: this.options.colors.lines.base, text: this.options.colors.text.base };
-		}, this ),
-			workColorSource = {
-				lines: repeatArrayToLength( this.options.colors.lines.work, this.parent.workGroups.length ),
-				text: repeatArrayToLength( this.options.colors.text.work, this.parent.workGroups.length )
-			};
+		}, this );
+		workColorSource = {
+			lines: repeatArrayToLength( this.options.colors.lines.work, this.parent.workGroups.length ),
+			text: repeatArrayToLength( this.options.colors.text.work, this.parent.workGroups.length )
+		};
 		this.parent.huntBells.forEach( function( pos ) {
 			this.courseColors[pos] = { line: this.options.colors.lines.hunt, text: this.options.colors.text.hunt };
 		}, this );
@@ -562,7 +567,7 @@
 				i = 0, iLim = this.courseColors.length;
 			this.courseColors.forEach( function( color, i ) {
 				if( color.text != this.options.colors.text.base ) {
-					if( color.text == 'transparent' ) {
+					if( color.text === 'transparent' ) {
 						cssString += '#' + textContainerId + ' span.b' + bellToChar( i ) + ' {color:transparent !important;} * html #' + textContainerId + ' span.b' + bellToChar( i ) + ', *+html #' + textContainerId + ' span.b' + bellToChar( i ) + ' { visibility: hidden; } #' + textContainerId + ' span.b' + bellToChar( i ) + ' { visibility: hidden\\0/ !important; }';
 					}
 					else {
@@ -574,7 +579,7 @@
 				var colors = this.callColors[call];
 				colors.forEach( function( color, i ) {
 					if( color.text != this.options.colors.text.base ) {
-						if( color.text == 'transparent' ) {
+						if( color.text === 'transparent' ) {
 							cssString += '#' + textContainerId + ' span.'+call+'_b' + bellToChar( i ) + ' {color:transparent !important;} * html #' + textContainerId + ' span.'+call+'_b' + bellToChar( i ) + ', *+html #' + textContainerId + ' span.'+call+'_b' + bellToChar( i ) + ' {visibility:hidden;} #' + textContainerId + ' span.'+call+'_b' + bellToChar( i ) + ' {visibility:hidden\\0/ !important;}';
 						}
 						else {
@@ -641,7 +646,7 @@
 				leadsPerColumn = 1,
 				numberOfColumns = this.parent.numberOfLeads;
 			// If the number of columns is fixed
-			if( typeof( this.options_orig.columns ) != 'undefined' ) {
+			if( typeof this.options_orig.columns !== 'undefined' ) {
 				numberOfColumns = this.options_orig.columns;
 				leadsPerColumn = Math.ceil( this.parent.numberOfLeads/numberOfColumns );
 				var sizeTestBase = pageWidth - 30 - ( ((2*(numberOfColumns+callColumns)-1) * columnPadding ) + ( numberOfColumns * placeStartPadding ) );
@@ -651,7 +656,7 @@
 				}
 			}
 			// If the number of leads per column is fixed
-			else if( typeof( this.options_orig.leadsPerColumn ) != 'undefined' ) {
+			else if( typeof this.options_orig.leadsPerColumn !== 'undefined' ) {
 				leadsPerColumn = this.options_orig.leadsPerColumn;
 				numberOfColumns = Math.ceil( this.parent.numberOfLeads / leadsPerColumn );
 				var sizeTestBase = pageWidth - 30 - ( ((2*(numberOfColumns+callColumns)-1) * columnPadding ) + ( numberOfColumns * placeStartPadding ) );
@@ -742,11 +747,12 @@
 				methodText = document.createElement( 'table' ),
 				methodTextInnerHTML = '',
 				leadsPerColumn = this.options.leadsPerColumn,
-				i = 0, iLim = this.options.columns;
+				i = 0, iLim = this.options.columns,
+				repeats;
 			methodText.id = 'methodText_'+this.parent.id;
 			while( i < iLim ) {
-				var repeats = (((i+1)*leadsPerColumn)%this.parent.numberOfLeads)%leadsPerColumn;
-				methodTextInnerHTML += '<td'+((i==0)?' class="first"':'')+'>' + textSegment( this.parent.leadHeads[i*leadsPerColumn], this.parent.notation, textSource, repeats?repeats:leadsPerColumn ) + '</td>';
+				repeats = (((i+1)*leadsPerColumn)%this.parent.numberOfLeads)%leadsPerColumn;
+				methodTextInnerHTML += '<td'+((i===0)?' class="first"':'')+'>' + textSegment( this.parent.leadHeads[i*leadsPerColumn], this.parent.notation, textSource, repeats?repeats:leadsPerColumn ) + '</td>';
 				++i;
 			}
 			
@@ -755,7 +761,7 @@
 				this.parent.calls.forEach( function( call ) {
 					var textSource = this.parent.rounds.map( function( e ) {
 						var bellText = bellToChar( e );
-						return ( this.callColors[call.id][e].text != this.options.colors.text.base )? '<span class="'+call.id+'_b'+bellToChar( e )+'">'+bellText+'</span>' : bellText;
+						return ( this.callColors[call.id][e].text !== this.options.colors.text.base )? '<span class="'+call.id+'_b'+bellToChar( e )+'">'+bellText+'</span>' : bellText;
 					}, this )
 					methodTextInnerHTML += '<td class="call" id="methodText_call_'+call.id+'"><p class="callTitle">'+call.title+':</p>'+textSegment( call.startRow, call.notation, textSource )+'</td>';
 				}, this );
@@ -774,15 +780,15 @@
 				hMultiplier = this.dimensions.row.x + (2*this.options.columnPadding) + this.options.placeStartPadding;
 			// We'll build a single long path for each different path style
 			for( ; j < jLim; ++j ) {
-				if( typeof( paths[this.courseColors[j].line] ) == 'undefined' ) {
+				if( typeof paths[this.courseColors[j].line] === 'undefined' ) {
 					paths[this.courseColors[j].line] = '';
 					pathcolors.push( this.courseColors[j].line );
 				}
 			}
 			// Calculate paths
 			for( ; i < iLim; ++i ) {
-				for( upTo = (i+1)*this.options.leadsPerColumn; typeof( this.parent.leadHeads[upTo]) == 'undefined'; --upTo ) {}
-				leadsToDraw = (upTo%this.options.leadsPerColumn == 0)? this.options.leadsPerColumn : upTo%this.options.leadsPerColumn;
+				for( upTo = (i+1)*this.options.leadsPerColumn; typeof this.parent.leadHeads[upTo] === 'undefined'; --upTo ) {}
+				leadsToDraw = (upTo%this.options.leadsPerColumn === 0)? this.options.leadsPerColumn : upTo%this.options.leadsPerColumn;
 				for( j = 0; j < jLim; ++j ) {
 					if( this.courseColors[j].line != 'transparent' ) {
 						paths[this.courseColors[j].line] += 'M'+(i*hMultiplier)+',0' + pathString( this.parent.leadHeads[i*this.options.leadsPerColumn].indexOf( j ), this.parent.notation, this.dimensions.bell.x, this.dimensions.bell.y, leadsToDraw, true );
@@ -819,7 +825,7 @@
 		},
 	
 		drawRuleOffs: function() {
-			if( this.options.colors.ruleOffs == 'transparent' ) { return; }
+			if( this.options.colors.ruleOffs === 'transparent' ) { return; }
 			// i will iterate over columns
 			var i = -1, iLim = this.options.columns,
 				// j will iterate over rule offs within a column
@@ -918,16 +924,16 @@
 		this.options = options;
 	
 		// Find container, allow an element or an ID string
-		if( typeof( options.container ) == 'undefined' ) { return false; }
-		this.container = ( typeof( options.container ) == 'string' )? document.getElementById( options.container ) : options.container;	
-		if( typeof( this.container.nodeName ) == 'undefined' ) { return false; }
+		if( typeof options.container === 'undefined' ) { return false; }
+		this.container = ( typeof options.container === 'string' )? document.getElementById( options.container ) : options.container;	
+		if( typeof this.container.nodeName === 'undefined' ) { return false; }
 		
 		// Set up options
-		if( typeof( options.showNotation ) == 'undefined' ) {
+		if( typeof options.showNotation === 'undefined' ) {
 			// Show place notation by default
 			this.options.showNotation = true;
 		}
-		if( typeof( options.colors ) == 'undefined' ) {
+		if( typeof options.colors === 'undefined' ) {
 			// Default colors array
 			this.options.colors = {
 				lines: repeatArrayToLength( ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'], parent.stage ).map( function( e, i ) { return ( parent.huntBells.indexOf( i ) != -1 )? '#D11' : e; }, this ),
@@ -962,11 +968,11 @@
 			titleRow = document.createElement( 'tr' )
 			gridRow = document.createElement( 'tr' );
 		grid.id = id;
-		if( typeof( notation ) == 'string' ) {
+		if( typeof notation === 'string' ) {
 			gridRow.appendChild( notationCell( notation, highlightRows ) );
 		}
 		gridRow.appendChild( paperCell( paper ) );
-		if( typeof( title ) == 'string' ) {
+		if( typeof title === 'string' ) {
 			titleRow.appendChild( titleCell( title ) );
 			grid.appendChild( titleRow );
 		}
@@ -984,11 +990,11 @@
 	// Build a cell containing the place notation
 	var notationCell = function( notation, highlight ) {
 		var notationExploded = explodeNotation( notation );
-		if( typeof( highlight ) != 'undefined' ) {
-			if( typeof( highlight ) == 'number' ) {
+		if( typeof highlight !== 'undefined' ) {
+			if( typeof highlight === 'number' ) {
 				notationExploded[highlight-1] = '<strong>'+notationExploded[highlight-1]+'</strong>';
 			}
-			else if( typeof( highlight.from ) == 'number' && typeof( highlight.to ) == 'number' ) {
+			else if( typeof highlight.from === 'number' && typeof highlight.to === 'number' ) {
 				for( var i = highlight.from; i <= highlight.to; ++i ) {
 				notationExploded[i-1] = '<strong>'+notationExploded[i-1]+'</strong>';
 				}
@@ -1040,13 +1046,16 @@
 					width: this.dimensions.row.x,
 					height: this.dimensions.row.y*( options.notation.length+1 )
 				} ),
-				huntBellStartPositions = ( typeof( options.huntBellStartPositions ) != 'undefined' )? options.huntBellStartPositions : [];
+				huntBellStartPositions = ( typeof( options.huntBellStartPositions ) != 'undefined' )? options.huntBellStartPositions : [],
+				i, iLim,
+				path;
 			
 			if( paper.type != 'fail' ) {
 				// Draw rule offs
 				if( options.colors.ruleOffs != 'transparent' ) {
-					var i = options.ruleOffs.from, iLim = options.notation.length,
-						path = '';
+					i = options.ruleOffs.from;
+					iLim = options.notation.length;
+					path = '';
 
 					while( i <= iLim ) {
 						if( i > 0 ) {
@@ -1059,7 +1068,7 @@
 					}
 				}
 				// Draw lines
-				var i = this.parent.stage;
+				i = this.parent.stage;
 				while( i-- ) {
 					var isHuntBell = huntBellStartPositions.indexOf( i ) != -1;
 					paper.add( 'path', {
@@ -1089,7 +1098,6 @@
 		if( ( nowTime - lastRedrawTime ) < 500 ) { return; }
 		lastRedrawTime = nowTime;
 		
-		// Redraw all methods
 		window.methods.forEach( function( method ) {
 			method.Line.reDraw();
 		} );

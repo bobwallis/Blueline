@@ -1,4 +1,4 @@
-( function( window, document, google ) {
+( function( window, document, google, _ ) {
 	// Set up some global objects
 	window['towerMaps'] = [];
 	
@@ -16,7 +16,7 @@
 		
 		// Resize and recenter all maps
 		
-		if( window['towerMaps'].length == 1 ) {
+		if( window['towerMaps'].length === 1 ) {
 			var mapCenter = window.towerMaps[0].map.getCenter(),
 				parent = window.towerMaps[0].container.parentNode,
 				towerHeader = parent.parentNode.getElementsByTagName( 'header' )[0];
@@ -61,10 +61,6 @@
 				towerMap.map.setCenter( mapCenter );
 			} );
 		}
-		
-		// Fix big map
-		var fullMap = document.getElementById( 'fullMap' );
-		if( fullMap ) { fullMap.style.height = pageHeight - ( $top.offsetHeight + $bottom.offsetHeight ); }
 	};
 	_.addEventListener( window, 'resize', towersResize );
 	// Fire a resize event on page load too
@@ -72,9 +68,9 @@
 	
 	// Scroll event
 	var towersScroll = function() {
-		$top = document.getElementById( 'top' );
-		$bottom = document.getElementById( 'bottom' );
-		if( window.towerMaps.length == 1 ) {
+		var $top = document.getElementById( 'top' ),
+			$bottom = document.getElementById( 'bottom' );
+		if( window.towerMaps.length === 1 ) {
 			var parent = window.towerMaps[0].container.parentNode,
 				mapCenter = window.towerMaps[0].map.getCenter(),
 				pageWidth = window.innerWidth || document.documentElement.clientWidth,
@@ -89,7 +85,7 @@
 				newHeight = pageHeight - bottomVisible - topVisible;
 			if( pageWidth > 480 ) {
 				parent.style.top = topVisible+'px';
-				if( originalHeight != newHeight ) {
+				if( originalHeight !== newHeight ) {
 					parent.style.height = newHeight+'px';
 					google.maps.event.trigger( window.towerMaps[0].map, 'resize' );
 					window.towerMaps[0].map.setCenter( mapCenter );
@@ -106,11 +102,11 @@
 	var TowerMap = function( options ) {
 		this.id = options.id;
 		this.big = options.big || false;
-		this.container = ( typeof( options.container ) == 'string' )? document.getElementById( options.container ) : options.container;
+		this.container = ( typeof options.container === 'string' )? document.getElementById( options.container ) : options.container;
 		this.options = {
-			scrollwheel: ( typeof( options.scrollwheel ) != 'undefined' )? options.scrollwheel : true,
-			zoom: ( typeof( options.zoom ) != 'undefined' )? options.zoom : 10,
-			center: ( typeof( options.center ) != 'undefined' )? options.center : ( (typeof( options.fitBounds ) != 'undefined' )? options.fitBounds.getCenter() : new google.maps.LatLng( 51.75015, -1.25436 ) ),
+			scrollwheel: ( typeof options.scrollwheel !== 'undefined' )? options.scrollwheel : true,
+			zoom: ( typeof options.zoom !== 'undefined' )? options.zoom : 10,
+			center: ( typeof options.center !== 'undefined' )? options.center : ( (typeof options.fitBounds !== 'undefined' )? options.fitBounds.getCenter() : new google.maps.LatLng( 51.75015, -1.25436 ) ),
 			mapTypeControlOptions: {
 				mapTypeIds: [google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID, 'openStreetMap', 'osMap', google.maps.MapTypeId.ROADMAP]
 			},
@@ -121,7 +117,7 @@
 		};
 
 		this.map = new google.maps.Map( this.container, this.options );
-		this.fusionTableLayer = new google.maps.FusionTablesLayer( (( typeof( options.fusionTable ) != 'undefined' )? options.fusionTable : 247449), { query: options.fusionTableQuery , suppressInfoWindows: true } );
+		this.fusionTableLayer = new google.maps.FusionTablesLayer( (( typeof options.fusionTable !== 'undefined' )? options.fusionTable : 247449), { query: options.fusionTableQuery , suppressInfoWindows: true } );
 		this.fusionTableInfoWindow = new google.maps.InfoWindow( { maxWidth: 400 } );
 	
 		var map = this.map, infoWindow = this.fusionTableInfoWindow; // Needed in the event listener
@@ -130,8 +126,8 @@
 				.replace( 'NULL, ', '' )
 				.replace( /(in .)b/, '$1&#x266d;' )
 				.replace( /(in .)#/, '$1&#x266f;' )
-				.replace( ' ((unknown))', '' );
-			var doveId = content.match( /<abbr>(.*)<\/abbr>/ )[1];
+				.replace( ' ((unknown))', '' ),
+				doveId = content.match( /<abbr>(.*)<\/abbr>/ )[1];
 			content = content.replace( /<abbr>.*<\/abbr>/g, '' )
 				.replace( /<h1([^\>]*)>(.*)<\/h1>/, '<h1$1><a href="/towers/view/'+doveId+'">$2</a></h1>' );
 			infoWindow.close();
@@ -144,7 +140,7 @@
 		this.map.mapTypes.set( 'osMap', new google.maps.ImageMapType( this.OSMapOptions ) );
 		this.fusionTableLayer.setMap( this.map );
 
-		if( typeof( options.fitBounds ) != 'undefined' ) {
+		if( typeof options.fitBounds !== 'undefined' ) {
 			if( options.fitBounds.getNorthEast().equals( options.fitBounds.getSouthWest() ) ) {
 				this.map.setCenter( options.fitBounds.getNorthEast() );
 				this.map.setZoom( 15 );
@@ -154,7 +150,7 @@
 			}
 		}
 	
-		if( typeof( options.center ) == 'undefined' && typeof( options.fitBounds ) == 'undefined' && navigator.geolocation ) {
+		if( typeof options.center === 'undefined' && typeof options.fitBounds === 'undefined' && navigator.geolocation ) {
 			navigator.geolocation.getCurrentPosition( function( position ) {
 				var location = new google.maps.LatLng( position.coords.latitude, position.coords.longitude );
 				map.setCenter( location );
@@ -162,7 +158,7 @@
 			} );
 		}
 	
-		if( typeof( document.querySelector ) != 'undefined' ) {
+		if( typeof document.querySelector !== 'undefined' ) {
 			var googleTitle = function() { try { document.querySelector( 'div.map div[title="Show street map"]' ).innerHTML = 'Google'; } catch(e){} };
 			window.setTimeout( googleTitle, 500 ); window.setTimeout( googleTitle, 1000 ); window.setTimeout( googleTitle, 1500 );
 		}
@@ -185,10 +181,10 @@
 				while( zoom-- ) {
 					var digit = 0,
 						mask = 1 << zoom;
-					if( ( coord.x & mask ) != 0 ) {
+					if( ( coord.x & mask ) !== 0 ) {
 						digit++;
 					}
-					if( ( coord.y & mask ) != 0 ) {
+					if( ( coord.y & mask ) !== 0 ) {
 						digit += 2;
 					}
 					quadkey += digit.toString();
@@ -203,4 +199,4 @@
 	};
 	// Expose global objects
 	window['TowerMap'] = TowerMap;
-} )( window, document, window.google );
+} )( window, document, window.google, window['_'] );

@@ -14,7 +14,7 @@
 			d.innerHTML = '<v:shape adj="1"/>';
 			b = d.firstChild;
 			b.style.behavior = 'url(#default#VML)';
-			var canVML = ( b && typeof( b.adj ) == 'object' );
+			var canVML = ( b && typeof b.adj === 'object' );
 			d = b = null;
 			return canVML;
 		},
@@ -25,10 +25,10 @@
 	window['can'] = can;
 	
 	// A set of helper functions for making code writing easier
-	var helpers = {
+	var _ = {
 		// Convert some iterable collection into an array
 		toArray: function( iter ) {
-			var array = new Array(),
+			var array = [],
 				i = 0, iLim = iter.length;
 			while( i < iLim ) {
 				array[i] = iter[i];
@@ -38,7 +38,8 @@
 		},
 		// Test whether an object is empty
 		isEmpty: function( e ) {
-			for( var prop in e ) {
+			var prop;
+			for( prop in e ) {
 				if( e.hasOwnProperty( prop ) ) {
 					return false;
 				}
@@ -49,7 +50,7 @@
 		eventTarget: function( e ) {
 			if( e.target ) { return e.target; }
 			else if( e.srcElement ) {
-				return ( e.srcElement.nodeType == 3 )? e.srcElement.parentNode : e.srcElement;
+				return ( e.srcElement.nodeType === 3 )? e.srcElement.parentNode : e.srcElement;
 			}
 		},
 		// Creates a query string from a form's elements
@@ -87,6 +88,7 @@
 			}
 		},
 		getElementsByClassName: function( className, elem, tag ) {
+			var i;
 			if( !elem ) { elem = document; }
 			if( !tag ) { tag = '*'; }
 			try {
@@ -95,7 +97,7 @@
 			catch( no_getElementsByClassName ) {
 				var get = document.getElementsByTagName( tag ),
 					collect = [];
-				for( var i = 0; i < get.length; i++ ) { if( this.hasClass( get[i], className ) ) { collect.push( get[i] ); } }
+				for( i = 0; i < get.length; i++ ) { if( this.hasClass( get[i], className ) ) { collect.push( get[i] ); } }
 				return collect;
 			}
 		},
@@ -124,7 +126,7 @@
 			}
 		},
 		addEventListener: function( element, type, func ) {
-			if( typeof( element ) == 'string' ) { element = document.getElementById( element ); }
+			if( typeof element === 'string' ) { element = document.getElementById( element ); }
 			try { element.addEventListener( type, func, false ); }
 			catch( no_addEventListener ) { element.attachEvent( 'on'+type, func ); }
 		},
@@ -134,9 +136,28 @@
 			window.onload = func;
 		}
 	};
-	window['_'] = helpers;
+	window['_'] = _;
 	
-	// Tab bar creation
+	// Tab bars
+	// Tab bar click event
+	var tabBarClick = function( e ) {
+		var i, targetTab, tabs;
+		if( !e ) { e = window.event; }
+		targetTab = _.eventTarget( e );
+		if( targetTab.nodeName !== 'LI' ) { return; }
+		tabs = targetTab.parentNode.getElementsByTagName( 'li' );
+			for( i = 0; i < tabs.length; i++ ) {
+				if( tabs[i].id === targetTab.id ) {
+					_.addClass( tabs[i], 'active' );
+					document.getElementById( tabs[i].id.replace( /tab_/, 'content_' ) ).style.display = 'block';
+				}
+				else {
+					_.removeClass( tabs[i], 'active' );
+					if( _.getComputedStyle( tabs[i], 'display' ) !== 'none' ) { document.getElementById( tabs[i].id.replace( /tab_/, 'content_' ) ).style.display = 'none'; }
+				}
+			}
+			_.fireEvent( 'scroll' );
+	};
 	window['tabBars'] = [];
 	var TabBar = function( options ) {
 		var landmark = document.getElementById( options.landmark ),
@@ -156,7 +177,7 @@
 				} );
 			container.className = 'tabBar';
 			container.id = landmark.id+'_';
-			_.addClass( tabs[(typeof( options.active ) == 'number' )?options.active:0], 'active' );
+			_.addClass( tabs[(typeof options.active === 'number' )?options.active:0], 'active' );
 			tabs.forEach( function( t ) { container.appendChild( t ); } );
 			_.addEventListener( container, 'click', tabBarClick );
 			landmark.parentNode.insertBefore( container, landmark );
@@ -164,23 +185,4 @@
 		}
 	};
 	window['TabBar'] = TabBar;
-	// Tab bar click event
-	var tabBarClick = function( e ) {
-		if( !e ) { e = window.event; }
-		var targetTab = _.eventTarget( e );
-		if( targetTab.nodeName != 'LI' ) { return; }
-		var tabs = targetTab.parentNode.getElementsByTagName( 'li' );
-			for( var i = 0; i < tabs.length; i++ ) {
-				if( tabs[i].id == targetTab.id ) {
-					_.addClass( tabs[i], 'active' );
-					document.getElementById( tabs[i].id.replace( /tab_/, 'content_' ) ).style.display = 'block';
-				}
-				else {
-					_.removeClass( tabs[i], 'active' );
-					if( _.getComputedStyle( tabs[i], 'display' ) != 'none' ) { document.getElementById( tabs[i].id.replace( /tab_/, 'content_' ) ).style.display = 'none'; }
-				}
-			}
-			// Fire a scroll event
-			_.fireEvent( 'scroll' );
-	};
 } )( window, document );
