@@ -772,6 +772,7 @@
 		},
 		
 		drawLines: function() {
+			// Draw lines for the plain course
 			var paths = {},
 				pathcolors = [],
 				i = 0, iLim = this.options.columns,
@@ -797,7 +798,7 @@
 			}
 			// Draw paths
 			// Base
-			if( typeof( paths[this.options.colors.lines.base] ) != 'undefined' && this.options.colors.lines.base != 'transparent' ) {
+			if( typeof paths[this.options.colors.lines.base] !== 'undefined' && this.options.colors.lines.base !== 'transparent' ) {
 				this.paper.add( 'path', {
 					'stroke-width': 1, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', fill: 'none',
 					stroke: this.options.colors.lines.base,
@@ -805,7 +806,7 @@
 				} );
 			}
 			// Hunts
-			if( typeof( paths[this.options.colors.lines.hunt] ) != 'undefined' && this.options.colors.lines.hunt != 'transparent' ) {
+			if( typeof paths[this.options.colors.lines.hunt] !== 'undefined' && this.options.colors.lines.hunt !== 'transparent' ) {
 				this.paper.add( 'path', {
 					'stroke-width': 1, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', fill: 'none',
 					stroke: this.options.colors.lines.hunt,
@@ -814,7 +815,7 @@
 			}
 			// Working
 			for( i = 0, iLim = pathcolors.length; i < iLim; ++i ) {
-				if( pathcolors[i] != this.options.colors.lines.base && pathcolors[i] != this.options.colors.lines.hunt && pathcolors[i] != 'transparent' ) {
+				if( pathcolors[i] !== this.options.colors.lines.base && pathcolors[i] !== this.options.colors.lines.hunt && pathcolors[i] !== 'transparent' ) {
 					this.paper.add( 'path', {
 						'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', fill: 'none',
 						stroke: pathcolors[i],
@@ -822,6 +823,24 @@
 					} );
 				}
 			}
+			
+			// Draw lines for each of the call
+			this.parent.calls.forEach( function( call, i ) {
+				// Work out positioning
+				var x = ( this.options.columns + i )*( this.dimensions.row.x + (2*this.options.columnPadding) ) + ( this.options.columns*this.options.placeStartPadding ),
+					y = this.dimensions.row.y+3;
+				call.startRow.forEach( function( bell, pos ) {
+					var color = this.callColors[call.id][bell].line;
+					if( color !== 'transparent' ) {
+						this.paper.add( 'path', {
+							'stroke-linejoin': 'round', 'stroke-linecap': 'round', fill: 'none',
+							'stroke-width': ( color === this.options.colors.lines.hunt )? 1 : 2,
+							stroke: color,
+							d: 'M'+x+','+y+pathString( pos, call.notation, this.dimensions.bell.x, this.dimensions.bell.y, 1, false )
+						} );
+					}
+				}, this );
+			}, this );
 		},
 	
 		drawRuleOffs: function() {
