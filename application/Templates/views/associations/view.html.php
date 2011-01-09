@@ -66,15 +66,16 @@ foreach( $associations as $association ) : ?>
 			</tr>
 		</table>
 	</section>
-<?php if( $association->towerCount() > 0 ) : ?>
 	<section id="content_towers<?php echo $i; ?>" class="associationAffiliations">
+<?php if( $association->towerCount() > 0 ) : ?>
+		<noscript><h2>Affiliated Towers</h2></noscript>
 		<ol class="noliststyle">
 <?php foreach( $association->affiliatedTowers() as $tower ) : ?>
 			<li><?php echo '<a href="'.$tower->href().'">' . $tower->place().' <small>('.$tower->dedication().')</small></a>'; ?></li>
 <?php endforeach; ?>
 		</ol>
-	</section>
 <?php endif; ?>
+	</section>
 </section>
 <?php ++$i; endforeach; ?>
 <?php View::element( 'default.footer' ); ?>

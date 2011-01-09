@@ -135,6 +135,7 @@ $i = 0;
 	</section>
 	<section id="content_peals<?php echo $i; ?>" class="towerFirstPeals">
 <?php if( count( $tower->firstPeals() ) > 0 ) : ?>
+		<noscript><h2>First Peals</h2></noscript>
 		<ol class="noliststyle">
 <?php foreach( $tower->firstPeals()  as $method ) : ?>
 			<li><?php echo "<a href=\"{$method->href()}\">{$method->title()}</a> <small>({$method->firstTowerbellPeal_date()})</small>"; ?></li>
