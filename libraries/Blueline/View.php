@@ -103,6 +103,15 @@ class View {
 		include( $viewPath );
 		$content = ob_get_contents();
 		ob_end_clean();
+		if( self::contentType() == 'html' ) {
+			$tidyConfig = Config::get( 'htmlTidy' );
+			if( $tidyConfig ) {
+				$tidy = tidy_parse_string( $content, $tidyConfig );
+				if( tidy_clean_repair( $tidy ) ) {
+					$content = strval( $tidy );
+				}
+			}
+		}
 		Response::body( $content );
 	}
 	

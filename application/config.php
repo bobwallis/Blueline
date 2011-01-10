@@ -15,6 +15,26 @@ View::set( 'site', Config::get( 'site' ) );
 //Config::set( 'ga.trackingCode', 'UA-11877145-5' );
 Config::set( 'ga.trackingCode', false );
 
+// HTML Tidy
+Config::set( 'htmlTidy', false );
+/* Not so useful until HTML Tidy supports HTML5
+Config::set( 'htmlTidy', (!function_exists('tidy_parse_string'))? false : array(
+	'bare' => true,
+	'clean' => false,
+	'drop-empty-paras' => false,
+	'doctype' => '<!DOCTYPE html>',
+	'hide-comments' => true,
+	'indent' => true,
+	'indent-cdata' => true,
+	'indent-spaces' => 1,
+	'literal-attributes' => true,
+	'new-blocklevel-tags' => 'section,header,footer,nav',
+	'new-inline-tags' => 'video,audio,canvas,ruby,rt,rp',
+	'tab-size' => 1,
+	'wrap' => 0
+) );
+*/
+
 // Caches
 Config::set( 'caches', array(
 	array(
