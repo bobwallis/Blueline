@@ -18,9 +18,9 @@ View::element( 'default.header', array(
 ) );
 $i = 0;
 foreach( $associations as $association ) : ?>
-<section class="association" id="association_<?php echo $i; ?>">
+<section class="association" id="association_<?php echo $i; ?>" itemscope itemtype="http://data-vocabulary.org/Organization">
 	<header>
-		<h1><?php echo htmlspecialchars( $association->name() ); ?></h1>
+		<h1 itemprop="name"><?php echo htmlspecialchars( $association->name() ); ?></h1>
 		<span id="association_<?php echo $i; ?>_tabBar"></span>
 		<script>
 		//<![CDATA[
@@ -57,7 +57,7 @@ foreach( $associations as $association ) : ?>
 <?php if( $association->link() ) : ?>
 			<tr>
 				<th>Link:</th>
-				<td><a href="<?php echo htmlentities( $association->link() ); ?>" class="external"><?php echo htmlentities( $association->link() ); ?></a></td>
+				<td><a href="<?php echo htmlentities( $association->link() ); ?>" class="external" itemprop="url"><?php echo htmlentities( $association->link() ); ?></a></td>
 			</tr>
 <?php endif; ?>
 			<tr>
