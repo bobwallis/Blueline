@@ -59,7 +59,7 @@ class DataAccess {
 		
 		$model = $options['model']?:static::$_model;
 		if( is_string( $model ) ) {
-			return ( $data = $sth->fetchAll( PDO::FETCH_CLASS, $model ) )? $data : array();
+			return ( $data = $sth->fetchAll( PDO::FETCH_CLASS, $model ) )? $data : array( new $model );
 		}
 		else {
 			$sth->setFetchMode( PDO::FETCH_INTO, $model );
