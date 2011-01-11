@@ -6,14 +6,14 @@ CREATE TABLE IF NOT EXISTS method_extras (
   PRIMARY KEY (method_title)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Stedman Triples', 'stedman calls', '6:-3');
-INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Stedman Doubles', '', '6:-3');
-INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Stedman Caters', '', '6:-3');
-INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Stedman Cinques', '', '6:-3');
-INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Erin Doubles', '', '6:-5');
-INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Erin Triples', '', '6:-5');
-INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Erin Caters', '', '6:-5');
-INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Erin Cinques', '', '6:-5');
+INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Stedman Triples', 'a:2:{s:3:"Bob";s:6:"5:6:-3";s:6:"Single";s:8:"567:6:-3";}', '6:-3');
+INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Stedman Doubles', 'a:1:{s:6:"Single";s:6:"45:6:0";}', '6:-3');
+INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Stedman Caters', 'a:2:{s:3:"Bob";s:6:"7:6:-3";s:6:"Single";s:8:"789:6:-3";}', '6:-3');
+INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Stedman Cinques', 'a:2:{s:3:"Bob";s:6:"9:6:-3";s:6:"Single";s:8:"90E:6:-3";}', '6:-3');
+INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Erin Doubles', 'a:1:{s:6:"Single";s:8:"345:6:-2";}', '6:-5');
+INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Erin Triples', 'a:2:{s:3:"Bob";s:6:"5:6:-5";s:6:"Single";s:8:"567:6:-5";}', '6:-5');
+INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Erin Caters', 'a:2:{s:3:"Bob";s:6:"7:6:-5";s:6:"Single";s:8:"789:6:-5";}', '6:-5');
+INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Erin Cinques', 'a:2:{s:3:"Bob";s:6:"9:6:-5";s:6:"Single";s:8:"90E:6:-5";}', '6:-5');
 INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Erin Sextuples', '', '6:-5');
 INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Erin Septuples', '', '6:-5');
 INSERT INTO method_extras (method_title, calls, ruleOffs) VALUES('Erin Octuples', '', '6:-5');
