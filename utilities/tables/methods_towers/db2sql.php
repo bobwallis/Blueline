@@ -14,7 +14,7 @@ $password = 'password';
 DROP TABLE IF EXISTS methods_towers;
 CREATE TABLE IF NOT EXISTS methods_towers (
   method_title varchar(255) NOT NULL UNIQUE,
-  tower_doveId varchar(10) NOT NULL, INDEX (tower_id)
+  tower_doveId varchar(10) NOT NULL, INDEX (tower_doveId)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 DROP TABLE IF EXISTS methods_towers_unmatched;
 CREATE TABLE IF NOT EXISTS methods_towers_unmatched (
