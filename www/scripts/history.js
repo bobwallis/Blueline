@@ -9,7 +9,7 @@
 		
 		// Helpers to modify the page's contents
 		// Cache some document.getElementById calls
-		var $content, $breadcrumbContainer, $topSearchContainer, $topSearch, $smallQ, $bigSearchContainer, $bigSearch, $bigQ;
+		var $content, $breadcrumbContainer, $topSearchContainer, $topSearch, $smallQ, $bigSearchContainer, $bigSearch, $bigQ, $loading;
 		_.addReadyListener( function() {
 			$content = document.getElementById( 'content' );
 			$breadcrumbContainer = document.getElementById( 'breadcrumbContainer' );
@@ -66,6 +66,15 @@
 				}
 			},
 			
+			loadingSetter: null,
+			showLoading: function() {
+				this.loadingSetter = setTimeout( function() { $loading.style.display = 'block'; } , 150 );
+			},
+			hideLoading: function() {
+				clearTimeout( this.loadingSetter );
+				$loading.style.display = 'none';
+			},
+			
 			// Clears the main content area
 			clearContent: function() {
 				// Wipe HTML
@@ -99,12 +108,14 @@
 					if( this.AJAXContentRequest && typeof this.AJAXContentRequest.abort === 'function' ) {
 						this.AJAXContentRequest.abort();
 					}
+					this.showLoading();
 					var req = new XMLHttpRequest();
 					this.AJAXContentRequest = req;
 					req.open( 'GET', stateOrString.href.replace( /(\?|$)/, '?snippet=1&' ), true );
 					req.onreadystatechange = function() {
 						if( req.readyState === 4 ) {
 							helpers.AJAXContentRequest = null;
+							helpers.hideLoading();
 							$content.innerHTML = req.responseText;
 							saveState();
 							// Evaluate scripts
@@ -156,16 +167,19 @@
 			'/search': function( state ) {
 				helpers.setWindowTitle( 'Search' );
 				helpers.setHeader( false, false, searches.all );
+				helpers.clearContent();
 				helpers.setContent( state );
 			},
 			'/associations': function( state ) {
 				helpers.setWindowTitle( 'Associations' );
 				helpers.setHeader( breadcrumbs.associations, searches.associations, false );
+				helpers.clearContent();
 				helpers.setContent( state );
 			},
 			'/associations/search': function( state ) {
 				helpers.setWindowTitle( 'Search | Associations' );
 				helpers.setHeader( breadcrumbs.associations, false, searches.associations );
+				helpers.clearContent();
 				helpers.setContent( state );
 			},
 			'/associations/view': function( state ) {
@@ -231,6 +245,7 @@
 			'/copyright': function( state ) {
 				helpers.setWindowTitle( 'Copyright' );
 				helpers.setHeader( false, searches.all, false );
+				helpers.clearContent();
 				helpers.setContent( state );
 			}
 		};
@@ -305,6 +320,12 @@
 			// Attach to the big and little search form's submit events
 			_.addEventListener( 'topSearch', 'submit', historySubmit );
 			_.addEventListener( 'bigSearch', 'submit', historySubmit );
+			
+			// Add loading animation container
+			loading = document.createElement( 'div' );
+			loading.id = 'loading';
+			document.body.appendChild( loading );
+			$loading = document.getElementById( 'loading' );
 		};
 		_.addReadyListener( historyReady );
 		

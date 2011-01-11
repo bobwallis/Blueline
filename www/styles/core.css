@@ -54,6 +54,17 @@ a {
 	height: 100%;
 }
 
+/* Loading animation */
+#loading {
+	display: none;
+	position: absolute;
+	left: 0;
+	top: 100px;
+	z-index: 100;
+	width: 100%;
+	height: 18px;
+	background: #FFF url(../images/loading.gif) no-repeat center center;
+}
 
 /* Header */
 #top {
