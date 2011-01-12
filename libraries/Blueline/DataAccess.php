@@ -59,7 +59,7 @@ class DataAccess {
 		
 		$model = $options['model']?:static::$_model;
 		if( is_string( $model ) ) {
-			return ( $data = $sth->fetchAll( PDO::FETCH_CLASS, $model ) )? $data : array( new $model );
+			return ( $data = $sth->fetchAll( PDO::FETCH_CLASS, $model ) )? $data : array();
 		}
 		else {
 			$sth->setFetchMode( PDO::FETCH_INTO, $model );
@@ -68,7 +68,8 @@ class DataAccess {
 	}
 	
 	public static function findOne( $options = array() ) {
-		return array_pop( static::find( array_merge( $options, array( 'limit' => 1 ) ) ) );
+		$model = array_key_exists( 'model', $options )? $options['model'] :static::$_model;
+		return array_pop( static::find( array_merge( $options, array( 'limit' => 1 ) ) ) )? : new $model;
 	}
 	
 	public static function findCount( $options = array() ) {
