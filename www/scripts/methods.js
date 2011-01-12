@@ -457,7 +457,7 @@
 			// Some default colors. Red hunt bells; blue, green, purple... work bells. Transparent text for colored lines
 			this.options.colors = {
 				lines: { hunt: '#D11', base: 'transparent', work: ['#11D','#1D1','#D1D', '#DD1', '#1DD'] },
-				text: ( this.options.lines === true )? { hunt: 'transparent', base: '#000', work: 'transparent' } : { hunt: '#D11', base: '#000', work: ['#11D','#1D1','#D1D', '#DD1', '#1DD'] },
+				text: ( this.options.lines === true && ( window.can.SVG() || window.can.VML() ) )? { hunt: 'transparent', base: '#000', work: 'transparent' } : { hunt: '#D11', base: '#000', work: ['#11D','#1D1','#D1D', '#DD1', '#1DD'] },
 				ruleOffs: '#999'
 			};
 		}
