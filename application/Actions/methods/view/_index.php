@@ -20,7 +20,7 @@ $methods = array_map(
 		return Methods::findOne( array(
 			'fields' => array( 'title', 'stage', 'classification', 'notation', 'notationExpanded', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef', 'tdmmRef', 'pmmRef', 'lengthOfLead', 'numberOfHunts', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational', 'firstTowerbellPeal_date', 'firstTowerbellPeal_location', 'firstHandbellPeal_date', 'firstHandbellPeal_location', 'calls', 'ruleOffs', 'mt.tower_doveId AS firstTowerbellPeal_location_doveId' ),
 			'left_outer_join' => array(
-				'method_extras' => array( 'method_title = title' => null ),
+				'methods_extras' => array( 'method_title = title' => null ),
 				'methods_towers AS mt' => array( 'mt.method_title = title' => null )
 			),
 			'where' => array( 'title LIKE' => $request )
