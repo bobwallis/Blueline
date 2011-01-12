@@ -10,9 +10,6 @@ View::element( 'default.header', array(
 	'headerSearch' => array( 
 		'action' => '/methods/search',
 		'placeholder' => 'Search methods'
-	),
-	'scripts' => array(
-		'/scripts/general.js'
 	)
 ) );
 ?>

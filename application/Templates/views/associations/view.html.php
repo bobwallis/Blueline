@@ -12,7 +12,6 @@ View::element( 'default.header', array(
 	),
 	'scripts' => array(
 		'http://maps.google.com/maps/api/js?sensor=false',
-		'/scripts/general.js',
 		'/scripts/towers.js'
 	)
 ) );
