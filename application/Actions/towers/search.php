@@ -2,6 +2,11 @@
 namespace Blueline;
 use \Models\DataAccess\Towers;
 
+// No optional arguments
+if( isset( $arguments[0] ) ) {
+	throw new Exception( 'Not found', 404 );
+}
+
 $searchOptions = array(
 	'fields' => array( 'doveId', 'place', 'dedication' ),
 	'where' => Towers::GETtoConditions(),

@@ -2,9 +2,9 @@
 namespace Blueline;
 use \Models\Method, \Models\DataAccess\Methods;
 
-// Error on bad request
-if( isset( $arguments[0] ) && !empty( $arguments[0] ) ) {
-	throw new Exception( 'Bad request', 404 );
+// No optional arguments
+if( isset( $arguments[0] ) ) {
+	throw new Exception( 'Not found', 404 );
 }
 
 // Extract information from $_GET

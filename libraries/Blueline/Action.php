@@ -29,10 +29,7 @@ class Action {
 	public static function action() {
 		if( self::$_action === false ) {
 			$pathRequest = ( Request::path() == '/' )? array( '' ) : explode( '/', Request::path() );
-			if( count( $pathRequest ) > 7 ) {
-				throw new Exception( 'Too many arguments', 403 );
-			}
-			elseif( strpos( Request::path(), '..' ) !== false ) {
+			if( strpos( Request::path(), '..' ) !== false ) {
 				throw new Exception( 'Request contains \'..\'', 403 );
 			}
 			else {
@@ -66,7 +63,8 @@ class Action {
 	public static function arguments() {
 		if( self::$_arguments === false ) {
 			$action = str_replace( '/_index', '', self::action() );
-			self::$_arguments = explode( '/', trim( str_replace( $action, '', Request::path() ), '/' ) );
+			$arguments = explode( '/', trim( str_replace( $action, '', Request::path() ), '/' ) );
+			self::$_arguments = ( count( $arguments ) > 0 && !empty( $arguments[0] ) )? $arguments : array();
 		}
 		return self::$_arguments;
 	}

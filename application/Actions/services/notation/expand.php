@@ -2,6 +2,11 @@
 namespace Blueline;
 use Helpers\PlaceNotation;
 
+// No optional arguments
+if( isset( $arguments[0] ) ) {
+	throw new Exception( 'Not found', 404 );
+}
+
 if( Request::extension() == '' ) {
 	Response::contentType( 'json' );
 	View::contentType( 'json' );

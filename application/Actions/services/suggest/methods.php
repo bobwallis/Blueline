@@ -2,6 +2,11 @@
 namespace Blueline;
 use \Models\DataAccess\Methods;
 
+// No optional arguments
+if( isset( $arguments[0] ) ) {
+	throw new Exception( 'Not found', 404 );
+}
+
 if( Request::extension() == '' ) {
 	Response::contentType( 'opensearch_suggestions' );
 	View::contentType( 'json' );

@@ -2,6 +2,11 @@
 namespace Blueline;
 use \Models\DataAccess\Associations;
 
+// No optional arguments
+if( isset( $arguments[0] ) ) {
+	throw new Exception( 'Not found', 404 );
+}
+
 $searchOptions = array(
 	'fields' => array( 'abbreviation', 'name', 'link' ),
 	'where' => Associations::GETtoConditions(),
