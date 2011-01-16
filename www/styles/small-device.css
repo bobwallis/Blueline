@@ -25,9 +25,9 @@ form#topSearch { display: none; }
 /* Big search */
 div#bigSearchContainer {
 	margin-bottom: 10px;
+	padding: 5px;
 }
 form#bigSearch {
-	margin: 5px;
 	width: 304px;
 }
 	form#bigSearch div {

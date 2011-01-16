@@ -43,9 +43,9 @@ form#topSearch {
 /* Big search */
 div#bigSearchContainer {
 	margin-bottom: 8px;
+	padding: 8px;
 }
 form#bigSearch {
-	margin: 8px;
 	width: 350px;
 }
 	form#bigSearch div {
