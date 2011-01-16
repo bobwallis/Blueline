@@ -4,8 +4,6 @@
 "gi"),t=RegExp("<(/*)("+z+")","gi"),u=RegExp("(^|[^\\n]*?\\s)("+z+")([^\\n]*)({[\\n\\w\\W]*?})","gi"),r=c.createDocumentFragment(),k=c.documentElement;g=k.firstChild;var h=c.createElement("body"),l=c.createElement("style"),f;n(c);n(r);g.insertBefore(l,
 g.firstChild);l.media="print";m.attachEvent("onbeforeprint",function(){var d=-1,a=p(c.styleSheets,"all"),e=[],b;for(f=f||c.body;(b=u.exec(a))!=null;)e.push((b[1]+b[2]+b[3]).replace(s,"$1.iepp_$2")+b[4]);for(l.styleSheet.cssText=e.join("\n");++d<o;){a=c.getElementsByTagName(i[d]);e=a.length;for(b=-1;++b<e;)if(a[b].className.indexOf("iepp_")<0)a[b].className+=" iepp_"+i[d]}r.appendChild(f);k.appendChild(h);h.className=f.className;h.innerHTML=f.innerHTML.replace(t,"<$1font")});m.attachEvent("onafterprint",
 function(){h.innerHTML="";k.removeChild(h);k.appendChild(f);l.styleSheet.cssText=""})}})(this,document);@*/
-
-// Background image cache bug for IE6
 /*@cc_on @if(@_win32){document.execCommand('BackgroundImageCache',false,true);} @end @*/
 
 // Provide the XMLHttpRequest constructor for IE 5.x-6.x:
@@ -69,14 +67,27 @@ if( typeof( Array.prototype.indexOf ) == 'undefined' ) {
 
 // Define a VML object compatible with the SVG one
 ( function( window, document ) {
+	var canVML = function() {
+		var d = document.createElement( 'div' ), b;
+		d.innerHTML = '<v:shape adj="1"/>';
+		b = d.firstChild;
+		b.style.behavior = 'url(#default#VML)';
+		var canVML = ( b && typeof b.adj === 'object' );
+		d = b = null;
+		return canVML;
+	};
 	var VML = false;
-	if( window.can.VML() ) {
+	if( canVML() ) {
+	/**
+	 * VML object
+	 * @constructor
+	 */
 		VML = function( options ) {
 			this.canvas = this.makeCanvas( options );
 		};
 		VML.prototype = {
 			type: 'VML',
-			ns: 'BluelineVML',
+			ns: 'vml',
 			makeCanvas: function( options ) {
 				var canvas = document.createElement( this.ns+':group' );
 				canvas.setAttribute( 'id', options.id );
@@ -127,16 +138,16 @@ if( typeof( Array.prototype.indexOf ) == 'undefined' ) {
 		};
 		
 		// Add the VML namespace to the document
-		if( document.documentMode !== 8 && document.namespaces && !document.namespaces[SVG.prototype.ns] ) {
+		if( document.documentMode !== 8 && document.namespaces && !document.namespaces[VML.prototype.ns] ) {
 			document.namespaces.add( VML.prototype.ns, 'urn:schemas-microsoft-com:vml' );
 		}
 		else if( document.documentMode === 8 ) {
 			document.writeln( '<?import namespace="'+VML.prototype.ns+'" implementation="#default#VML" ?>' );
 		}
 		// Add the VML behaviour rules to a stylesheet
-		var VMLStyle = document.createElement( 'style' );
-		document.documentElement.firstChild.insertBefore( VMLStyle, document.documentElement.firstChild.firstChild );
-		VMLStyle.styleSheet.addRule( VML.prototype.ns+'\\:*', '{ behavior: url(#default#VML); display:inline-block; }' );
+		var VMLStyle = document.createStyleSheet();
+		VMLStyle.addRule( VML.prototype.ns+'\\: *',  "behavior:url(#default#VML);" );
+		VMLStyle.addRule( VML.prototype.ns+'\\: *',  "display:inline-block;" );
 	}
 	window['VML'] = VML;
 } )( window, document );
