@@ -72,6 +72,10 @@ $i = 0;
 			</tr>
 <?php endif; ?>
 			<tr>
+				<th>Diocese:</th>
+				<td><?php echo "<a href=\"/towers/search?diocese=".urlencode($tower->diocese())."\">{$tower->diocese()}</a>"; ?></td>
+			</tr>
+			<tr>
 				<th>Information:</th>
 				<td><?php
 			$information = array();

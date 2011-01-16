@@ -7,13 +7,14 @@ function(){h.innerHTML="";k.removeChild(h);k.appendChild(f);l.styleSheet.cssText
 /*@cc_on @if(@_win32){document.execCommand('BackgroundImageCache',false,true);} @end @*/
 
 // Provide the XMLHttpRequest constructor for IE 5.x-6.x:
-if( typeof( XMLHttpRequest ) == 'undefined' ) {
+if( typeof XMLHttpRequest === 'undefined' ) {
 	XMLHttpRequest = function () {
 		try { return new ActiveXObject( 'Msxml2.XMLHTTP.6.0' ); }
-		catch (e) {}
+		catch(e) {}
 		try { return new ActiveXObject( 'Msxml2.XMLHTTP.3.0' ); }
-		catch (e) {}
-		return new ActiveXObject( 'Msxml2.XMLHTTP' );
+		catch(e) {}
+		try { return new ActiveXObject( 'Msxml2.XMLHTTP' ); }
+		catch(e) { return false; }
 	};
 }
 
@@ -65,9 +66,10 @@ if( typeof( Array.prototype.indexOf ) == 'undefined' ) {
 	};
 }
 
-// Define a VML object compatible with the SVG one
-( function( window, document ) {
-	var canVML = function() {
+// Define a VML object compatible with the SVG one in methods.js
+( function( window, document ) {	
+	window['can'] = window.can?window.can:{};
+	window.can.VML = function() {
 		var d = document.createElement( 'div' ), b;
 		d.innerHTML = '<v:shape adj="1"/>';
 		b = d.firstChild;
@@ -77,7 +79,7 @@ if( typeof( Array.prototype.indexOf ) == 'undefined' ) {
 		return canVML;
 	};
 	var VML = false;
-	if( canVML() ) {
+	if( window.can.VML() ) {
 	/**
 	 * VML object
 	 * @constructor

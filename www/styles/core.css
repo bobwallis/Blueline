@@ -28,6 +28,7 @@ abbr { border-bottom: 1px dotted #E0DED9; cursor: help; }
 .hide { display: none; }
 .hyphenate { text-align: justify; }
 .noliststyle { list-style: none; }
+.normalweight { font-weight: normal !important; }
 
 /* Links */
 a {	
@@ -271,7 +272,7 @@ div.methodLine td {
 	vertical-align: top;
 }
 .methodText, div.methodLine {
-	font-family: 'Droid Sans Mono', 'DejaVu Sans Mono', monospace;
+	font-family: 'Droid Sans Mono', 'DejaVu Sans Mono', Consolas, monospace;
 	font-size: 14px;
 	line-height: 15px;
 }

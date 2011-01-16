@@ -1,28 +1,17 @@
 ( function( window, document ) {
 	// can will be a set of functions to detect browser capabilities.
 	// Largely borrowed from Modernizer <http://www.modernizer.com>
-	var can = {
-		localStorage: function() {
-			try { return ( 'localStorage' in window ) && ( window.localStorage !== null ); }
-			catch( e ) { return false; }
-		},
-		SVG: function() {
-			return window.SVGAngle || document.implementation.hasFeature( 'http://www.w3.org/TR/SVG11/feature#BasicStructure', '1.1' );
-		},
-		VML: function() {
-			var d = document.createElement( 'div' ), b;
-			d.innerHTML = '<v:shape adj="1"/>';
-			b = d.firstChild;
-			b.style.behavior = 'url(#default#VML)';
-			var canVML = ( b && typeof b.adj === 'object' );
-			d = b = null;
-			return canVML;
-		},
-		history: function() {
-			return !!( window.history && window.history.pushState );
-		}
+	window['can'] = window.can?window.can:{};
+	window.can.localStorage= function() {
+		try { return ( 'localStorage' in window ) && ( window.localStorage !== null ); }
+		catch( e ) { return false; }
 	};
-	window['can'] = can;
+	window.can.SVG = function() {
+		return window.SVGAngle || document.implementation.hasFeature( 'http://www.w3.org/TR/SVG11/feature#BasicStructure', '1.1' );
+	};
+	window.can.history = function() {
+		return !!( window.history && window.history.pushState );
+	};
 	
 	// A set of helper functions for making code writing easier
 	var _ = {
@@ -149,11 +138,11 @@
 			for( i = 0; i < tabs.length; i++ ) {
 				if( tabs[i].id === targetTab.id ) {
 					_.addClass( tabs[i], 'active' );
-					document.getElementById( tabs[i].id.replace( /tab_/, 'content_' ) ).style.display = 'block';
+					document.getElementById( tabs[i].id.replace( /^tab_/, 'content_' ) ).style.display = 'block';
 				}
 				else {
 					_.removeClass( tabs[i], 'active' );
-					if( _.getComputedStyle( tabs[i], 'display' ) !== 'none' ) { document.getElementById( tabs[i].id.replace( /tab_/, 'content_' ) ).style.display = 'none'; }
+					if( _.getComputedStyle( tabs[i], 'display' ) !== 'none' ) { document.getElementById( tabs[i].id.replace( /^tab_/, 'content_' ) ).style.display = 'none'; }
 				}
 			}
 			_.fireEvent( 'scroll' );
@@ -164,7 +153,6 @@
 			container = document.getElementById( landmark.id+'_' );
 		if( container ) {
 			_.addEventListener( container, 'click', tabBarClick );
-			return;
 		}
 		else {
 			container = document.createElement( 'ul' );

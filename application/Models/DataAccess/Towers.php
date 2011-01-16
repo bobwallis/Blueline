@@ -24,6 +24,9 @@ class Towers extends \Blueline\DataAccess {
 					}
 				}
 			}
+			if( isset( $_GET['diocese'] ) ) {
+				$conditions['diocese ='] = urldecode( $_GET['diocese'] );
+			}
 			self::$_GETConditions = $conditions;
 		}
 		return self::$_GETConditions;

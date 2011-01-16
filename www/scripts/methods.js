@@ -42,7 +42,7 @@
 	// Expose as a global object
 	window['SVG'] = SVG;
 	
-	var SVGorVML = function( options ) {
+	SVGorVML = function( options ) {
 		if( SVG !== false ) {
 			return new SVG( options );
 		}

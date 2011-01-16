@@ -300,7 +300,7 @@
 			var s = e.state;
 			if( s ) {
 				// Execute the handler for the requested URL if there is one
-				if( s.exec ) { historyEvents[s.exec]( s ); }
+				if( s.exec && typeof historyEvents[s.exec] === 'function' ) { historyEvents[s.exec]( s ); }
 				// Otherwise let the browser load the requested URL as normal
 				else { location.href = s.href; }
 			}
