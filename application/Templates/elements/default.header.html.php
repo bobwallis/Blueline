@@ -3,7 +3,11 @@ namespace Blueline;
 if( !Response::snippet() ) :
 ?>
 <!doctype html>
+<?php if( Config::get( 'development' ) ) : ?>
+<html lang="en-gb">
+<?php else: ?>
 <html lang="en-gb" manifest="/site.manifest">
+<?php endif; ?>
 	<head>
 		<meta charset="utf-8" />
 		<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
