@@ -39,7 +39,7 @@ Config::set( 'htmlTidy', (!function_exists('tidy_parse_string'))? false : array(
 Config::set( 'caches', array(
 	array(
 		'name' => 'static',
-		'type' => 'Fail',
+		'type' => 'File',
 		'options' => array(
 			'location' => __DIR__.'/../cache/static',
 			'serialize' => false
@@ -54,7 +54,7 @@ Config::set( 'caches', array(
 	),
 	array(
 		'name' => 'dynamic',
-		'type' => 'Fail',
+		'type' => 'File',
 		'options' => array(
 			'location' => __DIR__.'/../cache/dynamic',
 			'serialize' => false

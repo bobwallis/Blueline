@@ -111,7 +111,7 @@
 					this.showLoading();
 					var req = new XMLHttpRequest();
 					this.AJAXContentRequest = req;
-					req.open( 'GET', stateOrString.href.replace( /(\?|$)/, '?snippet=1&' ), true );
+					req.open( 'GET', stateOrString.href.replace( /(\?|$)/, '?snippet=1&' ).replace( /&$/, '' ), true );
 					req.onreadystatechange = function() {
 						if( req.readyState === 4 ) {
 							helpers.AJAXContentRequest = null;

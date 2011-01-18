@@ -69,11 +69,11 @@ class Request {
 	 * The query string of the request
 	 * @return string http://example.com/path/example.html?q=eg -> q=eg
 	 */
-	public static function queryString() {
+	public static function queryString( $showSnippet = false ) {
 		if( self::$_queryString === false ) {
-			self::$_queryString = preg_replace( '/&?snippet=1&?/', '', parse_url( $_SERVER['REQUEST_URI'], PHP_URL_QUERY ) );
+			self::$_queryString = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_QUERY );
 		}
-		return self::$_queryString;
+		return $showSnippet? self::$_queryString : preg_replace( '/&?snippet=1&?/', '', self::$_queryString );
 	}
 	
 	/**
