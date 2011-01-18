@@ -104,7 +104,8 @@ class PlaceNotationTest extends \PHPUnit_Framework_TestCase {
 			array( 'stage' => 6, 'short' => '-1-1-1,2', 'expand' => 'x16x16x16x16x16x12' ),
 			array( 'stage' => 6, 'short' => '&x1x1x1 2', 'expand' => 'x16x16x16x16x16x12' ),
 			array( 'stage' => 6, 'short' => 'a &-1-1-1', 'expand' => 'x16x16x16x16x16x12' ),
-			array( 'stage' => 6, 'short' => 'x16x16x16x16x16x12', 'expand' => 'x16x16x16x16x16x12' )
+			array( 'stage' => 6, 'short' => 'x16x16x16x16x16x12', 'expand' => 'x16x16x16x16x16x12' ),
+			array( 'stage' => 6, 'short' => '&-34-14-16-1236-16-36,12', 'expand' => 'x34x14x16x1236x16x36x16x1236x16x14x34x12' )
 		) as $test ) {
 			$this->assertEquals( $test['expand'], $this->object->expand( $test['stage'], $test['short'] ) );
 		}

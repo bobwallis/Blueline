@@ -122,7 +122,7 @@ class PlaceNotation {
 	 * @param string $notation
 	 * @return string
 	 */
-	public static function expand( $stage, $notation ) {	
+	public static function expand( $stage, $notation ) {
 		// Tidy up letter cases
 		$notationFull = strtoupper( $notation );
 		$notationFull = str_replace( 'X', 'x', $notationFull );
@@ -140,19 +140,19 @@ class PlaceNotation {
 			$notationFull = self::expandHalf( $match[1] ).'.'.$match[2];
 		}
 		$notationFull = str_replace( '-', 'x', $notationFull );
-	
+		
 		// Turn notation like ...x34 hl 16 le 12 into ...x34.16 le 12
 		if( strpos( $notationFull, ' HL ' ) !== false ) {
 			$notationFull = str_replace( ' HL ', '.', $notationFull );
 		}
 	
 		// Deal with notation like '-1-1-1LH2', or '-1-1-1 le2'
-		if( preg_match( '/(.*)(LH|LE)/', $notationFull, $match ) == 1 ) {
+		if( preg_match( '/^(.*)(LH|LE)/', $notationFull, $match ) == 1 ) {
 			$notationFull = str_replace( $match[0], self::expandHalf( $match[1] ), $notationFull );
 		}
 	
 		// Deal with notation like '-1-1-1,2' or '3,1.5.1.5.1'
-		if( preg_match( '/(.*),(.*)/', $notationFull, $match ) == 1 ) {
+		if( preg_match( '/^\s*&?\s*(.*),(.*)/', $notationFull, $match ) == 1 ) {
 			$notationFull = self::expandHalf( $match[1] ) . '.' . self::expandHalf( $match[2] );
 			$notationFull = str_replace( array( '.x.', 'x.', '.x'), 'x', $notationFull );
 		}

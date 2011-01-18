@@ -13,8 +13,7 @@ if( Request::extension() == '' ) {
 }
 
 if( isset( $_GET['n'], $_GET['s'] ) ) {
-	$parsed = PlaceNotation::parse( intval( $_GET['s'] ), urldecode( $_GET['n'] ) );
-	View::set( 'notation', $parsed['full'] );
+	View::set( 'notation', PlaceNotation::expand( intval( $_GET['s'] ), urldecode( $_GET['n'] ) ) );
 }
 else {
 	throw new Exception( 'Bad arguments', 400 );

@@ -15,7 +15,7 @@ if( isset( $_GET['name'], $_GET['notation'] ) ) {
 		$notations = array( $_GET['notation'] );
 		$stages = array( $_GET['stage'] );
 	}
-	elseif( is_array( $_GET['name'] ) && is_array( $_GET['notation'] ) && is_array( $_GET['stage'] ) && count( $_GET['name'] ) == count( $_GET['notation'] && count( $_GET['notation'] ) == count( $_GET['stage'] ) ) ) {
+	elseif( is_array( $_GET['name'] ) && is_array( $_GET['notation'] ) && is_array( $_GET['stage'] ) && count( $_GET['name'] ) == count( $_GET['notation'] ) && count( $_GET['notation'] ) == count( $_GET['stage'] ) ) {
 		$names = $_GET['name'];
 		$notations = $_GET['notation'];
 		$stages = $_GET['stage'];
@@ -49,7 +49,7 @@ foreach( $methods as &$method ) {
 				'notationExpanded =' => $method->notationExpanded()
 			)
 		) );
-		if( $check ) {
+		if( !$check->isEmpty() ) {
 			$check->title = "{$method->title()} ({$check->title()})";
 			$method = $check;
 		}
