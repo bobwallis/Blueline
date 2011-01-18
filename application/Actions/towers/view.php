@@ -74,3 +74,10 @@ foreach( $towers as $tower ) {
 // Export data to the view for successful request
 Response::cacheType( 'static' );
 View::set( 'towers', $towers );
+if( count( $towers ) == 1 ) {
+	View::set( 'ICBM', array(
+		'latitude' => $towers[0]->latitude(),
+		'longitude' => $towers[0]->longitude(),
+		'placename' => strval( $towers[0] )
+	) );
+}

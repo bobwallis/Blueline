@@ -126,7 +126,8 @@ class View {
 			throw new Exception( 'Element \''.$name.'\' not found', 404 );
 		}
 		else {
-			extract( $variables, EXTR_SKIP );
+			extract( self::variables(), EXTR_SKIP );
+			extract( $variables, EXTR_OVERWRITE );
 			include( $elementPath );
 		}
 	}

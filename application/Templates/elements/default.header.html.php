@@ -13,8 +13,11 @@ if( !Response::snippet() ) :
 		<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
 		<title><?php echo isset( $title )? $title : 'Blueline'; ?></title>
 		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="format-detection" content="telephone=no" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta name="application-name" content="Blueline"/>
+		<meta name="application-name" content="Blueline" />
+		<meta name="msapplication-starturl" content="<?php echo $site['baseURL']; ?>" />
+		<meta name="msapplication-navbutton-color" content="#002147" />
 <?php if( isset( $ICBM ) ) : ?>
 		<meta name="icbm" content="<?php echo $ICBM['latitude']; ?>, <?php echo $ICBM['longitude']; ?>" />
 		<meta name="geo.position" content="<?php echo $ICBM['latitude']; ?>;<?php echo $ICBM['longitude']; ?>" />
@@ -31,7 +34,7 @@ if( !Response::snippet() ) :
 		<link rel="stylesheet" media="print" href="/styles/print.css" />
 		<noscript><link rel="stylesheet" media="all" href="/styles/noscript.css" /></noscript>
 		<script src="/scripts/general.js"></script>
-		<script>window.baseURL = <?php echo json_encode( Config::get( 'site.baseURL' ) ); ?>;if(can.history()){document.write("<script src=\"\/scripts\/history.js\"><\/script>");}</script>
+		<script>window.baseURL = <?php echo json_encode( $site['baseURL'] ); ?>;if(can.history()){document.write("<script src=\"\/scripts\/history.js\"><\/script>");}</script>
 <?php if( isset( $scripts ) ): foreach( $scripts as $script ) : ?>
 		<script src="<?php echo $script; ?>"></script>
 <?php endforeach; endif; ?>
