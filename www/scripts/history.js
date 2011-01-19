@@ -115,6 +115,9 @@
 					req.onreadystatechange = function() {
 						if( req.readyState === 4 ) {
 							helpers.AJAXContentRequest = null;
+							if( typeof _gaq !== 'undefined' ) {
+								_gaq.push( ['_trackPageview'] );
+							}
 							helpers.hideLoading();
 							$content.innerHTML = req.responseText;
 							saveState();
