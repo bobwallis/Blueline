@@ -26,7 +26,8 @@ if( !Response::snippet() ) :
 		<link rel="search" type="application/opensearchdescription+xml" href="/services/opensearch/associations.xml" title="Associations | Blueline" />
 		<link rel="search" type="application/opensearchdescription+xml" href="/services/opensearch/methods.xml" title="Methods | Blueline" />
 		<link rel="search" type="application/opensearchdescription+xml" href="/services/opensearch/towers.xml" title="Towers | Blueline" />
-		<link rel="shortcut icon" href="/favicon.ico" sizes="16x16,24x24,32x32,48x48" type="image/x-icon" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any" /> 
+		<link rel="alternate shortcut icon" type="image/x-ixon" href="/favicon.ico" sizes="16x16,24x24,48x48" />
 		<!--[if lt IE 9]><script src="/scripts/ieCompat.js"></script><![endif]-->
 		<link rel="stylesheet" media="all" href="/styles/core.css" />
 		<link rel="stylesheet" media="screen" href="/styles/normal.css" />
