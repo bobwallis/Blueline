@@ -20,25 +20,29 @@ class Methods extends \Blueline\DataAccess {
 					$qExplode = explode( ' ', $q );
 					if( count( $qExplode ) > 1 ) {
 						$last = array_pop( $qExplode );
-						// If the search ends in a number then use that to filter by stage
+						// If the search ends in a number then use that to filter by stage and remove it from the title search
 						if( \Helpers\Stages::toInt( $last ) ) {
 							$conditions['stage ='] = \Helpers\Stages::toInt( $last );
+							$q = implode( ' ', $qExplode );
 							$last = array_pop( $qExplode );
 						}
-						
-						// This will be used to test against the title
-						$q = implode( ' ', $qExplode ).($last?' '.$last:'');
+						else {
+							$q = implode( ' ', $qExplode ).($last?' '.$last:'');
+						}
 						
 						// Remove non-name parts of the search to test against nameMetaphone
 						if( \Helpers\Classifications::isClass( $last ) ) {
+							$conditions['classification ='] = ucwords( strtolower( $last ) );
 							$last = array_pop( $qExplode );
 						}
 						while( 1 ) {
-							switch( $last ) {
-								case 'Little':
+							switch( strtolower( $last ) ) {
+								case 'little':
+									$conditions['little ='] = 1;
 									$last = array_pop( $qExplode );
 									break;
-								case 'Differential':
+								case 'differential':
+									$conditions['differential ='] = 1;
 									$last = array_pop( $qExplode );
 									break;
 								default:
