@@ -893,25 +893,29 @@
 			// Show place notation by default
 			this.options.showNotation = true;
 		}
-		if( typeof options.colors === 'undefined' ) {
-			// Default colors array
-			this.options.colors = {
-				lines: repeatArrayToLength( ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'], parent.stage ).map( function( e, i ) { return ( parent.huntBells.indexOf( i ) != -1 )? '#D11' : e; }, this ),
-				ruleOffs: '#999'
-			}
-		}
 		
-		// Collect information from the parent to provide options for drawing the plain lead
-		this.options.plainLeadGridOptions = {
-			id: 'methodGrid_'+parent.id+'_lead',
-			title: 'Plain Lead',
-			notation: parent.notation,
-			notationText: parent.options.notation,
-			showNotation: options.showNotation,
-			huntBellStartPositions: parent.huntBells,
-			ruleOffs: parent.ruleOffs,
-			colors: this.options.colors
-		};
+		// Default display options
+		this.options.display = _.mergeObjects( {
+			lines: repeatArrayToLength( ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'], parent.stage )
+				.map( function( e, i ) {
+					return ( parent.huntBells.indexOf( i ) != -1 )? {stroke: '#D11', 'stroke-width': 1} : { stroke: e };
+				}, this )
+				.map( function( e ) {
+					return _.mergeObjects( {
+						'stroke-linejoin': 'round',
+						'stroke-linecap': 'round',
+						'stroke-width': 2,
+						fill: 'none'
+					}, e );
+				}, this ),
+			ruleOffs: {
+				'stroke-width': 1,
+				'stroke-linecap': 'round',
+				'stroke-dasharray': '4,2',
+				'stroke': '#999',
+				fill: 'none'
+			}
+		}, this.options.display );
 		
 		// Calculate bell and row dimensions for use later
 		this.dimensions = {
@@ -981,19 +985,29 @@
 		
 		draw: function() {
 			// Create a grid for the whole lead
-			this.leadGrid = this.createGrid( this.options.plainLeadGridOptions );
+			this.leadGrid = this.createGrid( {
+				id: 'methodGrid_'+this.parent.id+'_lead',
+				title: 'Plain Lead',
+				notation: this.parent.notation,
+				notationText: this.parent.options.notation,
+				showNotation: this.options.showNotation,
+				huntBellStartPositions: this.parent.huntBells,
+				ruleOffs: this.parent.ruleOffs,
+				display: this.options.display
+			} );
 			this.container.appendChild( this.leadGrid );
 			
 			// Create grids for calls
 			this.callGrids = [];
 			this.parent.calls.forEach( function( call ) {
-				var gridOptions = {}; for( e in call ) { gridOptions[e] = call[e]; }
-				gridOptions.id = 'methodGrid_'+this.parent.id+'_'+call.id;
-				gridOptions.showNotation = this.options.showNotation;
-				gridOptions.colors = {
-					lines: permute( this.options.plainLeadGridOptions.colors.lines, call.startRow ),
-					ruleOffs: this.options.plainLeadGridOptions.colors.ruleOffs
-				};
+				var gridOptions = _.mergeObjects( call, {
+					id: 'methodGrid_'+this.parent.id+'_'+call.id,
+					showNotation: this.options.showNotation,
+					display: {
+						lines: permute( this.options.display.lines, call.startRow ),
+						ruleOffs: this.options.display.ruleOffs
+					}
+				} );
 				var callGrid = this.createGrid( gridOptions );
 				this.container.appendChild( callGrid );
 				this.callGrids.push( callGrid );
@@ -1006,13 +1020,12 @@
 					width: this.dimensions.row.x,
 					height: this.dimensions.row.y*( options.notation.length+1 )
 				} ),
-				huntBellStartPositions = ( typeof( options.huntBellStartPositions ) != 'undefined' )? options.huntBellStartPositions : [],
 				i, iLim,
 				path;
 			
 			if( paper.type !== false ) {
 				// Draw rule offs
-				if( options.colors.ruleOffs != 'transparent' ) {
+				if( typeof this.options.display.ruleOffs.stroke === 'string' && this.options.display.ruleOffs.stroke !== 'transparent' ) {
 					i = options.ruleOffs.from;
 					iLim = options.notation.length;
 					path = '';
@@ -1024,19 +1037,13 @@
 						i += options.ruleOffs.every;
 					}
 					if( path != '' ) {
-						paper.add( 'path', { 'stroke-width': 1, 'stroke-linecap': 'round', 'stroke-dasharray': '4,2', 'stroke': options.colors.ruleOffs, 'd': path } );
+						paper.add( 'path', _.mergeObjects( options.display.ruleOffs, { d: path } ) );
 					}
 				}
 				// Draw lines
 				i = this.parent.stage;
 				while( i-- ) {
-					var isHuntBell = huntBellStartPositions.indexOf( i ) != -1;
-					paper.add( 'path', {
-						'stroke-linejoin': 'round', 'stroke-linecap': 'round', fill: 'none',
-						'stroke-width': isHuntBell? 1 : 2,
-						stroke: options.colors.lines[i],
-						d: 'M0,0' + pathString( i, options.notation, this.dimensions.bell.x, this.dimensions.bell.y, 1, false )
-					} );
+					paper.add( 'path', _.mergeObjects( options.display.lines[i], { d: 'M0,0' + pathString( i, options.notation, this.dimensions.bell.x, this.dimensions.bell.y, 1, false ) } ) );
 				}
 				
 				return gridTable( options.id, paper, options.showNotation? options.notationText : null, options.highlight, ( typeof( options.title ) == 'string' )? options.title : null );

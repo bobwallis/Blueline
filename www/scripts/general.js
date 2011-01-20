@@ -35,6 +35,22 @@
 			}
 			return true;
 		},
+		mergeObjects: function( a, b ) {
+			var prop, c;
+			a = a || {};
+			b = b || {};
+			if( this.isEmpty( a ) && this.isEmpty( b ) ) { return {}; }
+			c = this.mergeObjects( {}, a ); // To ensure a is not overwritten
+			for( prop in b ) {
+				if( typeof a[prop] === 'object' && typeof b[prop] === 'object' ) {
+					c[prop] = this.mergeObjects( a[prop], b[prop] );
+				}
+				else {
+					c[prop] = b[prop];
+				}
+			}
+			return c;
+		},
 		// Returns the target of an event object e
 		eventTarget: function( e ) {
 			if( e.target ) { return e.target; }
