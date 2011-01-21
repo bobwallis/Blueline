@@ -293,15 +293,33 @@
 		};
 		
 		// Capture form submitions
-		var historySubmit = function( e ) {
-			var form = _.eventTarget( e ),
-				href = form.getAttribute( 'action' ) + '?' + _.formToQueryString( form ),
+		var historySubmitForm = function( form ) {
+			var href = form.getAttribute( 'action' ) + '?' + _.formToQueryString( form ),
 				handler = historyMatch( href );
-				if( typeof historyEvents[handler] === 'function' ) {
-					e.preventDefault();
-					history.pushState( { exec: handler, href: href }, '', href );
-					historyEvents[handler]( { href: href } );
-				}
+			if( typeof historyEvents[handler] === 'function' ) {
+				history.pushState( { exec: handler, href: href }, '', href );
+				historyEvents[handler]( { href: href } );
+			}
+		};
+		
+		var historySubmit = function( e ) {
+			var form = _.eventTarget( e );
+			if( form.nodeName === 'FORM' ) {
+				e.preventDefault();
+				historySubmitForm( form );
+			}
+		};
+		
+		var historyChange = function( e ) {
+			var form = _.eventTarget( e );
+			while( form.nodeName !== 'FORM' && form.nodeName !== 'BODY' ) {
+				form = form.parentNode;
+			}
+			if( form.nodeName === 'FORM' ) {
+				window.setTimeout( function() { // Let cuts and pastes happen before firing
+					historySubmitForm( form );
+				}, 5 );
+			}
 		};
 		
 		// The popstate handler
@@ -329,6 +347,9 @@
 			// Attach to the big and little search form's submit events
 			_.addEventListener( 'topSearch', 'submit', historySubmit );
 			_.addEventListener( 'bigSearch', 'submit', historySubmit );
+			
+			// Auto-submit bigSearch on data change
+			_.addEventListener( 'bigSearch', 'paste', historyChange );
 			
 			// Add loading animation container
 			loading = document.createElement( 'div' );

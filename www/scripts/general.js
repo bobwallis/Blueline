@@ -128,14 +128,15 @@
 				}
 			}
 		},
-		fireEvent: function( type ) {
+		fireEvent: function( type, element ) {
+			element = element || window;
 			try {
 				var event = document.createEvent( 'HTMLEvents' );
 				event.initEvent( type );
-				window.dispatchEvent( event );
+				element.dispatchEvent( event );
 			}
 			catch( no_createEvent ) {
-				try { window.fireEvent( 'on'+type ); }
+				try { element.fireEvent( 'on'+type ); }
 				catch( no_fireEvent ) {}
 			}
 		},
