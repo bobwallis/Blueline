@@ -322,13 +322,8 @@
 
 	// Javascript for method/view pages
 	var MethodView = function( options ) {
-		// Check the options are sane
-		if( typeof( options.id ) == 'undefined' || typeof( options.stage ) == 'undefined' || typeof( options.notation ) == 'undefined' ) {
-			return false;
-		}
-	
 		// Copy in or create basic properties
-		this.options = options;
+		this.userOptions = options;
 		this.id = options.id;
 		this.stage = parseInt( options.stage, 10 );
 		this.rounds = roundsRow( this.stage );
@@ -346,7 +341,7 @@
 		this.huntBells = this.workGroups.filter( function( e ) { return ( e.length == 1 ); } ).map( function( e ) { return e[0]; } );
 		
 		this.ruleOffs = { every: this.notation.length, from: 0 };
-		if( typeof( options.ruleOffs ) == 'string' ) {
+		if( typeof options.ruleOffs === 'string' ) {
 			var ruleOffsExplode = options.ruleOffs.split( ':' ).map( function( e ) { return parseInt( e, 10 ); } );
 			this.ruleOffs.every = ( ruleOffsExplode[0] == NaN )? this.notation.length : ruleOffsExplode[0];
 			this.ruleOffs.from = ( ruleOffsExplode[1] == NaN )? 0 : ruleOffsExplode[1];
@@ -354,10 +349,10 @@
 		
 		// Calculate new notation, and other details for calls
 		this.calls = [];
-		if( typeof( this.options.calls ) != 'undefined' && this.options.calls.length !== 0 && !_.isEmpty( this.options.calls ) ) {
-			for( var call in this.options.calls ) {
+		if( typeof( options.calls ) != 'undefined' && options.calls.length !== 0 && !_.isEmpty( options.calls ) ) {
+			for( var call in options.calls ) {
 				// Parse the information given
-				var callInfo = this.options.calls[call].split( ':', 3 );
+				var callInfo = options.calls[call].split( ':', 3 );
 				if( callInfo[1] == '' ) { callInfo[1] = this.notation.length; } else { callInfo[1] = parseInt( callInfo[1], 10 ); }
 				if( callInfo[2] == '' ) { callInfo[2] = 0; } else { callInfo[2] = parseInt( callInfo[2], 10 ); }
 				// Get a block of notation to work with
@@ -404,22 +399,110 @@
 			}
 		}
 		
+		// Create objects to pass to child classes
+		this.container = {};
+		if( typeof options.options_line.container !== 'undefined' ) { this.container.line = options.options_line.container; }
+		if( typeof options.options_grid.container !== 'undefined' ) { this.container.grid = options.options_grid.container; }
+		
+		this.options = { line: {}, grid: {} };
+		
+		// Grid options
+		// Decide on some colours to use
+		var grid_ruleOffParams = _.mergeObjects( {
+			'stroke-width': 1,
+			'stroke-linecap': 'round',
+			'stroke-dasharray': '4,2',
+			'stroke': '#999',
+			fill: 'none'
+		}, options.options_grid.ruleOffDisplay ),
+		grid_lineParams = _.mergeArrays( 
+			repeatArrayToLength( ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'], this.stage )
+				.map( function( e, i ) {
+					return ( this.huntBells.indexOf( i ) != -1 )? {stroke: '#D11', 'stroke-width': 1} : { stroke: e };
+				}, this )
+				.map( function( e ) {
+					return _.mergeObjects( {
+						'stroke-linejoin': 'round',
+						'stroke-linecap': 'round',
+						'stroke-width': 2,
+						fill: 'none'
+					}, e );
+				}, this ),
+		options.options_grid.linesDisplay );
+		
+		this.options.grid.plainLead = {
+			id: this.id+'_grid_plainLead',
+			title: 'Plain Lead',
+			container: this.container.grid,
+			notation: this.notation,
+			stage: this.stage,
+			notationText: this.notationText,
+			notationExploded: this.notationExploded,
+			ruleOffs: this.ruleOffs,
+			showNotation: true,
+			display: {
+				dimensions: {
+					row: {x:15*this.stage,y:15},
+					bell: {x:15,y:15}
+				},
+				notation: true,
+				ruleOffs: grid_ruleOffParams,
+				lines: grid_lineParams
+			}
+		};
+		this.options.grid.calls = this.calls.map( function( call ) {
+			return {
+				id: this.id+'_grid_'+call.id,
+				title: call.title,
+				container: this.container.grid,
+				notation: call.notation,
+				stage: this.stage,
+				notationText: call.notationText,
+				ruleOffs: call.ruleOffs,
+				showNotation: true,
+				display: {
+					dimensions: {
+						row: {x:15*this.stage,y:15},
+						bell: {x:15,y:15}
+					},
+					notation: true,
+					highlight: call.highlight,
+					ruleOffs: grid_ruleOffParams,
+					lines: permute( grid_lineParams, call.startRow )
+				}
+			};
+		}, this );
+		
 		// Create child classes
-		if( typeof( options.options_line.container ) != 'undefined' ) {
-			this.Line = new MethodLine( this, options.options_line );
-			this.Line.draw();
-		}
-		if( typeof( options.options_grid.container ) != 'undefined' ) {
-			this.Grid = new MethodGrid( this, options.options_grid );
-			this.Grid.draw();
-		}
+		this.draw();
 	};
 	MethodView.prototype = {
+		
+		draw: function() {
+			this.Grids = [];
+			if( typeof this.container.grid !== 'undefined' ) {
+				this.Grids.push( new MethodGrid( this.options.grid.plainLead ) );
+				this.options.grid.calls.forEach( function( call ) {
+					this.Grids.push( new MethodGrid( call ) );
+				}, this );
+			}
+			if( typeof this.container.line !== 'undefined' ) {
+				this.Line = new MethodLine( this, this.userOptions.options_line );
+				this.Line.draw();
+			}
+		},
+		
+		redraw: function() {
+			this.destroy();
+			this.draw();
+		},
+		
 		destroy: function() {
 			this.Line.destroy();
-			this.Grid.destroy();
+			this.Grids.forEach( function( Grid ) { Grid.destroy(); } );
 		}
 	};
+	window['MethodView'] = MethodView;
 	
 	var MethodLine = function( parent, options ) {
 		var e, workColorSource;
@@ -433,7 +516,9 @@
 		if( typeof options.container === 'undefined' ) { return false; }
 		this.container = ( typeof options.container === 'string' )? document.getElementById( options.container ) : options.container;
 		if( typeof this.container.nodeName === 'undefined' ) { return false; }
-
+		
+		// Merge options with defaults
+		
 		if( typeof options.text === 'undefined' ) {
 			// Show text by default
 			this.options.text = true;
@@ -876,84 +961,63 @@
 	};
 	
 	
+	/**
+	 * Draws out a method grid, possibly with place notation
+	 * options:
+	 * options.id:               An ID string to use
+	 * options.title:            A title to give the grid (optional)
+	 * options.container:        An element (or ID string of one) into which the grid will be appended
+	 * options.notationText      The place notation of the grid (string)
+	 * options.stage:            The stage of the method (integer)
+	 * options.notation:         Parsed notation (optional)
+	 * options.notationExploded: Exploded notation (optional)
+	 * options.ruleOffs:         {from: x, every: u} object describing how to draw rule offs
+	 * options.showNotation:     Whether or not to print the place notation
+	 * options.display.dimensions: Dimensions object
+	 * options.display.ruleOffs: SVG path parameters for rule offs
+	 * options.display.lines:    An array mapping a line's start position to a set of options to pass to the SVG path
+	 */
 	
-	
-	
-	var MethodGrid = function( parent, options ) {
-		this.parent = parent;
-		this.options = options;
-	
-		// Find container, allow an element or an ID string
-		if( typeof options.container === 'undefined' ) { return false; }
+	var MethodGrid = function( options ) {
+		// Find the container
 		this.container = ( typeof options.container === 'string' )? document.getElementById( options.container ) : options.container;	
 		if( typeof this.container.nodeName === 'undefined' ) { return false; }
 		
-		// Set up options
-		if( typeof options.showNotation === 'undefined' ) {
-			// Show place notation by default
-			this.options.showNotation = true;
-		}
+		this.id = options.id;
 		
-		// Default display options
-		this.options.display = _.mergeObjects( {
-			lines: repeatArrayToLength( ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'], parent.stage )
-				.map( function( e, i ) {
-					return ( parent.huntBells.indexOf( i ) != -1 )? {stroke: '#D11', 'stroke-width': 1} : { stroke: e };
-				}, this )
-				.map( function( e ) {
-					return _.mergeObjects( {
-						'stroke-linejoin': 'round',
-						'stroke-linecap': 'round',
-						'stroke-width': 2,
-						fill: 'none'
-					}, e );
-				}, this ),
-			ruleOffs: {
-				'stroke-width': 1,
-				'stroke-linecap': 'round',
-				'stroke-dasharray': '4,2',
-				'stroke': '#999',
-				fill: 'none'
-			}
-		}, this.options.display );
+		// Parse the place notation
+		this.stage = options.stage;
+		this.notation = (typeof options.notation === 'object')? options.notation : parseNotation( options.notationText, options.stage );
+		this.notationText = options.notationText;
+		this.notationExploded = (typeof options.notationExploded === 'object')? options.notationExploded : explodeNotation( options.notationText );
 		
-		// Calculate bell and row dimensions for use later
-		this.dimensions = {
-			bell: { x: 12, y: 15 },
-			row: { x: 12*parent.stage, y: 15 }
-		};
+		// Rule offs
+		this.ruleOffs = (typeof options.ruleOffs === 'object')? options.ruleOffs : false;
+		
+		// Display options
+		this.title = (typeof options.title === 'string')? options.title : false;
+		this.display = _.mergeObjects( { notation: false }, options.display );
+		
+		this.draw();
 	};
+	// Private functions for MethodGrid2
 	
-	// Private methods for MethodGrid
-	
-	// Creates the table containing all the relavant information
-	var gridTable = function( id, paper, notation, highlightRows, title ) {
+	var MethodGrid_table = function( id, title ) {
 		var grid = document.createElement( 'table' ),
-			titleRow = document.createElement( 'tr' )
-			gridRow = document.createElement( 'tr' );
-		grid.id = id;
-		if( typeof notation === 'string' ) {
-			gridRow.appendChild( notationCell( notation, highlightRows ) );
-		}
-		gridRow.appendChild( paperCell( paper ) );
+			titleRow = document.createElement( 'tr' ),
+			titleCell = document.createElement( 'td' );
+		grid.id = 'method'+id;
 		if( typeof title === 'string' ) {
-			titleRow.appendChild( titleCell( title ) );
+			titleCell.className = 'titleCell';
+			titleCell.innerHTML = title+':';
+			titleCell.colSpan = 2;
+			titleRow.appendChild( titleCell );
 			grid.appendChild( titleRow );
 		}
-		grid.appendChild( gridRow );
 		return grid;
 	};
-	// Build a cell containing the title
-	var titleCell = function( title ) {
-		var cell = document.createElement( 'td' );
-		cell.className = 'titleCell';
-		cell.colSpan = 2;
-		cell.innerHTML = title+':';
-		return cell;
-	};
-	// Build a cell containing the place notation
-	var notationCell = function( notation, highlight ) {
-		var notationExploded = explodeNotation( notation );
+	
+	var MethodGrid_notationCell = function( notationExploded, highlight ) {
 		if( typeof highlight !== 'undefined' ) {
 			if( typeof highlight === 'number' ) {
 				notationExploded[highlight-1] = '<strong>'+notationExploded[highlight-1]+'</strong>';
@@ -969,93 +1033,75 @@
 		cell.innerHTML = notationExploded.join( '<br />' );
 		return cell;
 	};
-	// Build a cell containing the SVG grid
-	var paperCell = function( paper ) {
-		var cell = document.createElement( 'td' );
-		cell.className = 'paperCell';
-		cell.appendChild( paper.canvas );
-		return cell;
+	
+	var MethodGrid_grid = function( options ) {
+		var paperCell = document.createElement( 'td' ),
+			paper = new SVGorVML( {
+				id: options.id+'_paper',
+				width: options.display.dimensions.row.x,
+				height: options.display.dimensions.row.y*( options.notation.length+1 )
+			} ),
+			i, iLim,
+			path;
+			
+		if( paper === false ) {
+			// If we can't draw using SVG, then request an image from the server instead
+			// to implement
+		}
+		else {
+			// Draw rule offs
+			if( options.ruleOffs && typeof options.display.ruleOffs.stroke === 'string' && options.display.ruleOffs.stroke !== 'transparent' ) {
+				i = options.ruleOffs.from;
+				iLim = options.notation.length;
+				path = '';
+				
+				while( i <= iLim ) {
+					if( i > 0 ) {
+						path += 'M0,'+(i*options.display.dimensions.row.y)+'l'+options.display.dimensions.row.x+',0';
+					}
+					i += options.ruleOffs.every;
+				}
+				if( path != '' ) {
+					paper.add( 'path', _.mergeObjects( options.display.ruleOffs, { d: path } ) );
+				}
+			}
+			// Draw lines
+			i = options.stage;
+			while( i-- ) {
+				paper.add( 'path', _.mergeObjects( options.display.lines[i], { d: 'M0,0' + pathString( i, options.notation, options.display.dimensions.bell.x, options.display.dimensions.bell.y, 1, false ) } ) );
+			}
+			paperCell.appendChild( paper.canvas );
+		}
+		return paperCell;
 	}
 	
-	// Public methods for MethodGrid
 	MethodGrid.prototype = {
-		destroy: function() {
-			while( this.container.firstChild ) { this.container.removeChild( this.container.firstChild ); }
-		},
 		
 		draw: function() {
-			// Create a grid for the whole lead
-			this.leadGrid = this.createGrid( {
-				id: 'methodGrid_'+this.parent.id+'_lead',
-				title: 'Plain Lead',
-				notation: this.parent.notation,
-				notationText: this.parent.options.notation,
-				showNotation: this.options.showNotation,
-				huntBellStartPositions: this.parent.huntBells,
-				ruleOffs: this.parent.ruleOffs,
-				display: this.options.display
-			} );
-			this.container.appendChild( this.leadGrid );
+			var grid = MethodGrid_table( this.id, this.title ),
+				gridRow = document.createElement( 'tr' );
+			grid.appendChild( gridRow );
 			
-			// Create grids for calls
-			this.callGrids = [];
-			this.parent.calls.forEach( function( call ) {
-				var gridOptions = _.mergeObjects( call, {
-					id: 'methodGrid_'+this.parent.id+'_'+call.id,
-					showNotation: this.options.showNotation,
-					display: {
-						lines: permute( this.options.display.lines, call.startRow ),
-						ruleOffs: this.options.display.ruleOffs
-					}
-				} );
-				var callGrid = this.createGrid( gridOptions );
-				this.container.appendChild( callGrid );
-				this.callGrids.push( callGrid );
-			}, this );
+			if( this.display.notation ) {
+				gridRow.appendChild( MethodGrid_notationCell( this.notationExploded, this.display.highlight ) );
+			}
+			gridRow.appendChild( MethodGrid_grid( this ) );
+			
+			this.grid = grid;
+			this.container.appendChild( this.grid );
 		},
 		
-		createGrid: function( options ) {
-			var paper = new SVGorVML( {
-					id: options.id+'_paper',
-					width: this.dimensions.row.x,
-					height: this.dimensions.row.y*( options.notation.length+1 )
-				} ),
-				i, iLim,
-				path;
-			
-			if( paper.type !== false ) {
-				// Draw rule offs
-				if( typeof this.options.display.ruleOffs.stroke === 'string' && this.options.display.ruleOffs.stroke !== 'transparent' ) {
-					i = options.ruleOffs.from;
-					iLim = options.notation.length;
-					path = '';
-
-					while( i <= iLim ) {
-						if( i > 0 ) {
-							path += 'M0,'+(i*this.dimensions.row.y)+'l'+this.dimensions.row.x+',0';
-						}
-						i += options.ruleOffs.every;
-					}
-					if( path != '' ) {
-						paper.add( 'path', _.mergeObjects( options.display.ruleOffs, { d: path } ) );
-					}
-				}
-				// Draw lines
-				i = this.parent.stage;
-				while( i-- ) {
-					paper.add( 'path', _.mergeObjects( options.display.lines[i], { d: 'M0,0' + pathString( i, options.notation, this.dimensions.bell.x, this.dimensions.bell.y, 1, false ) } ) );
-				}
-				
-				return gridTable( options.id, paper, options.showNotation? options.notationText : null, options.highlight, ( typeof( options.title ) == 'string' )? options.title : null );
-			}
-			else {
-				return false;
+		redraw: function() {
+			this.destroy();
+			this.draw();
+		},
+		destroy: function() {
+			if( typeof this.grid !== 'undefined' ) {
+				this.container.removeChild( this.grid );
+				this.grid = null;
 			}
 		}
 	};
-
-	// Export globals
-	window['MethodView'] = MethodView;
 	
 	// Resize
 	var lastRedrawTime = (new Date()).getTime(),
@@ -1066,7 +1112,7 @@
 		lastRedrawTime = nowTime;
 		
 		window.methods.forEach( function( method ) {
-			method.Line.reDraw();
+			method.redraw();
 		} );
 	};
 	_.addEventListener( window, 'resize', methodsResize );

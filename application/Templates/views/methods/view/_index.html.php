@@ -17,14 +17,14 @@ View::element( 'default.header', array(
 ) );
 $i = 0;
 foreach( $methods as $method ) : ?>
-<section class="method" id="method_<?php echo $i; ?>">
+<section class="method" id="method<?php echo $i; ?>">
 	<header>
 		<h1><?php echo $method->title(); ?></h1>
-		<span id="method_<?php echo $i; ?>_tabBar"></span>
+		<span id="method<?php echo $i; ?>_tabBar"></span>
 		<script>
 		//<![CDATA[
 			window.tabBars.push( new TabBar( {
-				landmark: 'method_<?php echo $i; ?>_tabBar',
+				landmark: 'method<?php echo $i; ?>_tabBar',
 				tabs: [
 					{ id: 'details<?php echo $i; ?>', title: 'Details' },
 					{ id: 'line<?php echo $i; ?>', title: 'Line' },
@@ -95,7 +95,7 @@ foreach( $methods as $method ) : ?>
 	//<![CDATA[
 		window.methods.push( new MethodView( {
 			id: <?php echo $i; ?>,
-			stage: <?php echo intval( $method->stage() ); ?>,
+			stage: <?php echo $method->stage(); ?>,
 			notation: <?php echo json_encode( $method->notationExpanded() ); ?>,
 			leadHead: <?php echo json_encode( $method->leadHead() ); ?>,
 			calls: <?php echo json_encode( $method->calls() ); ?>,

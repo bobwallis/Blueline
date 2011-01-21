@@ -51,6 +51,15 @@
 			}
 			return c;
 		},
+		mergeArrays: function( a, b ) {
+			var c = [], i;
+			a = a || [];
+			b = b || [];
+			for( i = 0; i < a.length; ++i ) {
+				c[i] = (typeof b[i] !== 'undefined')? b[i] : a[i];
+			}
+			return c;
+		},
 		// Returns the target of an event object e
 		eventTarget: function( e ) {
 			if( e.target ) { return e.target; }
