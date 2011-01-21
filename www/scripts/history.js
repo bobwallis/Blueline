@@ -80,9 +80,11 @@
 				// Wipe HTML
 				while( $content.firstChild ) { $content.removeChild( $content.firstChild ); }
 				// Clear global variables
-				window['methods'].forEach( function( method ) {
-					method.destroy();
-				} );
+				if( typeof window['methods'] === 'object' ) {
+					window['methods'].forEach( function( method ) {
+						method.destroy();
+					} );
+				}
 				window['methods'] = [];
 				window['towerMaps'] = [];
 			},
@@ -275,6 +277,10 @@
 		// Capture link clicks
 		var historyClick = function( e ) {
 			var target = _.eventTarget( e );
+			if( target.nodeName !== 'A' ) {
+				// Allow one level of nesting for links (why does this not just happen thanks to bubbling?)
+				target = target.parentNode;
+			}
 			if( target.nodeName === 'A' ) {
 				var href = target.href.replace( new RegExp( '^'+window.baseURL ), '' ),
 					handler = historyMatch( href );
