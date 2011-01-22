@@ -28,7 +28,8 @@
 			
 			// Modifies the header bar
 			setHeader: function( breadcrumb, topSearch, bigSearch ) {
-				var i;
+				var i,
+					newQValue = (window.location.search.match( /q=./ ))? decodeURIComponent( window.location.search.replace( /.*q=(.*?)(&|$).*/, '$1' ) ) : '';
 				// Set the breadcrumb in the header
 				while( $breadcrumbContainer.firstChild ) { $breadcrumbContainer.removeChild( $breadcrumbContainer.firstChild ); }
 				if( breadcrumb ) {
@@ -56,7 +57,9 @@
 				}
 				else {
 					$bigSearchContainer.style.display = 'block';
-					$bigQ.value = (window.location.search.match( /q=./ ))? decodeURIComponent( window.location.search.replace( /.*q=(.*?)(&|$).*/, '$1' ) ) : '' ;
+					if( $bigQ.value != newQValue ) {
+						$bigQ.value = newQValue;
+					}
 					if( typeof bigSearch.placeholder === 'string' ) {
 						$bigQ.setAttribute( 'placeholder', bigSearch.placeholder );
 					}
@@ -305,6 +308,9 @@
 		
 		var historyChange = function( e ) {
 			var form = _.eventTarget( e );
+			if( [13,16,17,27,33,34,35,36,37,38,39,40,45,91].indexOf( e.keyCode ) !== -1 ) { // Don't fire for various non-character keys
+				return true;
+			}
 			if( typeof form.value === 'string' && form.value == '' ) {
 				helpers.clearContent();
 				return false;
