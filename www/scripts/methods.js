@@ -493,8 +493,7 @@
 		},
 		
 		redraw: function() {
-			this.destroy();
-			this.draw();
+			this.Line.reDraw();
 		},
 		
 		destroy: function() {
@@ -758,7 +757,7 @@
 			}
 		},
 		
-		reDraw: function() {
+		resize: function() {
 			this.initialiseContainers();
 			this.calculateSizing();
 			this.draw();
@@ -1095,6 +1094,7 @@
 			this.destroy();
 			this.draw();
 		},
+		
 		destroy: function() {
 			if( typeof this.grid !== 'undefined' ) {
 				this.container.removeChild( this.grid );
