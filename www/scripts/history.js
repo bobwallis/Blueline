@@ -109,26 +109,30 @@
 					// Replaces the content of an element with the result of an AJAX call
 					if( this.AJAXContentRequest && typeof this.AJAXContentRequest.abort === 'function' ) {
 						this.AJAXContentRequest.abort();
+						this.AJAXContentRequest = null;
 					}
-					this.showLoading();
-					var req = new XMLHttpRequest();
-					this.AJAXContentRequest = req;
-					req.open( 'GET', stateOrString.href.replace( /(\?|$)/, '?snippet=1&' ).replace( /&$/, '' ), true );
-					req.onreadystatechange = function() {
-						if( req.readyState === 4 ) {
-							helpers.AJAXContentRequest = null;
-							if( typeof _gaq !== 'undefined' ) {
-								_gaq.push( ['_trackPageview'] );
+					if( $content.innerHTML == '' ) { // Only show loading animation if content has been cleared
+						this.showLoading();
+					}
+					var req = new XMLHttpRequest(),
+						onreadystatechange = function() {
+							if( req.readyState === 4 && req.responseText != '' ) {
+								helpers.AJAXContentRequest = null;
+								helpers.hideLoading();
+								$content.innerHTML = req.responseText;
+								if( typeof _gaq !== 'undefined' ) {
+									_gaq.push( ['_trackPageview'] );
+								}
+								saveState();
+								// Evaluate scripts
+								_.toArray( $content.getElementsByTagName( 'script' ) ).forEach( function( s ) { eval( s.innerHTML ); } );
+								if( typeof callbacks.after === 'function' ) { callbacks.after(); }
 							}
-							helpers.hideLoading();
-							$content.innerHTML = req.responseText;
-							saveState();
-							// Evaluate scripts
-							_.toArray( $content.getElementsByTagName( 'script' ) ).forEach( function( s ) { eval( s.innerHTML ); } );
-							if( typeof callbacks.after === 'function' ) { callbacks.after(); }
-						}
-					};
-					req.send();
+						};
+					req.open( 'GET', stateOrString.href.replace( /(\?|$)/, '?snippet=1&' ).replace( /&$/, '' ), true );
+					req.onreadystatechange = onreadystatechange;
+					this.AJAXContentRequest = req;
+					this.AJAXContentRequest.send();
 				}
 				else {
 					location.href = stateOrString.href;
@@ -167,29 +171,24 @@
 			'/': function() {
 				helpers.setWindowTitle( false );
 				helpers.setHeader( false, false, searches.all );
-				helpers.clearContent();
 			},
 			'/search': function( state ) {
 				helpers.setWindowTitle( 'Search' );
 				helpers.setHeader( false, false, searches.all );
-				helpers.clearContent();
 				helpers.setContent( state );
 			},
 			'/associations': function( state ) {
 				helpers.setWindowTitle( 'Associations' );
 				helpers.setHeader( breadcrumbs.associations, searches.associations, false );
-				helpers.clearContent();
 				helpers.setContent( state );
 			},
 			'/associations/search': function( state ) {
 				helpers.setWindowTitle( 'Search | Associations' );
 				helpers.setHeader( breadcrumbs.associations, false, searches.associations );
-				helpers.clearContent();
 				helpers.setContent( state );
 			},
 			'/associations/view': function( state ) {
 				helpers.setHeader( breadcrumbs.associations, searches.associations, false );
-				helpers.clearContent();
 				helpers.setContent( state, { 
 					after: function() {
 						var associationTitles = _.toArray( _.getElementsByClassName( 'association' ) ).map( function( a ) { return a.getElementsByTagName( 'h1' )[0].innerHTML; } );
@@ -201,23 +200,19 @@
 			'/methods': function() {
 				helpers.setWindowTitle( 'Methods' );
 				helpers.setHeader( breadcrumbs.methods, false, searches.methods );
-				helpers.clearContent();
 			},
 			'/methods/search': function( state ) {
 				helpers.setWindowTitle( 'Search | Methods' );
 				helpers.setHeader( breadcrumbs.methods, false, searches.methods );
-				helpers.clearContent();
 				helpers.setContent( state );
 			},
 			'/methods/view/custom': function( state ) {
 				helpers.setWindowTitle( 'Custom Method' );
 				helpers.setHeader( breadcrumbs.methods, searches.methods, false );
-				helpers.clearContent();
 				helpers.setContent( state );
 			},
 			'/methods/view': function( state ) {
 				helpers.setHeader( breadcrumbs.methods, searches.methods, false );
-				helpers.clearContent();
 				helpers.setContent( state, { 
 					after: function() {
 						var methodTitles = _.toArray( _.getElementsByClassName( 'method' ) ).map( function( m ) { return m.getElementsByTagName( 'h1' )[0].innerHTML; } );
@@ -228,17 +223,14 @@
 			'/towers': function() {
 				helpers.setWindowTitle( 'Towers' );
 				helpers.setHeader( breadcrumbs.towers, false, searches.towers );
-				helpers.clearContent();
 			},
 			'/towers/search': function( state ) {
 				helpers.setWindowTitle( 'Search | Towers' );
 				helpers.setHeader( breadcrumbs.towers, false, searches.towers );
-				helpers.clearContent();
 				helpers.setContent( state );
 			},
 			'/towers/view': function( state ) {
 				helpers.setHeader( breadcrumbs.towers, searches.towers, false );
-				helpers.clearContent();
 				helpers.setContent( state, { 
 					after: function() {
 						var towerTitles = _.toArray( _.getElementsByClassName( 'tower' ) ).map( function( a ) { return a.getElementsByTagName( 'h1' )[0].innerHTML.replace( /\<.*?\>/g, '' ); } );
@@ -250,7 +242,6 @@
 			'/copyright': function( state ) {
 				helpers.setWindowTitle( 'Copyright' );
 				helpers.setHeader( false, searches.all, false );
-				helpers.clearContent();
 				helpers.setContent( state );
 			}
 		};
@@ -286,6 +277,7 @@
 					handler = historyMatch( href );
 				if( typeof historyEvents[handler] === 'function' ) {
 					e.preventDefault();
+					helpers.clearContent();
 					history.pushState( { exec: handler, href: href }, '', target.href );
 					historyEvents[handler]( { href: href } );
 				}
@@ -306,12 +298,17 @@
 			var form = _.eventTarget( e );
 			if( form.nodeName === 'FORM' ) {
 				e.preventDefault();
+				helpers.clearContent();
 				historySubmitForm( form );
 			}
 		};
 		
 		var historyChange = function( e ) {
 			var form = _.eventTarget( e );
+			if( typeof form.value === 'string' && form.value == '' ) {
+				helpers.clearContent();
+				return false;
+			}
 			while( form.nodeName !== 'FORM' && form.nodeName !== 'BODY' ) {
 				form = form.parentNode;
 			}
@@ -327,9 +324,14 @@
 			var s = e.state;
 			if( s ) {
 				// Execute the handler for the requested URL if there is one
-				if( s.exec && typeof historyEvents[s.exec] === 'function' ) { historyEvents[s.exec]( s ); }
+				if( s.exec && typeof historyEvents[s.exec] === 'function' ) {
+					helpers.clearContent();
+					historyEvents[s.exec]( s );
+				}
 				// Otherwise let the browser load the requested URL as normal
-				else { location.href = s.href; }
+				else {
+					location.href = s.href;
+				}
 			}
 		};
 		_.addEventListener( window, 'popstate', historyPopstate );
@@ -349,7 +351,9 @@
 			_.addEventListener( 'bigSearch', 'submit', historySubmit );
 			
 			// Auto-submit bigSearch on data change
+			_.addEventListener( 'bigSearch', 'cut', historyChange );
 			_.addEventListener( 'bigSearch', 'paste', historyChange );
+			_.addEventListener( 'bigSearch', 'keyup', historyChange );
 			
 			// Add loading animation container
 			loading = document.createElement( 'div' );
