@@ -1,10 +1,17 @@
-( function( window, history, location, document, _ ) {
+( function( window, history, location, document, localStorage, _ ) {
 	if( window.can.history() ) {
+		
+		// Clear localStorage when updating the cache manifest
+		window.applicationCache.addEventListener( 'downloading', localStorage.clear, false );
 		
 		// Replace the history state of the current URL with the current page contents
 		var saveState = function() {
 			var href = location.href.replace( new RegExp( '^'+window.baseURL ), '' );
-			history.replaceState( { exec: historyMatch( href ), href: href, content: document.getElementById( 'content' ).innerHTML }, '', location.href );
+			try {
+				localStorage.setItem( href, document.getElementById( 'content' ).innerHTML );
+			}
+			catch( e ) {}
+			history.replaceState( { exec: historyMatch( href ), href: href }, '', location.href );
 		};
 		
 		// Helpers to modify the page's contents
@@ -94,6 +101,7 @@
 			// Sets the content of the main content area using either a HTML string, a saved state, or fetching content by url
 			AJAXContentRequest: null,
 			setContent: function( stateOrString, callbacks ) {
+				var content;
 				if( !callbacks ) { callbacks = {}; }
 				if( typeof callbacks.before === 'function' ) { callbacks.before(); }
 				if( typeof stateOrString === 'string' ) {
@@ -102,11 +110,14 @@
 					if( typeof callbacks.after === 'function' ) { callbacks.after(); }
 					return;
 				}
-				if( typeof stateOrString.content === 'string' ) {
-					$content.innerHTML = stateOrString.content;
-					_.toArray( $content.getElementsByTagName( 'script' ) ).forEach( function( s ) { eval( s.innerHTML ); } );
-					if( typeof callbacks.after === 'function' ) { callbacks.after(); }
-					return;
+				if( typeof stateOrString.href === 'string' ) {
+					content = localStorage.getItem( stateOrString.href );
+					if( content ) {
+						$content.innerHTML = content;
+						_.toArray( $content.getElementsByTagName( 'script' ) ).forEach( function( s ) { eval( s.innerHTML ); } );
+						if( typeof callbacks.after === 'function' ) { callbacks.after(); }
+						return;
+					}
 				}
 				if( navigator.onLine ) {
 					// Replaces the content of an element with the result of an AJAX call
@@ -405,4 +416,4 @@
 		};
 		_.addEventListener( window, 'load', lazyLoadScripts );
 	} // window.can.history()
-} )( window, window['history'], location, document, window['_'] );
+} )( window, window['history'], location, document, window['localStorage'], window['_'] );

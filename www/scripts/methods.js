@@ -492,8 +492,8 @@
 			}
 		},
 		
-		redraw: function() {
-			this.Line.reDraw();
+		resize: function() {
+			this.Line.resize();
 		},
 		
 		destroy: function() {
@@ -1112,7 +1112,7 @@
 		lastRedrawTime = nowTime;
 		
 		window.methods.forEach( function( method ) {
-			method.redraw();
+			method.resize();
 		} );
 	};
 	_.addEventListener( window, 'resize', methodsResize );
