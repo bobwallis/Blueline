@@ -5,7 +5,7 @@
 cd ../../
 rm -rf docs
 rm -rf tests
-rm -rf utilities
+rm -rf resources
 rm -rf .git
 rm .gitignore
 rm ./libraries/parsecsv.lib.php
