@@ -442,8 +442,8 @@
 			showNotation: true,
 			display: {
 				dimensions: {
-					row: {x:15*this.stage,y:15},
-					bell: {x:15,y:15}
+					row: {x:12*this.stage,y:15},
+					bell: {x:12,y:15}
 				},
 				notation: true,
 				ruleOffs: grid_ruleOffParams,
@@ -462,8 +462,8 @@
 				showNotation: true,
 				display: {
 					dimensions: {
-						row: {x:15*this.stage,y:15},
-						bell: {x:15,y:15}
+						row: {x:12*this.stage,y:15},
+						bell: {x:12,y:15}
 					},
 					notation: true,
 					highlight: call.highlight,
