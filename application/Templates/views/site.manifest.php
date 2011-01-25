@@ -8,6 +8,7 @@ CACHE:
 /favicon.ico
 /images/external_link.png
 /images/search.png
+/images/search.svg
 /images/loading.gif
 /styles/core.css
 /styles/normal.css

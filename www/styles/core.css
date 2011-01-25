@@ -113,7 +113,9 @@ form#topSearch {
 	form#topSearch button {
 		display: block;
 		float: right;
-		background: #FFF url(../images/search.png);
+		background-color: #FFF;
+		background-image: url(../images/search.png);
+		background-image: none,url(../images/search.svg), url(../images/search.png);
 		border: 0;
 	}
 		form#topSearch button:hover { cursor: pointer; }
@@ -144,6 +146,7 @@ form#bigSearch {
 	form#bigSearch button {
 		float: left;
 		background: #FFF url(../images/search.png) no-repeat center center;
+		background-image: none,url(../images/search.svg), url(../images/search.png);
 		border: 0;
 	}
 		form#bigSearch button:hover { cursor: pointer; }
