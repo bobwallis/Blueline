@@ -19,7 +19,7 @@
 		if( window['towerMaps'].length === 1 ) {
 			var mapCenter = window.towerMaps[0].map.getCenter(),
 				parent = window.towerMaps[0].container.parentNode,
-				towerHeader = parent.parentNode.getElementsByTagName( 'header' )[0];
+				towerHeader = parent.parentNode.parentNode.getElementsByTagName( 'header' )[0];
 			if( pageWidth > 480 ) {
 				towerHeader.style.width = '40%';
 				parent.style.display = 'block';
@@ -43,7 +43,7 @@
 		window['towerMaps'].forEach( function( towerMap ) {
 				var mapCenter = towerMap.map.getCenter(),
 					parent = towerMap.container.parentNode,
-					towerHeader = parent.parentNode.getElementsByTagName( 'header' )[0];
+					towerHeader = parent.parentNode.parentNode.getElementsByTagName( 'header' )[0];
 				if( pageWidth > 480 ) {
 					towerHeader.style.width = '40%';
 					parent.style.display = 'block';

@@ -39,45 +39,46 @@ $i = 0;
 		//]]>
 		</script>
 	</header>
-	<section id="content_map<?php echo $i; ?>" class="towerMap">
-		<noscript><h2>Map</h2></noscript>
-		<div id="map<?php echo $i; ?>" class="map"><noscript><img width="600px" height="370px" src="http://maps.google.com/maps/api/staticmap?format=png&amp;size=600x370&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center=<?php echo "{$tower->latitude()},{$tower->longitude()}&amp;markers=size:small|color:red|{$tower->latitude()},{$tower->longitude()}"; ?>" /></noscript></div>
-	</section>
-	<script>
-	//<![CDATA[
-		window.towerMaps.push( new TowerMap( {
-			id: <?php echo $i; ?>,
-			container: 'map<?php echo $i; ?>',
-			scrollwheel: false,
-			zoom: 15,
-			center: new google.maps.LatLng( <?php echo "{$tower->latitude()}, {$tower->longitude()}"; ?> )
-		} ) );
-	//]]>
-	</script>
-	<section id="content_details<?php echo $i; ?>">
-		<noscript><h2>Details</h2></noscript>
-		<table class="horizontalDetails">
-			<tr class="bigDetails">
-				<th>Bells:</th>
-				<td><strong><?php echo $tower->bells(); ?></strong></td>
-			</tr>
-			<tr class="bigDetails">
-				<th>Tenor:</th>
-				<td><strong><?php echo (($tower->weightApprox())?'~':'').$tower->weightText() . '</strong> in ' . $tower->note( true ) . ($tower->hz()?' ('.$tower->hz().'Hz)':''); ?></td>
-			</tr>
+	<div class="content">
+		<section id="content_map<?php echo $i; ?>" class="towerMap">
+			<noscript><h2>Map</h2></noscript>
+			<div id="map<?php echo $i; ?>" class="map"><noscript><img width="600px" height="370px" src="http://maps.google.com/maps/api/staticmap?format=png&amp;size=600x370&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center=<?php echo "{$tower->latitude()},{$tower->longitude()}&amp;markers=size:small|color:red|{$tower->latitude()},{$tower->longitude()}"; ?>" /></noscript></div>
+		</section>
+		<script>
+		//<![CDATA[
+			window.towerMaps.push( new TowerMap( {
+				id: <?php echo $i; ?>,
+				container: 'map<?php echo $i; ?>',
+				scrollwheel: false,
+				zoom: 15,
+				center: new google.maps.LatLng( <?php echo "{$tower->latitude()}, {$tower->longitude()}"; ?> )
+			} ) );
+		//]]>
+		</script>
+		<section id="content_details<?php echo $i; ?>">
+			<noscript><h2>Details</h2></noscript>
+			<table class="horizontalDetails">
+				<tr class="bigDetails">
+					<th>Bells:</th>
+					<td><strong><?php echo $tower->bells(); ?></strong></td>
+				</tr>
+				<tr class="bigDetails">
+					<th>Tenor:</th>
+					<td><strong><?php echo (($tower->weightApprox())?'~':'').$tower->weightText() . '</strong> in ' . $tower->note( true ) . ($tower->hz()?' ('.$tower->hz().'Hz)':''); ?></td>
+				</tr>
 <?php if( count( $tower->affiliations() ) > 0 ) : ?>
-			<tr>
-				<th>Affiliations:</th>
-				<td><?php echo Text::toList( array_map( function( $a ) { return "<a href=\"{$a->href()}\">{$a->name()}</a>"; }, $tower->affiliations() ) ); ?></td>
-			</tr>
+				<tr>
+					<th>Affiliations:</th>
+					<td><?php echo Text::toList( array_map( function( $a ) { return "<a href=\"{$a->href()}\">{$a->name()}</a>"; }, $tower->affiliations() ) ); ?></td>
+				</tr>
 <?php endif; ?>
-			<tr>
-				<th>Diocese:</th>
-				<td><?php echo "<a href=\"/towers/search?diocese=".urlencode($tower->diocese())."\">{$tower->diocese()}</a>"; ?></td>
-			</tr>
-			<tr>
-				<th>Information:</th>
-				<td><?php
+				<tr>
+					<th>Diocese:</th>
+					<td><?php echo "<a href=\"/towers/search?diocese=".urlencode($tower->diocese())."\">{$tower->diocese()}</a>"; ?></td>
+				</tr>
+				<tr>
+					<th>Information:</th>
+					<td><?php
 			$information = array();
 			if( $tower->unringable() && stripos( $tower->extraInfo(),'unringable' ) === false ) {
 				$information[] = 'Unringable. ';
@@ -114,39 +115,40 @@ $i = 0;
 		
 			echo implode( '<br/>', $information );
 		?></td>
-			</tr>
+				</tr>
 <?php if( $tower->postcode() ) : ?>
-			<tr>
-				<th>Postcode:</th>
-				<td><?php echo $tower->postcode(); ?></td>
-			</tr>
+				<tr>
+					<th>Postcode:</th>
+					<td><?php echo $tower->postcode(); ?></td>
+				</tr>
 <?php endif; ?>
 <?php if( $tower->gridReference() ) : ?>
-			<tr>
-				<th>Grid Reference:</th>
-				<td><?php echo $tower->gridReference(); ?></td>
-			</tr>
+				<tr>
+					<th>Grid Reference:</th>
+					<td><?php echo $tower->gridReference(); ?></td>
+				</tr>
 <?php endif; ?>
-		</table>
+			</table>
 <?php if( count( $tower->nearbyTowers() ) > 0 ) : ?>
-		<h3>Nearby Towers:</h3>
-		<ol class="noliststyle">
+			<h3>Nearby Towers:</h3>
+			<ol class="noliststyle">
 <?php foreach( $tower->nearbyTowers() as $nTower ) : ?>
-			<li><?php echo '<a href="'.$nTower->href().'">' . $nTower->place().' <small>('.$nTower->dedication().')</small></a> <small>'.round( $nTower->distance(), 1 ).' miles</small>'; ?></li>
+				<li><?php echo '<a href="'.$nTower->href().'">' . $nTower->place().' <small>('.$nTower->dedication().')</small></a> <small>'.round( $nTower->distance(), 1 ).' miles</small>'; ?></li>
 <?php endforeach; ?>
-		</ol>
+			</ol>
 <?php endif; ?>
-	</section>
-	<section id="content_peals<?php echo $i; ?>" class="towerFirstPeals">
+		</section>
+		<section id="content_peals<?php echo $i; ?>" class="towerFirstPeals">
 <?php if( count( $tower->firstPeals() ) > 0 ) : ?>
-		<noscript><h2>First Peals</h2></noscript>
-		<ol class="noliststyle">
+			<noscript><h2>First Peals</h2></noscript>
+			<ol class="noliststyle">
 <?php foreach( $tower->firstPeals()  as $method ) : ?>
-			<li><?php echo "<a href=\"{$method->href()}\">{$method->title()}</a> <small>({$method->firstTowerbellPeal_date()})</small>"; ?></li>
+				<li><?php echo "<a href=\"{$method->href()}\">{$method->title()}</a> <small>({$method->firstTowerbellPeal_date()})</small>"; ?></li>
 <?php endforeach; ?>
-		</ol>
+			</ol>
 <?php endif; ?>
-	</section>
+		</section>
+	</div>
 </section>
 <?php ++$i; endforeach; ?>
 <?php View::element( 'default.footer' ); ?>

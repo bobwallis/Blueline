@@ -183,31 +183,11 @@ ul.tabBar {
 			cursor: default;
 		}
 
-
-/* Search results */
-.searchResults {
-	margin: 5px;
-	padding: 0;
-	color: #555;
-	list-style: none;
-}
-	.searchResults li {
-		padding: 2px 0;
-		margin: 0;
-	}
-
-
 /* Paging links */
-div.paging {
-	margin: 10px 0;
-}
 	div.pagingLinks {
-		margin: 0 18px;
 		color: #CCC;
 	}
-	div.pagingLinks a { margin: 0 6px; }
 	div.pagingLinks span {
-		margin: 0 6px;
 		color: #000;
 	}
 
@@ -255,9 +235,15 @@ table.horizontalDetails {}
 		font-weight: normal;
 	}
 
-section.wallOfText {
-	width: 100%;
+.wallOfText {
 	max-width: 600px;
+}
+
+
+/* Search results */
+.searchResults {
+	color: #555;
+	list-style: none;
 }
 
 
@@ -279,7 +265,7 @@ div.methodLine td {
 
 .methodGrid table {
 	float: left;
-	margin: 0 20px 0 10px;
+	margin-right: 20px;
 }
 td.call p {
 	display: block;
@@ -302,12 +288,6 @@ td.notationCell {
 	height: 100%;
 }
 	.map a { border: 0; }
-#fullMap {
-	position: absolute;
-	left: 0;
-	width: 100%;
-	height: 500px;
-}
 
 
 /* Associations list */

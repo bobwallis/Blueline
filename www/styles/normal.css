@@ -42,7 +42,6 @@ form#topSearch {
 
 /* Big search */
 div#bigSearchContainer {
-	margin-bottom: 8px;
 	padding: 8px;
 }
 form#bigSearch {
@@ -64,9 +63,6 @@ form#bigSearch {
 
 
 /* Section header */
-section header {
-	margin-bottom: 8px;
-}
 	section header h1 {
 		font-size: 22px;
 		padding: 10px 5px 10px 10px;
@@ -96,69 +92,83 @@ ul.tabBar {
 
 
 /* Page content */
-#content {
-	padding: 0 0 10px 0;
-}
+	#content .content {
+		padding: 15px;
+	}
 	#content h3 {
 		font-size: 12px;
 		font-weight: bold;
 		line-height: 15px;
-		margin: 0 5px 2px 13px;
+		margin: 0 5px 2px 0;
 	}
 	#content h4 {
 		font-size: 11px;
 		font-weight: bold;
 		line-height: 15px;
-		margin: 0 5px 10px 25px;
+		margin: 0 5px 10px 10px;
 	}
 	#content p {
-		margin: 0 15px 5px 15px;
+		margin-bottom: 10px;
 	}
 	#content blockquote {
-		margin: 0 15px 5px 20px;
+		padding-left: 10px;
+		margin-bottom: 10px;
 	}
 	#content ol {
-		margin: 0 20px 5px 20px;
+		margin: 0 10px 5px 0;
 	}
+		#content ul ol {
+			margin-left: 10px;
+		}
 
 table.horizontalDetails {
 	line-height: 15px;
-	margin: 0 0 10px 13px;
+	margin-bottom: 10px;
 }
 	tr.bigDetails {
 		font-size: 14px;
 	}
 	table.horizontalDetails th {
-		padding: 2px 4px 2px 5px;
+		padding: 2px 4px 2px 0;
 	}
 	table.horizontalDetails td {
-		padding: 2px 5px 2px 4px;
+		padding: 2px 0 2px 4px;
 	}
 
 
+/* Search results */
+.searchResults {
+	padding: 0;
+}
+	.searchResults li {
+		padding: 2px 0;
+		margin: 0;
+	}
+		.searchResults li:first-child { padding-top: 0; }
+
+
+/* Paging links */
+div.paging {
+	margin: 10px 0;
+}
+	div.pagingLinks a { margin: 0 6px; }
+	div.pagingLinks span {
+		margin: 0 6px;
+	}
 
 section.method {
 	padding-bottom: 15px;
 }
 	section.method:last-child { padding-bottom: 0; }
-div.methodLine {
-	margin: 0 10px 10px 10px;
-}
 	div.methodLine td {
 		padding: 0 20px;
 	}
-.methodGrid {
-	margin-left: 10px;
-}
 
-.fullMap {
-	top: 35px;
-	height: 600px;
-}
 .towerMap {
 	display: block;
 	float: right;
-	margin-top: -8px;
+	margin: -8px 0 0 0;
+	padding: 0;
 	width: 60%;
 	height: 450px;
 	border-left: 1px solid #E0DED9;

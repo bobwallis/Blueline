@@ -14,12 +14,18 @@ View::element( 'default.header', array(
 	)
 ) );
 ?>
-<section class="search">
+<section class="content search">
+<?php if( count( $towers ) == 0 ) : ?>
+	<ol class="searchResults">
+		<li>No results</li>
+	</ol>
+<?php else : ?>
 	<ol class="searchResults">
 <?php foreach( $towers as $tower ) : ?>
 		<li><?php echo "<a href=\"{$tower->href()}\">{$tower->place()} <small>({$tower->dedication()})</small></a>"; ?></li>
 <?php endforeach; ?>
 	</ol>
 <?php View::element( 'paging', compact( 'limit', 'count' ) ); ?>
+<?php endif; ?>
 </section>
 <?php View::element( 'default.footer' ); ?>

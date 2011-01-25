@@ -24,7 +24,6 @@ form#topSearch { display: none; }
 
 /* Big search */
 div#bigSearchContainer {
-	margin-bottom: 10px;
 	padding: 5px;
 }
 form#bigSearch {
@@ -45,9 +44,6 @@ form#bigSearch {
 	}
 
 /* Section header */
-section header {
-	margin-bottom: 10px;
-}
 	section header h1 {
 		font-size: 17px;
 		padding: 7px 3px 7px 5px;
@@ -65,7 +61,7 @@ section header {
 
 /* Tab bar */
 ul.tabBar {
-	padding-left: 10px;
+	padding-left: 5px;
 	height: 21px;
 	font-size: 11px;
 }
@@ -77,9 +73,9 @@ ul.tabBar {
 
 
 /* Page content */
-#content {
-	padding: 0 0 10px 0;
-}
+	#content .content {
+		padding: 8px;
+	}
 	#content h3 {
 		font-size: 12px;
 		font-weight: bold;
@@ -93,10 +89,11 @@ ul.tabBar {
 		margin: 0 5px 10px 25px;
 	}
 	#content p {
-		margin: 0 8px 5px 8px;
+		margin-bottom: 5px;
 	}
 	#content blockquote {
-		margin: 0 8px 5px 12px;
+		padding-left: 5px;
+		margin-bottom: 5px;
 	}
 	#content ol {
 		margin: 0 12px 5px 12px;
@@ -104,16 +101,27 @@ ul.tabBar {
 
 table.horizontalDetails {
 	line-height: 15px;
-	margin: 0 0 10px 15px;
+	margin-bottom: 10px;
 }
 	tr.bigDetails {
 		font-size: 14px;
 	}
-	table.horizontalDetails th, table.horizontalDetails td {
-		padding: 2px 4px;
+	table.horizontalDetails th {
+		padding: 2px 4px 2px 0;
+	}
+	table.horizontalDetails td {
+		padding: 2px 0 2px 4px;
 	}
 
 
+/* Search results */
+.searchResults {
+	padding: 0;
+}
+	.searchResults li {
+		padding: 4px 0;
+		margin: 0;
+	}
 
 
 
@@ -121,25 +129,10 @@ section.method {
 	padding-bottom: 15px;
 }
 	section.method:last-child { padding-bottom: 0; }
-.methodDetails {
-	padding: 5px;
-}
-	.methodDetails th { padding-left: 5px; }
-	.methodDetails td { padding-right: 5px; }
-div.methodLine {
-	margin: 0 10px 10px 10px;
-}
 	div.methodLine td {
 		padding: 0 20px;
 	}
-.methodGrid {
-	margin: 0 auto;
-}
 
-
-
-
-#content { padding: 0 0 5px 0; }
 
 
 

@@ -17,7 +17,7 @@ View::element( 'default.header', array(
 	<header>
 		<h1>Custom Method</h1>
 	</header>
-	<div>
+	<div class="content">
 		<p>Enter the basic details of a valid method below, and click 'View' to view the line and extended details.</p>
 		<form id="customMethodForm" action="/methods/view/custom" method="get">
 			<fieldset>

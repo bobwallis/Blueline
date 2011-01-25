@@ -17,10 +17,12 @@ View::element( 'default.header', array(
 	<header>
 		<h1>Methods</h1>
 	</header>
-	<ol class="searchResults">
+	<div class="content">
+		<ol class="searchResults">
 <?php foreach( $methods as $method ) : ?>
-		<li><a href="<?php echo $method->href(); ?>"><?php echo $method->title(); ?></a></li>
+			<li><a href="<?php echo $method->href(); ?>"><?php echo $method->title(); ?></a></li>
 <?php endforeach; ?>
-	</ol>
+		</ol>
+	</div>
 </section>
 <?php View::element( 'default.footer' ); ?>

@@ -12,10 +12,12 @@ View::element( 'default.header', array(
 	<header>
 		<h1>Towers</h1>
 	</header>
-	<ol class="searchResults">
+	<div class="content">
+		<ol class="searchResults">
 <?php foreach( $towers as $tower ) : ?>
-		<li><?php echo "<a href=\"{$tower->href()}\">{$tower->place()} <small>({$tower->dedication()})</small></a>"; ?></li>
+			<li><?php echo "<a href=\"{$tower->href()}\">{$tower->place()} <small>({$tower->dedication()})</small></a>"; ?></li>
 <?php endforeach; ?>
-	</ol>
+		</ol>
+	</div>
 </section>
 <?php View::element( 'default.footer' ); ?>

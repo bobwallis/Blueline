@@ -36,45 +36,47 @@ foreach( $associations as $association ) : ?>
 		//]]>
 		</script>
 	</header>
-	<section id="content_map<?php echo $i; ?>" class="towerMap">
-		<noscript><h2>Map</h2></noscript>
-		<div id="map<?php echo $i; ?>" class="map"></div>
-	</section>
-	<script>
-	//<![CDATA[
-		window.towerMaps.push( new TowerMap( {
-			id: <?php echo $i; ?>,
-			container: 'map<?php echo $i; ?>',
-			scrollwheel: false,
-			fitBounds: new google.maps.LatLngBounds( <?php $bbox = $association->bbox(); echo "new google.maps.LatLng( {$bbox['lat_min']}, {$bbox['long_min']} ), new google.maps.LatLng( {$bbox['lat_max']}, {$bbox['long_max']} )"; ?> ),
-			fusionTableQuery: "SELECT location from 247449 WHERE affiliations contains '<?php echo $association->abbreviation(); ?>'"
-		} ) );
-	//]]>
-	</script>
-	<section id="content_details<?php echo $i; ?>">
-		<table class="horizontalDetails">
+	<div class="content">
+		<section id="content_map<?php echo $i; ?>" class="towerMap">
+			<noscript><h2>Map</h2></noscript>
+			<div id="map<?php echo $i; ?>" class="map"></div>
+		</section>
+		<script>
+		//<![CDATA[
+			window.towerMaps.push( new TowerMap( {
+				id: <?php echo $i; ?>,
+				container: 'map<?php echo $i; ?>',
+				scrollwheel: false,
+				fitBounds: new google.maps.LatLngBounds( <?php $bbox = $association->bbox(); echo "new google.maps.LatLng( {$bbox['lat_min']}, {$bbox['long_min']} ), new google.maps.LatLng( {$bbox['lat_max']}, {$bbox['long_max']} )"; ?> ),
+				fusionTableQuery: "SELECT location from 247449 WHERE affiliations contains '<?php echo $association->abbreviation(); ?>'"
+			} ) );
+		//]]>
+		</script>
+		<section id="content_details<?php echo $i; ?>">
+			<table class="horizontalDetails">
 <?php if( $association->link() ) : ?>
-			<tr>
-				<th>Link:</th>
-				<td><a href="<?php echo htmlentities( $association->link() ); ?>" class="external" itemprop="url"><?php echo htmlentities( $association->link() ); ?></a></td>
-			</tr>
+				<tr>
+					<th>Link:</th>
+					<td><a href="<?php echo htmlentities( $association->link() ); ?>" class="external" itemprop="url"><?php echo htmlentities( $association->link() ); ?></a></td>
+				</tr>
 <?php endif; ?>
-			<tr>
-				<th>Towers:</th>
-				<td><?php echo $association->towerCount(); ?></td>
-			</tr>
-		</table>
-	</section>
-	<section id="content_towers<?php echo $i; ?>" class="associationAffiliations">
+				<tr>
+					<th>Towers:</th>
+					<td><?php echo $association->towerCount(); ?></td>
+				</tr>
+			</table>
+		</section>
+		<section id="content_towers<?php echo $i; ?>" class="associationAffiliations">
 <?php if( $association->towerCount() > 0 ) : ?>
-		<noscript><h2>Affiliated Towers</h2></noscript>
-		<ol class="noliststyle">
+			<noscript><h2>Affiliated Towers</h2></noscript>
+			<ol class="noliststyle">
 <?php foreach( $association->affiliatedTowers() as $tower ) : ?>
-			<li><?php echo '<a href="'.$tower->href().'">' . $tower->place().' <small>('.$tower->dedication().')</small></a>'; ?></li>
+				<li><?php echo '<a href="'.$tower->href().'">' . $tower->place().' <small>('.$tower->dedication().')</small></a>'; ?></li>
 <?php endforeach; ?>
-		</ol>
+			</ol>
 <?php endif; ?>
-	</section>
+		</section>
+	</div>
 </section>
 <?php ++$i; endforeach; ?>
 <?php View::element( 'default.footer' ); ?>

@@ -11,7 +11,12 @@ View::element( 'default.header', array(
 	)
 ) );
 ?>
-<section class="search">
+<section class="content search">
+<?php if( $associationCount == 0 && $towerCount == 0 && $methodCount == 0 ) : ?>
+	<ol class="searchResults">
+		<li>No results</li>
+	</ol>
+<?php else : ?>
 	<ul class="searchResults">
 <?php if( $associationCount > 0 ) : ?>
 		<li>
@@ -20,10 +25,10 @@ View::element( 'default.header', array(
 <?php foreach( $associations as $association ) : ?>
 				<li><a href="<?php echo $association->href(); ?>"><?php echo $association->name(); ?></a></li>
 <?php endforeach; ?>
-			</ol>
 <?php if( $associationCount > $searchLimit ) : ?>
-			<h4><a href="/associations/search?<?php echo $queryString; ?>">More associations &raquo;</a></h4>
+				<li><strong><a href="/associations/search?<?php echo $queryString; ?>">More associations &raquo;</a><strong></li>
 <?php endif; ?>
+			</ol>
 		</li>
 <?php endif; ?>
 <?php if( $methodCount > 0 ) : ?>
@@ -33,10 +38,10 @@ View::element( 'default.header', array(
 <?php foreach( $methods as $method ) : ?>
 				<li><a href="<?php echo $method->href(); ?>"><?php echo $method->title(); ?></a></li>
 <?php endforeach; ?>
-			</ol>
 <?php if( $methodCount > $searchLimit ) : ?>
-			<h4><a href="/methods/search?<?php echo $queryString; ?>">More methods &raquo;</a></h4>
+				<li><strong><a href="/methods/search?<?php echo $queryString; ?>">More methods &raquo;</a></strong></li>
 <?php endif; ?>
+			</ol>
 		</li>
 <?php endif; ?>
 <?php if( $towerCount > 0 ) : ?>
@@ -47,10 +52,12 @@ View::element( 'default.header', array(
 				<li><?php echo "<a href=\"{$tower->href()}\">{$tower->place()} <small>({$tower->dedication()})</small></a>"; ?></li>
 <?php endforeach; ?>
 <?php if( $towerCount > $searchLimit ) : ?>
-			</ol><h4><a href="/towers/search?<?php echo $queryString; ?>">More towers &raquo;</a></h4>
+				<li><strong><a href="/towers/search?<?php echo $queryString; ?>">More towers &raquo;</a></strong></li>
 <?php endif; ?>
+			</ol>
 		</li>
 <?php endif; ?>
 	</ul>
+<?php endif; ?>
 </section>
 <?php View::element( 'default.footer' ); ?>
