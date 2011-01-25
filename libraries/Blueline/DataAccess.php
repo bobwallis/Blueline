@@ -112,7 +112,7 @@ class DataAccess {
 	
 
 	public static $_GETsearchLimit = false;
-	public static $_searchLimit = 30;
+	public static $_searchLimit = 24;
 	public static function GETtoLimit() {
 		self::$_GETsearchLimit = self::$_GETsearchLimit?: ( isset( $_GET['count'] )? intval( $_GET['count'] ) : self::$_searchLimit );
 		return ( isset( $_GET['from'] )? intval( $_GET['from'] ) : '0' ) . ','.self::$_GETsearchLimit;
