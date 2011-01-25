@@ -26,7 +26,7 @@ View::element( 'default.header', array(
 				<li><a href="<?php echo $association->href(); ?>"><?php echo $association->name(); ?></a></li>
 <?php endforeach; ?>
 <?php if( $associationCount > $searchLimit ) : ?>
-				<li><strong><a href="/associations/search?<?php echo $queryString; ?>">More associations &raquo;</a><strong></li>
+				<li><strong><a href="/associations/search?<?php echo $queryString; ?>">More associations &raquo;</a></strong></li>
 <?php endif; ?>
 			</ol>
 		</li>
