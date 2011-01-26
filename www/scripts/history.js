@@ -253,6 +253,11 @@
 					}
 				 } );
 			},
+			'/about': function( state ) {
+				helpers.setWindowTitle( 'About' );
+				helpers.setHeader( false, searches.all, false );
+				helpers.setContent( state );
+			},
 			'/copyright': function( state ) {
 				helpers.setWindowTitle( 'Copyright' );
 				helpers.setHeader( false, searches.all, false );

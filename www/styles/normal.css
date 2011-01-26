@@ -69,9 +69,8 @@ form#bigSearch {
 		line-height: 22px;
 	}
 	section header h2 {
-		font-size: 18px;
 		padding: 0 5px 10px 13px;
-		line-height: 20px;
+		margin: 0;
 	}
 		section header h2.sub {
 			margin-top: -3px !important;
@@ -95,11 +94,17 @@ ul.tabBar {
 	#content .content {
 		padding: 15px;
 	}
+	#content h2 {
+		font-size: 18px;
+		font-weight: bold;
+		line-height: 20px;
+		margin: 0 5px 2px 0;
+	}
 	#content h3 {
 		font-size: 12px;
 		font-weight: bold;
 		line-height: 15px;
-		margin: 0 5px 2px 0;
+		margin-right: 5px;
 	}
 	#content h4 {
 		font-size: 11px;
