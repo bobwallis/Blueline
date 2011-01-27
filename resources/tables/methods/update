@@ -1,0 +1,14 @@
+#!/bin/bash
+
+dWhich=`which "$0"`
+d=`dirname "$dWhich"`
+
+echo "Downloading new method data..."
+curl --progress-bar -o "$d/data/allmeths-xml.zip" "http://methods.org.uk/method-collections/xml-zip-files/allmeths-xml.zip"
+unzip -d "$d/data" -o "$d/data/allmeths-xml.zip"
+
+echo "Creating SQL..."
+php "$d/xml2sql.php" > "$d/methods.sql"
+gzip -9f "$d/methods.sql"
+
+echo -e "Created method table SQL\n"

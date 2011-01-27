@@ -2,3 +2,7 @@
 /cache
 /tests/report
 /docs/phpdoc
+*.sql.gz
+*.tmp
+*.js.gz
+*.css.gz

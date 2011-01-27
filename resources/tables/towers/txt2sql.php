@@ -18,6 +18,14 @@ function weightText( $weight, $weightApprox ) {
 	}
 }
 
+function longCounty( $lookup, array $array ) {
+	if( array_key_exists( $lookup, $array ) ) { return $array[$lookup]; 	}
+	elseif( in_array( $lookup, $array ) ) { return $lookup; }
+	else {
+		trigger_error( 'No full county for: '.$tower['County'], E_USER_ERROR );
+	}
+}
+
 date_default_timezone_set( 'UTC' );
 
 header( 'Content-type: text/plain' );
@@ -131,43 +139,34 @@ foreach( $dove->data as $tower ) {
 	else {
 		switch( $tower['Country'] ) {
 			case 'England':
-				if( isset( $counties[$tower['County']] ) ) { $tower['County'] = $counties[$tower['County']]; }
-				else { trigger_error( 'No full county for: '.$tower['County'], E_USER_ERROR ); }
+				$tower['County'] = longCounty( $tower['County'], $counties );
 				break;
 			case 'Wales':
-				if( isset( $welshAreas[$tower['County']] ) ) { $tower['County'] = $welshAreas[$tower['County']]; }
-				else { trigger_error( 'No full county for Welsh region: '.$tower['County'], E_USER_ERROR ); }
+				$tower['County'] = longCounty( $tower['County'], $welshAreas );
 				break;
 			case 'Scotland':
-				if( isset( $scottishAreas[$tower['County']] ) ) { $tower['County'] = $scottishAreas[$tower['County']]; }
-				else { trigger_error( 'No full county for Scottish region: '.$tower['County'], E_USER_ERROR ); }
+				$tower['County'] = longCounty( $tower['County'], $scottishAreas );
 				break;
 			case 'Ireland':
-				if( isset( $irishAreas[$tower['County']] ) ) { $tower['County'] = $irishAreas[$tower['County']]; }
-				else { trigger_error( 'No full county for Irish region: '.$tower['County'], E_USER_ERROR ); }
+				$tower['County'] = longCounty( $tower['County'], $irishAreas );
 				break;
 			case 'USA':
-				if( isset( $states[$tower['County']] ) ) { $tower['County'] = $states[$tower['County']]; }
-				else { trigger_error( 'No full county for USA region: '.$tower['County'], E_USER_ERROR ); }
+				$tower['County'] = longCounty( $tower['County'], $states );
 				break;
 			case 'Canada':
-				if( isset( $canadianStates[$tower['County']] ) ) { $tower['County'] = $canadianStates[$tower['County']]; }
-				else { trigger_error( 'No full county for Canadian region: '.$tower['County'], E_USER_ERROR ); }
+				$tower['County'] = longCounty( $tower['County'], $canadianStates );
 				break;
 			case 'Australia':
-				if( isset( $australianAreas[$tower['County']] ) ) { $tower['County'] = $australianAreas[$tower['County']]; }
-				else { trigger_error( 'No full county for Australian region: '.$tower['County'], E_USER_ERROR ); }
+				$tower['County'] = longCounty( $tower['County'], $australianAreas );
 				break;
 			case 'New Zealand':
-				if( isset( $newZealandAreas[$tower['County']] ) ) { $tower['County'] = $newZealandAreas[$tower['County']]; }
-				else { trigger_error( 'No full county for New Zealand region: '.$tower['County'], E_USER_ERROR ); }
+				$tower['County'] = longCounty( $tower['County'], $newZealandAreas );
 				break;
 			case 'Africa':
 				if( $tower['County'] == 'Zimb' ) { $tower['County'] = 'Zimbabwe'; }
 				break;
 			case 'South Africa':
-				if( isset( $southAfricanAreas[$tower['County']] ) ) { $tower['County'] = $southAfricanAreas[$tower['County']]; }
-				else { trigger_error( 'No full county for South Africa region: '.$tower['County'], E_USER_ERROR ); }
+				$tower['County'] = longCounty( $tower['County'], $southAfricanAreas );
 				break;
 			case 'Netherlands':
 				if( $tower['County'] == 'S Holland' ) { $tower['County'] = 'South Holland'; }

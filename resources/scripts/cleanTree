@@ -1,14 +1,18 @@
 #!/bin/bash
 
+dWhich=`which "$0"`
+d=`dirname "$dWhich"`
+
+top=$d/../..
+
 # Removes files that are unnecessary for production from the source tree
 
-cd ../../
-rm -rf docs
-rm -rf tests
-rm -rf resources
-rm -rf .git
-rm .gitignore
-rm ./libraries/parsecsv.lib.php
-rm ./libraries/phpcoord.php
+rm -rf "$top/docs"
+rm -rf "$top/tests"
+rm -rf "$top/resources"
+rm -rf "$top/.git"
+rm "$top/.gitignore"
+rm "$top/libraries/parsecsv.lib.php"
+rm "$top/libraries/phpcoord.php"
 
 echo "Cleaned unneeded files"

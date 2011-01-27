@@ -1,16 +1,17 @@
 #!/bin/bash
 
-# Compresses files and creates gzipped versions as appropriate
+dWhich=`which "$0"`
+d=`dirname "$dWhich"`
 
 # Required files
-yuicompressor=$(pwd)/jar/yuicompressor.jar
-closure=$(pwd)/jar/compiler.jar
+yuicompressor=$d/jar/yuicompressor.jar
+closure=$d/jar/compiler.jar
 
 # Change to top level directory
 cd ../../
 
 # Strips whitespace from all PHP files except applcation/config.php to reduce their size
-find . -type f -name "*.php" ! -name "config.php" -print | parallel -j +0 "php -w {} > {}.tmp && mv {}.tmp {} && echo \"Done {}\""
+# find . -type f -name "*.php" ! -name "config.php" -print | parallel -j +0 "php -w {} > {}.tmp && mv {}.tmp {} && echo \"Done {}\""
 
 # Crush all png images
 find . -type f -name "*.png" -print | parallel -j +0 "pngcrush -brute -q {} {}.tmp && mv {}.tmp {} && echo \"Done {}\""
