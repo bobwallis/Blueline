@@ -114,6 +114,9 @@
 					content = localStorage.getItem( stateOrString.href );
 					if( content ) {
 						$content.innerHTML = content;
+						if( typeof _gaq !== 'undefined' ) {
+							_gaq.push( ['_trackPageview'] );
+						}
 						_.toArray( $content.getElementsByTagName( 'script' ) ).forEach( function( s ) { eval( s.innerHTML ); } );
 						if( typeof callbacks.after === 'function' ) { callbacks.after(); }
 						return;
