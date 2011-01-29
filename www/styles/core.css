@@ -6,7 +6,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; font-weight:
 input,textarea,select { *font-size: 100%; }
 input[type="search"] { -webkit-appearance: textfield; }
 button { width: auto; overflow: visible; }
-header, footer, section, svg { display: block; }
+header, footer, section, svg, canvas { display: block; }
 
 /* Basic color and font definitions */
 html, body {

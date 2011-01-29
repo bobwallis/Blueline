@@ -9,6 +9,10 @@
 	window.can.SVG = function() {
 		return window.SVGAngle || document.implementation.hasFeature( 'http://www.w3.org/TR/SVG11/feature#BasicStructure', '1.1' );
 	};
+	window.can.canvas = function() {
+			var elem = document.createElement( 'canvas' );
+			return !!( elem.getContext && elem.getContext( '2d' ) );
+	};
 	window.can.history = function() {
 		return !!( window.history && window.history.pushState );
 	};
