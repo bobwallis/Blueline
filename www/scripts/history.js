@@ -115,6 +115,7 @@
 						// Replaces the content of an element with the result of an AJAX call
 						if( this.AJAXContentRequest && typeof this.AJAXContentRequest.abort === 'function' ) {
 							this.AJAXContentRequest.abort();
+							helpers.hideLoading();
 							this.AJAXContentRequest = null;
 						}
 						if( $content.innerHTML == '' ) { // Only show loading animation if content has been cleared
