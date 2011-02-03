@@ -90,6 +90,7 @@
 			},
 			// Sets the content of the main content area using either a HTML string, a saved state, or fetching content by url
 			AJAXContentRequest: null,
+			AJAXContentRequestTimeout: null,
 			setContent: function( stateOrString, callbacks ) {
 				var content, req, href, onreadystatechange;
 				if( !callbacks ) { callbacks = {}; }
@@ -115,8 +116,9 @@
 						// Replaces the content of an element with the result of an AJAX call
 						if( this.AJAXContentRequest && typeof this.AJAXContentRequest.abort === 'function' ) {
 							this.AJAXContentRequest.abort();
+							clearTimeout( this.AJAXContentRequestTimeout );
 							helpers.hideLoading();
-							this.AJAXContentRequest = null;
+							this.AJAXContentRequest = this.AJAXContentRequestTimeout = null;
 						}
 						if( $content.innerHTML == '' ) { // Only show loading animation if content has been cleared
 							this.showLoading();
@@ -125,11 +127,12 @@
 						href = stateOrString.href.replace( /(\?|$)/, '?snippet=1&' ).replace( /&$/, '' );
 						onreadystatechange = function() {
 							if( req.readyState === 4 && req.responseText != '' ) {
-								helpers.AJAXContentRequest = null;
+								clearTimeout( helpers.AJAXContentRequestTimeout );
+								helpers.AJAXContentRequest = helpers.AJAXContentRequestTimeout = null;
 								helpers.hideLoading();
 								$content.innerHTML = req.responseText;
 								// Save history state
-								try { localStorage.setItem( href, req.responseText ); }
+								try { localStorage.setItem( stateOrString.href, req.responseText ); }
 								catch( e ) {}
 								if( typeof _gaq !== 'undefined' ) {
 									_gaq.push( ['_trackPageview'] );
@@ -139,10 +142,14 @@
 								if( typeof callbacks.after === 'function' ) { callbacks.after(); }
 							}
 						};
-						req.open( 'GET', href, true );
 						req.onreadystatechange = onreadystatechange;
+						req.open( 'GET', href, true );
 						this.AJAXContentRequest = req;
 						this.AJAXContentRequest.send();
+						this.AJAXContentRequestTimeout = setTimeout( function() {
+							helpers.AJAXContentRequest.abort();
+							location.href = stateOrString.href;
+						}, 5000 );
 					}
 					else {
 						location.href = stateOrString.href;
