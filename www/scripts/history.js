@@ -4,16 +4,6 @@
 		// Clear localStorage when updating the cache manifest
 		window.applicationCache.addEventListener( 'downloading', localStorage.clear, false );
 		
-		// Replace the history state of the current URL with the current page contents
-		var saveState = function() {
-			var href = location.href.replace( new RegExp( '^'+window.baseURL ), '' );
-			try {
-				localStorage.setItem( href, document.getElementById( 'content' ).innerHTML );
-			}
-			catch( e ) {}
-			history.replaceState( { exec: historyMatch( href ), href: href }, '', location.href );
-		};
-		
 		// Helpers to modify the page's contents
 		// Cache some document.getElementById calls
 		var $content, $breadcrumbContainer, $topSearchContainer, $topSearch, $smallQ, $bigSearchContainer, $bigSearch, $bigQ, $loading;
@@ -101,7 +91,7 @@
 			// Sets the content of the main content area using either a HTML string, a saved state, or fetching content by url
 			AJAXContentRequest: null,
 			setContent: function( stateOrString, callbacks ) {
-				var content;
+				var content, req, href, onreadystatechange;
 				if( !callbacks ) { callbacks = {}; }
 				if( typeof callbacks.before === 'function' ) { callbacks.before(); }
 				if( typeof stateOrString === 'string' ) {
@@ -121,38 +111,41 @@
 						if( typeof callbacks.after === 'function' ) { callbacks.after(); }
 						return;
 					}
-				}
-				if( navigator.onLine ) {
-					// Replaces the content of an element with the result of an AJAX call
-					if( this.AJAXContentRequest && typeof this.AJAXContentRequest.abort === 'function' ) {
-						this.AJAXContentRequest.abort();
-						this.AJAXContentRequest = null;
-					}
-					if( $content.innerHTML == '' ) { // Only show loading animation if content has been cleared
-						this.showLoading();
-					}
-					var req = new XMLHttpRequest(),
+					else if( navigator.onLine ) {
+						// Replaces the content of an element with the result of an AJAX call
+						if( this.AJAXContentRequest && typeof this.AJAXContentRequest.abort === 'function' ) {
+							this.AJAXContentRequest.abort();
+							this.AJAXContentRequest = null;
+						}
+						if( $content.innerHTML == '' ) { // Only show loading animation if content has been cleared
+							this.showLoading();
+						}
+						req = new XMLHttpRequest();
+						href = stateOrString.href.replace( /(\?|$)/, '?snippet=1&' ).replace( /&$/, '' );
 						onreadystatechange = function() {
 							if( req.readyState === 4 && req.responseText != '' ) {
 								helpers.AJAXContentRequest = null;
 								helpers.hideLoading();
 								$content.innerHTML = req.responseText;
+								// Save history state
+								try { localStorage.setItem( href, req.responseText ); }
+								catch( e ) {}
 								if( typeof _gaq !== 'undefined' ) {
 									_gaq.push( ['_trackPageview'] );
 								}
-								saveState();
 								// Evaluate scripts
 								_.toArray( $content.getElementsByTagName( 'script' ) ).forEach( function( s ) { eval( s.innerHTML ); } );
 								if( typeof callbacks.after === 'function' ) { callbacks.after(); }
 							}
 						};
-					req.open( 'GET', stateOrString.href.replace( /(\?|$)/, '?snippet=1&' ).replace( /&$/, '' ), true );
-					req.onreadystatechange = onreadystatechange;
-					this.AJAXContentRequest = req;
-					this.AJAXContentRequest.send();
-				}
-				else {
-					location.href = stateOrString.href;
+						req.open( 'GET', href, true );
+						req.onreadystatechange = onreadystatechange;
+						this.AJAXContentRequest = req;
+						this.AJAXContentRequest.send();
+					}
+					else {
+						location.href = stateOrString.href;
+					}
 				}
 			}
 		};
@@ -366,7 +359,8 @@
 		historyReady = function() {
 			if( readyFired ) { return; } else { readyFired = true; }
 			// Store current state so the back button doesn't break
-			saveState();
+			var href = location.href.replace( new RegExp( '^'+window.baseURL ), '' );
+			history.replaceState( { exec: historyMatch( href ), href: href }, '', location.href );
 			
 			// Attach to click events
 			_.addEventListener( document.body, 'click', historyClick );
