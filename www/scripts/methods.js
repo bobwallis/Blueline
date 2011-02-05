@@ -1110,7 +1110,7 @@
 		
 		this.draw();
 	};
-	// Private functions for MethodGrid2
+	// Private functions for MethodGrid
 	
 	var MethodGrid_table = function( id, title ) {
 		var grid = document.createElement( 'table' ),
