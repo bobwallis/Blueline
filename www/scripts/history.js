@@ -94,6 +94,13 @@
 			setContent: function( stateOrString, callbacks ) {
 				var content, req, href, onreadystatechange;
 				if( !callbacks ) { callbacks = {}; }
+				// Abort any existing AJAX requests
+				if( this.AJAXContentRequest && typeof this.AJAXContentRequest.abort === 'function' ) {
+					this.AJAXContentRequest.abort();
+					clearTimeout( this.AJAXContentRequestTimeout );
+					helpers.hideLoading();
+					this.AJAXContentRequest = this.AJAXContentRequestTimeout = null;
+				}
 				if( typeof callbacks.before === 'function' ) { callbacks.before(); }
 				if( typeof stateOrString === 'string' ) {
 					$content.innerHTML = stateOrString;
@@ -114,12 +121,6 @@
 					}
 					else if( navigator.onLine ) {
 						// Replaces the content of an element with the result of an AJAX call
-						if( this.AJAXContentRequest && typeof this.AJAXContentRequest.abort === 'function' ) {
-							this.AJAXContentRequest.abort();
-							clearTimeout( this.AJAXContentRequestTimeout );
-							helpers.hideLoading();
-							this.AJAXContentRequest = this.AJAXContentRequestTimeout = null;
-						}
 						if( $content.innerHTML == '' ) { // Only show loading animation if content has been cleared
 							this.showLoading();
 						}
