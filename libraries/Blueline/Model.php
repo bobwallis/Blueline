@@ -25,7 +25,7 @@ class Model {
 		$this->data[$key] = $value;
 	}
 	function __get( $key ) {
-		return array_key_exists( $key, $this->data )? $this->data[$key] : false;
+		return array_key_exists( $key, $this->data )? $this->data[$key] : null;
 	}
 	
 	public function isEmpty() {

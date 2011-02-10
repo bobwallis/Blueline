@@ -145,7 +145,22 @@ class Method extends \Blueline\Model {
 		return $this->hunts? : array();
 	}
 	
+	// This is wrong (to implement)
+	public function principalHunts() {
+		if( $this->numberOfHunts() == 1 ) {
+			return $this->hunts();
+		}
+	}
+	
 	public function little() {
+		if( is_null( $this->little ) ) {
+			$hunt = array_pop( $this->principalHunts() );
+			$positions = $this->firstLead();
+			foreach( $positions as &$pos ) {
+				$pos = intval( array_search( $hunt, $pos ) );
+			}
+			$this->little = ( max( $positions ) - min( $positions ) ) < ( $this->stage() - 1 );
+		}
 		return $this->little? true : false;
 	}
 	
