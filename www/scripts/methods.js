@@ -166,7 +166,7 @@
 } )( window, document );
 
 
-( function( window ) {
+( function( window, document ) {
 	// Set up global objects
 	window['methods'] = [];
 	
@@ -338,16 +338,6 @@
 		return parsed;
 	};
 
-	// Returns the first lead head of a method given notation, stage
-	var getLeadHead = function( notation, stage ) {
-		var leadHead = roundsRow( stage ),
-			i = 0, iLim = notation.length;
-		while( i < iLim ) {
-			leadHead = permute( leadHead, notation[i++] );
-		}
-		return leadHead;
-	};
-
 	// Seperate a permutation into disjoint cycles
 	var getCycles = function( permutation ) {
 		var cycles = [], i = permutation.length, rounds = roundsRow( i ), cycle, calcRow;
@@ -441,7 +431,7 @@
 		this.notation = parseNotation( options.notation, this.stage );
 		this.notationText = options.notation;
 		this.notationExploded = explodeNotation( this.notationText );
-		this.leadHead = ( typeof( options.leadHead ) == 'string' )? makeRow( options.leadHead ) : getLeadHead( this.notation, this.stage );
+		this.leadHead = ( typeof( options.leadHead ) == 'string' )? makeRow( options.leadHead ) : permutes( this.rounds, this.notation );
 		this.workGroups = getCycles( this.leadHead );
 		this.leadHeads = [this.rounds];
 			for( var tmp = permute( this.rounds, this.leadHead ); !rowsEqual( tmp, this.rounds ); tmp = permute( tmp, this.leadHead ) ) {
@@ -1227,4 +1217,4 @@
 		} );
 	};
 	_.addEventListener( window, 'resize', methodsResize );
-} )( window );
+} )( window, document );
