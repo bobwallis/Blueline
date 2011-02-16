@@ -1,6 +1,6 @@
 require( [ 'helpers/_' ], function( _ ) {
 	// We'll need to know the base URL
-	baseURL = location.href.replace( /^(.*)\/.*$/, '$1' );
+	var baseURL = location.href.replace( /^(.*)\/.*$/, '$1' );
 	
 	// Helpers to modify the page's contents
 	// Cache some document.getElementById calls
