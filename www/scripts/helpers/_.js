@@ -1,30 +1,11 @@
-( function( window, document ) {
-	// can will be a set of functions to detect browser capabilities.
-	// Largely borrowed from Modernizer <http://www.modernizer.com>
-	window['can'] = window.can?window.can:{};
-	window.can.localStorage= function() {
-		try { return ( 'localStorage' in window ) && ( window.localStorage !== null ); }
-		catch( e ) { return false; }
-	};
-	window.can.SVG = function() {
-		return window.SVGAngle || document.implementation.hasFeature( 'http://www.w3.org/TR/SVG11/feature#BasicStructure', '1.1' );
-	};
-	window.can.canvas = function() {
-			var elem = document.createElement( 'canvas' );
-			return !!( elem.getContext && elem.getContext( '2d' ) );
-	};
-	window.can.history = function() {
-		return !!( window.history && window.history.pushState );
-	};
-	
-	// A set of helper functions for making code writing easier
-	var _ = {
+define( function() {
+	return {
 		// Convert some iterable collection into an array
 		toArray: function( iter ) {
-			var array = [],
-				i = 0, iLim = iter.length;
+			var i = 0, iLim = iter.length,
+				array = new Array( iLim );
 			while( i < iLim ) {
-				array[i] = iter[i];
+				array.push( iter[i] );
 				++i;
 			}
 			return array;
@@ -155,52 +136,4 @@
 			window.onload = func;
 		}
 	};
-	window['_'] = _;
-	
-	// Tab bars
-	// Tab bar click event
-	var tabBarClick = function( e ) {
-		var i, targetTab, tabs;
-		if( !e ) { e = window.event; }
-		targetTab = _.eventTarget( e );
-		if( targetTab.nodeName !== 'LI' ) { return; }
-		tabs = targetTab.parentNode.getElementsByTagName( 'li' );
-			for( i = 0; i < tabs.length; i++ ) {
-				if( tabs[i].id === targetTab.id ) {
-					_.addClass( tabs[i], 'active' );
-					document.getElementById( tabs[i].id.replace( /^tab_/, 'content_' ) ).style.display = 'block';
-				}
-				else {
-					_.removeClass( tabs[i], 'active' );
-					if( _.getComputedStyle( tabs[i], 'display' ) !== 'none' ) { document.getElementById( tabs[i].id.replace( /^tab_/, 'content_' ) ).style.display = 'none'; }
-				}
-			}
-			_.fireEvent( 'scroll' );
-	};
-	window['tabBars'] = [];
-	var TabBar = function( options ) {
-		var landmark = document.getElementById( options.landmark ),
-			container = document.getElementById( landmark.id+'_' );
-		if( container ) {
-			_.addEventListener( container, 'click', tabBarClick );
-		}
-		else {
-			container = document.createElement( 'ul' );
-			var tabs = options.tabs.map( function( t ) {
-					var tab = document.createElement( 'li' );
-					tab.id = 'tab_'+t.id;
-					tab.innerHTML = t.title;
-					tab.className = t.className? t.className : '';
-					return tab;
-				} );
-			container.className = 'tabBar';
-			container.id = landmark.id+'_';
-			_.addClass( tabs[(typeof options.active === 'number' )?options.active:0], 'active' );
-			tabs.forEach( function( t ) { container.appendChild( t ); } );
-			_.addEventListener( container, 'click', tabBarClick );
-			landmark.parentNode.insertBefore( container, landmark );
-			this.container = container;
-		}
-	};
-	window['TabBar'] = TabBar;
-} )( window, document );
+} );

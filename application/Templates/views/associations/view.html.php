@@ -9,10 +9,6 @@ View::element( 'default.header', array(
 	'headerSearch' => array( 
 		'action' => '/associations/search',
 		'placeholder' => 'Search associations'
-	),
-	'scripts' => array(
-		'http://maps.google.com/maps/api/js?sensor=false',
-		'/scripts/towers.js'
 	)
 ) );
 $i = 0;
@@ -23,16 +19,18 @@ foreach( $associations as $association ) : ?>
 		<span id="association_<?php echo $i; ?>_tabBar"></span>
 		<script>
 		//<![CDATA[
-			window.tabBars.push( new TabBar( {
-				landmark: 'association_<?php echo $i; ?>_tabBar',
-				tabs: [
-					{ id: 'details<?php echo $i; ?>', title: 'Details' },
-					{ id: 'map<?php echo $i; ?>', title: 'Map', className: 'normal_hide' }
+			require( ['ui/TabBar'], function( TabBar ) {
+				window['TabBars'].push( new TabBar( {
+					landmark: 'association_<?php echo $i; ?>_tabBar',
+					tabs: [
+						{ title: 'Details', content: 'content_details<?php echo $i; ?>' },
+						{ title: 'Map', content: 'content_map<?php echo $i; ?>', className: 'normal_hide' }
 <?php if( $association->towerCount() > 0 ) : ?>
-					,{ id: 'towers<?php echo $i; ?>', title: 'Towers' }
+						,{ title: 'Towers', content: 'content_towers<?php echo $i; ?>' }
 <?php endif; ?>
-				]
-			} ) );
+					]
+				} ) );
+			} );
 		//]]>
 		</script>
 	</header>
@@ -43,13 +41,15 @@ foreach( $associations as $association ) : ?>
 		</section>
 		<script>
 		//<![CDATA[
-			window.towerMaps.push( new TowerMap( {
-				id: <?php echo $i; ?>,
-				container: 'map<?php echo $i; ?>',
-				scrollwheel: false,
-				fitBounds: new google.maps.LatLngBounds( <?php $bbox = $association->bbox(); echo "new google.maps.LatLng( {$bbox['lat_min']}, {$bbox['long_min']} ), new google.maps.LatLng( {$bbox['lat_max']}, {$bbox['long_max']} )"; ?> ),
-				fusionTableQuery: "SELECT location from 247449 WHERE affiliations contains '<?php echo $association->abbreviation(); ?>'"
-			} ) );
+			require( ['ui/TowerMap'], function( TowerMap ) {
+				window['towerMaps'].push( new TowerMap( {
+					id: <?php echo $i; ?>,
+					container: 'map<?php echo $i; ?>',
+					scrollwheel: false,
+					fitBounds: new google.maps.LatLngBounds( <?php $bbox = $association->bbox(); echo "new google.maps.LatLng( {$bbox['lat_min']}, {$bbox['long_min']} ), new google.maps.LatLng( {$bbox['lat_max']}, {$bbox['long_max']} )"; ?> ),
+					fusionTableQuery: "SELECT location from 247449 WHERE affiliations contains '<?php echo $association->abbreviation(); ?>'"
+				} ) );
+			} );
 		//]]>
 		</script>
 		<section id="content_details<?php echo $i; ?>">

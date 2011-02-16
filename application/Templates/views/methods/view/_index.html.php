@@ -10,9 +10,6 @@ View::element( 'default.header', array(
 	'headerSearch' => array( 
 		'action' => '/methods/search',
 		'placeholder' => 'Search methods'
-	),
-	'scripts' => array(
-		'/scripts/methods.js'
 	)
 ) );
 $i = 0;
@@ -23,15 +20,17 @@ foreach( $methods as $method ) : ?>
 		<span id="method<?php echo $i; ?>_tabBar"></span>
 		<script>
 		//<![CDATA[
-			window.tabBars.push( new TabBar( {
-				landmark: 'method<?php echo $i; ?>_tabBar',
-				tabs: [
-					{ id: 'details<?php echo $i; ?>', title: 'Details' },
-					{ id: 'line<?php echo $i; ?>', title: 'Line' },
-					{ id: 'grid<?php echo $i; ?>', title: 'Grid' }
-				],
-				active: 1
-			} ) );
+			require( ['ui/TabBar'], function( TabBar ) {
+				window['TabBars'].push( new TabBar( {
+					landmark: 'method<?php echo $i; ?>_tabBar',
+					tabs: [
+						{ title: 'Details', content: 'content_details<?php echo $i; ?>' },
+						{ title: 'Line', content: 'content_line<?php echo $i; ?>' },
+						{ title: 'Grid', content: 'content_grid<?php echo $i; ?>' }
+					],
+					active: 1
+				} ) );
+			} );
 		//]]>
 		</script>
 	</header>
@@ -93,22 +92,24 @@ foreach( $methods as $method ) : ?>
 		<div id="content_grid<?php echo $i; ?>" class="methodGrid"></div>
 		<script>
 		//<![CDATA[
-			window.methods.push( new MethodView( {
-				id: <?php echo $i; ?>,
-				stage: <?php echo $method->stage(); ?>,
-				notation: <?php echo json_encode( $method->notationExpanded() ); ?>,
-				leadHead: <?php echo json_encode( $method->leadHead() ); ?>,
-				calls: <?php echo json_encode( $method->calls() ); ?>,
+			require( ['ui/MethodView'], function( MethodView ) {
+				window.methods.push( new MethodView( {
+					id: <?php echo $i; ?>,
+					stage: <?php echo $method->stage(); ?>,
+					notation: <?php echo json_encode( $method->notationExpanded() ); ?>,
+					leadHead: <?php echo json_encode( $method->leadHead() ); ?>,
+					calls: <?php echo json_encode( $method->calls() ); ?>,
 <?php if( $method->ruleOffs() ) : ?>
-				ruleOffs: <?php echo json_encode( $method->ruleOffs() ); ?>,
+					ruleOffs: <?php echo json_encode( $method->ruleOffs() ); ?>,
 <?php endif; ?>
-				options_line: {
-					container: 'content_line<?php echo $i; ?>'
-				},
-				options_grid: {
-					container: 'content_grid<?php echo $i; ?>'
-				}
-			} ) );
+					options_line: {
+						container: 'content_line<?php echo $i; ?>'
+					},
+					options_grid: {
+						container: 'content_grid<?php echo $i; ?>'
+					}
+				} ) );
+			} );
 		//]]>
 		</script>
 	</div>

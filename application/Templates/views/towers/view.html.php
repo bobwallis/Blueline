@@ -10,10 +10,6 @@ View::element( 'default.header', array(
 	'headerSearch' => array( 
 		'action' => '/towers/search',
 		'placeholder' => 'Search towers'
-	),
-	'scripts' => array(
-		'http://maps.google.com/maps/api/js?sensor=false',
-		'/scripts/towers.js'
 	)
 ) );
 $i = 0;
@@ -26,16 +22,18 @@ $i = 0;
 		<span id="tower_<?php echo $i; ?>_tabBar"></span>
 		<script>
 		//<![CDATA[
-			window.tabBars.push( new TabBar( {
-				landmark: 'tower_<?php echo $i; ?>_tabBar',
-				tabs: [
-					{ id: 'details<?php echo $i; ?>', title: 'Details' },
-					{ id: 'map<?php echo $i; ?>', title: 'Map', className: 'normal_hide' }
-<?php if( count( $tower->firstPeals() ) > 0 ) : ?>
-					,{ id: 'peals<?php echo $i; ?>', title: 'Methods First Pealed' }
-<?php endif; ?>
-				]
-			} ) );
+			require( ['ui/TabBar'], function( TabBar ) {
+				window['TabBars'].push( new TabBar( {
+					landmark: 'tower_<?php echo $i; ?>_tabBar',
+					tabs: [
+						{ title: 'Details', content: 'content_details<?php echo $i; ?>' },
+						{ title: 'Map', content: 'content_map<?php echo $i; ?>', className: 'normal_hide' }
+	<?php if( count( $tower->firstPeals() ) > 0 ) : ?>
+						,{ title: 'Methods First Pealed', content: 'content_peals<?php echo $i; ?>' }
+	<?php endif; ?>
+					]
+				} ) );
+			} );
 		//]]>
 		</script>
 	</header>
@@ -46,13 +44,15 @@ $i = 0;
 		</section>
 		<script>
 		//<![CDATA[
-			window.towerMaps.push( new TowerMap( {
-				id: <?php echo $i; ?>,
-				container: 'map<?php echo $i; ?>',
-				scrollwheel: false,
-				zoom: 15,
-				center: new google.maps.LatLng( <?php echo "{$tower->latitude()}, {$tower->longitude()}"; ?> )
-			} ) );
+			require( ['ui/TowerMap'], function( TowerMap ) {
+				window['towerMaps'].push( new TowerMap( {
+					id: <?php echo $i; ?>,
+					container: 'map<?php echo $i; ?>',
+					scrollwheel: false,
+					zoom: 15,
+					center: new google.maps.LatLng( <?php echo "{$tower->latitude()}, {$tower->longitude()}"; ?> )
+				} ) );
+			} );
 		//]]>
 		</script>
 		<section id="content_details<?php echo $i; ?>">
