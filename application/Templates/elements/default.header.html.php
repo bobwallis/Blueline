@@ -34,7 +34,7 @@ if( !Response::snippet() ) :
 		<link rel="stylesheet" media="handheld, screen and (max-width:480px)" href="/styles/small-device.css" />
 		<link rel="stylesheet" media="print" href="/styles/print.css" />
 		<noscript><link rel="stylesheet" media="all" href="/styles/noscript.css" /></noscript>
-		<script data-main="main" src="/scripts/require.js"></script>
+		<script data-main="/scripts/main" src="/scripts/require.js"></script>
 <?php $gaTrackingCode = Config::get( 'ga.trackingCode' ); if( !empty( $gaTrackingCode ) ) : ?>
 		<script>var _gaq=_gaq || [];_gaq.push(['_setAccount', '<?php echo $gaTrackingCode; ?>']);_gaq.push(['_trackPageview']);(function(){var ga=document.createElement('script');ga.type='text/javascript';ga.async=true;ga.src=('https:'==document.location.protocol?'https://ssl':'http://www')+'.google-analytics.com/ga.js';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(ga,s);})();</script>
 <?php endif; ?>
