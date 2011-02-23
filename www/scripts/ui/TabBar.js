@@ -69,5 +69,7 @@ define( [ '../helpers/_' ], function( _ ) {
 			this.container = container;
 		}
 	};
+	
+	// Expose the TabBar constructor
 	return TabBar;
 } );
