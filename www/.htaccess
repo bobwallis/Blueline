@@ -1,0 +1,8 @@
+# This should go into the virtual hosts configuration file to save Apache loading the .htaccess on every request
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteBase /
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteRule ^.*$ index.php [QSA,L]
+</IfModule>
