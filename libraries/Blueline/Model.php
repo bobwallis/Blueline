@@ -15,7 +15,7 @@ class Model {
 	}
 	public function toArray() {
 		$data = $this->data;
-		array_walk_recursive ( &$data, function( &$value, $key ) {
+		array_walk_recursive( $data, function( &$value, $key ) {
 			if( is_a( $value, 'Blueline\\Model' ) ) { $value = $value->toArray(); }
 		} );
 		return $data;
