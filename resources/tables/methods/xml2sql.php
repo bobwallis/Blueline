@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS methods (
   firstTowerbellPeal_location varchar(255), INDEX (firstTowerbellPeal_location),
   firstHandbellPeal_date date, INDEX (firstHandbellPeal_date),
   firstHandbellPeal_location varchar(255), INDEX (firstHandbellPeal_location)
-);
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 <?php
 // Get a list of all .xml files in the ./ directory
