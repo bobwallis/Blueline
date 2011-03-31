@@ -1,11 +1,12 @@
 <?php
 namespace Models\DataAccess;
+use Pan\DataAccess;
 
-class Towers extends \Blueline\DataAccess {
+class Towers extends DataAccess {
 	protected static $_model = '\Models\Tower';
 	protected static $_table = 'towers';
 	protected static $_fields = array( 'doveId', 'gridReference', 'latitude', 'longitude', 'latitudeSatNav', 'longitudeSatNav', 'postcode', 'country', 'county', 'diocese', 'place', 'altName', 'dedication', 'bells', 'weight', 'weightApprox', 'weightText', 'note', 'hz', 'practiceNight', 'practiceStart', 'practiceNotes', 'groundFloor', 'toilet', 'unringable', 'simulator', 'overhaulYear', 'contractor', 'tuned', 'extraInfo', 'webPage' );
-	
+
 	private static $_GETConditions = false;
 	public static function GETtoConditions() {
 		if( self::$_GETConditions === false ) {

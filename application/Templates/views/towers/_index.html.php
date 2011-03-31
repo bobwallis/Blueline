@@ -1,8 +1,10 @@
 <?php
 namespace Blueline;
-use \Helpers\Text;
+use Pan\View, Helpers\Text;
 
-View::element( 'default.header', array(
+View::cache( true );
+
+View::element( 'header', array(
 	'title' => 'Towers | Blueline',
 	'breadcrumb' => array(
 		'<a href="/towers">Towers</a>'
@@ -12,6 +14,4 @@ View::element( 'default.header', array(
 		'placeholder' => 'Search towers'
 	)
 ) );
-
-View::element( 'default.footer' );
-?>
+View::element( 'footer' );

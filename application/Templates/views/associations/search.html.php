@@ -1,9 +1,14 @@
 <?php
 namespace Blueline;
-use \Helpers\Text;
+use Pan\View, \Helpers\Text;
 
-View::element( 'default.header', array(
+View::cache( true );
+
+$associations = $this->get( 'associations', array() );
+
+View::element( 'header', array(
 	'title' => 'Search | Associations | Blueline',
+	'q' => $this->get( 'q' ),
 	'breadcrumb' => array(
 		'<a href="/associations">Associations</a>'
 	),
@@ -24,8 +29,8 @@ View::element( 'default.header', array(
 		<li><a href="<?php echo $association->href(); ?>"><?php echo $association->name(); ?></a></li>
 <?php endforeach; ?>
 	</ol>
-<?php View::element( 'paging', compact( 'limit', 'count' ) ); ?>
+<?php View::element( 'paging', array( 'limit' => $this->get( 'limit' ), 'count' => $this->get( 'count' ), 'queryString' => $this->get( 'queryString' ) ) ); ?>
 <?php endif; ?>
 </section>
-<?php View::element( 'default.footer' ); ?>
+<?php View::element( 'footer' ); ?>
 

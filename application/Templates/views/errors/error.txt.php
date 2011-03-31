@@ -1,5 +1,4 @@
 <?php
 namespace Blueline;
 
-echo $errorCode.' | '.$errorTitle;
-?>
+echo $this->get( 'errorCode', '500' ).' | '.$this->get( 'errorTitle', 'Unknown Error' );

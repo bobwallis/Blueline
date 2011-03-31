@@ -1,12 +1,15 @@
 <?php
 namespace Blueline;
+use Pan\View;
 
-View::element( 'default.header', array(
+View::cache( true );
+
+View::element( 'header', array(
 	'title' => 'Methods | Blueline',
 	'breadcrumb' => array(
 		'<a href="/methods">Methods</a>'
 	),
-	'headerSearch' => array( 
+	'headerSearch' => array(
 		'action' => '/methods/search',
 		'placeholder' => 'Search methods'
 	),
@@ -19,10 +22,10 @@ View::element( 'default.header', array(
 	</header>
 	<div class="content">
 		<ol class="searchResults">
-<?php foreach( $methods as $method ) : ?>
-			<li><a href="<?php echo $method->href(); ?>"><?php echo $method->title(); ?></a></li>
+<?php foreach( $this->get( 'methods', array() ) as $method ) : ?>
+			<li><a href="<?=$method->href()?>"><?=$method->title()?></a></li>
 <?php endforeach; ?>
 		</ol>
 	</div>
 </section>
-<?php View::element( 'default.footer' ); ?>
+<?php View::element( 'footer' ); ?>

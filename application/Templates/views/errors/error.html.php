@@ -1,19 +1,20 @@
 <?php
 namespace Blueline;
+use Pan\View;
 
-View::element( 'default.header', array(
-	'title' => $errorTitle.' | Blueline',
-	'headerSearch' => array( 
+View::element( 'header', array(
+	'title' => $this->get( 'errorTitle' ).' | Blueline',
+	'headerSearch' => array(
 		'action' => '/search',
 		'placeholder' => 'Search'
 	)
 ) );
 ?>
 <header>
-	<h1><?php echo $errorTitle; ?></h1>
+	<h1><?=$this->get( 'errorTitle', 'Unknown Error' )?:''?></h1>
 </header>
-<div class="content wallOfText">
+<div class="content">
 	<p>Try a search, or visit the homepage to find what you're looking for.</p>
-	<?php echo ( Config::get( 'development' ) && isset( $errorMessage ) )? '<p>'.str_replace( "\n", "<br />\n", $errorMessage ).'</p>' : ''; ?>
+	<?=($this->get( 'site[development]' ) && $this->get( 'errorMessage', false ) )? '<p>'.str_replace( "\n", "<br />\n", $this->get( 'errorMessage' ) ).'</p>' : ''?>
 </div>
-<?php View::element( 'default.footer' ); ?>
+<?php View::element( 'footer' ); ?>

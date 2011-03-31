@@ -1,15 +1,21 @@
 <?php
 namespace Blueline;
-use \Helpers\Text;
+use Pan\View, \Helpers\Text;
 
-View::element( 'default.header', array(
+View::cache( true );
+
+View::element( 'header', array(
 	'title' => 'Search | Blueline',
-	'q' => $q,
+	'q' => $this->get( 'q' ),
 	'bigSearch' => array(
 		'action' => '/search',
 		'placeholder' => 'Search'
 	)
 ) );
+$associationCount = $this->get( 'associationCount', 0 );
+$towerCount = $this->get( 'towerCount', 0 );
+$methodCount = $this->get( 'methodCount', 0 );
+$searchLimit = $this->get( 'searchLimit', 0 );
 ?>
 <section class="content search">
 <?php if( $associationCount == 0 && $towerCount == 0 && $methodCount == 0 ) : ?>
@@ -22,11 +28,11 @@ View::element( 'default.header', array(
 		<li>
 			<h3>Associations:</h3>
 			<ol class="searchResults">
-<?php foreach( $associations as $association ) : ?>
-				<li><a href="<?php echo $association->href(); ?>"><?php echo $association->name(); ?></a></li>
+<?php foreach( $this->get( 'associations', array() ) as $association ) : ?>
+				<li><a href="<?=$association->href()?>"><?=$association->name()?></a></li>
 <?php endforeach; ?>
 <?php if( $associationCount > $searchLimit ) : ?>
-				<li><strong><a href="/associations/search?<?php echo $queryString; ?>">More associations &raquo;</a></strong></li>
+				<li><strong><a href="/associations/search?<?=$this->get( 'queryString' )?>">More associations &raquo;</a></strong></li>
 <?php endif; ?>
 			</ol>
 		</li>
@@ -35,11 +41,11 @@ View::element( 'default.header', array(
 		<li>
 			<h3>Methods:</h3>
 			<ol class="searchResults">
-<?php foreach( $methods as $method ) : ?>
-				<li><a href="<?php echo $method->href(); ?>"><?php echo $method->title(); ?></a></li>
+<?php foreach( $this->get( 'methods', array() ) as $method ) : ?>
+				<li><a href="<?=$method->href()?>"><?=$method->title()?></a></li>
 <?php endforeach; ?>
 <?php if( $methodCount > $searchLimit ) : ?>
-				<li><strong><a href="/methods/search?<?php echo $queryString; ?>">More methods &raquo;</a></strong></li>
+				<li><strong><a href="/methods/search?<?=$this->get( 'queryString' )?>">More methods &raquo;</a></strong></li>
 <?php endif; ?>
 			</ol>
 		</li>
@@ -48,11 +54,11 @@ View::element( 'default.header', array(
 		<li>
 			<h3>Towers:</h3>
 			<ol class="searchResults">
-<?php foreach( $towers as $tower ) : ?>
-				<li><?php echo "<a href=\"{$tower->href()}\">{$tower->place()} <small>({$tower->dedication()})</small></a>"; ?></li>
+<?php foreach( $this->get( 'towers', array() ) as $tower ) : ?>
+				<li><?="<a href=\"{$tower->href()}\">{$tower->place()} <small>({$tower->dedication()})</small></a>"?></li>
 <?php endforeach; ?>
 <?php if( $towerCount > $searchLimit ) : ?>
-				<li><strong><a href="/towers/search?<?php echo $queryString; ?>">More towers &raquo;</a></strong></li>
+				<li><strong><a href="/towers/search?<?=$this->get( 'queryString' )?>">More towers &raquo;</a></strong></li>
 <?php endif; ?>
 			</ol>
 		</li>
@@ -60,4 +66,4 @@ View::element( 'default.header', array(
 	</ul>
 <?php endif; ?>
 </section>
-<?php View::element( 'default.footer' ); ?>
+<?php View::element( 'footer' );

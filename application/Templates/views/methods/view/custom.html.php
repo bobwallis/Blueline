@@ -1,13 +1,15 @@
 <?php
 namespace Blueline;
-use Helpers\Text, Helpers\Stages, Helpers\Dates;
+use Pan\View;
 
-View::element( 'default.header', array(
+View::cache( true );
+
+View::element( 'header', array(
 	'title' => 'Custom Method | Methods | Blueline',
 	'breadcrumb' => array(
 		'<a href="/methods">Methods</a>'
 	),
-	'headerSearch' => array( 
+	'headerSearch' => array(
 		'action' => '/methods/search',
 		'placeholder' => 'Search methods'
 	)
@@ -40,4 +42,4 @@ View::element( 'default.header', array(
 		</form>
 	</div>
 </section>
-<?php View::element( 'default.footer' ); ?>
+<?php View::element( 'footer' ); ?>

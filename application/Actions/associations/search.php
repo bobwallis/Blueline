@@ -1,6 +1,6 @@
 <?php
 namespace Blueline;
-use \Models\DataAccess\Associations;
+use Pan\Exception, Pan\View, Pan\Request, \Models\DataAccess\Associations;
 
 // No optional arguments
 if( isset( $arguments[0] ) ) {
@@ -16,9 +16,10 @@ $searchOptions = array(
 $searchResults = Associations::find( $searchOptions );
 $searchCount = ( count( $searchResults ) > 0 )? Associations::findCount( $searchOptions ) : 0;
 
-Response::cacheType( 'static' );
-View::set( 'associations', $searchResults );
-View::set( 'count', $searchCount );
-View::set( 'limit', Associations::GETtoLimit() );
-View::set( 'q', isset( $_GET['q'] )? $_GET['q'] : '' );
-View::set( 'searchQuery', Request::queryString() );
+View::set( array(
+	'associations' => $searchResults,
+	'count' => $searchCount,
+	'limit' => Associations::GETtoLimit(),
+	'q' => isset( $_GET['q'] )? $_GET['q'] : '',
+	'queryString' => Request::queryString()
+) );

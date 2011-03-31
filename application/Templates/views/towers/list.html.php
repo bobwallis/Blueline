@@ -1,11 +1,19 @@
 <?php
 namespace Blueline;
+use Pan\View;
 
-View::element( 'default.header', array(
+View::cache( true );
+
+View::element( 'header', array(
 	'title' => 'Towers | Blueline',
 	'breadcrumb' => array(
 		'<a href="/towers">Towers</a>'
-	)
+	),
+	'headerSearch' => array(
+			'action' => '/towers/search',
+			'placeholder' => 'Search towers'
+	),
+	'bigSearch' => false
 ) );
 ?>
 <section class="search">
@@ -14,10 +22,10 @@ View::element( 'default.header', array(
 	</header>
 	<div class="content">
 		<ol class="searchResults">
-<?php foreach( $towers as $tower ) : ?>
-			<li><?php echo "<a href=\"{$tower->href()}\">{$tower->place()} <small>({$tower->dedication()})</small></a>"; ?></li>
+<?php foreach( $this->get( 'towers', array() ) as $tower ) : ?>
+			<li><?="<a href=\"{$tower->href()}\">{$tower->place()} <small>({$tower->dedication()})</small></a>"?></li>
 <?php endforeach; ?>
 		</ol>
 	</div>
 </section>
-<?php View::element( 'default.footer' ); ?>
+<?php View::element( 'footer' ); ?>

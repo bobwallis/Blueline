@@ -1,5 +1,6 @@
 <?php
 namespace Blueline;
+use Pan\Response, Pan\View;
 
 View::set( 'errorCode', Response::code() );
 

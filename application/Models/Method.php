@@ -1,20 +1,20 @@
 <?php
 namespace Models;
-use \Blueline\Config;
+use Pan\Config, Pan\Model;
 
-class Method extends \Blueline\Model {
+class Method extends Model {
 	public function __toString() {
 		return $this->title();
 	}
-	
+
 	public function title() {
 		return $this->title? : '';
 	}
-	
+
 	public function stage() {
 		return $this->stage? : 0;
 	}
-	
+
 	public function stageText() {
 		if( !$this->stageText ) {
 			if( $this->stage() ) {
@@ -23,15 +23,15 @@ class Method extends \Blueline\Model {
 		}
 		return $this->stageText? : '';
 	}
-	
+
 	public function classification() {
 		return $this->classification? : '';
 	}
-	
+
 	public function notation() {
 		return $this->notation? : '';
 	}
-	
+
 	public function notationExpanded() {
 		if( !$this->notationExpanded ) {
 			if( $this->stage() && $this->notation() ) {
@@ -40,7 +40,7 @@ class Method extends \Blueline\Model {
 		}
 		return $this->notationExpanded? : '';
 	}
-	
+
 	public function notationExploded() {
 		if( !$this->notationExploded ) {
 			if( $this->notationExpanded() ) {
@@ -49,7 +49,7 @@ class Method extends \Blueline\Model {
 		}
 		return $this->notationExploded? : array();
 	}
-	
+
 	public function notationPermutations() {
 		if( !$this->notationPermutations ) {
 			if( $this->stage() && $this->notationExploded() ) {
@@ -58,7 +58,7 @@ class Method extends \Blueline\Model {
 		}
 		return $this->notationPermutations? : array();
 	}
-	
+
 	public function firstLead() {
 		if( !$this->firstLead ) {
 			if( $this->notation() && $this->stage() ) {
@@ -67,7 +67,7 @@ class Method extends \Blueline\Model {
 		}
 		return $this->firstLead? : array();
 	}
-	
+
 	public function leadHeadCode() {
 		if( !$this->leadHeadCode ) {
 			$placeNotation = $this->notationExploded();
@@ -77,7 +77,7 @@ class Method extends \Blueline\Model {
 		}
 		return $this->leadHeadCode? : '';
 	}
-	
+
 	public function leadHead() {
 		if( !$this->leadHead ) {
 			if( $this->leadHeadCode && $this->stage() ) { // Using leadHeadCode() could result in infinte recursion
@@ -92,27 +92,27 @@ class Method extends \Blueline\Model {
 		}
 		return $this->leadHead? : '';
 	}
-	
+
 	public function fchGroups() {
 		return $this->fchGroups? : '';
 	}
-	
+
 	public function rwRef() {
 		return $this->rwRef? : '';
 	}
-	
+
 	public function bnRef() {
 		return $this->bnRef? : '';
 	}
-	
+
 	public function tdmmRef() {
 		return $this->tdmmRef? : 0;
 	}
-	
+
 	public function pmmRef() {
 		return $this->pmmRef? : 0;
 	}
-	
+
 	public function lengthOfLead() {
 		if( !$this->lengthOfLead ) {
 			if( $this->notationExploded() ) {
@@ -121,7 +121,7 @@ class Method extends \Blueline\Model {
 		}
 		return $this->lengthOfLead? : 0;
 	}
-	
+
 	public function numberOfHunts() {
 		if( !$this->numberOfHunts ) {
 			if( $this->hunts() ) {
@@ -130,7 +130,7 @@ class Method extends \Blueline\Model {
 		}
 		return $this->numberOfHunts? : 0;
 	}
-	
+
 	public function hunts() {
 		if( !$this->hunts ) {
 			if( $this->leadHead() ) {
@@ -144,14 +144,14 @@ class Method extends \Blueline\Model {
 		}
 		return $this->hunts? : array();
 	}
-	
+
 	// This is wrong (to implement)
 	public function principalHunts() {
 		if( $this->numberOfHunts() == 1 ) {
 			return $this->hunts();
 		}
 	}
-	
+
 	public function little() {
 		if( is_null( $this->little ) ) {
 			$hunt = array_pop( $this->principalHunts() );
@@ -163,55 +163,55 @@ class Method extends \Blueline\Model {
 		}
 		return $this->little? true : false;
 	}
-	
+
 	public function differential() {
 		return $this->differential? true : false;
 	}
-	
+
 	public function plain() {
 		return $this->plain? true : false;
 	}
-	
+
 	public function trebleDodging() {
 		return $this->trebleDodging? true : false;
 	}
-	
+
 	public function palindromic() {
 		return $this->palindromic? true : false;
 	}
-	
+
 	public function doubleSym() {
 		return $this->doubleSym? true : false;
 	}
-	
+
 	public function rotational() {
 		return $this->rotational? true : false;
 	}
-	
+
 	public function firstTowerbellPeal_date() {
 		return $this->firstTowerbellPeal_date? : '';
 	}
-	
+
 	public function firstTowerbellPeal_location() {
 		return $this->firstTowerbellPeal_location? : '';
 	}
-	
+
 	public function firstTowerbellPeal_location_doveId() {
 		return $this->firstTowerbellPeal_location_doveId? : '';
 	}
-	
+
 	public function firstHandbellPeal_date() {
 		return $this->firstHandbellPeal_date? : '';
 	}
-	
+
 	public function firstHandbellPeal_location() {
 		return $this->firstHandbellPeal_location? : '';
 	}
-	
+
 	public function ruleOffs() {
 		return $this->ruleOffs? : '';
 	}
-	
+
 	public function calls() {
 		if( !$this->calls ) {
 			if( !$this->differential() && $this->stage() > 4 ) {
@@ -262,7 +262,7 @@ class Method extends \Blueline\Model {
 		}
 		return unserialize( $this->calls )? : array();
 	}
-	
+
 	public function href( $absolute = false ) {
 		return ($absolute?Config::get( 'site.baseURL' ):'').'/methods/view/'.urlencode( str_replace( ' ', '_', $this->title() ) );
 	}

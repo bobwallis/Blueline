@@ -1,24 +1,24 @@
 <?php
 namespace Models;
-use \Blueline\Config;
+use Pan\Config, Pan\Model;
 
-class Association extends \Blueline\Model {
+class Association extends Model {
 	public function __toString() {
 		return $this->name();
 	}
-	
+
 	public function abbreviation() {
 		return $this->abbreviation?:'';
 	}
-	
+
 	public function name() {
 		return $this->name? : '';
 	}
-	
+
 	public function link() {
 		return $this->link? : '';
 	}
-	
+
 	public function towerCount() {
 		if( !$this->towerCount ) {
 			if( $this->affiliatedTowers && ( is_array( $this->affiliatedTowers ) || $this->affiliatedTowers instanceof Countable ) ) {
@@ -27,11 +27,11 @@ class Association extends \Blueline\Model {
 		}
 		return $this->towerCount? : 0;
 	}
-	
+
 	public function affiliatedTowers() {
 		return $this->affiliatedTowers? : array();
 	}
-	
+
 	public function bbox() {
 		return array(
 			'lat_max' => $this->lat_max?:false,
@@ -40,7 +40,7 @@ class Association extends \Blueline\Model {
 			'long_min' => $this->long_min?:false
 		);
 	}
-	
+
 	public function href( $absolute = false ) {
 		return ($absolute?Config::get( 'site.baseURL' ):'').'/associations/view/'.urlencode( $this->abbreviation() );
 	}

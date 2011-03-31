@@ -1,6 +1,6 @@
 <?php
 namespace Blueline;
-use \Models\DataAccess\Associations, \Models\DataAccess\Towers;
+use Pan\Exception, Pan\View, Models\DataAccess\Associations, Models\DataAccess\Towers;
 
 // Redirect to /associations on empty request
 if( !isset( $arguments[0] ) || empty( $arguments[0] ) ) {
@@ -33,7 +33,6 @@ if( count( $associations ) == 0 || empty( $associations[0] ) ) {
 // If the URL could be neater, then redirect to the neater version
 $tidyArgument = implode( '|', array_map( function( $a ) { return $a->abbreviation(); }, $associations ) );
 if( strcmp( $arguments[0], $tidyArgument ) != 0 ) {
-	Response::cacheType( 'dynamic' );
 	Response::redirect( '/associations/view/'.$tidyArgument.( Request::extension()? '.'.Request::extension() : '' ) );
 }
 
@@ -52,5 +51,4 @@ foreach( $associations as $association ) {
 }
 
 // Export data to the view for a successful request
-Response::cacheType( 'static' );
 View::set( 'associations', $associations );

@@ -1,63 +1,31 @@
 <?php
-namespace Blueline;
-
-// Obviously set this to false on servers to which the public have access to
-// prevent debug messages with passwords in being thrown everywhere.
-Config::set( 'development', true );
+namespace Pan;
 
 // These environment-type settings are passed to the View
-Config::set( 'site', array( 
+Config::set( 'site', array(
+	'development' => true, // Obviously set this to false on servers to which the public have access to prevent debug messages with passwords in being thrown everywhere.
 	'baseURL' => 'http://blueline.local',
+	//'ga_trackingCode' => 'UA-11877145-5',
+	'ga_trackingCode' => false
 ) );
-View::set( 'site', Config::get( 'site' ) );
-
-// Google Analytics
-//Config::set( 'ga.trackingCode', 'UA-11877145-5' );
-Config::set( 'ga.trackingCode', false );
-
-// HTML Tidy
-Config::set( 'htmlTidy', false );
-/* Not so useful until HTML Tidy supports HTML5
-Config::set( 'htmlTidy', (!function_exists('tidy_parse_string'))? false : array(
-	'bare' => true,
-	'clean' => false,
-	'drop-empty-paras' => false,
-	'doctype' => '<!DOCTYPE html>',
-	'hide-comments' => true,
-	'indent' => true,
-	'indent-cdata' => true,
-	'indent-spaces' => 1,
-	'literal-attributes' => true,
-	'new-blocklevel-tags' => 'section,header,footer,nav',
-	'new-inline-tags' => 'video,audio,canvas,ruby,rt,rp',
-	'tab-size' => 1,
-	'wrap' => 0
-) );
-*/
 
 // Caches
 Config::set( 'caches', array(
-	array(
-		'name' => 'static',
-		'type' => 'Fail',
-		'options' => array(
-			'location' => __DIR__.'/../cache/static',
-			'serialize' => false
-		)
+	'view' => array(
+		'type' => 'directory',
+		'data_store' => CACHE_PATH.'/views',
+		'ttl_store' => array(
+			'type' => 'directory',
+			'data_store' => CACHE_PATH.'/views/metadata'
+		),
+		'serialize' => false
 	),
-	array(
-		'name' => 'data',
-		'type' => ( function_exists( 'apc_cache_info' ) && apc_cache_info( 'user', false ) !== false )? 'APC' : 'File',
-		'options' => array(
-			'location' => __DIR__.'/../cache/data'
-		)
-	),
-	array(
-		'name' => 'dynamic',
-		'type' => 'Fail',
-		'options' => array(
-			'location' => __DIR__.'/../cache/dynamic',
-			'serialize' => false
+	'action' => array(
+		'type' => 'directory',
+		'data_store' => CACHE_PATH.'/actions',
+		'ttl_store' => array(
+			'type' => 'directory',
+			'data_store' => CACHE_PATH.'/actions/metadata'
 		)
 	)
 ) );

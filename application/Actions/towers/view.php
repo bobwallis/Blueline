@@ -1,6 +1,6 @@
 <?php
 namespace Blueline;
-use \Models\DataAccess\Towers, \Models\DataAccess\Associations, \Models\DataAccess\Methods;
+use Pan\Exception, Pan\View, Models\DataAccess\Towers, Models\DataAccess\Associations, Models\DataAccess\Methods;
 
 // Redirect to /methods on empty request
 if( !isset( $arguments[0] ) || empty( $arguments[0] ) ) {
@@ -16,9 +16,9 @@ $towers = array_map(
 			'left_outer_join' => array(
 				'tower_oldpks' => array( 'tower_doveId = doveId' => null )
 			),
-			'where' => array( 'OR' => array( 
+			'where' => array( 'OR' => array(
 				'doveId =' => $request,
-				'oldpk =' => $request 
+				'oldpk =' => $request
 			) )
 		) );
 	},
@@ -32,7 +32,6 @@ if( count( $towers ) == 0 || empty( $towers[0] ) ) {
 // If the URL could be neater, then redirect to the neater version
 $tidyArgument = implode( '|', array_map( function( $t ) { return $t->doveId(); }, $towers ) );
 if( strcmp( $arguments[0], $tidyArgument ) != 0 ) {
-	Response::cacheType( 'dynamic' );
 	Response::redirect( '/towers/view/'.$tidyArgument );
 }
 
@@ -72,7 +71,6 @@ foreach( $towers as $tower ) {
 }
 
 // Export data to the view for successful request
-Response::cacheType( 'static' );
 View::set( 'towers', $towers );
 if( count( $towers ) == 1 ) {
 	View::set( 'ICBM', array(

@@ -1,6 +1,6 @@
 <?php
 namespace Blueline;
-use Helpers\PlaceNotation, Models\Method;
+use Pan\Exception, Pan\View, Flourish\fRequest, Helpers\PlaceNotation, Models\Method;
 
 // No optional arguments
 if( isset( $arguments[0] ) ) {
@@ -10,7 +10,7 @@ if( isset( $arguments[0] ) ) {
 // Basic properties
 if( ! isset( $_GET['notation'], $_GET['stage'] ) ) { throw new Exception( 'Bad arguments', 400 ); }
 $method = new Method();
-$method->stage = intval( $_GET['stage'] );
+$method->stage = fRequest::get( 'stage', 'integer' );
 $method->notation = urldecode( $_GET['notation'] );
 
 // Dimensions
@@ -63,23 +63,22 @@ for( $i = 0; $i < $method->stage(); ++$i ) {
 	}
 }
 
-View::set( 'dimensions', array(
-	'grid' => array(
-		'x' => $rowWidth,
-		'y' => $rowHeight*($method->lengthOfLead()+1)
+View::set( array(
+	'dimensions' => array(
+		'grid' => array(
+			'x' => $rowWidth,
+			'y' => $rowHeight*($method->lengthOfLead()+1)
+		),
+		'row' => array(
+			'x' => $rowWidth,
+			'y' => $rowHeight
+		),
+		'bell' => array(
+			'x' => $bellWidth,
+			'y' => $rowHeight
+		)
 	),
-	'row' => array(
-		'x' => $rowWidth,
-		'y' => $rowHeight
-	),
-	'bell' => array(
-		'x' => $bellWidth,
-		'y' => $rowHeight
-	)
+	'colours' => $colours,
+	'widths' => $widths,
+	'paths' => $paths
 ) );
-
-View::set( 'colours', $colours );
-View::set( 'widths', $widths );
-View::set( 'paths', $paths );
-
-Response::cacheType( 'static' );

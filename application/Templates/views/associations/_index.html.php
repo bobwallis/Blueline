@@ -1,12 +1,15 @@
 <?php
 namespace Blueline;
+use Pan\View;
 
-View::element( 'default.header', array(
+View::cache( true );
+
+View::element( 'header', array(
 	'title' => 'Associations | Blueline',
 	'breadcrumb' => array(
 		'<a href="/associations">Associations</a>'
 	),
-	'headerSearch' => array( 
+	'headerSearch' => array(
 		'action' => '/associations/search',
 		'placeholder' => 'Search associations'
 	)
@@ -17,9 +20,9 @@ View::element( 'default.header', array(
 </header>
 <div class="content">
 	<ol id="associationsList">
-<?php foreach( $associations as $association ) : ?>
-		<li><a href="<?php echo $association->href(); ?>"><?php echo htmlspecialchars( $association->name() ); ?></a></li>
+<?php foreach( $this->get( 'associations', array() ) as $association ) : ?>
+		<li><a href="<?=$association->href()?>"><?= htmlspecialchars( $association->name() )?></a></li>
 <?php endforeach; ?>
 	</ol>
 </div>
-<?php View::element( 'default.footer' ); ?>
+<?php View::element( 'footer' ); ?>

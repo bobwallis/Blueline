@@ -1,10 +1,14 @@
 <?php
 namespace Blueline;
-use \Helpers\Text;
+use Pan\View, Helpers\Text;
 
-View::element( 'default.header', array(
+View::cache( true );
+
+$methods = $this->get( 'methods', array() );
+
+View::element( 'header', array(
 	'title' => 'Search | Methods | Blueline',
-	'q' => $q,
+	'q' => $this->get( 'q' ),
 	'breadcrumb' => array(
 		'<a href="/methods">Methods</a>'
 	),
@@ -22,10 +26,10 @@ View::element( 'default.header', array(
 <?php else : ?>
 	<ol class="searchResults">
 <?php foreach( $methods as $method ) : ?>
-		<li><a href="<?php echo $method->href(); ?>"><?php echo $method->title(); ?></a></li>
+		<li><a href="<?=$method->href()?>"><?=$method->title()?></a></li>
 <?php endforeach; ?>
-	</ol>
-<?php View::element( 'paging', compact( 'limit', 'count' ) ); ?>
+</ol>
+<?php View::element( 'paging', array( 'limit' => $this->get( 'limit' ), 'count' => $this->get( 'count' ), 'queryString' => $this->get( 'queryString' ) ) ); ?>
 <?php endif; ?>
 </section>
-<?php View::element( 'default.footer' ); ?>
+<?php View::element( 'footer' ); ?>

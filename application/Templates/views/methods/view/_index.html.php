@@ -1,32 +1,34 @@
 <?php
 namespace Blueline;
-use Helpers\Text, Helpers\Stages, Helpers\Dates;
+use Pan\View, Helpers\Text, Helpers\Stages, Helpers\Dates;
 
-View::element( 'default.header', array(
-	'title' => htmlspecialchars( \Helpers\Text::toList( array_map( function( $m ){ return $m->title(); }, $methods ) ) ) . ' | Methods | Blueline',
+View::cache( true );
+
+View::element( 'header', array(
+	'title' => htmlspecialchars( \Helpers\Text::toList( array_map( function( $m ){ return $m->title(); }, $this->get( 'methods', array() ) ) ) ) . ' | Methods | Blueline',
 	'breadcrumb' => array(
 		'<a href="/methods">Methods</a>'
 	),
-	'headerSearch' => array( 
+	'headerSearch' => array(
 		'action' => '/methods/search',
 		'placeholder' => 'Search methods'
 	)
 ) );
 $i = 0;
-foreach( $methods as $method ) : ?>
-<section class="method" id="method<?php echo $i; ?>">
+foreach( $this->get( 'methods', array() ) as $method ) : ?>
+<section class="method" id="method<?=$i?>">
 	<header>
-		<h1><?php echo $method->title(); ?></h1>
-		<span id="method<?php echo $i; ?>_tabBar"></span>
+		<h1><?=$method->title()?></h1>
+		<span id="method<?=$i?>_tabBar"></span>
 		<script>
 		//<![CDATA[
 			require( ['ui/TabBar'], function( TabBar ) {
 				window['TabBars'].push( new TabBar( {
-					landmark: 'method<?php echo $i; ?>_tabBar',
+					landmark: 'method<?=$i?>_tabBar',
 					tabs: [
-						{ title: 'Details', content: 'content_details<?php echo $i; ?>' },
-						{ title: 'Line', content: 'content_line<?php echo $i; ?>' },
-						{ title: 'Grid', content: 'content_grid<?php echo $i; ?>' }
+						{ title: 'Details', content: 'content_details<?=$i?>' },
+						{ title: 'Line', content: 'content_line<?=$i?>' },
+						{ title: 'Grid', content: 'content_grid<?=$i?>' }
 					],
 					active: 1
 				} ) );
@@ -35,78 +37,78 @@ foreach( $methods as $method ) : ?>
 		</script>
 	</header>
 	<div class="content">
-		<div id="content_details<?php echo $i; ?>" class="methodDetails">
+		<div id="content_details<?=$i?>" class="methodDetails">
 			<noscript><h2>Details</h2></noscript>
 			<table class="horizontalDetails">
 				<tr>
 					<th>Classification:</th>
-					<td><?php echo ($method->differential()?'Differential ':'') . ($method->little()?'Little ' :'') . $method->classification() .' '. $method->stageText(); ?></td>
+					<td><?=($method->differential()?'Differential ':'') . ($method->little()?'Little ' :'') . $method->classification() .' '. $method->stageText()?></td>
 				</tr>
 				<tr>
 					<th>Place&nbsp;Notation:</th>
-					<td><abbr title="<?php echo $method->notationExpanded(); ?>"><?php echo $method->notation(); ?></abbr></td>
+					<td><abbr title="<?=$method->notationExpanded()?>"><?=$method->notation()?></abbr></td>
 				</tr>
 				<tr>
 					<th>Lead Head:</th>
-					<td><?php echo $method->leadHead() . ($method->leadHeadCode()?" <small>(Code: {$method->leadHeadCode()})</small>":''); ?></td>
+					<td><?=$method->leadHead() . ($method->leadHeadCode()?" <small>(Code: {$method->leadHeadCode()})</small>":'')?></td>
 				</tr>
 <?php if( $method->palindromic() || $method->doubleSym() || $method->rotational() ) : ?>
 				<tr>
 					<th>Symmetry:</th>
-					<td><?php echo ucfirst( Text::toList( array_filter( array( ($method->palindromic()?'palindromic':''), ($method->doubleSym()?'double':''), ($method->rotational()?'rotational':'') ) ) ) ); ?></td>
+					<td><?= ucfirst( Text::toList( array_filter( array( ($method->palindromic()?'palindromic':''), ($method->doubleSym()?'double':''), ($method->rotational()?'rotational':'') ) ) ) )?></td>
 				</tr>
 <?php endif; ?>
 <?php if( $method->fchGroups() ) : ?>
 				<tr>
 					<th><abbr title="False Course Head">FCH</abbr> Groups:</th>
-					<td><?php echo $method->fchGroups(); ?></td>
+					<td><?=$method->fchGroups()?></td>
 				</tr>
 <?php endif; ?>
 <?php if( $method->numberOfHunts() ) : ?>
 				<tr>
 					<th>Hunt Bells:</th>
-					<td><?php echo ( $method->numberOfHunts() > 0 )? implode( ', ', $method->hunts() ) : 'None'; ?></td>
+					<td><?=( $method->numberOfHunts() > 0 )? implode( ', ', $method->hunts() ) : 'None'?></td>
 				</tr>
 <?php endif; ?>
 <?php if( $method->lengthOfLead() ) : ?>
 				<tr>
 					<th>Lead Length:</th>
-					<td><?php echo $method->lengthOfLead(); ?> rows</td>
+					<td><?=$method->lengthOfLead()?> rows</td>
 				</tr>
 <?php endif; ?>
 <?php if( $method->firstTowerbellPeal_date() ) : ?>
 				<tr>
 					<th>First towerbell peal:</th>
-					<td><?php echo Dates::convert( $method->firstTowerbellPeal_date() ) . ($method->firstTowerbellPeal_location()? ' at '.($method->firstTowerbellPeal_location_doveId()? '<a href="/towers/view/'.$method->firstTowerbellPeal_location_doveId().'">'.$method->firstTowerbellPeal_location().'</a>' : $method->firstTowerbellPeal_location()) : ''); ?></td>
+					<td><?= Dates::convert( $method->firstTowerbellPeal_date() ) . ($method->firstTowerbellPeal_location()? ' at '.($method->firstTowerbellPeal_location_doveId()? '<a href="/towers/view/'.$method->firstTowerbellPeal_location_doveId().'">'.$method->firstTowerbellPeal_location().'</a>' : $method->firstTowerbellPeal_location()) : '')?></td>
 				</tr>
 <?php endif; ?>
 <?php if( $method->firstHandbellPeal_date() ) : ?>
 				<tr>
 					<th>First handbell peal:</th>
-					<td><?php echo Dates::convert( $method->firstHandbellPeal_date() ); ?></td>
+					<td><?= Dates::convert( $method->firstHandbellPeal_date() )?></td>
 				</tr>
 <?php endif; ?>
 			</table>
 		</div>
-		<div id="content_line<?php echo $i; ?>" class="methodLine"></div>
-		<div id="content_grid<?php echo $i; ?>" class="methodGrid"></div>
+		<div id="content_line<?=$i?>" class="methodLine"></div>
+		<div id="content_grid<?=$i?>" class="methodGrid"></div>
 		<script>
 		//<![CDATA[
 			require( ['ui/MethodView'], function( MethodView ) {
 				window.methods.push( new MethodView( {
-					id: <?php echo $i; ?>,
-					stage: <?php echo $method->stage(); ?>,
-					notation: <?php echo json_encode( $method->notationExpanded() ); ?>,
-					leadHead: <?php echo json_encode( $method->leadHead() ); ?>,
-					calls: <?php echo json_encode( $method->calls() ); ?>,
+					id: <?=$i?>,
+					stage: <?=$method->stage()?>,
+					notation: <?= json_encode( $method->notationExpanded() )?>,
+					leadHead: <?= json_encode( $method->leadHead() )?>,
+					calls: <?= json_encode( $method->calls() )?>,
 <?php if( $method->ruleOffs() ) : ?>
-					ruleOffs: <?php echo json_encode( $method->ruleOffs() ); ?>,
+					ruleOffs: <?= json_encode( $method->ruleOffs() )?>,
 <?php endif; ?>
 					options_line: {
-						container: 'content_line<?php echo $i; ?>'
+						container: 'content_line<?=$i?>'
 					},
 					options_grid: {
-						container: 'content_grid<?php echo $i; ?>'
+						container: 'content_grid<?=$i?>'
 					}
 				} ) );
 			} );
@@ -115,4 +117,4 @@ foreach( $methods as $method ) : ?>
 	</div>
 </section>
 <?php ++$i; endforeach; ?>
-<?php View::element( 'default.footer' ); ?>
+<?php View::element( 'footer' ); ?>

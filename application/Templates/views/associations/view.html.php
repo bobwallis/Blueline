@@ -1,32 +1,35 @@
 <?php
 namespace Blueline;
+use Pan\View;
 
-View::element( 'default.header', array(
-	'title' => htmlspecialchars( \Helpers\Text::toList( array_map( function( $a ){ return $a->name();}, $associations ) ) ) . ' | Associations | Blueline',
+View::cache( true );
+
+View::element( 'header', array(
+	'title' => htmlspecialchars( \Helpers\Text::toList( array_map( function( $a ){ return $a->name();}, $this->get( 'associations', array() ) ) ) ) . ' | Associations | Blueline',
 	'breadcrumb' => array(
 		'<a href="/associations">Associations</a>'
 	),
-	'headerSearch' => array( 
+	'headerSearch' => array(
 		'action' => '/associations/search',
 		'placeholder' => 'Search associations'
 	)
 ) );
 $i = 0;
-foreach( $associations as $association ) : ?>
-<section class="association" id="association_<?php echo $i; ?>" itemscope itemtype="http://data-vocabulary.org/Organization">
+foreach( $this->get( 'associations', array() ) as $association ) : ?>
+<section class="association" id="association_<?=$i?>" itemscope itemtype="http://data-vocabulary.org/Organization">
 	<header>
-		<h1 itemprop="name"><?php echo htmlspecialchars( $association->name() ); ?></h1>
-		<span id="association_<?php echo $i; ?>_tabBar"></span>
+		<h1 itemprop="name"><?= htmlspecialchars( $association->name() )?></h1>
+		<span id="association_<?=$i?>_tabBar"></span>
 		<script>
 		//<![CDATA[
 			require( ['ui/TabBar'], function( TabBar ) {
 				window['TabBars'].push( new TabBar( {
-					landmark: 'association_<?php echo $i; ?>_tabBar',
+					landmark: 'association_<?=$i?>_tabBar',
 					tabs: [
-						{ title: 'Details', content: 'content_details<?php echo $i; ?>' },
-						{ title: 'Map', content: 'content_map<?php echo $i; ?>', className: 'normal_hide' }
+						{ title: 'Details', content: 'content_details<?=$i?>' },
+						{ title: 'Map', content: 'content_map<?=$i?>', className: 'normal_hide' }
 <?php if( $association->towerCount() > 0 ) : ?>
-						,{ title: 'Towers', content: 'content_towers<?php echo $i; ?>' }
+						,{ title: 'Towers', content: 'content_towers<?=$i?>' }
 <?php endif; ?>
 					]
 				} ) );
@@ -35,16 +38,16 @@ foreach( $associations as $association ) : ?>
 		</script>
 	</header>
 	<div class="content">
-		<section id="content_map<?php echo $i; ?>" class="towerMap">
+		<section id="content_map<?=$i?>" class="towerMap">
 			<noscript><h2>Map</h2></noscript>
-			<div id="map<?php echo $i; ?>" class="map"></div>
+			<div id="map<?=$i?>" class="map"></div>
 		</section>
 		<script>
 		//<![CDATA[
 			require( ['ui/TowerMap'], function( TowerMap ) {
 				window['towerMaps'].push( new TowerMap( {
-					id: <?php echo $i; ?>,
-					container: 'map<?php echo $i; ?>',
+					id: <?=$i?>,
+					container: 'map<?=$i?>',
 					scrollwheel: false,
 					fitBounds: new google.maps.LatLngBounds( <?php $bbox = $association->bbox(); echo "new google.maps.LatLng( {$bbox['lat_min']}, {$bbox['long_min']} ), new google.maps.LatLng( {$bbox['lat_max']}, {$bbox['long_max']} )"; ?> ),
 					fusionTableQuery: "SELECT location from 247449 WHERE affiliations contains '<?php echo $association->abbreviation(); ?>'"
@@ -52,21 +55,21 @@ foreach( $associations as $association ) : ?>
 			} );
 		//]]>
 		</script>
-		<section id="content_details<?php echo $i; ?>">
+		<section id="content_details<?=$i?>">
 			<table class="horizontalDetails">
 <?php if( $association->link() ) : ?>
 				<tr>
 					<th>Link:</th>
-					<td><a href="<?php echo htmlentities( $association->link() ); ?>" class="external" itemprop="url"><?php echo htmlentities( $association->link() ); ?></a></td>
+					<td><a href="<?= htmlentities( $association->link() )?>" class="external" itemprop="url"><?= htmlentities( $association->link() )?></a></td>
 				</tr>
 <?php endif; ?>
 				<tr>
 					<th>Towers:</th>
-					<td><?php echo $association->towerCount(); ?></td>
+					<td><?=$association->towerCount()?></td>
 				</tr>
 			</table>
 		</section>
-		<section id="content_towers<?php echo $i; ?>" class="associationAffiliations">
+		<section id="content_towers<?=$i?>" class="associationAffiliations">
 <?php if( $association->towerCount() > 0 ) : ?>
 			<noscript><h2>Affiliated Towers</h2></noscript>
 			<ol class="noliststyle">
@@ -79,4 +82,4 @@ foreach( $associations as $association ) : ?>
 	</div>
 </section>
 <?php ++$i; endforeach; ?>
-<?php View::element( 'default.footer' ); ?>
+<?php View::element( 'footer' ); ?>

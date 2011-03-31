@@ -1,11 +1,12 @@
 <?php
 namespace Models\DataAccess;
+use Pan\DataAccess;
 
-class Associations extends \Blueline\DataAccess {
+class Associations extends DataAccess {
 	protected static $_model = '\Models\Association';
 	protected static $_table = 'associations';
 	protected static $_fields = array( 'id', 'abbreviation', 'name', 'link' );
-	
+
 	// Helper function to assemble search queries
 	private static $_GETConditions = false;
 	public static function GETtoConditions() {
@@ -29,7 +30,7 @@ class Associations extends \Blueline\DataAccess {
 					$conditions['abbreviation LIKE'] = '%'.self::prepareStringForLike( $_GET['abbreviation'] ).'%';
 				}
 			}
-			
+
 			// If an abbreviation search isn't specified, then use the q value to also search by abbreviation
 			if( isset( $conditions['name LIKE'] ) && !isset( $_GET['abbreviation'] ) ) {
 				$conditions = array(

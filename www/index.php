@@ -1,47 +1,61 @@
 <?php
-namespace Blueline;
+namespace Pan;
 
 // Define some paths
 define( 'LIBRARY_PATH', __DIR__.'/../libraries' );
 define( 'APPLICATION_PATH', __DIR__.'/../application' );
 define( 'TEMPLATE_PATH', __DIR__.'/../application/Templates' );
 define( 'ACTION_PATH', __DIR__.'/../application/Actions' );
+define( 'CACHE_PATH', __DIR__.'/../cache' );
 
-// Initialise a class autoloader
-require( LIBRARY_PATH.'/Blueline/ClassLoader.php' );
-$classLoader_Blueline = new ClassLoader( 'Blueline', LIBRARY_PATH );
+// Initialise class autoloaders
+require( LIBRARY_PATH.'/Pan/ClassLoader.php' );
+$classLoader_Flourish = new ClassLoader( 'Flourish', LIBRARY_PATH );
+$classLoader_Pan = new ClassLoader( 'Pan', LIBRARY_PATH );
 $classLoader_Models = new ClassLoader( 'Models', APPLICATION_PATH );
 $classLoader_Helpers = new ClassLoader( 'Helpers', LIBRARY_PATH );
 
-// Load application configuration
-require( APPLICATION_PATH.'/config.php' );
+ob_start( 'ob_gzhandler' );
 
-// Initialise an Exception handler
-require( LIBRARY_PATH.'/Blueline/ExceptionHandler.php' );
+try {
+	// Load application configuration
+	require( APPLICATION_PATH.'/config.php' );
 
-// Define caches
-Cache::initialise();
-
-// Check the static cache for a response
-// Ideally this should be done by the web server so PHP is never loaded
-if( Cache::exists( 'static', Response::id() ) ) {
-	Response::body( Cache::get( 'static', Response::id() ) );
+	if( !Config::get( 'site.development' ) ) {
+		// Check for a cached view
+		$cachedPage = Cache::get( 'view', View::id() );
+		if( !is_null( $cachedPage ) ) {
+			Response::header( array( 'Cache-Control' => 'max-age='.Cache::getTTL( 'view', Response::id() ) ) );
+			Response::body( $cachedPage );
+			Response::send();
+			exit();
+		}
+		else {
+			// Check for an action cache
+			$actionCache = null;
+			if( !is_null( $actionCache ) ) {
+				die('action cache');
+			}
+		}
+	}
+	Database::initialise();
+	Action::execute();
+	View::create();
 	Response::send();
-	exit();
 }
+catch( \Exception $e ) {
+	$code = $e->getCode()?:500;
+	if( !in_array( $code, array( 400, 403, 404, 500 ) ) ) {
+		$code = 500;
+	}
 
-// Check the dynamic cache for a response
-if( Cache::exists( 'dynamic', Response::id().'.php' ) ) {
-	if( eval( preg_replace( '/^<\?php/', '', Cache::get( 'dynamic', Response::id().'.php' ) ) ) === false ) {
-		if( Config::get( 'development' ) ) { throw new Exception( 'Error in dynamic cache: '.Response::id().'.php', 500 ); }
-		else { Cache::delete( 'dynamic', Response::id().'.php' ); }
+	if( \Flourish\fBuffer::isStarted() ) {
+		\Flourish\fBuffer::stopCapture(); // Throw away any output we already have
 	}
-	else {
-		exit();
-	}
+	Response::code( $code );
+	Action::error( $code );
+	View::error( $code, Exception::toText( $e ) );
+	Action::execute();
+	View::create();
+	Response::send();
 }
-
-Database::initialise();
-Action::execute();
-View::create();
-Response::send();

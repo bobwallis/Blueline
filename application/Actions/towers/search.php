@@ -1,6 +1,6 @@
 <?php
 namespace Blueline;
-use \Models\DataAccess\Towers;
+use Pan\Exception, Pan\View, Pan\Request, Models\DataAccess\Towers;
 
 // No optional arguments
 if( isset( $arguments[0] ) ) {
@@ -15,9 +15,10 @@ $searchOptions = array(
 $searchResults = Towers::find( $searchOptions );
 $searchCount = ( count( $searchResults ) > 0 )? Towers::findCount( $searchOptions ) : 0;
 
-Response::cacheType( 'static' );
-View::set( 'towers', $searchResults );
-View::set( 'count', $searchCount );
-View::set( 'limit', Towers::GETtoLimit() );
-View::set( 'q', isset( $_GET['q'] )? $_GET['q'] : '' );
-View::set( 'searchQuery', Request::queryString() );
+View::set( array(
+	'towers' => $searchResults,
+	'count' => $searchCount,
+	'limit' => Towers::GETtoLimit(),
+	'q' => isset( $_GET['q'] )? $_GET['q'] : '',
+	'queryString' => Request::queryString()
+) );

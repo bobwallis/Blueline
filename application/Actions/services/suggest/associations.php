@@ -1,6 +1,6 @@
 <?php
 namespace Blueline;
-use \Models\DataAccess\Associations;
+use Pan\Exception, Pan\Request, Pan\Response, Pan\View, Models\DataAccess\Associations;
 
 // No optional arguments
 if( isset( $arguments[0] ) ) {
@@ -8,12 +8,7 @@ if( isset( $arguments[0] ) ) {
 }
 
 if( Request::extension() == '' ) {
-	Response::contentType( 'opensearch_suggestions' );
-	View::contentType( 'json' );
-	Response::cacheType( 'dynamic' ); // Needs strange headers
-}
-else {
-	Response::cacheType( 'static' );
+	Response::contentTypeId( 'opensearch_suggestions' );
 }
 
 $suggestionData = Associations::find( array(
@@ -27,5 +22,7 @@ $suggestions = array(
 );
 
 View::view( '/services/suggest' );
-View::set( 'suggestions', $suggestions );
-View::set( 'q', isset( $_GET['q'] )? $_GET['q'] : '' );
+View::set( array(
+	'suggestions' => $suggestions,
+	'q' => isset( $_GET['q'] )? $_GET['q'] : ''
+) );

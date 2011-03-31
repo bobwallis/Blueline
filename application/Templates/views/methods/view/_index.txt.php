@@ -1,5 +1,10 @@
 <?php
-foreach( $methods as $method ) {
+namespace Blueline;
+use Pan\View;
+
+View::cache( true );
+
+foreach( $this->get( 'methods', array() ) as $method ) {
 	$references = array();
 	if( $method->rwRef() ) { $references[] = 'Ringing World '.$method->rwRef(); }
 	if( $method->bnRef() ) { $references[] = 'Bell News '.$method->bnRef(); }

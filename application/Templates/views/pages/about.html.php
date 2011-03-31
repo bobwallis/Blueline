@@ -1,9 +1,12 @@
 <?php
 namespace Blueline;
+use Pan\View;
 
-View::element( 'default.header', array(
+View::cache( true );
+
+View::element( 'header', array(
 	'title' => 'About | Blueline',
-	'headerSearch' => array( 
+	'headerSearch' => array(
 		'action' => '/search',
 		'placeholder' => 'Search'
 	)
@@ -24,4 +27,4 @@ View::element( 'default.header', array(
 		</li>
 	</ul>
 </div>
-<?php View::element( 'default.footer' ); ?>
+<?php View::element( 'footer' ); ?>

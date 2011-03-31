@@ -1,6 +1,6 @@
 <?php
 namespace Blueline;
-use \Models\DataAccess\Associations;
+use Pan\Exception, Pan\View, Models\DataAccess\Associations;
 
 // No optional arguments
 if( isset( $arguments[0] ) ) {
@@ -8,4 +8,3 @@ if( isset( $arguments[0] ) ) {
 }
 
 View::set( 'associations', Associations::find( array( 'order' => 'name ASC' ) ) );
-Response::cacheType( 'static' );

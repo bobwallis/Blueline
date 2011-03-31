@@ -1,6 +1,6 @@
 <?php
 namespace Blueline;
-use \Models\Method, \Models\DataAccess\Methods;
+use Pan\Exception, Pan\View, Models\Method, Models\DataAccess\Methods;
 
 // No optional arguments
 if( isset( $arguments[0] ) ) {
@@ -26,7 +26,7 @@ if( isset( $_GET['name'], $_GET['notation'] ) ) {
 	array_map( 'urldecode', $names );
 	array_map( 'urldecode', $notations );
 	array_map( 'urldecode', $stages );
-	
+
 	for( $i = 0; $i < count( $names ); $i++ ) {
 		$method = new Method;
 		$method->notation = $notations[$i];
@@ -56,7 +56,6 @@ foreach( $methods as &$method ) {
 }
 
 // Export data to the view for successful request
-Response::cacheType( 'static' );
 if( $methods ) {
 	View::view( '/methods/view/_index' );
 	View::set( 'methods', $methods );

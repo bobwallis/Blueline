@@ -1,6 +1,10 @@
 <?php
 namespace Blueline;
-if( isset( $limit ) ) :
+
+$limit = $this->get( 'limit' );
+$count = $this->get( 'count' );
+
+if( !is_null( $limit ) ) :
 	$limit = explode( ',', $limit );
 	if( isset( $limit[1] ) ) {
 		$from = $limit[0];
@@ -14,7 +18,7 @@ if( isset( $limit ) ) :
 		'number' => max( 1, ceil( ($from+1)/$increment ) ),
 		'of' => max( 1, ceil( $count / $increment ) )
 	);
-	$queryString = trim( preg_replace( '/(&|^)from=.*?(&|$)/', '&', Request::queryString() ), '&' );
+	$queryString = trim( preg_replace( '/(&|^)from=.*?(&|$)/', '&', $this->get( 'queryString' ) ), '&' );
 ?>
 <div class="paging">
 	<p><?php echo 'Page '.$page['number'].' of '.$page['of']; ?></p>
@@ -26,7 +30,7 @@ if( isset( $limit ) ) :
 		else {
 			echo '<span>&laquo</span>';
 		}
-		
+
 		// If there's more than seven pages
 		if( $page['of'] > 7 ) {
 			// If we're near the end
@@ -73,7 +77,7 @@ if( isset( $limit ) ) :
 			}
 			echo implode( '|' , $links );
 		}
-		
+
 		if( $page['number'] < $page['of'] ) {
 			echo '<a href="search?'.$queryString.'&from='.(($page['number'])*$increment).'">&raquo;</a>';
 		}

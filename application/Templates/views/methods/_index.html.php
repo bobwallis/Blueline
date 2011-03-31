@@ -1,8 +1,10 @@
 <?php
 namespace Blueline;
-use \Helpers\Text;
+use Pan\View, Helpers\Text;
 
-View::element( 'default.header', array(
+View::cache( true );
+
+View::element( 'header', array(
 	'title' => 'Methods | Blueline',
 	'breadcrumb' => array(
 		'<a href="/methods">Methods</a>'
@@ -12,6 +14,4 @@ View::element( 'default.header', array(
 		'placeholder' => 'Search methods'
 	)
 ) );
-
-View::element( 'default.footer' );
-?>
+View::element( 'footer' );

@@ -1,35 +1,35 @@
 <?php
 namespace Blueline;
-use \Helpers\Text;
+use Pan\View, Helpers\Text;
 
-View::element( 'default.header', array(
-	'title' => htmlspecialchars( Text::toList( array_map( function( $t ){ return $t->place().(($t->dedication()!='Unknown')?' ('.$t->dedication().')':''); }, $towers ) ) ) . ' | Towers | Blueline',
+View::element( 'header', array(
+	'title' => htmlspecialchars( Text::toList( array_map( function( $t ){ return $t->place().(($t->dedication()!='Unknown')?' ('.$t->dedication().')':''); }, $this->get( 'towers', array() ) ) ) ) . ' | Towers | Blueline',
 	'breadcrumb' => array(
 		'<a href="/towers">Towers</a>'
 	),
-	'headerSearch' => array( 
+	'headerSearch' => array(
 		'action' => '/towers/search',
 		'placeholder' => 'Search towers'
 	)
 ) );
 $i = 0;
 ?>
-<?php $i = 0; foreach( $towers as $tower ) : ?>
+<?php $i = 0; foreach( $this->get( 'towers', array() ) as $tower ) : ?>
 <section class="tower">
 	<header>
-		<h1><?php echo $tower->place().(($tower->dedication()!='Unknown')?' <span class="normalweight">('.$tower->dedication().')</span>':''); ?></h1>
-		<h2 class="sub"><?php echo Text::toList( array( $tower->county(), $tower->country() ), ', ', ', ' ); ?></h2>
-		<span id="tower_<?php echo $i; ?>_tabBar"></span>
+		<h1><?=$tower->place().(($tower->dedication()!='Unknown')?' <span class="normalweight">('.$tower->dedication().')</span>':'')?></h1>
+		<h2 class="sub"><?= Text::toList( array( $tower->county(), $tower->country() ), ', ', ', ' )?></h2>
+		<span id="tower_<?=$i?>_tabBar"></span>
 		<script>
 		//<![CDATA[
 			require( ['ui/TabBar'], function( TabBar ) {
 				window['TabBars'].push( new TabBar( {
-					landmark: 'tower_<?php echo $i; ?>_tabBar',
+					landmark: 'tower_<?=$i?>_tabBar',
 					tabs: [
-						{ title: 'Details', content: 'content_details<?php echo $i; ?>' },
-						{ title: 'Map', content: 'content_map<?php echo $i; ?>', className: 'normal_hide' }
+						{ title: 'Details', content: 'content_details<?=$i?>' },
+						{ title: 'Map', content: 'content_map<?=$i?>', className: 'normal_hide' }
 	<?php if( count( $tower->firstPeals() ) > 0 ) : ?>
-						,{ title: 'Methods First Pealed', content: 'content_peals<?php echo $i; ?>' }
+						,{ title: 'Methods First Pealed', content: 'content_peals<?=$i?>' }
 	<?php endif; ?>
 					]
 				} ) );
@@ -38,43 +38,43 @@ $i = 0;
 		</script>
 	</header>
 	<div class="content">
-		<section id="content_map<?php echo $i; ?>" class="towerMap">
+		<section id="content_map<?=$i?>" class="towerMap">
 			<noscript><h2>Map</h2></noscript>
-			<div id="map<?php echo $i; ?>" class="map"><noscript><img width="600px" height="370px" src="http://maps.google.com/maps/api/staticmap?format=png&amp;size=600x370&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center=<?php echo "{$tower->latitude()},{$tower->longitude()}&amp;markers=size:small|color:red|{$tower->latitude()},{$tower->longitude()}"; ?>" /></noscript></div>
+			<div id="map<?=$i?>" class="map"><noscript><img width="600px" height="370px" src="http://maps.google.com/maps/api/staticmap?format=png&amp;size=600x370&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center=<?php echo "{$tower->latitude()},{$tower->longitude()}&amp;markers=size:small|color:red|{$tower->latitude()},{$tower->longitude()}"; ?>" /></noscript></div>
 		</section>
 		<script>
 		//<![CDATA[
 			require( ['ui/TowerMap'], function( TowerMap ) {
 				window['towerMaps'].push( new TowerMap( {
-					id: <?php echo $i; ?>,
-					container: 'map<?php echo $i; ?>',
+					id: <?=$i?>,
+					container: 'map<?=$i?>',
 					scrollwheel: false,
 					zoom: 15,
-					center: new google.maps.LatLng( <?php echo "{$tower->latitude()}, {$tower->longitude()}"; ?> )
+					center: new google.maps.LatLng( <?="{$tower->latitude()}, {$tower->longitude()}"?> )
 				} ) );
 			} );
 		//]]>
 		</script>
-		<section id="content_details<?php echo $i; ?>">
+		<section id="content_details<?=$i?>">
 			<noscript><h2>Details</h2></noscript>
 			<table class="horizontalDetails">
 				<tr class="bigDetails">
 					<th>Bells:</th>
-					<td><strong><?php echo $tower->bells(); ?></strong></td>
+					<td><strong><?=$tower->bells()?></strong></td>
 				</tr>
 				<tr class="bigDetails">
 					<th>Tenor:</th>
-					<td><strong><?php echo (($tower->weightApprox())?'~':'').$tower->weightText() . '</strong> in ' . $tower->note( true ) . ($tower->hz()?' ('.$tower->hz().'Hz)':''); ?></td>
+					<td><strong><?=(($tower->weightApprox())?'~':'').$tower->weightText() . '</strong> in ' . $tower->note( true ) . ($tower->hz()?' ('.$tower->hz().'Hz)':'')?></td>
 				</tr>
 <?php if( count( $tower->affiliations() ) > 0 ) : ?>
 				<tr>
 					<th>Affiliations:</th>
-					<td><?php echo Text::toList( array_map( function( $a ) { return "<a href=\"{$a->href()}\">{$a->name()}</a>"; }, $tower->affiliations() ) ); ?></td>
+					<td><?= Text::toList( array_map( function( $a ) { return "<a href=\"{$a->href()}\">{$a->name()}</a>"; }, $tower->affiliations() ) )?></td>
 				</tr>
 <?php endif; ?>
 				<tr>
 					<th>Diocese:</th>
-					<td><?php echo "<a href=\"/towers/search?diocese=".urlencode($tower->diocese())."\">{$tower->diocese()}</a>"; ?></td>
+					<td><?="<a href=\"/towers/search?diocese=".urlencode($tower->diocese())."\">{$tower->diocese()}</a>"?></td>
 				</tr>
 				<tr>
 					<th>Information:</th>
@@ -112,20 +112,20 @@ $i = 0;
 				$information[] = 'Practice: '.$days[$tower->practiceNight()].($tower->practiceStart()?', '.$tower->practiceStart():'').' '.($tower->practiceNotes()?:'');
 			}
 			$information[] = ($tower->webPage()?'<a href="http://'.$tower->webPage().'" class="external">Tower Website</a>, ':'') . '<a href="http://dove.cccbr.org.uk/detail.php?DoveID='.str_replace( '_', '&#43;', $tower->doveId()).'&showFrames=true" class="external">Dove Entry</a>';
-		
+
 			echo implode( '<br/>', $information );
 		?></td>
 				</tr>
 <?php if( $tower->postcode() ) : ?>
 				<tr>
 					<th>Postcode:</th>
-					<td><?php echo $tower->postcode(); ?></td>
+					<td><?=$tower->postcode()?></td>
 				</tr>
 <?php endif; ?>
 <?php if( $tower->gridReference() ) : ?>
 				<tr>
 					<th>Grid Reference:</th>
-					<td><?php echo $tower->gridReference(); ?></td>
+					<td><?=$tower->gridReference()?></td>
 				</tr>
 <?php endif; ?>
 			</table>
@@ -133,17 +133,17 @@ $i = 0;
 			<h3>Nearby Towers:</h3>
 			<ol class="noliststyle">
 <?php foreach( $tower->nearbyTowers() as $nTower ) : ?>
-				<li><?php echo '<a href="'.$nTower->href().'">' . $nTower->place().' <small>('.$nTower->dedication().')</small></a> <small>'.round( $nTower->distance(), 1 ).' miles</small>'; ?></li>
+				<li><?='<a href="'.$nTower->href().'">' . $nTower->place().' <small>('.$nTower->dedication().')</small></a> <small>'.round( $nTower->distance(), 1 ).' miles</small>'?></li>
 <?php endforeach; ?>
 			</ol>
 <?php endif; ?>
 		</section>
-		<section id="content_peals<?php echo $i; ?>" class="towerFirstPeals">
+		<section id="content_peals<?=$i?>" class="towerFirstPeals">
 <?php if( count( $tower->firstPeals() ) > 0 ) : ?>
 			<noscript><h2>First Peals</h2></noscript>
 			<ol class="noliststyle">
 <?php foreach( $tower->firstPeals()  as $method ) : ?>
-				<li><?php echo "<a href=\"{$method->href()}\">{$method->title()}</a> <small>({$method->firstTowerbellPeal_date()})</small>"; ?></li>
+				<li><?="<a href=\"{$method->href()}\">{$method->title()}</a> <small>({$method->firstTowerbellPeal_date()})</small>"?></li>
 <?php endforeach; ?>
 			</ol>
 <?php endif; ?>
@@ -151,4 +151,4 @@ $i = 0;
 	</div>
 </section>
 <?php ++$i; endforeach; ?>
-<?php View::element( 'default.footer' ); ?>
+<?php View::element( 'footer' ); ?>

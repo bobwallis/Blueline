@@ -1,11 +1,12 @@
 <?php
 namespace Models\DataAccess;
+use Pan\DataAccess;
 
-class Methods extends \Blueline\DataAccess {
+class Methods extends DataAccess {
 	protected static $_model = '\Models\Method';
 	protected static $_table = 'methods';
 	protected static $_fields = array( 'title', 'stage', 'classification', 'notation', 'notationExpanded', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef', 'tdmmRef', 'pmmRef', 'lengthOfLead', 'numberOfHunts', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational', 'firstTowerbellPeal_date', 'firstTowerbellPeal_location', 'firstHandbellPeal_date', 'firstHandbellPeal_location' );
-	
+
 	private static $_GETConditions = false;
 	public static function GETtoConditions() {
 		if( self::$_GETConditions === false ) {
@@ -29,7 +30,7 @@ class Methods extends \Blueline\DataAccess {
 						else {
 							$q = implode( ' ', $qExplode ).($last?' '.$last:'');
 						}
-						
+
 						// Remove non-name parts of the search to test against nameMetaphone
 						if( \Helpers\Classifications::isClass( $last ) ) {
 							$conditions['classification ='] = ucwords( strtolower( $last ) );

@@ -1,6 +1,6 @@
 <?php
 namespace Blueline;
-use Helpers\PlaceNotation;
+use Pan\Exception, Pan\Request, Pan\Response, Pan\View, Flourish\fRequest, Helpers\PlaceNotation;
 
 // No optional arguments
 if( isset( $arguments[0] ) ) {
@@ -8,12 +8,11 @@ if( isset( $arguments[0] ) ) {
 }
 
 if( Request::extension() == '' ) {
-	Response::contentType( 'json' );
-	View::contentType( 'json' );
+	Response::contentTypeId( 'txt' );
 }
 
-if( isset( $_GET['n'], $_GET['s'] ) ) {
-	View::set( 'notation', PlaceNotation::expand( intval( $_GET['s'] ), urldecode( $_GET['n'] ) ) );
+if( isset( $_GET['notation'], $_GET['stage'] ) ) {
+	View::set( 'notation', PlaceNotation::expand( fRequest::get( 'stage', 'integer' ), urldecode( $_GET['notation'] ) ) );
 }
 else {
 	throw new Exception( 'Bad arguments', 400 );

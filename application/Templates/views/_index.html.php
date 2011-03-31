@@ -1,12 +1,14 @@
 <?php
 namespace Blueline;
-use \Helpers\Text;
+use \Pan\View;
 
-View::element( 'default.header', array(
+View::cache( true );
+
+View::element( 'header', array(
+	'manifest' => true,
 	'bigSearch' => array(
 		'action' => '/search',
 		'placeholder' => 'Search'
 	)
 ) );
-?>
-<?php View::element( 'default.footer' ); ?>
+View::element( 'footer' );

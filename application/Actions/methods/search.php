@@ -1,6 +1,6 @@
 <?php
 namespace Blueline;
-use \Models\DataAccess\Methods;
+use Pan\Exception, Pan\View, Pan\Request, Models\DataAccess\Methods;
 
 // No optional arguments
 if( isset( $arguments[0] ) ) {
@@ -15,9 +15,10 @@ $searchOptions = array(
 $searchResults = Methods::find( $searchOptions );
 $searchCount = ( count( $searchResults ) > 0 )? Methods::findCount( $searchOptions ) : 0;
 
-Response::cacheType( 'static' );
-View::set( 'methods', $searchResults );
-View::set( 'count', $searchCount );
-View::set( 'limit', Methods::GETtoLimit() );
-View::set( 'q', isset( $_GET['q'] )? $_GET['q'] : '' );
-View::set( 'searchQuery', Request::queryString() );
+View::set( array(
+	'methods' => $searchResults,
+	'count' => $searchCount,
+	'limit' => Methods::GETtoLimit(),
+	'q' => isset( $_GET['q'] )? $_GET['q'] : '',
+	'queryString' => Request::queryString()
+) );

@@ -1,12 +1,12 @@
 <?php
 namespace Models;
-use \Blueline\Config;
+use Pan\Config, Pan\Model;
 
-class Tower extends \Blueline\Model {
+class Tower extends Model {
 	public function __toString() {
 		return \Helpers\Text::toList( array( "{$this->place()} ({$this->dedication()})", $this->county(), $this->country() ), ', ', ', ' );
 	}
-	
+
 	public function doveId() {
 		return $this->doveId? : '';
 	}
@@ -59,7 +59,7 @@ class Tower extends \Blueline\Model {
 		return $this->weightText? : '';
 	}
 	public function note( $html = false ) {
-		return $this->note? str_replace( array( '#', 'b' ), array( '&#x266f;', '&#x266d;' ), $this->note ) : ''; 
+		return $this->note? str_replace( array( '#', 'b' ), array( '&#x266f;', '&#x266d;' ), $this->note ) : '';
 	}
 	public function hz() {
 		return $this->hz? : 0;
@@ -100,23 +100,23 @@ class Tower extends \Blueline\Model {
 	public function webPage() {
 		return $this->webPage? : '';
 	}
-	
+
 	public function distance() {
 		return $this->distance? : 0;
 	}
-	
+
 	public function firstPeals() {
 		return $this->firstPeals? : array();
 	}
-	
+
 	public function affiliations() {
 		return $this->affiliations? : array();
 	}
-	
+
 	public function nearbyTowers() {
 		return $this->nearbyTowers? : array();
 	}
-	
+
 	public function href( $absolute = false ) {
 		return ($absolute?Config::get( 'site.baseURL' ):'').'/towers/view/'.urlencode( $this->doveId() );
 	}

@@ -1,5 +1,7 @@
 <?php
 namespace Blueline;
+
+$suggestions = $this->get( 'suggestions' );
 ?>
 <ul>
 <?php

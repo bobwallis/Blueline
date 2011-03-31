@@ -1,1 +1,2 @@
-<?php echo isset( $notation )? $notation : '';
+<?php
+echo $this->get( 'notation', '' );

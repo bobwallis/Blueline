@@ -1,1 +1,2 @@
-<?php echo isset( $notation )? json_encode( $notation ) : 'false';
+<?php
+echo json_encode( $this->get( 'notation' ) );
