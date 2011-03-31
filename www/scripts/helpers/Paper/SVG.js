@@ -36,7 +36,7 @@ define( ['../can'], function( can ) {
 				return this.canvas.appendChild( toAdd );
 			}
 		};
-	
+
 		return SVG;
 	}
 	else {

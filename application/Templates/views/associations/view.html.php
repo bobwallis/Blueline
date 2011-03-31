@@ -27,7 +27,6 @@ foreach( $this->get( 'associations', array() ) as $association ) : ?>
 					landmark: 'association_<?=$i?>_tabBar',
 					tabs: [
 						{ title: 'Details', content: 'content_details<?=$i?>' },
-						{ title: 'Map', content: 'content_map<?=$i?>', className: 'normal_hide' }
 <?php if( $association->towerCount() > 0 ) : ?>
 						,{ title: 'Towers', content: 'content_towers<?=$i?>' }
 <?php endif; ?>
@@ -38,20 +37,13 @@ foreach( $this->get( 'associations', array() ) as $association ) : ?>
 		</script>
 	</header>
 	<div class="content">
-		<section id="content_map<?=$i?>" class="towerMap">
-			<noscript><h2>Map</h2></noscript>
-			<div id="map<?=$i?>" class="map"></div>
-		</section>
 		<script>
 		//<![CDATA[
 			require( ['ui/TowerMap'], function( TowerMap ) {
-				window['towerMaps'].push( new TowerMap( {
-					id: <?=$i?>,
-					container: 'map<?=$i?>',
-					scrollwheel: false,
+				TowerMap.set( {
 					fitBounds: new google.maps.LatLngBounds( <?php $bbox = $association->bbox(); echo "new google.maps.LatLng( {$bbox['lat_min']}, {$bbox['long_min']} ), new google.maps.LatLng( {$bbox['lat_max']}, {$bbox['long_max']} )"; ?> ),
 					fusionTableQuery: "SELECT location from 247449 WHERE affiliations contains '<?php echo $association->abbreviation(); ?>'"
-				} ) );
+				} );
 			} );
 		//]]>
 		</script>

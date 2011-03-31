@@ -1,7 +1,7 @@
 require( [ 'helpers/_' ], function( _ ) {
 	// We'll need to know the base URL
 	var baseURL = location.href.replace( /^(.*)\/.*$/, '$1' );
-	
+
 	// Helpers to modify the page's contents
 	// Cache some document.getElementById calls
 	var $content, $breadcrumbContainer, $topSearchContainer, $topSearch, $smallQ, $bigSearchContainer, $bigSearch, $bigQ, $loading;
@@ -10,7 +10,7 @@ require( [ 'helpers/_' ], function( _ ) {
 		setWindowTitle: function( title ) {
 			document.title = ( !title )? 'Blueline' : title+' | Blueline';
 		},
-		
+
 		// Modifies the header bar
 		setHeader: function( breadcrumb, topSearch, bigSearch ) {
 			var i,
@@ -53,7 +53,7 @@ require( [ 'helpers/_' ], function( _ ) {
 				}
 			}
 		},
-		
+
 		loadingSetter: null,
 		showLoading: function() {
 			this.loadingSetter = setTimeout( function() { $loading.style.display = 'block'; } , 150 );
@@ -62,7 +62,7 @@ require( [ 'helpers/_' ], function( _ ) {
 			clearTimeout( this.loadingSetter );
 			$loading.style.display = 'none';
 		},
-		
+
 		// Clears the main content area
 		clearContent: function() {
 			// Wipe HTML
@@ -74,7 +74,6 @@ require( [ 'helpers/_' ], function( _ ) {
 				} );
 			}
 			window['methods'] = [];
-			window['towerMaps'] = [];
 		},
 		// Sets the content of the main content area using either a HTML string, a saved state, or fetching content by url
 		AJAXContentRequest: null,
@@ -172,7 +171,7 @@ require( [ 'helpers/_' ], function( _ ) {
 			action: '/towers/search'
 		}
 	};
-	
+
 	// History URL handlers
 	var historyEvents = {
 		'/': function() {
@@ -196,7 +195,7 @@ require( [ 'helpers/_' ], function( _ ) {
 		},
 		'/associations/view': function( state ) {
 			helpers.setHeader( breadcrumbs.associations, searches.associations, false );
-			helpers.setContent( state, { 
+			helpers.setContent( state, {
 				after: function() {
 					var associationTitles = _.toArray( _.getElementsByClassName( 'association' ) ).map( function( a ) { return a.getElementsByTagName( 'h1' )[0].innerHTML; } );
 					helpers.setWindowTitle( associationTitles.join( ', ' )+' | Associations' );
@@ -220,7 +219,7 @@ require( [ 'helpers/_' ], function( _ ) {
 		},
 		'/methods/view': function( state ) {
 			helpers.setHeader( breadcrumbs.methods, searches.methods, false );
-			helpers.setContent( state, { 
+			helpers.setContent( state, {
 				after: function() {
 					var methodTitles = _.toArray( _.getElementsByClassName( 'method' ) ).map( function( m ) { return m.getElementsByTagName( 'h1' )[0].innerHTML; } );
 					helpers.setWindowTitle( methodTitles.join( ', ' )+' | Methods' );
@@ -238,7 +237,7 @@ require( [ 'helpers/_' ], function( _ ) {
 		},
 		'/towers/view': function( state ) {
 			helpers.setHeader( breadcrumbs.towers, searches.towers, false );
-			helpers.setContent( state, { 
+			helpers.setContent( state, {
 				after: function() {
 					var towerTitles = _.toArray( _.getElementsByClassName( 'tower' ) ).map( function( a ) { return a.getElementsByTagName( 'h1' )[0].innerHTML.replace( /\<.*?\>/g, '' ); } );
 					helpers.setWindowTitle( towerTitles.join( ', ' )+' | Towers' );
@@ -257,7 +256,7 @@ require( [ 'helpers/_' ], function( _ ) {
 			helpers.setContent( state );
 		}
 	};
-	
+
 	// A function to map URLs to URL handlers
 	var historyMatch = function( url ) {
 		var match;
@@ -276,7 +275,7 @@ require( [ 'helpers/_' ], function( _ ) {
 			return match[1];
 		}
 	};
-	
+
 	// Capture link clicks
 	var historyClick = function( e ) {
 		var target = _.eventTarget( e );
@@ -295,7 +294,7 @@ require( [ 'helpers/_' ], function( _ ) {
 			}
 		}
 	};
-	
+
 	// Capture form submitions
 	var historySubmitForm = function( form ) {
 		var href = form.getAttribute( 'action' ) + '?' + _.formToQueryString( form ),
@@ -305,7 +304,7 @@ require( [ 'helpers/_' ], function( _ ) {
 			historyEvents[handler]( { href: href } );
 		}
 	};
-	
+
 	var historySubmit = function( e ) {
 		var form = _.eventTarget( e );
 		if( form.nodeName === 'FORM' ) {
@@ -314,7 +313,7 @@ require( [ 'helpers/_' ], function( _ ) {
 			historySubmitForm( form );
 		}
 	};
-	
+
 	var historyChange = function( e ) {
 		var form = _.eventTarget( e );
 		if( [13,16,17,27,33,34,35,36,37,38,39,40,45,91].indexOf( e.keyCode ) !== -1 ) { // Don't fire for various non-character keys
@@ -333,7 +332,7 @@ require( [ 'helpers/_' ], function( _ ) {
 			}, 5 );
 		}
 	};
-	
+
 	// The popstate handler
 	var historyPopstate = function( e ) {
 		var s = e.state;
@@ -349,8 +348,8 @@ require( [ 'helpers/_' ], function( _ ) {
 			}
 		}
 	};
-	window.addEventListener( 'popstate', historyPopstate );
-	
+	window.addEventListener( 'popstate', historyPopstate, false );
+
 	// DOM Ready/Load event
 	require.ready( function() {
 		// Cache some document.getElementById calls for use here
@@ -362,26 +361,26 @@ require( [ 'helpers/_' ], function( _ ) {
 		$bigSearchContainer = document.getElementById( 'bigSearchContainer' );
 		$bigSearch = document.getElementById( 'bigSearch' );
 		$bigQ = document.getElementById( 'bigQ' );
-		
+
 		// Clear localStorage when updating the cache manifest
 		window.applicationCache.addEventListener( 'downloading', localStorage.clear, false );
-		
+
 		// Store current state so the back button doesn't break
 		var href = location.href.replace( new RegExp( '^'+baseURL ), '' );
 		history.replaceState( { exec: historyMatch( href ), href: href }, '', location.href );
-		
+
 		// Attach to click events
-		document.body.addEventListener( 'click', historyClick );
-		
+		document.body.addEventListener( 'click', historyClick, false );
+
 		// Attach to the big and little search form's submit events
-		$topSearch.addEventListener( 'submit', historySubmit );
-		$bigSearch.addEventListener( 'submit', historySubmit );
-		
+		$topSearch.addEventListener( 'submit', historySubmit, false );
+		$bigSearch.addEventListener( 'submit', historySubmit, false );
+
 		// Auto-submit bigSearch on data change
-		$bigSearch.addEventListener( 'cut', historyChange );
-		$bigSearch.addEventListener( 'paste', historyChange );
-		$bigSearch.addEventListener( 'keyup', historyChange );
-		
+		$bigSearch.addEventListener( 'cut', historyChange, false );
+		$bigSearch.addEventListener( 'paste', historyChange, false );
+		$bigSearch.addEventListener( 'keyup', historyChange, false );
+
 		// Add loading animation container
 		loading = document.createElement( 'div' );
 		loading.id = 'loading';

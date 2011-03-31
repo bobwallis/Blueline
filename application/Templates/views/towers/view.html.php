@@ -38,20 +38,17 @@ $i = 0;
 		</script>
 	</header>
 	<div class="content">
-		<section id="content_map<?=$i?>" class="towerMap">
+		<section id="content_map<?=$i?>" class="towerStaticMap">
 			<noscript><h2>Map</h2></noscript>
-			<div id="map<?=$i?>" class="map"><noscript><img width="600px" height="370px" src="http://maps.google.com/maps/api/staticmap?format=png&amp;size=600x370&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center=<?php echo "{$tower->latitude()},{$tower->longitude()}&amp;markers=size:small|color:red|{$tower->latitude()},{$tower->longitude()}"; ?>" /></noscript></div>
+			<img width="320px" height="400px" src="http://maps.google.com/maps/api/staticmap?format=png&amp;size=320x400&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center=<?php echo "{$tower->latitude()},{$tower->longitude()}&amp;markers=size:small|color:red|{$tower->latitude()},{$tower->longitude()}"; ?>" />
 		</section>
 		<script>
 		//<![CDATA[
 			require( ['ui/TowerMap'], function( TowerMap ) {
-				window['towerMaps'].push( new TowerMap( {
-					id: <?=$i?>,
-					container: 'map<?=$i?>',
-					scrollwheel: false,
+				TowerMap.set( {
 					zoom: 15,
 					center: new google.maps.LatLng( <?="{$tower->latitude()}, {$tower->longitude()}"?> )
-				} ) );
+				} );
 			} );
 		//]]>
 		</script>

@@ -31,7 +31,7 @@ abbr { border-bottom: 1px dotted #E0DED9; cursor: help; }
 .normalweight { font-weight: normal !important; }
 
 /* Links */
-a {	
+a {
 	text-decoration: none;
 	border-bottom: 1px solid #A1C4D0;
 	-webkit-transition-property: border-bottom-color, color;
@@ -253,8 +253,26 @@ table.horizontalDetails {}
 /* CSS for specific pages */
 
 /* Hidden  by default */
-.towerFirstPeals, .methodDetails, .methodGrid, .associationAffiliations { display: none; }
+.towerFirstPeals, .towerStaticMap, .methodDetails, .methodGrid, .associationAffiliations { display: none; }
 
+/* Tower map */
+#towerMap {
+	position: fixed;
+	right: 0;
+	top: 35px;
+	display: block;
+	padding: 0;
+	width: 60%;
+	height: 450px;
+	border-left: 1px solid #E0DED9;
+}
+#towerMap .map {
+	width: 100%;
+	height: 100%;
+	position: relative;
+	right: 0;
+}
+	#towerMap .map a { border: 0; }
 
 /* Methods */
 div.methodLine td {
@@ -285,13 +303,11 @@ td.notationCell {
 	padding-right: 5px;
 }
 
-/* Tower Maps */
-.map {
+/* Towers */
+.towerStaticMap {
 	width: 100%;
-	height: 100%;
+	text-align: center;
 }
-	.map a { border: 0; }
-
 
 /* Associations list */
 #associationsList {
