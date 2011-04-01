@@ -162,8 +162,8 @@ require( [ 'helpers/history', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 
 	// Capture link clicks
 	var historyClick = function( e ) {
-		var target = $( e.target );
-		if( target.is( 'a' ) ) {
+		var target = $( e.target ).closest( 'a' );
+		if( target.length > 0 ) {
 			var href = target.attr( 'href' );
 			if( href.charAt( 0 ) !== '/' && href.indexOf( '//' ) !== 0 && href.indexOf( 'http://' ) !== 0 && href.indexOf( 'https://' ) !== 0 ) {
 				var url = History.getState().url;
