@@ -26,13 +26,13 @@ if( !\Pan\Response::snippet() ) :
 		<link rel="search" type="application/opensearchdescription+xml" href="/services/opensearch/towers.xml" title="Towers | Blueline" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any" />
 		<link rel="alternate shortcut icon" type="image/x-ixon" href="/favicon.ico" sizes="16x16,24x24,48x48" />
-		<!--[if lt IE 9]><script src="/scripts/ieCompat.js"></script><![endif]-->
+		<!--[if lt IE 9]><script src="/scripts/helpers/ieCompat.js"></script><![endif]-->
 		<link rel="stylesheet" media="all" href="/styles/core.css" />
 		<link rel="stylesheet" media="screen" href="/styles/normal.css" />
 		<link rel="stylesheet" media="handheld, screen and (max-width:480px)" href="/styles/small-device.css" />
 		<link rel="stylesheet" media="print" href="/styles/print.css" />
 		<noscript><link rel="stylesheet" media="all" href="/styles/noscript.css" /></noscript>
-		<script src="/scripts/jquery.js"></script>
+		<script src="/scripts/helpers/jquery.js"></script>
 		<script data-main="/scripts/main" src="/scripts/require.js"></script>
 <?php if( !empty( $site['ga_trackingCode'] ) ) : ?>
 		<script>var _gaq=_gaq || [];_gaq.push(['_setAccount', '<?=$site['ga_trackingCode']?>']);_gaq.push(['_trackPageview']);(function(){var ga=document.createElement('script');ga.type='text/javascript';ga.async=true;ga.src=('https:'==document.location.protocol?'https://ssl':'http://www')+'.google-analytics.com/ga.js';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(ga,s);})();</script>

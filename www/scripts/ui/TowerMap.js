@@ -55,15 +55,15 @@ define( ['../plugins/google!maps/3/sensor=false'], function( googleAjaxReady ) {
 		TowerMap = {
 			container: $( '#towerMap' ),
 			map: false,
-			visible: function() {
-				return this.container.is( ':visible' );
-			},
+			visible: false,
 			show: function() {
 				this.container.show();
+				this.visible = true;
 				towerMapResize();
 			},
 			hide: function() {
 				this.container.hide();
+				this.visible = false;
 			},
 			maximise: function() {
 				this.maximised = true;
@@ -71,7 +71,9 @@ define( ['../plugins/google!maps/3/sensor=false'], function( googleAjaxReady ) {
 			},
 			maximised: false,
 			set: function( options ) {
-				// Copy the passed in options over the current ones
+				this.show();
+				towerMapResize( true );
+				// Copy allowed, passed in options over the current ones
 				['center','zoom','fusionTableQuery'].forEach( function( e ) { if( typeof options[e] !== 'undefined') { TowerMapOptions[e] = options[e]; } } );
 				if( !TowerMapInitialised ) {
 					// Initialise the map
@@ -129,7 +131,6 @@ define( ['../plugins/google!maps/3/sensor=false'], function( googleAjaxReady ) {
 						TowerMap.map.fitBounds( options.fitBounds );
 					}
 				}
-
 				// If no center or fitBounds have been requested, try to center on the user's current location
 				if( typeof options.center === 'undefined' && typeof options.fitBounds === 'undefined' && navigator.geolocation ) {
 					var map = this.map;
@@ -138,6 +139,13 @@ define( ['../plugins/google!maps/3/sensor=false'], function( googleAjaxReady ) {
 						map.setCenter( location );
 						map.setZoom( 13 );
 					} );
+				}
+				// Set fusion table layer query
+				if( typeof options.fusionTableQuery === 'string' ) {
+					this.fusionTableLayer.setQuery( options.fusionTableQuery );
+				}
+				else {
+					this.fusionTableLayer.setQuery( 'SELECT location from 247449 WHERE 1=1' );
 				}
 			}
 		};
@@ -151,31 +159,31 @@ define( ['../plugins/google!maps/3/sensor=false'], function( googleAjaxReady ) {
 				if( nowTime - towerMapResizedLastFired < 300 ) { return; }
 				else { towerMapResizedLastFired = nowTime; }
 			}
-
-			var mapCenter = (TowerMap.map !== false)? TowerMap.map.getCenter() : 0,
-				pageWidth = $window.width(),
-				pageHeight = $window.height(),
-				scrollTop = $window.scrollTop(),
-				topHeight = $top.height(),
-				topVisible = (scrollTop < topHeight)? topHeight - scrollTop : 0,
-				bottomHeight = $bottom.height(),
-				bottomTop = $bottom.offset().top,
-				bottomVisible = ( (scrollTop+pageHeight) > bottomTop )? (scrollTop+pageHeight) - bottomTop : 0,
-				newHeight = pageHeight - bottomVisible - topVisible;
-			if( pageWidth > 480 ) {
-				TowerMap.show();
-				TowerMap.container.css( {
-					width: (TowerMap.maximised?pageWidth:pageWidth*0.6)+'px',
-					height: newHeight+'px',
-					top: topVisible+'px'
-				} ) ;
-			}
-			else {
-				TowerMap.hide();
-			}
-			if( TowerMap.map !== false ) {
-				google.maps.event.trigger( TowerMap.map, 'resize' );
-				TowerMap.map.setCenter( mapCenter );
+			if( TowerMap.visible ) {
+				var mapCenter = (TowerMap.map !== false)? TowerMap.map.getCenter() : 0,
+					pageWidth = $window.width(),
+					pageHeight = $window.height(),
+					scrollTop = $window.scrollTop(),
+					topHeight = $top.height(),
+					topVisible = (scrollTop < topHeight)? topHeight - scrollTop : 0,
+					bottomHeight = $bottom.height(),
+					bottomTop = $bottom.offset().top,
+					bottomVisible = ( (scrollTop+pageHeight) > bottomTop )? (scrollTop+pageHeight) - bottomTop : 0,
+					newHeight = pageHeight - bottomVisible - topVisible;
+				if( pageWidth > 480 ) {
+					TowerMap.container.css( {
+						width: (TowerMap.maximised?pageWidth:pageWidth*0.6)+'px',
+						height: newHeight+'px',
+						top: topVisible+'px'
+					} ) ;
+				}
+				else {
+					TowerMap.hide();
+				}
+				if( TowerMap.map !== false ) {
+					google.maps.event.trigger( TowerMap.map, 'resize' );
+					TowerMap.map.setCenter( mapCenter );
+				}
 			}
 		};
 		$window.resize( towerMapResize );
@@ -183,7 +191,7 @@ define( ['../plugins/google!maps/3/sensor=false'], function( googleAjaxReady ) {
 
 	// Scroll event
 	var towerMapScroll = function() {
-		if( TowerMap.visible() ) {
+		if( TowerMap.visible ) {
 			towerMapResize( true );
 		}
 	};

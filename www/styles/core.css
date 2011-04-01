@@ -260,7 +260,7 @@ table.horizontalDetails {}
 	position: fixed;
 	right: 0;
 	top: 35px;
-	display: block;
+	display: none;
 	padding: 0;
 	width: 60%;
 	height: 450px;

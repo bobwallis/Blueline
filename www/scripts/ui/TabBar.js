@@ -1,4 +1,4 @@
-define( [ '../helpers/_' ], function( _ ) {
+define( function() {
 	if( typeof window['TabBars'] === 'undefined' ) {
 		window['TabBars'] = [];
 	}
@@ -29,7 +29,7 @@ define( [ '../helpers/_' ], function( _ ) {
 				$( '#'+tab.attr( 'id' ).replace( /^tab_/, '' ) ).hide();
 			}
 		} );
-		_.fireEvent( 'scroll' );
+		$( window ).scroll();
 	};
 
 	/**
