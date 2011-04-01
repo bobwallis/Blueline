@@ -34,8 +34,8 @@ abbr { border-bottom: 1px dotted #E0DED9; cursor: help; }
 a {
 	text-decoration: none;
 	border-bottom: 1px solid #A1C4D0;
-	-webkit-transition-property: border-bottom-color, color;
-	-webkit-transition-duration: .4s;
+	transition-property: border-bottom-color, color; -webkit-transition-property: border-bottom-color, color; -moz-transition-property: border-bottom-color, color;
+	transition-duration: .4s; -webkit-transition-duration: .4s; -moz-transition-duration: .4s;
 }
 	a:link { color: #29404C; -webkit-tap-highlight-color: #FF5E99; }
 	a:visited { color: #4C2940; }
@@ -174,8 +174,8 @@ ul.tabBar {
 		background-color: #F3F3F3;
 		border-bottom: 0;
 		cursor: pointer;
-		-webkit-transition-property: background-color;
-		-webkit-transition-duration: .4s;
+		-webkit-transition-property: background-color; -moz-transition-property: background-color;
+		-webkit-transition-duration: .4s; -moz-transition-duration: .4s;
 	}
 		ul.tabBar li:hover { background: #FFF; }
 		ul.tabBar li.active {
@@ -312,9 +312,10 @@ td.notationCell {
 /* Associations list */
 #associationsList {
 	list-style: none;
-	-webkit-column-count: 2; -webkit-column-gap: 20px; column-count: 2; column-gap: 20px;
+	column-count: 2; -webkit-column-count: 2; -moz-column-count: 2;
+	column-gap: 20px; -webkit-column-gap: 20px; -moz-column-gap: 20px;
 }
-	@media screen and (min-width: 850px) { #associationsList { -webkit-column-count: 3; column-count: 3; } }
+	@media screen and (min-width: 850px) { #associationsList { column-count: 3; -webkit-column-count: 3; -moz-column-count: 3; } }
 	#associationsList li {
 		padding: 2px 0;
 	}
