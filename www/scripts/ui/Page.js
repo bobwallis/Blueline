@@ -19,7 +19,7 @@ define( ['./Header', './Content', './TowerMap'], function( Header, Content, Towe
 				// Abort existing AJAX request
 				if( AJAXContentRequest && typeof AJAXContentRequest.abort === 'function' ) {
 					AJAXContentRequest.abort();
-					Content.hideLoading();
+					Content.loading.hide();
 					AJAXContentRequest = null;
 				}
 				// Try to get content for the URL from localStorage
@@ -33,7 +33,7 @@ define( ['./Header', './Content', './TowerMap'], function( Header, Content, Towe
 					// Don't clear existing content if asked not to
 					if( typeof options.content.retain !== 'boolean' || options.content.retain === false ) {
 						Content.clear();
-						Content.showLoading();
+						Content.loading.show();
 					}
 					AJAXContentRequest = $.ajax( {
 						url: options.content.url,

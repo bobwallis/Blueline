@@ -1,4 +1,4 @@
-define( ['../plugins/google!maps/3/sensor=false'], function( googleAjaxReady ) {
+define( ['../plugins/google!maps/3/sensor=false', '../ui/Content'], function( googleAjaxReady, Content ) {
 		// Create some reusable variables
 		var $window = $( window ),
 			$document = $( document ),
@@ -58,11 +58,13 @@ define( ['../plugins/google!maps/3/sensor=false'], function( googleAjaxReady ) {
 			visible: false,
 			show: function() {
 				this.container.show();
+				Content.loading.container.css( 'width', '40%' );
 				this.visible = true;
 				towerMapResize();
 			},
 			hide: function() {
 				this.container.hide();
+				Content.loading.container.css( 'width', '100%' );
 				this.visible = false;
 			},
 			maximise: function() {

@@ -15,16 +15,19 @@ define( function() {
 		},
 		set: function( content ) {
 			this.clear();
-			this.hideLoading();
+			this.loading.hide();
 			$content.append( content );
 			$( 'script', $content ).each( console.log );
 		},
-		showLoading: function() {
-			loadingSetter = setTimeout( function() { $loading.show(); } , 150 );
-		},
-		hideLoading: function() {
-			clearTimeout( loadingSetter );
-			$loading.hide();
+		loading: {
+			container: $loading,
+			show: function() {
+				loadingSetter = setTimeout( function() { $loading.show(); } , 150 );
+			},
+			hide: function() {
+				clearTimeout( loadingSetter );
+				$loading.hide();
+			}
 		}
 	};
 } );
