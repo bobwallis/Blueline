@@ -7,6 +7,7 @@ define( 'APPLICATION_PATH', __DIR__.'/../application' );
 define( 'TEMPLATE_PATH', __DIR__.'/../application/Templates' );
 define( 'ACTION_PATH', __DIR__.'/../application/Actions' );
 define( 'CACHE_PATH', __DIR__.'/../cache' );
+define( 'WWW_PATH', __DIR__ );
 
 // Initialise class autoloaders
 require( LIBRARY_PATH.'/Pan/ClassLoader.php' );

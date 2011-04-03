@@ -1,20 +1,15 @@
-<?php namespace Blueline; ?>
+<?php
+namespace Blueline;
+use Pan\View;
+
+View::cache( 43200 );
+?>
 CACHE MANIFEST
-# 20110129 1226
+# <?=$this->get( 'timestamp' )."\n"?>
 NETWORK:
 *
 CACHE:
 /
-/favicon.ico
-/images/external_link.png
-/images/search.png
-/images/search.svg
-/images/loading.gif
-/styles/core.css
-/styles/normal.css
-/styles/print.css
-/styles/small-device.css
-/scripts/general.js
-/scripts/history.js
-/scripts/methods.js
-/scripts/towers.js
+<?php foreach( $this->get( 'resources' ) as $resource ) : ?>
+<?=$resource."\n"?>
+<?php endforeach; ?>
