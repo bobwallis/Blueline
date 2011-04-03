@@ -142,7 +142,7 @@ require( [ 'helpers/history', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 	// A function to map URLs to URL handlers
 	var historyMatch = function( url ) {
 		var match;
-		url = url.replace( new RegExp( '^'+baseURL ), '' );
+		url = url.replace( baseURL, '' );
 		// Match a page directly
 		if( typeof urlHandlers[url] === 'function' ) {
 			return url;
