@@ -26,7 +26,7 @@ require( [ 'helpers/history', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 			Page.set( {
 				windowTitle: 'Search',
 				bigSearch: searches.all,
-				content: { url: state.url, retain: (History.lastHandler == '/search') }
+				content: { url: state.url, retain: !(Content.isEmpty() || state.data.type != 'keyup') }
 			} );
 		},
 		'/associations': function( state ) {
@@ -42,7 +42,7 @@ require( [ 'helpers/history', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 				windowTitle: 'Search | Associations',
 				breadcrumb: breadcrumbs.associations,
 				bigSearch: searches.associations,
-				content: { url: state.url, retain: (History.lastHandler == '/associations/search') }
+				content: { url: state.url, retain: !(Content.isEmpty() || state.data.type != 'keyup') }
 			} );
 		},
 		'/associations/view': function( state ) {
@@ -72,7 +72,7 @@ require( [ 'helpers/history', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 				windowTitle: 'Search | Methods',
 				breadcrumb: breadcrumbs.methods,
 				bigSearch: searches.methods,
-				content: { url: state.url, retain: (History.lastHandler == '/methods/search') }
+				content: { url: state.url, retain: !(Content.isEmpty() || state.data.type != 'keyup') }
 			} );
 		},
 		'/methods/view/custom': function( state ) {
@@ -106,7 +106,7 @@ require( [ 'helpers/history', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 				windowTitle: 'Search | Towers',
 				breadcrumb: breadcrumbs.towers,
 				bigSearch: searches.towers,
-				content: { url: state.url, retain: (History.lastHandler == '/towers/search') }
+				content: { url: state.url, retain: !(Content.isEmpty() || state.data.type != 'keyup') }
 			} );
 		},
 		'/towers/view': function( state ) {
@@ -172,28 +172,25 @@ require( [ 'helpers/history', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 			var handler = historyMatch( href );
 			if( handler !== false ) {
 				e.preventDefault();
-				History.pushState( null, null, href );
+				History.pushState( { type: 'click' }, null, href );
 			}
 		}
 	};
 
 	// Capture form submitions
-	var historySubmitForm = function( form ) {
-		var href = form.attr( 'action' ) + '?' + form.serialize(),
-			handler = historyMatch( href );
-		if( handler !== false ) {
-			History.pushState( null, null, href );
-		}
-	};
-
 	var historySubmit = function( e ) {
 		var form = $( e.target );
 		if( form.is( 'form' ) ) {
-			e.preventDefault();
-			historySubmitForm( form );
+			var href = form.attr( 'action' ) + '?' + form.serialize(),
+				handler = historyMatch( href );
+			if( handler !== false ) {
+				e.preventDefault();
+				History.pushState( { type: 'submit' }, null, href );
+			}
 		}
 	};
 
+	// Capture changes to input fields
 	var historyChange = function( e ) {
 		var input = $( e.target );
 		if( [13,16,17,27,33,34,35,36,37,38,39,40,45,91].indexOf( e.which ) !== -1 ) { // Don't fire for various non-character keys
@@ -201,15 +198,22 @@ require( [ 'helpers/history', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 		}
 		if( input.attr( 'value' ) == '' ) {
 			Content.clear();
-			return false;
+			return true;
 		}
-		var form = input.parent();
-		while( !form.is( 'form' ) && !form.is( 'body' ) ) {
-			form = form.parent();
-		}
+		for( var form = input.parent(); !form.is( 'form' ) && !form.is( 'body' ); form = form.parent() );
 		if( form.is( 'form' ) ) {
 			window.setTimeout( function() { // Let cuts and pastes happen before firing
-				historySubmitForm( form );
+				var href = form.attr( 'action' ) + '?' + form.serialize(),
+					handler = historyMatch( href );
+				if( handler !== false ) {
+					// If the last state type was 'keyup' then replace that state in history
+					if( History.getState().data.type === 'keyup' ) {
+						History.replaceState( { type: 'keyup' }, null, href );
+					}
+					else {
+						History.pushState( { type: 'keyup' }, null, href );
+					}
+				}
 			}, 5 );
 		}
 	};
@@ -222,7 +226,6 @@ require( [ 'helpers/history', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 		// Execute the handler for the requested URL if there is one
 		if( handler !== false ) {
 			urlHandlers[handler]( state );
-			History.lastHandler = handler;
 			if( typeof _gaq !== 'undefined' ) {
 				_gaq.push( ['_trackPageview'] );
 			}

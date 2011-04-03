@@ -13,6 +13,9 @@ define( function() {
 		clear: function() {
 			$content.empty();
 		},
+		isEmpty: function() {
+			return $content.is( ':empty' );
+		},
 		set: function( content ) {
 			this.clear();
 			this.loading.hide();
