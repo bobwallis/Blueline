@@ -223,6 +223,9 @@ require( [ 'helpers/history', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 		if( handler !== false ) {
 			urlHandlers[handler]( state );
 			History.lastHandler = handler;
+			if( typeof _gaq !== 'undefined' ) {
+				_gaq.push( ['_trackPageview'] );
+			}
 		}
 		// Otherwise let the browser load the requested URL as normal
 		else {
