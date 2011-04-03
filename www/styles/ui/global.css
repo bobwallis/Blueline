@@ -4,9 +4,6 @@ input[type="search"] { -webkit-appearance: textfield; }
 /* Fix button layout */
 button { width: auto; overflow: visible; }
 
-/* Layout for block level HTML5 elements */
-header, footer, section, svg, canvas { display: block; }
-
 /* Basic color and font definitions */
 html, body {
 	color: #000;
@@ -23,8 +20,9 @@ h1, h2 {
 .mono {
 	font-family: 'Droid Sans Mono', 'DejaVu Sans Mono', monospace;
 }
-abbr {
-	border-bottom: 1px dotted #E0DED9; cursor: help;
+abbr, dfn {
+	border-bottom: 1px dotted #E0DED9;
+	cursor: help;
 }
 .hide {
 	display: none;

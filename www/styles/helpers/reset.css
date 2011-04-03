@@ -124,3 +124,9 @@ select {
 legend {
 	color:#000;
 }
+
+/* HTML5 block level elements */
+article,aside,details,figcaption,figure,
+footer,header,hgroup,menu,nav,section,svg,canvas {
+	display:block;
+}
