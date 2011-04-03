@@ -16,12 +16,9 @@ $classLoader_Pan = new ClassLoader( 'Pan', LIBRARY_PATH );
 $classLoader_Models = new ClassLoader( 'Models', APPLICATION_PATH );
 $classLoader_Helpers = new ClassLoader( 'Helpers', LIBRARY_PATH );
 
-ob_start( 'ob_gzhandler' );
-
 try {
 	// Load application configuration
 	require( APPLICATION_PATH.'/config.php' );
-
 	if( !Config::get( 'site.development' ) ) {
 		// Check for a cached view
 		$cachedPage = Cache::get( 'view', View::id() );
@@ -30,13 +27,6 @@ try {
 			Response::body( $cachedPage );
 			Response::send();
 			exit();
-		}
-		else {
-			// Check for an action cache
-			$actionCache = null;
-			if( !is_null( $actionCache ) ) {
-				die('action cache');
-			}
 		}
 	}
 	Database::initialise();

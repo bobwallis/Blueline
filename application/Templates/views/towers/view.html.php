@@ -2,6 +2,8 @@
 namespace Blueline;
 use Pan\View, Helpers\Text;
 
+View::cache( true );
+
 View::element( 'header', array(
 	'title' => htmlspecialchars( Text::toList( array_map( function( $t ){ return $t->place().(($t->dedication()!='Unknown')?' ('.$t->dedication().')':''); }, $this->get( 'towers', array() ) ) ) ) . ' | Towers | Blueline',
 	'breadcrumb' => array(

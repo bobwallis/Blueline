@@ -94,6 +94,14 @@ class Request {
 	}
 
 	/**
+	 * Returns true if the HTTP_ACCEPT_ENCODING header contains 'gzip'
+	 * @return string|boolean
+	 */
+	public static function acceptsGzip() {
+		return ( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && strpos( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) !== false );
+	}
+
+	/**
 	 * @access private
 	 */
 	private static $_headers = false;

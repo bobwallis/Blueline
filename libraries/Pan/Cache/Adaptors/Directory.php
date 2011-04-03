@@ -19,7 +19,12 @@ class Directory implements Adaptor {
 		if( !isset( $options['location'] ) ) { throw new fProgrammerException( 'Directory cache requires a location' ); }
 		$location = rtrim( $options['location'], '/' );
 
-		$this->_location = new fDirectory( $location );
+		if( is_dir( $location ) ) {
+			$this->_location = new fDirectory( $location );
+		}
+		else {
+			$this->_location = fDirectory::create( $location );
+		}
 		$this->_serialize = ( isset( $options['serialize'] ) )? $options['serialize'] : true;
 		$this->_canSet = $this->_location->isWritable();
 		$this->_ttlCache = (isset( $options['ttl_cache'] ) && $options['ttl_cache'] instanceof Adaptor)? $options['ttl_cache'] : false;

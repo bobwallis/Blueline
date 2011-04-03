@@ -78,7 +78,7 @@ class View {
 		if( is_null( $ttl ) ) {
 			// If we've not been asked to cache, don't
 			if( self::$_ttl === false ) {
-				Response::header( array( 'Cache-Control' => 'no-cache' ) );
+				Response::header( 'Cache-Control', 'no-cache' );
 			}
 			// Otherwise, do
 			else {
@@ -86,11 +86,11 @@ class View {
 				Cache::set( 'view', self::id(), self::$_response, self::$_ttl );
 				// Set headers so that the user's browser caches too
 				if( is_int( self::$_ttl ) ) {
-					Response::header( array( 'Cache-Control' => 'max-age='.self::$_ttl ) );
+					Response::header( 'Cache-Control', 'max-age='.self::$_ttl );
 				}
 				elseif( is_null( self::$_ttl ) ) {
 					// Cache for 3 days
-					Response::header( array( 'Cache-Control' => 'max-age=259200' ) );
+					Response::header( 'Cache-Control', 'max-age=259200' );
 				}
 			}
 		}
@@ -112,7 +112,7 @@ class View {
 		fBuffer::startCapture();
 		self::set( 'site', Config::get( 'site' ) );
 		self::$_template->inject( $viewPath );
-		self::$_response = fBuffer::stopCapture();
+		self::$_response = gzcompress( fBuffer::stopCapture(), 9 );
 		Response::body( self::$_response );
 		self::cache();
 	}

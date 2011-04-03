@@ -16,17 +16,9 @@ Config::set( 'caches', array(
 		'data_store' => CACHE_PATH.'/views',
 		'ttl_store' => array(
 			'type' => 'directory',
-			'data_store' => CACHE_PATH.'/views/metadata'
+			'data_store' => CACHE_PATH.'/views/metadata',
 		),
 		'serialize' => false
-	),
-	'action' => array(
-		'type' => 'directory',
-		'data_store' => CACHE_PATH.'/actions',
-		'ttl_store' => array(
-			'type' => 'directory',
-			'data_store' => CACHE_PATH.'/actions/metadata'
-		)
 	)
 ) );
 

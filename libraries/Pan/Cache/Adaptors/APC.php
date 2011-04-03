@@ -21,10 +21,10 @@ class APC implements Adaptor {
 		return apc_exists( $this->_prefix.$key );
 	}
 
-	public function get( $key ) {
+	public function get( $key, $returnOnFail = false ) {
 		$success = false;
-		$value = apc_fetch( $this->_prefix.$key, &$success );
-		return ( $success )? $value : false;
+		$value = apc_fetch( $this->_prefix.$key, $success );
+		return ( $success )? $value : $returnOnFail;
 	}
 
 	public function getTTL( $key ) {

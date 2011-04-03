@@ -2,6 +2,8 @@
 namespace Blueline;
 use Pan\View;
 
+View::cache( true );
+
 View::element( 'header', array(
 	'title' => 'Towers | Blueline',
 	'breadcrumb' => array(

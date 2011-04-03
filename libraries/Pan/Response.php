@@ -135,7 +135,7 @@ class Response {
 			return self::$_headers;
 		}
 	}
-	public static function header( $set = null ) { return self::headers( $set ); }
+	public static function header( $title, $body ) { return self::headers( array( $title => $body ) ); }
 
 	/**
 	 * @access private
@@ -160,6 +160,20 @@ class Response {
 	 * Pushes both the response headers and body to the user
 	 */
 	public static function send() {
+		// Set up basic headers
+		if( !empty( self::$_body ) ) {
+			self::header( 'Content-Type' ,Response::contentType() );
+			self::header( 'Vary', 'Accept-Encoding' );
+			// If the client doesn't support GZip then we need to decompress the response
+			if( Request::acceptsGzip() ) {
+				self::header( 'Content-Encoding', 'gzip' );
+				self::header( 'Content-Length', 8+strlen( self::$_body ) );
+			}
+			else {
+				self::body( gzuncompress( self::$_body ) );
+				self::header( 'Content-Length', strlen( self::$_body) );
+			}
+		}
 		self::sendHeaders();
 		self::sendBody();
 	}
@@ -169,10 +183,6 @@ class Response {
 	 */
 	public static function sendHeaders() {
 		header( self::$_httpHeaders[self::code()] );
-		if( !empty( self::$_body ) ) {
-			header( 'Content-Type: '.Response::contentType() );
-			header( 'Vary: Accept-Encoding' );
-		}
 		foreach( self::headers() as $key=>$header ) {
 			header( $key.': '.$header );
 		}
@@ -184,6 +194,9 @@ class Response {
 	public static function sendBody() {
 		$body = self::body();
 		if( !empty( $body ) ) {
+			if( Request::acceptsGzip() ) {
+				print( "\x1f\x8b\x08\x00\x00\x00\x00\x00" );
+			}
 			echo $body;
 		}
 	}
