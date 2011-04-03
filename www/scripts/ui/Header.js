@@ -56,7 +56,7 @@ define( function() {
 					}
 					else if( typeof History === 'object' && History.enabled ) {
 						var queryString = History.getState().url.replace( /^.*?(\?|$)/, '' );
-						$bigSearchInput.attr( 'value', (queryString.indexOf( 'q=' ) !== -1)? queryString.replace( /q=(.*?)(&|$)/, '$1' ) : '' );
+						$bigSearchInput.attr( 'value', (queryString.indexOf( 'q=' ) !== -1)? queryString.replace( /^.*q=(.*?)(&.*$|$)/, '$1' ) : '' );
 					}
 				}
 				$bigSearchContainer.show();
