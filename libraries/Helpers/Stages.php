@@ -35,7 +35,7 @@ class Stages {
 		21 =>	'Twenty-one',
 		22 =>	'Twenty-two'
 	);
-	
+
 	/**
 	 * Converts an integer (or a valid string representation) into a string representation
 	 * @param integer|string $i
@@ -51,7 +51,7 @@ class Stages {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Converts a string representation (or an integer) into an integer
 	 * @param string|integer $s
@@ -69,5 +69,5 @@ class Stages {
 		}
 		return false;
 	}
-	
+
 };

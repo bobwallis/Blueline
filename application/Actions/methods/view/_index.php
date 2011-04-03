@@ -1,15 +1,26 @@
 <?php
 namespace Blueline;
-use Pan\Exception, Pan\Response, Pan\View, Models\DataAccess\Methods;
+use Pan\Exception, Pan\Response, Pan\View, Models\DataAccess\Methods, Helpers\Stages;
 
 // Redirect to /methods on empty request
 if( !isset( $arguments[0] ) || empty( $arguments[0] ) ) {
 	Response::redirect( '/methods' );
 	return;
 }
-// 404 if there are more than two arguments, or if the second argument is invalid
-if( isset( $arguments[2] ) || ( isset( $arguments[1] ) && !in_array( $arguments[1], array( 'grid' ) ) ) ) {
-	throw new Exception( 'Bad arguments', 404 );
+// 404 if there is more than one argument, after accounting for special cases where method names contain '/'
+if( isset( $arguments[1] ) ) {
+	$stages = array_map( function( $i ) { return Stages::toString( $i ); }, range( 3, 22) );
+	for( $i = 0; $i < count( $arguments ); ++$i ) {
+		foreach( $stages as $s ) {
+			if( strpos( $arguments[$i], $s ) !== false ) { break 2; }
+		}
+	}
+	if( isset( $arguments[$i+1] ) ) {
+		throw new Exception( 'Bad arguments', 404 );
+	}
+	else {
+		$arguments[0] = implode( '/', $arguments );
+	}
 }
 
 // Try and find methods matching the argument(s)
@@ -40,6 +51,3 @@ if( strcmp( $arguments[0], $tidyArgument ) != 0 ) {
 
 // Export data to the view for successful request
 View::set( 'methods', $methods );
-if( isset( $arguments[1] ) ) {
-	View::view( '/methods/view.'.$arguments[1] );
-}
