@@ -1,6 +1,0 @@
-/* Hide UI elements that don't function without Javascript */
-
-/* Show elements that would normally only be visible using Javascript */
-.methodDetails, .methodLine, .methodGrid,
-.associationAffiliations,
-.towerFirstPeals { display: block; }

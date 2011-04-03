@@ -1,0 +1,116 @@
+/* Section header */
+section header {
+	clear: both;
+	border-bottom: 1px solid #E0DED9;
+	border-top: 1px solid #E0DED9;
+	background-color: #FAFAFA;
+	padding: 10px;
+}
+section#content section:first-child header { border-top: 0; }
+
+@media screen and (max-width: 480px) {
+	section header {
+		padding: 5px;
+	}
+}
+
+/* Page content */
+#content .content {
+	padding: 15px;
+}
+	#content h1 {
+		font-size: 22px;
+		font-weight: bold;
+		line-height: 22px;
+	}
+	#content h2 {
+		font-size: 18px;
+		font-weight: bold;
+		line-height: 20px;
+		margin-left: 5px;
+	}
+	#content h3 {
+		font-size: 12px;
+		font-weight: bold;
+		line-height: 15px;
+		margin-left: 10px;
+	}
+	#content h4 {
+		font-size: 11px;
+		font-weight: bold;
+		line-height: 15px;
+		margin-left: 15px;
+	}
+	#content p {
+		margin-bottom: 10px;
+	}
+	#content blockquote {
+		padding-left: 10px;
+		margin-bottom: 10px;
+	}
+	#content ol {
+		margin: 0 10px 5px 0;
+	}
+	#content ul ol {
+		margin-left: 10px;
+	}
+
+.wallOfText {
+	max-width: 600px;
+}
+
+@media screen and (max-width: 480px) {
+	#content .content {
+		padding: 8px;
+	}
+	#content h1 {
+		font-size: 18px;
+		font-weight: bold;
+		line-height: 20px;
+	}
+	#content h2 {
+		font-size: 15px;
+		font-weight: bold;
+		line-height: 16px;
+		margin: 0 5px 2px 0;
+	}
+	#content h3 {
+		font-size: 12px;
+		font-weight: bold;
+		line-height: 15px;
+		margin: 0 5px 2px 5px;
+	}
+	#content h4 {
+		font-size: 11px;
+		font-weight: bold;
+		line-height: 15px;
+		margin: 0 5px 10px 25px;
+	}
+	#content p {
+		margin-bottom: 5px;
+	}
+	#content blockquote {
+		padding-left: 5px;
+		margin-bottom: 5px;
+	}
+	#content ol {
+		margin: 0 12px 5px 12px;
+	}
+}
+
+
+/* Search results */
+.searchResults {
+	padding: 0;
+	color: #555;
+	list-style: none;
+}
+	.searchResults li {
+		padding: 4px 0;
+		margin: 0;
+		padding: 2px 0;
+		margin: 0;
+	}
+		.searchResults li:first-child {
+			padding-top: 0;
+		}

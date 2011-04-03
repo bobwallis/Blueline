@@ -27,11 +27,8 @@ if( !\Pan\Response::snippet() ) :
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any" />
 		<link rel="alternate shortcut icon" type="image/x-ixon" href="/favicon.ico" sizes="16x16,24x24,48x48" />
 		<!--[if lt IE 9]><script src="/scripts/helpers/ieCompat.js"></script><![endif]-->
-		<link rel="stylesheet" media="all" href="/styles/core.css" />
-		<link rel="stylesheet" media="screen" href="/styles/normal.css" />
-		<link rel="stylesheet" media="handheld, screen and (max-width:480px)" href="/styles/small-device.css" />
+		<link rel="stylesheet" media="all" href="/styles/main.css" />
 		<link rel="stylesheet" media="print" href="/styles/print.css" />
-		<noscript><link rel="stylesheet" media="all" href="/styles/noscript.css" /></noscript>
 		<script src="/scripts/helpers/jquery.js"></script>
 		<script data-main="/scripts/main" src="/scripts/require.js"></script>
 <?php if( !empty( $site['ga_trackingCode'] ) ) : ?>

@@ -20,7 +20,7 @@ $i = 0;
 <section class="tower">
 	<header>
 		<h1><?=$tower->place().(($tower->dedication()!='Unknown')?' <span class="normalweight">('.$tower->dedication().')</span>':'')?></h1>
-		<h2 class="sub"><?= Text::toList( array( $tower->county(), $tower->country() ), ', ', ', ' )?></h2>
+		<h2><?= Text::toList( array( $tower->county(), $tower->country() ), ', ', ', ' )?></h2>
 		<span id="tower_<?=$i?>_tabBar"></span>
 		<script>
 		//<![CDATA[
@@ -130,7 +130,7 @@ $i = 0;
 			</table>
 <?php if( count( $tower->nearbyTowers() ) > 0 ) : ?>
 			<h3>Nearby Towers:</h3>
-			<ol class="noliststyle">
+			<ol>
 <?php foreach( $tower->nearbyTowers() as $nTower ) : ?>
 				<li><?='<a href="'.$nTower->href().'">' . $nTower->place().' <small>('.$nTower->dedication().')</small></a> <small>'.round( $nTower->distance(), 1 ).' miles</small>'?></li>
 <?php endforeach; ?>
@@ -140,7 +140,7 @@ $i = 0;
 		<section id="content_peals<?=$i?>" class="towerFirstPeals">
 <?php if( count( $tower->firstPeals() ) > 0 ) : ?>
 			<noscript><h2>First Peals</h2></noscript>
-			<ol class="noliststyle">
+			<ol>
 <?php foreach( $tower->firstPeals()  as $method ) : ?>
 				<li><?="<a href=\"{$method->href()}\">{$method->title()}</a> <small>({$method->firstTowerbellPeal_date()})</small>"?></li>
 <?php endforeach; ?>

@@ -1,0 +1,24 @@
+table.horizontalDetails {
+	line-height: 15px;
+	margin-bottom: 10px;
+}
+	table.horizontalDetails tr.bigDetails {
+		font-size: 14px;
+	}
+	table.horizontalDetails td {
+		vertical-align: top;
+		padding: 2px 0 2px 4px;
+		text-align: left;
+	}
+	table.horizontalDetails th {
+		vertical-align: top;
+		padding: 2px 4px 2px 0;
+		text-align: right;
+		font-weight: normal;
+	}
+
+@media screen and (max-width: 480px) {
+	table.horizontalDetails tr.bigDetails {
+		font-size: 12px;
+	}
+}
