@@ -5,7 +5,7 @@ if( !\Pan\Response::snippet() ) :
 	$site = $this->get( 'site' );
 ?>
 <!doctype html>
-<?php echo ( (!$site['development'] && $this->get( 'manifest', false ))? '<html lang="en-gb" manifest="/site.manifest">' : '<html lang="en-gb">' )."\n" ?>
+<?php echo ( (!$site['development'] && $this->get( 'manifest', false )&& false)? '<html lang="en-gb" manifest="/site.manifest">' : '<html lang="en-gb">' )."\n" ?>
 	<head>
 		<meta charset="utf-8" />
 		<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
@@ -27,8 +27,8 @@ if( !\Pan\Response::snippet() ) :
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any" />
 		<link rel="alternate shortcut icon" type="image/x-ixon" href="/favicon.ico" sizes="16x16,24x24,48x48" />
 		<!--[if lt IE 9]><script src="/scripts/ieCompat.js"></script><![endif]-->
-		<link rel="stylesheet" media="all" href="/styles<?=$site['development']?'.built':''?>/main.css" />
-		<link rel="stylesheet" media="print" href="/styles<?=$site['development']?'.built':''?>/print.css" />
+		<link rel="stylesheet" media="all" href="/styles<?=$site['development']?'':'.built'?>/main.css" />
+		<link rel="stylesheet" media="print" href="/styles<?=$site['development']?'':'.built'?>/print.css" />
 <?php if( $site['development'] ) : ?>
 		<script src="/scripts/helpers/jquery.js"></script>
 		<script data-main="/scripts/main" src="/scripts/require.js"></script>

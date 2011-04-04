@@ -23,7 +23,7 @@ try {
 		// Check for a cached view
 		$cachedPage = Cache::get( 'view', View::id() );
 		if( !is_null( $cachedPage ) ) {
-			Response::header( array( 'Cache-Control' => 'max-age='.Cache::getTTL( 'view', Response::id() ) ) );
+			Response::header( 'Cache-Control', 'max-age='.Cache::getTTL( 'view', Response::id() ) );
 			Response::body( $cachedPage );
 			Response::send();
 			exit();
