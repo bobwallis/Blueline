@@ -1,6 +1,6 @@
-require( ['helpers/can'], function( can ) {
+require( ['require', 'helpers/can'], function( require, can ) {
 	// Load the history API if it is supported
 	if( can.history() ) {
-		require( ['/scripts/history.js'] );
+		require( ['history'] );
 	}
 } );
