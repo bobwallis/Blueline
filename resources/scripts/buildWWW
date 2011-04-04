@@ -8,9 +8,9 @@ cd "$dWhich"
 ./helpers/requirejs/build/build.sh app.build.js
 
 # YUI Compress, and GZip the built CSS files
-yuicompressor --type css ../../www-build/styles/main.css > ../../www/styles/main.built.css
+yuicompressor --type css --line-break 120 ../../www-build/styles/main.css > ../../www/styles/main.built.css
 gzip -9c ../../www/styles/main.built.css > ../../www/styles/main.built.css.gz
-yuicompressor --type css ../../www-build/styles/print.css > ../../www/styles/print.built.css
+yuicompressor --type css --line-break 120 ../../www-build/styles/print.css > ../../www/styles/print.built.css
 gzip -9c ../../www/styles/print.built.css > ../../www/styles/print.built.css.gz
 
 # Remove www-build directory
