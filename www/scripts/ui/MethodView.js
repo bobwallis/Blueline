@@ -326,7 +326,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 					notationText: callNotation,
 					highlight: { from: rowsToDisplayBefore, to: (rowsToDisplayBefore-1)+justCallNotationExploded.length },
 					huntBellStartPositions: this.huntBells.map( function( e ) { return startRow.indexOf( e ); }, this ),
-					affectedBellStartPositions: this.rounds.filter( function( e ) { return endCallRow.indexOf( startRow[e] ) != endPlainRow.indexOf( startRow[e] ) }, this ),
+					affectedBellStartPositions: this.rounds.filter( function( e ) { return endCallRow.indexOf( startRow[e] ) != endPlainRow.indexOf( startRow[e] ); }, this ),
 					ruleOffs: { every: this.ruleOffs.every, from: this.ruleOffs.from-preSlice }
 				} );
 			}
@@ -351,7 +351,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 		grid_lineParams = _.mergeArrays(
 			repeatArrayToLength( ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'], this.stage )
 				.map( function( e, i ) {
-					return ( this.huntBells.indexOf( i ) != -1 )? {stroke: '#D11', 'stroke-width': 1} : { stroke: e };
+					return ( this.huntBells.indexOf( i ) != -1 )? { stroke: '#D11', 'stroke-width': 1 } : { stroke: e };
 				}, this )
 				.map( function( e ) {
 					return _.mergeObjects( {
@@ -518,7 +518,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 		if( this.options.text ) {
 			var cssString = '',
 				colorStyleSheet = document.createElement( 'style' ),
-				sizeStyleSheet = document.createElement( 'style' );
+				sizeStyleSheet = document.createElement( 'style' ),
 				textContainerId = 'methodText_'+this.parent.id,
 				i = 0, iLim = this.courseColors.length;
 			this.courseColors.forEach( function( color, i ) {
@@ -720,7 +720,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 					var textSource = this.parent.rounds.map( function( e ) {
 						var bellText = bellToChar( e );
 						return ( this.callColors[call.id][e].text !== this.options.colors.text.base )? '<span class="'+call.id+'_b'+bellToChar( e )+'">'+bellText+'</span>' : bellText;
-					}, this )
+					}, this );
 					methodTextInnerHTML += '<td class="call" id="methodText_call_'+call.id+'"><p class="callTitle">'+call.title+':</p>'+textSegment( call.startRow, call.notation, textSource )+'</td>';
 				}, this );
 			}
@@ -1005,7 +1005,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 			paperCell.appendChild( paper.canvas );
 		}
 		return paperCell;
-	}
+	};
 
 	MethodGrid.prototype = {
 

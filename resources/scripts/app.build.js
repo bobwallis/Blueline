@@ -5,15 +5,24 @@
 	optimize: "uglify",
 	optimizeCss: "standard",
 	modules: [
-		{ name: "helpers/Paper" },
-		{ name: "helpers/history" },
-		{ name: "history" },
+		{
+			name: "history",
+			exclude: ["helpers/can"]
+
+		},
 		{
 			name: "main",
 			includeRequire: true,
 			include: ["ui/TabBar"],
 			exclude: ["history"]
 		},
-		{ name: "ui/TowerMap" }
+		{
+			name: "ui/TowerMap",
+			exclude: ["helpers/can"]
+		},
+		{
+			name: "ui/MethodView",
+			exclude: ["helpers/can"]
+		}
 	]
 } )
