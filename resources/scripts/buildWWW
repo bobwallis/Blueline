@@ -2,16 +2,20 @@
 
 dWhich=`which "$0"`
 d=`dirname "$dWhich"`
-cd "$dWhich"
 
 # Execute RequireJS builder
-./helpers/requirejs/build/build.sh app.build.js
+"$d/helpers/requirejs/build/build.sh" app.build.js
 
-# YUI Compress, and GZip the built CSS files
-yuicompressor --type css --line-break 120 ../../www-build/styles/main.css > ../../www/styles/main.built.css
-gzip -9c ../../www/styles/main.built.css > ../../www/styles/main.built.css.gz
-yuicompressor --type css --line-break 120 ../../www-build/styles/print.css > ../../www/styles/print.built.css
-gzip -9c ../../www/styles/print.built.css > ../../www/styles/print.built.css.gz
+# GZip compiled CSS and copy to styles.built
+find "$d/../../www-build/" -type f -name "*.css" -print | parallel -j +0 "gzip -9c {} > {}.gz"
+rm -rf "$d/../../www/styles.built"
+mv "$d/../../www-build/styles" "$d/../../www/styles.built"
+
+# GZip compressed JS and copy to scripts.built
+find "$d/../../www-build/" -type f -name "*.js" -print | parallel -j +0 "gzip -9c {} > {}.gz"
+rm -rf "$d/../../www/scripts.built"
+mv "$d/../../www-build/scripts" "$d/../../www/scripts.built"
+
 
 # Remove www-build directory
-rm -rf ../../www-build
+rm -rf "$d/../../www-build"

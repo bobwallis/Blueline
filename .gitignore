@@ -7,4 +7,5 @@ error.log
 /docs/phpdoc
 *.sql.gz
 *.tmp
-*.built.*
+/www/scripts.built
+/www/styles.built

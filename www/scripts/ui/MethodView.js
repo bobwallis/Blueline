@@ -14,7 +14,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 		}
 		return array2;
 	};
-	
+
 	// Checks if two row arrays are equal
 	var rowsEqual = function( row1, row2 ) {
 		var i = row1.length;
@@ -87,7 +87,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 		} while( j-- );
 		return permuted;
 	};
-	
+
 	// Returns the row after applying the given permutations to start
 	var permutes = function( start, permutations ) {
 		var row = start,
@@ -97,7 +97,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 		}
 		return row;
 	};
-	
+
 	// Returns a row containing rounds of a given stage
 	var roundsRow = function( stage ) {
 		var row = new Array( stage ), i = stage;
@@ -115,28 +115,28 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 		}
 		return stationary;
 	};
-	
+
 	// Explodes notation into an array
 	var explodeNotation = function( notation ) {
 		return ( typeof notation === 'string' )? notation.replace( /x/gi, '.x.' ).split( '.' ).filter( function( e ) { return e !== ''; } ) : notation;
 	};
-	
+
 	// Implodes a notation array to a string
 	var implodeNotation = function( notationArray ) {
 		return ( typeof notationArray.join === 'function' )? notationArray.join( '.' ).replace( /\.?x\.?/g, 'x' ) : notationArray;
 	};
-	
+
 	// Parse place notation into an array of cycle permutations
 	var parseNotation = function( notation, stage ) {
 		var parsed = [],
 			exploded = explodeNotation( notation ),
 			i,
 			xPermutation = new Array( stage );
-		
+
 		// Construct the X permutation for stage
 		for( i = 0; i < stage; i+=2 ) { xPermutation[i] = i+1; xPermutation[i+1] = i; }
 		if( i-1 == stage ) { xPermutation[i-1] = i-1; }
-		
+
 		for( i = 0; i < exploded.length; i++ ) {
 			// For an x, push our pregenerated x permutation
 			if( exploded[i] == 'x' ) {
@@ -185,8 +185,8 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 		}
 		return cycles;
 	};
-	
-	
+
+
 	var pathString = function( position, notation, xPlus, yPlus, repeats, flicks ) {
 		if( !xPlus ) { xPlus = 1; }
 		if( !yPlus ) { yPlus = 1; }
@@ -206,7 +206,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 		}
 		return path;
 	};
-	
+
 	var textSegment = function( start, notation, textSource, repeats ) {
 		if( !textSource ) { textSource = start; }
 		if( !repeats ) { repeats = 1; }
@@ -272,14 +272,14 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 			this.leadHeads.push( this.rounds );
 		this.numberOfLeads = this.leadHeads.length - 1;
 		this.huntBells = this.workGroups.filter( function( e ) { return ( e.length == 1 ); } ).map( function( e ) { return e[0]; } );
-		
+
 		this.ruleOffs = { every: this.notation.length, from: 0 };
 		if( typeof options.ruleOffs === 'string' ) {
 			var ruleOffsExplode = options.ruleOffs.split( ':' ).map( function( e ) { return parseInt( e, 10 ); } );
 			this.ruleOffs.every = ( ruleOffsExplode[0] == NaN )? this.notation.length : ruleOffsExplode[0];
 			this.ruleOffs.from = ( ruleOffsExplode[1] == NaN )? 0 : ruleOffsExplode[1];
 		}
-		
+
 		// Calculate new notation, and other details for calls
 		this.calls = [];
 		if( typeof( options.calls ) != 'undefined' && options.calls.length !== 0 && !_.isEmpty( options.calls ) ) {
@@ -331,14 +331,14 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 				} );
 			}
 		}
-		
+
 		// Create objects to pass to child classes
 		this.container = {};
 		if( typeof options.options_line.container !== 'undefined' ) { this.container.line = options.options_line.container; }
 		if( typeof options.options_grid.container !== 'undefined' ) { this.container.grid = options.options_grid.container; }
-		
+
 		this.options = { line: {}, grid: {} };
-		
+
 		// Grid options
 		// Decide on some colours to use
 		var grid_ruleOffParams = _.mergeObjects( {
@@ -348,7 +348,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 			'stroke': '#999',
 			fill: 'none'
 		}, options.options_grid.ruleOffDisplay ),
-		grid_lineParams = _.mergeArrays( 
+		grid_lineParams = _.mergeArrays(
 			repeatArrayToLength( ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'], this.stage )
 				.map( function( e, i ) {
 					return ( this.huntBells.indexOf( i ) != -1 )? {stroke: '#D11', 'stroke-width': 1} : { stroke: e };
@@ -362,7 +362,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 					}, e );
 				}, this ),
 		options.options_grid.linesDisplay );
-		
+
 		this.options.grid.plainLead = {
 			id: this.id+'_grid_plainLead',
 			title: 'Plain Lead',
@@ -405,12 +405,12 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 				}
 			};
 		}, this );
-		
+
 		// Create child classes
 		this.draw();
 	};
 	MethodView.prototype = {
-		
+
 		draw: function() {
 			this.Grids = [];
 			if( typeof this.container.grid !== 'undefined' ) {
@@ -424,40 +424,40 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 				this.Line.draw();
 			}
 		},
-		
+
 		resize: function() {
 			this.Line.resize();
 		},
-		
+
 		destroy: function() {
 			this.Line.destroy();
 			this.Grids.forEach( function( Grid ) { Grid.destroy(); } );
 		}
 	};
 	window['MethodView'] = MethodView;
-	
+
 	var MethodLine = function( parent, options ) {
 		var e, workColorSource;
-		
+
 		this.parent = parent;
 		this.options = options;
 		this.options_orig = {}; for( e in options ) { this.options_orig[e] = options[e]; } // Copying an object is such a mission in Javascript. This method doesn't work properly in general, but does enough in this case
 		this.cache = {};
-	
+
 		// Find container
 		if( typeof options.container === 'undefined' ) { return false; }
 		this.container = ( typeof options.container === 'string' )? document.getElementById( options.container ) : options.container;
 		if( typeof this.container.nodeName === 'undefined' ) { return false; }
-		
+
 		// Merge options with defaults
-		
+
 		if( typeof options.text === 'undefined' ) {
 			// Show text by default
 			this.options.text = true;
 		}
 		// Create text and SVG containers
 		this.initialiseContainers();
-		
+
 		if( typeof options.lines === 'undefined' ) {
 			// Show lines by default
 			this.options.lines = true;
@@ -478,7 +478,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 				ruleOffs: '#999'
 			};
 		}
-		
+
 		// Assign colors to bells
 		this.courseColors = this.parent.rounds.map( function( e ) {
 			return { line: this.options.colors.lines.base, text: this.options.colors.text.base };
@@ -495,7 +495,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 				this.courseColors[group[0]] = { line: workColorSource.lines.shift(), text: workColorSource.text.shift() };
 			}
 		}, this );
-		
+
 		this.callColors = {};
 		this.parent.calls.forEach( function( call ) {
 			var colors = this.parent.rounds.map( function( e ) {
@@ -513,7 +513,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 			}, this );
 			this.callColors[call.id] = colors;
 		}, this );
-		
+
 		// Add the CSS for text styling to the page
 		if( this.options.text ) {
 			var cssString = '',
@@ -552,7 +552,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 			this.sizeStyleSheet = sizeStyleSheet;
 			this.colorStyleSheet = colorStyleSheet;
 		}
-	
+
 		// Calculate font size, lead distribution across columns
 		this.calculateSizing();
 	};
@@ -562,7 +562,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 			$head.removeChild( this.sizeStyleSheet );
 			$head.removeChild( this.colorStyleSheet );
 		},
-		
+
 		initialiseContainers: function() {
 			// Empty the container by creating a new one with the same attributes, and replacing the old one with it. This is often faster than emptying the old one.
 			var newLineContainer = document.createElement( this.container.nodeName );
@@ -572,7 +572,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 			this.container.parentNode.replaceChild( newLineContainer, this.container );
 			this.container = newLineContainer;
 		},
-	
+
 		calculateSizing: function() {
 			// Calculate column padding
 			var columnPadding = 20,
@@ -584,17 +584,17 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 			}
 			this.options.columnPadding = columnPadding;
 			this.options.placeStartPadding = placeStartPadding;
-			
+
 			// How many columns to include for calls
 			var callColumns =  this.options.calls? this.parent.calls.length : 0;
-			
+
 			// Add an element to the page whose width we can use to test font sizes
 			var testText = document.createElement( 'span' );
 			testText.className = 'methodText';
 			testText.style.fontSize = '14px';
 			testText.innerHTML = this.parent.rounds.map( bellToChar ).join('');
 			document.body.appendChild( testText );
-			
+
 			// Work out column/lead distribution and font size
 			var pageWidth = window.innerWidth || document.documentElement.clientWidth,
 				testWidth = testText.offsetWidth,
@@ -648,14 +648,14 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 				bell: { x: testWidth/this.parent.stage, y: testFontSize+1 }
 			};
 			testText.parentNode.removeChild( testText );
-		
+
 			// Add size information to the page
 			var textContainerId = 'methodText_'+this.parent.id;
 			this.sizeStyleSheet.innerHTML = '#' + textContainerId + ' td{padding:0 '+(this.options.columnPadding+this.options.placeStartPadding)+'px 0 '+this.options.columnPadding+'px !important;}' +
 				'#' + textContainerId + ' td.first{padding-left:0 !important;}' +
 				'#' + textContainerId + '{font-size:' + this.options.fontSize + 'px !important;line-height:' + (this.options.fontSize+1) + 'px !important;}';
 		},
-	
+
 		draw: function() {
 			// Create the paper for drawing on
 			var paperHeight = this.dimensions.row.y*(this.parent.notation.length+1)*this.options.leadsPerColumn;
@@ -680,7 +680,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 				// Add the paper to the page
 				this.container.appendChild( this.paper.canvas );
 			}
-			
+
 			// Draw method text?
 			if( this.options.text !== false ) {
 				if( this.paper !== false ) {
@@ -689,7 +689,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 				this.container.appendChild( this.textTable() );
 			}
 		},
-		
+
 		resize: function() {
 			this.initialiseContainers();
 			this.calculateSizing();
@@ -713,7 +713,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 				methodTextInnerHTML += '<td'+((i===0)?' class="first"':'')+'>' + textSegment( this.parent.leadHeads[i*leadsPerColumn], this.parent.notation, textSource, repeats?repeats:leadsPerColumn ) + '</td>';
 				++i;
 			}
-			
+
 			// Write out any calls
 			if( this.options.calls ) {
 				this.parent.calls.forEach( function( call ) {
@@ -724,11 +724,11 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 					methodTextInnerHTML += '<td class="call" id="methodText_call_'+call.id+'"><p class="callTitle">'+call.title+':</p>'+textSegment( call.startRow, call.notation, textSource )+'</td>';
 				}, this );
 			}
-			
+
 			methodText.innerHTML = '<tr>' + methodTextInnerHTML + '</tr>';
 			return methodText;
 		},
-		
+
 		drawLines: function() {
 			// Draw lines for the plain course
 			var paths = {},
@@ -781,7 +781,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 					} );
 				}
 			}
-			
+
 			// Draw lines for each of the call
 			this.parent.calls.forEach( function( call, i ) {
 				// Work out positioning
@@ -800,7 +800,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 				}, this );
 			}, this );
 		},
-	
+
 		drawRuleOffs: function() {
 			if( this.options.colors.ruleOffs === 'transparent' ) { return; }
 			// i will iterate over columns
@@ -821,7 +821,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 			}
 			this.paper.add( 'path', { 'stroke-width': 1, 'stroke-linecap': 'round', 'stroke-dasharray': '4,2', 'stroke': this.options.colors.ruleOffs, 'd': path } );
 		},
-	
+
 		drawPlaceStarts: function() {
 			var toDraw = this.parent.rounds.filter( function( e ) {
 				return ( this.courseColors[e].line != this.options.colors.lines.base && this.courseColors[e].line != this.options.colors.lines.hunt );
@@ -836,7 +836,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 					hPadding = 0;
 				while( i-- ) {
 					for( j = 0; j < jLim; j++ ) {
-						this.paper.add( 'circle', { 
+						this.paper.add( 'circle', {
 							cx: (Math.floor(i/this.options.leadsPerColumn)*hMultiplier)+((this.parent.leadHeads[i].indexOf(toDraw[j])+0.5)*this.dimensions.bell.x)+hPadding,
 							cy: ((i%this.options.leadsPerColumn)*vMultiplier)+vPadding,
 							r: 2,
@@ -891,8 +891,8 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 				return toDraw2;
 		}
 	};
-	
-	
+
+
 	/**
 	 * Draws out a method grid, possibly with place notation
 	 * options:
@@ -909,31 +909,31 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 	 * options.display.ruleOffs: SVG path parameters for rule offs
 	 * options.display.lines:    An array mapping a line's start position to a set of options to pass to the SVG path
 	 */
-	
+
 	var MethodGrid = function( options ) {
 		// Find the container
-		this.container = ( typeof options.container === 'string' )? document.getElementById( options.container ) : options.container;	
+		this.container = ( typeof options.container === 'string' )? document.getElementById( options.container ) : options.container;
 		if( typeof this.container.nodeName === 'undefined' ) { return false; }
-		
+
 		this.id = options.id;
-		
+
 		// Parse the place notation
 		this.stage = options.stage;
 		this.notation = (typeof options.notation === 'object')? options.notation : parseNotation( options.notationText, options.stage );
 		this.notationText = options.notationText;
 		this.notationExploded = (typeof options.notationExploded === 'object')? options.notationExploded : explodeNotation( options.notationText );
-		
+
 		// Rule offs
 		this.ruleOffs = (typeof options.ruleOffs === 'object')? options.ruleOffs : false;
-		
+
 		// Display options
 		this.title = (typeof options.title === 'string')? options.title : false;
 		this.display = _.mergeObjects( { notation: false }, options.display );
-		
+
 		this.draw();
 	};
 	// Private functions for MethodGrid
-	
+
 	var MethodGrid_table = function( id, title ) {
 		var grid = document.createElement( 'table' ),
 			titleRow = document.createElement( 'tr' ),
@@ -948,7 +948,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 		}
 		return grid;
 	};
-	
+
 	var MethodGrid_notationCell = function( notationExploded, highlight ) {
 		if( typeof highlight !== 'undefined' ) {
 			if( typeof highlight === 'number' ) {
@@ -965,7 +965,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 		cell.innerHTML = notationExploded.join( '<br />' );
 		return cell;
 	};
-	
+
 	var MethodGrid_grid = function( options ) {
 		var paperCell = document.createElement( 'td' ),
 			paper = new Paper( {
@@ -975,7 +975,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 			} ),
 			i, iLim,
 			path;
-			
+
 		if( paper === false ) {
 			// If we can't draw using SVG, then request an image from the server instead
 			// to implement
@@ -986,7 +986,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 				i = options.ruleOffs.from;
 				iLim = options.notation.length;
 				path = '';
-				
+
 				while( i <= iLim ) {
 					if( i > 0 ) {
 						path += 'M0,'+(i*options.display.dimensions.row.y)+'l'+options.display.dimensions.row.x+',0';
@@ -1006,28 +1006,28 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 		}
 		return paperCell;
 	}
-	
+
 	MethodGrid.prototype = {
-		
+
 		draw: function() {
 			var grid = MethodGrid_table( this.id, this.title ),
 				gridRow = document.createElement( 'tr' );
 			grid.appendChild( gridRow );
-			
+
 			if( this.display.notation ) {
 				gridRow.appendChild( MethodGrid_notationCell( this.notationExploded, this.display.highlight ) );
 			}
 			gridRow.appendChild( MethodGrid_grid( this ) );
-			
+
 			this.grid = grid;
 			this.container.appendChild( this.grid );
 		},
-		
+
 		redraw: function() {
 			this.destroy();
 			this.draw();
 		},
-		
+
 		destroy: function() {
 			if( typeof this.grid !== 'undefined' ) {
 				this.container.removeChild( this.grid );
@@ -1035,7 +1035,7 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 			}
 		}
 	};
-	
+
 	// Resize
 	var lastRedrawTime = (new Date()).getTime(),
 	methodsResize = function() {
@@ -1043,12 +1043,12 @@ define( ['../helpers/_', '../helpers/Paper'], function( _, Paper ) {
 		var nowTime = (new Date()).getTime();
 		if( ( nowTime - lastRedrawTime ) < 500 ) { return; }
 		lastRedrawTime = nowTime;
-		
+
 		window.methods.forEach( function( method ) {
 			method.resize();
 		} );
 	};
 	_.addEventListener( window, 'resize', methodsResize );
-	
+
 	return MethodView;
 } );
