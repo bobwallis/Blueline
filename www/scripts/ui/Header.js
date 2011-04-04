@@ -1,3 +1,4 @@
+/*global require: false, define: false, google: false */
 define( function() {
 	var $header, $breadcrumbContainer, $topSearchContainer, $topSearch, $topSearchInput, $bigSearchContainer, $bigSearch, $bigSearchInput;
 	$( function() {
@@ -21,7 +22,7 @@ define( function() {
 		},
 		breadcrumb: function( set ) {
 			if( set === false ) {
-				$breadcrumbContainer.empty()
+				$breadcrumbContainer.empty();
 			}
 			else {
 				$breadcrumbContainer.html( set.map( function( b ) {

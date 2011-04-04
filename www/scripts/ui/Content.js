@@ -1,3 +1,4 @@
+/*global require: false, define: false, google: false */
 define( function() {
 	var $loading = $( '<div id="loading"></div>' ),
 		loadingSetter = null,

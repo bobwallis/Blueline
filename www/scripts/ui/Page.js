@@ -1,3 +1,4 @@
+/*global require: false, define: false, google: false */
 define( ['./Header', './Content', './TowerMap'], function( Header, Content, TowerMap ) {
 	var baseURL = location.href.replace( /^(.*)\/.*$/, '$1' ),
 		AJAXContentRequest = null;

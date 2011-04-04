@@ -1,3 +1,4 @@
+/*global require: false, define: false, google: false */
 define( function() {
 	if( typeof window['TabBars'] === 'undefined' ) {
 		window['TabBars'] = [];
@@ -11,7 +12,7 @@ define( function() {
 		var i = 0,
 			target = $( e.target ),
 			targetId = target.attr( 'id' ),
-			tabs = $( 'li', target.parent() )
+			tabs = $( 'li', target.parent() );
 
 		// If the click wasn't on one of the tabs then ignore it
 		if( !target.is( 'li' ) ) { return; }

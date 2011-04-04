@@ -1,3 +1,4 @@
+/*global require: false, define: false, google: false, History: false */
 require( [ 'helpers/history', 'ui/Content', 'ui/Header', 'ui/Page' ], function( History, Content, Header, Page ) {
 	// We'll need to know the base URL
 	var baseURL = location.href.replace( /^(.*)\/.*$/, '$1' );
@@ -196,7 +197,7 @@ require( [ 'helpers/history', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 		if( [13,16,17,27,33,34,35,36,37,38,39,40,45,91].indexOf( e.which ) !== -1 ) { // Don't fire for various non-character keys
 			return true;
 		}
-		if( input.attr( 'value' ) == '' ) {
+		if( input.attr( 'value' ) === '' ) {
 			Content.clear();
 			return true;
 		}

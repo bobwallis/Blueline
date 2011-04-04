@@ -1,3 +1,4 @@
+/*global require: false, define: false, google: false */
 define( ['../plugins/google!maps/3/sensor=false', '../ui/Content'], function( googleAjaxReady, Content ) {
 		// Create some reusable variables
 		var $window = $( window ),
@@ -117,11 +118,11 @@ define( ['../plugins/google!maps/3/sensor=false', '../ui/Content'], function( go
 				this.fusionTableInfoWindow.close();
 				// Set zoom
 				if( typeof options.zoom === 'number' ) {
-					this.map.setZoom( options.zoom )
+					this.map.setZoom( options.zoom );
 				}
 				// Set center
 				if( typeof options.center === 'object' ) {
-					this.map.setCenter( options.center )
+					this.map.setCenter( options.center );
 				}
 				// Set bounding box
 				if( typeof options.fitBounds === 'object' ) {
