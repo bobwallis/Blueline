@@ -60,12 +60,14 @@ define( ['../plugins/google!maps/3/sensor=false', '../ui/Content'], function( go
 			show: function() {
 				this.container.show();
 				Content.loading.container.css( 'width', '40%' );
+				Content.container.css( 'width', '40%' );
 				this.visible = true;
 				towerMapResize();
 			},
 			hide: function() {
 				this.container.hide();
 				Content.loading.container.css( 'width', '100%' );
+				Content.container.css( 'width', '100%' );
 				this.visible = false;
 			},
 			maximise: function() {
