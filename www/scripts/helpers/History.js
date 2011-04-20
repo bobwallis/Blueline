@@ -5,7 +5,7 @@
  * @license New BSD License <http://creativecommons.org/licenses/BSD/>
  */
 
-define( ['./history.adapter.jquery'], function() {
+define( ['./History.adapter.jquery'], function() {
 	"use strict";
 
 	// --------------------------------------------------------------------------

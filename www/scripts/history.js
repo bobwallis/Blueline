@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false, History: false */
-require( [ 'helpers/history', 'ui/Content', 'ui/Header', 'ui/Page' ], function( History, Content, Header, Page ) {
+require( [ 'helpers/History', 'ui/Content', 'ui/Header', 'ui/Page' ], function( History, Content, Header, Page ) {
 	// We'll need to know the base URL
 	var baseURL = location.href.replace( /^(.*)\/.*$/, '$1' );
 

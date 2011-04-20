@@ -95,22 +95,17 @@ foreach( $this->get( 'methods', array() ) as $method ) : ?>
 		<script>
 		//<![CDATA[
 			require( ['ui/MethodView'], function( MethodView ) {
-				window.methods.push( new MethodView( {
+				new MethodView( {
 					id: <?=$i?>,
+					numbersContainer: '#content_line<?=$i?>',
+					gridContainer: '#content_grid<?=$i?>',
 					stage: <?=$method->stage()?>,
 					notation: <?= json_encode( $method->notationExpanded() )?>,
-					leadHead: <?= json_encode( $method->leadHead() )?>,
 					calls: <?= json_encode( $method->calls() )?>,
 <?php if( $method->ruleOffs() ) : ?>
-					ruleOffs: <?= json_encode( $method->ruleOffs() )?>,
+					ruleOffs: <?= json_encode( $method->ruleOffs() )?>
 <?php endif; ?>
-					options_line: {
-						container: 'content_line<?=$i?>'
-					},
-					options_grid: {
-						container: 'content_grid<?=$i?>'
-					}
-				} ) );
+				} );
 			} );
 		//]]>
 		</script>

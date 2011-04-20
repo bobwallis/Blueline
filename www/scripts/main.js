@@ -1,7 +1,7 @@
 /*global require: false, define: false, google: false */
-require( ['require', 'helpers/can'], function( require, can ) {
+require( ['require', 'helpers/Can'], function( require, Can ) {
 	// Load the history API if it is supported
-	if( can.history() ) {
+	if( Can.history() ) {
 		require( ['history'] );
 	}
 } );

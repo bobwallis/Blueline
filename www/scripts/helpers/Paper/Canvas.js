@@ -1,5 +1,5 @@
-define( ['../can'], function( can ) {
-	if( can.canvas() ) {
+define( ['../Can'], function( Can ) {
+	if( Can.canvas() ) {
 		/**
 		 * Canvas object
 		 * @constructor
@@ -14,7 +14,7 @@ define( ['../can'], function( can ) {
 			this.context.lineCap = 'round';
 			this.context.lineJoin = 'round';
 		};
-	
+
 		Canvas.prototype = {
 			type: 'canvas',
 			svgnumber: /[+\-]?(\.\d+|\d+\.\d*|\d+)([Ee][+\-]?\d+)?/g,
@@ -89,7 +89,7 @@ define( ['../can'], function( can ) {
 					case 'circle':
 						if( typeof attributes.cx === 'number' && typeof attributes.cy === 'number' && typeof attributes.r === 'number' ) {
 							this.context.beginPath();
-							this.context.arc( attributes.cx, attributes.cy, attributes.r, 0, Math.PI*2, true); 
+							this.context.arc( attributes.cx, attributes.cy, attributes.r, 0, Math.PI*2, true);
 							this.context.closePath();
 							doAttributes = true;
 						}
@@ -109,7 +109,7 @@ define( ['../can'], function( can ) {
 				return;
 			}
 		};
-	
+
 		return Canvas;
 	}
 	else {

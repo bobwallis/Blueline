@@ -1,5 +1,5 @@
-define( ['../can'], function( can ) {
-	if( can.SVG() ) {
+define( ['../Can'], function( Can ) {
+	if( Can.SVG() ) {
 		/**
 		 * SVG object
 		 * @constructor

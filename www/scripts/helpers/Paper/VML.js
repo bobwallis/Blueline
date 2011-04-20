@@ -1,5 +1,5 @@
-define( ['../can'], function( can ) {
-	if( can.VML() ) {
+define( ['../Can'], function( Can ) {
+	if( Can.VML() ) {
 		/**
 		 * VML object
 		 * @constructor
@@ -58,7 +58,7 @@ define( ['../can'], function( can ) {
 				return VMLAttributes;
 			}
 		};
-	
+
 		// Add the VML namespace to the document
 		if( document.documentMode !== 8 && document.namespaces && !document.namespaces[VML.prototype.ns] ) {
 			document.namespaces.add( VML.prototype.ns, 'urn:schemas-microsoft-com:vml' );
@@ -70,8 +70,8 @@ define( ['../can'], function( can ) {
 		var VMLStyle = document.createStyleSheet();
 		VMLStyle.addRule( VML.prototype.ns+'\\: *',  "behavior:url(#default#VML);" );
 		VMLStyle.addRule( VML.prototype.ns+'\\: *',  "display:inline-block;" );
-		
-		return VML;
+
+		return false; // TO IMPLEMENT
 	}
 	else {
 		return false;

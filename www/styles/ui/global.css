@@ -18,7 +18,7 @@ h1, h2 {
 	font-family: Palatino, "Palatino Linotype", "Palatino LT STD", "Book Antiqua", Constantia, Georgia, serif;
 }
 .mono {
-	font-family: 'Droid Sans Mono', 'DejaVu Sans Mono', monospace;
+	font-family: 'Droid Sans Mono', 'DejaVu Sans Mono', Consolas, monospace;
 }
 abbr, dfn {
 	border-bottom: 1px dotted #E0DED9;
@@ -32,6 +32,12 @@ strong {
 }
 .normalweight {
 	font-weight: normal !important;
+}
+.transparent {
+	color: transparent;
+}
+* html .transparent, *+html .transparent {
+	visibility: hidden;
 }
 
 /* Links */

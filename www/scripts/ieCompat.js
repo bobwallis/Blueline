@@ -6,22 +6,8 @@ g.firstChild);l.media="print";m.attachEvent("onbeforeprint",function(){var d=-1,
 function(){h.innerHTML="";k.removeChild(h);k.appendChild(f);l.styleSheet.cssText=""})}})(this,document);
 
 // IE background flicker
-try {
-	document.execCommand( 'BackgroundImageCache', false, true );
-}
+try { document.execCommand( 'BackgroundImageCache', false, true ); }
 catch( e ) {}
-
-// Provide the XMLHttpRequest constructor for IE 5.x-6.x:
-if( typeof XMLHttpRequest === 'undefined' ) {
-	XMLHttpRequest = function () {
-		try { return new ActiveXObject( 'Msxml2.XMLHTTP.6.0' ); }
-		catch(e) {}
-		try { return new ActiveXObject( 'Msxml2.XMLHTTP.3.0' ); }
-		catch(e) {}
-		try { return new ActiveXObject( 'Msxml2.XMLHTTP' ); }
-		catch(e) { return false; }
-	};
-}
 
 // Extend the array prototype for compatibility if needed (compatibility code from MDC)
 if( typeof Array.prototype.forEach === 'undefined' ) {

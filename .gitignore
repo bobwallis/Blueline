@@ -1,11 +1,11 @@
-.directory
-error.log
-/application/config.php
 /sql
 /cache
 /tests/report
 /docs/phpdoc
-*.sql.gz
-*.tmp
 /www/scripts.built
 /www/styles.built
+/application/config.php
+.directory
+error.log
+*.sql.gz
+*.tmp

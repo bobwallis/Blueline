@@ -1,8 +1,7 @@
 /*global require: false, define: false, google: false */
 define( function() {
-	if( typeof window['TabBars'] === 'undefined' ) {
-		window['TabBars'] = [];
-	}
+	window['TabBars'] = window['TabBars'] || [];
+
 	/**
 		* Handles click events on a tab bar
 		* @private
@@ -67,6 +66,11 @@ define( function() {
 		}
 	};
 
+	TabBar.prototype = {
+		destroy: function() {
+			this.container.remove();
+		}
+	};
 	// Expose the TabBar constructor
 	return TabBar;
 } );

@@ -40,6 +40,7 @@ $resources = array_map( function( $p ) { return str_replace( WWW_PATH, '', $p );
 
 // Add external files
 $resources[] = 'http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js';
+$resources[] = 'http://www.google.com/jsapi?key=ABQIAAAAsHJGcx2ntv993hmfnp9RUxSKTQnQ5SFZ1y3T8JIF3ZKhvws7bhQeEX_bZiQrw9Fb925kIkJLnnQfkA&callback=define';
 
 View::set( 'resources', $resources );
 View::set( 'timestamp', $timestamp );
