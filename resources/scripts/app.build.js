@@ -8,7 +8,6 @@
 		{
 			name: "history",
 			exclude: ["helpers/can"]
-
 		},
 		{
 			name: "main",

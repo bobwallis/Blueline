@@ -14,6 +14,7 @@ div.line td {
 .grid {
 	float: left;
 	margin-right: 20px;
+	margin-bottom: 20px;
 }
 	.grid td {
 		vertical-align: top;
@@ -24,4 +25,8 @@ td.gridNotation {
 	color: #666;
 	text-align: right;
 	padding: 7px 5px 7px 0;
+}
+td.gridTitle {
+	font-size: 13px;
+	padding-bottom: 3px;
 }

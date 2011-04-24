@@ -1,7 +1,8 @@
 /*global require: false, define: false, google: false */
 define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, PlaceNotation ) {
 	// Reusable
-	$body = $( document.body );
+	var $window = $( window ),
+		$body = $( document.body );
 
 	var MethodView = function( options ) {
 	// Required options
@@ -156,6 +157,8 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 				}
 			}, this );
 			
+			// Decide which bells get place starts drawn
+			var plainPlaceStarts = plainLines.map( function( l, i ) { return (l.stroke !== 'transparent' && this.method.huntBells.indexOf( i ) === -1)? i : -1; }, this ).filter( function( l ) { return l !== -1; } );
 			
 			// Determine the correct bell width
 			var testText = $( '<span class="mono">123456</span>' );
@@ -164,7 +167,25 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 			var bellWidth = testText.width() / 6;
 			testText.remove();
 			
-			// Plain lead
+			// Determine the appropriate lead distribution for the plain course to ensure a fit
+			var maxWidth = this.container.numbers.width(),
+				rowWidth = bellWidth*this.method.stage,
+				callWidth = 20 + rowWidth,
+				placeStartWidth = (10 + plainPlaceStarts.length*12),
+				leadsPerColumn = 1;
+			// Check for case when the window is plenty big enough
+			if( maxWidth > 2*callWidth + 5 + (rowWidth + placeStartWidth + 15)*this.method.numberOfLeads ) {
+				leadsPerColumn = 1;
+			}
+			else {
+				for( leadsPerColumn = 1; leadsPerColumn < this.method.numberOfLeads; ++leadsPerColumn ) {
+					if( maxWidth > ((leadsPerColumn>1)?callWidth:2*callWidth) + 5 + Math.ceil( this.method.numberOfLeads/leadsPerColumn )*(15 + rowWidth + placeStartWidth ) ) {
+						break;
+					}
+				}
+			}
+			
+			// Plain course
 			this.container.numbers.append( new MethodGrid( $.extend( true, {}, this.options.plainCourse, {
 				id: 'numbers'+this.id+'_plain',
 				show: {
@@ -174,11 +195,11 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 				},
 				display: {
 					numberOfLeads: this.method.numberOfLeads,
-					leadsPerColumn: 1,
+					leadsPerColumn: leadsPerColumn,
 					dimensions: { rowHeight: 14, bellWidth: bellWidth, columnPadding: 15 },
 					lines: plainLines,
 					numbers: plainLines.map( function( l ) { return (l.stroke !== 'transparent')? 'transparent' : false; } ),
-					placeStarts: plainLines.map( function( l, i ) { return (l.stroke !== 'transparent' && this.method.huntBells.indexOf( i ) === -1)? i : -1; }, this ).filter( function( l ) { return l !== -1; } )
+					placeStarts: plainPlaceStarts
 				}
 			} ) ) );
 			// Calls

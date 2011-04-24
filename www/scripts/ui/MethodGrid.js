@@ -119,7 +119,7 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 			// If we're including a title or place notation then wrap everything in a table
 			if( this.show.title || this.show.notation ) {
 				html = '<table class="grid" id="'+this.id+'"><tr>' + 
-				(this.show.title? '<td colspan="2" class="gridTitle">'+this.title+'</td></tr><tr>' : '') + 
+				(this.show.title? '<td colspan="2" class="gridTitle">'+this.title+':</td></tr><tr>' : '') + 
 				(this.show.notation? '<td class="gridNotation" style="padding-top: '+(this.display.dimensions.row.y/2)+'px; padding-bottom: '+(this.display.dimensions.row.y/2)+'px;line-height: '+this.display.dimensions.row.y+'px;">'+this.notation.exploded.join( '<br />' )+'</td>' : '') +
 				'<td class="gridLine"></td></tr></table>';
 			}

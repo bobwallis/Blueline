@@ -23,6 +23,7 @@ rm -rf "$d/../../www-build/scripts/helpers"
 rm -rf "$d/../../www-build/scripts/plugins"
 rm "$d/../../www-build/scripts/ui/Content.js"
 rm "$d/../../www-build/scripts/ui/Header.js"
+rm "$d/../../www-build/scripts/ui/MethodGrid.js"
 rm "$d/../../www-build/scripts/ui/Page.js"
 rm "$d/../../www-build/scripts/ui/TabBar.js"
 # GZip compressed JS
