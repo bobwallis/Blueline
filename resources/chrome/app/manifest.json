@@ -1,0 +1,20 @@
+{
+  "name": "Blueline",
+  "description": "Information for bellringers. Includes a blueline generator, tower listings and more.",
+  "version": "1",
+  "app": {
+    "urls": [
+      "*://blueline.rsw.me.uk/"
+    ],
+    "launch": {
+      "web_url": "http://blueline.rsw.me.uk/"
+    }
+  },
+  "icons": {
+    "128": "icon_128.png"
+  },
+  "permissions": [
+    "geolocation",
+    "unlimitedStorage"
+  ]
+}
