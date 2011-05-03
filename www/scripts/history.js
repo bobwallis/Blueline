@@ -197,7 +197,7 @@ require( [ 'helpers/History', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 		if( [13,16,17,27,33,34,35,36,37,38,39,40,45,91].indexOf( e.which ) !== -1 ) { // Don't fire for various non-character keys
 			return true;
 		}
-		if( input.attr( 'value' ) === '' ) {
+		if( input.val() === '' ) {
 			Content.clear();
 			return true;
 		}

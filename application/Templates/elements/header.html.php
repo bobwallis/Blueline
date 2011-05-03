@@ -33,7 +33,7 @@ if( !\Pan\Response::snippet() ) :
 		<script src="/scripts/helpers/jquery.js"></script>
 		<script data-main="/scripts/main" src="/scripts/require.js"></script>
 <?php else : ?>
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
 		<script data-main="/scripts.built/main" src="/scripts.built/main.js"></script>
 <?php endif; ?>
 <?php if( !empty( $site['ga_trackingCode'] ) ) : ?>

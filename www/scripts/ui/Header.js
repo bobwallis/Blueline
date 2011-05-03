@@ -37,7 +37,7 @@ define( function() {
 			else {
 				$topSearch.attr( 'action', (typeof set.action === 'string')?set.action:'/search' );
 				$topSearchInput.attr( 'placeholder', (typeof set.placeholder === 'string')?set.placeholder:'Search' );
-				$topSearchInput.attr( 'value', '' );
+				$topSearchInput.val( '' );
 				$topSearchContainer.show();
 			}
 		},
@@ -53,11 +53,11 @@ define( function() {
 				// Value
 				if( !$bigSearchInput.is( ':focus' ) ) { // Only modify the value when not focussed to prevent messing with user input
 					if( typeof set.value === 'string' ) {
-						$bigSearchInput.attr( 'value', set.value );
+						$bigSearchInput.val( set.value );
 					}
 					else if( typeof History === 'object' && History.enabled ) {
 						var queryString = History.getState().url.replace( /^.*?(\?|$)/, '' );
-						$bigSearchInput.attr( 'value', (queryString.indexOf( 'q=' ) !== -1)? queryString.replace( /^.*q=(.*?)(&.*$|$)/, '$1' ) : '' );
+						$bigSearchInput.val( (queryString.indexOf( 'q=' ) !== -1)? queryString.replace( /^.*q=(.*?)(&.*$|$)/, '$1' ) : '' );
 					}
 				}
 				$bigSearchContainer.show();
