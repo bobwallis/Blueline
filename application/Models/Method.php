@@ -119,7 +119,7 @@ class Method extends Model {
 				$this->lengthOfLead = count( $this->notationExploded() );
 			}
 		}
-		return $this->lengthOfLead? : 0;
+		return intval( $this->lengthOfLead )? : 0;
 	}
 
 	public function numberOfHunts() {
@@ -276,8 +276,8 @@ class Method extends Model {
 		if( count( $calls ) > 0 ) {
 			foreach( $calls as $title => &$call ) {
 				if( is_string( $call ) ) {
-					if( preg_match( '/^([^:]*):([^:]*):([^:]*)$/', $call, $matches ) && isset( $matches[1], $matches[2], $matches[3] ) ) {
-						$call = array( 'notation' => $matches[1], 'every' => intval( $matches[2] ), 'from' => intval( $matches[3] ) );
+					if( preg_match( '/^([^:]*):([^:]*):([^:]*)$/', $call, $matches ) && isset( $matches[1] ) ) {
+						$call = array( 'notation' => $matches[1], 'every' => intval( $matches[2]?:$this->lengthOfLead() ), 'from' => intval( $matches[3] )?:0 );
 					}
 					else {
 						unset( $calls[$title] );
