@@ -38,9 +38,8 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 		if( typeof options.ruleOffs === 'undefined' ) {
 			this.method.ruleOffs = { from: 0, every: this.method.notation.exploded.length };
 		}
-		else if( typeof options.ruleOffs === 'string' ) {
-			var parsed = options.ruleOffs.match( /^([^:]*):([^:]*)$/ );
-			this.method.ruleOffs = { every: parseInt( parsed[1], 10 ), from: parseInt( parsed[2], 10 ) };
+		else if( typeof options.ruleOffs === 'object' ) {
+			this.method.ruleOffs = options.ruleOffs;
 		}
 		else {
 			this.method.ruleOffs = { from: 0, every: 0 };
@@ -61,12 +60,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 			this.options.calls = [];
 			for( var callTitle in options.calls ) {
 				if( Object.prototype.hasOwnProperty.call( options.calls, callTitle ) ) {
-					var positionsParse = options.calls[callTitle].match( /^([^:]*):([^:]*):([^:]*)$/ ),
-						call = {
-							notation: positionsParse[1],
-							every: (positionsParse[2] === '')? this.method.notation.parsed.length : parseInt( positionsParse[2], 10 ),
-							from: (positionsParse[3] === '')? 0 : parseInt( positionsParse[3], 10 )
-						};
+					var call = options.calls[callTitle];
 						
 					// If call.from is negative, add to it so we use the second calling position (this stops us from having to mess around with adding notation to the start (Erin))
 					if( call.from < 0 ) { call.from += call.every; }

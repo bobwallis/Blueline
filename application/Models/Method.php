@@ -209,17 +209,22 @@ class Method extends Model {
 	}
 
 	public function ruleOffs() {
-		return $this->ruleOffs? : '';
+		if( is_string( $this->ruleOffs ) ) {
+			if( preg_match( '/^([^:]*):([^:]*)$/', $this->ruleOffs, $matches ) && isset( $matches[1], $matches[2] ) ) {
+				$this->ruleOffs = array( 'every' => intval( $matches[1] ), 'from' => intval( $matches[2] ) );
+			}
+		}
+		return $this->ruleOffs? : array( 'from' => 0, 'every' => $this->lengthOfLead() );
 	}
 
 	public function calls() {
+		// Set default calls
 		if( !$this->calls ) {
 			if( !$this->differential() && $this->stage() > 4 ) {
 				$leadEndChange = array_pop( $this->notationExploded() );
 				$postLeadEndChange = array_shift( $this->notationExploded() );
 				$stageNotation = \Helpers\PlaceNotation::intToBell( $this->stage() );
 				switch( $this->numberOfHunts() ) {
-				case 0:
 				case 1:
 					if( $this->stage() % 2 == 0 ) {
 						if( $leadEndChange == '12' ) {
@@ -257,10 +262,31 @@ class Method extends Model {
 					if( $leadEndChange == '1' && $postLeadEndChange == $stageNotation ) {
 						$this->calls = serialize( array( 'Bob' => '3::-1', 'Single' => '3.23::-1' ) );
 					}
+				default:
+					$this->calls = serialize( array() );
 				}
 			}
 		}
-		return unserialize( $this->calls )? : array();
+		// Unserialize
+		if( is_string( $this->calls ) ) {
+			$this->calls = unserialize( $this->calls );
+		}
+		// Parse the format
+		$calls = $this->calls;
+		if( count( $calls ) > 0 ) {
+			foreach( $calls as $title => &$call ) {
+				if( is_string( $call ) ) {
+					if( preg_match( '/^([^:]*):([^:]*):([^:]*)$/', $call, $matches ) && isset( $matches[1], $matches[2], $matches[3] ) ) {
+						$call = array( 'notation' => $matches[1], 'every' => intval( $matches[2] ), 'from' => intval( $matches[3] ) );
+					}
+					else {
+						unset( $calls[$title] );
+					}
+				}
+			}
+			$this->calls = $calls;
+		}
+		return $this->calls? : array();
 	}
 
 	public function href( $absolute = false ) {
