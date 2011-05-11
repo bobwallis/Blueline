@@ -103,9 +103,7 @@ define( ['../plugins/google!maps/3/sensor=false', '../ui/Content'], function( go
 							.replace( 'NULL, ', '' )
 							.replace( /(in .)b/, '$1&#x266d;' )
 							.replace( /(in .)#/, '$1&#x266f;' )
-							.replace( ' ((unknown))', '' ),
-						doveId = content.match( /<abbr>(.*)<\/abbr>/ )[1];
-						content = content.replace( /<abbr>.*<\/abbr>/g, '' ).replace( /<h1([^\>]*)>(.*)<\/h1>/, '<h1$1><a href="/towers/view/'+doveId+'">$2</a></h1>' );
+							.replace( ' ((unknown))', '' );
 						infoWindow.close();
 						infoWindow.setPosition( e.latLng );
 						infoWindow.setContent( content );
