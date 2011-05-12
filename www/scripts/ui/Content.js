@@ -2,10 +2,9 @@
 define( function() {
 	var $loading = $( '<div id="loading"></div>' ),
 		loadingSetter = null,
-		$content;
+		$content = $( '#content' );
 
 	$( function() {
-		$content = $( '#content' );
 		$( document.body ).append( $loading );
 	} );
 
