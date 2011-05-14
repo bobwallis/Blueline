@@ -27,14 +27,5 @@ define( {
 	},
 	history: function() {
 		return !!( window.history && window.history.pushState );
-	},
-	VML: function() {
-		var d = document.createElement( 'div' ), b;
-		d.innerHTML = '<v:shape adj="1"/>';
-		b = d.firstChild;
-		b.style.behavior = 'url(#default#VML)';
-		var canVML = ( b && typeof b.adj === 'object' );
-		d = b = null;
-		return canVML;
 	}
 } );

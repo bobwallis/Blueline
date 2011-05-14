@@ -1,11 +1,9 @@
-define( ['./Paper/SVG', './Paper/Canvas', './Paper/VML'], function( SVG, Canvas, VML ) {
+define( ['./Paper/SVG', './Paper/Canvas'], function( SVG, Canvas ) {
 	if( SVG !== false ) {
 		return SVG;
 	}
-	else if( Canvas !== false ) {
+	if( Canvas !== false ) {
 		return Canvas;
 	}
-	else {
-		return VML;
-	}
+	return false;
 } );
