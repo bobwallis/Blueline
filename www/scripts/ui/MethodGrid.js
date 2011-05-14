@@ -1,8 +1,8 @@
 /*global require: false, define: false, google: false */
 define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMono'], function( PlaceNotation, Paper, Font ) {
 	if( typeof window['MethodGrids'] === 'undefined' ) {
-		window['MethodGrids'] = []
-	};
+		window['MethodGrids'] = [];
+	}
 
 	/* MethodGrid
 	 * options object:
@@ -29,7 +29,7 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 	 * 
 	 */
 	var MethodGrid = function( options ) {
-		$.extend( this, options );
+		$.extend( true, this, options );
 		
 		// Set unset show options
 		['notation', 'title', 'lines', 'ruleOffs', 'placeStarts', 'numbers'].forEach( function( e ) {
@@ -110,7 +110,7 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 		
 		this.draw();
 		window['MethodGrids'].push( this );
-		return this.container;
+		return this;
 	};
 
 	MethodGrid.prototype = {
@@ -283,6 +283,11 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 		},
 		destroy: function() {
 			this.container.remove();
+			window['MethodGrids'].forEach( function( view, i ) {
+				if( view.id === window['MethodGrids'][i].id ) {
+					window['MethodGrids'].splice( i, 1 );
+				}
+			} );
 		}
 	};
 	

@@ -155,32 +155,41 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 			var plainPlaceStarts = plainLines.map( function( l, i ) { return (l.stroke !== 'transparent' && this.method.huntBells.indexOf( i ) === -1)? i : -1; }, this ).filter( function( l ) { return l !== -1; } );
 			
 			// Determine the correct bell width
-			var testText = $( '<span class="mono">123456</span>' );
-			testText.css( { fontSize: '14px' } );
-			$body.append( testText );
-			var bellWidth = testText.width() / 6;
-			testText.remove();
+			var bellWidth = (function() {
+				var testText = $( '<span class="mono">123456</span>' );
+				testText.css( { fontSize: '14px' } );
+				$body.append( testText );
+				var bellWidth = testText.width() / 6;
+				testText.remove();
+				return bellWidth;
+			})();
 			
 			// Determine the appropriate lead distribution for the plain course to ensure a fit
-			var maxWidth = this.container.numbers.width(),
-				rowWidth = bellWidth*this.method.stage,
-				callWidth = 20 + rowWidth,
-				placeStartWidth = (10 + plainPlaceStarts.length*12),
-				leadsPerColumn = 1;
-			// Check for case when the window is plenty big enough
-			if( maxWidth > 2*callWidth + 5 + (rowWidth + placeStartWidth + 15)*this.method.numberOfLeads ) {
-				leadsPerColumn = 1;
-			}
-			else {
-				for( leadsPerColumn = 1; leadsPerColumn < this.method.numberOfLeads; ++leadsPerColumn ) {
-					if( maxWidth > ((leadsPerColumn>1)?callWidth:2*callWidth) + 5 + Math.ceil( this.method.numberOfLeads/leadsPerColumn )*(15 + rowWidth + placeStartWidth ) ) {
-						break;
+			var determineLeadsPerColumn = (function( view ) {
+				var numberOfLeads = view.method.numberOfLeads,
+					numberOfCalls = view.options.calls.length,
+					maxWidth = view.container.numbers.width(),
+					rowWidth = bellWidth*view.method.stage,
+					callWidth = 20 + rowWidth,
+					placeStartWidth = (10 + plainPlaceStarts.length*12);
+				return function() {
+					var leadsPerColumn = 1;
+					maxWidth = view.container.numbers.width();
+					// Check that the window isn't plenty big enough before bothering to look at adjusting
+					if( maxWidth <= 2*callWidth + 5 + (rowWidth + placeStartWidth + 15)*numberOfLeads ) {
+						for( leadsPerColumn = 1; leadsPerColumn < numberOfLeads; ++leadsPerColumn ) {
+							if( maxWidth > ((leadsPerColumn>1)?callWidth:numberOfCalls*callWidth) + 5 + Math.ceil( numberOfLeads/leadsPerColumn )*(15 + rowWidth + placeStartWidth ) ) {
+								break;
+							}
+						}
 					}
-				}
-			}
+					return leadsPerColumn;
+				};
+			})( this );
+			var leadsPerColumn = determineLeadsPerColumn();
 			
 			// Plain course
-			this.container.numbers.append( new MethodGrid( $.extend( true, {}, this.options.plainCourse, {
+			var plainCourseOptions = $.extend( true, {}, this.options.plainCourse, {
 				id: 'numbers'+this.id+'_plain',
 				show: {
 					notation: false,
@@ -195,7 +204,28 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 					numbers: plainLines.map( function( l ) { return (l.stroke !== 'transparent')? 'transparent' : false; } ),
 					placeStarts: plainPlaceStarts
 				}
-			} ) ) );
+			} );
+			var plainCourseContainer = this.container.numbers;
+			var plainCourseGrid = new MethodGrid( plainCourseOptions );
+			plainCourseContainer.append( plainCourseGrid.container );
+			// Update the plain course when resizing
+			var plainCourseResizedLastFired = 0;
+			$window.resize( function() {
+				// Fire at most once every 200ms
+				var nowTime = (new Date()).getTime();
+				if( nowTime - plainCourseResizedLastFired < 200 ) { return; }
+				else { plainCourseResizedLastFired = nowTime; }
+				var currentLeadsPerColumn = leadsPerColumn,
+					newLeadsPerColumn = determineLeadsPerColumn();
+				if( currentLeadsPerColumn !== newLeadsPerColumn ) {
+					plainCourseGrid.destroy();
+					plainCourseOptions.display.leadsPerColumn = newLeadsPerColumn;
+					plainCourseGrid = new MethodGrid( plainCourseOptions );
+					plainCourseContainer.prepend( plainCourseGrid.container );
+					leadsPerColumn = newLeadsPerColumn;
+				}
+			} );
+			
 			// Calls
 			this.options.calls.forEach( function( call, i ) {
 				this.container.numbers.append( new MethodGrid( $.extend( true, {}, call, {
@@ -211,7 +241,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 						lines: callLines[i],
 						numbers: callLines[i].map( function( l ) { return (l.stroke !== 'transparent')? 'transparent' : false; } )
 					}
-				} ) ) );
+				} ) ).container );
 			}, this );
 		},
 		drawGrids: function() {
@@ -240,7 +270,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 					dimensions: { rowHeight: 14, bellWidth: 12 },
 					lines: lines
 				}
-			} ) ) );
+			} ) ).container );
 			// Calls
 			this.options.calls.forEach( function( call ) {
 				this.container.grid.append( new MethodGrid( $.extend( true, {}, call, {
@@ -253,7 +283,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 						dimensions: { rowHeight: 14, bellWidth: 12 },
 						lines: lines
 					}
-				} ) ) );
+				} ) ).container );
 			}, this );
 		}
 	};
