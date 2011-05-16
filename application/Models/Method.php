@@ -262,6 +262,7 @@ class Method extends Model {
 					if( $leadEndChange == '1' && $postLeadEndChange == $stageNotation ) {
 						$this->calls = serialize( array( 'Bob' => '3::-1', 'Single' => '3.23::-1' ) );
 					}
+					break;
 				default:
 					$this->calls = serialize( array() );
 				}
