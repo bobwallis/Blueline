@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false */
-define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMono'], function( PlaceNotation, Paper, Font ) {
+define( ['../helpers/PlaceNotation', '../helpers/Paper'], function( PlaceNotation, Paper ) {
 	if( typeof window['MethodGrids'] === 'undefined' ) {
 		window['MethodGrids'] = [];
 	}
@@ -182,7 +182,6 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 					
 					// Draw place starts
 					if( this.show.placeStarts ) {
-						var textPath = '';
 						this.display.placeStarts.forEach( function( i, pos ) {
 							var j = (typeof this.startRow === 'object')? this.startRow[i] : i;
 							for( var k = 0; k < this.display.numberOfColumns; ++k ) {
@@ -211,22 +210,20 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 									} );
 									// The text
 									var numberToDraw = positionInLeadHead + 1;
-									if( numberToDraw < 10 ) {
-										textPath += 'M'+xPos+','+yPos+Font.medium[numberToDraw];
-									}
-									else {
-										textPath += 'M'+(xPos-2)+','+yPos+Font.small[Math.floor(numberToDraw/10)];
-										textPath += 'M'+(xPos+2)+','+yPos+Font.small[numberToDraw%10];
-									}
+									paper.add( 'text', {
+										content: numberToDraw.toString(),
+										x: xPos,
+										y: yPos,
+										fill: '#000',
+										'text-anchor': 'middle',
+										'dominant-baseline': 'central',
+										style: 'dominant-baseline: central;',
+										'font-size': ((numberToDraw < 10)? '9' : '8')+'px',
+										'font-family': "'Droid Sans', 'DejaVu Sans', sans-serif"
+									} );
 								}
 							}
 						}, this );
-						// Add the finished text path
-						paper.add( 'path', {
-							'stroke': 'none',
-							'fill': '#000',
-							'd': textPath
-						} );
 					}
 				
 					// Append the paper to the appropriate container

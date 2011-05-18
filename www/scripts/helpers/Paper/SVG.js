@@ -27,11 +27,20 @@ define( ['../Can'], function( Can ) {
 					case 'circle':
 						toAdd = document.createElementNS( this.ns, 'svg:circle' );
 						break;
+					case 'text':
+						toAdd = document.createElementNS( this.ns, 'svg:text' );
+						break;
 					default:
 						return;
 				}
 				for( attribute in attributes ) {
-					toAdd.setAttribute( attribute, attributes[attribute] );
+					if( attribute === 'content' ) {
+						var content = document.createTextNode( attributes[attribute] );
+						toAdd.appendChild( content );
+					}
+					else {
+						toAdd.setAttributeNS( null, attribute, attributes[attribute] );
+					}
 				}
 				return this.canvas.appendChild( toAdd );
 			}

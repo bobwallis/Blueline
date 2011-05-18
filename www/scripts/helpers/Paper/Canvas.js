@@ -94,6 +94,33 @@ define( ['../Can'], function( Can ) {
 							doAttributes = true;
 						}
 						break;
+					case 'text':
+						if( typeof attributes.content !== 'undefined' && typeof attributes.x === 'number' && typeof attributes.y === 'number' ) {
+							this.context.font = ((typeof attributes['font-size'] !== 'undefined')?attributes['font-size']+' ':'') + ((typeof attributes['font-family'] !== 'undefined')?attributes['font-family']:'');
+							switch( (typeof attributes['text-anchor'] === 'string')? attributes['text-anchor'] : '' ) {
+								case 'middle':
+									this.context.textAlign = 'center';
+									break;
+								case 'end':
+									this.context.textAlign = 'end';
+									break;
+								case 'start':
+								default:
+									this.context.textAlign = 'start';
+									break;
+							}
+							this.context.textBaseline = (typeof attributes['dominant-baseline'] === 'string')? ((attributes['dominant-baseline']==='central')?'middle':attributes['dominant-baseline']) : 'alphabetic';
+							if( typeof attributes.fill === 'string' && attributes.fill !== 'none' ) {
+								this.context.fillStyle = attributes.fill;
+								this.context.fillText( attributes.content, attributes.x, attributes.y );
+							}
+							if( typeof attributes.stroke === 'string' && attributes.stroke !== 'none' ) {
+								this.context.lineWidth = ( typeof attributes['stroke-width'] === 'number' )? attributes['stroke-width'] : 1;
+								this.context.strokeStyle = attributes.stroke;
+								this.context.strokeText( attributes.content, attributes.x, attributes.y );
+							}
+						}
+						break;
 				}
 				if( doAttributes ) {
 					if( typeof attributes.fill === 'string' && attributes.fill !== 'none' ) {
