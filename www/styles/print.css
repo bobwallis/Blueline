@@ -1,0 +1,6 @@
+#top, footer, #push, ul.tabBar {
+	display: none;
+}
+#wrapper {
+	margin: 0;
+}

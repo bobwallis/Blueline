@@ -218,7 +218,7 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper'], function( PlaceNotatio
 										'text-anchor': 'middle',
 										'dominant-baseline': 'central',
 										style: 'dominant-baseline: central;',
-										'font-size': ((numberToDraw < 10)? '9' : '8')+'px',
+										'font-size': ((numberToDraw < 10)? '9.5' : '8')+'px',
 										'font-family': "'Droid Sans', 'DejaVu Sans', sans-serif"
 									} );
 								}
