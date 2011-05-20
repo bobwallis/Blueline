@@ -20,6 +20,7 @@
 		float: left;
 		margin-left: 10px;
 		font-size: 18px;
+		text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
 	}
 	#top h2, #top span.headerSep {
 		font-weight: normal;
@@ -47,6 +48,7 @@ form#topSearch {
 	-moz-border-radius: 3px;
 	border-radius: 3px;
 	border: 1px solid #E0DED9;
+	box-shadow: 1px 1px 3px rgba(0,0,0,0.6);
 	overflow: hidden;
 	margin: 7.5px 0 7.5px 8px;
 	height: 19px;
@@ -97,8 +99,7 @@ form#bigSearch {
 }
 	form#bigSearch div {
 		background-color: #FFF;
-		-moz-border-radius: 3px;
-		border-radius: 3px;
+		border-radius: 3px; -moz-border-radius: 3px;
 		border: 2px solid #DDD;
 		height: 25px;
 	}
