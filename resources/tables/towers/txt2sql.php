@@ -203,6 +203,9 @@ foreach( $dove->data as $tower ) {
 		case 'AnglicanNonUK':
 			$tower['Diocese'] = 'Anglican (Non-UK)';
 			break;
+		case 'ExtraParochial':
+			$tower['Diocese'] = 'Extra-Parochial';
+			break;
 		case '(RC)':
 			$tower['Diocese'] = 'Roman Catholic';
 			break;
