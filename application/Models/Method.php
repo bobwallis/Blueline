@@ -223,44 +223,47 @@ class Method extends Model {
 			if( !$this->differential() && $this->stage() > 4 ) {
 				$leadEndChange = array_pop( $this->notationExploded() );
 				$postLeadEndChange = array_shift( $this->notationExploded() );
-				$stageNotation = \Helpers\PlaceNotation::intToBell( $this->stage() );
+				$n = \Helpers\PlaceNotation::intToBell( $this->stage() );
+				$n_1 = \Helpers\PlaceNotation::intToBell( $this->stage() - 1 );
+				$n_2 = \Helpers\PlaceNotation::intToBell( $this->stage() - 2 );
 				switch( $this->numberOfHunts() ) {
+				case 0:
+					if( $this->stage() % 2 == 0 ) {
+						if( $leadEndChange == '1'.$n ) {
+							$this->calls = serialize( array( 'Bob' => '1'.$n_2.'::', 'Single' => '1'.$n_2.$n_1.$n.'::' ) );
+						}
+					}
+					else {
+					
+					}
+					break;
 				case 1:
 					if( $this->stage() % 2 == 0 ) {
 						if( $leadEndChange == '12' ) {
 							$this->calls = serialize( array( 'Bob' => '14::', 'Single' => '1234::' ) );
 						}
-						elseif( $leadEndChange == '1'.$stageNotation ) {
+						elseif( $leadEndChange == '1'.$n ) {
 							if( $this->leadHeadCode() == 'm' ) {
 								$this->calls = serialize( array( 'Bob' => '14::', 'Single' => '1234::' ) );
 							}
 							else {
-								$this->calls = serialize( array( 'Bob' => '1'.\Helpers\PlaceNotation::intToBell( $this->stage() - 2 ).'::', 'Single' => '1'.\Helpers\PlaceNotation::intToBell( $this->stage() - 2 ).\Helpers\PlaceNotation::intToBell( $this->stage() - 1 ).$stageNotation.'::' ) );
+								$this->calls = serialize( array( 'Bob' => '1'.$n_2.'::', 'Single' => '1'.$n_2.$n_1.$n.'::' ) );
 							}
 						}
 					}
 					else {
-						if( $leadEndChange == '12'.$stageNotation ) {
-							$this->calls = serialize( array( 'Bob' => '14'.$stageNotation.'::', 'Single' => (($this->stage()<6)?'123':'1234'.$stageNotation).'::' ) );
+						if( $leadEndChange == '12'.$n || $leadEndChange == '1' ) {
+							$this->calls = serialize( array( 'Bob' => '14'.$n.'::', 'Single' => (($this->stage()<6)?'123':'1234'.$n).'::' ) );
 						}
-						elseif( $leadEndChange == '1'.\Helpers\PlaceNotation::intToBell( $this->stage() - 1 ).$stageNotation ) {
-							if( $this->leadHeadCode() == 'm' ) {
-							$this->calls = serialize( array( 'Bob' => '14'.$stageNotation.'::', 'Single' => (($this->stage()<6)?'123':'1234'.$stageNotation).'::' ) );
-							}
-							else {
-								$this->calls = serialize( array( 'Bob' => '1'.\Helpers\PlaceNotation::intToBell( $this->stage() - 3 ).\Helpers\PlaceNotation::intToBell( $this->stage() - 2 ).'::', 'Single' => '1'.\Helpers\PlaceNotation::intToBell( $this->stage() - 3 ).\Helpers\PlaceNotation::intToBell( $this->stage() - 2 ).\Helpers\PlaceNotation::intToBell( $this->stage() - 1 ).$stageNotation.'::' ) );
-							}
+						elseif( $leadEndChange == '123' ) {
+							$this->calls = serialize( array( 'Bob' => '12'.$n.'::' ) );
 						}
 					}
 					break;
 				case 2:
-					// Bobs and singles for Grandsire-like lead ends
-					if( $leadEndChange == '1' && $postLeadEndChange == '3' ) {
-						$this->calls = serialize( array( 'Bob' => '3::-1', 'Single' => '3.23::-1' ) );
-					}
-					// Bobs and singles for Single Court-like lead ends
-					if( $leadEndChange == '1' && $postLeadEndChange == $stageNotation ) {
-						$this->calls = serialize( array( 'Bob' => '3::-1', 'Single' => '3.23::-1' ) );
+					// Bobs and singles for Grandsire and Single Court like lead ends
+					if( $leadEndChange == '1' && ( $postLeadEndChange == '3' || $postLeadEndChange == $n ) ) {
+						$this->calls = serialize( array( 'Bob' => '3.1::-1', 'Single' => '3.23::-1' ) );
 					}
 					break;
 				default:
