@@ -35,6 +35,34 @@ class PlaceNotation {
 	}
 	
 	/**
+	 * Returns a row containing rounds of a given stage
+	 * @param integer $stage
+	 * @return array
+	 */
+	public static function rounds( $stage ) {
+		return array_map( array( 'Helpers\PlaceNotation', 'intToBell' ), range( 1, $stage ) );
+	}
+	
+	/**
+	 * Tests whether two rows are equal
+	 * @param array $a
+	 * @param array $b
+	 * @return boolean
+	 */
+	public static function rowsEqual( $a, $b ) {
+		$i = count( $a );
+		if( $i != count( $b ) ) {
+			return false;
+		}
+		while( $i-- ) {
+			if( $a[$i] != $b[$i] ) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
 	 * Trims external places from a piece of notation
 	 * @param string $piece The piece of notation
 	 * @param integer $stage The stage that the notation will be applied on

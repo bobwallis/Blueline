@@ -62,7 +62,7 @@ class Method extends Model {
 	public function firstLead() {
 		if( !$this->firstLead ) {
 			if( $this->notation() && $this->stage() ) {
-				$this->firstLead = \Helpers\PlaceNotation::apply( $this->notationPermutations(), array_map( array( 'Helpers\PlaceNotation', 'intToBell' ), range( 1, $this->stage() ) ) );
+				$this->firstLead = \Helpers\PlaceNotation::apply( $this->notationPermutations(), \Helpers\PlaceNotation::rounds( $this->stage() ) );
 			}
 		}
 		return $this->firstLead? : array();
@@ -91,6 +91,21 @@ class Method extends Model {
 			}
 		}
 		return $this->leadHead? : '';
+	}
+	
+	public function leadHeads() {
+		if( !$this->leadHeads ) {
+			$rounds = \Helpers\PlaceNotation::rounds( $this->stage() );
+			$tmp = str_split( $this->leadHead() );
+			$leadHeadPermutation = array_map( function( $b ) { return \Helpers\PlaceNotation::bellToInt( $b ) - 1; }, $tmp );
+			$leadHeads = array( $tmp );
+			while( !\Helpers\PlaceNotation::rowsEqual( $rounds, $tmp ) ) {
+				$tmp = \Helpers\PlaceNotation::permute( $tmp, $leadHeadPermutation );
+				array_push( $leadHeads, $tmp );
+			}
+			$this->leadHeads = $leadHeads;
+		}
+		return $this->leadHeads? : array();
 	}
 
 	public function fchGroups() {
@@ -291,6 +306,56 @@ class Method extends Model {
 			$this->calls = $calls;
 		}
 		return $this->calls? : array();
+	}
+
+	public function callingPositions() {
+		if( !$this->callingPositions ) {
+			$stage = $this->stage();
+			$calls = $this->calls();
+			$lengthOfLead = $this->lengthOfLead();
+			if( $stage < 6 || empty( $calls ) || !isset( $calls['Bob'] ) ) {
+				$this->callingPositions = array();
+			}
+			else {
+				// Calling positions for calls at lead ends (Home, Wrong and so forth)
+				$bobNotation = \Helpers\PlaceNotation::explodedToPermutations( $stage, \Helpers\PlaceNotation::explode( $calls['Bob']['notation'] ), $stage );
+				if( $calls['Bob']['every'] == $lengthOfLead && $calls['Bob']['from'] == 0 && count( $bobNotation ) == 1 ) {
+					$leadHeads = $this->leadHeads();
+					// Work out what the lead end of a bobbed lead looks like
+					$notation = $this->notationPermutations();
+					$notation[$lengthOfLead-1] = $bobNotation[0];
+					$bobbedLead = \Helpers\PlaceNotation::apply( $notation, \Helpers\PlaceNotation::rounds( $this->stage() ) );
+					$bobbedLeadHeadPermutation = array_map( function( $b ) { return \Helpers\PlaceNotation::bellToInt( $b ) - 1; }, array_pop( $bobbedLead ) );
+					// Collect an array of what happens at each lead if a bob is called
+					$bobbedLeadHeads = array( \Helpers\PlaceNotation::permute( \Helpers\PlaceNotation::rounds( $stage ), $bobbedLeadHeadPermutation ) );
+					for( $i = 1; $i < count( $leadHeads ); $i++ ) {
+						array_push( $bobbedLeadHeads, \Helpers\PlaceNotation::permute( $leadHeads[$i-1], $bobbedLeadHeadPermutation ) );
+					}
+					// Convert the array of lead heads into calling position names
+					$this->callingPositions = array( 'from' => 0, 'every' => $lengthOfLead, 'titles' => array_map( function( $leadEnd ) use( $stage ) {
+						$position = array_search( \Helpers\PlaceNotation::intToBell( $stage ), $leadEnd );
+						switch( $position+1 ) {
+							case 2:
+								return 'I';
+							case 3:
+								return 'B';
+							case 4:
+								return 'F';
+							case $stage-2:
+								return 'M';
+							case $stage-1:
+								return 'W';
+							case $stage:
+								return 'H';
+							case 5:
+								return 'V';
+						}
+						return null;
+					}, $bobbedLeadHeads ) );
+				}
+			}
+		}
+		return $this->callingPositions? : array();
 	}
 
 	public function href( $absolute = false ) {

@@ -102,9 +102,8 @@ foreach( $this->get( 'methods', array() ) as $method ) : ?>
 					stage: <?=$method->stage()?>,
 					notation: <?= json_encode( $method->notationExpanded() )?>,
 					calls: <?= json_encode( $method->calls() )?>,
-<?php if( $method->ruleOffs() ) : ?>
+					callingPositions: <?= json_encode( $method->callingPositions() )?>,
 					ruleOffs: <?= json_encode( $method->ruleOffs() )?>
-<?php endif; ?>
 				} );
 			} );
 		//]]>

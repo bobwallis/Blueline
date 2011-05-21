@@ -45,6 +45,14 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 			this.method.ruleOffs = { from: 0, every: 0 };
 		}
 		
+		// Calling positions
+		if( typeof options.callingPositions === 'object' ) {
+			this.method.callingPositions = options.callingPositions;
+		}
+		else {
+			this.method.callingPositions = { from: 0, every: 0, titles: [] };
+		}
+		
 		// Set up reusable options objects
 		this.options = {}
 		
@@ -191,6 +199,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 			// Plain course
 			var plainCourseOptions = $.extend( true, {}, this.options.plainCourse, {
 				id: 'numbers'+this.id+'_plain',
+				callingPositions: this.method.callingPositions,
 				show: {
 					notation: false,
 					numbers: true,

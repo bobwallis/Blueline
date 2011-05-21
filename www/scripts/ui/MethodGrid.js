@@ -11,6 +11,7 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 	 * .notation: A notation object, containing text, parsed, exploded objects
 	 * .stage: An integer
 	 * .ruleOffs: An object containing 'from' and every' as integer values. (infers show.ruleOffs)
+	 * .callingPositions
 	 * .placeStarts: (infers show.placeStarts)
 	 * .show:
 	 *  .notation
@@ -19,6 +20,7 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 	 *  .ruleOffs
 	 *  .placeStarts
 	 *  .numbers
+	 *  .callingPositions
 	 * .display
 	 *  .numberOfLeads
 	 *  .numberOfColumns
@@ -32,7 +34,7 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 		$.extend( true, this, options );
 		
 		// Set unset show options
-		['notation', 'title', 'lines', 'ruleOffs', 'placeStarts', 'numbers'].forEach( function( e ) {
+		['notation', 'title', 'lines', 'ruleOffs', 'placeStarts', 'numbers', 'callingPositions'].forEach( function( e ) {
 			if( typeof this.show[e] !== 'boolean' ) {
 				this.show[e] = (typeof this[e] !== 'undefined' || typeof this.display[e] !== 'undefined')? true : false;
 			}
@@ -227,6 +229,27 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 							'fill': '#000',
 							'd': textPath
 						} );
+					}
+					
+					// Draw calling positions
+					if( this.show.callingPositions && typeof this.callingPositions.every == 'number' && typeof this.callingPositions.from == 'number' && typeof this.callingPositions.titles.length == 'number' ) {
+						var rowsPerColumn = this.display.leadsPerColumn * this.notation.parsed.length;
+						for( var i = 0; i < this.callingPositions.titles.length; ++i ) {
+							if( this.callingPositions.titles[i] !== null ) {
+								var rowInMethod = this.callingPositions.from + ( this.callingPositions.every * (i+1) ) - 2,
+									row = rowInMethod % rowsPerColumn,
+									column = Math.floor( rowInMethod/rowsPerColumn );
+								paper.add( 'text', {
+									content: '-'+this.callingPositions.titles[i],
+									x: (column*totalRowAndColumnWidth)+this.display.dimensions.row.x+3,
+									y: (row+0.5)*this.display.dimensions.row.y,
+									fill: '#000',
+									'font-size': '10px',
+									'font-family': 'sans-serif',
+									'dominant-baseline': 'central'
+								} );
+							}
+						}
 					}
 				
 					// Append the paper to the appropriate container
