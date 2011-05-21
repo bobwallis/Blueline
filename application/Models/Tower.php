@@ -74,16 +74,16 @@ class Tower extends Model {
 		return $this->practiceNotes? : '';
 	}
 	public function groundFloor() {
-		return $this->groundFloor? true : false;
+		return (boolean) $this->groundFloor;
 	}
 	public function toilet() {
-		return $this->toilet? true : false;
+		return (boolean) $this->toilet;
 	}
 	public function unringable() {
-		return $this->unringable? true : false;
+		return (boolean) $this->unringable;
 	}
 	public function simulator() {
-		return $this->simulator? true : false;
+		return (boolean) $this->simulator;
 	}
 	public function overhaulYear() {
 		return $this->overhaulYear? : 0;

@@ -22,6 +22,18 @@ class Model {
 	}
 
 	public function __set( $key, $value ) {
+		// BIT fields get returned as binary data, convert them to booleans here
+		if( is_string( $value ) && strlen( $value ) == 1 ) {
+			switch( bin2hex( $value ) ) {
+				case "00":
+					$value = false;
+					break;
+				case "01":
+					$value = true;
+					break;
+			}
+		}
+		
 		$this->data[$key] = $value;
 	}
 	function __get( $key ) {

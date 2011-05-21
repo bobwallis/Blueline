@@ -161,31 +161,31 @@ class Method extends Model {
 			}
 			$this->little = ( max( $positions ) - min( $positions ) ) < ( $this->stage() - 1 );
 		}
-		return ($this->little === true)? true : false;
+		return (boolean) $this->little;
 	}
 
 	public function differential() {
-		return ($this->differential === true)? true : false;
+		return (boolean) $this->differential;
 	}
 
 	public function plain() {
-		return ($this->plain === true)? true : false;
+		return (boolean) $this->plain;
 	}
 
 	public function trebleDodging() {
-		return ($this->trebleDodging === true)? true : false;
+		return (boolean) $this->trebleDodging;
 	}
 
 	public function palindromic() {
-		return ($this->palindromic === true)? true : false;
+		return (boolean) $this->palindromic;
 	}
 
 	public function doubleSym() {
-		return ($this->doubleSym === true)? true : false;
+		return (boolean) $this->doubleSym;
 	}
 
 	public function rotational() {
-		return ($this->rotational === true)? true : false;
+		return (boolean) $this->rotational;
 	}
 
 	public function firstTowerbellPeal_date() {
