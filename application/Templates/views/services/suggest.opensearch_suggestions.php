@@ -1,10 +1,11 @@
 <?php
 namespace Blueline;
 use Pan\View;
+use Flourish/fJSON;
 
 View::cache( true );
 
-echo json_encode( array(
+echo fJSON::encode( array(
 	$this->get( 'q' ),
 	$this->get( 'suggestions[queries]' ),
 	array(),

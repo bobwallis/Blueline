@@ -1,9 +1,8 @@
 <?php
 namespace Blueline;
-
-$baseURL = $this->get( 'site[baseURL]' );
+use Flourish/fXML;
 ?>
-	<Image height="16" width="16" type="image/x-icon"><?=$baseURL?>/favicon.ico</Image>
+	<Image height="16" width="16" type="image/x-icon"><?=fXML::encode( $this->get( 'site[baseURL]' ).'/favicon.ico' )?></Image>
 	<Contact>blueline@rsw.me.uk</Contact>
 	<AdultContent>false</AdultContent>
 	<Language>*</Language>

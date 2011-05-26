@@ -1,5 +1,6 @@
 <?php
 namespace Blueline;
+use Flourish\fXML;
 
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
 ?>

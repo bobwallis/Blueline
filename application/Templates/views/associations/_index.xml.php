@@ -1,6 +1,7 @@
 <?php
 namespace Blueline;
 use Pan\View;
+use Flourish\fXML;
 
 View::cache( true );
 
@@ -9,11 +10,11 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"; ?>
 <?php
 foreach( $this->get( 'associations', array() ) as $association ) {
 	echo "\t<association"
-		. ($association->abbreviation()?' abbreviation="'.htmlentities( $association->abbreviation() ).'"':'')
-		. ($association->link()?' link="'.htmlentities( $association->link() ).'"':'')
+		. ($association->abbreviation()?' abbreviation="'.fXML::encode( $association->abbreviation() ).'"':'')
+		. ($association->link()?' link="'.fXML::encode( $association->link() ).'"':'')
 		. ($association->towerCount()?' towerCount="'.$association->towerCount().'"':'')
 		. '>'
-		. htmlentities( $association->name() )
+		. fXML::encode( $association->name() )
 		. "</association>\n";
 }
 ?>

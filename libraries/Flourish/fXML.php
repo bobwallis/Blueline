@@ -22,7 +22,7 @@ namespace Flourish;
  * @changes    1.0.0b2  Added instance functionality for reading of XML files [wb, 2009-09-01]
  * @changes    1.0.0b   The initial implementation [wb, 2008-01-13]
  */
-class fXML implements ArrayAccess
+class fXML implements \ArrayAccess
 {
 	// The following constants allow for nice looking callbacks to static methods
 	const encode     = 'fXML::encode';
