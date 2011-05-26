@@ -12,7 +12,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
 	<methodSet>
 <?php foreach( $this->get( 'methods', array() ) as $method ) : ?>
 		<method>
-			<stage><?php=$method->stage()?></stage>
+			<stage><?=$method->stage()?></stage>
 			<notation><?=$method->notation()?></notation>
 			<title><?=$method->title()?></title>
 			<classification><?=$method->classification()?></classification>
