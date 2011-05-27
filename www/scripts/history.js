@@ -195,7 +195,8 @@ require( [ 'helpers/History', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 	// Capture changes to input fields
 	var historyChange = function( e ) {
 		var input = $( e.target );
-		if( [13,16,17,27,33,34,35,36,37,38,39,40,45,91].indexOf( e.which ) !== -1 ) { // Don't fire for various non-character keys
+		// Don't fire for various non-character keys, or if the input has been focussed by a '/' press
+		if( [13,16,17,27,33,34,35,36,37,38,39,40,45,91].indexOf( e.which ) !== -1 || ( e.which === 191 && input.val().indexOf( '/' ) === -1 ) ) {
 			return true;
 		}
 		if( input.val() === '' ) {

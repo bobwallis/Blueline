@@ -1,7 +1,7 @@
 ul.tabBar {
 	display: block;
 	clear: both;
-	margin: 10px 0 -10px 0;
+	margin: 10px 0 -10px 0 !important;
 	height: 21px;
 	font-size: 11px;
 	text-rendering: optimizeLegibility;

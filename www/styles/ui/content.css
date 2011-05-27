@@ -49,11 +49,8 @@ section#content section:first-child header { border-top: 0; }
 		padding-left: 10px;
 		margin-bottom: 10px;
 	}
-	#content ol {
-		margin: 0 10px 5px 0;
-	}
-	#content ul ol {
-		margin-left: 10px;
+	#content ol, #content ul {
+		margin-bottom: 10px;
 	}
 
 .wallOfText {
@@ -75,19 +72,19 @@ section#content section:first-child header { border-top: 0; }
 		font-size: 15px;
 		font-weight: bold;
 		line-height: 16px;
-		margin: 0 5px 2px 0;
+		margin: 0 0 2px 0;
 	}
 	#content h3 {
 		font-size: 12px;
 		font-weight: bold;
 		line-height: 15px;
-		margin: 0 5px 2px 5px;
+		margin: 0 0 2px 5px;
 	}
 	#content h4 {
 		font-size: 11px;
 		font-weight: bold;
 		line-height: 15px;
-		margin: 0 5px 10px 25px;
+		margin: 0 0 10px 25px;
 	}
 	#content p {
 		margin-bottom: 5px;
@@ -96,8 +93,8 @@ section#content section:first-child header { border-top: 0; }
 		padding-left: 5px;
 		margin-bottom: 5px;
 	}
-	#content ol {
-		margin: 0 12px 5px 12px;
+	#content ol, #content ul {
+		margin-bottom: 5px;
 	}
 }
 
@@ -107,13 +104,24 @@ section#content section:first-child header { border-top: 0; }
 	padding: 0;
 	color: #555;
 	list-style: none;
+	margin-left: -8px;
 }
+	.searchResults .searchResults {
+		margin-left: 0;
+	}
 	.searchResults li {
-		padding: 4px 0;
-		margin: 0;
-		padding: 2px 0;
+		padding: 2px 0 2px 8px;
 		margin: 0;
 	}
+		.searchResults li.selected {
+			background-repeat: no-repeat;
+			background-position: left center;
+			background-image: url(../../images/selectIndicator.png);
+			background-image: none,url(../../images/selectIndicator.svg), url(../../images/selectIndicator.png);
+		}
+		.searchResults li.selected a {
+			border-bottom-color: #29404C;
+		}
 		.searchResults li:first-child {
 			padding-top: 0;
 		}
