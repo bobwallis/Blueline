@@ -1,25 +1,24 @@
 /*global require: false, define: false, google: false */
-define( ['../helpers/jquery.hotkeys.js'], function() {
+define( ['../helpers/jquery.hotkeys.js', '../ui/], function() {
 	var $document = $( document );
 	var Hotkeys = {
-		add: function( keys, fn ) {
+		addGlobal: function( keys, fn ) {
 			 $document.bind( 'keydown', keys, fn );
+		},
+		add: function( el, keys, fn ) {
+			$( el ).bind( 'keydown', keys, fn );
 		}
 	};
 	
 	// Add hotkeys to click paging links
-	Hotkeys.add( 'home', function() {
-		$( "div.pagingLinks:first a:contains('1'):first" ).click();
-	} );
-	Hotkeys.add( 'pageup', function() {
-		$( "div.pagingLinks:first a:contains('«'):first" ).click();
-	} );
-	Hotkeys.add( 'pagedown', function() {
-		$( "div.pagingLinks:first a:contains('»'):first" ).click();
-	} );
-	Hotkeys.add( 'end', function() {
-		$( "div.pagingLinks:first :not(:contains('»')):last" ).click();
-	} );
+	var clickFirst = function() { $( "div.pagingLinks:first a:contains('1'):first" ).click(); },
+		clickLast = function() { $( "div.pagingLinks:first :not(:contains('»')):last" ).click(); },
+		clickPrevious = function() { $( "div.pagingLinks:first a:contains('«'):first" ).click(); },
+		clickNext = function() { $( "div.pagingLinks:first a:contains('»'):first" ).click(); };
+	Hotkeys.addGlobal( 'home', clickFirst );
+	Hotkeys.addGlobal( 'pageup', clickPrevious );
+	Hotkeys.addGlobal( 'pagedown', clickNext );
+	Hotkeys.addGlobal( 'end', clickLast );
 	
 	return Hotkeys;
 } );
