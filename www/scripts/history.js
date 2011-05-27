@@ -186,6 +186,7 @@ require( [ 'helpers/History', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 				handler = historyMatch( href );
 			if( handler !== false ) {
 				e.preventDefault();
+				$( ':focus', $form ).blur();
 				History.pushState( { type: 'submit' }, null, href );
 			}
 		}
