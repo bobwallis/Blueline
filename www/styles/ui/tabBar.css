@@ -4,6 +4,7 @@ ul.tabBar {
 	margin: 10px 0 -10px 0;
 	height: 21px;
 	font-size: 11px;
+	text-rendering: optimizeLegibility;
 }
 	ul.tabBar li {
 		float: left;

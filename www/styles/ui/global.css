@@ -16,6 +16,7 @@ html, body {
 }
 h1, h2 {
 	font-family: Palatino, "Palatino Linotype", "Palatino LT STD", "Book Antiqua", Constantia, Georgia, serif;
+	text-rendering: optimizeLegibility;
 }
 .mono {
 	font-family: 'Droid Sans Mono', 'DejaVu Sans Mono', Consolas, monospace;

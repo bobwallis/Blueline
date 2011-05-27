@@ -58,6 +58,8 @@ section#content section:first-child header { border-top: 0; }
 
 .wallOfText {
 	max-width: 600px;
+	text-align: justify;
+	hyphens: auto; -moz-hyphens: auto; -webkit-hyphens: auto;
 }
 
 @media screen and (max-width: 480px) {
