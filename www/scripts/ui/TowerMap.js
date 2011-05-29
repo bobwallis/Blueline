@@ -47,7 +47,7 @@ define( ['../plugins/google!maps/3/sensor=false', '../ui/Content'], function( go
 			noClear: true,
 			streetViewControl: true,
 			scaleControl: true,
-			fusionTable: 247449,
+			fusionTable: 916439,
 			fusionTableQuery: ''
 		};
 
@@ -95,7 +95,7 @@ define( ['../plugins/google!maps/3/sensor=false', '../ui/Content'], function( go
 					this.map.mapTypes.set( 'osMap', new google.maps.ImageMapType( OSMapOptions ) );
 
 					// Add the Fusion Table layer
-					this.fusionTableLayer = new google.maps.FusionTablesLayer( TowerMapOptions.fusionTable, { query: TowerMapOptions.fusionTableQuery , suppressInfoWindows: true } );
+					this.fusionTableLayer = new google.maps.FusionTablesLayer( { map: this.map, suppressInfoWindows: true } );
 					this.fusionTableInfoWindow = new google.maps.InfoWindow( { maxWidth: 400 } );
 					var map = this.map, infoWindow = this.fusionTableInfoWindow; // Needed in the event listener
 					google.maps.event.addListener( this.fusionTableLayer, 'click', function( e ) {
@@ -109,21 +109,22 @@ define( ['../plugins/google!maps/3/sensor=false', '../ui/Content'], function( go
 						infoWindow.setContent( content );
 						infoWindow.open( map );
 					} );
-					this.fusionTableLayer.setMap( this.map );
 					TowerMapInitialised = true;
 				}
 
-				// If the tower map has already been initialised, then modify the existing one
 				// Close the info window
 				this.fusionTableInfoWindow.close();
+				
 				// Set zoom
 				if( typeof options.zoom === 'number' ) {
 					this.map.setZoom( options.zoom );
 				}
+				
 				// Set center
 				if( typeof options.center === 'object' ) {
 					this.map.setCenter( options.center );
 				}
+				
 				// Set bounding box
 				if( typeof options.fitBounds === 'object' ) {
 					if( options.fitBounds.getNorthEast().equals( options.fitBounds.getSouthWest() ) ) {
@@ -134,6 +135,7 @@ define( ['../plugins/google!maps/3/sensor=false', '../ui/Content'], function( go
 						TowerMap.map.fitBounds( options.fitBounds );
 					}
 				}
+				
 				// If no center or fitBounds have been requested, try to center on the user's current location
 				if( typeof options.center === 'undefined' && typeof options.fitBounds === 'undefined' && navigator.geolocation ) {
 					var map = this.map;
@@ -143,13 +145,15 @@ define( ['../plugins/google!maps/3/sensor=false', '../ui/Content'], function( go
 						map.setZoom( 13 );
 					} );
 				}
+				
 				// Set fusion table layer query
 				if( typeof options.fusionTableQuery === 'string' ) {
-					this.fusionTableLayer.setQuery( 'SELECT location from 916439 WHERE '+options.fusionTableQuery );
+					this.fusionTableLayer.setOptions( { query: { from: TowerMapOptions.fusionTable, select: 'location', where: options.fusionTableQuery } } );
 				}
 				else {
-					this.fusionTableLayer.setQuery( 'SELECT location from 916439 WHERE 1=1' );
+					this.fusionTableLayer.setOptions( { query: { from: TowerMapOptions.fusionTable, select: 'location' } } );
 				}
+				
 				// Add a marker over the user's current location
 				if( navigator.geolocation ) {
 					var currentPositionMarker = false;
