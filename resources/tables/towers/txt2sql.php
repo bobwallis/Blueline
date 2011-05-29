@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS towersFusion (
   toilet bit,
   unringable bit,
   simulator bit,
-  marker varchar(12)
+  marker varchar(63)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8, COMMENT = 'Export into CSV for importing into Google Fusion Tables';
 
 -- Set up associations_towers table
@@ -282,11 +282,14 @@ foreach( $dove->data as $tower ) {
 	// fusionTowers INSERT
 	if( isset( $rowData['latitude'], $rowData['longitude'] ) ) {
 		$rowData['location'] = '\''.$rowData['latitude'].','.$rowData['longitude'].'\'';
-		$rowData['marker'] = ( isset( $rowData['unringable'] ) == 1 )? "'small_red'" : (
-			( $rowData['bells'] < 6 )? "'small_yellow'" : (
-			( $rowData['bells'] < 8 )? "'small_green'" : (
-			( $rowData['bells'] < 10 )? "'small_blue'" : 
-			"'small_purple'" ) ) );
+		$rowData['marker'] = ( isset( $rowData['unringable'] ) == 1 )? "'measle_white'" : (
+			( $rowData['bells'] <= 4 )? "'measle_brown'" : (
+			( $rowData['bells'] == 5 )? "'small_yellow'" : (
+			( $rowData['bells'] == 6 )? "'measle_turquoise'" : (
+			( $rowData['bells'] <= 8 )? "'small_green'" : (
+			( $rowData['bells'] <= 10 )? "'small_blue'" : (
+			( $rowData['bells'] <= 12 )? "'small_purple'" : (
+			"'small_red'" ) ) ) ) ) ) );
 		unset( $rowData['gridReference'], $rowData['latitude'],$rowData['longitude'], $rowData['latitudeSatNav'], $rowData['longitudeSatNav'], $rowData['postcode'], $rowData['countryCode'], $rowData['altName'], $rowData['weightApprox'], $rowData['hz'], $rowData['practiceStart'], $rowData['practiceNotes'], $rowData['overhaulYear'], $rowData['contractor'], $rowData['tuned'], $rowData['extraInfo'], $rowData['webPage'] );
 		echo 'INSERT INTO towersFusion ('.implode( ', ', array_keys( $rowData ) ).') VALUES ('.implode( ', ', $rowData ).");\n";
 	}
