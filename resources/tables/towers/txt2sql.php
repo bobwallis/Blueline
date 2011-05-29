@@ -281,6 +281,7 @@ foreach( $dove->data as $tower ) {
 	
 	// fusionTowers INSERT
 	if( isset( $rowData['latitude'], $rowData['longitude'] ) ) {
+		$rowData['affiliations'] = "'".sqlite_escape_string( $tower['Affiliations'] )."'";
 		$rowData['location'] = '\''.$rowData['latitude'].','.$rowData['longitude'].'\'';
 		$rowData['marker'] = ( isset( $rowData['unringable'] ) == 1 )? "'measle_white'" : (
 			( $rowData['bells'] <= 4 )? "'measle_brown'" : (
