@@ -267,7 +267,7 @@ foreach( $dove->data as $tower ) {
 	$rowData['practiceNotes'] = "'".sqlite_escape_string( $tower['PrXF'] )."'";
 	$rowData['groundFloor'] = empty( $tower['GF'] )? 0 : 1;
 	$rowData['toilet'] = empty( $tower['Toilet'] )? 0 : 1;
-	$rowData['unringable'] = empty( $tower['Unringable'] )? 0 : 1;
+	$rowData['unringable'] = empty( $tower['UR'] )? 0 : 1;
 	$rowData['simulator'] = empty( $tower['Simulator'] )? 0 : 1;
 	$rowData['overhaulYear'] = intval( $tower['OvhaulYr'] );
 	$rowData['contractor'] = "'".sqlite_escape_string( $tower['Contractor'] )."'";
