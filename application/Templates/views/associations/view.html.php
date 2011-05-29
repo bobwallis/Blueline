@@ -42,7 +42,7 @@ foreach( $this->get( 'associations', array() ) as $association ) : ?>
 			require( ['ui/TowerMap'], function( TowerMap ) {
 				TowerMap.set( {
 					fitBounds: new google.maps.LatLngBounds( <?php $bbox = $association->bbox(); echo "new google.maps.LatLng( {$bbox['lat_min']}, {$bbox['long_min']} ), new google.maps.LatLng( {$bbox['lat_max']}, {$bbox['long_max']} )"; ?> ),
-					fusionTableQuery: "SELECT location from 247449 WHERE affiliations contains '<?php echo $association->abbreviation(); ?>'"
+					fusionTableQuery: "affiliations contains '<?php echo $association->abbreviation(); ?>'"
 				} );
 			} );
 		//]]>

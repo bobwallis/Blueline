@@ -145,10 +145,26 @@ define( ['../plugins/google!maps/3/sensor=false', '../ui/Content'], function( go
 				}
 				// Set fusion table layer query
 				if( typeof options.fusionTableQuery === 'string' ) {
-					this.fusionTableLayer.setQuery( options.fusionTableQuery );
+					this.fusionTableLayer.setQuery( 'SELECT location from 916439 WHERE '+options.fusionTableQuery );
 				}
 				else {
-					this.fusionTableLayer.setQuery( 'SELECT location from 247449 WHERE 1=1' );
+					this.fusionTableLayer.setQuery( 'SELECT location from 916439 WHERE 1=1' );
+				}
+				// Add a marker over the user's current location
+				if( navigator.geolocation ) {
+					var currentPositionMarker = false;
+					navigator.geolocation.watchPosition( function( position ) {
+						if( currentPositionMarker === false ) {
+							currentPositionMarker = new google.maps.Marker( {
+								position: new google.maps.LatLng( position.coords.latitude, position.coords.longitude ),
+								map: map,
+								title: 'Your location'
+							} );
+						}
+						else {
+							currentPositionMarker.setPosition( new google.maps.LatLng( position.coords.latitude, position.coords.longitude ) );
+						}
+					} );
 				}
 			}
 		};
