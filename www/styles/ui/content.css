@@ -125,3 +125,10 @@ section#content section:first-child header { border-top: 0; }
 		.searchResults li:first-child {
 			padding-top: 0;
 		}
+		
+	
+@media screen and (max-width: 480px) {
+	.searchResults li {
+		padding: 4px 0 4px 8px;
+	}
+}

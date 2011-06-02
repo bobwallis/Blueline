@@ -21,13 +21,23 @@ div.line td {
 		vertical-align: top;
 	}
 td.gridNotation {
-	line-height: 14px;
 	font-size: 10px;
 	color: #666;
 	text-align: right;
-	padding: 7px 5px 7px 0;
+	padding-right: 5px;
 }
 td.gridTitle {
 	font-size: 13px;
 	padding-bottom: 3px;
+}
+
+
+@media screen and (max-width: 480px) {
+	td.gridNotation {
+		font-size: 9px;
+	}
+	td.gridTitle {
+		font-size: 11px;
+		padding-bottom: 0;
+	}
 }

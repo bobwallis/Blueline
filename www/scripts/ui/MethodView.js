@@ -159,13 +159,17 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 				}
 			}, this );
 			
+			// Choose a font size, and column padding
+			var numbersFontSize = ($window.width() < 500)? 12 : 14,
+				numbersColumnPadding = ($window.width() < 500)? 12 : 15;
+			
 			// Decide which bells get place starts drawn
 			var plainPlaceStarts = plainLines.map( function( l, i ) { return (l.stroke !== 'transparent' && this.method.huntBells.indexOf( i ) === -1)? i : -1; }, this ).filter( function( l ) { return l !== -1; } );
 			
 			// Determine the correct bell width
 			var bellWidth = (function() {
 				var testText = $( '<span class="mono">123456</span>' );
-				testText.css( { fontSize: '14px' } );
+				testText.css( { fontSize: numbersFontSize+'px' } );
 				$body.append( testText );
 				var bellWidth = testText.width() / 6;
 				testText.remove();
@@ -184,9 +188,9 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 					var leadsPerColumn = 1;
 					maxWidth = view.container.numbers.width();
 					// Check that the window isn't plenty big enough before bothering to look at adjusting
-					if( maxWidth <= 2*callWidth + 5 + (rowWidth + placeStartWidth + 15)*numberOfLeads ) {
+					if( maxWidth <= 2*callWidth + 5 + (rowWidth + placeStartWidth + numbersColumnPadding)*numberOfLeads ) {
 						for( leadsPerColumn = 1; leadsPerColumn < numberOfLeads; ++leadsPerColumn ) {
-							if( maxWidth > ((leadsPerColumn>1)?callWidth:numberOfCalls*callWidth) + 5 + Math.ceil( numberOfLeads/leadsPerColumn )*(15 + rowWidth + placeStartWidth ) ) {
+							if( maxWidth > ((leadsPerColumn>1)?callWidth:numberOfCalls*callWidth) + 5 + Math.ceil( numberOfLeads/leadsPerColumn )*(numbersColumnPadding + rowWidth + placeStartWidth ) ) {
 								break;
 							}
 						}
@@ -208,7 +212,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 				display: {
 					numberOfLeads: this.method.numberOfLeads,
 					leadsPerColumn: leadsPerColumn,
-					dimensions: { rowHeight: 14, bellWidth: bellWidth, columnPadding: 15 },
+					dimensions: { rowHeight: numbersFontSize, bellWidth: bellWidth, columnPadding: numbersColumnPadding },
 					lines: plainLines,
 					numbers: plainLines.map( function( l ) { return (l.stroke !== 'transparent')? 'transparent' : false; } ),
 					placeStarts: plainPlaceStarts
@@ -246,7 +250,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 					},
 					display: {
 						numberOfLeads: 1,
-						dimensions: { rowHeight: 14, bellWidth: bellWidth },
+						dimensions: { rowHeight: numbersFontSize, bellWidth: bellWidth },
 						lines: callLines[i],
 						numbers: callLines[i].map( function( l ) { return (l.stroke !== 'transparent')? 'transparent' : false; } )
 					}
@@ -266,6 +270,8 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 					stroke: (this.method.huntBells.indexOf( i ) !== -1)? '#D11' : colours[j++] || colours[j = 0, j++]
 				} );
 			}
+			// Decide how big to draw them
+			var gridDimensions = ($window.width() > 600)? { rowHeight: 14, bellWidth: 12 } : { rowHeight: 11, bellWidth: 9 };
 			
 			// Plain lead
 			this.container.grid.append( new MethodGrid( $.extend( true, {}, this.options.plainCourse, {
@@ -276,7 +282,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 					lines: true
 				},
 				display: {
-					dimensions: { rowHeight: 14, bellWidth: 12 },
+					dimensions: gridDimensions,
 					lines: lines
 				}
 			} ) ).container );
@@ -289,7 +295,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 						lines: true
 					},
 					display: {
-						dimensions: { rowHeight: 14, bellWidth: 12 },
+						dimensions: gridDimensions,
 						lines: lines
 					}
 				} ) ).container );

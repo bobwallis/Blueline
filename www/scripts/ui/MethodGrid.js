@@ -289,7 +289,7 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 				numbersTable.css( {
 					marginTop: paperNeeded? '-'+this.display.dimensions.paper.y+'px' : 0,
 					lineHeight: this.display.dimensions.row.y+'px',
-					fontSize: '14px'
+					fontSize: this.display.dimensions.row.y+'px'
 				} );
 				
 				// Append the text table to the appropriate container
