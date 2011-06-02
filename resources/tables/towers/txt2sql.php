@@ -212,11 +212,29 @@ foreach( $dove->data as $tower ) {
 		case '(Ireland)':
 			$tower['Diocese'] = 'Ireland';
 			break;
+		case '(Scotland)':
+			$tower['Diocese'] = 'Scotland';
+			break;
 		case 'ChConsvnTrust':
 			$tower['Diocese'] = 'Churches Conservation Trust';
 			break;
+		case 'LocalAuthority':
+			$tower['Diocese'] = 'Local Authority';
+			break;
+		case 'Trust (nonCCT)':
+			$tower['Diocese'] = 'Trust (non-CCT)';
+			break;
 		case 'St Eds and Ips':
 			$tower['Diocese'] = 'St Edmundsbury and Ipswich';
+			break;
+		case 'RiponAndLeeds':
+			$tower['Diocese'] = 'Ripon and Leeds';
+			break;
+		case 'SouthwellNottm':
+			$tower['Diocese'] = 'Southwell and Nottingham';
+			break;
+		case 'SwanseaBrecon':
+			$tower['Diocese'] = 'Swansea and Brecon';
 			break;
 	}
 	
