@@ -17,18 +17,22 @@ define( ['./Header', './Content', './TowerMap'], function( Header, Content, Towe
 				Content.clear();
 			}
 			else if( typeof options.content === 'object' && typeof options.content.url === 'string' ) {
-				// Abort existing AJAX request
-				if( AJAXContentRequest && typeof AJAXContentRequest.abort === 'function' ) {
-					AJAXContentRequest.abort();
-					Content.loading.hide();
-					AJAXContentRequest = null;
-				}
-				// Try to get content for the URL from localStorage
-				var content = localStorage.getItem( options.content.url.replace( baseURL, '' ) );
-				if( content !== null ) {
+				var setContent = function( content, status,  jqXHR ) {
+					// Don't set the content of aborted requests
+					if( typeof jqXHR === 'object' && typeof jqXHR._bluelineAborted === 'boolean' && jqXHR._bluelineAborted === true ) {
+						return;
+					}
 					Content.set( content );
 					if( typeof options.content.after === 'function' ) { options.content.after(); }
 				}
+				// Only cache the result of the last AJAX request
+				if( AJAXContentRequest && typeof AJAXContentRequest.abort === 'function' ) {
+					AJAXContentRequest._bluelineAborted = true;
+					Content.loading.hide();
+				}
+				// Try to get content for the URL from localStorage
+				var content = localStorage.getItem( options.content.url.replace( baseURL, '' ) );
+				if( content !== null ) { setContent( content ); }
 				// Otherwise request it
 				else {
 					// Don't clear existing content if asked not to
@@ -40,16 +44,16 @@ define( ['./Header', './Content', './TowerMap'], function( Header, Content, Towe
 						url: options.content.url,
 						dataType: 'html',
 						data: 'snippet=1',
-						success: function( content ) {
-							Content.set( content );
-							if( typeof options.content.after === 'function' ) { options.content.after(); }
-							localStorage.setItem( options.content.url.replace( baseURL, '' ), content );
-						},
+						success: setContent,
 						error: function( e ) {
 							if( e.statusText !== 'abort' ) {
 								location.href = options.content.url;
 							}
 						}
+					} )
+					// Cache the result of the request in localStorage
+					.success( function( content ) {
+						localStorage.setItem( options.content.url.replace( baseURL, '' ), content );
 					} );
 				}
 			}
