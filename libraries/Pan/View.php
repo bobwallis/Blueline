@@ -128,6 +128,7 @@ class View {
 			throw new Exception( 'Element \''.$name.'\' not found', 404 );
 		}
 		$element = new fTemplating( TEMPLATE_PATH, $elementPath );
+		$element->enablePHPShortTags( Config::get( 'site.development' )?'development':'production', CACHE_PATH.'/templates' );
 		$element->set( $variables );
 		$element->set( 'site', Config::get( 'site' ) );
 		self::$_template->set( '_'.$name, $element );

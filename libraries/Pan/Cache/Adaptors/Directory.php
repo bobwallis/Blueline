@@ -75,10 +75,10 @@ class Directory implements Adaptor {
 		if( $this->_canSet == false ) { return false; }
 		if( is_string( $key ) && strpos( $key, '..' ) === false ) {
 			// Store the $value under $key
-			$filename = $this->_location . $key;
+			$filename = $this->_location . ltrim( $key, '/' );
 			$directory = dirname( $filename );
 			if( !is_dir( $directory ) ) {
-				mkdir( $directory, 0777, true );
+				$directory = fDirectory::create( $directory );
 			}
 			file_put_contents( $filename, $this->_serialize? serialize( $value ) : $value );
 			// Set an expiry time in the metadata cache if we can

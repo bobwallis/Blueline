@@ -6,8 +6,6 @@ View::cache( 43200 );
 ?>
 CACHE MANIFEST
 # <?=$this->get( 'timestamp' )."\n"?>
-NETWORK:
-*
 CACHE:
 /
 <?php foreach( $this->get( 'resources' ) as $resource ) : ?>

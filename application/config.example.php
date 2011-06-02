@@ -19,6 +19,10 @@ Config::set( 'caches', array(
 			'data_store' => CACHE_PATH.'/views/metadata',
 		),
 		'serialize' => false
+	),
+	'template' => array(
+		'type' => 'directory',
+		'data_store' => CACHE_PATH.'/templates'
 	)
 ) );
 

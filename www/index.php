@@ -19,6 +19,7 @@ $classLoader_Helpers = new ClassLoader( 'Helpers', LIBRARY_PATH );
 try {
 	// Load application configuration
 	require( APPLICATION_PATH.'/config.php' );
+	Cache::initialise();
 	if( !Config::get( 'site.development' ) ) {
 		// Check for a cached view
 		$cachedPage = Cache::get( 'view', View::id() );
