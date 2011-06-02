@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false */
-define( ['../helpers/jquery.hotkeys.js'], function() {
+define( ['../helpers/jquery.hotkeys'], function() {
 	var $document = $( document ),
 		$window = $( window );
 	var Hotkeys = {
