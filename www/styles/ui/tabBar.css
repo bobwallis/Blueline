@@ -34,7 +34,7 @@ ul.tabBar {
 	ul.tabBar {
 		height: 21px;
 		font-size: 11px;
-		margin: 5px 0 -5px 0;
+		margin: 5px 0 -5px 0 !important;
 	}
 		ul.tabBar li {
 			margin-right: 3px;
