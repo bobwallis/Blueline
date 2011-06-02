@@ -5,7 +5,7 @@ if( !\Pan\Response::snippet() ) :
 	$site = $this->get( 'site' );
 ?>
 <!doctype html>
-<?php echo ( (!$site['development'] && $this->get( 'manifest', false )&& false)? '<html lang="en-gb" manifest="/site.manifest">' : '<html lang="en-gb">' )."\n" ?>
+<?php echo ((!$site['development'] && $this->get( 'manifest', false ))? '<html lang="en-gb" manifest="/site.manifest">' : '<html lang="en-gb">' )."\n" ?>
 	<head>
 		<meta charset="utf-8" />
 		<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
