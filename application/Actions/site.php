@@ -39,8 +39,7 @@ $timestamp = max( array_map( 'filemtime', $resources ) );
 $resources = array_map( function( $p ) { return str_replace( WWW_PATH, '', $p ); }, $resources );
 
 // Add external files
-$resources[] = 'http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js';
-$resources[] = 'http://www.google.com/jsapi?key=ABQIAAAAsHJGcx2ntv993hmfnp9RUxSKTQnQ5SFZ1y3T8JIF3ZKhvws7bhQeEX_bZiQrw9Fb925kIkJLnnQfkA&callback=define';
+$resources[] = 'http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js';
 
 View::set( 'resources', $resources );
 View::set( 'timestamp', $timestamp );
