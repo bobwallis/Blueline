@@ -7,7 +7,7 @@
 	modules: [
 		{
 			name: "history",
-			exclude: ["helpers/can"]
+			exclude: ["helpers/Can"]
 		},
 		{
 			name: "main",
@@ -17,11 +17,11 @@
 		},
 		{
 			name: "ui/TowerMap",
-			exclude: ["helpers/can"]
+			exclude: ["helpers/Can"]
 		},
 		{
 			name: "ui/MethodView",
-			exclude: ["helpers/can"]
+			exclude: ["helpers/Can"]
 		}
 	]
 } )
