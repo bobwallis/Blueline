@@ -42,7 +42,7 @@ $i = 0;
 	<div class="content">
 		<section id="content_map<?=$i?>" class="towerStaticMap">
 			<noscript><h2>Map</h2></noscript>
-			<img width="320px" height="400px" src="http://maps.google.com/maps/api/staticmap?format=png&amp;size=320x400&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center=<?php echo "{$tower->latitude()},{$tower->longitude()}&amp;markers=size:small|color:red|{$tower->latitude()},{$tower->longitude()}"; ?>" />
+			<img width="310px" height="380px" src="http://maps.google.com/maps/api/staticmap?format=png&amp;size=310x380&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center=<?php echo "{$tower->latitude()},{$tower->longitude()}&amp;markers=size:small|color:red|{$tower->latitude()},{$tower->longitude()}"; ?>" />
 		</section>
 		<script>
 		//<![CDATA[
