@@ -10,3 +10,5 @@ CACHE:
 <?php foreach( $this->get( 'resources' ) as $resource ) : ?>
 <?=$resource."\n"?>
 <?php endforeach; ?>
+NETWORK:
+*
