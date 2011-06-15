@@ -1,7 +1,7 @@
 /*global require: false, define: false, google: false, History: false */
 require( [ 'helpers/History', 'ui/Content', 'ui/Header', 'ui/Page' ], function( History, Content, Header, Page ) {
 	// We'll need to know the base URL
-	var baseURL = location.href.replace( /^(.*)\/.*$/, '$1' );
+	var baseURL = location.protocol+'//'+location.host;
 
 	// Reusable options objects
 	var breadcrumbs = {
