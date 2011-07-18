@@ -11,7 +11,6 @@
 		},
 		{
 			name: "main",
-			includeRequire: true,
 			include: ["ui/TabBar"],
 			exclude: ["history"]
 		},

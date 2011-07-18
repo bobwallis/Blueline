@@ -4,7 +4,7 @@ dWhich=`which "$0"`
 d=`dirname "$dWhich"`
 
 # Execute RequireJS builder
-"$d/helpers/requirejs/build/build.sh" app.build.js
+node "$d/helpers/r.js" -o app.build.js
 
 # CSS
 # Remove unneeded files
@@ -18,7 +18,6 @@ mv "$d/../../www-build/styles" "$d/../../www/styles.built"
 
 # JS
 # Remove unneeded files
-rm "$d/../../www-build/scripts/require.js"
 rm -rf "$d/../../www-build/scripts/helpers"
 rm -rf "$d/../../www-build/scripts/plugins"
 rm "$d/../../www-build/scripts/ui/Hotkeys.js"

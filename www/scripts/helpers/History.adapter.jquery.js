@@ -5,7 +5,7 @@
  * @license New BSD License <http://creativecommons.org/licenses/BSD/>
  */
 
-// Closure
+
 define( function() {
 	// Localise Globals
 	var
