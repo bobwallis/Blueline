@@ -20,7 +20,7 @@ typedef long long longlong;
 extern "C" {
 	my_bool levenshteinRatio_init( UDF_INIT *initid, UDF_ARGS *args, char *message );
 	void levenshteinRatio_deinit( UDF_INIT *initid );
-	int levenshteinRatio( UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error );
+	longlong levenshteinRatio( UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error );
 }
 
 my_bool levenshteinRatio_init( UDF_INIT *initid, UDF_ARGS *args, char *message ) {
@@ -65,17 +65,17 @@ void levenshteinRatio_deinit( UDF_INIT *initid ) {
 	}
 }
 
-int levenshteinRatio( UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error ) {
+longlong levenshteinRatio( UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error ) {
 	const char *s = args->args[0];
 	const char *t = args->args[1];
 	int *d = (int*) initid->ptr;
 
 	longlong n, m;
 	int b, c, f, g, h, i, j, k, min;
-
+	
 	n = (s == NULL)? 0 : args->lengths[0];
 	m = (t == NULL)? 0 : args->lengths[1];
-
+	
 	if( n == 0 || m == 0 ) {
 		return 0;
 	}
@@ -92,11 +92,11 @@ int levenshteinRatio( UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *err
       	d[k * n] = k;
 		}
 
-		/* throughout these loops, g will be equal to i minus one */
+		/* g will be equal to i minus one */
 		g = 0;
 		for( i = 1; i < n; i++) {
 			k = i;
-			/* throughout the for j loop, f will equal j minus one */
+			/* f will equal j minus one */
 			f = 0;
 			for( j = 1; j < m; j++ ) {
 				h = k;
@@ -111,6 +111,7 @@ int levenshteinRatio( UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *err
 			}
 			g = i;
 		}
+		
 		return floor( 0.5 + ( (1-((float)d[k]/max(n,m))) * 100) );
 	}
 }
