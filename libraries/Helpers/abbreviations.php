@@ -24,6 +24,7 @@ $counties = array(
 	'Herts' => 'Hertfordshire',
 	'Hunts' => 'Huntingdonshire',
 	'IOW' => 'Isle of Wight',
+	'IoW' => 'Isle of Wight',
 	'Kent' => 'Kent',
 	'Lancs' => 'Lancashire',
 	'Leics' => 'Leicestershire',
