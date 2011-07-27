@@ -22,7 +22,7 @@ function longCounty( $lookup, array $array ) {
 	if( array_key_exists( $lookup, $array ) ) { return $array[$lookup]; 	}
 	elseif( in_array( $lookup, $array ) ) { return $lookup; }
 	else {
-		trigger_error( 'No full county for: '.$tower['County'], E_USER_ERROR );
+		trigger_error( 'No full county for: '.$lookup, E_USER_ERROR );
 	}
 }
 
