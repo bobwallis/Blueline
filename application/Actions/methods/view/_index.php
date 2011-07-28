@@ -40,7 +40,7 @@ $methods = array_map(
 );
 
 // If only one method has been requested, and it hasn't been found, then 404
-if( count( $methods ) == 0 || empty( $methods[0] ) ) {
+if( count( $methods ) == 0 || $methods[0]->isEmpty() ) {
 	throw new Exception( 'Method not found', 404 );
 }
 // If the URL could be neater, then redirect to the neater version

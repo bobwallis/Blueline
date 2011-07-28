@@ -26,7 +26,7 @@ $towers = array_map(
 );
 
 // If only one tower has been requested, and it hasn't been found, then 404
-if( count( $towers ) == 0 || empty( $towers[0] ) ) {
+if( count( $towers ) == 0 || $towers[0]->isEmpty() ) {
 	throw new Exception( 'Tower not found', 404 );
 }
 // If the URL could be neater, then redirect to the neater version
