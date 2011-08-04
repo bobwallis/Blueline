@@ -1,0 +1,3 @@
+BluelineCCCBRDataBundle_welcome:
+    pattern:  /
+    defaults: { _controller: BluelineCCCBRDataBundle:Pages:welcome }

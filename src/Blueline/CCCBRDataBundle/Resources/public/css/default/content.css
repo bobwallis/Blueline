@@ -6,7 +6,7 @@ section header {
 	background-color: #FAFAFA;
 	padding: 10px;
 }
-section#content section:first-child header { border-top: 0; }
+#content section:first-child header { border-top: 0; }
 
 @media screen and (max-width: 480px) {
 	section header {
