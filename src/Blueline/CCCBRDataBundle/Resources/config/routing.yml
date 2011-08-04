@@ -1,3 +1,9 @@
-BluelineCCCBRDataBundle_welcome:
+Blueline_welcome:
     pattern:  /
     defaults: { _controller: BluelineCCCBRDataBundle:Pages:welcome }
+
+Blueline_page:
+    pattern:  /{page}.{_format}
+    defaults: { _controller: BluelineCCCBRDataBundle:Pages:page, _format: html }
+    requirements:
+        page: about|copyright
