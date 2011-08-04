@@ -7,8 +7,11 @@ echo "Downloading new tower data..."
 curl --progress-bar --referer "http://dove.cccbr.org.uk" --user-agent "Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.224 Safari/534.10" -o "$d/data/dove.txt" "http://dove.cccbr.org.uk/downloads.php?download=dove.txt"
 curl --progress-bar --referer "http://dove.cccbr.org.uk" --user-agent "Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.224 Safari/534.10" -o "$d/data/newpks.txt" "http://dove.cccbr.org.uk/downloads.php?download=newpks.txt"
 
-echo "Creating SQL..."
+echo -n "Creating SQL..."
 php "$d/txt2sql.php" > "$d/towers.sql"
+echo "Done"
+echo -n "Compressing SQL..."
 gzip -9f "$d/towers.sql"
+echo "Done"
 
-echo -e "Created tower table\n"
+echo -e "\nCompleted file at: $d/towers.sql.gz\n"
