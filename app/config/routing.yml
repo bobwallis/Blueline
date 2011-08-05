@@ -6,3 +6,8 @@ BluelineCCCBRDataBundle:
 _internal:
    resource: "@FrameworkBundle/Resources/config/routing/internal.xml"
    prefix:   /_internal
+
+# Assetic
+_assetic:
+    resource: .
+    type:     assetic
