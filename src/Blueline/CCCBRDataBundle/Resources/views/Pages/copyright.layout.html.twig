@@ -1,0 +1,8 @@
+{% extends 'BluelineCCCBRDataBundle::base.html.twig' %}
+
+{% block title %}Copyright | {{ parent() }}{% endblock %}
+{% set search_header = true %}
+
+{% block body %}
+	{% render '/copyright?snippet=1' with {}, {'standalone':true} %}
+{% endblock %}
