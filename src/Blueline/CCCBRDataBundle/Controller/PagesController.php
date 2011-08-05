@@ -14,7 +14,8 @@ class PagesController extends Controller {
 	}
 	
 	public function pageAction( $page ) {
-		$format = $this->getRequest()->getRequestFormat();
+		$request = $this->getRequest();
+		$format = $request->getRequestFormat();
 		
 		return $this->render( 'BluelineCCCBRDataBundle:Pages:'.$page.'.'.$format.'.twig' );
 	}
