@@ -1,0 +1,52 @@
+{% import 'BluelineCCCBRDataBundle:Macros:content.html.twig' as content %}
+{% if abbreviations is defined %}
+	{% for abbreviation in abbreviations %}
+		{% render path('Blueline_Associations_view', {'abbreviation':abbreviation, 'snippet':true}) with {}, {'standalone':true} %}
+	{% endfor %}
+{% else %}
+<section class="association">
+	{{ content.header( association.name, null, { 'id': 'association_'~id~'_tabBar', 'tabs': [
+		{ 'title': 'Details', 'content': 'association_details_'~id },
+		{ 'title': 'Towers', 'content': 'association_towers_'~id }
+	], 'active': 0 } ) }}
+	<div class="content">
+		<script>
+		{% autoescape false %}
+		//<![CDATA[
+			require( ['ui/TowerMap'], function( TowerMap ) {
+				TowerMap.set( {
+					fitBounds: new google.maps.LatLngBounds( new google.maps.LatLng( {{ association.bbox.lat_min }}, {{ association.bbox.long_min }} ), new google.maps.LatLng( {{ association.bbox.lat_max }}, {{ association.bbox.long_max }} ) ),
+					fusionTableQuery: "affiliations contains '{{ association.abbreviation|e('js') }}'"
+				} );
+			} );
+		{% endautoescape %}
+		//]]>
+		</script>
+		<div id="association_details_{{ id }}">
+			<noscript><h2>Details</h2></noscript>
+			<table class="horizontalDetails">
+			{% if association.link is not null %}
+				<tr>
+					<th>Link:</th>
+					<td><a href="{{ association.link }}" class="external">{{ association.link }}</a></td>
+				</tr>
+			{% endif %}
+				<tr>
+					<th>Towers:</th>
+					<td>{{ association.affiliatedTowers_count }}</td>
+				</tr>
+			</table>
+		</div>
+		<div id="association_towers_{{ id }}" class="associationAffiliations">
+			<noscript><h2>Affiliated Towers</h2></noscript>
+			<ol class="noliststyle">
+			{% for tower in association.affiliatedTowers %}
+				<li><a href="{{ path( 'Blueline_Towers_view', { 'doveid': tower.doveid } ) }}">{{ tower.place }} <small> ({{ tower.dedication }})</small></a></li>
+			{% else %}
+				<li>None</li>
+			{% endfor %}
+			</ol>
+		</div>
+	</div>
+</section>
+{% endif %}

@@ -38,50 +38,70 @@ header( 'Content-Disposition: inline; filename="towers.sql"' );
 
 -- Generated from CCCBR data from http://dove.cccbr.org.uk
 
+SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+
 -- Set up tower_oldpks table
-DROP TABLE IF EXISTS tower_oldpks;
-CREATE TABLE IF NOT EXISTS tower_oldpks (
-  oldpk varchar(10) NOT NULL,
-  tower_doveId varchar(10) NOT NULL,
-  PRIMARY KEY (oldpk),
-  UNIQUE KEY (tower_doveId)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+DROP TABLE IF EXISTS `tower_oldpks`;
+CREATE TABLE IF NOT EXISTS `tower_oldpks` (
+  `oldpk` varchar(10) NOT NULL,
+  `tower_doveId` varchar(10) NOT NULL,
+  PRIMARY KEY (`oldpk`),
+  UNIQUE KEY `tower_doveId` (`tower_doveId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Set up towers table
-DROP TABLE IF EXISTS towers;
-CREATE TABLE IF NOT EXISTS towers (
-  doveId varchar(10) NOT NULL, PRIMARY KEY (doveId),
-  gridReference varchar(10),
-  latitude decimal(8,5), INDEX (latitude),
-  longitude decimal(8,5), INDEX (longitude),
-  latitudeSatNav decimal(8,5),
-  longitudeSatNav decimal(8,5),
-  postcode varchar(10),
-  country varchar(255) NOT NULL, INDEX (country),
-  county varchar(255), INDEX (county),
-  diocese varchar(255), INDEX (diocese),
-  place varchar(255) NOT NULL,
-  altName varchar(255),
-  dedication varchar(255),
-  bells tinyint NOT NULL, INDEX (bells),
-  weight smallint, INDEX (weight),
-  weightApprox bit,
-  weightText varchar(20),
-  note varchar(2),
-  hz decimal(5,1),
-  practiceNight tinyint, INDEX (practiceNight),
-  practiceStart varchar(5),
-  practiceNotes text,
-  groundFloor bit, INDEX (groundFloor),
-  toilet bit, INDEX (toilet),
-  unringable bit, INDEX (unringable),
-  simulator bit, INDEX (simulator),
-  overhaulYear smallint DEFAULT NULL,
-  contractor varchar(255) DEFAULT NULL,
-  tuned smallint DEFAULT NULL,
-  extraInfo text DEFAULT NULL,
-  webPage text DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+DROP TABLE IF EXISTS `towers`;
+CREATE TABLE IF NOT EXISTS `towers` (
+  `doveId` varchar(10) NOT NULL,
+  `gridReference` varchar(10) DEFAULT NULL,
+  `latitude` decimal(8,5) DEFAULT NULL,
+  `longitude` decimal(8,5) DEFAULT NULL,
+  `latitudeSatNav` decimal(8,5) DEFAULT NULL,
+  `longitudeSatNav` decimal(8,5) DEFAULT NULL,
+  `postcode` varchar(10) DEFAULT NULL,
+  `country` varchar(255) NOT NULL,
+  `county` varchar(255) DEFAULT NULL,
+  `diocese` varchar(255) DEFAULT NULL,
+  `place` varchar(255) NOT NULL,
+  `altName` varchar(255) DEFAULT NULL,
+  `dedication` varchar(255) DEFAULT NULL,
+  `bells` tinyint(4) NOT NULL,
+  `weight` smallint(6) DEFAULT NULL,
+  `weightApprox` tinyint(1) DEFAULT NULL,
+  `weightText` varchar(20) DEFAULT NULL,
+  `note` varchar(2) DEFAULT NULL,
+  `hz` decimal(5,1) DEFAULT NULL,
+  `practiceNight` tinyint(4) DEFAULT NULL,
+  `practiceStart` varchar(5) DEFAULT NULL,
+  `practiceNotes` text,
+  `groundFloor` tinyint(1) DEFAULT NULL,
+  `toilet` tinyint(1) DEFAULT NULL,
+  `unringable` tinyint(1) DEFAULT NULL,
+  `simulator` tinyint(1) DEFAULT NULL,
+  `overhaulYear` smallint(6) DEFAULT NULL,
+  `contractor` varchar(255) DEFAULT NULL,
+  `tuned` smallint(6) DEFAULT NULL,
+  `extraInfo` text,
+  `webPage` text,
+  PRIMARY KEY (`doveId`),
+  KEY `latitude` (`latitude`),
+  KEY `longitude` (`longitude`),
+  KEY `country` (`country`),
+  KEY `county` (`county`),
+  KEY `diocese` (`diocese`),
+  KEY `bells` (`bells`),
+  KEY `weight` (`weight`),
+  KEY `practiceNight` (`practiceNight`),
+  KEY `groundFloor` (`groundFloor`),
+  KEY `toilet` (`toilet`),
+  KEY `unringable` (`unringable`),
+  KEY `simulator` (`simulator`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Set up a towers fusion table
 DROP TABLE IF EXISTS towersFusion;
@@ -106,19 +126,22 @@ CREATE TABLE IF NOT EXISTS towersFusion (
   marker varchar(63)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8, COMMENT = 'Export into CSV for importing into Google Fusion Tables';
 
--- Set up associations_towers table
-DROP TABLE IF EXISTS associations_towers;
-CREATE TABLE IF NOT EXISTS associations_towers (
-  association_abbreviation varchar(10) NOT NULL, INDEX (association_abbreviation),
-  tower_doveId varchar(10) NOT NULL, INDEX (tower_doveId)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+-- Set up associations_affiliatedtowers table
+DROP TABLE IF EXISTS `associations_affiliatedtowers`;
+CREATE TABLE IF NOT EXISTS `associations_affiliatedtowers` (
+  `association` varchar(10) NOT NULL COMMENT 'Abbreviation of association',
+  `affiliatedTower` varchar(10) NOT NULL COMMENT 'Dove ID of an affiliated tower',
+  PRIMARY KEY (`association`,`affiliatedTower`),
+  KEY `association_abbreviation` (`association`),
+  KEY `tower_doveId` (`affiliatedTower`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 <?php
 
 // tower_oldpks data from data/newpks.txt
 $newpks = new parseCSV();
 $newpks->auto( __DIR__.'/data/newpks.txt' );
-echo "INSERT INTO tower_oldpks (oldpk,tower_doveId) VALUES\n" .
+echo "INSERT INTO `tower_oldpks` (`oldpk`, `tower_doveId`) VALUES\n" .
 	implode( ",\n", array_map( function( $row ) {
 		return "\t('".sqlite_escape_string( str_replace( ' ', '_', trim( $row['OldID'] ) ) )."','".sqlite_escape_string( str_replace( ' ', '_', trim( $row['NewID'] ) ) ).'\')';
 	}, $newpks->data ) ) .
@@ -295,7 +318,7 @@ foreach( $dove->data as $tower ) {
 	$rowData = array_filter( $rowData, function( $e ) { return ( !empty( $e ) && $e != '\'\'' ); } );
 	
 	// towers INSERT
- 	echo 'INSERT INTO towers ('.implode( ', ', array_keys( $rowData ) ).') VALUES ('.implode( ', ', $rowData ).");\n";
+ 	echo 'INSERT INTO `towers` (`'.implode( '`, `', array_keys( $rowData ) ).'`) VALUES ('.implode( ', ', $rowData ).");\n";
 	
 	// fusionTowers INSERT
 	if( isset( $rowData['latitude'], $rowData['longitude'] ) ) {
@@ -316,11 +339,15 @@ foreach( $dove->data as $tower ) {
 	// Association links
 	if( !empty( $tower['Affiliations'] ) ) {
 		foreach( explode( ',', $tower['Affiliations'] ) as $link ) {
-			echo 'INSERT INTO associations_towers (association_abbreviation, tower_doveId) VALUES (\''.sqlite_escape_string( $link ).'\', '.$rowData['doveId'].');'."\n";
+			echo 'INSERT INTO `associations_affiliatedtowers` (`association`, `affiliatedTower`) VALUES (\''.sqlite_escape_string( $link ).'\', '.$rowData['doveId'].');'."\n";
 		}
 	}
 }
 ?>
 
-OPTIMIZE TABLE towers;
-OPTIMIZE TABLE associations_towers;
+ALTER TABLE `associations_affiliatedtowers`
+  ADD CONSTRAINT `associations_affiliatedtowers_ibfk_2` FOREIGN KEY (`affiliatedTower`) REFERENCES `towers` (`doveId`),
+  ADD CONSTRAINT `associations_affiliatedtowers_ibfk_1` FOREIGN KEY (`association`) REFERENCES `associations` (`abbreviation`);
+
+ALTER TABLE `tower_oldpks`
+  ADD CONSTRAINT `tower_oldpks_ibfk_1` FOREIGN KEY (`tower_doveId`) REFERENCES `towers` (`doveId`);

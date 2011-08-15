@@ -1,5 +1,5 @@
 <?php
-namespace Helpers;
+namespace Blueline\Helpers;
 
 /**
  * Functions to assist working with method classifications

@@ -64,8 +64,8 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 		};
 		
 		// Calls
+		this.options.calls = [];
 		if( typeof options.calls === 'object' ) {
-			this.options.calls = [];
 			for( var callTitle in options.calls ) {
 				if( Object.prototype.hasOwnProperty.call( options.calls, callTitle ) ) {
 					var call = options.calls[callTitle];

@@ -1,6 +1,4 @@
 <?php
-namespace Helpers;
-
 $counties = array(
 	'Beds' => 'Bedfordshire',
 	'Berks' => 'Berkshire',
@@ -213,4 +211,3 @@ $southAfricanAreas = array(
 	'Gaut' => 'Gauteng',
 	'North West' => 'North West'
 );
-?>

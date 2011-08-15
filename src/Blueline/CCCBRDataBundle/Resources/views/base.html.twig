@@ -27,7 +27,8 @@
 {% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/print/*' output='css/print.css' filter='?yui_css' %}
 		<link rel="stylesheet" media="print" href="{{ asset_url }}" />
 {% endstylesheets %}
-{% block javascripts %}{% endblock %}
+		<script src="/scripts/helpers/jquery.js"></script>
+		<script data-main="/scripts/main" src="/scripts/require.js"></script>
 {% if ga_trackingCode is defined %}
 		<script>var _gaq=_gaq || [];_gaq.push(['_setAccount', '{{ ga_trackingCode }}']);_gaq.push(['_trackPageview']);(function(){var ga=document.createElement('script');ga.type='text/javascript';ga.async=true;ga.src=('https:'==document.location.protocol?'https://ssl':'http://www')+'.google-analytics.com/ga.js';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(ga,s);})();</script>
 {% endif %}
@@ -39,7 +40,7 @@
 				<div id="breadcrumbContainer">
 					{% for crumb in breadcrumb|default([]) %}
 					<span class="headerSep">&raquo;</span>
-					<h2><a href="{{ crumb.href }}">{{ crumb.caption }}</a></h2>
+					<h2><a href="{{ crumb.href }}">{{ crumb.title }}</a></h2>
 					{% endfor %}
 				</div>
 				<div id="topSearchContainer"{{ search_header|default(false) ? '' : 'style="display: none;"' }}>
@@ -64,7 +65,7 @@
 			<div id="push"></div>
 		</div>
 		<footer id="bottom">
-			<nav role="navigation"><a href="{{ path('Blueline_welcome') }}">Home</a> | <a href="/associations">Associations</a> | 	<a href="/methods">Methods</a> | <a href="/towers">Towers</a></nav>
+			<nav role="navigation"><a href="{{ path('Blueline_welcome') }}">Home</a> | <a href="{{ path('Blueline_Associations_welcome') }}">Associations</a> | 	<a href="{{ path('Blueline_Methods_welcome') }}">Methods</a> | <a href="{{ path('Blueline_Towers_welcome') }}">Towers</a></nav>
 			<p role="contentinfo"><a href="{{ path('Blueline_page', { 'page':'about' }) }}">About</a> | <a href="{{ path('Blueline_page', { 'page':'copyright' }) }}">Copyright</a> | Blueline &copy; MMXI</p>
 		</footer>
 	</body>

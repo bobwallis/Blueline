@@ -1,5 +1,5 @@
 <?php
-namespace Helpers;
+namespace Blueline\Helpers;
 
 /**
  * Functions to assist working with lead head codes

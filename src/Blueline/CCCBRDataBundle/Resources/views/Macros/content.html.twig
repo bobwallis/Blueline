@@ -1,5 +1,26 @@
-{% macro header(title) %}
+{% macro header( title, subtitle, tabs ) %}
 <header>
-	<h1>{{ title }}</h1>
+	<h1>{% if title.title is defined %}{{ title.title }}{% if title.title2 is not empty %} <span class="normalweight">({{ title.title2 }})</span>{% endif %}{% else %}{{ title }}{% endif %}</h1>
+	{% if subtitle is not empty %}<h2>{{ subtitle }}</h2>{% endif %}
+	{% if tabs is not empty %}
+		<span id="{{ tabs.id }}"></span>
+		<script>
+		{% autoescape false %}
+		//<![CDATA[
+			require( ['ui/TabBar'], function( TabBar ) {
+				window['TabBars'].push( new TabBar( {
+					landmark: '{{ tabs.id }}',
+					tabs: [
+					{% for tab in tabs.tabs %}
+						{ title: '{{ tab.title }}', content: '{{ tab.content }}'{{ (tab.className is defined)? ', className: \''~tab.className~'\'' : '' }} }{{ not loop.last ? ',' : '' }}
+					{% endfor %}
+					],
+					active: {{ tabs.active|default(0) }}
+				} ) );
+			} );
+		//]]>
+		{% endautoescape %}
+		</script>
+	{% endif %}
 </header>
 {% endmacro %}

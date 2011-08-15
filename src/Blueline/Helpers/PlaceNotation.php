@@ -1,5 +1,5 @@
 <?php
-namespace Helpers;
+namespace Blueline\Helpers;
 
 /**
  * Functions to assist working with place notation
@@ -40,7 +40,7 @@ class PlaceNotation {
 	 * @return array
 	 */
 	public static function rounds( $stage ) {
-		return array_map( array( 'Helpers\PlaceNotation', 'intToBell' ), range( 1, $stage ) );
+		return array_map( array( '\Blueline\Helpers\PlaceNotation', 'intToBell' ), range( 1, $stage ) );
 	}
 	
 	/**

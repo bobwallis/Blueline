@@ -1,0 +1,9 @@
+{% extends 'BluelineCCCBRDataBundle::base.html.twig' %}
+
+{% block title %}Associations | {{ parent() }}{% endblock %}
+{% set search_header = true %}
+{% set search_placeholder = 'Search associations' %}
+
+{% block body %}
+	{% render path('Blueline_Associations_welcome', {'snippet':true}) with {}, {'standalone':true} %}
+{% endblock %}

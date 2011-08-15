@@ -1,6 +1,6 @@
 <?php
 namespace Utilities;
-require( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/abbreviations.php' );
+require( dirname(dirname(dirname(dirname(__FILE__)))).'/vendor/blueline/abbreviations.php' );
 use \PDO, \Helpers;
 
 $dsn = 'mysql:host=localhost;dbname=blueline';
@@ -11,18 +11,24 @@ $password = 'password';
 -- Generated on: <?php echo date( 'Y/m/d' ); ?>
 
 -- Set up methods_towers table
-DROP TABLE IF EXISTS methods_towers;
-CREATE TABLE IF NOT EXISTS methods_towers (
-  method_title varchar(255) NOT NULL UNIQUE,
-  tower_doveId varchar(10) NOT NULL, INDEX (tower_doveId)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-DROP TABLE IF EXISTS methods_towers_unmatched;
-CREATE TABLE IF NOT EXISTS methods_towers_unmatched (
-  method_title varchar(255) NOT NULL UNIQUE,
-  location varchar(255) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+
+DROP TABLE IF EXISTS `methods_firsttowerbellpeal_tower`;
+CREATE TABLE IF NOT EXISTS `methods_firsttowerbellpeal_tower` (
+  `method` varchar(255) NOT NULL COMMENT 'Title of method',
+  `firstTowerbellPeal_tower` varchar(10) NOT NULL COMMENT 'Dove ID of the tower where the first tower bell peal was rung',
+  PRIMARY KEY (`method`,`firstTowerbellPeal_tower`),
+  UNIQUE KEY `method` (`method`),
+  KEY `tower_doveId` (`firstTowerbellPeal_tower`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 <?php
+$notFound = array();
 try {
 	$dbh = new PDO( $dsn, $username, $password );
 	
@@ -54,7 +60,7 @@ try {
 			elseif( $location == 'Wath on Dearne' ) { $doveId = 'WATH_UPOND'; }
 			
 			elseif( ! $doveId = search( array( 'minBells' => $minBells, 'place' => $location ), $dbh ) ) {
-				notFound( $method, $location );
+				$notFound[] = $location.' : '.$method;
 			}
 		}
 		else {
@@ -106,7 +112,7 @@ try {
 					break;
 				}
 			
-				notFound( $method, $location );
+				$notFound[] = $location.' : '.$method;
 				break;
 			
 			case 3:
@@ -122,7 +128,7 @@ try {
 					break;
 				}
 			
-				notFound( $method, $location );
+				$notFound[] = $location.' : '.$method;
 				break;
 			
 			case 4:
@@ -137,28 +143,29 @@ try {
 				}
 			
 			default:
-				notFound( $method, $location );
+				$notFound[] = $location.' : '.$method;
 				break;
 			}
 		}
 		
 		if( !empty( $doveId ) ) {
-			echo 'INSERT IGNORE INTO methods_towers (method_title,tower_doveId) VALUES (\''.sqlite_escape_string( $method ).'\', \''.sqlite_escape_string( $doveId ).'\');'."\n";
+			echo 'INSERT INTO methods_firsttowerbellpeal_tower (method,firstTowerbellPeal_tower) VALUES (\''.sqlite_escape_string( $method ).'\', \''.sqlite_escape_string( $doveId ).'\');'."\n";
 		}
 	}
 	$dbh = null;
+?>
+ALTER TABLE `methods_firsttowerbellpeal_tower`
+  ADD CONSTRAINT `methods_firsttowerbellpeal_tower_ibfk_3` FOREIGN KEY (`method`) REFERENCES `methods` (`title`),
+  ADD CONSTRAINT `methods_firsttowerbellpeal_tower_ibfk_2` FOREIGN KEY (`firstTowerbellPeal_tower`) REFERENCES `towers` (`doveId`);
+<?php
+	echo "\n/*\nUnmatched towers:\n";
+	sort( $notFound );
+	echo implode( "\n", $notFound )."\n*/";
 }
 catch ( PDOException $e ) {
 	echo 'Error: ' . $e->getMessage();
 	die();
 }
-
-
-function notFound( $method, $location ) {
-	echo 'INSERT IGNORE INTO methods_towers_unmatched (method_title,location) VALUES (\''.sqlite_escape_string( $method ).'\',\''.sqlite_escape_string( $location )."');\n";
-	// trigger_error( 'Not matched: '.$method."\n" , E_USER_NOTICE );
-}
-
 
 function search( $where, &$dbh ) {
 	global $counties, $states, $australianAreas, $canadianStates;
@@ -244,6 +251,3 @@ function search( $where, &$dbh ) {
 	}
 	return false;
 }
-?>
-
-OPTIMIZE TABLE methods_towers;

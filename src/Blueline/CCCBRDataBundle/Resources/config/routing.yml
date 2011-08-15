@@ -2,8 +2,43 @@ Blueline_welcome:
     pattern:  /
     defaults: { _controller: BluelineCCCBRDataBundle:Pages:welcome }
 
+
 Blueline_page:
     pattern:  /{page}.{_format}
     defaults: { _controller: BluelineCCCBRDataBundle:Pages:page, _format: html }
     requirements:
         page: about|copyright
+        format: html|txt
+
+
+Blueline_Methods_welcome:
+    pattern:  /methods
+    defaults: { _controller: BluelineCCCBRDataBundle:Methods:welcome }
+
+Blueline_Methods_view:
+    pattern: /methods/view/{title}.{_format}
+    defaults: { _controller: BluelineCCCBRDataBundle:Methods:view, _format: html }
+    requirements:
+        _format: html|txt|json|xml
+
+
+Blueline_Associations_welcome:
+    pattern:  /associations
+    defaults: { _controller: BluelineCCCBRDataBundle:Associations:welcome }
+
+Blueline_Associations_view:
+    pattern: /associations/view/{abbreviation}.{_format}
+    defaults: { _controller: BluelineCCCBRDataBundle:Associations:view, _format: html }
+    requirements:
+        _format: html|txt|json
+
+
+Blueline_Towers_welcome:
+    pattern:  /towers
+    defaults: { _controller: BluelineCCCBRDataBundle:Towers:welcome }
+
+Blueline_Towers_view:
+    pattern: /towers/view/{doveid}.{_format}
+    defaults: { _controller: BluelineCCCBRDataBundle:Towers:view, _format: html }
+    requirements:
+        _format: html|txt|json

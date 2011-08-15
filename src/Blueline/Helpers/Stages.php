@@ -1,5 +1,5 @@
 <?php
-namespace Helpers;
+namespace Blueline\Helpers;
 
 /**
  * A helper for working with method stages
