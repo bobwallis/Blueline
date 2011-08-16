@@ -45,14 +45,14 @@
 				</div>
 				<div id="topSearchContainer"{{ search_header|default(false) ? '' : 'style="display: none;"' }}>
 					<span class="headerSep">&raquo;</span>
-					<form id="topSearch" role="search" action="{{ search_action|default('/search') }}">
+					<form id="topSearch" role="search" action="{{ search_action|default(path( 'Blueline_search' )) }}">
 						<input type="text" accesskey="/" name="q" id="smallQ" spellcheck="false" autocomplete="off" placeholder="{{ search_placeholder|default('Search') }}" />
 						<button type="submit" title="Search"><span class="hide">Search</span></button>
 					</form>
 				</div>
 			</header>
 			<div id="bigSearchContainer"{{ search_big|default(false) ? '' : 'style="display: none;"' }}>
-				<form id="bigSearch" role="search" action="{{ search_action|default('/search') }}">
+				<form id="bigSearch" role="search" action="{{ search_action|default(path( 'Blueline_search' )) }}">
 					<div>
 					<input type="text" accesskey="/" name="q" id="bigQ" spellcheck="false" autocomplete="off" placeholder="{{ search_placeholder|default('Search') }}" value="{{ search_query|default('') }}" />
 					<button type="submit" title="Search"><span class="hide">Search</span></button>

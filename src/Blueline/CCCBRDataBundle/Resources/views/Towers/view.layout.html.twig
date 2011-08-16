@@ -3,6 +3,7 @@
 {% block title %}{{ pageTitle }} | Towers | {{ parent() }}{% endblock %}
 {% set breadcrumb = [ {'title':'Towers', 'href':path('Blueline_Towers_welcome')} ] %}
 {% set search_header = true %}
+{% set search_action = path( 'Blueline_Towers_search' ) %}
 {% set search_placeholder = 'Search towers' %}
 
 {% block body %}

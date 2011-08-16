@@ -2,8 +2,9 @@
 
 {% block title %}Associations | {{ parent() }}{% endblock %}
 {% set search_header = true %}
+{% set search_action = path( 'Blueline_Associations_search' ) %}
 {% set search_placeholder = 'Search associations' %}
 
 {% block body %}
-	{% render path('Blueline_Associations_welcome', {'snippet':true}) with {}, {'standalone':true} %}
+	{% render path( 'Blueline_Associations_welcome', { 'snippet': true } ) with {}, { 'standalone': true } %}
 {% endblock %}
