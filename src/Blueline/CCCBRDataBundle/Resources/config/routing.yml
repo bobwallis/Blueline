@@ -2,12 +2,17 @@ Blueline_welcome:
     pattern:  /
     defaults: { _controller: BluelineCCCBRDataBundle:Pages:welcome }
 
+Blueline_search:
+    pattern:  /search.{_format}
+    defaults: { _controller: BluelineCCCBRDataBundle:Search:global, _format: html }
+    requirements:
+        format: html|txt|json|xml
 
 Blueline_page:
     pattern:  /{page}.{_format}
     defaults: { _controller: BluelineCCCBRDataBundle:Pages:page, _format: html }
     requirements:
-        page: about|copyright
+        page: about|copyright|humans|robots
         format: html|txt
 
 
@@ -21,6 +26,12 @@ Blueline_Methods_view:
     requirements:
         _format: html|txt|json|xml
 
+Blueline_Methods_search:
+    pattern:  /methods/search.{_format}
+    defaults: { _controller: BluelineCCCBRDataBundle:Search:methods, _format: html }
+    requirements:
+        format: html|txt|json|xml
+
 
 Blueline_Associations_welcome:
     pattern:  /associations
@@ -32,6 +43,12 @@ Blueline_Associations_view:
     requirements:
         _format: html|txt|json
 
+Blueline_Associations_search:
+    pattern:  /associations/search.{_format}
+    defaults: { _controller: BluelineCCCBRDataBundle:Search:associations, _format: html }
+    requirements:
+        format: html|txt|json|xml
+
 
 Blueline_Towers_welcome:
     pattern:  /towers
@@ -42,3 +59,9 @@ Blueline_Towers_view:
     defaults: { _controller: BluelineCCCBRDataBundle:Towers:view, _format: html }
     requirements:
         _format: html|txt|json
+
+Blueline_Towers_search:
+    pattern:  /towers/search.{_format}
+    defaults: { _controller: BluelineCCCBRDataBundle:Search:towers, _format: html }
+    requirements:
+        format: html|txt|json|xml

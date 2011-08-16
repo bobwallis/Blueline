@@ -4,5 +4,5 @@
 {% set search_header = true %}
 
 {% block body %}
-	{% render '/copyright?snippet=1' with {}, {'standalone':true} %}
+	{% render path('Blueline_page', {'page':'copyright', 'snippet':true}) with {}, {'standalone':true} %}
 {% endblock %}
