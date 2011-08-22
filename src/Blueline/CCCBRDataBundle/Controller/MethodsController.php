@@ -57,7 +57,8 @@ class MethodsController extends Controller {
 			$id = preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $title ) ) );
 			
 			$query = $em->createQuery(
-				'SELECT m, t FROM BluelineCCCBRDataBundle:Methods m 
+				'SELECT m, partial e.{id,calls,ruleOffs}, t FROM BluelineCCCBRDataBundle:Methods m 
+				LEFT JOIN m.extras e
 				LEFT JOIN m.firstTowerbellPealTower t 
 				WHERE m.title LIKE :title' )
 				->setParameter( 'title', $title );

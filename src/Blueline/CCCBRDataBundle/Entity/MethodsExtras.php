@@ -22,6 +22,13 @@ class MethodsExtras {
 	public function getId() { return $this->id; }
 
 	/**
+	 * @var string $method_title
+	 *
+	 * @ORM\Column(name="method_title", type="string", length=255, nullable=false)
+	 */
+	private $method_title;
+
+	/**
 	 * @var text $calls
 	 *
 	 * @ORM\Column(name="calls", type="text", nullable=false)
@@ -31,23 +38,11 @@ class MethodsExtras {
 	public function getCalls() { return unserialize( $this->calls ); }
 
 	/**
-	 * @var text $ruleoffs
+	 * @var text $ruleOffs
 	 *
 	 * @ORM\Column(name="ruleOffs", type="text", nullable=false)
 	 */
-	private $ruleoffs;
-	public function setRuleOffs( $ruleOffs ) { $this->ruleoffs = serialize( $ruleoffs ); }
-	public function getRuleoffs() { return unserialize( $this->ruleOffs ); }
-
-	/**
-	 * @var Methods
-	 *
-	 * @ORM\OneToOne(targetEntity="Methods")
-	 * @ORM\JoinColumns({
-	 *   @ORM\JoinColumn(name="method_title", referencedColumnName="title")
-	 * })
-	 */
-	private $method;
-	public function setMethod( \Blueline\CCCBRDataBundle\Entity\Methods $method ) { $this->method = $method; }
-	public function getMethod() { return $this->methodTitle; }
+	private $ruleOffs;
+	public function setRuleOffs( $ruleOffs ) { $this->ruleOffs = $ruleOffs; }
+	public function getRuleOffs() { return $this->ruleOffs; }
 }

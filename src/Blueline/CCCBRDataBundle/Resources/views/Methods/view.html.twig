@@ -75,8 +75,8 @@
 					stage: {{ method.stage }},
 					notation: '{{ method.notationExpanded }}',
 					calls: {{ method.calls|json_encode|raw }},
-					callingPositions: {{ method.callingPositions|json_encode }}
-					{#ruleOffs: {{ method.ruleOffs|json_encode }}#}
+					callingPositions: {{ method.callingPositions|json_encode }},
+					ruleOffs: {{ method.ruleOffs|json_encode }}
 				} );
 			} );
 		//]]>

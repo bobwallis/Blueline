@@ -328,11 +328,32 @@ class Methods {
 	public function setFirstTowerbellPealTower( \Blueline\CCCBRDataBundle\Entity\Towers $firstTowerbellPealTower ) { $this->firstTowerbellPealTower = array( $firstTowerbellPealTower ); }
 	public function getFirstTowerbellPealTower() { return $this->firstTowerbellPealTower[0]; }
 	
+	/**
+	 * @ORM\OneToOne(targetEntity="MethodsExtras")
+	 * @ORM\JoinColumn(name="title", referencedColumnName="method_title")
+	 */
+	private $extras;
+	
+	private $ruleOffs;
+	public function getRuleOffs() {
+		// Get rule offs from extras
+		if( empty( $this->ruleOffs ) && is_a( $this->extras, 'Blueline\CCCBRDataBundle\Entity\MethodsExtras' ) && is_string( $this->extras->getRuleOffs() ) ) {
+			if( preg_match( '/^([^:]*):([^:]*)$/', $this->extras->getRuleOffs(), $matches ) && isset( $matches[1], $matches[2] ) ) {
+				$this->ruleOffs = array( 'every' => intval( $matches[1] ), 'from' => intval( $matches[2] ) );
+			}
+		}
+		return $this->ruleOffs? : array( 'from' => 0, 'every' => $this->getLengthOfLead() );
+	}
 
 	private $calls;
 	public function getCalls() {
+		// Get calls from extras
+		if( is_a( $this->extras, 'Blueline\CCCBRDataBundle\Entity\MethodsExtras' ) ) {
+			$this->calls = $this->extras->getCalls();
+		}
+		
 		// Set default calls
-		if( !$this->calls ) {
+		if( empty( $this->calls ) ) {
 			$stage = $this->getStage();
 			$notationExploded = $this->getNotationExploded();
 			if( !$this->getDifferential() && $stage > 4 ) {
@@ -346,7 +367,7 @@ class Methods {
 				case 0:
 					if( $stage % 2 == 0 ) {
 						if( $leadEndChange == '1'.$n ) {
-							$this->calls = serialize( array( 'Bob' => '1'.$n_2.'::', 'Single' => '1'.$n_2.$n_1.$n.'::' ) );
+							$this->calls = array( 'Bob' => '1'.$n_2.'::', 'Single' => '1'.$n_2.$n_1.$n.'::' );
 						}
 					}
 					else {
@@ -356,44 +377,41 @@ class Methods {
 				case 1:
 					if( $stage % 2 == 0 ) {
 						if( $leadEndChange == '12' ) {
-							$this->calls = serialize( array( 'Bob' => '14::', 'Single' => '1234::' ) );
+							$this->calls = array( 'Bob' => '14::', 'Single' => '1234::' );
 						}
 						elseif( $leadEndChange == '1'.$n ) {
 							if( $this->getLeadHeadCode() == 'm' ) {
-								$this->calls = serialize( array( 'Bob' => '14::', 'Single' => '1234::' ) );
+								$this->calls = array( 'Bob' => '14::', 'Single' => '1234::' );
 							}
 							else {
-								$this->calls = serialize( array( 'Bob' => '1'.$n_2.'::', 'Single' => '1'.$n_2.$n_1.$n.'::' ) );
+								$this->calls = array( 'Bob' => '1'.$n_2.'::', 'Single' => '1'.$n_2.$n_1.$n.'::' );
 							}
 						}
 					}
 					else {
 						if( $leadEndChange == '12'.$n || $leadEndChange == '1' ) {
-							$this->calls = serialize( array( 'Bob' => '14'.$n.'::', 'Single' => (($this->stage()<6)?'123':'1234'.$n).'::' ) );
+							$this->calls = array( 'Bob' => '14'.$n.'::', 'Single' => (($this->stage()<6)?'123':'1234'.$n).'::' );
 						}
 						elseif( $leadEndChange == '123' ) {
-							$this->calls = serialize( array( 'Bob' => '12'.$n.'::' ) );
+							$this->calls = array( 'Bob' => '12'.$n.'::' );
 						}
 					}
 					break;
 				case 2:
 					// Bobs and singles for Grandsire and Single Court like lead ends
 					if( $leadEndChange == '1' && ( $postLeadEndChange == '3' || $postLeadEndChange == $n ) ) {
-						$this->calls = serialize( array( 'Bob' => '3.1::-1', 'Single' => '3.23::-1' ) );
+						$this->calls = array( 'Bob' => '3.1::-1', 'Single' => '3.23::-1' );
 					}
 					break;
 				default:
-					$this->calls = serialize( array() );
+					$this->calls = array();
 				}
 			}
 		}
-		// Unserialize
-		if( is_string( $this->calls ) ) {
-			$this->calls = unserialize( $this->calls );
-		}
+		
 		// Parse the format
 		$calls = $this->calls;
-		if( count( $calls ) > 0 ) {
+		if( is_array( $calls ) && count( $calls ) > 0 ) {
 			foreach( $calls as $title => &$call ) {
 				if( is_string( $call ) ) {
 					if( preg_match( '/^([^:]*):([^:]*):([^:]*)$/', $call, $matches ) && isset( $matches[1] ) ) {
