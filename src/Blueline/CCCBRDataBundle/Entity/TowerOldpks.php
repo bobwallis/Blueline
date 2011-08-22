@@ -22,14 +22,10 @@ class TowerOldpks {
 	public function getOldpk() { return $this->oldpk; }
 
 	/**
-	 * @var Towers
+	 * @var string $tower_doveid
 	 *
-	 * @ORM\ManyToOne(targetEntity="Towers")
-	 * @ORM\JoinColumns({
-	 *   @ORM\JoinColumn(name="tower_doveid", referencedColumnName="doveid")
-	 * })
+	 * @ORM\Column(name="tower_doveid", type="string", length=10, nullable=false)
 	 */
-	private $tower;
-	public function setTower( \Blueline\CCCBRDataBundle\Entity\Towers $tower ) { $this->tower = $tower; }
-	public function getTower() { return $this->tower; }
+	private $tower_doveid;
+	public function getTowerDoveid() { return $this->tower_doveid; }
 }

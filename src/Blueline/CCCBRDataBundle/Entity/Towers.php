@@ -315,4 +315,10 @@ class Towers
 		$this->affiliation = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->firstPealedMethod = new \Doctrine\Common\Collections\ArrayCollection();
 	}
+	
+	/**
+	 * @ORM\OneToOne(targetEntity="TowerOldpks")
+	 * @ORM\JoinColumn(name="doveid", referencedColumnName="tower_doveid")
+	 */
+	private $oldpk;
 }

@@ -31,8 +31,10 @@ class TowersController extends Controller {
 		if( !$isSnippet || count( $doveids ) > 1 ) {
 			$towers = $this->getDoctrine()->getEntityManager()->createQuery( '
 				SELECT partial t.{doveid,place,dedication} FROM BluelineCCCBRDataBundle:Towers t
-				WHERE t.doveid IN (:doveid)' )
+				LEFT JOIN t.oldpk t2
+				WHERE t.doveid IN (:doveid) OR t2.oldpk IN (:doveid)' )
 				->setParameter( 'doveid', $doveids )
+				->setMaxResults( count( $doveids ) )
 				->getArrayResult();
 			$url = implode( '|', array_map( function( $t ) { return $t['doveid']; }, $towers ) );
 			$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $t ) { return $t['place'].(($t['dedication']!='Unknown')?' ('.$t['dedication'].')':''); }, $towers ) );
