@@ -33,6 +33,7 @@ class MethodsController extends Controller {
 				SELECT m.title FROM BluelineCCCBRDataBundle:Methods m
 				WHERE m.title IN (:title)' )
 				->setParameter( 'title', $titles )
+				->setMaxResults( count( $titles ) )
 				->getArrayResult();
 			$url = implode( '|', array_map( function( $m ) { return str_replace( ' ', '_', $m['title'] ); }, $methods ) );
 			$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $m ) { return $m['title']; }, $methods ) );

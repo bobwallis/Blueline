@@ -34,6 +34,7 @@ class AssociationsController extends Controller {
 				SELECT partial a.{abbreviation,name} FROM BluelineCCCBRDataBundle:Associations a
 				WHERE a.abbreviation IN (:abbreviation)' )
 				->setParameter( 'abbreviation', $abbreviations )
+				->setMaxResults( count( $abbreviations ) )
 				->getArrayResult();
 			$url = implode( '|', array_map( function( $a ) { return $a['abbreviation']; }, $associations ) );
 			$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $a ) { return $a['name']; }, $associations ) );
