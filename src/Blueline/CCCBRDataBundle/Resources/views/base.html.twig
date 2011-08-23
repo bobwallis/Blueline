@@ -54,7 +54,7 @@
 			<div id="bigSearchContainer"{{ search_big|default(false) ? '' : 'style="display: none;"' }}>
 				<form id="bigSearch" role="search" action="{{ search_action|default(path( 'Blueline_search' )) }}">
 					<div>
-					<input type="text" accesskey="/" name="q" id="bigQ" spellcheck="false" autocomplete="off" placeholder="{{ search_placeholder|default('Search') }}" value="{{ search_query|default('') }}" />
+					<input type="text" accesskey="/" name="q" id="bigQ" spellcheck="false" autocomplete="off" placeholder="{{ search_placeholder|default('Search') }}" value="{{ searchVariables['q']|default('') }}" />
 					<button type="submit" title="Search"><span class="hide">Search</span></button>
 					</div>
 				</form>

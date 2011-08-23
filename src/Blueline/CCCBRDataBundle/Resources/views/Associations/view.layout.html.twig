@@ -1,13 +1,13 @@
 {% extends 'BluelineCCCBRDataBundle::base.html.twig' %}
 
 {% block title %}{{ pageTitle }} | Associations | {{ parent() }}{% endblock %}
-{% set breadcrumb = [ {'title':'Associations', 'href':path('Blueline_Associations_welcome')} ] %}
+{% set breadcrumb = [ { 'title': 'Associations', 'href': path( 'Blueline_Associations_welcome' ) } ] %}
 {% set search_header = true %}
 {% set search_action = path( 'Blueline_Associations_search' ) %}
 {% set search_placeholder = 'Search associations' %}
 
 {% block body %}
 	{% for abbreviation in abbreviations %}
-		{% render path('Blueline_Associations_view', {'abbreviation':abbreviation, 'snippet':true}) with {}, {'standalone':true} %}
+		{% render path( 'Blueline_Associations_view', { 'abbreviation': abbreviation, 'snippet': true } ) with {}, { 'standalone': true } %}
 	{% endfor %}
 {% endblock %}

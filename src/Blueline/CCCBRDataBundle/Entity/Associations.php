@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Blueline\CCCBRDataBundle\Entity\Associations
  *
  * @ORM\Table(name="associations")
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Blueline\CCCBRDataBundle\Repository\AssociationsRepository")
  */
 class Associations {
 	/**

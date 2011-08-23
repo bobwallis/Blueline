@@ -4,7 +4,7 @@
 	<div class="content">
 		<ol id="associationsList">
 		{% for association in associations|default([]) %}
-			<li><a href="{{ path( 'Blueline_Associations_view', {'abbreviation':association.abbreviation} ) }}">{{ association.name }}</a></li>
+			<li><a href="{{ path( 'Blueline_Associations_view', { 'abbreviation': association.abbreviation } ) }}">{{ association.name }}</a></li>
 		{% endfor %}
 		</ol>
 	</div>
