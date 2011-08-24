@@ -1,0 +1,11 @@
+{% import 'BluelineCCCBRDataBundle:Macros:content.html.twig' as content %}
+<section class="content search">
+	<ol class="searchResults">
+	{% for tower in towers %}
+		<li><a href="{{ path( 'Blueline_Towers_view', { 'doveid': tower.doveid } ) }}">{{ tower.place }} <small>({{ tower.dedication }})</small></a></li>
+	{% else %}
+		<li>No results</li>
+	{% endfor %}
+	</ol>
+	{{ content.paging( searchVariables, pageActive, pageCount ) }}
+</section>

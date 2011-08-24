@@ -28,9 +28,11 @@ class AssociationsController extends Controller {
 		
 		$abbreviations = explode( '|', $abbreviation );
 		
+		$em = $this->getDoctrine()->getEntityManager();
+		
 		// If we're building a layout, or a snippet for multiple associations, then check we are at the canonical URL for the content
 		if( !$isSnippet || count( $abbreviations ) > 1 ) {
-			$associations = $this->getDoctrine()->getEntityManager()->createQuery( '
+			$associations = $em->createQuery( '
 				SELECT partial a.{abbreviation,name} FROM BluelineCCCBRDataBundle:Associations a
 				WHERE a.abbreviation IN (:abbreviation)' )
 				->setParameter( 'abbreviation', $abbreviations )
@@ -53,8 +55,6 @@ class AssociationsController extends Controller {
 			return $this->render( 'BluelineCCCBRDataBundle:Associations:view.'.$format.'.twig', compact( 'abbreviations' ) );
 		}
 		else {
-			$em = $this->getDoctrine()->getEntityManager();
-			
 			// Create a HTML-safe id
 			$id = preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $abbreviation ) ) );
 			

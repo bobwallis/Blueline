@@ -21,7 +21,7 @@ class AssociationsRepository extends SharedRepository {
 		
 		foreach( array( 'abbreviation', 'name' ) as $key ) {
 			if( isset(  $searchVariables[$key] ) ) {
-				if( strpos( $value, '/' ) === 0 ) {
+				if( strpos( $searchVariables[$key], '/' ) === 0 ) {
 					$query->andWhere( 'a.'.$key.' REGEXP :'.$key.'Regexp' ) // This doesn't work, which is annoying
 						->setParameter( $key.'Regexp', trim( $searchVariables[$key], '/' ) );
 				}

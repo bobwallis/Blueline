@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Blueline\CCCBRDataBundle\Entity\Towers
  *
  * @ORM\Table(name="towers")
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Blueline\CCCBRDataBundle\Repository\TowersRepository")
  */
 class Towers
 {

@@ -72,7 +72,7 @@ form#topSearch {
 		float: right;
 		background-color: #FFF;
 		background-image: url(../../images/search.png);
-		background-image: none,url(../../images/search.svg), url(../../images/search.png);
+		background-image: url(../../images/search.svg), url(../../images/search.png);
 		border: 0;
 		width: 19px;
 		height: 19px;
@@ -119,7 +119,7 @@ form#bigSearch {
 	form#bigSearch button {
 		float: left;
 		background: #FFF url(../../images/search.png) no-repeat center center;
-		background-image: none,url(../../images/search.svg), url(../../images/search.png);
+		background-image: url(../../images/search.svg), url(../../images/search.png);
 		border: 0;
 		width: 25px;
 		height: 25px;
