@@ -2,6 +2,8 @@
 	display: block;
 	width: 100%;
 	background: #002147;
+	background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0, #001E40),color-stop(1, #00254F));
+	background-image: -moz-linear-gradient(center bottom,#001E40 0%,#00254F 100%);
 	color: #E0DED9;
 	height: 35px;
 	line-height: 35px;

@@ -4,6 +4,8 @@ section header {
 	border-bottom: 1px solid #E0DED9;
 	border-top: 1px solid #E0DED9;
 	background-color: #FAFAFA;
+	background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0, #F3F3F3),color-stop(1, #FAFAFA));
+	background-image: -moz-linear-gradient(center bottom,#F3F3F3 0%,#FAFAFA 100%);
 	padding: 10px;
 }
 #content section:first-child header { border-top: 0; }
