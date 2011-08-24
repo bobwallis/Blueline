@@ -7,11 +7,11 @@ use Doctrine\ORM\EntityRepository;
 class SharedRepository extends EntityRepository {
 
 	public function prepareStringForLike( $string ) {
-		return str_replace(
-			array( '*', '?', ',', '.', ' ', '%%' ),
-			array( '%', '_', ' ', ' ', '%', '%' ),
-			$string
-		);
+		return preg_replace( '/%+/', '%', str_replace(
+			array( '*', '?', ',', '.', ' ' ),
+			array( '%', '_', ' ', ' ', '%' ),
+			'%'.$string.'%'
+		) );
 	}
 
 	public function requestToSearchVariables( $request, $searchable ) {
