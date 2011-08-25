@@ -1,6 +1,6 @@
-{% import 'BluelineCCCBRDataBundle:Macros:content.html.twig' as content %}
+{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
 <section>
-	{{ content.header( 'Associations' ) }}
+	{{ header( 'Associations' ) }}
 	<div class="content">
 		<ol id="associationsList">
 		{% for association in associations|default([]) %}

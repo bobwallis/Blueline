@@ -1,11 +1,11 @@
-{% import 'BluelineCCCBRDataBundle:Macros:content.html.twig' as content %}
 {% if doveids is defined and doveids.length > 1 %}
 	{% for doveid in doveids %}
 		{% render path('Blueline_Towers_view', {'doveid':doveid, 'snippet':true}) with {}, {'standalone':true} %}
 	{% endfor %}
 {% else %}
+{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
 <section class="tower">
-	{{ content.header( { 'title': tower.place, 'title2': (tower.dedication != 'Unknown')? tower.dedication : null }, tower.countyCountry, { 'id': 'tower_'~id~'_tabBar', 'tabs': [
+	{{ header( { 'title': tower.place, 'title2': (tower.dedication != 'Unknown')? tower.dedication : null }, tower.countyCountry, { 'id': 'tower_'~id~'_tabBar', 'tabs': [
 		{ 'title': 'Details', 'content': 'tower_details_'~id },
 		{ 'title': 'Map', 'content': 'tower_map_'~id, 'className': 'normal_hide' },
 		{ 'title': 'Methods First Pealed', 'content': 'tower_peals_'~id }

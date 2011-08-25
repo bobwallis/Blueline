@@ -1,11 +1,11 @@
-{% import 'BluelineCCCBRDataBundle:Macros:content.html.twig' as content %}
 {% if titles is defined and titles.length > 1 %}
 	{% for title in titles %}
 		{% render path('Blueline_Methods_view', {'title':title, 'snippet':true}) with {}, {'standalone':true} %}
 	{% endfor %}
 {% else %}
+{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
 <section class="method">
-	{{ content.header( method.title, null, { 'id': 'method_'~id~'_tabBar', 'tabs': [
+	{{ header( method.title, null, { 'id': 'method_'~id~'_tabBar', 'tabs': [
 		{ 'title': 'Details', 'content': 'method_details_'~id },
 		{ 'title': 'Line', 'content': 'method_line_'~id },
 		{ 'title': 'Grid', 'content': 'method_grid_'~id }

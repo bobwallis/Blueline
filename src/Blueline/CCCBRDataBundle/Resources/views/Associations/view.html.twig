@@ -1,11 +1,11 @@
-{% import 'BluelineCCCBRDataBundle:Macros:content.html.twig' as content %}
 {% if abbreviations is defined %}
 	{% for abbreviation in abbreviations %}
 		{% render path('Blueline_Associations_view', {'abbreviation':abbreviation, 'snippet':true}) with {}, {'standalone':true} %}
 	{% endfor %}
 {% else %}
+{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
 <section class="association">
-	{{ content.header( association.name, null, { 'id': 'association_'~id~'_tabBar', 'tabs': [
+	{{ header( association.name, null, { 'id': 'association_'~id~'_tabBar', 'tabs': [
 		{ 'title': 'Details', 'content': 'association_details_'~id },
 		{ 'title': 'Towers', 'content': 'association_towers_'~id }
 	], 'active': 0 } ) }}
