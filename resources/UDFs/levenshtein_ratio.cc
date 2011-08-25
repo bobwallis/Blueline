@@ -1,3 +1,5 @@
+/* Compile, and install into MySQL using: CREATE FUNCTION levenshtein_ratio RETURNS INT SONAME 'levenshtein_ratio.so'; */
+
 #ifdef STANDARD
 #include <string.h>
 #ifdef __WIN__
@@ -18,37 +20,37 @@ typedef long long longlong;
 #ifdef HAVE_DLOPEN
 
 extern "C" {
-	my_bool levenshteinRatio_init( UDF_INIT *initid, UDF_ARGS *args, char *message );
-	void levenshteinRatio_deinit( UDF_INIT *initid );
-	longlong levenshteinRatio( UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error );
+	my_bool levenshtein_ratio_init( UDF_INIT *initid, UDF_ARGS *args, char *message );
+	void levenshtein_ratio_deinit( UDF_INIT *initid );
+	longlong levenshtein_ratio( UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error );
 }
 
-my_bool levenshteinRatio_init( UDF_INIT *initid, UDF_ARGS *args, char *message ) {
+my_bool levenshtein_ratio_init( UDF_INIT *initid, UDF_ARGS *args, char *message ) {
 	int *workspace;
 
 	/* Make sure user has provided two arguments */
 	if( args->arg_count != 2 ) {
-		strcpy( message, "levenshteinRatio() requires two arguments" );
+		strcpy( message, "LEVENSHTEIN_RATIO() requires two arguments" );
 		return 1;
 	}
 	/* Make sure both arguments are strings */
 	if( args->arg_type[0] != STRING_RESULT || args->arg_type[1] != STRING_RESULT ) {
-		strcpy( message, "levenshteinRatio() requires two string arguments" );
+		strcpy( message, "LEVENSHTEIN_RATIO() requires two string arguments" );
 		return 1;
 	}
 
 	/* set the maximum number of digits MySQL should expect as the return
-	** value of the levenshteinRatio() function */
+	** value of the LEVENSHTEIN_RATIO() function */
 	initid->max_length = 3;
 
-	/* levenshteinRatio() will not be returning null */
+	/* LEVENSHTEIN_RATIO() will not be returning null */
 	initid->maybe_null = 0;
 
 	/* attempt to allocate memory in which to calculate levenshtein distance */
 	workspace = new int[(args->lengths[0] + 1) * (args->lengths[1] + 1)];
 		
 	if( workspace == NULL ) {
-		strcpy( message, "Failed to allocate memory for levenshteinRatio function" );
+		strcpy( message, "Failed to allocate memory for LEVENSHTEIN_RATIO function" );
 		return 1;
 	}
 
@@ -59,13 +61,13 @@ my_bool levenshteinRatio_init( UDF_INIT *initid, UDF_ARGS *args, char *message )
 	return 0;
 }
 
-void levenshteinRatio_deinit( UDF_INIT *initid ) {
+void levenshtein_ratio_deinit( UDF_INIT *initid ) {
 	if( initid->ptr != NULL ) {
 		delete [] initid->ptr;
 	}
 }
 
-longlong levenshteinRatio( UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error ) {
+longlong levenshtein_ratio( UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error ) {
 	const char *s = args->args[0];
 	const char *t = args->args[1];
 	int *d = (int*) initid->ptr;
