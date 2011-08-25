@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Blueline\CCCBRDataBundle\Entity\Methods
  *
  * @ORM\Table(name="methods")
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Blueline\CCCBRDataBundle\Repository\MethodsRepository")
  */
 class Methods {
 

@@ -30,7 +30,24 @@ class SearchController extends Controller {
 		}
 	}
 	
-	public function methodsAction() {
+	public function methodsAction( $searchVariables = array() ) {
+		$request = $this->getRequest();
+		$format = $request->getRequestFormat();
+		$isLayout = $format == 'html' && !$request->query->get( 'snippet' );
+		
+		$methodsRepository = $this->getDoctrine()->getEntityManager()->getRepository( 'BluelineCCCBRDataBundle:Methods' );
+		$searchVariables = empty( $searchVariables )? $methodsRepository->requestToSearchVariables( $request ) : $searchVariables;
+		
+		if( $isLayout ) {
+			return $this->render( 'BluelineCCCBRDataBundle:Methods:search.layout.'.$format.'.twig', compact( 'searchVariables' ) );
+		}
+		else {
+			$methods = $methodsRepository->search( $searchVariables );
+			$count = (count( $methods ) > 0)? $methodsRepository->searchCount( $searchVariables ) : 0;
+			$pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
+			$pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
+			return $this->render( 'BluelineCCCBRDataBundle:Methods:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'methods' ) );
+		}
 	}
 	
 	public function towersAction( $searchVariables = array() ) {

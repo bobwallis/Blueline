@@ -1,0 +1,11 @@
+{% extends 'BluelineCCCBRDataBundle::base.html.twig' %}
+
+{% block title %}Search | Methods | {{ parent() }}{% endblock %}
+{% set breadcrumb = [ {'title': 'Methods', 'href': path( 'Blueline_Methods_welcome' ) } ] %}
+{% set search_big = true %}
+{% set search_action = path( 'Blueline_Methods_search' ) %}
+{% set search_placeholder = 'Search methods' %}
+
+{% block body %}
+	{% render path( 'Blueline_Methods_search', searchVariables|merge( { 'snippet': true } ) ) with {}, { 'standalone': true } %}
+{% endblock %}

@@ -42,10 +42,18 @@ doctrine:
         user:     %database_user%
         password: %database_password%
         charset:  UTF8
-
     orm:
         auto_generate_proxy_classes: %kernel.debug%
-        auto_mapping: true
+        entity_managers:
+            default:
+                mappings:
+                    BluelineCCCBRDataBundle: ~
+                dql:
+                    string_functions:
+                        concat_ws:
+                            Blueline\DoctrineExtensions\ConcatWs
+                        levenshtein_ratio:
+                            Blueline\DoctrineExtensions\LevenshteinRatio
 
 # Swiftmailer Configuration
 swiftmailer:
