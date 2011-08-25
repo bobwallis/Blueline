@@ -8,6 +8,8 @@ button { width: auto; overflow: visible; }
 html, body {
 	color: #000;
 	background: #FFF;
+	background-image: -webkit-linear-gradient(center bottom,#F9F9F9 0,#F9F9F9 25px,#FFF 60px);
+	background-image: -moz-linear-gradient(center bottom,#F9F9F9 0,#F9F9F9 25px,#FFF 60px);
 	height: 100%;
 	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
 	font-size: 12px;
