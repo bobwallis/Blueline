@@ -2,7 +2,7 @@
 <section class="content search">
 	<ol class="searchResults">
 	{% for method in methods %}
-		<li><a href="{{ path( 'Blueline_Methods_view', { 'title': method.title } ) }}">{{ method.title }}</a></li>
+		<li><a href="{{ path( 'Blueline_Methods_view', { 'title': method.title|replace({' ':'_'}) } ) }}">{{ method.title }}</a></li>
 	{% else %}
 		<li>No results</li>
 	{% endfor %}
