@@ -21,10 +21,10 @@
 		<link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" sizes="any" />
 		<link rel="alternate shortcut icon" type="image/x-ixon" href="{{ asset('favicon.ico') }}" sizes="16x16,24x24,48x48" />
 		<!--[if lt IE 9]><script src="/scripts/ieCompat.js"></script><![endif]-->
-{% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/default/*' output='css/default.css' filter='?yui_css' %}
+{% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/normalize.css' '@BluelineCCCBRDataBundle/Resources/public/css/default/*' output='css/default.css' filter='?yui_css' %}
 		<link rel="stylesheet" href="{{ asset_url }}" />
 {% endstylesheets %}
-{% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/print/*' output='css/print.css' filter='?yui_css' %}
+{% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/normalize.css' '@BluelineCCCBRDataBundle/Resources/public/css/print/*' output='css/print.css' filter='?yui_css' %}
 		<link rel="stylesheet" media="print" href="{{ asset_url }}" />
 {% endstylesheets %}
 		<script src="/scripts/helpers/jquery.js"></script>

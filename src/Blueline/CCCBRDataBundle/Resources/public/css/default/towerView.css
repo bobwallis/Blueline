@@ -2,6 +2,10 @@
 	display: none;
 }
 
+.towerFirstPeals ol {
+	list-style: none;
+}
+
 .towerStaticMap {
 	width: 100%;
 	text-align: center;

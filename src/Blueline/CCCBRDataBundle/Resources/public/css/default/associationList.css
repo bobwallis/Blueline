@@ -1,6 +1,7 @@
 #associationsList {
 	column-count: 2; -webkit-column-count: 2; -moz-column-count: 2;
 	column-gap: 20px; -webkit-column-gap: 20px; -moz-column-gap: 20px;
+	list-style: none;
 }
 	#associationsList li {
 		padding: 2px 0;

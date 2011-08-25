@@ -39,7 +39,7 @@
 		</div>
 		<div id="association_towers_{{ id }}" class="associationAffiliations">
 			<noscript><h2>Affiliated Towers</h2></noscript>
-			<ol class="noliststyle">
+			<ol>
 			{% for tower in association.affiliatedTowers %}
 				<li><a href="{{ path( 'Blueline_Towers_view', { 'doveid': tower.doveid } ) }}">{{ tower.place }} <small> ({{ tower.dedication }})</small></a></li>
 			{% else %}

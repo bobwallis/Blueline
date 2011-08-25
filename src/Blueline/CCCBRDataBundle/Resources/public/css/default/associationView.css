@@ -1,3 +1,6 @@
 .associationAffiliations {
 	display: none;
 }
+	.associationAffiliations ol {
+		list-style: none;
+	}

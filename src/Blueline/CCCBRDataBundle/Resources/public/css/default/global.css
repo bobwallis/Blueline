@@ -2,7 +2,7 @@
 input[type="search"] { -webkit-appearance: textfield; }
 
 /* Fix button layout */
-button { width: auto; overflow: visible; }
+button { width: auto; }
 
 /* Basic color and font definitions */
 html, body {
@@ -11,7 +11,6 @@ html, body {
 	background-image: -webkit-linear-gradient(center bottom,#F9F9F9 0,#F9F9F9 25px,#FFF 60px);
 	background-image: -moz-linear-gradient(center bottom,#F9F9F9 0,#F9F9F9 25px,#FFF 60px);
 	height: 100%;
-	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
 	font-size: 12px;
 	line-height: 15px;
 	-webkit-font-smoothing: antialiased;
@@ -23,15 +22,8 @@ h1, h2 {
 .mono {
 	font-family: 'Droid Sans Mono', 'DejaVu Sans Mono', Consolas, monospace;
 }
-abbr, dfn {
-	border-bottom: 1px dotted #E0DED9;
-	cursor: help;
-}
 .hide {
 	display: none;
-}
-strong {
-	font-weight: bold;
 }
 .normalweight {
 	font-weight: normal !important;
@@ -53,8 +45,7 @@ a {
 a:link { color: #29404C; -webkit-tap-highlight-color: #FF5E99; }
 a:visited { color: #4C2940; }
 a:hover { border-bottom-color: #29404C; }
-a:active { color: #404C29; outline: none; }
-a:focus { outline: thin dotted; }
+a:active { color: #404C29; }
 a.external {
 	padding-right: 13px;
 	background: transparent url(../../images/external_link.png) no-repeat center right;
