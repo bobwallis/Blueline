@@ -390,7 +390,7 @@ class Methods {
 					}
 					else {
 						if( $leadEndChange == '12'.$n || $leadEndChange == '1' ) {
-							$this->calls = array( 'Bob' => '14'.$n.'::', 'Single' => (($this->stage()<6)?'123':'1234'.$n).'::' );
+							$this->calls = array( 'Bob' => '14'.$n.'::', 'Single' => (($stage<6)?'123':'1234'.$n).'::' );
 						}
 						elseif( $leadEndChange == '123' ) {
 							$this->calls = array( 'Bob' => '12'.$n.'::' );
