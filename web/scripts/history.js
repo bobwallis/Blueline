@@ -10,7 +10,6 @@ require( [ 'helpers/History', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 		towers: [ { title: 'Towers', url: '/towers' } ]
 	};
 	var searches = {
-		all : { placeholder: 'Search', action: '/search' },
 		methods: { placeholder: 'Search methods', action: '/methods/search' },
 		associations: { placeholder: 'Search associations', action: '/associations/search' },
 		towers: { placeholder: 'Search towers', action: '/towers/search' }
@@ -19,15 +18,7 @@ require( [ 'helpers/History', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 	var urlHandlers = {
 		'/': function() {
 			Page.set( {
-				bigSearch: searches.all,
 				content: false
-			} );
-		},
-		'/search': function( state ) {
-			Page.set( {
-				windowTitle: 'Search',
-				bigSearch: searches.all,
-				content: { url: state.url, retain: !(Content.isEmpty() || state.data.type != 'keyup') }
 			} );
 		},
 		'/associations': function( state ) {
@@ -127,14 +118,12 @@ require( [ 'helpers/History', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 		'/about': function( state ) {
 			Page.set( {
 				windowTitle: 'About',
-				topSearch: searches.all,
 				content: { url: state.url }
 			} );
 		},
 		'/copyright': function( state ) {
 			Page.set( {
 				windowTitle: 'Copyright',
-				topSearch: searches.all,
 				content: { url: state.url }
 			} );
 		}

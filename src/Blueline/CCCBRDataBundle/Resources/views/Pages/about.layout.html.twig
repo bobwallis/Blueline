@@ -1,7 +1,6 @@
 {% extends 'BluelineCCCBRDataBundle::base.html.twig' %}
 
 {% block title %}About | {{ parent() }}{% endblock %}
-{% set search_header = true %}
 
 {% block body %}
 	{% render path('Blueline_page', {'page':'about', 'snippet':true}) with {}, {'standalone':true} %}
