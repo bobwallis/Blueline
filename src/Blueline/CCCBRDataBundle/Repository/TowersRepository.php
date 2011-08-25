@@ -13,7 +13,7 @@ class TowersRepository extends SharedRepository {
 		
 		if( isset( $searchVariables['q'] ) ) {
 			if( strpos( $searchVariables['q'], ' ' ) !== false ) {
-				$query->andWhere( "CONCAT(CONCAT(CONCAT(CONCAT(t.dedication,' '),t.place),' '),t.dedication) LIKE :qLike" );
+				$query->andWhere( "CONCAT_WS(' ', t.dedication, t.place ,t.dedication) LIKE :qLike" );
 			}
 			else {
 				$query->andWhere( 't.place LIKE :qLike' );
