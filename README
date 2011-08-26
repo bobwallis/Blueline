@@ -1,0 +1,21 @@
+
+
+Installation Notes:
+After checking out the source, run 'php bin/vendors install' to install the 
+libraries used by Symfony.
+
+The app/cache and app/logs directories must be writable both by the web server 
+and the command line user. Either:
+ rm -rf app/cache/*
+ rm -rf app/logs/*
+ sudo chmod +a "www-data allow delete,write,append,file_inherit,directory_inherit" app/cache app/logs
+ sudo chmod +a "yourname allow delete,write,append,file_inherit,directory_inherit" app/cache app/logs
+Or:
+ sudo setfacl -R -m u:www-data:rwx -m u:yourname:rwx app/cache app/logs
+ sudo setfacl -dR -m u:www-data:rwx -m u:yourname:rwx app/cache app/logs
+
+The code is set up to be used behind a reverse caching proxy (like Varnish), 
+but the built-in Symfony cache (written in PHP) can be used instead.
+See <http://symfony.com/doc/current/book/http_cache.html> for details.
+
+Access to app_dev.php and config.php should be denied.
