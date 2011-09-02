@@ -65,7 +65,7 @@ class MethodsController extends Controller {
 				->setParameter( 'title', $title );
 			
 			$method = $query->getSingleResult();
-			
+
 			return $this->render( 'BluelineCCCBRDataBundle:Methods:view.'.$format.'.twig', compact( 'method', 'id' ) );
 		}
 	}

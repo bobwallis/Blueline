@@ -1,73 +1,63 @@
 #top {
 	display: block;
 	width: 100%;
-	background: #002147;
-	background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0, #001E40),color-stop(1, #00254F));
-	background-image: -moz-linear-gradient(center bottom,#001E40 0%,#00254F 100%);
-	color: #E0DED9;
-	height: 35px;
-	line-height: 35px;
-}
-	#top a {
-		color: #E0DED9;
+	background: @headerBackground;
+	background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0, darken(@headerBackground,3%)),color-stop(1, lighten(@headerBackground,3%)));
+	background-image: -moz-linear-gradient(center bottom,darken(@headerBackground,3%) 0%,lighten(@headerBackground,3%) 100%);
+	color: @lightGrey;
+	height: @headerHeight;
+	line-height: @headerHeight;
+	a {
+		color: @lightGrey;
 		border: 0;
-	}
-		#top a:hover {
+		&:hover {
 			color: #FFF;
 		}
-	#top h1, #top h2, #top span.headerSep {
+	}
+	h1, h2, span.headerSep {
 		font-weight: bold;
 		text-transform: uppercase;
 		font-weight: normal;
 		float: left;
-		margin: 0 0 0 10px;
-		font-size: 18px;
+		margin: 0 0 0 @headerHeight/4;
+		font-size: @headerHeight/2;
 		text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
 	}
-	#top h2, #top span.headerSep {
+	h2, span.headerSep {
 		font-weight: normal;
 		text-transform: none;
 		margin-left: 5px;
 	}
-
-	/* Small screen overrides */
-@media screen and (max-width: 480px) {
-	#top {
-		height: 25px;
-		line-height: 25px;
-	}
-	#top h1, #top h2, #top span.headerSep {
-		margin-left: 4px;
-		font-size: 13px;
-	}
 }
 
 /* Header search */
+@topSearchWidth: 200px;
+@topSearchHeight: 21px;
 form#topSearch {
 	display: block;
 	float: left;
-	background-color: #FFF;
+	background-color: @background;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
-	border: 1px solid #E0DED9;
+	border: 1px solid @lightGrey;
 	box-shadow: 1px 1px 3px rgba(0,0,0,0.6);
 	overflow: hidden;
-	margin: 7.5px 0 7.5px 8px;
-	height: 19px;
-	width: 200px;
-}
-	form#topSearch input {
+	margin: ((@headerHeight - @topSearchHeight)/2) 0 ((@headerHeight - @topSearchHeight)/2) 8px;
+	height: @topSearchHeight - 2;
+	width: @topSearchWidth;
+	input {
 		display: block;
 		float: left;
-		background-color: #FFF;
+		background-color: @background;
 		border: 0;
 		font-size: 11px;
-		width: 165px;
+		width: @topSearchWidth - 25;
 		height: 15px;
+		line-height: 15px;
 		padding: 2px;
+		&:focus { border: 0; outline-width: 0; }
 	}
-		form#topSearch input:focus { border: 0; outline-width: 0; }
-	form#topSearch button {
+	button {
 		display: block;
 		float: right;
 		background-color: #FFF;
@@ -78,18 +68,12 @@ form#topSearch {
 		height: 19px;
 		margin-right: 2px;
 	}
-
-/* Small screen overrides */
-@media screen and (max-width: 480px) {
-	form#topSearch {
-		display: none;
-	}
 }
 
 /* Big search */
 div#bigSearchContainer {
 	clear: both;
-	border-bottom: 1px solid #E0DED9;
+	border-bottom: 1px solid @lightGrey;
 	background-color: #FAFAFA;
 	padding: 8px;
 }
@@ -123,26 +107,3 @@ form#bigSearch {
 		width: 25px;
 		height: 25px;
 	}
-
-/* Small screen overrides */
-@media screen and (max-width: 480px) {
-	div#bigSearchContainer {
-		padding: 5px;
-	}
-	form#bigSearch {
-		width: 304px;
-	}
-		form#bigSearch div {
-			height: 25px;
-		}
-		form#bigSearch input {
-			font-size: 13px;
-			width: 264px;
-			height: 21px;
-			padding: 2px 5px;
-		}
-		form#bigSearch button {
-			width: 25px;
-			height: 25px;
-		}
-}

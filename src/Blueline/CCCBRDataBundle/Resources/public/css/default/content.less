@@ -1,0 +1,71 @@
+// Section headers
+section {
+	header {
+		clear: both;
+		border-bottom: 1px solid @lightGrey;
+		border-top: 1px solid @lightGrey;
+		background-color: #FAFAFA;
+		background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0, #F3F3F3),color-stop(1, #FAFAFA));
+		background-image: -moz-linear-gradient(center bottom,#F3F3F3 0%,#FAFAFA 100%);
+		padding: 10px;
+		h1 {
+			font-size: 22px;
+			font-weight: bold;
+			line-height: 22px;
+			margin: 0;
+			text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+		}
+		h2 {
+			font-size: 18px;
+			font-weight: bold;
+			line-height: 20px;
+			margin: 0 0 0 5px;
+			text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+		}
+	}
+}
+#content section:first-child header { border-top: 0; }
+
+// Tab bars
+@import 'tabBar.less';
+
+// Tower map
+@import 'towerMap.less';
+
+// Sections with lots of text
+.text {
+	.wrap {
+		margin: @contentYPadding @contentXPadding;
+		max-width: 600px;
+		text-align: justify;
+		hyphens: auto; -moz-hyphens: auto; -webkit-hyphens: auto;
+	}
+}
+
+// Search results and paging
+@import 'searchResults.less';
+
+// Details table
+section .details {
+	table {
+		margin: @contentYPadding @contentXPadding;
+		td {
+			padding-left: 4px;
+			text-align: left;
+		}
+		th {
+			padding-right: 4px;
+			text-align: right;
+			font-weight: normal;
+		}
+	}
+}
+
+// Association specific styling
+@import 'associations.less';
+
+// Tower specific styling
+@import 'towers.less';
+
+// Method specific styling
+@import 'methods.less';

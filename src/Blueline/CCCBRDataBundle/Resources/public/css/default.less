@@ -1,15 +1,25 @@
-/* Fix appearance of search inputs in Safari */
-input[type="search"] { -webkit-appearance: textfield; }
+// Import vendor prefixing mixins
+@import 'mixins/vendor.less';
 
-/* Fix button layout */
-button { width: auto; }
+// Layout
+@headerHeight: 35px;
+@footerHeight: 25px;
+@contentXPadding: 15px;
+@contentYPadding: 12px;
+
+// Colours
+@background: #FFF;
+@headerBackground: #002147;
+@footerBackground: #F9F9F9;
+@lightGrey: #E0DED9;
+
 
 /* Basic color and font definitions */
 html, body {
 	color: #000;
-	background: #FFF;
-	background-image: -webkit-linear-gradient(center bottom,#F9F9F9 0,#F9F9F9 25px,#FFF 60px);
-	background-image: -moz-linear-gradient(center bottom,#F9F9F9 0,#F9F9F9 25px,#FFF 60px);
+	background: @background;
+	background-image: -webkit-linear-gradient(center bottom,@footerBackground 0,@footerBackground 25px,@background 60px);
+	background-image: -moz-linear-gradient(center bottom,@footerBackground 0,@footerBackground 25px,@background 60px);
 	height: 100%;
 	font-size: 12px;
 	line-height: 15px;
@@ -35,20 +45,20 @@ h1, h2 {
 	visibility: hidden;
 }
 
-/* Links */
+// Links
 a {
 	text-decoration: none;
 	border-bottom: 1px solid #A1C4D0;
 	transition-property: border-bottom-color, color; -webkit-transition-property: border-bottom-color, color; -moz-transition-property: border-bottom-color, color;
 	transition-duration: .4s; -webkit-transition-duration: .4s; -moz-transition-duration: .4s;
-}
-a:link { color: #29404C; -webkit-tap-highlight-color: #FF5E99; }
-a:visited { color: #4C2940; }
-a:hover { border-bottom-color: #29404C; }
-a:active { color: #404C29; }
-a.external {
-	padding-right: 13px;
-	background: transparent url(../../images/external_link.png) no-repeat center right;
+	&:link { color: #29404C; -webkit-tap-highlight-color: #FF5E99; }
+	&:visited { color: #4C2940; }
+	&:hover { border-bottom-color: #29404C; }
+	&:active { color: #404C29; }
+	&.external {
+		padding-right: 13px;
+		background: transparent url(../../images/external_link.png) no-repeat center right;
+	}
 }
 
 /* Size specific hiding */
@@ -57,13 +67,6 @@ a.external {
 @media screen and (max-width: 480px) {
 	.normal_hide { display: block; }
 	.small_hide { display: none; }
-}
-
-/* Content wrapper */
-#wrapper {
-	min-height: 100%;
-	height: auto !important;
-	height: 100%;
 }
 
 /* Loading animation */
@@ -77,3 +80,7 @@ a.external {
 	height: 18px;
 	background: #FFF url(../../images/loading.gif) no-repeat center center;
 }
+
+@import 'default/header.less';
+@import 'default/content.less';
+@import 'default/footer.less'; 

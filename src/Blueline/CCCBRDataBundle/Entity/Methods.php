@@ -199,7 +199,7 @@ class Methods {
 	/**
 	 * @var boolean $numberOfHunts
 	 *
-	 * @ORM\Column(name="numberOfHunts", type="boolean", nullable=true)
+	 * @ORM\Column(name="numberOfHunts", type="smallint", nullable=true)
 	 */
 	private $numberOfHunts;
 	public function setNumberOfHunts( $numberOfHunts ) { $this->numberOfHunts = $numberOfHunts; }

@@ -429,3 +429,6 @@ table {
     border-collapse: collapse;
     border-spacing: 0;
 }
+table td, table th {
+	vertical-align: top;
+}

@@ -160,8 +160,8 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 			}, this );
 			
 			// Choose a font size, and column padding
-			var numbersFontSize = ($window.width() < 500)? 12 : 14,
-				numbersColumnPadding = ($window.width() < 500)? 12 : 15;
+			var numbersFontSize = 14,
+				numbersColumnPadding = 15;
 			
 			// Decide which bells get place starts drawn
 			var plainPlaceStarts = plainLines.map( function( l, i ) { return (l.stroke !== 'transparent' && this.method.huntBells.indexOf( i ) === -1)? i : -1; }, this ).filter( function( l ) { return l !== -1; } );
@@ -186,7 +186,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 					placeStartWidth = (10 + plainPlaceStarts.length*12);
 				return function() {
 					var leadsPerColumn = 1;
-					maxWidth = view.container.numbers.width();
+					maxWidth = view.container.numbers.width() - 30;
 					// Check that the window isn't plenty big enough before bothering to look at adjusting
 					if( maxWidth <= 2*callWidth + 5 + (rowWidth + placeStartWidth + numbersColumnPadding)*numberOfLeads ) {
 						for( leadsPerColumn = 1; leadsPerColumn < numberOfLeads; ++leadsPerColumn ) {

@@ -120,14 +120,14 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 			var html = '';
 			// If we're including a title or place notation then wrap everything in a table
 			if( this.show.title || this.show.notation ) {
-				html = '<table class="grid" id="'+this.id+'"><tr>' + 
-				(this.show.title? '<td colspan="2" class="gridTitle">'+this.title+':</td></tr><tr>' : '') + 
-				(this.show.notation? '<td class="gridNotation" style="padding-top: '+(this.display.dimensions.row.y/2)+'px; padding-bottom: '+(this.display.dimensions.row.y/2)+'px;line-height: '+this.display.dimensions.row.y+'px;">'+this.notation.exploded.join( '<br />' )+'</td>' : '') +
-				'<td class="gridLine"></td></tr></table>';
+				html = '<table class="_grid" id="'+this.id+'"><tr>' + 
+				(this.show.title? '<td colspan="2" class="_gridTitle">'+this.title+':</td></tr><tr>' : '') + 
+				(this.show.notation? '<td class="_gridNotation" style="padding-top: '+(this.display.dimensions.row.y/2)+'px; padding-bottom: '+(this.display.dimensions.row.y/2)+'px;line-height: '+this.display.dimensions.row.y+'px;">'+this.notation.exploded.join( '<br />' )+'</td>' : '') +
+				'<td class="_gridLine"></td></tr></table>';
 			}
 			// Otherwise wrap in a div
 			else {
-				html = '<div class="grid" id="'+this.id+'"></div>';
+				html = '<div class="_grid" id="'+this.id+'"></div>';
 			}
 			this.container = $( html );
 			
@@ -254,7 +254,7 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 				
 					// Append the paper to the appropriate container
 					if( this.show.title || this.show.notation ) {
-						$( 'td.gridLine', this.container ).append( paper.canvas );
+						$( 'td._gridLine', this.container ).append( paper.canvas );
 					}
 					else {
 						this.container.append( paper.canvas );
@@ -294,7 +294,7 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 				
 				// Append the text table to the appropriate container
 				if( this.show.title || this.show.notation ) {
-					$( 'td.gridLine', this.container ).append( numbersTable );
+					$( 'td._gridLine', this.container ).append( numbersTable );
 				}
 				else {
 					this.container.append( numbersTable );
