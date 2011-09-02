@@ -65,7 +65,7 @@ audio:not([controls]) {
 
 html {
     font-size: 100%; /* 1 */
-    overflow-y: scroll; /* 2 */
+   /* overflow-y: scroll; *//* 2 */
     -webkit-text-size-adjust: 100%; /* 3 */
     -ms-text-size-adjust: 100%; /* 3 */
     font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
