@@ -6,16 +6,6 @@ d=`dirname "$dWhich"`
 # Execute RequireJS builder
 node "$d/helpers/r.js" -o app.build.js
 
-# CSS
-# Remove unneeded files
-rm -rf "$d/../../www-build/styles/ui"
-rm -rf "$d/../../www-build/styles/helpers"
-# GZip compiled CSS
-find "$d/../../www-build/" -type f -name "*.css" -exec sh -c 'gzip -9c "$1" > "$1.gz"' -- {} \;
-# Copy to styles.built
-rm -rf "$d/../../www/styles.built"
-mv "$d/../../www-build/styles" "$d/../../www/styles.built"
-
 # JS
 # Remove unneeded files
 rm -rf "$d/../../www-build/scripts/helpers"
@@ -26,11 +16,9 @@ rm "$d/../../www-build/scripts/ui/Header.js"
 rm "$d/../../www-build/scripts/ui/MethodGrid.js"
 rm "$d/../../www-build/scripts/ui/Page.js"
 rm "$d/../../www-build/scripts/ui/TabBar.js"
-# GZip compressed JS
-find "$d/../../www-build/" -type f -name "*.js" -exec sh -c 'gzip -9c "$1" > "$1.gz"' -- {} \;
 # Copy to scripts.built
-rm -rf "$d/../../www/scripts.built"
-mv "$d/../../www-build/scripts" "$d/../../www/scripts.built"
+rm -rf "$d/../../web/scripts.built"
+mv "$d/../../www-build/scripts" "$d/../../web/scripts.built"
 
 
 # Remove www-build directory

@@ -1,9 +1,8 @@
 ( {
-	appDir: "../../www",
+	appDir: "../../web",
 	baseUrl: "scripts",
 	dir: "../../www-build",
 	optimize: "uglify",
-	optimizeCss: "standard",
 	modules: [
 		{
 			name: "history",
