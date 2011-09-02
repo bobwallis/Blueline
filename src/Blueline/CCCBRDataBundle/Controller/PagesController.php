@@ -5,12 +5,7 @@ namespace Blueline\CCCBRDataBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 
-class PagesController extends Controller {
-
-	public function welcomeAction() {
-		return $this->render( 'BluelineCCCBRDataBundle:Pages:welcome.layout.html.twig' );
-	}
-	
+class PagesController extends Controller {	
 	public function pageAction( $page ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();

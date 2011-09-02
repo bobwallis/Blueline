@@ -96,4 +96,13 @@ class TowersController extends Controller {
 			return $this->render( 'BluelineCCCBRDataBundle:Towers:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'towers' ) );
 		}
 	}
+
+	public function sitemapAction() {
+		$request = $this->getRequest();
+		$format = $request->getRequestFormat();
+		
+		$towers = $this->getDoctrine()->getEntityManager()->createQuery( 'SELECT partial t.{doveid} FROM BluelineCCCBRDataBundle:Towers t' )->getArrayResult();
+
+		return $this->render( 'BluelineCCCBRDataBundle:Towers:sitemap.'.$format.'.twig', compact( 'towers' ) );
+	}
 }

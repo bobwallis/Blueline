@@ -89,4 +89,13 @@ class MethodsController extends Controller {
 			return $this->render( 'BluelineCCCBRDataBundle:Methods:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'methods' ) );
 		}
 	}
+
+	public function sitemapAction() {
+		$request = $this->getRequest();
+		$format = $request->getRequestFormat();
+		
+		$methods = $this->getDoctrine()->getEntityManager()->createQuery( 'SELECT partial m.{title} FROM BluelineCCCBRDataBundle:Methods m' )->getArrayResult();
+
+		return $this->render( 'BluelineCCCBRDataBundle:Methods:sitemap.'.$format.'.twig', compact( 'methods' ) );
+	}
 }

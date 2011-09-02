@@ -101,4 +101,13 @@ class AssociationsController extends Controller {
 			return $this->render( 'BluelineCCCBRDataBundle:Associations:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'associations' ) );
 		}
 	}
+
+	public function sitemapAction() {
+		$request = $this->getRequest();
+		$format = $request->getRequestFormat();
+		
+		$associations = $this->getDoctrine()->getEntityManager()->createQuery( 'SELECT partial a.{abbreviation} FROM BluelineCCCBRDataBundle:Associations a' )->getArrayResult();
+
+		return $this->render( 'BluelineCCCBRDataBundle:Associations:sitemap.'.$format.'.twig', compact( 'associations' ) );
+	}
 }
