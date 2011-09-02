@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false */
-define( ['./Header', './Content', './TowerMap'], function( Header, Content, TowerMap ) {
+define( ['../helpers/Can', './Header', './Content', './TowerMap'], function( Can, Header, Content, TowerMap ) {
 	var baseURL = location.href.replace( /^(.*)\/.*$/, '$1' ),
 		AJAXContentRequest = null;
 	return {
@@ -31,7 +31,7 @@ define( ['./Header', './Content', './TowerMap'], function( Header, Content, Towe
 					Content.loading.hide();
 				}
 				// Try to get content for the URL from localStorage
-				var content = localStorage.getItem( options.content.url.replace( baseURL, '' ) );
+				var content = Can.localStorage()? localStorage.getItem( options.content.url.replace( baseURL, '' ) ) : null;
 				if( content !== null ) { setContent( content ); }
 				// Otherwise request it
 				else {

@@ -15,7 +15,7 @@
 
 define( {
 	localStorage: function() {
-		try { return ( 'localStorage' in window ) && ( window.localStorage !== null ); }
+		try { return !!localStorage.getItem; }
 		catch( e ) { return false; }
 	},
 	SVG: function() {

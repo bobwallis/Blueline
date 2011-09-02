@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false, History: false */
-require( [ 'helpers/History', 'ui/Content', 'ui/Header', 'ui/Page' ], function( History, Content, Header, Page ) {
+require( [ 'helpers/Can', 'helpers/History', 'ui/Content', 'ui/Header', 'ui/Page' ], function( Can, History, Content, Header, Page ) {
 	// We'll need to know the base URL
 	var baseURL = location.protocol+'//'+location.host;
 
@@ -229,8 +229,16 @@ require( [ 'helpers/History', 'ui/Content', 'ui/Header', 'ui/Page' ], function( 
 
 	// DOM Ready/Load event
 	$( function() {
-		// Clear localStorage when updating the cache manifest
-		window.applicationCache.addEventListener( 'downloading', localStorage.clear, false );
+		// Check if all the content stored in localStorage is fresh
+		if( Can.localStorage() ) {
+			var clearedBefore = localStorage.getItem( '_cleared' ),
+				// The resources/buildWWW script will update this line automatically
+				clearBefore = new Date( 2011, 9, 2, 14, 17 );
+			if( clearedBefore != clearBefore ) {
+				localStorage.clear();
+				localStorage.setItem( '_cleared', clearBefore );
+			}
+		}
 
 		// Attach to click events
 		$( document.body ).click( historyClick );

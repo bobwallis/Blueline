@@ -3,19 +3,13 @@
 dWhich=`which "$0"`
 d=`dirname "$dWhich"`
 
+# Update the localStorage clear parameter in history.js
+sed -i -e"s/clearBefore = new Date(.*$/clearBefore = new Date( `date "+%Y, %-m, %-d, %-H, %-M"` );/" "$d/../../web/scripts/history.js"
+
 # Execute RequireJS builder
 node "$d/helpers/r.js" -o app.build.js
 
 # JS
-# Remove unneeded files
-rm -rf "$d/../../www-build/scripts/helpers"
-rm -rf "$d/../../www-build/scripts/plugins"
-rm "$d/../../www-build/scripts/ui/Hotkeys.js"
-rm "$d/../../www-build/scripts/ui/Content.js"
-rm "$d/../../www-build/scripts/ui/Header.js"
-rm "$d/../../www-build/scripts/ui/MethodGrid.js"
-rm "$d/../../www-build/scripts/ui/Page.js"
-rm "$d/../../www-build/scripts/ui/TabBar.js"
 # Copy to scripts.built
 rm -rf "$d/../../web/scripts.built"
 mv "$d/../../www-build/scripts" "$d/../../web/scripts.built"
