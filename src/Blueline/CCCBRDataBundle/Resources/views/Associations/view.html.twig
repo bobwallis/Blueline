@@ -23,8 +23,8 @@
 	</script>
 	<div id="association_details_{{ id }}" class="details">
 		<noscript><h2>Details</h2></noscript>
-		<table class="horizontalDetails">
-		{% if association.link is not null %}
+		<table>
+		{% if association.link is not empty %}
 			<tr>
 				<th>Link:</th>
 				<td><a href="{{ association.link }}" class="external">{{ association.link }}</a></td>
