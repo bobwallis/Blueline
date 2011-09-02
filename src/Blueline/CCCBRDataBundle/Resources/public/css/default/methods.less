@@ -5,13 +5,18 @@
 }
 
 .method {
-	.line {
-		padding: 0 @contentXPadding;
-	}
 	._grid {
 		margin-left: 20px;
-		&:first-child {
+	}
+	.line {
+		padding: 0 @contentXPadding;
+		._grid:first-child {
 			margin-left: 0;
+		}
+	}
+	.grid {
+		._grid:first-child {
+			margin-left: @contentXPadding;
 		}
 	}
 }
