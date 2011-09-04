@@ -21,6 +21,13 @@ twig:
     debug:            %kernel.debug%
     strict_variables: %kernel.debug%
 
+# Twig Extensions
+services:
+    blueline.twig.extension:
+        class: Blueline\Extensions\Twig\All
+        tags:
+            - { name: twig.extension }
+
 # Assetic Configuration
 assetic:
     debug:          %kernel.debug%
@@ -54,9 +61,9 @@ doctrine:
                 dql:
                     string_functions:
                         concat_ws:
-                            Blueline\DoctrineExtensions\ConcatWs
+                            Blueline\Extensions\Doctrine\ConcatWs
                         levenshtein_ratio:
-                            Blueline\DoctrineExtensions\LevenshteinRatio
+                            Blueline\Extensions\Doctrine\LevenshteinRatio
 
 # Swiftmailer Configuration
 swiftmailer:
