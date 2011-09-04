@@ -10,28 +10,35 @@ class AssociationsController extends Controller {
 	public function welcomeAction() {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
+		$isLayout = $format == 'html' && !$request->query->get( 'snippet' );
 		
-		if( $isSnippet ) {
-			$associations = $this->getDoctrine()->getEntityManager()->createQuery( 'SELECT a FROM BluelineCCCBRDataBundle:Associations a' )->getArrayResult();
-			return $this->render( 'BluelineCCCBRDataBundle:Associations:welcome.'.$format.'.twig', compact( 'associations' ) );
+		if( $isLayout ) {
+			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:welcome.layout.'.$format.'.twig' );
 		}
 		else {
-			return $this->render( 'BluelineCCCBRDataBundle:Associations:welcome.layout.'.$format.'.twig' );
+			$associations = $this->getDoctrine()->getEntityManager()->createQuery( 'SELECT a FROM BluelineCCCBRDataBundle:Associations a' )->getArrayResult();
+			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:welcome.'.$format.'.twig', compact( 'associations' ) );
 		}
+		
+		// Caching headers
+		$response->setPublic();
+		$response->setMaxAge( 129600 );
+		$response->setSharedMaxAge( 129600 );
+		
+		return $response;
 	}
 	
 	public function viewAction( $abbreviation ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
+		$isLayout = $format == 'html' && !$request->query->get( 'snippet' );
 		
 		$abbreviations = explode( '|', $abbreviation );
 		
 		$em = $this->getDoctrine()->getEntityManager();
 		
 		// If we're building a layout, or a snippet for multiple associations, then check we are at the canonical URL for the content
-		if( !$isSnippet || count( $abbreviations ) > 1 ) {
+		if( $isLayout || count( $abbreviations ) > 1 ) {
 			$associations = $em->createQuery( '
 				SELECT partial a.{abbreviation,name} FROM BluelineCCCBRDataBundle:Associations a
 				WHERE a.abbreviation IN (:abbreviation)' )
@@ -48,11 +55,11 @@ class AssociationsController extends Controller {
 			}
 		}
 		
-		if( !$isSnippet ) {
-			return $this->render( 'BluelineCCCBRDataBundle:Associations:view.layout.'.$format.'.twig', compact( 'abbreviations', 'pageTitle' ) );
+		if( $isLayout ) {
+			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:view.layout.'.$format.'.twig', compact( 'abbreviations', 'pageTitle' ) );
 		}
 		elseif( count( $abbreviations ) > 1 ){
-			return $this->render( 'BluelineCCCBRDataBundle:Associations:view.'.$format.'.twig', compact( 'abbreviations' ) );
+			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:view.'.$format.'.twig', compact( 'abbreviations' ) );
 		}
 		else {
 			// Create a HTML-safe id
@@ -78,8 +85,15 @@ class AssociationsController extends Controller {
 			->setParameter( 'abbreviation', $abbreviation )
 			->getSingleResult();
 			
-			return $this->render( 'BluelineCCCBRDataBundle:Associations:view.'.$format.'.twig', compact( 'association', 'id' ) );
+			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:view.'.$format.'.twig', compact( 'association', 'id' ) );
 		}
+		
+		// Caching headers
+		$response->setPublic();
+		$response->setMaxAge( 129600 );
+		$response->setSharedMaxAge( 129600 );
+		
+		return $response;
 	}
 	
 	public function searchAction( $searchVariables = array() ) {
@@ -91,15 +105,22 @@ class AssociationsController extends Controller {
 		$searchVariables = empty( $searchVariables )? $associationsRepository->requestToSearchVariables( $request ) : $searchVariables;
 		
 		if( $isLayout ) {
-			return $this->render( 'BluelineCCCBRDataBundle:Associations:search.layout.'.$format.'.twig', compact( 'searchVariables' ) );
+			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:search.layout.'.$format.'.twig', compact( 'searchVariables' ) );
 		}
 		else {
 			$associations = $associationsRepository->search( $searchVariables );
 			$count = (count( $associations ) > 0)? $associationsRepository->searchCount( $searchVariables ) : 0;
 			$pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
 			$pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
-			return $this->render( 'BluelineCCCBRDataBundle:Associations:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'associations' ) );
+			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'associations' ) );
 		}
+		
+		// Caching headers
+		$response->setPublic();
+		$response->setMaxAge( 129600 );
+		$response->setSharedMaxAge( 129600 );
+		
+		return $response;
 	}
 
 	public function sitemapAction() {
@@ -108,6 +129,13 @@ class AssociationsController extends Controller {
 		
 		$associations = $this->getDoctrine()->getEntityManager()->createQuery( 'SELECT partial a.{abbreviation} FROM BluelineCCCBRDataBundle:Associations a' )->getArrayResult();
 
-		return $this->render( 'BluelineCCCBRDataBundle:Associations:sitemap.'.$format.'.twig', compact( 'associations' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Associations:sitemap.'.$format.'.twig', compact( 'associations' ) );
+		
+		// Caching headers
+		$response->setPublic();
+		$response->setMaxAge( 129600 );
+		$response->setSharedMaxAge( 129600 );
+		
+		return $response;
 	}
 }

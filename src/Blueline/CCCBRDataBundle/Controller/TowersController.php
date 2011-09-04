@@ -10,25 +10,32 @@ class TowersController extends Controller {
 	public function welcomeAction() {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
+		$isLayout = $format == 'html' && !$request->query->get( 'snippet' );
 		
-		if( $isSnippet ) {
-			;
+		if( $isLayout ) {
+			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:welcome.layout.'.$format.'.twig' );
 		}
 		else {
-			return $this->render( 'BluelineCCCBRDataBundle:Towers:welcome.layout.'.$format.'.twig' );
+			;
 		}
+		
+		// Caching headers
+		$response->setPublic();
+		$response->setMaxAge( 129600 );
+		$response->setSharedMaxAge( 129600 );
+		
+		return $response;
 	}
 	
 	public function viewAction( $doveid ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
+		$isLayout = $format == 'html' && !$request->query->get( 'snippet' );
 		
 		$doveids = explode( '|', $doveid );
 		
 		// If we're building a layout, or a snippet for multiple associations, then check we are at the canonical URL for the content
-		if( !$isSnippet || count( $doveids ) > 1 ) {
+		if( $isLayout || count( $doveids ) > 1 ) {
 			$towers = $this->getDoctrine()->getEntityManager()->createQuery( '
 				SELECT partial t.{doveid,place,dedication} FROM BluelineCCCBRDataBundle:Towers t
 				LEFT JOIN t.oldpk t2
@@ -46,11 +53,11 @@ class TowersController extends Controller {
 			}
 		}
 		
-		if( !$isSnippet ) {
-			return $this->render( 'BluelineCCCBRDataBundle:Towers:view.layout.'.$format.'.twig', compact( 'doveids', 'pageTitle' ) );
+		if( $isLayout ) {
+			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:view.layout.'.$format.'.twig', compact( 'doveids', 'pageTitle' ) );
 		}
 		elseif( count( $doveids ) > 1 ){
-			return $this->render( 'BluelineCCCBRDataBundle:Towers:view.'.$format.'.twig', compact( 'doveids' ) );
+			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:view.'.$format.'.twig', compact( 'doveids' ) );
 		}
 		else {
 			$em = $this->getDoctrine()->getEntityManager();
@@ -73,8 +80,15 @@ class TowersController extends Controller {
 			$days = array( '', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' );
 			if( !empty( $tower['practiceNight'] ) ) { $tower['practiceNight_day'] = $days[$tower['practiceNight']]; }
 			
-			return $this->render( 'BluelineCCCBRDataBundle:Towers:view.'.$format.'.twig', compact( 'tower', 'id' ) );
+			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:view.'.$format.'.twig', compact( 'tower', 'id' ) );
 		}
+		
+		// Caching headers
+		$response->setPublic();
+		$response->setMaxAge( 129600 );
+		$response->setSharedMaxAge( 129600 );
+		
+		return $response;
 	}
 	
 	public function searchAction( $searchVariables = array() ) {
@@ -86,15 +100,22 @@ class TowersController extends Controller {
 		$searchVariables = empty( $searchVariables )? $towersRepository->requestToSearchVariables( $request ) : $searchVariables;
 		
 		if( $isLayout ) {
-			return $this->render( 'BluelineCCCBRDataBundle:Towers:search.layout.'.$format.'.twig', compact( 'searchVariables' ) );
+			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:search.layout.'.$format.'.twig', compact( 'searchVariables' ) );
 		}
 		else {
 			$towers = $towersRepository->search( $searchVariables );
 			$count = (count( $towers ) > 0)? $towersRepository->searchCount( $searchVariables ) : 0;
 			$pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
 			$pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
-			return $this->render( 'BluelineCCCBRDataBundle:Towers:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'towers' ) );
+			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'towers' ) );
 		}
+		
+		// Caching headers
+		$response->setPublic();
+		$response->setMaxAge( 129600 );
+		$response->setSharedMaxAge( 129600 );
+		
+		return $response;
 	}
 
 	public function sitemapAction() {
@@ -103,6 +124,13 @@ class TowersController extends Controller {
 		
 		$towers = $this->getDoctrine()->getEntityManager()->createQuery( 'SELECT partial t.{doveid} FROM BluelineCCCBRDataBundle:Towers t' )->getArrayResult();
 
-		return $this->render( 'BluelineCCCBRDataBundle:Towers:sitemap.'.$format.'.twig', compact( 'towers' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Towers:sitemap.'.$format.'.twig', compact( 'towers' ) );
+		
+		// Caching headers
+		$response->setPublic();
+		$response->setMaxAge( 129600 );
+		$response->setSharedMaxAge( 129600 );
+		
+		return $response;
 	}
 }
