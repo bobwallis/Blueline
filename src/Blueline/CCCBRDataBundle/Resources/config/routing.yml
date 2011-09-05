@@ -7,7 +7,7 @@ Blueline_page:
     pattern:  /{page}.{_format}
     defaults: { _controller: BluelineCCCBRDataBundle:Pages:page, _format: html }
     requirements:
-        page: about|copyright|robots|sitemap|sitemap_root
+        page: about|copyright|robots|humans|sitemap|sitemap_root
         format: html|txt|xml
 
 
