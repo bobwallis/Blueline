@@ -60,6 +60,8 @@ doctrine:
                     BluelineCCCBRDataBundle: ~
                 dql:
                     string_functions:
+                        regexp:
+                            Blueline\Extensions\Doctrine\Regexp
                         concat_ws:
                             Blueline\Extensions\Doctrine\ConcatWs
                         levenshtein_ratio:
