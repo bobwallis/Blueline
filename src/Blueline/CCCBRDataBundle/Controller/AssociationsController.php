@@ -16,7 +16,7 @@ class AssociationsController extends Controller {
 			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:welcome.layout.'.$format.'.twig' );
 		}
 		else {
-			$associations = $this->getDoctrine()->getEntityManager()->createQuery( 'SELECT a FROM BluelineCCCBRDataBundle:Associations a' )->getArrayResult();
+			$associations = $this->getDoctrine()->getEntityManager()->createQuery( 'SELECT partial a.{abbreviation,name} FROM BluelineCCCBRDataBundle:Associations a' )->getArrayResult();
 			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:welcome.'.$format.'.twig', compact( 'associations' ) );
 		}
 		
@@ -45,13 +45,14 @@ class AssociationsController extends Controller {
 				->setParameter( 'abbreviation', $abbreviations )
 				->setMaxResults( count( $abbreviations ) )
 				->getArrayResult();
-			$url = implode( '|', array_map( function( $a ) { return $a['abbreviation']; }, $associations ) );
-			$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $a ) { return $a['name']; }, $associations ) );
-			if( empty( $url ) ) {
-				die( 'not found' );
+			if( empty( $associations ) || count( $associations ) < count( $abbreviations ) ) {
+				throw $this->createNotFoundException( 'The association does not exist' );
 			}
-			elseif( $abbreviation !== $url ) {
-				die('non-canonical url, should be: "'.$url.'", not: "'.$abbreviation.'"');
+			$url = $this->generateUrl( 'Blueline_Associations_view', array( 'abbreviation' => implode( '|', array_map( function( $a ) { return $a['abbreviation']; }, $associations ) ), '_format' => $format ) );
+			$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $a ) { return $a['name']; }, $associations ) );
+			
+			if( $request->getRequestUri() !== $url ) {
+				return $this->redirect( $url, 301 );
 			}
 		}
 		
@@ -74,16 +75,15 @@ class AssociationsController extends Controller {
 			->getArrayResult();
 			$association = $association[0];
 			
-			// Count towers
-			$association['affiliatedTowers_count'] = count( $association['affiliatedTowers'] );
-			
-			// Get bounding box
-			$association['bbox'] = $em->createQuery( '
-				SELECT MAX(t.latitude) as lat_max, MIN(t.latitude) as lat_min, MAX(t.longitude) as long_max, MIN(t.longitude) as long_min FROM BluelineCCCBRDataBundle:Associations a
-				JOIN a.affiliatedTowers t
-				WHERE a.abbreviation = :abbreviation' )
-			->setParameter( 'abbreviation', $abbreviation )
-			->getSingleResult();
+			// Get the bounding box for the tower map if needed
+			if( $format == 'html' ) {
+				$association['bbox'] = $em->createQuery( '
+					SELECT MAX(t.latitude) as lat_max, MIN(t.latitude) as lat_min, MAX(t.longitude) as long_max, MIN(t.longitude) as long_min FROM BluelineCCCBRDataBundle:Associations a
+					JOIN a.affiliatedTowers t
+					WHERE a.abbreviation = :abbreviation' )
+				->setParameter( 'abbreviation', $abbreviation )
+				->getSingleResult();
+			}
 			
 			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:view.'.$format.'.twig', compact( 'association', 'id' ) );
 		}
