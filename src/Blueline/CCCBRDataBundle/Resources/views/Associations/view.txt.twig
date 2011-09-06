@@ -6,11 +6,11 @@
 {% autoescape false %}
 {{ association.name }}
 {% if association.link is not empty %}
-	Link:	{{ association.link }}
+	Link:  	{{ association.link }}
 {% endif %}
-	Towers:	{{ association.affiliatedTowers.count }}
+	Towers:	{{ count( association.affiliatedTowers ) }}
 {% for tower in association.affiliatedTowers %}
-		{{ tower.place }} ({{ tower.dedication }})
+	       	{{ tower.place }} ({{ tower.dedication }})
 {% endfor %}
 
 {% endautoescape %}

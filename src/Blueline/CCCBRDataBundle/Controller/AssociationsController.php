@@ -37,8 +37,8 @@ class AssociationsController extends Controller {
 		
 		$em = $this->getDoctrine()->getEntityManager();
 		
-		// If we're building a layout, or a snippet for multiple associations, then check we are at the canonical URL for the content
-		if( $isLayout || count( $abbreviations ) > 1 ) {
+		// Check we are at the canonical URL for the content
+		if( ( !$isLayout && $format != 'html' ) || $isLayout ) {
 			$associations = $em->createQuery( '
 				SELECT partial a.{abbreviation,name} FROM BluelineCCCBRDataBundle:Associations a
 				WHERE a.abbreviation IN (:abbreviation)' )

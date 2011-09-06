@@ -66,6 +66,15 @@ doctrine:
                             Blueline\Extensions\Doctrine\ConcatWs
                         levenshtein_ratio:
                             Blueline\Extensions\Doctrine\LevenshteinRatio
+                    numeric_functions:
+                        acos:
+                            Blueline\Extensions\Doctrine\Acos
+                        cos:
+                            Blueline\Extensions\Doctrine\Cos
+                        sin:
+                            Blueline\Extensions\Doctrine\Sin
+                        radians:
+                            Blueline\Extensions\Doctrine\Radians
 
 # Swiftmailer Configuration
 swiftmailer:

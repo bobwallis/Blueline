@@ -34,22 +34,25 @@ class TowersController extends Controller {
 		
 		$doveids = explode( '|', $doveid );
 		
-		// If we're building a layout, or a snippet for multiple associations, then check we are at the canonical URL for the content
-		if( $isLayout || count( $doveids ) > 1 ) {
-			$towers = $this->getDoctrine()->getEntityManager()->createQuery( '
+		$em = $this->getDoctrine()->getEntityManager();
+		
+		// Check we are at the canonical URL for the content
+		if( ( !$isLayout && $format != 'html' ) || $isLayout ) {
+			$towers = $em->createQuery( '
 				SELECT partial t.{doveid,place,dedication} FROM BluelineCCCBRDataBundle:Towers t
 				LEFT JOIN t.oldpk t2
 				WHERE t.doveid IN (:doveid) OR t2.oldpk IN (:doveid)' )
 				->setParameter( 'doveid', $doveids )
 				->setMaxResults( count( $doveids ) )
 				->getArrayResult();
-			$url = implode( '|', array_map( function( $t ) { return $t['doveid']; }, $towers ) );
-			$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $t ) { return $t['place'].(($t['dedication']!='Unknown')?' ('.$t['dedication'].')':''); }, $towers ) );
-			if( empty( $url ) ) {
-				die( 'not found' );
+			if( empty( $towers ) || count( $towers ) < count( $doveids ) ) {
+				throw $this->createNotFoundException( 'The tower does not exist' );
 			}
-			elseif( $doveid !== $url ) {
-				die('non-canonical url, should be: "'.$url.'", not: "'.$doveid.'"');
+			$url = $this->generateUrl( 'Blueline_Towers_view', array( 'doveid' => implode( '|', array_map( function( $t ) { return $t['doveid']; }, $towers ) ), '_format' => $format ) );
+			$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $t ) { return $t['place'].(($t['dedication']!='Unknown')?' ('.$t['dedication'].')':''); }, $towers ) );
+		
+			if( $request->getRequestUri() !== $url ) {
+				return $this->redirect( $url, 301 );
 			}
 		}
 		
@@ -60,8 +63,6 @@ class TowersController extends Controller {
 			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:view.'.$format.'.twig', compact( 'doveids' ) );
 		}
 		else {
-			$em = $this->getDoctrine()->getEntityManager();
-			
 			// Create a HTML-safe id
 			$id = preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $doveid ) ) );
 			
@@ -75,10 +76,20 @@ class TowersController extends Controller {
 			->getArrayResult();
 			$tower = $tower[0];
 			
-			$tower['countyCountry'] = \Blueline\Helpers\Text::toList( array( $tower['county'], $tower['country'] ), ', ', ', ' );
-			
-			$days = array( '', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' );
-			if( !empty( $tower['practiceNight'] ) ) { $tower['practiceNight_day'] = $days[$tower['practiceNight']]; }
+			// Get nearby tower data
+			if( $format == 'html' ) {
+				$distance = '( 6371 * acos( cos( radians(:near_lat) ) * cos( radians( t.latitude ) ) * cos( radians( t.longitude ) - radians(:near_long) ) + sin( radians(:near_lat) ) * sin( radians( t.latitude ) ) ) )';
+				$tower['nearbyTowers'] = array_map( function( $t ) { return array_merge( $t[0], array( 'distance' => $t['distance'] ) ); }, $em->createQuery( '
+						SELECT partial t.{doveid,place,dedication,latitude,longitude}, '.$distance.' as distance FROM BluelineCCCBRDataBundle:Towers t
+						WHERE t.latitude IS NOT NULL
+						HAVING '.$distance.' < 20
+						ORDER BY distance ASC' )
+					->setFirstResult( 1 )
+					->setMaxResults( 7 )
+					->setParameter( 'near_lat', $tower['latitude'] )
+					->setParameter( 'near_long', $tower['longitude'] )
+					->getArrayResult() );
+			}
 			
 			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:view.'.$format.'.twig', compact( 'tower', 'id' ) );
 		}

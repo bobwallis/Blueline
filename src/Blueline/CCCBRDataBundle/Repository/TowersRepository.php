@@ -25,7 +25,7 @@ class TowersRepository extends SharedRepository {
 		foreach( array( 'doveid', 'gridReference', 'postcode', 'country', 'county', 'diocese', 'place', 'dedication', 'note', 'contractor' ) as $key ) {
 			if( isset(  $searchVariables[$key] ) ) {
 				if( strpos( $searchVariables[$key], '/' ) === 0 ) {
-					$query->andWhere( 't.'.$key.' REGEXP :'.$key.'Regexp' ) // This doesn't work, which is annoying
+					$query->andWhere( 'REGEXP(t.'.$key.',:'.$key.'Regexp) = TRUE' )
 						->setParameter( $key.'Regexp', trim( $searchVariables[$key], '/' ) );
 				}
 				else {

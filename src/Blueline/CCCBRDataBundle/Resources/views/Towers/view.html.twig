@@ -5,7 +5,7 @@
 {% else %}
 {% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
 <section class="tower">
-	{{ header( { 'title': tower.place, 'title2': (tower.dedication != 'Unknown')? tower.dedication : null }, tower.countyCountry, { 'id': 'tower_'~id~'_tabBar', 'tabs': [
+	{{ header( { 'title': tower.place, 'title2': (tower.dedication != 'Unknown')? tower.dedication : null }, list( [tower.county, tower.country],', ',', ' ), { 'id': 'tower_'~id~'_tabBar', 'tabs': [
 		{ 'title': 'Details', 'content': 'tower_details_'~id },
 		{ 'title': 'Map', 'content': 'tower_map_'~id, 'className': 'normal_hide' },
 		{ 'title': 'Methods First Pealed', 'content': 'tower_peals_'~id }
@@ -31,11 +31,11 @@
 		<table>
 			<tr>
 				<th>Bells:</th>
-				<td><strong>{{ tower.bells }}</strong></td>
+				<td><strong>{{ tower.bells }}</strong>{% if tower.unringable %} (Unringable){% endif %}</td>
 			</tr>
 			<tr>
 				<th>Tenor:</th>
-				<td><strong>{{ (tower.weightApprox?'~':'')~tower.weightText }}</strong> in {{ tower.note }}{{ tower.hz is not empty? ' ('~tower.hz~'Hz)' : '' }}</td>
+				<td><strong>{{ (tower.weightApprox?'~':'')~tower.weightText }}</strong> in {{ tower.note|addAccidentals }}{{ tower.hz is not empty? ' ('~tower.hz~'Hz)' : '' }}</td>
 			</tr>
 {% if tower.affiliations is not empty %}
 			<tr>
@@ -47,56 +47,52 @@
 				<th>Diocese:</th>
 				<td>{{ tower.diocese }}</td>
 			</tr>
+{% if tower.postcode is not empty %}
 			<tr>
-				<th>Information:</th>
-				<td>{#<?php
-		$information = array();
-		if( $tower->unringable() && stripos( $tower->extraInfo(),'unringable' ) === false ) {
-			$information[] = 'Unringable. ';
-		}
-		if( $tower->extraInfo() ) {
-			$extraInfo = preg_replace( array( '/([0-9]+)b/', '/([0-9]+)#/' ), array( '${1}&#x266d;', '${1}&#x266f;' ), $tower->extraInfo() );
-			if( isset( $information[0] ) ) {
-				$information[0] .= $extraInfo;
-			}
-			else {
-				$information[] = $extraInfo;
-			}
-		}#}
-					{% if tower.groundFloor %}Ground floor.<br />{% endif %}
-					{% if tower.toilet %}Toilet available.<br />{% endif %}
-					{% if tower.simulator %}Has a simulator.<br />{% endif %}
-					{% if tower.overhaulYear %}Overhauled in {{ tower.overhaulYear }}{{ tower.contractor is not empty? ' by '~tower.contractor : '' }}.<br />{% endif %}
-					{% if tower.tuned %}Tuned in {{ tower.tuned }}.<br />{% endif %}
-					{% if tower.practiceNight > 0 or tower.practiceNotes is not empty %}
-					Practice: {{ tower.practiceNight_day|default('') }}{{ tower.practiceStart is not empty?', '~tower.practiceStart : '' }}{{ tower.practiceNotes is not empty? ' - '~tower.practiceNotes : '' }}<br />
-					{% endif %}
-					{% if tower.webPage is not empty %}<a href="http://{{ tower.webPage }}" class="external">Tower Website</a>, {% endif %}<a href="http://dove.cccbr.org.uk/detail.php?DoveID={{ tower.doveid }}&showFrames=true" class="external">Dove Entry</a>
-				</td>
-			</tr>
-{% if tower.postcode is not null %}
-			<tr>
+{% if tower.country in ['USA'] %}
+				<th>Zip Code:</th>
+{% else %}
 				<th>Postcode:</th>
+{% endif %}
 				<td>{{ tower.postcode }}</td>
 			</tr>
 {% endif %}
-{% if tower.gridReference is not null %}
+{% if tower.gridReference is not empty %}
 			<tr>
 				<th>Grid Reference:</th>
 				<td>{{ tower.gridReference }}</td>
 			</tr>
 {% endif %}
+{% if tower.toilet or tower.simulator %}
+			<tr>
+				<th>Facilities:</th>
+				<td>
+					{% if tower.toilet %}Toilet available.<br />{% endif %}
+					{% if tower.simulator %}Has a simulator.<br />{% endif %}
+				</td>
+			</tr>
+{% endif %}
+			<tr>
+				<th>Information:</th>
+				<td>
+					{% if tower.extraInfo is not empty %}{{ tower.extraInfo }}<br />{% endif %}
+					{% if tower.overhaulYear %}Overhauled in {{ tower.overhaulYear }}{{ tower.contractor is not empty? ' by '~tower.contractor : '' }}.<br />{% endif %}
+					{% if tower.tuned %}Tuned in {{ tower.tuned }}.<br />{% endif %}
+					{% if tower.practiceNight > 0 or tower.practiceNotes is not empty %}
+					Practice: {{ dayToString( tower.practiceNight ) }}{{ tower.practiceStart is not empty?', '~tower.practiceStart : '' }}{{ tower.practiceNotes is not empty? ' - '~tower.practiceNotes : '' }}<br />
+					{% endif %}
+					{% if tower.webPage is not empty %}<a href="http://{{ tower.webPage }}" class="external">Tower Website</a>, {% endif %}<a href="http://dove.cccbr.org.uk/detail.php?DoveID={{ tower.doveid }}&showFrames=true" class="external">Dove Entry</a>
+				</td>
+			</tr>
 		</table>
-{#
-{% if count( $tower->nearbyTowers() ) > 0 ) : ?>
 		<h3>Nearby Towers:</h3>
 		<ol>
-<?php foreach( $tower->nearbyTowers() as $nTower ) : ?>
-			<li><?='<a href="'.$nTower->href().'">' . $nTower->place().' <small>('.$nTower->dedication().')</small></a> <small>'.round( $nTower->distance(), 1 ).' miles</small>'?></li>
-<?php endforeach; ?>
+{% for tower2 in tower.nearbyTowers|default([]) %}
+			<li><a href="{{ path( 'Blueline_Towers_view', {'doveid':tower2.doveid} ) }}">{{ tower2.place}} <small>({{ tower2.dedication }})</small></a> <small>{{ round( tower2.distance, 1 ) }} miles</small></li>
+{% else %}
+			<li>None</li>
+{% endfor %}
 		</ol>
-{% endif %}
-#}
 	</div>
 	<div id="tower_peals_{{ id }}" class="firstPeals">
 		<noscript><h2>First Peals</h2></noscript>

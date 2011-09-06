@@ -1,5 +1,8 @@
 // Section headers
 section {
+	h1, h2, h3 {
+		font-weight: bold;
+	}
 	header {
 		clear: both;
 		border-bottom: 1px solid @lightGrey;
@@ -10,18 +13,20 @@ section {
 		padding: 10px;
 		h1 {
 			font-size: 22px;
-			font-weight: bold;
 			line-height: 22px;
 			margin: 0;
 			text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
 		}
 		h2 {
 			font-size: 18px;
-			font-weight: bold;
 			line-height: 20px;
 			margin: 0 0 0 5px;
 			text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
 		}
+	}
+	h3 {
+		font-size: 12px;
+		line-height: 15px;
 	}
 }
 #content section:first-child header { border-top: 0; }

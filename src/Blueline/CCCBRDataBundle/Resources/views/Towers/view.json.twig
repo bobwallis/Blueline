@@ -1,0 +1,14 @@
+{% autoescape false %}
+{% if doveids is defined %}
+{% spaceless json %}
+[
+	{% for doveid in doveids %}
+		{{ loop.first?'':',' }}
+		{% render path('Blueline_Tower_view', {'doveid':doveid, '_format':'json'}) with {}, {'standalone':true} %}
+	{% endfor %}
+]
+{% endspaceless %}
+{% else %}
+{{ tower|json_encode }}
+{% endif %}
+{% endautoescape %}
