@@ -31,7 +31,6 @@ services:
 # Assetic Configuration
 assetic:
     debug:          %kernel.debug%
-    use_controller: true
     filters:
         cssrewrite: ~
         less:

@@ -1,5 +1,4 @@
 <?php
-
 namespace Blueline\CCCBRDataBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;

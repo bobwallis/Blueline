@@ -1,6 +1,9 @@
 imports:
     - { resource: config.yml }
 
+assetic:
+    use_controller: true
+
 framework:
     router:   { resource: "%kernel.root_dir%/config/routing_dev.yml" }
     profiler: { only_exceptions: false }

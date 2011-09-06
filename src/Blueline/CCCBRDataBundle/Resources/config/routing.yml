@@ -8,7 +8,7 @@ Blueline_page:
     defaults: { _controller: BluelineCCCBRDataBundle:Pages:page, _format: html }
     requirements:
         page: about|copyright|robots|humans|sitemap|sitemap_root
-        format: html|txt|xml
+        _format: html|txt|xml
 
 
 Blueline_Methods_welcome:
@@ -26,13 +26,13 @@ Blueline_Methods_search:
     pattern:  /methods/search.{_format}
     defaults: { _controller: BluelineCCCBRDataBundle:Methods:search, _format: html }
     requirements:
-        format: html|txt|json|xml
+        _format: html|txt|json|xml
         
 Blueline_Methods_sitemap:
     pattern:  /methods/sitemap.{_format}
     defaults: { _controller: BluelineCCCBRDataBundle:Methods:sitemap }
     requirements:
-        format: xml
+        _format: xml
 
 
 Blueline_Associations_welcome:
@@ -49,13 +49,13 @@ Blueline_Associations_search:
     pattern:  /associations/search.{_format}
     defaults: { _controller: BluelineCCCBRDataBundle:Associations:search, _format: html }
     requirements:
-        format: html|txt|json
+        _format: html|txt|json
         
 Blueline_Associations_sitemap:
     pattern:  /associations/sitemap.{_format}
     defaults: { _controller: BluelineCCCBRDataBundle:Associations:sitemap }
     requirements:
-        format: xml
+        _format: xml
 
 
 Blueline_Towers_welcome:
@@ -72,10 +72,18 @@ Blueline_Towers_search:
     pattern:  /towers/search.{_format}
     defaults: { _controller: BluelineCCCBRDataBundle:Towers:search, _format: html }
     requirements:
-        format: html|txt|json
+        _format: html|txt|json
         
 Blueline_Towers_sitemap:
     pattern:  /towers/sitemap.{_format}
     defaults: { _controller: BluelineCCCBRDataBundle:Towers:sitemap }
     requirements:
-        format: xml
+        _format: xml
+
+
+Blueline_Opensearch_description:
+    pattern:  /opensearch/{type}.{_format}
+    defaults: { _controller: BluelineCCCBRDataBundle:Opensearch:description }
+    requirements:
+        type: associations|methods|towers
+        _format: xml
