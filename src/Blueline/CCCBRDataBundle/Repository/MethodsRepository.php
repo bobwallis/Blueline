@@ -13,7 +13,7 @@ class MethodsRepository extends SharedRepository {
 		
 		if( isset( $searchVariables['q'] ) ) {
 			if( strpos( $searchVariables['q'], '/' ) === 0 ) {
-				$query->andWhere( 'm.title REGEXP :qRegexp' )
+				$query->andWhere( 'REGEXP(m.title, :qRegexp) = TRUE' )
 					->setParameter( 'qRegexp', trim( $searchVariables['q'], '/' ) );
 			}
 			else {
@@ -78,7 +78,7 @@ class MethodsRepository extends SharedRepository {
 		foreach( array( 'title', 'classification', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef' ) as $key ) {
 			if( isset(  $searchVariables[$key] ) ) {
 				if( strpos( $searchVariables[$key], '/' ) === 0 ) {
-					$query->andWhere( 'm.'.$key.' REGEXP :'.$key.'Regexp' ) // This doesn't work, which is annoying
+					$query->andWhere( 'REGEXP(m.'.$key.', :'.$key.'Regexp) = 1' )
 						->setParameter( $key.'Regexp', trim( $searchVariables[$key], '/' ) );
 				}
 				else {

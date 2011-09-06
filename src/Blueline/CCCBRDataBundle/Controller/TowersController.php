@@ -16,7 +16,7 @@ class TowersController extends Controller {
 			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:welcome.layout.'.$format.'.twig' );
 		}
 		else {
-			;
+			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:welcome.'.$format.'.twig' );
 		}
 		
 		// Caching headers

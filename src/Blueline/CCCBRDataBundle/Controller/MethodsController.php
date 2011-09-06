@@ -16,7 +16,7 @@ class MethodsController extends Controller {
 			$response = $this->render( 'BluelineCCCBRDataBundle:Methods:welcome.layout.'.$format.'.twig' );
 		}
 		else {
-			;
+			$response = $this->render( 'BluelineCCCBRDataBundle:Methods:welcome.'.$format.'.twig' );
 		}
 		
 		// Caching headers
@@ -34,21 +34,24 @@ class MethodsController extends Controller {
 		
 		$titles = explode( '|', str_replace( '_', ' ', $title ) );
 		
-		// If we're building a layout, or a snippet for multiple associations, then check we are at the canonical URL for the content
-		if( $isLayout || count( $titles ) > 1 ) {
-			$methods = $this->getDoctrine()->getEntityManager()->createQuery( '
+		$em = $this->getDoctrine()->getEntityManager();
+		
+		// Check we are at the canonical URL for the content
+		if( ( !$isLayout && $format != 'html' ) || $isLayout ) {
+			$methods = $em->createQuery( '
 				SELECT m.title FROM BluelineCCCBRDataBundle:Methods m
 				WHERE m.title IN (:title)' )
 				->setParameter( 'title', $titles )
 				->setMaxResults( count( $titles ) )
 				->getArrayResult();
-			$url = implode( '|', array_map( function( $m ) { return str_replace( ' ', '_', $m['title'] ); }, $methods ) );
-			$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $m ) { return $m['title']; }, $methods ) );
-			if( empty( $url ) ) {
-				die( 'not found' );
+			if( empty( $methods ) || count( $methods ) < count( $methods ) ) {
+				throw $this->createNotFoundException( 'The method does not exist' );
 			}
-			elseif( $title !== $url ) {
-				die('non-canonical url, should be: "'.$url.'", not: "'.$title.'"');
+			$url = $this->generateUrl( 'Blueline_Methods_view', array( 'title' => implode( '|', array_map( function( $m ) { return str_replace( ' ', '_', $m['title'] ); }, $methods ) ), '_format' => $format ) );
+			$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $m ) { return $m['title']; }, $methods ) );
+		
+			if( $request->getRequestUri() !== $url ) {
+				return $this->redirect( $url, 301 );
 			}
 		}
 		
@@ -59,9 +62,9 @@ class MethodsController extends Controller {
 			$response = $this->render( 'BluelineCCCBRDataBundle:Methods:view.'.$format.'.twig', compact( 'titles' ) );
 		}
 		else {
-			$em = $this->getDoctrine()->getEntityManager();
-			
+			// We don't have _ in the database
 			$title = str_replace( '_', ' ', $title );
+			// Create a HTML-safe id
 			$id = preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $title ) ) );
 			
 			$query = $em->createQuery(
