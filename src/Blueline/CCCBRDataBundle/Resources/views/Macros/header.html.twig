@@ -8,7 +8,7 @@
 		{% autoescape false %}
 		//<![CDATA[
 			require( ['ui/TabBar'], function( TabBar ) {
-				window['TabBars'].push( new TabBar( {
+				TabBar( {
 					landmark: '{{ tabs.id }}',
 					tabs: [
 					{% for tab in tabs.tabs %}
@@ -16,7 +16,7 @@
 					{% endfor %}
 					],
 					active: {{ tabs.active|default(0) }}
-				} ) );
+				} );
 			} );
 		//]]>
 		{% endautoescape %}

@@ -11,10 +11,6 @@ define( function() {
 	return {
 		container: $content,
 		clear: function() {
-			if( typeof window['TabBars'] === 'object' ) {
-				window['TabBars'].forEach( function( t ) { t.destroy(); } );
-			}
-			window['TabBars'] = [];
 			if( typeof window['MethodGrids'] === 'object' ) {
 				window['MethodGrids'].forEach( function( g ) { g.destroy(); } );
 			}
