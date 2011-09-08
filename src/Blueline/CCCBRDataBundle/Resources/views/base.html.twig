@@ -10,11 +10,6 @@
 		<meta name="application-name" content="Blueline" />
 		<meta name="msapplication-starturl" content="{{ url( 'Blueline_welcome' ) }}" />
 		<meta name="msapplication-navbutton-color" content="#002147" />
-{% if ICBM is defined %}
-		<meta name="icbm" content="{{ ICBM.latitude }}, {{ ICBM.longitude }}" />
-		<meta name="geo.position" content="{{ ICBM.latitude }};{{ ICBM.longitude }}" />
-		<meta name="geo.placename" content="{{ ICBM.placename }}" />
-{% endif %}
 		<link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" sizes="any" />
 		<link rel="alternate shortcut icon" type="image/x-ixon" href="{{ asset('favicon.ico') }}" sizes="16x16,24x24,48x48" />
 {% if search_opensearch is defined %}
