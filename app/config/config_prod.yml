@@ -2,7 +2,7 @@ imports:
     - { resource: config.yml }
 
 assetic:
-    use_controller: false
+    use_controller: true
 
 doctrine:
     orm:

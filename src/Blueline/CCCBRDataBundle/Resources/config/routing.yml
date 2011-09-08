@@ -26,7 +26,7 @@ Blueline_Methods_search:
     pattern:  /methods/search.{_format}
     defaults: { _controller: BluelineCCCBRDataBundle:Methods:search, _format: html }
     requirements:
-        _format: html|txt|json|xml
+        _format: html|txt|json|atom
         
 Blueline_Methods_sitemap:
     pattern:  /methods/sitemap.{_format}
@@ -49,7 +49,7 @@ Blueline_Associations_search:
     pattern:  /associations/search.{_format}
     defaults: { _controller: BluelineCCCBRDataBundle:Associations:search, _format: html }
     requirements:
-        _format: html|txt|json
+        _format: html|txt|json|atom
         
 Blueline_Associations_sitemap:
     pattern:  /associations/sitemap.{_format}
@@ -72,7 +72,7 @@ Blueline_Towers_search:
     pattern:  /towers/search.{_format}
     defaults: { _controller: BluelineCCCBRDataBundle:Towers:search, _format: html }
     requirements:
-        _format: html|txt|json
+        _format: html|txt|json|atom
         
 Blueline_Towers_sitemap:
     pattern:  /towers/sitemap.{_format}
@@ -87,3 +87,10 @@ Blueline_Opensearch_description:
     requirements:
         type: associations|methods|towers
         _format: xml
+
+Blueline_Opensearch_suggestions:
+    pattern:  /opensearch/suggestions/{type}.{_format}
+    defaults: { _controller: BluelineCCCBRDataBundle:Opensearch:suggestions }
+    requirements:
+        type: associations|methods|towers
+        _format: json

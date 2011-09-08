@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">
+	<title>Search | Associations | Blueline</title>
+	<id>{{ url( 'Blueline_Associations_search', searchVariables|merge({ '_format': 'atom' }) ) }}</id>
+	<link rel="self" href="{{ url( 'Blueline_Associations_search', searchVariables|merge({ '_format': 'atom' }) ) }}" type="application/atom+xml" />
+	<updated>{{ database_update|date( "c" ) }}</updated>
+	<author>
+		<name>Blueline</name>
+		<email>{{ admin_email }}</email>
+		<uri>{{ url( 'Blueline_welcome' ) }}</uri>
+	</author>
+	<opensearch:totalResults>{{ count }}</opensearch:totalResults>
+	<opensearch:startIndex>{{ searchVariables['offset'] }}</opensearch:startIndex>
+	<opensearch:itemsPerPage>{{ searchVariables['count'] }}</opensearch:itemsPerPage>
+	<opensearch:Query role="request" searchTerms="{{ searchVariables['q']|default('') }}" startIndex="{{ searchVariables['offset'] }}" count="{{ searchVariables['count'] }}" />
+	<link rel="alternate" href="{{ url( 'Blueline_Associations_search', searchVariables|merge({ '_format': 'html' }) ) }}" type="text/html" />
+	<link rel="first" href="{{ url( 'Blueline_Associations_search', searchVariables|merge({ 'offset': 0, '_format': 'atom' }) ) }}" type="application/atom+xml" />
+{% if pageActive > 1 %}
+	<link rel="previous" href="{{ path( 'Blueline_Associations_search', searchVariables|merge({ 'offset': (searchVariables['offset']-searchVariables['count']), '_format': 'atom' }) ) }}" type="application/atom+xml" />
+{% endif %}
+{% if pageActive < pageCount %}
+	<link rel="next" href="{{ url( 'Blueline_Associations_search', searchVariables|merge({ 'offset': (searchVariables['offset']+searchVariables['count']), '_format': 'atom' }) ) }}" type="application/atom+xml" />
+{% endif %}
+	<link rel="last" href="{{ path( 'Blueline_Associations_search', searchVariables|merge( { 'offset': searchVariables['count']*(pageCount-1), '_format': 'atom' } ) ) }}" type="application/atom+xml" />
+	<link rel="search" type="application/opensearchdescription+xml" href="{{ url( 'Blueline_Opensearch_description', { 'type': 'associations', '_format': 'xml' } ) }}" />
+{% for association in associations %}
+	<entry>
+		<title type="text">{{ association.name }}</title>
+		<id>{{ url( 'Blueline_Associations_view', { 'abbreviation': association.abbreviation } ) }}</id>
+		<summary type="text">Details of {{ association.name }}, including tower affiliations provided by the CCCBR's Dove data file.</summary>
+		<updated>{{ database_update|date( "c" ) }}</updated>
+		<link rel="alternate" type="text/html" href="{{ url( 'Blueline_Associations_view', { 'abbreviation': association.abbreviation } ) }}" />
+		<link rel="alternate" type="text/plain" href="{{ url( 'Blueline_Associations_view', { 'abbreviation': association.abbreviation, '_format': 'txt' } ) }}" />
+		<link rel="alternate" type="application/json" href="{{ url( 'Blueline_Associations_view', { 'abbreviation': association.abbreviation, '_format': 'json' } ) }}" />
+	</entry>
+{% endfor %}
+</feed>

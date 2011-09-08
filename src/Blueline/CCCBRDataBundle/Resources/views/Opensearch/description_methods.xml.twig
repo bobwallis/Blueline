@@ -1,20 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
- <ShortName>Methods | Blueline</ShortName>
- <Description>Search the associations on Blueline</Description>
- <Image height="16" width="16" type="image/vnd.microsoft.icon">http://blueline.rsw.me.uk/favicon.ico</Image>
- <Url type="text/html"
-      indexOffset="0"
-      rel="results"
-      template="{{ url( 'Blueline_Methods_search' ) }}?q={searchTerms}&amp;offset={startIndex?}&amp;count={count?}" />
- <Url type="application/opensearchdescription+xml"
-      rel="self"
-      template="{{ url( 'Blueline_Opensearch_description', { 'type': 'methods', '_format': 'xml' } ) }}" />
- <Query role="example" searchTerms="oxford" />
- <Contact>blueline@rsw.me.uk</Contact>
- <Attribution>The Central Council of Church Bellringers</Attribution>
- <AdultContent>false</AdultContent>
- <Language>en-gb</Language>
- <OutputEncoding>UTF-8</OutputEncoding>
- <InputEncoding>UTF-8</InputEncoding>
+	<ShortName>Methods | Blueline</ShortName>
+	<Description>Search the methods on Blueline</Description>
+	<Image height="16" width="16" type="image/vnd.microsoft.icon">http://blueline.rsw.me.uk/favicon.ico</Image>
+	<Url rel="results"
+	     type="text/html"
+	     indexOffset="0"
+	     template="{{ url( 'Blueline_Methods_search' ) }}?q={searchTerms}&amp;offset={startIndex?}&amp;count={count?}" />
+	<Url rel="results"
+	     type="application/atom+xml"
+	     indexOffset="0"
+	     template="{{ url( 'Blueline_Methods_search', { '_format': 'atom' } ) }}?q={searchTerms}&amp;offset={startIndex?}&amp;count={count?}" />
+	<Url rel="suggestions"
+	    type="application/x-suggestions+json"
+      template="{{ url( 'Blueline_Opensearch_suggestions', { 'type': 'methods', '_format': 'json' } ) }}?q={searchTerms}" />
+	<Url rel="self"
+	     type="application/opensearchdescription+xml"
+	     template="{{ url( 'Blueline_Opensearch_description', { 'type': 'methods', '_format': 'xml' } ) }}" />
+	<Query role="example" searchTerms="oxford" />
+	<Contact>{{ admin_email }}</Contact>
+	<Attribution>The Central Council of Church Bellringers</Attribution>
+	<SyndicationRight>open</SyndicationRight>
+	<AdultContent>false</AdultContent>
+	<Language>*</Language>
+	<OutputEncoding>UTF-8</OutputEncoding>
+	<InputEncoding>UTF-8</InputEncoding>
 </OpenSearchDescription>

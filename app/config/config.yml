@@ -20,6 +20,9 @@ framework:
 twig:
     debug:            %kernel.debug%
     strict_variables: %kernel.debug%
+    globals:
+        admin_email: %admin_email%
+        database_update: %database_update%
 
 # Twig Extensions
 services:
