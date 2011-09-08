@@ -1,15 +1,53 @@
 /*global require: false, define: false, google: false */
-define( function() {
+define( ['../helpers/Can', '../helpers/ContentGetter', './Header', './TowerMap'], function( Can, ContentGetter, Header, TowerMap ) {
 	var $loading = $( '<div id="loading"></div>' ),
-		loadingSetter = null,
-		$content = $( '#content' );
+		loadingSetter = false,
+		$content = $( '#content' ),
+		towerMapRegexp = /\/(associations|towers)\/view/;
 
 	$( function() {
 		$( document.body ).append( $loading );
 	} );
 
-	return {
-		container: $content,
+	var Content = {
+		container: $content, // TODO: Refactor TowerMap so this can be removed
+		loading: {
+			container: $loading, // TODO: Refactor TowerMap so this can be removed
+			show: function() {
+				loadingSetter = setTimeout( function() { $loading.show(); } , 150 );
+			},
+			hide: function() {
+				clearTimeout( loadingSetter );
+				$loading.hide();
+			}
+		},
+		update: function( url ) {
+			// Show a loading animation if we're not doing instant results
+			if( History.getState().data.type !== 'keyup' || $content.is( ':empty' ) ) {
+				$content.empty();
+				Content.loading.show();
+			}
+			
+			// Hide the tower map if it won't be needed
+			if( towerMapRegexp.exec( url ) === null ) {
+				TowerMap.hide();
+			}
+			
+			// Request page content
+			ContentGetter( url,
+				function( content ) {
+					// Check the content requested hasn't arrived after some more recently requested content
+					if( History.getState().url === url ) {
+						Content.loading.hide();
+						$content.html( content );
+					}
+				},
+				function() {
+					Content.loading.hide();
+					console.log('fail lol');
+				}
+			);
+		},
 		clear: function() {
 			if( typeof window['MethodGrids'] === 'object' ) {
 				window['MethodGrids'].forEach( function( g ) { g.destroy(); } );
@@ -19,23 +57,9 @@ define( function() {
 		},
 		isEmpty: function() {
 			return $content.is( ':empty' );
-		},
-		set: function( content ) {
-			this.clear();
-			this.loading.hide();
-			$content.append( content );
-			$( 'script', $content ).each( console.log );
-		},
-		loading: {
-			container: $loading,
-			show: function() {
-				loadingSetter = setTimeout( function() { $loading.show(); } , 150 );
-			},
-			hide: function() {
-				clearTimeout( loadingSetter );
-				$loading.hide();
-			}
 		}
 	};
+	
+	return Content;
 } );
 

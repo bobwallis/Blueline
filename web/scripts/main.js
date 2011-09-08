@@ -1,7 +1,7 @@
 /*global require: false, define: false, google: false */
 require( ['require', 'helpers/Can', 'ui/Hotkeys'], function( require, Can, Hotkeys ) {
-	// Load the history API if it is supported
-	if( Can.history() ) {
-		require( ['history'] );
+	// Initialise app mode if the browser supports it
+	if( Can.history() && ( Can.localStorage() || Can.indexedDB() ) ) {
+		require( ['app'] );
 	}
 } );

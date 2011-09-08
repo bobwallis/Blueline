@@ -1,11 +1,12 @@
 /*global require: false, define: false, google: false */
-define( ['../plugins/google!maps/3/sensor=false', '../ui/Content'], function( googleAjaxReady, Content ) {
+define( ['../plugins/google!maps/3/sensor=false'], function( googleAjaxReady ) {
 		// Create some reusable variables
 		var $window = $( window ),
 			$document = $( document ),
 			$body = $( document.body ),
 			$top = $( '#top' ),
-			$bottom = $( '#bottom' );
+			$bottom = $( '#bottom' ),
+			$content = $( '#content' );
 
 		// Create the DOM objects we need
 		$body.append( '<div id="towerMap"><div class="map"></div></div>' );
@@ -59,15 +60,15 @@ define( ['../plugins/google!maps/3/sensor=false', '../ui/Content'], function( go
 			visible: false,
 			show: function() {
 				this.container.show();
-				Content.loading.container.css( 'width', '40%' );
-				Content.container.css( 'width', '40%' );
+				$( '#loading' ).css( 'width', '40%' );
+				$content.css( 'width', '40%' );
 				this.visible = true;
 				towerMapResize();
 			},
 			hide: function() {
 				this.container.hide();
-				Content.loading.container.css( 'width', '100%' );
-				Content.container.css( 'width', '100%' );
+				$( '#loading' ).css( 'width', '100%' );
+				$content.css( 'width', '100%' );
 				this.visible = false;
 			},
 			maximise: function() {

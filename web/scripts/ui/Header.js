@@ -1,66 +1,69 @@
-/*global require: false, define: false, google: false */
+/*global require: false, define: false, google: false, History: false */
 define( function() {
-	var $header, $breadcrumbContainer, $topSearchContainer, $topSearch, $topSearchInput, $bigSearchContainer, $bigSearch, $bigSearchInput;
-	$( function() {
-		$header = $( '#top' );
-		$breadcrumbContainer = $( '#breadcrumbContainer' );
-		$topSearchContainer = $( '#topSearchContainer' );
-		$topSearch = $( '#topSearch' );
-		$topSearchInput = $( '#smallQ' );
-		$bigSearchContainer = $( '#bigSearchContainer' );
-		$bigSearch = $( '#bigSearch' );
-		$bigSearchInput = $( '#bigQ' );
-	} );
+	var $breadcrumbContainer = false, $topSearchContainer, $topSearch, $topSearchInput, $bigSearchContainer, $bigSearch, $bigSearchInput,
+		sectionRegexp = /^(.*)\/(associations|methods|towers)($|\/)/,
+		topSearchRegexp = /\/view\//,
+		bigSearchRegexp = /\/(associations\/search|((methods|towers)($|\/search)))/;
 	return {
-		windowTitle: function( set ) {
-			if( typeof set === 'undefined' ) {
-				return document.title;
+		update: function( url ) {
+			// Initialise jQuery objects if not already done
+			if( $breadcrumbContainer === false ) {
+				$breadcrumbContainer = $( '#breadcrumbContainer' );
+				$topSearchContainer = $( '#topSearchContainer' );
+				$topSearch = $( '#topSearch' );
+				$topSearchInput = $( '#smallQ' );
+				$bigSearchContainer = $( '#bigSearchContainer' );
+				$bigSearch = $( '#bigSearch' );
+				$bigSearchInput = $( '#bigQ' );
 			}
-			else {
-				document.title = ( !set )? 'Blueline' : set+' | Blueline';
-			}
-		},
-		breadcrumb: function( set ) {
-			if( set === false ) {
+			
+			// Apply the default header if needed
+			var section = sectionRegexp.exec( url );
+			if( section === null ) {
 				$breadcrumbContainer.empty();
-			}
-			else {
-				$breadcrumbContainer.html( set.map( function( b ) {
-					return '<span class="headerSep">&raquo;</span><h2><a href="'+b.url+'">'+b.title+'</a></h2>';
-				} ).join( '' ) );
-			}
-		},
-		topSearch: function( set ) {
-			if( set === false ) {
 				$topSearchContainer.hide();
-			}
-			else {
-				$topSearch.attr( 'action', (typeof set.action === 'string')?set.action:'/search' );
-				$topSearchInput.attr( 'placeholder', (typeof set.placeholder === 'string')?set.placeholder:'Search' );
-				$topSearchInput.val( '' );
-				$topSearchContainer.show();
-			}
-		},
-		bigSearch: function( set ) {
-			if( set === false ) {
 				$bigSearchContainer.hide();
 			}
 			else {
-				// Action
-				$bigSearch.attr( 'action', (typeof set.action === 'string')?set.action:'/search' );
-				// Placeholder
-				$bigSearchInput.attr( 'placeholder', (typeof set.placeholder === 'string')?set.placeholder:'Search' );
-				// Value
-				if( !$bigSearchInput.is( ':focus' ) ) { // Only modify the value when not focussed to prevent messing with user input
-					if( typeof set.value === 'string' ) {
-						$bigSearchInput.val( set.value );
-					}
-					else if( typeof History === 'object' && History.enabled ) {
-						var queryString = History.getState().url.replace( /^.*?(\?|$)/, '' );
+				// Update and show the search bar in the header if needed
+				if( topSearchRegexp.exec( url ) !== null ) {
+					$topSearch.attr( 'action', section[1]+'/'+section[2]+'/search' );
+					$topSearchInput.attr( 'placeholder', 'Search '+section[2] ).val( '' );
+					$topSearchContainer.show();
+				}
+				else {
+					$topSearchContainer.hide();
+				}
+				
+				// Update and show the main search box if needed
+				if( bigSearchRegexp.exec( url ) !== null ) {
+					$bigSearch.attr( 'action', section[1]+'/'+section[2]+'/search' );
+					$bigSearchInput.attr( 'placeholder', 'Search '+section[2] );
+					if( !$bigSearchInput.is( ':focus' ) ) {
+						var queryString = url.replace( /^.*?(\?|$)/, '' );
 						$bigSearchInput.val( (queryString.indexOf( 'q=' ) !== -1)? decodeURI( queryString.replace( /^.*q=(.*?)(&.*$|$)/, '$1' ).replace( /\+/g, '%20' ) ) : '' );
 					}
+					$bigSearchContainer.show();
 				}
-				$bigSearchContainer.show();
+				else {
+					$bigSearchContainer.hide();
+				}
+				
+				// Update the text breadcrumb in the header
+				switch( section[2] ) {
+					case 'associations':
+						$breadcrumbContainer.html( '<span class="headerSep">&raquo;</span><h2><a href="'+section[1]+'/associations">Associations</a></h2>' );
+						break;
+					case 'methods':
+						$breadcrumbContainer.html( '<span class="headerSep">&raquo;</span><h2><a href="'+section[1]+'/methods">Methods</a></h2>' );
+						break;
+					case 'towers':
+						$breadcrumbContainer.html( '<span class="headerSep">&raquo;</span><h2><a href="'+section[1]+'/towers">Towers</a></h2>' );
+						break;
+					default:
+						$breadcrumbContainer.empty();
+						break;
+				}
 			}
 		}
 	};

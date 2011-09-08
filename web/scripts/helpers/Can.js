@@ -13,19 +13,29 @@
  * http://www.modernizr.com/license/
  */
 
-define( {
-	localStorage: function() {
-		try { return !!localStorage.getItem; }
-		catch( e ) { return false; }
-	},
-	SVG: function() {
-		return window.SVGAngle || document.implementation.hasFeature( 'http://www.w3.org/TR/SVG11/feature#BasicStructure', '1.1' );
-	},
-	canvas: function() {
-			var elem = document.createElement( 'canvas' );
-			return !!( elem.getContext && elem.getContext( '2d' ) );
-	},
-	history: function() {
-		return !!( window.history && window.history.pushState );
-	}
+define( function() {
+	var domPrefixes = 'Webkit Moz O ms Khtml'.split(' ');
+	return {
+		indexedDB: function() {
+			// Initialise the window.IndexedDB Object
+			window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB;
+			window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
+			window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
+			return !!window.indexedDB;
+		},
+		localStorage: function() {
+			try { return !!localStorage.getItem; }
+			catch( e ) { return false; }
+		},
+		SVG: function() {
+			return window.SVGAngle || document.implementation.hasFeature( 'http://www.w3.org/TR/SVG11/feature#BasicStructure', '1.1' );
+		},
+		canvas: function() {
+				var elem = document.createElement( 'canvas' );
+				return !!( elem.getContext && elem.getContext( '2d' ) );
+		},
+		history: function() {
+			return !!( window.history && window.history.pushState );
+		}
+	};
 } );
