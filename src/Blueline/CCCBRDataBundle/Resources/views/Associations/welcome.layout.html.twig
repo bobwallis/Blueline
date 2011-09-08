@@ -2,6 +2,7 @@
 
 {% block title %}Associations | {{ parent() }}{% endblock %}
 {% set breadcrumb = [ {'title':'Associations', 'href':path('Blueline_Associations_welcome')} ] %}
+{% set search_opensearch = 'associations' %}
 {% set search_header = true %}
 {% set search_action = path( 'Blueline_Associations_search' ) %}
 {% set search_placeholder = 'Search associations' %}
