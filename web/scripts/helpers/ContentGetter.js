@@ -4,6 +4,7 @@ define( ['./ContentCache'], function( ContentCache ) {
 			url: url,
 			dataType: 'html',
 			data: 'snippet=1',
+			cache: ContentCache.hasStore? false: true, // Bypass the browser's cache if our own is implemented
 			success: success,
 			error: failure
 		} )

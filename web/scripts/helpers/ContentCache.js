@@ -1,10 +1,11 @@
 define( ['./Can'], function( Can ) {
 	var ContentCache = {
 		get: function( key, success, failure ) { failure(); },
-		set: function( key, value ) {}
+		set: function( key, value ) {},
+		hasStore: false
 	};
 	// The resources/buildWWW script will update this line automatically
-	var clearBefore = new Date( 2011, 9, 8, 22, 17 );
+	var clearBefore = (new Date( 2011, 9, 11 )).toDateString();
 
 	var setupLocalStorageCache = function() {
 		// Check the cache is not stale
@@ -12,20 +13,19 @@ define( ['./Can'], function( Can ) {
 			localStorage.clear();
 			localStorage.setItem( '_pageCache_cleared', clearBefore );
 		}
-		ContentCache = {
-			get: function( url, success, failure ) {
-				var content = localStorage.getItem( url );
-				if( content === null ) {
-					failure();
-				}
-				else {
-					success( content );
-				}
-			},
-			set: function( url, content ) {
-				localStorage.setItem( url, content );
+		ContentCache.get = function( url, success, failure ) {
+			var content = localStorage.getItem( url );
+			if( content === null ) {
+				failure();
+			}
+			else {
+				success( content );
 			}
 		};
+		ContentCache.set = function( url, content ) {
+			localStorage.setItem( url, content );
+		};
+		ContentCache.hasStore = true;
 	}
 
 	var setupIndexedDbCache = function() {
@@ -35,13 +35,27 @@ define( ['./Can'], function( Can ) {
 			db = e.target.result;
 			// Check the cache is not stale
 			if( clearBefore != db.version ) {
-				var setVrequest = db.setVersion( clearBefore );
-				setVrequest.onfailure = setupLocalStorageCache;
-				setVrequest.onsuccess = function( e ) {
-					db.deleteObjectStore( 'content' );
-					var store = db.createObjectStore( 'content', { keyPath: 'url' } );
-					localStorage.setItem( '_pageCache_cleared', clearBefore );
+				var setDatabaseVersion = function() {
+					var setVersionRequest = db.setVersion( clearBefore );
+					setVersionRequest.onfailure = setupLocalStorageCache;
+					setVersionRequest.onsuccess = function( e ) {
+						if( !db.objectStoreNames.contains( 'content' ) ) {
+							db.createObjectStore( 'content', { keyPath: 'url' } );
+						}
+						localStorage.setItem( '_pageCache_cleared', clearBefore );
+					};
 				};
+				// If the content cache exists, empty it then update the version
+				if( db.objectStoreNames.contains( 'content' ) ) {
+					var clearTransaction = db.transaction(['content'], IDBTransaction.READ_WRITE ),
+						clearRequest = clearTransaction.objectStore( 'content' ).clear();
+					clearRequest.onfailure = setupLocalStorageCache;
+					clearRequest.onsuccess = setDatabaseVersion;
+				}
+				// Otherwise create it while setting the version
+				else {
+					setDatabaseVersion();
+				}
 			}
 			ContentCache.get = function( url, success, failure ) {
 					var transaction = db.transaction(['content'], IDBTransaction.READ_ONLY, 0 ),
@@ -66,6 +80,7 @@ define( ['./Can'], function( Can ) {
 					.objectStore( 'content' )
 					.put( { content: content, url: url } );
 			};
+			ContentCache.hasStore = true;
 		};
 		request.onfailure = setupLocalStorageCache;
 	};

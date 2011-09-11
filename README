@@ -18,4 +18,11 @@ The code is set up to be used behind a reverse caching proxy (like Varnish),
 but the built-in Symfony cache (written in PHP) can be used instead.
 See <http://symfony.com/doc/current/book/http_cache.html> for details.
 
+In 'app mode' Blueline tries to implement its own cache using IndexedDB, which 
+is cleared only when the server indicates that content has been changed. When 
+this is active, AJAX requests bypass the browser cache using the 'cache' setting
+described at <http://api.jquery.com/jQuery.ajax/>. If using Varnish you should 
+add a section to the VCL for the site to ignore the '_' GET parameter to make 
+sure Varnish's cache isn't bypassed too.
+
 Access to app_dev.php and config.php should be denied.
