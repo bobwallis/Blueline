@@ -9,5 +9,7 @@ app/config/parameters.ini
 */cache/*
 web/uploads/*
 web/bundles/*
+web/scripts.built
+web/css
 vendor/*
 !vendor/blueline/

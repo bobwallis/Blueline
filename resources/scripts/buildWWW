@@ -3,17 +3,24 @@
 dWhich=`which "$0"`
 d=`dirname "$dWhich"`
 
+# Javascript
 # Update the localStorage clear parameter in history.js
-sed -i -e"s/clearBefore = new Date(.*$/clearBefore = new Date( `date "+%Y, %-m, %-d, %-H, %-M"` );/" "$d/../../web/scripts/history.js"
+sed -i -e"s/clearBefore = (new Date(.*)$/clearBefore = (new Date( `date "+%Y, %-m, %-d"` )/" "$d/../../web/scripts/helpers/ContentCache.js"
 
 # Execute RequireJS builder
 node "$d/helpers/r.js" -o app.build.js
 
-# JS
 # Copy to scripts.built
 rm -rf "$d/../../web/scripts.built"
-mv "$d/../../www-build/scripts" "$d/../../web/scripts.built"
-
+mv "$d/www-build/scripts" "$d/../../web/scripts.built"
 
 # Remove www-build directory
-rm -rf "$d/../../www-build"
+rm -rf "$d/www-build"
+
+# Run the Closure compiler on all scripts (This is so slow it's painful)
+#for f in $(find "$d/../../web/scripts.built" -name "*.js"); do
+#	java -jar "$d/../../app/Resources/java/compiler.jar" --charset "UTF-8" --compilation_level SIMPLE_OPTIMIZATIONS --js "$f"
+#done
+
+# Dump production assets from Symfony
+"$d/../../app/console" assetic:dump --env=prod --no-debug

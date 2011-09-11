@@ -1,17 +1,17 @@
 ( {
 	appDir: "../../web",
 	baseUrl: "scripts",
-	dir: "../../www-build",
+	dir: "www-build",
 	optimize: "uglify",
 	modules: [
 		{
-			name: "history",
-			exclude: ["helpers/Can"]
+			name: "app",
+			exclude: ["helpers/Can", "ui/TowerMap"]
 		},
 		{
 			name: "main",
 			include: ["ui/TabBar"],
-			exclude: ["history"]
+			exclude: ["app"]
 		},
 		{
 			name: "ui/TowerMap",
