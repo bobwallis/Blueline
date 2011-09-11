@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `methods_extras` (
   `ruleOffs` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `method_title` (`method_title`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=19 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=19 ;
 
 INSERT INTO `methods_extras` (`id`, `method_title`, `calls`, `ruleOffs`) VALUES(1, 'Double Norwich Court Bob Caters', 'a:2:{s:3:"Bob";s:4:"3::4";s:6:"Single";s:6:"123::4";}', '');
 INSERT INTO `methods_extras` (`id`, `method_title`, `calls`, `ruleOffs`) VALUES(2, 'Erin Caters', 'a:2:{s:3:"Bob";s:6:"7:6:-5";s:6:"Single";s:8:"789:6:-5";}', '6:-5');
@@ -33,7 +33,3 @@ INSERT INTO `methods_extras` (`id`, `method_title`, `calls`, `ruleOffs`) VALUES(
 INSERT INTO `methods_extras` (`id`, `method_title`, `calls`, `ruleOffs`) VALUES(16, 'Stedman Septuples', 'a:2:{s:3:"Bob";s:6:"A:6:-3";s:6:"Single";s:8:"ABC:6:-3";}', '6:-3');
 INSERT INTO `methods_extras` (`id`, `method_title`, `calls`, `ruleOffs`) VALUES(17, 'Stedman Sextuples', 'a:2:{s:3:"Bob";s:6:"E:6:-3";s:6:"Single";s:8:"ETA:6:-3";}', '6:-3');
 INSERT INTO `methods_extras` (`id`, `method_title`, `calls`, `ruleOffs`) VALUES(18, 'Stedman Triples', 'a:2:{s:3:"Bob";s:6:"5:6:-3";s:6:"Single";s:8:"567:6:-3";}', '6:-3');
-
-
-ALTER TABLE `methods_extras`
-  ADD CONSTRAINT `methods_extras_ibfk_1` FOREIGN KEY (`method_title`) REFERENCES `methods` (`title`);

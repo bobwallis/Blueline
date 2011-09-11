@@ -3,6 +3,10 @@
 dWhich=`which "$0"`
 d=`dirname "$dWhich"`
 
+# Remove old file
+rm "$d/levenshtein_ratio.so"
+
+# Build new one
 g++ -I /usr/include/mysql/ -o "$d/levenshtein_ratio.so" -fPIC -shared "$d/levenshtein_ratio.cc"
 
 echo "Built UDFs"

@@ -1,11 +1,9 @@
 <?php
 // Converts the CCCBR provided XML files of method data into SQL INSERT statements, one per method
-namespace Utilities;
-
-require_once( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/LeadHeadCodes.php' );
-require_once( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/PlaceNotation.php' );
-require_once( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/Stages.php' );
-use \Helpers\LeadHeadCodes, \Helpers\PlaceNotation;
+require( dirname(__FILE__).'/../../../src/Blueline/Helpers/LeadHeadCodes.php' );
+require( dirname(__FILE__).'/../../../src/Blueline/Helpers/PlaceNotation.php' );
+require( dirname(__FILE__).'/../../../src/Blueline/Helpers/Stages.php' );
+use \Blueline\Helpers\LeadHeadCodes, \Blueline\Helpers\PlaceNotation, \Blueline\Helpers\Stages;
 
 date_default_timezone_set( 'UTC' );
 
@@ -25,11 +23,10 @@ header( 'Content-Disposition: inline; filename="methods.sql"' );
 -- distributing it, you must include a clear notice that the material
 -- has been modified.
 
-
 -- Set up table
 DROP TABLE IF EXISTS `methods`;
 CREATE TABLE IF NOT EXISTS `methods` (
-  `stage` tinyint(4) NOT NULL,
+  `stage` smallint(6) NOT NULL,
   `classification` varchar(15) DEFAULT NULL,
   `title` varchar(255) NOT NULL DEFAULT '',
   `nameMetaphone` varchar(255) DEFAULT NULL,
@@ -43,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `methods` (
   `tdmmRef` smallint(6) DEFAULT NULL,
   `pmmRef` smallint(6) DEFAULT NULL,
   `lengthOfLead` smallint(6) DEFAULT NULL,
-  `numberOfHunts` tinyint(4) DEFAULT NULL,
+  `numberOfHunts` smallint(6) DEFAULT NULL,
   `little` tinyint(1) DEFAULT NULL,
   `differential` tinyint(1) DEFAULT NULL,
   `plain` tinyint(1) DEFAULT NULL,
@@ -71,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `methods` (
   KEY `firstTowerbellPeal_date` (`firstTowerbellPeal_date`),
   KEY `firstTowerbellPeal_location` (`firstTowerbellPeal_location`),
   KEY `firstHandbellPeal_date` (`firstHandbellPeal_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 <?php
 // Get a list of all .xml files in the ./ directory
@@ -330,6 +327,3 @@ function charData( $parser, $data ) {
 	}
 }
 
-?>
-
-OPTIMIZE TABLE methods;

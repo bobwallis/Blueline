@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS `associations` (
   `link` varchar(255) DEFAULT NULL COMMENT 'Web address of the Association''s site',
   PRIMARY KEY (`abbreviation`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('ANZAB', 'Australian and New Zealand Association', 'http://www.anzab.org.au/');
 INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('ASCY', 'Ancient Society of College Youths', 'http://www.ascy.org.uk/');
