@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false */
-define( ['../helpers/Can', '../helpers/ContentGetter', './Header', './TowerMap'], function( Can, ContentGetter, Header, TowerMap ) {
+define( ['../helpers/Can', '../helpers/ContentGetter', './Header', './Window', './TowerMap'], function( Can, ContentGetter, Header, Window, TowerMap ) {
 	var $loading = $( '<div id="loading"></div>' ),
 		loadingSetter = false,
 		$content = $( '#content' ),
@@ -40,6 +40,7 @@ define( ['../helpers/Can', '../helpers/ContentGetter', './Header', './TowerMap']
 					if( History.getState().url === url ) {
 						Content.loading.hide();
 						$content.html( content );
+						Window.update( url );
 					}
 				},
 				function() {
