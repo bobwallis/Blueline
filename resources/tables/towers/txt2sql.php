@@ -1,8 +1,7 @@
 <?php
-namespace Utilities;
-require( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/abbreviations.php' );
-require( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/parsecsv.lib.php' );
-use \Helpers, \parseCSV;
+require( dirname(__FILE__).'/../../../vendor/blueline/abbreviations.php' );
+require( dirname(__FILE__).'/../../../vendor/blueline/parsecsv.lib.php' );
+
 function weightText( $weight, $weightApprox ) {
 	// Calculate weight text
 	$tmp = $weight % 112;
@@ -31,56 +30,75 @@ date_default_timezone_set( 'UTC' );
 header( 'Content-type: text/plain' );
 header( 'Content-Disposition: inline; filename="towers.sql"' );
 
-
 ?>
 -- Tower Library
 -- Generated on: <?php echo date( 'Y/m/d' ); ?>
 
 -- Generated from CCCBR data from http://dove.cccbr.org.uk
 
+SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+
 -- Set up tower_oldpks table
-DROP TABLE IF EXISTS tower_oldpks;
-CREATE TABLE IF NOT EXISTS tower_oldpks (
-  oldpk varchar(10) NOT NULL,
-  tower_doveId varchar(10) NOT NULL,
-  PRIMARY KEY (oldpk),
-  UNIQUE KEY (tower_doveId)
+DROP TABLE IF EXISTS `tower_oldpks`;
+CREATE TABLE IF NOT EXISTS `tower_oldpks` (
+  `oldpk` varchar(10) NOT NULL,
+  `tower_doveId` varchar(10) NOT NULL,
+  PRIMARY KEY (`oldpk`),
+  KEY `tower_doveId` (`tower_doveid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- Set up towers table
-DROP TABLE IF EXISTS towers;
-CREATE TABLE IF NOT EXISTS towers (
-  doveId varchar(10) NOT NULL, PRIMARY KEY (doveId),
-  gridReference varchar(10),
-  latitude decimal(8,5), INDEX (latitude),
-  longitude decimal(8,5), INDEX (longitude),
-  latitudeSatNav decimal(8,5),
-  longitudeSatNav decimal(8,5),
-  postcode varchar(10),
-  country varchar(255) NOT NULL, INDEX (country),
-  county varchar(255), INDEX (county),
-  diocese varchar(255), INDEX (diocese),
-  place varchar(255) NOT NULL,
-  altName varchar(255),
-  dedication varchar(255),
-  bells tinyint NOT NULL, INDEX (bells),
-  weight smallint, INDEX (weight),
-  weightApprox bit,
-  weightText varchar(20),
-  note varchar(2),
-  hz decimal(5,1),
-  practiceNight tinyint, INDEX (practiceNight),
-  practiceStart varchar(5),
-  practiceNotes text,
-  groundFloor bit, INDEX (groundFloor),
-  toilet bit, INDEX (toilet),
-  unringable bit, INDEX (unringable),
-  simulator bit, INDEX (simulator),
-  overhaulYear smallint DEFAULT NULL,
-  contractor varchar(255) DEFAULT NULL,
-  tuned smallint DEFAULT NULL,
-  extraInfo text DEFAULT NULL,
-  webPage text DEFAULT NULL
+DROP TABLE IF EXISTS `towers`;
+CREATE TABLE IF NOT EXISTS `towers` (
+  `doveid` varchar(10) NOT NULL,
+  `gridReference` varchar(10) DEFAULT NULL,
+  `latitude` decimal(8,5) DEFAULT NULL,
+  `longitude` decimal(8,5) DEFAULT NULL,
+  `latitudeSatNav` decimal(8,5) DEFAULT NULL,
+  `longitudeSatNav` decimal(8,5) DEFAULT NULL,
+  `postcode` varchar(10) DEFAULT NULL,
+  `country` varchar(255) NOT NULL,
+  `county` varchar(255) DEFAULT NULL,
+  `diocese` varchar(255) DEFAULT NULL,
+  `place` varchar(255) NOT NULL,
+  `altName` varchar(255) DEFAULT NULL,
+  `dedication` varchar(255) DEFAULT NULL,
+  `bells` tinyint(4) NOT NULL,
+  `weight` smallint(6) DEFAULT NULL,
+  `weightApprox` tinyint(1) DEFAULT NULL,
+  `weightText` varchar(20) DEFAULT NULL,
+  `note` varchar(2) DEFAULT NULL,
+  `hz` decimal(5,1) DEFAULT NULL,
+  `practiceNight` tinyint(4) DEFAULT NULL,
+  `practiceStart` varchar(5) DEFAULT NULL,
+  `practiceNotes` text,
+  `groundFloor` tinyint(1) DEFAULT NULL,
+  `toilet` tinyint(1) DEFAULT NULL,
+  `unringable` tinyint(1) DEFAULT NULL,
+  `simulator` tinyint(1) DEFAULT NULL,
+  `overhaulYear` smallint(6) DEFAULT NULL,
+  `contractor` varchar(255) DEFAULT NULL,
+  `tuned` smallint(6) DEFAULT NULL,
+  `extraInfo` text,
+  `webPage` text,
+  PRIMARY KEY (`doveId`),
+  KEY `latitude` (`latitude`),
+  KEY `longitude` (`longitude`),
+  KEY `country` (`country`),
+  KEY `county` (`county`),
+  KEY `diocese` (`diocese`),
+  KEY `bells` (`bells`),
+  KEY `weight` (`weight`),
+  KEY `practiceNight` (`practiceNight`),
+  KEY `groundFloor` (`groundFloor`),
+  KEY `toilet` (`toilet`),
+  KEY `unringable` (`unringable`),
+  KEY `simulator` (`simulator`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- Set up a towers fusion table
@@ -107,29 +125,50 @@ CREATE TABLE IF NOT EXISTS towersFusion (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8, COMMENT = 'Export into CSV for importing into Google Fusion Tables';
 
 -- Set up associations_towers table
-DROP TABLE IF EXISTS associations_towers;
-CREATE TABLE IF NOT EXISTS associations_towers (
-  association_abbreviation varchar(10) NOT NULL, INDEX (association_abbreviation),
-  tower_doveId varchar(10) NOT NULL, INDEX (tower_doveId)
+DROP TABLE IF EXISTS `associations_towers`;
+CREATE TABLE IF NOT EXISTS `associations_towers` (
+  `association_abbreviation` varchar(10) NOT NULL COMMENT 'Abbreviation of association',
+  `tower_doveid` varchar(10) NOT NULL COMMENT 'Dove ID of an affiliated tower',
+  PRIMARY KEY (`association_abbreviation`,`tower_doveid`),
+  KEY `association_abbreviation` (`association_abbreviation`),
+  KEY `tower_doveid` (`tower_doveid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 <?php
 
 // tower_oldpks data from data/newpks.txt
-$newpks = new parseCSV();
-$newpks->auto( __DIR__.'/data/newpks.txt' );
-echo "INSERT INTO tower_oldpks (oldpk,tower_doveId) VALUES\n" .
-	implode( ",\n", array_map( function( $row ) {
-		return "\t('".sqlite_escape_string( str_replace( ' ', '_', trim( $row['OldID'] ) ) )."','".sqlite_escape_string( str_replace( ' ', '_', trim( $row['NewID'] ) ) ).'\')';
-	}, $newpks->data ) ) .
-	";\n";
-unset( $newpks );
+$newpksFile = new parseCSV();
+$newpksFile->auto( __DIR__.'/data/newpks.txt' );
 
+// Extract required data
+$oldpks = array_map( function( $row ) { return sqlite_escape_string( str_replace( ' ', '_', trim( $row['OldID'] ) ) ); }, $newpksFile->data );
+$newpks = array_map( function( $row ) { return sqlite_escape_string( str_replace( ' ', '_', trim( $row['NewID'] ) ) ); }, $newpksFile->data );
+unset( $newpksFile );
+
+// Prevent entries appearing as a newPK when they appear as an oldPK themselves
+$foundWrongEntry = true;
+while( $foundWrongEntry ) {
+	$foundWrongEntry = false;
+	for( $i = 0, $iLim = count( $oldpks ); $i < $iLim; ++$i ) {
+		$newOldPK = array_search( $newpks[$i], $oldpks );
+		if( $newOldPK !== false ) {
+			$newpks[$i] = $newpks[$newOldPK];
+			$foundWrongEntry = true;
+		}
+	}
+}
+
+echo "INSERT INTO `tower_oldpks` (`oldpk`, `tower_doveid`) VALUES\n";
+for( $i = 0, $iLim = count( $oldpks ); $i < $iLim; ++$i ) {
+	echo (($i==0)?'':",\n")."\t('{$oldpks[$i]}','{$newpks[$i]}')";
+}
+echo ';';
+unset( $oldpks, $newpks, $i, $iLim );
 
 // Other data from data/dove.txt
-$dove = new parseCSV();
-$dove->auto( __DIR__.'/data/dove.txt' );
-foreach( $dove->data as $tower ) {
+$doveFile = new parseCSV();
+$doveFile->auto( __DIR__.'/data/dove.txt' );
+foreach( $doveFile->data as $tower ) {
 	// Tidy up data values
 	// Expand shortened county/region names
 	if( empty( $tower['Country'] ) ) { $tower['Country'] = 'England'; }
@@ -182,7 +221,7 @@ foreach( $dove->data as $tower ) {
 	// Sort out dedication abbreviations
 	if( !empty( $tower['Dedicn'] ) ) {
 		$tower['Dedicn'] = str_replace( 
-			array( 'RC ',             'SS ',  'S ',  'SSs ', 'Cath ',      'Cath,',      'P Church',      'Ch ',     ' ch ',     ' K&M',             ' Gt',        'John Bapt',        ' Magd',     'Senara V',          'Mary V',          'BVM',                 'BV',             'Nativity St',    ' of Blessed',     '& Blessed',     'SMV',                'John Ev',             'Mark Ev',             'James Ap',          'Andrew Ap',          'Thomas Ap',          ' A&M',                    ' V&M',                   ' B&M',                    'Margaret Q',         'Edward Conf & K',                'Edward Conf',          'Edward M',          'George M',         'Thomas M',          'Stephen M',          'Laurence M',          'Matthew AEM' ),
+			array( 'RC ',             'SS ',  'S ',  'SSs ', 'Cath ',      'Cath,',      'P Church',      'Ch ',     ' ch ',     ' K&M',             ' Gt',        'John Bapt',        ' Magd',     'Senara V',          'Mary V',          'BVM',                 'BV',             'Nativity St',    ' of Blessed',     '& Blessed',     'SMV',                'John Ev',             'Mark Ev',             'James Ap',          'Andrew Ap',          'Thomas Ap',          ' A&M',                    ' V&M',                   ' B&M',                   'Margaret Q',         'Edward Conf & K',               'Edward Conf',          'Edward M',          'George M',          'Thomas M',          'Stephen M',          'Laurence M',          'Matthew AEM' ),
 			array( 'Roman Catholic ', 'SSs ', 'St ', 'SS ',  'Cathedral ', 'Cathedral,', 'Parish Church', 'Church ', ' church ', ' King and Martyr', ' the Great', 'John the Baptist', ' Magdalen', 'Senara the Virgin', 'Mary the Virgin', 'Blessed Virgin Mary', 'Blessed Virgin', 'Nativity of St', ' of the Blessed', '& the Blessed', 'St Mary the Virgin', 'John the Evangelist', 'Mark the Evangelist', 'James the Apostle', 'Andrew the Apostle', 'Thomas the Apostle', ' the Apostle and Martyr', ' the Virgin and Martyr', ' the Bishop and Martyr', 'Margaret the Queen', 'Edward the Confessor and King', 'Edward the Confessor', 'Edward the Martyr', 'George the Martyr', 'Thomas the Martyr', 'Stephen the Martyr', 'Laurence the Martyr', 'Matthew the Apostle, Evangelist and Martyr' ),
 			$tower['Dedicn'] );
 		$tower['Dedicn'] = preg_replace( 
@@ -244,13 +283,13 @@ foreach( $dove->data as $tower ) {
 			$tower['Contractor'] = 'Local labour';
 			break;
 		case '(The owner)':
-			$tower['Contractor'] = 'Owner';
+			$tower['Contractor'] = 'The Owner';
 			break;
 		case 'Merseyside Bell Restn Group':
 			$tower['Contractor'] = 'Merseyside Bell Restoration Group';
 			break;
 	}
-	// Check altName
+	// Check altName isn't unnecessary
 	if( $tower['Place'] == $tower['AltName'] ) { $tower['AltName'] = ''; }
 	
 	// Concat $place2 and $place
@@ -261,7 +300,7 @@ foreach( $dove->data as $tower ) {
 
 	// Escape values for SQL
 	$rowData = array();
-	$rowData['doveId'] = "'".sqlite_escape_string( str_replace( ' ', '_', trim( $tower['DoveID'] ) ) )."'";
+	$rowData['doveid'] = "'".sqlite_escape_string( str_replace( ' ', '_', trim( $tower['DoveID'] ) ) )."'";
 	$rowData['gridReference'] = "'".sqlite_escape_string( $tower['NG'] )."'";
 	$rowData['latitude'] = floatval( $tower['Lat'] );
 	$rowData['longitude'] = floatval( $tower['Long'] );
@@ -295,7 +334,7 @@ foreach( $dove->data as $tower ) {
 	$rowData = array_filter( $rowData, function( $e ) { return ( !empty( $e ) && $e != '\'\'' ); } );
 	
 	// towers INSERT
- 	echo 'INSERT INTO towers ('.implode( ', ', array_keys( $rowData ) ).') VALUES ('.implode( ', ', $rowData ).");\n";
+ 	echo 'INSERT INTO `towers` (`'.implode( '`, `', array_keys( $rowData ) ).'`) VALUES ('.implode( ', ', $rowData ).");\n";
 	
 	// fusionTowers INSERT
 	if( isset( $rowData['latitude'], $rowData['longitude'] ) ) {
@@ -309,18 +348,16 @@ foreach( $dove->data as $tower ) {
 			( $rowData['bells'] <= 10 )? "'small_blue'" : (
 			( $rowData['bells'] <= 12 )? "'small_purple'" : (
 			"'small_red'" ) ) ) ) ) ) );
-		unset( $rowData['gridReference'], $rowData['latitude'],$rowData['longitude'], $rowData['latitudeSatNav'], $rowData['longitudeSatNav'], $rowData['postcode'], $rowData['countryCode'], $rowData['altName'], $rowData['weightApprox'], $rowData['hz'], $rowData['practiceStart'], $rowData['practiceNotes'], $rowData['overhaulYear'], $rowData['contractor'], $rowData['tuned'], $rowData['extraInfo'], $rowData['webPage'] );
+		// Remove unwanted data
+		unset( $rowData['gridReference'], $rowData['latitude'], $rowData['longitude'], $rowData['latitudeSatNav'], $rowData['longitudeSatNav'], $rowData['postcode'], $rowData['countryCode'], $rowData['altName'], $rowData['weightApprox'], $rowData['hz'], $rowData['practiceStart'], $rowData['practiceNotes'], $rowData['overhaulYear'], $rowData['contractor'], $rowData['tuned'], $rowData['extraInfo'], $rowData['webPage'] );
 		echo 'INSERT INTO towersFusion ('.implode( ', ', array_keys( $rowData ) ).') VALUES ('.implode( ', ', $rowData ).");\n";
 	}
 	
-	// Association links
+	// associations_towers data
 	if( !empty( $tower['Affiliations'] ) ) {
 		foreach( explode( ',', $tower['Affiliations'] ) as $link ) {
-			echo 'INSERT INTO associations_towers (association_abbreviation, tower_doveId) VALUES (\''.sqlite_escape_string( $link ).'\', '.$rowData['doveId'].');'."\n";
+			echo 'INSERT INTO `associations_towers` (`association_abbreviation`, `tower_doveid`) VALUES (\''.sqlite_escape_string( $link ).'\', '.$rowData['doveid'].');'."\n";
 		}
 	}
 }
-?>
 
-OPTIMIZE TABLE towers;
-OPTIMIZE TABLE associations_towers;

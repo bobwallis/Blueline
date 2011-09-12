@@ -3,35 +3,24 @@
 dWhich=`which "$0"`
 d=`dirname "$dWhich"`
 
+# Javascript
+# Update the localStorage clear parameter in history.js
+sed -i -e"s/clearBefore = (new Date(.*)$/clearBefore = (new Date( `date "+%Y, %-m, %-d"` )/" "$d/../../web/scripts/helpers/ContentCache.js"
+
 # Execute RequireJS builder
 node "$d/helpers/r.js" -o app.build.js
 
-# CSS
-# Remove unneeded files
-rm -rf "$d/../../www-build/styles/ui"
-rm -rf "$d/../../www-build/styles/helpers"
-# GZip compiled CSS
-find "$d/../../www-build/" -type f -name "*.css" -exec sh -c 'gzip -9c "$1" > "$1.gz"' -- {} \;
-# Copy to styles.built
-rm -rf "$d/../../www/styles.built"
-mv "$d/../../www-build/styles" "$d/../../www/styles.built"
-
-# JS
-# Remove unneeded files
-rm -rf "$d/../../www-build/scripts/helpers"
-rm -rf "$d/../../www-build/scripts/plugins"
-rm "$d/../../www-build/scripts/ui/Hotkeys.js"
-rm "$d/../../www-build/scripts/ui/Content.js"
-rm "$d/../../www-build/scripts/ui/Header.js"
-rm "$d/../../www-build/scripts/ui/MethodGrid.js"
-rm "$d/../../www-build/scripts/ui/Page.js"
-rm "$d/../../www-build/scripts/ui/TabBar.js"
-# GZip compressed JS
-find "$d/../../www-build/" -type f -name "*.js" -exec sh -c 'gzip -9c "$1" > "$1.gz"' -- {} \;
 # Copy to scripts.built
-rm -rf "$d/../../www/scripts.built"
-mv "$d/../../www-build/scripts" "$d/../../www/scripts.built"
-
+rm -rf "$d/../../web/scripts.built"
+mv "$d/www-build/scripts" "$d/../../web/scripts.built"
 
 # Remove www-build directory
-rm -rf "$d/../../www-build"
+rm -rf "$d/www-build"
+
+# Run the Closure compiler on all scripts (This is so slow it's painful)
+#for f in $(find "$d/../../web/scripts.built" -name "*.js"); do
+#	java -jar "$d/../../app/Resources/java/compiler.jar" --charset "UTF-8" --compilation_level SIMPLE_OPTIMIZATIONS --js "$f"
+#done
+
+# Dump production assets from Symfony
+"$d/../../app/console" assetic:dump --env=prod --no-debug

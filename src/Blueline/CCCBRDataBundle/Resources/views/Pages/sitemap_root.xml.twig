@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+ <url>
+  <loc>{{ url('Blueline_welcome') }}</loc>
+{% for page in ['about', 'copyright'] %}
+  <loc>{{ url('Blueline_page', {'page':page}) }}</loc>
+{% endfor %}
+  <loc>{{ url('Blueline_Associations_welcome') }}</loc>
+  <loc>{{ url('Blueline_Methods_welcome') }}</loc>
+  <loc>{{ url('Blueline_Towers_welcome') }}</loc>
+ </url>
+</urlset>

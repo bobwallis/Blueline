@@ -1,0 +1,17 @@
+{% if abbreviations is defined %}
+{% for abbreviation in abbreviations %}
+{% render path('Blueline_Associations_view', {'abbreviation':abbreviation, '_format':'txt'}) with {}, {'standalone':true} %}
+{% endfor %}
+{% else %}
+{% autoescape false %}
+{{ association.name }}
+{% if association.link is not empty %}
+	Link:  	{{ association.link }}
+{% endif %}
+	Towers:	{{ count( association.affiliatedTowers ) }}
+{% for tower in association.affiliatedTowers %}
+	       	{{ tower.place }} ({{ tower.dedication }})
+{% endfor %}
+
+{% endautoescape %}
+{% endif %}

@@ -1,7 +1,7 @@
 <?php
-namespace Utilities;
-require( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/abbreviations.php' );
-use \PDO, \Helpers;
+// This is a horrendous mess
+
+require( dirname(__FILE__).'/../../../vendor/blueline/abbreviations.php' );
 
 $dsn = 'mysql:host=localhost;dbname=blueline';
 $username = 'blueline';
@@ -11,18 +11,58 @@ $password = 'password';
 -- Generated on: <?php echo date( 'Y/m/d' ); ?>
 
 -- Set up methods_towers table
-DROP TABLE IF EXISTS methods_towers;
-CREATE TABLE IF NOT EXISTS methods_towers (
-  method_title varchar(255) NOT NULL UNIQUE,
-  tower_doveId varchar(10) NOT NULL, INDEX (tower_doveId)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-DROP TABLE IF EXISTS methods_towers_unmatched;
-CREATE TABLE IF NOT EXISTS methods_towers_unmatched (
-  method_title varchar(255) NOT NULL UNIQUE,
-  location varchar(255) NOT NULL
+SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+
+DROP TABLE IF EXISTS `methods_towers`;
+CREATE TABLE IF NOT EXISTS `methods_towers` (
+  `method_title` varchar(255) NOT NULL COMMENT 'Title of method',
+  `tower_doveid` varchar(10) NOT NULL COMMENT 'Dove ID of the tower where the first tower bell peal was rung',
+  PRIMARY KEY (`method_title`,`tower_doveid`),
+  UNIQUE KEY `method_title` (`method_title`),
+  KEY `tower_doveid` (`tower_doveid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 <?php
+$notFound = array();
+$doesntExistInDove = array(
+	'All Saints, Leicester',
+	'Bell Meadow Peal, Warnham', // http://www.campaniles.co.uk/MiniRingsFixed.html
+	'Beehive Campanile, Swanage',
+	'Bishop Ryder, Birmingham', // http://www.warksbells.co.uk/lost.htm
+	'Brentford', // http://www.brentforddockresidents.co.uk/stlawrencebells.php
+	'Butterywells Campanile, Potterton', 
+	'Campanile, Romanby',
+	'Cathedral, Melbourne, VIC, AU', // Which one?!
+	'Coleridge Campanile, Walsoken', 
+	'Denholme Gate', // http://www.westgallerychurches.com/Yorks/West/Denholme/Denholme.html
+	'Deritend', // http://www.warksbells.co.uk/lost.htm
+	'Die Glockli, Modautal Brandau', 
+	'Earlsheaton', // http://www.dewsburyreporter.co.uk/lifestyle/features/ringing_the_changes_1_1349858
+	'Eastwell', // http://kent.lovesguide.com/eastwell.htm
+	'Hillbrow Campanile, Liss',
+	'Horsleydown', // http://en.wikipedia.org/wiki/St_John_Horsleydown
+	'Le Petit Beffroi, Souce', // Mini-ring
+	'Little Orchard, East Huntspill', // Mini-ring
+	'Lower House Farm, Leigh Sinton',
+	'Midways Campanile, Stubbington',
+	'Millcroft Campanile, Willingham',
+	'Mindinho le Tower, Newmarket',
+	'Narnia Campanile',
+	'Narnia Campanile, Stubbington',
+	'The Narnia Campanile, Stubbington',
+	'Pig le Tower, Marston Bigot',
+	'Senouillac', // Mini-ring
+	'St Bride, Fleet Street, London',
+	'St Dunstan in the East, London',
+	'St Dunstan in the West, London', // http://london.lovesguide.com/dunstan-in-the-west.htm
+	'St Francis, Holbeck', // http://www.riponandleedsbells.org.uk/Leeds%20St%20Anne.htm
+	'The Rector\'s Ring, Clenchwarton'
+);
 try {
 	$dbh = new PDO( $dsn, $username, $password );
 	
@@ -31,30 +71,44 @@ try {
 	
 	foreach( $methodSearch->fetchAll( PDO::FETCH_ASSOC ) as $method ) {
 		$location = $method['location'];
-		$minBells = $method['stage'];
+		$minBells = ($method['stage'] == 13 || $method['stage'] == 15)? $method['stage']-1 : $method['stage'];
 		$method = $method['title'];
-		$doveId = '';
+		$doveid = '';
 		$location = trim( str_replace( '-', ' ', $location ) );
+		
+		
+		if( in_array( $location, $doesntExistInDove ) ) {
+			continue;
+		}
 		
 		// Place
 		if( strpos( $location, ',' ) === FALSE ) {
-			if( $location == 'Barnsley' ) { $doveId = 'BARNSLEY_Y'; }
-			elseif( $location == 'Barrow on Humber' ) { $doveId = 'BARROW_UH'; }
-			elseif( $location == 'Birstall' ) { $doveId = 'BIRSTALL_Y'; }
-			elseif( $location == 'Bishop\'s Tawton' ) { $doveId = 'BISHOPS_TA'; }
-			elseif( $location == 'Bishops Cleeve' ) { $doveId = 'BISHOPS_6'; }
-			elseif( $location == 'Collingham' ) { $doveId = 'COLLINGHAM'; }
-			elseif( $location == 'Farnworth with Kearsley' ) { $doveId = 'FARNWORTHK'; }
-			elseif( $location == 'Great Berkhamsted' ) { $doveId = 'BERKHAMSTE'; }
-			elseif( $location == 'Lye' ) { $doveId = 'LYE'; }
-			elseif( $location == 'Michaelston y Fedw' ) { $doveId = 'MICHAELSTN'; }
-			elseif( $location == 'Pulham St Mary Magd.' ) { $doveId = 'PULHAM_MAR'; }
-			elseif( $location == 'Pulham St Mary the Virgin' ) { $doveId = 'PULHAM_ST'; }
-			elseif( $location == 'Scofton with Osberton' ) { $doveId = 'SCOFTON'; }
-			elseif( $location == 'Wath on Dearne' ) { $doveId = 'WATH_UPOND'; }
+			if( $location == 'Barnsley' ) { $doveid = 'BARNSLEY_Y'; }
+			elseif( $location == 'Barrow on Humber' ) { $doveid = 'BARROW_UH'; }
+			elseif( $location == 'Birstall' ) { $doveid = 'BIRSTALL_Y'; }
+			elseif( $location == 'Bishop\'s Tawton' ) { $doveid = 'BISHOPS_TA'; }
+			elseif( $location == 'Bishops Cleeve' ) { $doveid = 'BISHOPS_6'; }
+			elseif( $location == 'Church Lawford' ) { $doveid = 'CHURCH_LAW'; } // Assume not The Plantagenet Ring
+			elseif( $location == 'Collingham' ) { $doveid = 'COLLINGHAM'; }
+			elseif( $location == 'Farnworth with Kearsley' ) { $doveid = 'FARNWORTHK'; }
+			elseif( $location == 'Great Berkhamsted' ) { $doveid = 'BERKHAMSTE'; }
+			elseif( $location == 'Hanbury' && $method == 'Vale of Evesham Surprise Major' ) { $doveid = 'HANBURY_WO'; }
+			elseif( $location == 'Lye' ) { $doveid = 'LYE'; }
+			elseif( $location == 'Michaelston y Fedw' ) { $doveid = 'MICHAELSTN'; }
+			elseif( $location == 'Netherseale' ) { $doveid = 'NETHERSEAL'; }
+			elseif( $location == 'Newchurch Kenyon' ) { $doveid = 'CULCHETH'; }
+			elseif( $location == 'Overseale' ) { $doveid = 'OVERSEAL'; }
+			elseif( $location == 'Pulham St Mary Magd.' ) { $doveid = 'PULHAM_MAR'; }
+			elseif( $location == 'Pulham St Mary the Virgin' ) { $doveid = 'PULHAM_ST'; }
+			elseif( $location == 'Shaw' && $method == 'Shaw Bob Major' ) { $doveid = 'EAST_CROMP'; }
+			elseif( $location == 'St John in the Oaks' ) { $doveid = 'SAI_JOHNJE'; }
+			elseif( $location == 'Scofton with Osberton' ) { $doveid = 'SCOFTON'; }
+			elseif( $location == 'Sprotborough' ) { $doveid = 'SPROTBROUG'; }
+			elseif( $location == 'Sutton on Hull' ) { $doveid = 'KINGSTN6'; }
+			elseif( $location == 'Wath on Dearne' ) { $doveid = 'WATH_UPOND'; }
 			
-			elseif( ! $doveId = search( array( 'minBells' => $minBells, 'place' => $location ), $dbh ) ) {
-				notFound( $method, $location );
+			elseif( !$doveid = search( array( 'minBells' => $minBells, 'place' => $location ), $dbh ) ) {
+				$notFound[] = $location.' : '.$method;
 			}
 		}
 		else {
@@ -75,95 +129,103 @@ try {
 					'Arts Centre',
 					'Bell Foundry',
 				), $locationE[0] );
-				if( $locationE[1] == 'Milton Keynes' && $locationE[0] == 'All Saints' ) { $doveId = 'MILTONKY21'; break; }
-				if( $locationE[1] == 'Dublin' && $locationE[0] == 'Christ Church Cathedral' ) { $doveId = 'DUBLIN__DC'; break; }
-				if( $locationE[1] == 'Ealing' && $locationE[0] == 'Christ Church' ) { $doveId = 'EALING'; break; }
-				if( $locationE[0] == 'Christchurch' && $locationE[1] == 'Hants' ) { $doveId = 'CHRISTCH_D'; break; }
-				if( $locationE[0] == 'St Michael with St Paul' && $locationE[1] == 'Bath' ) { $doveId = 'BATH___MIC'; break; }
-				if( $locationE[0] == 'St Michael Coslany' && $locationE[1] == 'Norwich' ) { $doveId = 'NORWICH_MI'; break; }
-				if( $locationE[0] == 'St Mary' && $locationE[1] == 'Spalding' ) { $doveId = 'SPALDING'; break; }
-				if( $locationE[0] == 'St Mary' && $locationE[1] == 'Hayes' ) { $doveId = 'HAYES_MRY'; break; }
-				if( $locationE[0] == 'St Mary Magdalene' && $locationE[1] == 'Torquay' ) { $doveId = 'TORQUAY_UP'; break; }
-				if( $locationE[0] == 'St Mary Magdalene' && $locationE[1] == 'Bridgnorth' ) { $doveId = 'BRIDGNOR_M'; break; }
-				if( $locationE[0] == 'St Margaret of Antioch' && $locationE[1] == 'Uxbridge' ) { $doveId = 'UXBRIDGE_M'; break; }
-				if( $locationE[0] == 'St Machar\'s Cathedral' && $locationE[1] == 'Aberdeen' ) { $doveId = 'ABERDEEN'; break; }
-				if( $locationE[0] == 'St Laurence' && $locationE[1] == 'York' ) { $doveId = 'YORK___SLA'; break; }
-				if( $locationE[0] == 'St John in Bedwardine' && $locationE[1] == 'Worcester' ) { $doveId = 'WORCESTERB'; break; }
-				if( $locationE[0] == 'St John at Hackney' && $locationE[1] == 'Hackney' ) { $doveId = 'HACKNEY'; break; }
-				if( $locationE[0] == 'St John Bapt.' && $locationE[1] == 'Newcastle upon Tyne' ) { $doveId = 'NEWCASUT_J'; break; }
-				if( $locationE[0] == 'Newport' && $locationE[1] == 'Gwent' ) { $doveId = 'NEWPORT_NC'; break; }
-				if( $locationE[0] == 'Marshfield' && $locationE[1] == 'Mon' ) { $doveId = 'MARSHFLD_G'; break; }
-				if( $locationE[0] == 'Llanbadarn Fawr' && $locationE[1] == 'Dyfed' ) { $doveId = 'LLANBADARA'; break; }
-				if( $locationE[0] == 'Cape Town' && $locationE[1] == 'Woodstock' ) { $doveId = 'CAPE_TOWNW'; break; }
+				
+				// Some problem towers
+				if( $locationE[0] == 'Cape Town' && $locationE[1] == 'Woodstock' ) { $doveid = 'CAPE_TOWNW'; break; }
+				if( $locationE[0] == 'Christchurch' && $locationE[1] == 'Hants' ) { $doveid = 'CHRISTCH_D'; break; }
+				if( $locationE[1] == 'Dublin' && $locationE[0] == 'Christ Church Cathedral' ) { $doveid = 'DUBLIN__DC'; break; }
+				if( $locationE[1] == 'Ealing' && $locationE[0] == 'Christ Church' ) { $doveid = 'EALING'; break; }
+				if( $locationE[0] == 'Llanbadarn Fawr' && $locationE[1] == 'Dyfed' ) { $doveid = 'LLANBADARA'; break; }
+				if( $locationE[0] == 'Marshfield' && $locationE[1] == 'Mon' ) { $doveid = 'MARSHFLD_G'; break; }
+				if( $locationE[1] == 'Milton Keynes' && $locationE[0] == 'All Saints' ) { $doveid = 'MILTONKY21'; break; }
+				if( $locationE[0] == 'Newport' && $locationE[1] == 'Gwent' ) { $doveid = 'NEWPORT_NC'; break; }
+				if( $locationE[0] == 'Norton' && $locationE[1] == 'Yorks' ) { $doveid = 'SHEFFIELDN'; break; }
+				if( $locationE[0] == 'Old St Mary' && $locationE[1] == 'Chester' ) { $doveid = 'CHESTR___M'; break; }
+				if( $locationE[0] == 'Ryton' && $locationE[1] == 'Durham' ) { $doveid = 'RYTON__TYW'; break; }
+				if( $locationE[0] == 'St John' && $locationE[1] == 'Lambeth' ) { $doveid = 'WATERLOOWR'; break; }
+				if( $locationE[0] == 'St Michael with St Paul' && $locationE[1] == 'Bath' ) { $doveid = 'BATH___MIC'; break; }
+				if( $locationE[0] == 'St Michael Coslany' && $locationE[1] == 'Norwich' ) { $doveid = 'NORWICH_MI'; break; }
+				if( $locationE[0] == 'St Mary' && $locationE[1] == 'Spalding' ) { $doveid = 'SPALDING'; break; }
+				if( $locationE[0] == 'St Mary' && $locationE[1] == 'Hayes' ) { $doveid = 'HAYES_MRY'; break; }
+				if( $locationE[0] == 'St Mary' && $locationE[1] == 'Folkestone' ) { $doveid = 'FOLKESTN'; break; }
+				if( $locationE[0] == 'St Mary Magdalene' && $locationE[1] == 'Torquay' ) { $doveid = 'TORQUAY_UP'; break; }
+				if( $locationE[0] == 'St Mary Magdalene' && $locationE[1] == 'Bridgnorth' ) { $doveid = 'BRIDGNOR_M'; break; }
+				if( $locationE[0] == 'St Margaret of Antioch' && $locationE[1] == 'Uxbridge' ) { $doveid = 'UXBRIDGE_M'; break; }
+				if( $locationE[0] == 'St Machar\'s Cathedral' && $locationE[1] == 'Aberdeen' ) { $doveid = 'ABERDEEN'; break; }
+				if( $locationE[0] == 'St Laurence' && $locationE[1] == 'York' ) { $doveid = 'YORK___SLA'; break; }
+				if( $locationE[0] == 'St John in Bedwardine' && $locationE[1] == 'Worcester' ) { $doveid = 'WORCESTERB'; break; }
+				if( $locationE[0] == 'St John at Hackney' && $locationE[1] == 'Hackney' ) { $doveid = 'HACKNEY'; break; }
+				if( $locationE[0] == 'St John Bapt.' && $locationE[1] == 'Newcastle upon Tyne' ) { $doveid = 'NEWCASUT_J'; break; }
+				if( $locationE[0] == 'Wollaston' && $locationE[1] == 'Worcs' ) { $doveid = 'STOURBRGWO'; break; }
+				if( $locationE[0] == 'Woodchurch' && $locationE[1] == 'Cheshire' ) { $doveid = 'WOODCHURME'; break; }
 				
 				// Dedication, Place
-				if( $doveId = search( array( 'minBells' => $minBells, 'dedication' => $locationE[0], 'place' => $locationE[1] ), $dbh ) ) {
+				if( $doveid = search( array( 'minBells' => $minBells, 'dedication' => $locationE[0], 'place' => $locationE[1] ), $dbh ) ) {
 					break;
 				}
 				
 				// Place, County
-				if( $doveId = search( array( 'minBells' => $minBells, 'place' => $locationE[0], 'county' => $locationE[1] ), $dbh ) ) {
+				if( $doveid = search( array( 'minBells' => $minBells, 'place' => $locationE[0], 'county' => $locationE[1] ), $dbh ) ) {
 					break;
 				}
 			
-				notFound( $method, $location );
+				$notFound[] = $location.' : '.$method;
 				break;
 			
 			case 3:
-			if( $locationE[0] == 'Sullivans Island' ) { $locationE[0] = 'Charleston, Sullivan\'s Island'; }
+				if( $locationE[0] == 'Sullivans Island' ) { $doveid = 'CHARLESTNS'; break; }
 			
 				// Dedication, Place, County
-				if( $doveId = search( array( 'minBells' => $minBells, 'dedication' => $locationE[0], 'place' => $locationE[1], 'county' => $locationE[2] ), $dbh ) ) {
+				if( $doveid = search( array( 'minBells' => $minBells, 'dedication' => $locationE[0], 'place' => $locationE[1], 'county' => $locationE[2] ), $dbh ) ) {
 					break;
 				}
 				
 				// Place, County, Country
-				if( $doveId = search( array( 'minBells' => $minBells, 'place' => $locationE[0], 'county' => $locationE[1], 'country' => $locationE[2] ), $dbh ) ) {
+				if( $doveid = search( array( 'minBells' => $minBells, 'place' => $locationE[0], 'county' => $locationE[1], 'country' => $locationE[2] ), $dbh ) ) {
 					break;
 				}
 			
-				notFound( $method, $location );
+				$notFound[] = $location.' : '.$method;
 				break;
 			
 			case 4:
 				// Special cases
-				if( $locationE[0] == 'St Peter\'s Cathedral' && $locationE[1] == 'Adelaide' ) { $doveId = 'ADELA___CA'; break; }
-				if( $locationE[0] == 'St Mary\'s Cathedral' && $locationE[1] == 'Sydney' ) { $doveId = 'SYDNEY___R'; break; }
-				if( $locationE[0] == 'St Andrew\'s Cathedral' && $locationE[1] == 'Sydney' ) { $doveId = 'SYDNEY___A'; break; }
+				if( $locationE[0] == 'St Peter\'s Cathedral' && $locationE[1] == 'Adelaide' ) { $doveid = 'ADELA___CA'; break; }
+				if( $locationE[0] == 'St Mary\'s Cathedral' && $locationE[1] == 'Sydney' ) { $doveid = 'SYDNEY___R'; break; }
+				if( $locationE[0] == 'St Andrew\'s Cathedral' && $locationE[1] == 'Sydney' ) { $doveid = 'SYDNEY___A'; break; }
+				if( $locationE[0] == 'Swan Campanile' && $locationE[1] == 'Perth' ) { $doveid = 'PERTH_SWAN'; break; }
 			
 				// Dedication, Place, County, Country
-				if( $doveId = search( array( 'minBells' => $minBells, 'dedication' => $locationE[0], 'place' => $locationE[1], 'county' => $locationE[2], 'country' => $locationE[3] ), $dbh ) ) {
+				if( $doveid = search( array( 'minBells' => $minBells, 'dedication' => $locationE[0], 'place' => $locationE[1], 'county' => $locationE[2], 'country' => $locationE[3] ), $dbh ) ) {
 					break;
 				}
 			
 			default:
-				notFound( $method, $location );
+				$notFound[] = $location.' : '.$method;
 				break;
 			}
 		}
 		
-		if( !empty( $doveId ) ) {
-			echo 'INSERT IGNORE INTO methods_towers (method_title,tower_doveId) VALUES (\''.sqlite_escape_string( $method ).'\', \''.sqlite_escape_string( $doveId ).'\');'."\n";
+		if( !empty( $doveid ) ) {
+			echo 'INSERT INTO `methods_towers` (`method_title`, `tower_doveid`) VALUES (\''.sqlite_escape_string( $method ).'\', \''.sqlite_escape_string( $doveid ).'\');'."\n";
 		}
 	}
 	$dbh = null;
+
+	echo "\n\n-- Unmatched towers:\n";
+	sort( $notFound );
+	echo "\n-- ".implode( "\n-- ", $notFound )."\n";
+
 }
 catch ( PDOException $e ) {
 	echo 'Error: ' . $e->getMessage();
 	die();
 }
 
-
-function notFound( $method, $location ) {
-	echo 'INSERT IGNORE INTO methods_towers_unmatched (method_title,location) VALUES (\''.sqlite_escape_string( $method ).'\',\''.sqlite_escape_string( $location )."');\n";
-	// trigger_error( 'Not matched: '.$method."\n" , E_USER_NOTICE );
-}
-
-
 function search( $where, &$dbh ) {
 	global $counties, $states, $australianAreas, $canadianStates;
 
-	$queryText = 'SELECT doveId from towers WHERE 1';
+	$queryText = 'SELECT doveid from towers WHERE 1';
 	if( isset( $where['minBells'] ) ) {
 		$queryText .= ' AND bells >= :minBells';
 	}
@@ -177,7 +239,7 @@ function search( $where, &$dbh ) {
 	}
 	if( isset( $where['county'] ) ) {
 		$queryText .=  ' AND county LIKE CONCAT(\'%\', :county, \'%\')';
-		if( ! isset( $where['country'] ) ) {
+		if( !isset( $where['country'] ) ) {
 			if( isset( $counties[$where['county']] ) ) { $where['county'] = $counties[$where['county']]; }
 			elseif( isset( $states[$where['county']] ) ) { $where['county'] = $states[$where['county']]; }
 			elseif( isset( $australianAreas[$where['county']] ) ) { $where['county'] = $australianAreas[$where['county']]; }
@@ -196,7 +258,7 @@ function search( $where, &$dbh ) {
 	$query->execute( $where );
 	$search = $query->fetchAll( PDO::FETCH_ASSOC );
 	if( count( $search ) == 1 ) {
-		return $search[0]['doveId'];
+		return $search[0]['doveid'];
 	}
 	else {
 
@@ -220,8 +282,8 @@ function search( $where, &$dbh ) {
 				$countyAgain = true;
 			}
 			if( $countyAgain ) {
-				if( $doveId = search( array_merge( $where, array( 'county' => $county ) ), $dbh ) ) {
-					return $doveId;
+				if( $doveid = search( array_merge( $where, array( 'county' => $county ) ), $dbh ) ) {
+					return $doveid;
 				}
 			}
 		}
@@ -231,7 +293,7 @@ function search( $where, &$dbh ) {
 		$query->execute( $where );
 		$search = $query->fetchAll( PDO::FETCH_ASSOC );
 		if( count( $search ) == 1 ) {
-			return $search[0]['doveId'];
+			return $search[0]['doveid'];
 		}
 		
 		// Try even more general place searching
@@ -239,11 +301,8 @@ function search( $where, &$dbh ) {
 		$query->execute( $where );
 		$search = $query->fetchAll( PDO::FETCH_ASSOC );
 		if( count( $search ) == 1 ) {
-			return $search[0]['doveId'];
+			return $search[0]['doveid'];
 		}
 	}
 	return false;
 }
-?>
-
-OPTIMIZE TABLE methods_towers;

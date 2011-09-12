@@ -1,0 +1,85 @@
+{% if titles is defined and titles.length > 1 %}
+	{% for title in titles %}
+		{% render path('Blueline_Methods_view', {'title':title, 'snippet':true}) with {}, {'standalone':true} %}
+	{% endfor %}
+{% else %}
+{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
+<section class="method">
+	{{ header( method.title, null, { 'id': 'method_'~id~'_tabBar', 'tabs': [
+		{ 'title': 'Details', 'content': 'method_details_'~id },
+		{ 'title': 'Line', 'content': 'method_line_'~id },
+		{ 'title': 'Grid', 'content': 'method_grid_'~id }
+	], 'active': 1 } ) }}
+	<div id="method_details_{{ id }}" class="details">
+		<noscript><h2>Details</h2></noscript>
+		<table>
+			<tr>
+				<th>Classification:</th>
+				<td>{{ (method.differential? 'Differential ':'') ~ (method.little? 'Little ':'') ~ method.classification ~ ' ' ~ method.stageText }}</td>
+			</tr>
+			<tr>
+				<th>Place&nbsp;Notation:</th>
+				<td><abbr title="{{ method.notationExpanded }}">{{ method.notation }}</abbr></td>
+			</tr>
+			<tr>
+				<th>Lead Head:</th>
+				<td>{{ (method.leadHead ~ (method.leadHeadCode? ' <small>(Code: ' ~ method.leadHeadCode ~ ')</small>' : ''))|raw }}</td>
+			</tr>
+{% if method.palindromic or method.doubleSym or method.rotational %}
+			<tr>
+				<th>Symmetry:</th>
+				<td>{{ method.symmetryText }}</td>
+			</tr>
+{% endif %}
+{% if method.fchGroups is not empty %}
+			<tr>
+				<th><abbr title="False Course Head">FCH</abbr> Groups:</th>
+				<td>{{ method.fchGroups }}</td>
+			</tr>
+{% endif %}
+			<tr>
+				<th>Hunt Bells:</th>
+				<td>{{ ( method.numberOfHunts > 0 )? method.hunts|join(', ') : 'None' }}</td>
+			</tr>
+{% if method.lengthOfLead > 0 %}
+			<tr>
+				<th>Lead Length:</th>
+				<td>{{ method.lengthOfLead }} rows</td>
+			</tr>
+{% endif %}
+{% if method.firstTowerbellPealDate is not empty %}
+			<tr>
+				<th>First towerbell peal:</th>
+				<td>{{ method.firstTowerbellPealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}{% if method.firstTowerbellPealLocation is not empty %} at <a href="{{ path( 'Blueline_Towers_view', { 'doveid': method.firstTowerBellPealTower.doveid } ) }}">{{ method.firstTowerbellPealLocation }}</a>{% endif %}</td>
+			</tr>
+{% endif %}
+{% if method.firstHandbellpealDate is not empty %}
+			<tr>
+				<th>First handbell peal:</th>
+				<td>{{ method.firstHandbellpealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</td>
+			</tr>
+{% endif %}
+		</table>
+	</div>
+	<div id="method_line_{{ id }}" class="line"></div>
+	<div id="method_grid_{{ id }}" class="grid"></div>
+	<script>
+	{% autoescape false %}
+	//<![CDATA[
+		require( ['ui/MethodView'], function( MethodView ) {
+			new MethodView( {
+				id: '{{ id }}',
+				numbersContainer: '#method_line_{{ id }}',
+				gridContainer: '#method_grid_{{ id }}',
+				stage: {{ method.stage }},
+				notation: '{{ method.notationExpanded }}',
+				calls: {{ method.calls|json_encode }},
+				callingPositions: {{ method.callingPositions|json_encode }},
+				ruleOffs: {{ method.ruleOffs|json_encode }}
+			} );
+		} );
+	//]]>
+	{% endautoescape %}
+	</script>
+</section>
+{% endif %}

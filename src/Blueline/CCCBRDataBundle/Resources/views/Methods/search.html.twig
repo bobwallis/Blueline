@@ -1,0 +1,11 @@
+{% from 'BluelineCCCBRDataBundle:Macros:paging.html.twig' import paging %}
+<section class="search">
+	<ol>
+	{% for method in methods %}
+		<li><a href="{{ path( 'Blueline_Methods_view', { 'title': method.title|replace({' ':'_'}) } ) }}">{{ method.title }}</a></li>
+	{% else %}
+		<li>No results</li>
+	{% endfor %}
+	</ol>
+	{{ paging( searchVariables, pageActive, pageCount ) }}
+</section>

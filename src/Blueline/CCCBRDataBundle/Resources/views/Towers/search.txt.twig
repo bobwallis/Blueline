@@ -1,0 +1,7 @@
+{% autoescape false %}
+{% for tower in towers %}
+{{ tower.place }} ({{ tower.dedication }})	{{ tower.doveid }}
+{% else %}
+No results
+{% endfor %}
+{% endautoescape %}

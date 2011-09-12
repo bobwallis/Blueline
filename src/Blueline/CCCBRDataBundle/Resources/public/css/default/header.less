@@ -1,0 +1,109 @@
+#top {
+	display: block;
+	width: 100%;
+	background: @headerBackground;
+	background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0, darken(@headerBackground,3%)),color-stop(1, lighten(@headerBackground,3%)));
+	background-image: -moz-linear-gradient(center bottom,darken(@headerBackground,3%) 0%,lighten(@headerBackground,3%) 100%);
+	color: @lightGrey;
+	height: @headerHeight;
+	line-height: @headerHeight;
+	a {
+		color: @lightGrey;
+		border: 0;
+		&:hover {
+			color: #FFF;
+		}
+	}
+	h1, h2, span.headerSep {
+		font-weight: bold;
+		text-transform: uppercase;
+		font-weight: normal;
+		float: left;
+		margin: 0 0 0 @headerHeight/4;
+		font-size: @headerHeight*0.55;
+		text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+	}
+	h2, span.headerSep {
+		font-weight: normal;
+		text-transform: none;
+		margin-left: 5px;
+	}
+}
+
+/* Header search */
+@topSearchWidth: 200px;
+@topSearchHeight: 21px;
+form#topSearch {
+	display: block;
+	float: left;
+	background-color: @background;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	border: 1px solid @lightGrey;
+	box-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+	overflow: hidden;
+	margin: ((@headerHeight - @topSearchHeight)/2) 0 ((@headerHeight - @topSearchHeight)/2) 8px;
+	height: @topSearchHeight - 2;
+	width: @topSearchWidth;
+	input {
+		display: block;
+		float: left;
+		background-color: @background;
+		border: 0;
+		font-size: 11px;
+		width: @topSearchWidth - 25;
+		height: 15px;
+		line-height: 15px;
+		padding: 2px;
+		&:focus { border: 0; outline-width: 0; }
+	}
+	button {
+		display: block;
+		float: right;
+		background-color: #FFF;
+		background-image: url(../../images/search.png);
+		background-image: url(../../images/search.svg), url(../../images/search.png);
+		border: 0;
+		width: 19px;
+		height: 19px;
+		margin-right: 2px;
+	}
+}
+
+/* Big search */
+div#bigSearchContainer {
+	clear: both;
+	border-bottom: 1px solid @lightGrey;
+	background-color: #FAFAFA;
+	padding: 8px;
+}
+form#bigSearch {
+	display: block;
+	overflow: hidden;
+	width: 350px;
+}
+	form#bigSearch div {
+		background-color: #FFF;
+		border-radius: 3px; -moz-border-radius: 3px;
+		border: 2px solid #DDD;
+		height: 25px;
+	}
+	form#bigSearch input {
+		display: block;
+		float: left;
+		background-color: #FFF;
+		border: 0;
+		font-size: 13px;
+		width: 310px;
+		height: 21px;
+		padding: 2px 5px;
+	}
+		form#bigSearch input:focus { border: 0; outline-width: 0; }
+	form#bigSearch button {
+		float: left;
+		background: #FFF url(../../images/search.png) no-repeat center center;
+		background-image: url(../../images/search.svg), url(../../images/search.png);
+		border: 0;
+		width: 25px;
+		height: 25px;
+	}

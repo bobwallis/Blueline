@@ -1,0 +1,14 @@
+{% extends 'BluelineCCCBRDataBundle::base.html.twig' %}
+
+{% block title %}{{ pageTitle }} | Towers | {{ parent() }}{% endblock %}
+{% set breadcrumb = [ {'title':'Towers', 'href':path('Blueline_Towers_welcome')} ] %}
+{% set search_opensearch = 'towers' %}
+{% set search_header = true %}
+{% set search_action = path( 'Blueline_Towers_search' ) %}
+{% set search_placeholder = 'Search towers' %}
+
+{% block body %}
+	{% for doveid in doveids %}
+		{% render path('Blueline_Towers_view', {'doveid':doveid, 'snippet':true}) with {}, {'standalone':true} %}
+	{% endfor %}
+{% endblock %}

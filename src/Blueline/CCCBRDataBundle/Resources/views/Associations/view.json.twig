@@ -1,0 +1,14 @@
+{% autoescape false %}
+{% if abbreviations is defined %}
+{% spaceless json %}
+[
+	{% for abbreviation in abbreviations %}
+		{{ loop.first?'':',' }}
+		{% render path('Blueline_Associations_view', {'abbreviation':abbreviation, '_format':'json'}) with {}, {'standalone':true} %}
+	{% endfor %}
+]
+{% endspaceless %}
+{% else %}
+{{ association|json_encode }}
+{% endif %}
+{% endautoescape %}

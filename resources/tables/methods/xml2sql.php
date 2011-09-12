@@ -1,11 +1,9 @@
 <?php
 // Converts the CCCBR provided XML files of method data into SQL INSERT statements, one per method
-namespace Utilities;
-
-require_once( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/LeadHeadCodes.php' );
-require_once( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/PlaceNotation.php' );
-require_once( dirname(dirname(dirname(dirname(__FILE__)))).'/libraries/Helpers/Stages.php' );
-use \Helpers\LeadHeadCodes, \Helpers\PlaceNotation;
+require( dirname(__FILE__).'/../../../src/Blueline/Helpers/LeadHeadCodes.php' );
+require( dirname(__FILE__).'/../../../src/Blueline/Helpers/PlaceNotation.php' );
+require( dirname(__FILE__).'/../../../src/Blueline/Helpers/Stages.php' );
+use \Blueline\Helpers\LeadHeadCodes, \Blueline\Helpers\PlaceNotation, \Blueline\Helpers\Stages;
 
 date_default_timezone_set( 'UTC' );
 
@@ -25,36 +23,51 @@ header( 'Content-Disposition: inline; filename="methods.sql"' );
 -- distributing it, you must include a clear notice that the material
 -- has been modified.
 
-
 -- Set up table
-DROP TABLE IF EXISTS methods;
-CREATE TABLE IF NOT EXISTS methods (
-  stage tinyint NOT NULL, INDEX (stage),
-  classification varchar(15), INDEX (classification),
-  title varchar(255) UNIQUE,
-  nameMetaphone varchar(255), INDEX (nameMetaphone),
-  notation varchar(300),
-  notationExpanded text,
-  leadHeadCode varchar(3),
-  leadHead varchar(25),
-  fchGroups varchar(25),
-  rwRef varchar(30),
-  bnRef varchar(20),
-  tdmmRef smallint,
-  pmmRef smallint,
-  lengthOfLead smallint, INDEX (lengthOfLead),
-  numberOfHunts tinyint, INDEX (numberOfHunts),
-  little bit, INDEX (little),
-  differential bit, INDEX (differential),
-  plain bit, INDEX (plain),
-  trebleDodging bit, INDEX (trebleDodging),
-  palindromic bit, INDEX (palindromic),
-  doubleSym bit, INDEX (doubleSym),
-  rotational bit, INDEX (rotational),
-  firstTowerbellPeal_date date, INDEX (firstTowerbellPeal_date),
-  firstTowerbellPeal_location varchar(255), INDEX (firstTowerbellPeal_location),
-  firstHandbellPeal_date date, INDEX (firstHandbellPeal_date),
-  firstHandbellPeal_location varchar(255), INDEX (firstHandbellPeal_location)
+DROP TABLE IF EXISTS `methods`;
+CREATE TABLE IF NOT EXISTS `methods` (
+  `stage` smallint(6) NOT NULL,
+  `classification` varchar(15) DEFAULT NULL,
+  `title` varchar(255) NOT NULL DEFAULT '',
+  `nameMetaphone` varchar(255) DEFAULT NULL,
+  `notation` varchar(300) DEFAULT NULL,
+  `notationExpanded` text,
+  `leadHeadCode` varchar(3) DEFAULT NULL,
+  `leadHead` varchar(25) DEFAULT NULL,
+  `fchGroups` varchar(25) DEFAULT NULL,
+  `rwRef` varchar(30) DEFAULT NULL,
+  `bnRef` varchar(20) DEFAULT NULL,
+  `tdmmRef` smallint(6) DEFAULT NULL,
+  `pmmRef` smallint(6) DEFAULT NULL,
+  `lengthOfLead` smallint(6) DEFAULT NULL,
+  `numberOfHunts` smallint(6) DEFAULT NULL,
+  `little` tinyint(1) DEFAULT NULL,
+  `differential` tinyint(1) DEFAULT NULL,
+  `plain` tinyint(1) DEFAULT NULL,
+  `trebleDodging` tinyint(1) DEFAULT NULL,
+  `palindromic` tinyint(1) DEFAULT NULL,
+  `doubleSym` tinyint(1) DEFAULT NULL,
+  `rotational` tinyint(1) DEFAULT NULL,
+  `firstTowerbellPeal_date` date DEFAULT NULL,
+  `firstTowerbellPeal_location` varchar(255) DEFAULT NULL,
+  `firstHandbellPeal_date` date DEFAULT NULL,
+  `firstHandbellPeal_location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`title`),
+  KEY `stage` (`stage`),
+  KEY `classification` (`classification`),
+  KEY `nameMetaphone` (`nameMetaphone`),
+  KEY `lengthOfLead` (`lengthOfLead`),
+  KEY `numberOfHunts` (`numberOfHunts`),
+  KEY `little` (`little`),
+  KEY `differential` (`differential`),
+  KEY `plain` (`plain`),
+  KEY `trebleDodging` (`trebleDodging`),
+  KEY `palindromic` (`palindromic`),
+  KEY `doubleSym` (`doubleSym`),
+  KEY `rotational` (`rotational`),
+  KEY `firstTowerbellPeal_date` (`firstTowerbellPeal_date`),
+  KEY `firstTowerbellPeal_location` (`firstTowerbellPeal_location`),
+  KEY `firstHandbellPeal_date` (`firstHandbellPeal_date`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 <?php
@@ -108,7 +121,7 @@ foreach( $files as $file ) {
 		// Use the SQLite function, as the MySQL one needs to have an active database connection to work.
 		
 		// String valued entries
-		foreach( array( 'classification', 'title', 'notation', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef', 'firstTowerbellPeal_date', 'firstTowerbellPeal_location', 'firstHandbellPeal_date', 'firstHandbellPeal_location' ) as $mKey ) {
+		foreach( array( 'classification', 'title', 'notation', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef', 'firstTowerbellPeal_date', 'firstTowerbellPeal_location', 'firstHandbellPeal_date' ) as $mKey ) {
 			$m[$mKey] = ( isset( $methodData[$mKey][$i] ) )? "'".sqlite_escape_string( $methodData[$mKey][$i] )."'" : 'NULL';
 		}
 		// Integer valued entries
@@ -249,7 +262,7 @@ function startElement( $parser, $name, $attributes ) {
 	case 'REGION':
 	case 'COUNTRY':
 		if( $insideFirstTowerbellPeal ) { $pushTo = 'firstTowerbellPeal_location'; }
-		elseif( $insideFirstHandbellPeal ) { $pushTo = 'firstHandbellPeal_location'; }
+		elseif( $insideFirstHandbellPeal ) { /* If this starts happening then the method data has started including handbell peal locations, and the database needs a new column */ trigger_error( 'Handbell peal location detected.' ); }
 		break;
 	default:
 		break;
@@ -314,6 +327,3 @@ function charData( $parser, $data ) {
 	}
 }
 
-?>
-
-OPTIMIZE TABLE methods;

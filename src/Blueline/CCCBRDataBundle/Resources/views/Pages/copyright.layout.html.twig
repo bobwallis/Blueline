@@ -1,0 +1,7 @@
+{% extends 'BluelineCCCBRDataBundle::base.html.twig' %}
+
+{% block title %}Copyright | {{ parent() }}{% endblock %}
+
+{% block body %}
+	{% render path('Blueline_page', {'page':'copyright', 'snippet':true}) with {}, {'standalone':true} %}
+{% endblock %}

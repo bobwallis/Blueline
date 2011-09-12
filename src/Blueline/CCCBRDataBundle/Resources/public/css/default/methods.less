@@ -1,0 +1,41 @@
+.method {
+	.details, .grid {
+		display: none;
+	}
+}
+
+.method {
+	._grid {
+		margin-left: 20px;
+	}
+	.line {
+		padding: 0 @contentXPadding;
+		._grid:first-child {
+			margin-left: 0;
+		}
+	}
+	.grid {
+		._grid:first-child {
+			margin-left: @contentXPadding;
+		}
+	}
+}
+._grid {
+	float: left;
+	margin: @contentYPadding 0;
+	text-rendering: optimizeSpeed;
+	svg {
+		display: block;
+	}
+}
+
+td._gridNotation {
+	font-size: 10px;
+	color: #666;
+	text-align: right;
+	padding-right: 5px;
+}
+td._gridTitle {
+	font-size: 13px;
+	padding-bottom: 3px;
+}

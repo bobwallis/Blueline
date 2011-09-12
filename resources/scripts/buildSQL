@@ -3,32 +3,11 @@
 dWhich=`which "$0"`
 d=`dirname "$dWhich"`
 
-top=$d/../..
-
-# Make a folder to store the SQL in
-sql=$top/sql
-mkdir -p "$sql"
-
 # Create UDFs
-"$top/resources/UDFs/build"
-cp $top/resources/UDFs/*.sql "$sql"
-cp $top/resources/UDFs/*.so "$sql"
+"$d/../UDFs/build"
 
-# associations table
-cp "$top/resources/tables/associations.sql" "$sql"
-echo -e "Created associations table SQL \n"
+# Update methods table
+"$d/../tables/methods/update"
 
-# methods table
-"$top/resources/tables/methods/update"
-cp "$top/resources/tables/methods/methods.sql.gz" "$sql"
-
-# method_extras table
-cp "$top/resources/tables/method_extras.sql" "$sql"
-echo -e "Created method_extras table SQL\n"
-
-# towers table
-"$top/resources/tables/towers/update"
-cp "$top/resources/tables/towers/towers.sql.gz" "$sql"
-
-# GZip all SQL files
-gzip -f $sql/*.sql
+# Update towers table
+"$d/../tables/towers/update"

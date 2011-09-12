@@ -1,0 +1,7 @@
+{% autoescape false %}
+{% for association in associations %}
+{{ association.name }}	{{ association.abbreviation }}
+{% else %}
+No results
+{% endfor %}
+{% endautoescape %}
