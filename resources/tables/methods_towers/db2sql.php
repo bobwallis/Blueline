@@ -103,6 +103,7 @@ try {
 			elseif( $location == 'Shaw' && $method == 'Shaw Bob Major' ) { $doveid = 'EAST_CROMP'; }
 			elseif( $location == 'St John in the Oaks' ) { $doveid = 'SAI_JOHNJE'; }
 			elseif( $location == 'Scofton with Osberton' ) { $doveid = 'SCOFTON'; }
+			elseif( $location == 'Sprotborough' ) { $doveid = 'SPROTBROUG'; }
 			elseif( $location == 'Sutton on Hull' ) { $doveid = 'KINGSTN6'; }
 			elseif( $location == 'Wath on Dearne' ) { $doveid = 'WATH_UPOND'; }
 			
