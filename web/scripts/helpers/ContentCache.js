@@ -7,6 +7,11 @@ define( ['./Can'], function( Can ) {
 	// The resources/buildWWW script will update this line automatically
 	var clearBefore = (new Date( 2011, 9, 11 )).toDateString();
 
+	// Wipe out legacy cache entries
+	if( !localStorage.getItem( '_pageCache_cleared' ) ) {
+		localStorage.clear();
+	}
+
 	var setupLocalStorageCache = function() {
 		// Check the cache is not stale
 		if( localStorage.getItem( '_pageCache_cleared' ) != clearBefore ) {
