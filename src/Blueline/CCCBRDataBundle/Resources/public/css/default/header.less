@@ -1,3 +1,4 @@
+@headerHeight_smallScreen: @headerHeight*0.75;
 #top {
 	display: block;
 	width: 100%;
@@ -29,18 +30,27 @@
 		margin-left: 5px;
 	}
 }
+@media screen and (max-width: 480px) {
+	#top {
+		height: @headerHeight_smallScreen;
+		line-height: @headerHeight_smallScreen;
+		h1, h2, span.headerSep {
+			margin: 0 0 0 @headerHeight_smallScreen/4;
+			font-size: @headerHeight_smallScreen*0.55;
+		}
+	}
+}
 
 /* Header search */
 @topSearchWidth: 200px;
 @topSearchHeight: 21px;
-form#topSearch {
+#topSearch {
 	display: block;
 	float: left;
 	background-color: @background;
-	-moz-border-radius: 3px;
-	border-radius: 3px;
+	.border-radius(3px);
 	border: 1px solid @lightGrey;
-	box-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+	.box-shadow(1px 1px 3px rgba(0,0,0,0.6));
 	overflow: hidden;
 	margin: ((@headerHeight - @topSearchHeight)/2) 0 ((@headerHeight - @topSearchHeight)/2) 8px;
 	height: @topSearchHeight - 2;
@@ -70,7 +80,10 @@ form#topSearch {
 	}
 }
 
+
 /* Big search */
+@bigSearchWidth: 350px;
+@bigSearchWidth_smallScreen: 304px;
 div#bigSearchContainer {
 	clear: both;
 	border-bottom: 1px solid @lightGrey;
@@ -80,26 +93,28 @@ div#bigSearchContainer {
 form#bigSearch {
 	display: block;
 	overflow: hidden;
-	width: 350px;
-}
-	form#bigSearch div {
+	width: @bigSearchWidth;
+	div {
 		background-color: #FFF;
-		border-radius: 3px; -moz-border-radius: 3px;
+		.border-radius(3px);
 		border: 2px solid #DDD;
 		height: 25px;
 	}
-	form#bigSearch input {
+	input {
 		display: block;
 		float: left;
 		background-color: #FFF;
 		border: 0;
 		font-size: 13px;
-		width: 310px;
+		width: @bigSearchWidth - 40;
 		height: 21px;
 		padding: 2px 5px;
+		&:focus {
+			border: 0;
+			outline-width: 0;
+		}
 	}
-		form#bigSearch input:focus { border: 0; outline-width: 0; }
-	form#bigSearch button {
+	button {
 		float: left;
 		background: #FFF url(../../images/search.png) no-repeat center center;
 		background-image: url(../../images/search.svg), url(../../images/search.png);
@@ -107,3 +122,12 @@ form#bigSearch {
 		width: 25px;
 		height: 25px;
 	}
+}
+@media screen and (max-width: 480px) {
+form#bigSearch {
+	width: @bigSearchWidth_smallScreen;
+	input {
+		width: @bigSearchWidth_smallScreen - 40;
+	}
+}
+}
