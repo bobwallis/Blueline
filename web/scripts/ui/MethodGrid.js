@@ -276,7 +276,7 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 					rowJoiner = function( r ) { return r.join( '' ); };
 				// Begin each column in a new table cell
 				for( var i = 0; i < this.display.numberOfColumns; ++i ) {
-					text += '<td style="padding-left: '+this.display.dimensions.padding.columnLeft+'px;padding-right:'+(((i<this.display.numberOfColumns-1)?this.display.dimensions.padding.interColumn:0)+this.display.dimensions.padding.columnRight)+'px">';
+					text += '<td style="padding:0 '+(((i<this.display.numberOfColumns-1)?this.display.dimensions.padding.interColumn:0)+this.display.dimensions.padding.columnRight)+'px 0 '+this.display.dimensions.padding.columnLeft+'px">';
 					for( var j = 0; j < this.display.leadsPerColumn && (i*this.display.leadsPerColumn)+j < this.display.numberOfLeads; ++j ) {
 						var allRows = PlaceNotation.allRows( this.notation.parsed, leadHead );
 						leadHead = allRows.pop();
