@@ -183,7 +183,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 					numberOfCalls = view.options.calls.length,
 					maxWidth = view.container.numbers.width(),
 					rowWidth = bellWidth*view.method.stage,
-					callWidth = 20 + rowWidth,
+					callWidth = 15 + rowWidth,
 					placeStartWidth = (10 + plainPlaceStarts.length*12);
 				return function() {
 					var leadsPerColumn = 1;
@@ -191,7 +191,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 					// Check that the window isn't plenty big enough before bothering to look at adjusting
 					if( maxWidth <= 2*callWidth + 5 + (rowWidth + placeStartWidth + numbersColumnPadding)*numberOfLeads ) {
 						for( leadsPerColumn = 1; leadsPerColumn < numberOfLeads; ++leadsPerColumn ) {
-							if( maxWidth > ((leadsPerColumn>1)?callWidth:numberOfCalls*callWidth) + 5 + Math.ceil( numberOfLeads/leadsPerColumn )*(numbersColumnPadding + rowWidth + placeStartWidth ) ) {
+							if( maxWidth > ((leadsPerColumn>1)?callWidth:numberOfCalls*callWidth) + Math.ceil( numberOfLeads/leadsPerColumn )*(numbersColumnPadding + rowWidth + placeStartWidth ) ) {
 								break;
 							}
 						}
