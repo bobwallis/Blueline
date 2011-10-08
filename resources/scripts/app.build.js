@@ -1,8 +1,9 @@
 ( {
-	appDir: "../../web",
-	baseUrl: "scripts",
-	dir: "www-build",
+	appDir: "../../web/scripts",
+	baseUrl: "./",
+	dir: "../../web/scripts.built",
 	optimize: "uglify",
+	optimizeCss: "none",
 	modules: [
 		{
 			name: "app",

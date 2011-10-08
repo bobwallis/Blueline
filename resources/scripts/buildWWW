@@ -4,18 +4,14 @@ dWhich=`which "$0"`
 d=`dirname "$dWhich"`
 
 # Javascript
-# Update the localStorage clear parameter in history.js
+# Update the localStorage clear parameter in ContentCache.js
 sed -i -e"s/clearBefore = (new Date(.*)$/clearBefore = (new Date( `date "+%Y, %-m, %-d"` )/" "$d/../../web/scripts/helpers/ContentCache.js"
+
+# Remove old files
+rm -r "$d/../../web/scripts.built"
 
 # Execute RequireJS builder
 node "$d/helpers/r.js" -o app.build.js
-
-# Copy to scripts.built
-rm -rf "$d/../../web/scripts.built"
-mv "$d/www-build/scripts" "$d/../../web/scripts.built"
-
-# Remove www-build directory
-rm -rf "$d/www-build"
 
 # Run the Closure compiler on all scripts (This is so slow it's painful)
 #for f in $(find "$d/../../web/scripts.built" -name "*.js"); do

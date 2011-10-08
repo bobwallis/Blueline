@@ -54,7 +54,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 		}
 		
 		// Set up reusable options objects
-		this.options = {}
+		this.options = {};
 		
 		// Plain course
 		this.options.plainCourse = {
@@ -145,6 +145,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 					stroke: (this.method.huntBells.indexOf( i ) !== -1)? '#D11' : ((toFollow.indexOf( i ) !== -1)? colours[j++] || colours[j = 0, j++] : 'transparent')
 				} );
 			}
+			
 			var callLines = [];
 			this.options.calls.forEach( function( call, k ) {
 				callLines[k] = [];
@@ -218,6 +219,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 					placeStarts: plainPlaceStarts
 				}
 			} );
+			
 			var plainCourseContainer = this.container.numbers;
 			var plainCourseGrid = new MethodGrid( plainCourseOptions );
 			plainCourseContainer.append( plainCourseGrid.container );
@@ -287,9 +289,9 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 				}
 			} ) ).container );
 			// Calls
-			this.options.calls.forEach( function( call ) {
-				this.container.grid.append( new MethodGrid( $.extend( true, {}, call, {
-					id: 'grid'+this.id+'_'+call.id,
+			for( var i = 0; i < this.options.calls.length; i++ ) {
+				this.container.grid.append( new MethodGrid( $.extend( true, {}, this.options.calls[i], {
+					id: 'grid'+this.id+'_'+this.options.calls[i].id,
 					show: {
 						notation: true,
 						lines: true
@@ -299,7 +301,7 @@ define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, Plac
 						lines: lines
 					}
 				} ) ).container );
-			}, this );
+			}
 		}
 	};
 	
