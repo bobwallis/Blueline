@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Pull latest version
+echo -e "\033[1mPulling latest version\033[0m"
+git pull
+
+# Update vendors
+echo -e "\n\033[1mUpdating vendors\033[0m"
+php bin/vendors install
+
+# Clear cache
+echo -e "\n\033[1mClearing Symfony cache\033[0m"
+./app/console cache:clear --env=prod
+
+# Rebuild web assets
+echo -e "\n\033[1mRebuilding assets\033[0m"
+./resources/scripts/buildWWW
+
+# Invalidate old Varnish caches
+echo -e "\n\033[1mAdding Varnish ban\033[0m"
+curl -I -s -X BAN "http://blueline.rsw.me.uk/" | grep "HTTP"
+
