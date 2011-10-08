@@ -5,13 +5,13 @@ d=`dirname "$dWhich"`
 
 # Javascript
 # Update the localStorage clear parameter in ContentCache.js
-sed -i -e"s/clearBefore = (new Date(.*)$/clearBefore = (new Date( `date "+%Y, %-m, %-d"` )/" "$d/../../web/scripts/helpers/ContentCache.js"
+sed -i -e"s/var clearBefore = (new Date(.*$/var clearBefore = (new Date( `date "+%Y, %-m, %-d"` ).toDateString());/" "$d/../../web/scripts/helpers/ContentCache.js"
 
 # Remove old files
 rm -r "$d/../../web/scripts.built"
 
 # Execute RequireJS builder
-node "$d/helpers/r.js" -o app.build.js
+node "$d/helpers/r.js" -o "$d/app.build.js"
 
 # Run the Closure compiler on all scripts (This is so slow it's painful)
 #for f in $(find "$d/../../web/scripts.built" -name "*.js"); do
