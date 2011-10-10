@@ -7,7 +7,7 @@
 	modules: [
 		{
 			name: "app",
-			exclude: ["helpers/Can", "ui/TowerMap"]
+			exclude: ["helpers/Can"]
 		},
 		{
 			name: "main",
@@ -15,8 +15,7 @@
 			exclude: ["app"]
 		},
 		{
-			name: "ui/TowerMap",
-			exclude: ["helpers/Can"]
+			name: "ui/TowerMap"
 		},
 		{
 			name: "ui/MethodView",

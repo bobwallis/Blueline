@@ -1,8 +1,9 @@
 /*global require: false, define: false, google: false */
-define( ['../helpers/Can', '../helpers/ContentGetter', './Header', './Window', './TowerMap'], function( Can, ContentGetter, Header, Window, TowerMap ) {
+define( ['../helpers/Can', '../helpers/ContentGetter', './Header', './Window'], function( Can, ContentGetter, Header, Window ) {
 	var $loading = $( '<div id="loading"></div>' ),
 		loadingSetter = false,
 		$content = $( '#content' ),
+		$towerMap = [],
 		towerMapRegexp = /\/(associations|towers)\/view/;
 
 	$( function() {
@@ -10,9 +11,7 @@ define( ['../helpers/Can', '../helpers/ContentGetter', './Header', './Window', '
 	} );
 
 	var Content = {
-		container: $content, // TODO: Refactor TowerMap so this can be removed
 		loading: {
-			container: $loading, // TODO: Refactor TowerMap so this can be removed
 			show: function() {
 				loadingSetter = setTimeout( function() { $loading.show(); } , 150 );
 			},
@@ -28,9 +27,12 @@ define( ['../helpers/Can', '../helpers/ContentGetter', './Header', './Window', '
 				Content.loading.show();
 			}
 			
-			// Hide the tower map if it won't be needed
+			// Hide the tower map if it won't be needed, and reset content width
+			if( $towerMap.length == 0 ) { $towerMap = $( '#towerMap' ); }
 			if( towerMapRegexp.exec( url ) === null ) {
-				TowerMap.hide();
+				$towerMap.hide();
+				$loading.css( 'width', '100%' );
+				$content.css( 'width', '100%' );
 			}
 			
 			// Request page content
