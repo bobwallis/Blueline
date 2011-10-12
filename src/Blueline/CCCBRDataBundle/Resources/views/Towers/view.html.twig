@@ -7,7 +7,7 @@
 <section class="tower">
 	{{ header( { 'title': tower.place, 'title2': (tower.dedication != 'Unknown')? tower.dedication : null }, list( [tower.county, tower.country],', ',', ' ), { 'id': 'tower_'~id~'_tabBar', 'tabs': [
 		{ 'title': 'Details', 'content': 'tower_details_'~id },
-		{ 'title': 'Map', 'content': 'tower_map_'~id, 'className': 'normal_hide' },
+		{ 'title': 'Map', 'content': 'tower_map_'~id, 'className': 'l600' },
 		{ 'title': 'Methods First Pealed', 'content': 'tower_peals_'~id }
 	] } ) }}
 	<div id="tower_map_{{ id }}" class="staticMap">
@@ -20,7 +20,7 @@
 		require( ['ui/TowerMap'], function( TowerMap ) {
 			TowerMap.set( {
 				zoom: 15,
-				center: new google.maps.LatLng( {{ tower.latitude }}, {{ tower.longitude }} )
+				center: [{{ tower.latitude }},{{ tower.longitude }}]
 			} );
 		} );
 	{% endautoescape %}

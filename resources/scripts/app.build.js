@@ -18,6 +18,9 @@
 			name: "ui/TowerMap"
 		},
 		{
+			name: "ui/TowerMap_offline"
+		},
+		{
 			name: "ui/MethodView",
 			exclude: ["helpers/Can"]
 		}

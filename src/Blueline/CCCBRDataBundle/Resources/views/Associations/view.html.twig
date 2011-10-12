@@ -14,7 +14,7 @@
 	//<![CDATA[
 		require( ['ui/TowerMap'], function( TowerMap ) {
 			TowerMap.set( {
-				fitBounds: new google.maps.LatLngBounds( new google.maps.LatLng( {{ association.bbox.lat_min }}, {{ association.bbox.long_min }} ), new google.maps.LatLng( {{ association.bbox.lat_max }}, {{ association.bbox.long_max }} ) ),
+				fitBounds: [{{ association.bbox.lat_min }},{{ association.bbox.long_min }},{{ association.bbox.lat_max }},{{ association.bbox.long_max }}],
 				fusionTableQuery: "affiliations contains '{{ association.abbreviation|e('js') }}'"
 			} );
 		} );
