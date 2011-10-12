@@ -1,5 +1,12 @@
 #!/bin/bash
 
+dWhich=`which "$0"`
+d=`dirname "$dWhich"`
+cd $d
+
+# Reset ContentCache.js
+git checkout -- "web/scripts/helpers/ContentCache.js"
+
 # Pull latest version
 echo -e "\033[1mPulling latest version\033[0m"
 git pull
