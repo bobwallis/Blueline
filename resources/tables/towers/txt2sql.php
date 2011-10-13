@@ -360,4 +360,5 @@ foreach( $doveFile->data as $tower ) {
 		}
 	}
 }
-
+?>
+-- End

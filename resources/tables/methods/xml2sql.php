@@ -157,8 +157,6 @@ foreach( $files as $file ) {
 	}
 }
 
-echo "\n-- End";
-
 
 
 
@@ -326,4 +324,5 @@ function charData( $parser, $data ) {
 		$stillInsideSameTagAsLastTime = TRUE;
 	}
 }
-
+?>
+-- End

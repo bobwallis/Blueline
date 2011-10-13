@@ -1,0 +1,40 @@
+#!/bin/bash
+
+dWhich=`which "$0"`
+d=`dirname "$dWhich"`
+
+echo "Updating methods_towers.sql:"
+
+# Read configuration file
+function cfg.parser ()
+{
+    ini="$(<$1)"                # read the file
+    ini="${ini//[/\[}"          # escape [
+    ini="${ini//]/\]}"          # escape ]
+    IFS=$'\n' && ini=( ${ini} ) # convert to line-array
+    ini=( ${ini[*]//;*/} )      # remove comments with ;
+    ini=( ${ini[*]/\    =/=} )  # remove tabs before =
+    ini=( ${ini[*]/=\   /=} )   # remove tabs be =
+    ini=( ${ini[*]/\ =\ /=} )   # remove anything with a space around =
+    ini=( ${ini[*]/#\\[/\}$'\n'cfg.section.} ) # set section prefix
+    ini=( ${ini[*]/%\\]/ \(} )    # convert text2function (1)
+    ini=( ${ini[*]/=/=\( } )    # convert item to array
+    ini=( ${ini[*]/%/ \)} )     # close array parenthesis
+    ini=( ${ini[*]/%\\ \)/ \\} ) # the multiline trick
+    ini=( ${ini[*]/%\( \)/\(\) \{} ) # convert text2function (2)
+    ini=( ${ini[*]/%\} \)/\}} ) # remove extra parenthesis
+    ini[0]="" # remove first element
+    ini[${#ini[*]} + 1]='}'    # add the last brace
+    eval "$(echo "${ini[*]}")" # eval the result
+}
+cfg.parser "$d/../../../app/config/parameters.ini"
+cfg.section.parameters
+
+# Remove old files
+rm -f "$d/methods_towers.sql"
+rm -f "$d/methods_towers.sql.gz"
+
+# Create SQL
+echo "Parsing data"
+php "$d/db2sql.php" "$database_host" "$database_name" "$database_user" "$database_password" > "$d/methods_towers.sql"
+gzip -9c "$d/methods_towers.sql" > "$d/methods_towers.sql.gz"

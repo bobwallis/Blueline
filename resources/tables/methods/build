@@ -1,0 +1,20 @@
+#!/bin/bash
+
+dWhich=`which "$0"`
+d=`dirname "$dWhich"`
+
+echo "Updating methods.sql:"
+
+# Remove old files
+rm -f "$d/methods.sql"
+rm -f "$d/methods.sql.gz"
+
+# Download and unzip data
+echo "Downloading data"
+curl --progress-bar -o "$d/data/allmeths-xml.zip" "http://methods.org.uk/method-collections/xml-zip-files/allmeths-xml.zip"
+unzip -q -u -d "$d/data" -o "$d/data/allmeths-xml.zip"
+
+# Create SQL
+echo "Parsing data"
+php "$d/xml2sql.php" > "$d/methods.sql"
+gzip -9c "$d/methods.sql" > "$d/methods.sql.gz"

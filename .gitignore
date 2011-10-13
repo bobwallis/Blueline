@@ -2,6 +2,8 @@
 .directory
 error.log
 *.sql.gz
+resources/tables/methods/methods.sql
+resources/tables/towers/towers.sql
 *.tmp
 
 app/config/parameters.ini

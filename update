@@ -2,13 +2,37 @@
 
 dWhich=`which "$0"`
 d=`dirname "$dWhich"`
-cd $d
 
-# Reset ContentCache.js
-git checkout -- "web/scripts/helpers/ContentCache.js"
+cd "$d"
+
+# Read configuration file
+echo -e "\033[1mReading configuration file\033[0m"
+function cfg.parser ()
+{
+    ini="$(<$1)"                # read the file
+    ini="${ini//[/\[}"          # escape [
+    ini="${ini//]/\]}"          # escape ]
+    IFS=$'\n' && ini=( ${ini} ) # convert to line-array
+    ini=( ${ini[*]//;*/} )      # remove comments with ;
+    ini=( ${ini[*]/\    =/=} )  # remove tabs before =
+    ini=( ${ini[*]/=\   /=} )   # remove tabs be =
+    ini=( ${ini[*]/\ =\ /=} )   # remove anything with a space around =
+    ini=( ${ini[*]/#\\[/\}$'\n'cfg.section.} ) # set section prefix
+    ini=( ${ini[*]/%\\]/ \(} )    # convert text2function (1)
+    ini=( ${ini[*]/=/=\( } )    # convert item to array
+    ini=( ${ini[*]/%/ \)} )     # close array parenthesis
+    ini=( ${ini[*]/%\\ \)/ \\} ) # the multiline trick
+    ini=( ${ini[*]/%\( \)/\(\) \{} ) # convert text2function (2)
+    ini=( ${ini[*]/%\} \)/\}} ) # remove extra parenthesis
+    ini[0]="" # remove first element
+    ini[${#ini[*]} + 1]='}'    # add the last brace
+    eval "$(echo "${ini[*]}")" # eval the result
+}
+cfg.parser "app/config/parameters.ini"
+cfg.section.parameters
 
 # Pull latest version
-echo -e "\033[1mPulling latest version\033[0m"
+echo -e "\n\033[1mPulling latest version\033[0m"
 git pull
 
 # Update vendors
@@ -22,6 +46,28 @@ echo -e "\n\033[1mClearing Symfony cache\033[0m"
 # Rebuild web assets
 echo -e "\n\033[1mRebuilding assets\033[0m"
 ./resources/scripts/buildWWW
+
+# Update SQL generated from online sources
+echo -e "\n\033[1mUpdating SQL generated from online data\033[0m"
+./resources/tables/methods/build
+./resources/tables/towers/build
+
+# Import generated SQL into the database
+echo -e "\n\033[1mImporting generated SQL\033[0m"
+mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/associations.sql"
+mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/methods_extras.sql"
+mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/methods/methods.sql"
+mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/towers/towers.sql"
+echo "Done"
+
+# Update SQL generated from Blueline database
+echo -e "\n\033[1mUpdating SQL generated from Blueline database\033[0m"
+./resources/tables/methods_towers/build
+
+# Import generated SQL into the database
+echo -e "\n\033[1mImporting generated SQL\033[0m"
+mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/methods_towers/methods_towers.sql"
+echo "Done"
 
 # Invalidate old Varnish caches
 echo -e "\n\033[1mAdding Varnish ban\033[0m"

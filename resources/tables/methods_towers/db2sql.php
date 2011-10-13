@@ -1,11 +1,15 @@
 <?php
 // This is a horrendous mess
-
 require( dirname(__FILE__).'/../../../vendor/blueline/abbreviations.php' );
 
-$dsn = 'mysql:host=localhost;dbname=blueline';
-$username = 'blueline';
-$password = 'password';
+// Get database options from command line
+if( $argc < 4 ) {
+	die( 'Not enough arguments' );
+}
+$dsn = 'mysql:host='.$argv[1].';dbname='.$argv[2];
+$username = $argv[3];
+$password = $argv[4];
+
 ?>
 -- Method to Tower links
 -- Generated on: <?php echo date( 'Y/m/d' ); ?>
@@ -306,3 +310,5 @@ function search( $where, &$dbh ) {
 	}
 	return false;
 }
+?>
+-- End
