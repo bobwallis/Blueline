@@ -31,8 +31,12 @@ define( ['require'], function( require ) {
 			$content.css( 'width', '100%' );
 		},
 		set: function( options ) {
-			// If we're on a small screen and the tower map hasn't yet been made then do nothing
-			if( !TowerMapInitialised && $window.width() < SMALL_MAP_LIMIT ) {
+			// If we're on a small screen then show the static map
+			if( $window.width() < SMALL_MAP_LIMIT ) {
+				$( '.staticMap noscript' ).each( function( i, e ) {
+					e = $( e );
+					e.parent().html( e.text().replace( /^(.|\n)*(<img.*\/>)(.|\n)*/, '$2' ) );
+				} );
 				return;
 			}
 			

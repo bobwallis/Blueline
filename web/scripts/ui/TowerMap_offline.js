@@ -26,6 +26,7 @@ define( function() {
 		},
 		set: function() {
 			this.show();
+			$( '.staticMap' ).html( '<p>Maps unavailable while offline.</p>' );
 		}
 	};
 	
