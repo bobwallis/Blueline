@@ -3,9 +3,6 @@
 dWhich=`which "$0"`
 d=`dirname "$dWhich"`
 
-# Create UDFs
-"$d/../UDFs/build"
-
 # Update methods table
 "$d/../tables/methods/update"
 

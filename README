@@ -4,6 +4,8 @@ Installation Notes:
 After checking out the source, run 'php bin/vendors install' to install the 
 libraries used by Symfony.
 
+The UDFs in resources/UDFs should be built and installed.
+
 The app/cache and app/logs directories must be writable both by the web server 
 and the command line user. Either:
  rm -rf app/cache/*
