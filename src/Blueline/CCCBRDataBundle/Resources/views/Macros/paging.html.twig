@@ -1,52 +1,52 @@
-{% macro paging( searchVariables, pageActive, pageCount ) %}
+{% macro paging( searchPath, searchVariables, pageActive, pageCount ) %}
 <div class="paging">
 	<p>Page {{ pageActive }} of {{ pageCount }}</p>
 {% if pageCount > 1 %}
 	<div class="pagingLinks">
 		{% if pageActive > 1 %}
-			<a href="{{ path( 'Blueline_Associations_search', searchVariables|merge( { 'offset': (searchVariables['offset']-searchVariables['count']) } ) ) }}">&laquo;</a>
+			<a href="{{ path( searchPath, searchVariables|merge( { 'offset': (searchVariables['offset']-searchVariables['count']) } ) ) }}">&laquo;</a>
 		{% else %}
 			<span>&laquo</span>
 		{% endif %}
 		{% if pageCount > 7 %}
 			{# If we're near the start #}
 			{% if pageActive >= pageCount-2 %}
-				<a href="{{ path( 'Blueline_Associations_search', searchVariables|merge( { 'offset': 0 } ) ) }}">1</a> | &hellip; |
-				<a href="{{ path( 'Blueline_Associations_search', searchVariables|merge( { 'offset': (searchVariables['offset']-searchVariables['count']) } ) ) }}">{{ pageActive - 1 }}</a> | 
+				<a href="{{ path( searchPath, searchVariables|merge( { 'offset': 0 } ) ) }}">1</a> | &hellip; |
+				<a href="{{ path( searchPath, searchVariables|merge( { 'offset': (searchVariables['offset']-searchVariables['count']) } ) ) }}">{{ pageActive - 1 }}</a> | 
 				<span>{{ pageActive }}</span>
 				{% if pageActive < pageCount %}
 					{% for n in range( pageActive+1, pageCount ) %}
-						| <a href="{{ path( 'Blueline_Associations_search', searchVariables|merge( { 'offset': searchVariables['count']*(n-1) } ) ) }}">{{ n }}</a>
+						| <a href="{{ path( searchPath, searchVariables|merge( { 'offset': searchVariables['count']*(n-1) } ) ) }}">{{ n }}</a>
 					{% endfor %}
 				{% endif %}
 			{# If we're near the end #}
 			{% elseif pageActive <= 3 %}
 				{% if pageActive > 1 %}
     			{% for n in range( 1, pageActive-1 ) %}
-						<a href="{{ path( 'Blueline_Associations_search', searchVariables|merge( { 'offset': searchVariables['count']*(n-1) } ) ) }}">{{ n }}</a> | 
+						<a href="{{ path( searchPath, searchVariables|merge( { 'offset': searchVariables['count']*(n-1) } ) ) }}">{{ n }}</a> | 
 					{% endfor %}
 				{% endif %}
 				<span>{{ pageActive }}</span> | 
-				<a href="{{ path( 'Blueline_Associations_search', searchVariables|merge( { 'offset': (searchVariables['offset']+searchVariables['count']) } ) ) }}">{{ pageActive + 1 }}</a> | &hellip; | 
-				<a href="{{ path( 'Blueline_Associations_search', searchVariables|merge( { 'offset': searchVariables['count']*(pageCount-1) } ) ) }}">{{ pageCount }}</a>
+				<a href="{{ path( searchPath, searchVariables|merge( { 'offset': (searchVariables['offset']+searchVariables['count']) } ) ) }}">{{ pageActive + 1 }}</a> | &hellip; | 
+				<a href="{{ path( searchPath, searchVariables|merge( { 'offset': searchVariables['count']*(pageCount-1) } ) ) }}">{{ pageCount }}</a>
 			{# If we're in the middle #}
 			{% else %}
-				<a href="{{ path( 'Blueline_Associations_search', searchVariables|merge( { 'offset': 0 } ) ) }}">1</a> | &hellip; | 
-				<a href="{{ path( 'Blueline_Associations_search', searchVariables|merge( { 'offset': (searchVariables['offset']-searchVariables['count']) } ) ) }}">{{ pageActive - 1 }}</a> | 
+				<a href="{{ path( searchPath, searchVariables|merge( { 'offset': 0 } ) ) }}">1</a> | &hellip; | 
+				<a href="{{ path( searchPath, searchVariables|merge( { 'offset': (searchVariables['offset']-searchVariables['count']) } ) ) }}">{{ pageActive - 1 }}</a> | 
 				<span>{{ pageActive }}</span> | 
-				<a href="{{ path( 'Blueline_Associations_search', searchVariables|merge( { 'offset': (searchVariables['offset']+searchVariables['count']) } ) ) }}">{{ pageActive + 1 }}</a> | &hellip; | 
-				<a href="{{ path( 'Blueline_Associations_search', searchVariables|merge( { 'offset': searchVariables['count']*(pageCount-1) } ) ) }}">{{ pageCount }}</a>
+				<a href="{{ path( searchPath, searchVariables|merge( { 'offset': (searchVariables['offset']+searchVariables['count']) } ) ) }}">{{ pageActive + 1 }}</a> | &hellip; | 
+				<a href="{{ path( searchPath, searchVariables|merge( { 'offset': searchVariables['count']*(pageCount-1) } ) ) }}">{{ pageCount }}</a>
 			{% endif %}
 		{# If there's fewer than seven pages #}
 		{% else %}
 			{% for n in range( 1, pageCount ) %}
 				{% if not loop.first %}|{% endif %}
 				{% if n == pageActive %}<span>{{ n }}</span>
-				{% else %}<a href="{{ path( 'Blueline_Associations_search', searchVariables|merge( { 'offset': searchVariables['count']*(n-1) } ) ) }}">{{ n }}</a>{% endif %}
+				{% else %}<a href="{{ path( searchPath, searchVariables|merge( { 'offset': searchVariables['count']*(n-1) } ) ) }}">{{ n }}</a>{% endif %}
 			{% endfor %}
 		{% endif %}
 		{% if pageActive < pageCount %}
-			<a href="{{ path( 'Blueline_Associations_search', searchVariables|merge( { 'offset': (searchVariables['offset']+searchVariables['count']) } ) ) }}">&raquo;</a>
+			<a href="{{ path( searchPath, searchVariables|merge( { 'offset': (searchVariables['offset']+searchVariables['count']) } ) ) }}">&raquo;</a>
 		{% else %}
 			<span>&raquo</span>
 		{% endif %}
