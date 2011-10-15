@@ -188,32 +188,27 @@ define( ['require'], function( require ) {
 	
 	// Function adjust the tower map's size and location on window changes
 	var towerMapAdjustLastFired = 0,
-	towerMapVisibleCheck = false,
 	towerMapHiddenForSmallScreen = false,
 	towerMapAdjust = function( e ) {
 		var nowTime = (new Date()).getTime();
-		// Fire at most once every 300ms
+		// Fire at most once every 100ms
 		if( typeof e !== 'undefined' && e.type !== 'scroll' ) {
-			if( nowTime - towerMapAdjustLastFired < 300 ) { return; }
+			if( nowTime - towerMapAdjustLastFired < 100 ) { return; }
 			else { towerMapAdjustLastFired = nowTime; }
 		}
-		// Update tower map visibility check at most once every 300ms too
-		if( nowTime - towerMapAdjustLastFired > 300 ) { towerMapVisibleCheck = $towerMap.is( ':visible' ); }
 		
 		// Hide on small screens
 		var pageWidth = $window.width();
 		if( pageWidth < SMALL_MAP_LIMIT ) {
 			towerMapHiddenForSmallScreen = true;
-			towerMapVisibleCheck = false;
 			return TowerMap.hide();
 		}
 		else if( towerMapHiddenForSmallScreen ) {
 			towerMapHiddenForSmallScreen = false;
-			towerMapVisibleCheck = true;
 			return TowerMap.show();
 		}
 		
-		if( towerMapVisibleCheck ) {
+		if( $towerMap.is( ':visible' ) ) {
 			var mapCenter = (TowerMap.map !== false)? TowerMap.map.getCenter() : 0,
 				pageHeight = $window.height(),
 				scrollTop = $window.scrollTop(),
