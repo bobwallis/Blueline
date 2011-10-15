@@ -1,25 +1,35 @@
-.tower .details {
-	h3 {
-		margin: 0 @contentXPadding 2px;
-	}
-	ol {
-		margin: 0 @contentXPadding @contentYPadding @contentXPadding;
-		padding: 0;
-		list-style: none;
-	}
-}
-.tower .firstPeals {
-	display: none;
+.tower {
 	ol {
 		margin: @contentYPadding @contentXPadding;
 		padding: 0;
 		list-style: none;
+		li {
+			padding: 2px 0;
+			&:first-child {
+				padding-top: 0;
+			}
+			&:last-child {
+				padding-bottom: 0;
+			}
+		}
 	}
-}
+	h3 {
+		margin: 0 @contentXPadding 2px;
+		// Remove top margin for nearby towers ol
+		&+ol {
+			margin-top: 0;
+		}
+	}
 
-.tower .staticMap {
-	display: none;
-	width: 100%;
-	padding: @contentYPadding 0;
-	text-align: center;
+	// Hide map and first peal tabs by default
+	.staticMap {
+		display: none;
+		width: 100%;
+		padding: @contentYPadding 0;
+		text-align: center;
+	}
+	.firstPeals {
+		display: none;
+	}
+
 }
