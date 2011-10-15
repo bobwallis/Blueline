@@ -4,7 +4,7 @@ define( function() {
 	
 	Window = {
 		update: function( url ) {
-			var pageTitle = $( '#content h1' ).map( function( i, e ) { return $(e).html().replace( /<[^>]*>/g, '' ); } ),
+			var pageTitle = $( '#content h1' ).map( function( i, e ) { return $(e).text(); } ),
 				section = sectionRegExp.exec( url );
 			
 			switch( pageTitle.length ) {
@@ -22,7 +22,7 @@ define( function() {
 			
 			if( section == pageTitle ) { pageTitle = ''; }
 			
-			Window.title( ( pageTitle	+ ' | ' + section + ' | Blueline' ).replace( /^[\s\|]*/, '' ).replace( /[\s\|]*$/, '' ) );
+			Window.title( ( pageTitle	+ ' | ' + section + ' | Blueline' ).replace( '| |', '|' ).replace( /^[\s\|]*/, '' ).replace( /[\s\|]*$/, '' ) );
 		},
 		title: function( set ) {
 			if( typeof set === 'string' ) {
