@@ -11,6 +11,7 @@ then
 	echo -e "\n\033[1mPulling latest version\033[0m"
 	git pull
 	./update nopull
+	exit
 fi
 
 # Read configuration file

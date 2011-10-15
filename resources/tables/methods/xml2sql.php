@@ -122,7 +122,7 @@ foreach( $files as $file ) {
 		
 		// String valued entries
 		foreach( array( 'classification', 'title', 'notation', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef', 'firstTowerbellPeal_date', 'firstTowerbellPeal_location', 'firstHandbellPeal_date' ) as $mKey ) {
-			$m[$mKey] = ( isset( $methodData[$mKey][$i] ) )? "'".sqlite_escape_string( $methodData[$mKey][$i] )."'" : 'NULL';
+			$m[$mKey] = ( isset( $methodData[$mKey][$i] ) )? "'".mysql_escape_mimic( $methodData[$mKey][$i] )."'" : 'NULL';
 		}
 		// Integer valued entries
 		foreach( array( 'stage', 'tdmmRef', 'pmmRef', 'lengthOfLead', 'numberOfHunts' ) as $mKey ) {
@@ -134,13 +134,13 @@ foreach( $files as $file ) {
 		}
 		
 		// If needed, work out the lead head from the lead head code
-		if( $m['leadHead'] == 'NULL' && LeadHeadCodes::fromCode( trim( $m['leadHeadCode'], "'"), $m['stage'] ) !== false ) {  $m['leadHead'] = "'".sqlite_escape_string( LeadHeadCodes::fromCode( trim( $m['leadHeadCode'], "'" ), $m['stage'] ) )."'"; }
+		if( $m['leadHead'] == 'NULL' && LeadHeadCodes::fromCode( trim( $m['leadHeadCode'], "'"), $m['stage'] ) !== false ) {  $m['leadHead'] = "'".mysql_escape_mimic( LeadHeadCodes::fromCode( trim( $m['leadHeadCode'], "'" ), $m['stage'] ) )."'"; }
 		
 		// Parse the place notation from the format given into 'expanded' form
 		$m['notationExpanded'] = "'".PlaceNotation::expand( $m['stage'], trim( $m['notation'], "'" ) )."'";
 		
 		// Work out the name's metaphone string
-		$m['nameMetaphone'] = isset( $methodData['name'][$i] )? "'".sqlite_escape_string( metaphone( $methodData['name'][$i] ) )."'" : 'NULL';
+		$m['nameMetaphone'] = isset( $methodData['name'][$i] )? "'".mysql_escape_mimic( metaphone( $methodData['name'][$i] ) )."'" : 'NULL';
 		
 		// Read off the method's symmetry
 		$symmetryCheck = ( isset( $methodData['symmetry'][$i] ) )? $methodData['symmetry'][$i] : '';
@@ -323,6 +323,13 @@ function charData( $parser, $data ) {
 		}
 		$stillInsideSameTagAsLastTime = TRUE;
 	}
+}
+
+function mysql_escape_mimic( $inp ) {
+	if( !empty( $inp ) && is_string( $inp ) ) {
+		return str_replace( array( '\\', "\0", "\n", "\r", "'", '"', "\x1a" ), array( '\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z' ), $inp );
+	}
+return $inp;
 }
 ?>
 -- End

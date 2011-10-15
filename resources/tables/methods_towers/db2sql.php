@@ -211,7 +211,7 @@ try {
 		}
 		
 		if( !empty( $doveid ) ) {
-			echo 'INSERT INTO `methods_towers` (`method_title`, `tower_doveid`) VALUES (\''.sqlite_escape_string( $method ).'\', \''.sqlite_escape_string( $doveid ).'\');'."\n";
+			echo 'INSERT INTO `methods_towers` (`method_title`, `tower_doveid`) VALUES (\''.mysql_escape_mimic( $method ).'\', \''.mysql_escape_mimic( $doveid ).'\');'."\n";
 		}
 	}
 	$dbh = null;
@@ -309,6 +309,13 @@ function search( $where, &$dbh ) {
 		}
 	}
 	return false;
+}
+
+function mysql_escape_mimic( $inp ) {
+	if( !empty( $inp ) && is_string( $inp ) ) {
+		return str_replace( array( '\\', "\0", "\n", "\r", "'", '"', "\x1a" ), array( '\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z' ), $inp );
+	}
+return $inp;
 }
 ?>
 -- End

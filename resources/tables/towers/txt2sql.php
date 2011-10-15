@@ -141,8 +141,8 @@ $newpksFile = new parseCSV();
 $newpksFile->auto( __DIR__.'/data/newpks.txt' );
 
 // Extract required data
-$oldpks = array_map( function( $row ) { return sqlite_escape_string( str_replace( ' ', '_', trim( $row['OldID'] ) ) ); }, $newpksFile->data );
-$newpks = array_map( function( $row ) { return sqlite_escape_string( str_replace( ' ', '_', trim( $row['NewID'] ) ) ); }, $newpksFile->data );
+$oldpks = array_map( function( $row ) { return mysql_escape_mimic( str_replace( ' ', '_', trim( $row['OldID'] ) ) ); }, $newpksFile->data );
+$newpks = array_map( function( $row ) { return mysql_escape_mimic( str_replace( ' ', '_', trim( $row['NewID'] ) ) ); }, $newpksFile->data );
 unset( $newpksFile );
 
 // Prevent entries appearing as a newPK when they appear as an oldPK themselves
@@ -300,37 +300,37 @@ foreach( $doveFile->data as $tower ) {
 
 	// Escape values for SQL
 	$rowData = array();
-	$rowData['doveid'] = "'".sqlite_escape_string( str_replace( ' ', '_', trim( $tower['DoveID'] ) ) )."'";
-	$rowData['gridReference'] = "'".sqlite_escape_string( $tower['NG'] )."'";
+	$rowData['doveid'] = "'".mysql_escape_mimic( str_replace( ' ', '_', trim( $tower['DoveID'] ) ) )."'";
+	$rowData['gridReference'] = "'".mysql_escape_mimic( $tower['NG'] )."'";
 	$rowData['latitude'] = floatval( $tower['Lat'] );
 	$rowData['longitude'] = floatval( $tower['Long'] );
 	$rowData['latitudeSatNav'] = floatval( $tower['SNLat'] );
 	$rowData['longitudeSatNav'] = floatval( $tower['SNLong'] );
-	$rowData['postcode'] = "'".sqlite_escape_string( $tower['Postcode'] )."'";
-	$rowData['country'] = "'".sqlite_escape_string( $tower['Country'] )."'";
-	$rowData['county'] = "'".sqlite_escape_string( $tower['County'] )."'";
-	$rowData['diocese'] = "'".sqlite_escape_string( $tower['Diocese'] )."'";
-	$rowData['place'] = "'".sqlite_escape_string( $tower['Place'] )."'";
-	$rowData['altName'] = "'".sqlite_escape_string( $tower['AltName'] )."'";
-	$rowData['dedication'] = "'".sqlite_escape_string( $tower['Dedicn'] )."'";
+	$rowData['postcode'] = "'".mysql_escape_mimic( $tower['Postcode'] )."'";
+	$rowData['country'] = "'".mysql_escape_mimic( $tower['Country'] )."'";
+	$rowData['county'] = "'".mysql_escape_mimic( $tower['County'] )."'";
+	$rowData['diocese'] = "'".mysql_escape_mimic( $tower['Diocese'] )."'";
+	$rowData['place'] = "'".mysql_escape_mimic( $tower['Place'] )."'";
+	$rowData['altName'] = "'".mysql_escape_mimic( $tower['AltName'] )."'";
+	$rowData['dedication'] = "'".mysql_escape_mimic( $tower['Dedicn'] )."'";
 	$rowData['bells'] = intval( $tower['Bells'] );
 	$rowData['weight'] = intval( $tower['Wt'] );
 	$rowData['weightApprox'] = empty( $tower['App'] )? 0 : 1;
 	$rowData['weightText'] = "'".weightText( $rowData['weight'], $rowData['weightApprox'] )."'";
-	$rowData['note'] = "'".sqlite_escape_string( $tower['Note'] )."'";
+	$rowData['note'] = "'".mysql_escape_mimic( $tower['Note'] )."'";
 	$rowData['hz'] = floatval( $tower['Hz'] );
 	$rowData['practiceNight'] = intval( $tower['PDNo'] );
-	$rowData['practiceStart'] = "'".sqlite_escape_string( $tower['PSt'] )."'";
-	$rowData['practiceNotes'] = "'".sqlite_escape_string( $tower['PrXF'] )."'";
+	$rowData['practiceStart'] = "'".mysql_escape_mimic( $tower['PSt'] )."'";
+	$rowData['practiceNotes'] = "'".mysql_escape_mimic( $tower['PrXF'] )."'";
 	$rowData['groundFloor'] = empty( $tower['GF'] )? 0 : 1;
 	$rowData['toilet'] = empty( $tower['Toilet'] )? 0 : 1;
 	$rowData['unringable'] = empty( $tower['UR'] )? 0 : 1;
 	$rowData['simulator'] = empty( $tower['Simulator'] )? 0 : 1;
 	$rowData['overhaulYear'] = intval( $tower['OvhaulYr'] );
-	$rowData['contractor'] = "'".sqlite_escape_string( $tower['Contractor'] )."'";
+	$rowData['contractor'] = "'".mysql_escape_mimic( $tower['Contractor'] )."'";
 	$rowData['tuned'] = intval( $tower['TuneYr'] );
-	$rowData['extraInfo'] = "'".sqlite_escape_string( $tower['ExtraInfo'] )."'";
-	$rowData['webPage'] = "'".sqlite_escape_string( $tower['WebPage'] )."'";
+	$rowData['extraInfo'] = "'".mysql_escape_mimic( $tower['ExtraInfo'] )."'";
+	$rowData['webPage'] = "'".mysql_escape_mimic( $tower['WebPage'] )."'";
 	$rowData = array_filter( $rowData, function( $e ) { return ( !empty( $e ) && $e != '\'\'' ); } );
 	
 	// towers INSERT
@@ -338,7 +338,7 @@ foreach( $doveFile->data as $tower ) {
 	
 	// fusionTowers INSERT
 	if( isset( $rowData['latitude'], $rowData['longitude'] ) ) {
-		$rowData['affiliations'] = "'".sqlite_escape_string( $tower['Affiliations'] )."'";
+		$rowData['affiliations'] = "'".mysql_escape_mimic( $tower['Affiliations'] )."'";
 		$rowData['location'] = '\''.$rowData['latitude'].','.$rowData['longitude'].'\'';
 		$rowData['marker'] = ( isset( $rowData['unringable'] ) == 1 )? "'measle_white'" : (
 			( $rowData['bells'] <= 4 )? "'measle_brown'" : (
@@ -356,9 +356,16 @@ foreach( $doveFile->data as $tower ) {
 	// associations_towers data
 	if( !empty( $tower['Affiliations'] ) ) {
 		foreach( explode( ',', $tower['Affiliations'] ) as $link ) {
-			echo 'INSERT INTO `associations_towers` (`association_abbreviation`, `tower_doveid`) VALUES (\''.sqlite_escape_string( $link ).'\', '.$rowData['doveid'].');'."\n";
+			echo 'INSERT INTO `associations_towers` (`association_abbreviation`, `tower_doveid`) VALUES (\''.mysql_escape_mimic( $link ).'\', '.$rowData['doveid'].');'."\n";
 		}
 	}
+}
+
+function mysql_escape_mimic( $inp ) {
+	if( !empty( $inp ) && is_string( $inp ) ) {
+		return str_replace( array( '\\', "\0", "\n", "\r", "'", '"', "\x1a" ), array( '\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z' ), $inp );
+	}
+return $inp;
 }
 ?>
 -- End
