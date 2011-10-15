@@ -5,8 +5,16 @@ d=`dirname "$dWhich"`
 
 cd "$d"
 
+# Pull latest version
+if [ ! -n "$1" ]
+then
+	echo -e "\n\033[1mPulling latest version\033[0m"
+	git pull
+	./update nopull
+fi
+
 # Read configuration file
-echo -e "\033[1mReading configuration file\033[0m"
+echo -e "\n\033[1mReading configuration file\033[0m"
 function cfg.parser ()
 {
     ini="$(<$1)"                # read the file
@@ -30,10 +38,6 @@ function cfg.parser ()
 }
 cfg.parser "app/config/parameters.ini"
 cfg.section.parameters
-
-# Pull latest version
-echo -e "\n\033[1mPulling latest version\033[0m"
-git pull
 
 # Update vendors
 echo -e "\n\033[1mUpdating vendors\033[0m"
