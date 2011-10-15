@@ -1,6 +1,7 @@
 /*global require: false, define: false, google: false, History: false */
 define( function() {
-	var $breadcrumbContainer = false, $topSearchContainer, $topSearch, $topSearchInput, $bigSearchContainer, $bigSearch, $bigSearchInput,
+	var $window = $( window ),
+		$breadcrumbContainer = false, $topSearchContainer, $topSearch, $topSearchInput, $bigSearchContainer, $bigSearch, $bigSearchInput,
 		sectionRegexp = /^(.*)\/(associations|methods|towers)($|\/)/,
 		topSearchRegexp = /\/view\//,
 		bigSearchRegexp = /\/(associations\/search|((methods|towers)($|\/search)))/;
@@ -26,7 +27,7 @@ define( function() {
 			}
 			else {
 				// Update and show the search bar in the header if needed
-				if( topSearchRegexp.exec( url ) !== null ) {
+				if( $window.width() > 480 && topSearchRegexp.exec( url ) !== null ) {
 					$topSearch.attr( 'action', section[1]+'/'+section[2]+'/search' );
 					$topSearchInput.attr( 'placeholder', 'Search '+section[2] ).val( '' );
 					$topSearchContainer.show();
