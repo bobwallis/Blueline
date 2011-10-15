@@ -50,7 +50,7 @@ class AssociationsController extends Controller {
 			$url = $this->generateUrl( 'Blueline_Associations_view', array( 'abbreviation' => implode( '|', array_map( function( $a ) { return $a['abbreviation']; }, $associations ) ), '_format' => $format ) );
 			$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $a ) { return $a['name']; }, $associations ) );
 			
-			if( $request->getRequestUri() !== $url ) {
+			if( $request->getRequestUri() !== $url && $request->getRequestUri() !== urldecode( $url ) ) {
 				return $this->redirect( $url, 301 );
 			}
 		}

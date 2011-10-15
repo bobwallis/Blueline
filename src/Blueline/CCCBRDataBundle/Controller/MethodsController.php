@@ -49,8 +49,8 @@ class MethodsController extends Controller {
 			}
 			$url = $this->generateUrl( 'Blueline_Methods_view', array( 'title' => implode( '|', array_map( function( $m ) { return str_replace( ' ', '_', $m['title'] ); }, $methods ) ), '_format' => $format ) );
 			$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $m ) { return $m['title']; }, $methods ) );
-		
-			if( $request->getRequestUri() !== $url ) {
+			
+			if( $request->getRequestUri() !== $url && $request->getRequestUri() !== urldecode( $url ) ) {
 				return $this->redirect( $url, 301 );
 			}
 		}
