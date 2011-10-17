@@ -31,6 +31,10 @@ define( {
 			var elem = document.createElement( 'canvas' );
 			return !!( elem.getContext && elem.getContext( '2d' ) );
 	},
+	canvasText: function() {
+		var elem = document.createElement( 'canvas' );
+		return ( !!( elem.getContext && elem.getContext( '2d' ) ) && typeof elem.getContext( '2d' ).fillText === 'function');
+	},
 	history: function() {
 		return !!( window.history && window.history.pushState );
 	}

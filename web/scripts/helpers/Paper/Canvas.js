@@ -17,6 +17,7 @@ define( ['../Can'], function( Can ) {
 
 		Canvas.prototype = {
 			type: 'canvas',
+			canvasText: Can.canvasText(),
 			svgnumber: /[+\-]?(\.\d+|\d+\.\d*|\d+)([Ee][+\-]?\d+)?/g,
 			svgpathelt: /[MmLlZzHhVvCcQqSsTtAa]\s*(([+\-]?(\d+|\d+\.\d*|\.\d+)([Ee][+\-]?\d+)?)(,\s*|\s+,?\s*)?)*/g,
 			pathFunctions: {

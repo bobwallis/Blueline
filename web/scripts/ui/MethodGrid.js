@@ -111,12 +111,13 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 		this.display.dimensions.paper.y = this.display.dimensions.row.y * ((this.display.leadsPerColumn * this.notation.exploded.length)+1);
 		
 		this.draw();
-		window['MethodGrids'].push( this );
+		
 		return this;
 	};
 
 	MethodGrid.prototype = {
 		draw: function() {
+			// Set up the container
 			var html = '';
 			// If we're including a title or place notation then wrap everything in a table
 			if( this.show.title || this.show.notation ) {
@@ -131,187 +132,178 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 			}
 			this.container = $( html );
 			
-			// Create the paper if needed
-			var paperNeeded = this.show.lines || this.show.placeStarts || this.show.ruleOffs;
-			if( paperNeeded ) {
-				var paper =  new Paper( {
-					id: this.id+'_paper',
-					width: this.display.dimensions.paper.x,
-					height: this.display.dimensions.paper.y
-				} );
-				if( paper === false ) {
-					// TO IMPLEMENT: png fallback
+			// Set up paper
+			var paper =  new Paper( {
+				id: this.id+'_paper',
+				width: this.display.dimensions.paper.x,
+				height: this.display.dimensions.paper.y
+			} );
+			if( paper === false ) {
+				// TO IMPLEMENT: png fallback
+			}
+			else {
+				// Precalculate some reusable numbers
+				var totalRowAndColumnWidth = this.display.dimensions.padding.interColumn+this.display.dimensions.padding.columnLeft+this.display.dimensions.padding.columnRight+this.display.dimensions.row.x;
+			
+				// Draw rule offs
+				if( this.show.ruleOffs ) {
+					var path = '';
+					for( var i = 0; i < this.display.numberOfColumns; ++i ) {
+						for( var j = 0; j < this.display.leadsPerColumn && (i*this.display.leadsPerColumn)+j < this.display.numberOfLeads; ++j ) {
+							for( var k = this.ruleOffs.from; k <= this.notation.parsed.length; k += this.ruleOffs.every ) {
+								if( k > 0 ) {
+									path += 'M'+(i*totalRowAndColumnWidth)+','+(((j*this.notation.parsed.length)+k)*this.display.dimensions.row.y)+'l'+this.display.dimensions.row.x+',0';
+								}
+							}
+						}
+					}
+					if( path !== '' ) {
+						paper.add( 'path', { 'stroke-width': 1, 'stroke-linecap': 'round', 'stroke-dasharray': '4,2', stroke: '#999', d: path } );
+					}
 				}
-				else {
-					// Precalculate some reusable numbers
-					var totalRowAndColumnWidth = this.display.dimensions.padding.interColumn+this.display.dimensions.padding.columnLeft+this.display.dimensions.padding.columnRight+this.display.dimensions.row.x;
-				
-					// Draw rule offs
-					if( this.show.ruleOffs ) {
-						var path = '';
-						for( var i = 0; i < this.display.numberOfColumns; ++i ) {
-							for( var j = 0; j < this.display.leadsPerColumn && (i*this.display.leadsPerColumn)+j < this.display.numberOfLeads; ++j ) {
-								for( var k = this.ruleOffs.from; k <= this.notation.parsed.length; k += this.ruleOffs.every ) {
-									if( k > 0 ) {
-										path += 'M'+(i*totalRowAndColumnWidth)+','+(((j*this.notation.parsed.length)+k)*this.display.dimensions.row.y)+'l'+this.display.dimensions.row.x+',0';
-									}
-								}
-							}
-						}
-						if( path !== '' ) {
-							paper.add( 'path', { 'stroke-width': 1, 'stroke-linecap': 'round', 'stroke-dasharray': '4,2', stroke: '#999', d: path } );
-						}
-					}
-				
-					// Draw lines
-					if( this.show.lines ) {
-						var i = this.stage;
-						while( i-- ) {
-							var j = (typeof this.startRow === 'object')? this.startRow[i] : i;
-							if( typeof this.display.lines[j] === 'object' && this.display.lines[j].stroke !== 'transparent' ) {
-								var path = '';
-								for( var k = 0; k < this.display.numberOfColumns; ++k ) {
-									var columnNotation = this.notation.parsed;
-									for( var l = 1; l < this.display.leadsPerColumn && (k*this.display.leadsPerColumn)+l < this.display.numberOfLeads; ++l ) {
-										columnNotation = columnNotation.concat( this.notation.parsed );
-									}
-									path += 'M'+(k*totalRowAndColumnWidth)+',0' + PlaceNotation.pathString( this.leadHeads[k*this.display.leadsPerColumn].indexOf( j ), columnNotation, this.display.dimensions.bell.x, this.display.dimensions.bell.y, ((k*this.display.leadsPerColumn)+l < this.display.numberOfLeads)? true : false );
-								}
-								paper.add( 'path', $.extend( this.display.lines[j], { d: path } ) );
-							}
-						}
-					}
-					
-					// Draw place starts
-					if( this.show.placeStarts ) {
-						var textPath = '';
-						this.display.placeStarts.forEach( function( i, pos ) {
-							var j = (typeof this.startRow === 'object')? this.startRow[i] : i;
+			
+				// Draw lines
+				if( this.show.lines ) {
+					var i = this.stage;
+					while( i-- ) {
+						var j = (typeof this.startRow === 'object')? this.startRow[i] : i;
+						if( typeof this.display.lines[j] === 'object' && this.display.lines[j].stroke !== 'transparent' ) {
+							var path = '';
 							for( var k = 0; k < this.display.numberOfColumns; ++k ) {
-								for( var l = 0; l < this.display.leadsPerColumn && (k*this.display.leadsPerColumn)+l < this.display.numberOfLeads; ++l ) {
-									var positionInLeadHead = this.leadHeads[(k*this.display.leadsPerColumn)+l].indexOf( j ),
-										yPos = (l*this.display.dimensions.row.y*this.notation.parsed.length)+(this.display.dimensions.row.y/2);
-									// The little circle
-									paper.add( 'circle', {
-										cx: (k*totalRowAndColumnWidth) + ((positionInLeadHead+0.5)*this.display.dimensions.bell.x),
-										cy: yPos,
-										r: 2,
-										fill: this.display.lines[j].stroke,
-										'stroke-width': 0,
-										stroke: this.display.lines[j].stroke
-									} );
-									// The big circle
-									var xPos = (k*totalRowAndColumnWidth) + this.display.dimensions.row.x + 11*pos + 10;
-									paper.add( 'circle', {
-										cx: xPos,
-										cy: yPos,
-										r: 6,
-										fill: 'none',
-										'stroke-width': 1,
-										stroke: this.display.lines[j].stroke,
-										opacity: 0.8
-									} );
-									// The text
-									var numberToDraw = positionInLeadHead + 1;
-									if( numberToDraw < 10 ) {
-										textPath += 'M'+xPos+','+yPos+Font.medium[numberToDraw];
-									}
-									else {
-										textPath += 'M'+(xPos-2)+','+yPos+Font.small[Math.floor(numberToDraw/10)];
-										textPath += 'M'+(xPos+2)+','+yPos+Font.small[numberToDraw%10];
-									}
+								var columnNotation = this.notation.parsed;
+								for( var l = 1; l < this.display.leadsPerColumn && (k*this.display.leadsPerColumn)+l < this.display.numberOfLeads; ++l ) {
+									columnNotation = columnNotation.concat( this.notation.parsed );
 								}
+								path += 'M'+(k*totalRowAndColumnWidth)+',0' + PlaceNotation.pathString( this.leadHeads[k*this.display.leadsPerColumn].indexOf( j ), columnNotation, this.display.dimensions.bell.x, this.display.dimensions.bell.y, ((k*this.display.leadsPerColumn)+l < this.display.numberOfLeads)? true : false );
 							}
-						}, this );
-						// Add the finished text path
-						paper.add( 'path', {
-							'stroke': 'none',
-							'fill': '#000',
-							'd': textPath
-						} );
-					}
-					
-					// Draw calling positions
-					if( this.show.callingPositions && typeof this.callingPositions.every == 'number' && typeof this.callingPositions.from == 'number' && typeof this.callingPositions.titles.length == 'number' ) {
-						var rowsPerColumn = this.display.leadsPerColumn * this.notation.parsed.length;
-						for( var i = 0; i < this.callingPositions.titles.length; ++i ) {
-							if( this.callingPositions.titles[i] !== null ) {
-								var rowInMethod = this.callingPositions.from + ( this.callingPositions.every * (i+1) ) - 2,
-									row = rowInMethod % rowsPerColumn,
-									column = Math.floor( rowInMethod/rowsPerColumn );
-								paper.add( 'text', {
-									content: '-'+this.callingPositions.titles[i],
-									x: (column*totalRowAndColumnWidth)+this.display.dimensions.row.x+3,
-									y: (row+0.5)*this.display.dimensions.row.y,
-									fill: '#000',
-									'font-size': '10px',
-									'font-family': 'sans-serif',
-									'dominant-baseline': 'central'
-								} );
-							}
+							paper.add( 'path', $.extend( this.display.lines[j], { d: path } ) );
 						}
 					}
+				}
 				
-					// Append the paper to the appropriate container
-					if( this.show.title || this.show.notation ) {
-						$( 'td._gridLine', this.container ).append( paper.canvas );
-					}
-					else {
-						this.container.append( paper.canvas );
+				// Draw place starts
+				if( this.show.placeStarts ) {
+					var textPath = '';
+					this.display.placeStarts.forEach( function( i, pos ) {
+						var j = (typeof this.startRow === 'object')? this.startRow[i] : i;
+						for( var k = 0; k < this.display.numberOfColumns; ++k ) {
+							for( var l = 0; l < this.display.leadsPerColumn && (k*this.display.leadsPerColumn)+l < this.display.numberOfLeads; ++l ) {
+								var positionInLeadHead = this.leadHeads[(k*this.display.leadsPerColumn)+l].indexOf( j ),
+									yPos = (l*this.display.dimensions.row.y*this.notation.parsed.length)+(this.display.dimensions.row.y/2);
+								// The little circle
+								paper.add( 'circle', {
+									cx: (k*totalRowAndColumnWidth) + ((positionInLeadHead+0.5)*this.display.dimensions.bell.x),
+									cy: yPos,
+									r: 2,
+									fill: this.display.lines[j].stroke,
+									'stroke-width': 0,
+									stroke: this.display.lines[j].stroke
+								} );
+								// The big circle
+								var xPos = (k*totalRowAndColumnWidth) + this.display.dimensions.row.x + 11*pos + 10;
+								paper.add( 'circle', {
+									cx: xPos,
+									cy: yPos,
+									r: 6,
+									fill: 'none',
+									'stroke-width': 1,
+									stroke: this.display.lines[j].stroke,
+									opacity: 0.8
+								} );
+								// The text
+								var numberToDraw = positionInLeadHead + 1;
+								if( numberToDraw < 10 ) {
+									textPath += 'M'+xPos+','+yPos+Font.medium[numberToDraw];
+								}
+								else {
+									textPath += 'M'+(xPos-2)+','+yPos+Font.small[Math.floor(numberToDraw/10)];
+									textPath += 'M'+(xPos+2)+','+yPos+Font.small[numberToDraw%10];
+								}
+							}
+						}
+					}, this );
+					// Add the finished text path
+					paper.add( 'path', {
+						'stroke': 'none',
+						'fill': '#000',
+						'd': textPath
+					} );
+				}
+				
+				// Draw calling positions
+				if( this.show.callingPositions && typeof this.callingPositions.every == 'number' && typeof this.callingPositions.from == 'number' && typeof this.callingPositions.titles.length == 'number' ) {
+					var rowsPerColumn = this.display.leadsPerColumn * this.notation.parsed.length;
+					for( var i = 0; i < this.callingPositions.titles.length; ++i ) {
+						if( this.callingPositions.titles[i] !== null ) {
+							var rowInMethod = this.callingPositions.from + ( this.callingPositions.every * (i+1) ) - 2,
+								row = rowInMethod % rowsPerColumn,
+								column = Math.floor( rowInMethod/rowsPerColumn );
+							paper.add( 'text', {
+								content: '-'+this.callingPositions.titles[i],
+								x: (column*totalRowAndColumnWidth)+this.display.dimensions.row.x+3,
+								y: (row+0.5)*this.display.dimensions.row.y,
+								fill: '#000',
+								'font-size': '10px',
+								'font-family': 'sans-serif',
+								'dominant-baseline': 'central'
+							} );
+						}
 					}
 				}
 			}
 			
 			// Draw numbers if needed
 			if( this.show.numbers ) {
-				// Styling information for a bell will persist across the whole line, so add it in as soon as possible
-				var startRow = this.leadHeads[0].map( function( b, i ) {
-					var j = (typeof this.startRow === 'object')? this.startRow[i] : i;
-					return (typeof this.display.numbers[j] === 'string')? '<span '+((this.display.numbers[j] === 'transparent')? 'class="transparent"':'style="color: '+this.display.numbers[j]+';"')+'>' + PlaceNotation.bellToChar( b ) + '</span>' : PlaceNotation.bellToChar( b );
-				}, this ),
-					// Variable to store accumulated text in
-					text = '';
+				var numbersTable = false;
+				// Use a table if there's no valid paper, or if it's a Canvas one which doesn't support text
+				if( true || paper === false || ( paper.type == 'canvas' && paper.canvasText == false ) ) {
+					// Styling information for a bell will persist across the whole line, so add it in as soon as possible
+					var startRow = this.leadHeads[0].map( function( b, i ) {
+						var j = (typeof this.startRow === 'object')? this.startRow[i] : i;
+						return (typeof this.display.numbers[j] === 'string')? '<span '+((this.display.numbers[j] === 'transparent')? 'class="transparent"':'style="color: '+this.display.numbers[j]+';"')+'>' + PlaceNotation.bellToChar( b ) + '</span>' : PlaceNotation.bellToChar( b );
+					}, this ),
+						// Variable to store accumulated text in
+						text = '';
 				
-				var leadHead = startRow,
-					rowJoiner = function( r ) { return r.join( '' ); };
-				// Begin each column in a new table cell
-				for( var i = 0; i < this.display.numberOfColumns; ++i ) {
-					text += '<td style="padding:0 '+(((i<this.display.numberOfColumns-1)?this.display.dimensions.padding.interColumn:0)+this.display.dimensions.padding.columnRight)+'px 0 '+this.display.dimensions.padding.columnLeft+'px">';
-					for( var j = 0; j < this.display.leadsPerColumn && (i*this.display.leadsPerColumn)+j < this.display.numberOfLeads; ++j ) {
-						var allRows = PlaceNotation.allRows( this.notation.parsed, leadHead );
-						leadHead = allRows.pop();
-						text += allRows.map( rowJoiner ).join( '<br/>' ) + '<br/>';
+					var leadHead = startRow,
+						rowJoiner = function( r ) { return r.join( '' ); };
+					// Begin each column in a new table cell
+					for( var i = 0; i < this.display.numberOfColumns; ++i ) {
+						text += '<td style="padding:0 '+(((i<this.display.numberOfColumns-1)?this.display.dimensions.padding.interColumn:0)+this.display.dimensions.padding.columnRight)+'px 0 '+this.display.dimensions.padding.columnLeft+'px">';
+						for( var j = 0; j < this.display.leadsPerColumn && (i*this.display.leadsPerColumn)+j < this.display.numberOfLeads; ++j ) {
+							var allRows = PlaceNotation.allRows( this.notation.parsed, leadHead );
+							leadHead = allRows.pop();
+							text += allRows.map( rowJoiner ).join( '<br/>' ) + '<br/>';
+						}
+						text += leadHead.join( '' )+'</td>';
 					}
-					text += leadHead.join( '' )+'</td>';
-				}
 				
-				var numbersTable = $( '<table id="'+this.id+'_numbers" class="mono"><tr>'+text+'</tr></table>' );
-				numbersTable.css( {
-					marginTop: paperNeeded? '-'+this.display.dimensions.paper.y+'px' : 0,
-					lineHeight: this.display.dimensions.row.y+'px',
-					fontSize: this.display.dimensions.row.y+'px'
-				} );
-				
-				// Append the text table to the appropriate container
-				if( this.show.title || this.show.notation ) {
-					$( 'td._gridLine', this.container ).append( numbersTable );
+					numbersTable = $( '<table id="'+this.id+'_numbers" class="mono"><tr>'+text+'</tr></table>' );
+					numbersTable.css( {
+						marginTop: (paper === false)? 0 : '-'+this.display.dimensions.paper.y+'px', // Apply negative margin so this sits on top of the paper
+						lineHeight: this.display.dimensions.row.y+'px',
+						fontSize: this.display.dimensions.row.y+'px'
+					} );
 				}
+				// Draw the text on the paper
 				else {
-					this.container.append( numbersTable );
+					// TO IMPLEMENT: Efficiently handing new lines and colored numbers is troublesome.
 				}
+			}
+			
+			// Append the paper (and text table if it exists) to the appropriate container
+			if( this.show.title || this.show.notation ) {
+				$( 'td._gridLine', this.container ).append( paper.canvas )
+					.append( numbersTable );
+			}
+			else {
+				this.container.append( paper.canvas )
+					.append( numbersTable );
 			}
 		},
 		redraw: function() {
 			this.destroy();
 			this.draw();
-		},
-		destroy: function() {
-			this.container.remove();
-			window['MethodGrids'].forEach( function( view, i ) {
-				if( view.id === window['MethodGrids'][i].id ) {
-					window['MethodGrids'].splice( i, 1 );
-				}
-			} );
 		}
 	};
 	
