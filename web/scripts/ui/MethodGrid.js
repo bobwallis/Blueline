@@ -255,8 +255,69 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 			// Draw numbers if needed
 			if( this.show.numbers ) {
 				var numbersTable = false;
-				// Use a table if there's no valid paper, or if it's a Canvas one which doesn't support text
-				if( true || paper === false || ( paper.type == 'canvas' && paper.canvasText == false ) ) {
+				// Use SVG if possible
+				if( false && paper !== false && paper.type == 'svg' ) {
+				
+				}
+				// Use Canvas if the browser supports canvas text
+				else if( paper !== false && paper.type == 'canvas' && paper.canvasText == true ) {
+					// We don't have to worry about adding text in a sensible way to make it highlight-able, which makes things easier here
+					var ctx = paper.canvas.getContext( '2d' ),
+						rowWidth = this.display.dimensions.row.x,
+						rowHeight = this.display.dimensions.row.y,
+						topPadding = rowHeight/2,
+						sidePadding = this.display.dimensions.padding.interColumn + this.display.dimensions.padding.columnRight;
+					
+					// Set up the context
+					ctx.textAlign = 'left';
+					ctx.textBaseline = 'middle';
+					ctx.font = "normal 14px 'Droid Sans Mono', 'DejaVu Sans Mono', Consolas, monospace";
+					
+					// We need this
+					var Array_unique = function( array ) {
+						var a = [], l = array.length;
+						for( var i = 0; i < l; i++ ) {
+							for( var j = i+1; j < l; j++ ) {
+								if( array[i] === array[j] ) {
+									j = ++i;
+								}
+							}
+							a.push( array[i] );
+						}
+						return a;
+					};
+
+					Array_unique( this.display.numbers ).map( function( e, i ) { // For each color of text
+						if( e !== 'transparent' ) { // Only bother drawing at all if not transparent
+							// Set color
+							ctx.fillStyle = (e == 'normal')? '#000': e;
+							
+							// Produce the start row
+							var startRow = this.leadHeads[0].map( function( b, i ) {
+								var j = (typeof this.startRow === 'object')? this.startRow[i] : i;
+								return (this.display.numbers[j] === e)? PlaceNotation.bellToChar( b ) : ' ';
+							}, this );
+							
+							var leadHead = startRow;
+							for( var i = 0; i < this.display.numberOfColumns; ++i ) {
+								for( var j = 0; j < this.display.leadsPerColumn && (i*this.display.leadsPerColumn)+j < this.display.numberOfLeads; ++j ) {
+									var row = leadHead,
+										k = 0, kLim = this.notation.parsed.length;
+									if( j == 0 ) {
+										ctx.fillText( row.join( '' ), i*(rowWidth+sidePadding), topPadding+(j*kLim*rowHeight), rowWidth );
+									}
+									while( k < kLim ) {
+										row = PlaceNotation.apply( this.notation.parsed[k], row );
+										ctx.fillText( row.join( '' ), i*(rowWidth+sidePadding), topPadding+(j*kLim*rowHeight)+(++k*rowHeight), rowWidth );
+									}
+									leadHead = row;
+								}
+							}
+						}
+					}, this );
+				}
+				// Otherwise use a HTML table
+				else {
 					// Styling information for a bell will persist across the whole line, so add it in as soon as possible
 					var startRow = this.leadHeads[0].map( function( b, i ) {
 						var j = (typeof this.startRow === 'object')? this.startRow[i] : i;
@@ -285,10 +346,6 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 						fontSize: this.display.dimensions.row.y+'px'
 					} );
 				}
-				// Draw the text on the paper
-				else {
-					// TO IMPLEMENT: Efficiently handing new lines and colored numbers is troublesome.
-				}
 			}
 			
 			// Append the paper (and text table if it exists) to the appropriate container
@@ -304,6 +361,9 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 		redraw: function() {
 			this.destroy();
 			this.draw();
+		},
+		destroy: function() {
+			this.container.remove();
 		}
 	};
 	
