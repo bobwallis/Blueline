@@ -1,9 +1,5 @@
 /*global require: false, define: false, google: false */
 define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMono'], function( PlaceNotation, Paper, Font ) {
-	if( typeof window['MethodGrids'] === 'undefined' ) {
-		window['MethodGrids'] = [];
-	}
-
 	/* MethodGrid
 	 * options object:
 	 * .id: An identifier for use in HTML id attributes
