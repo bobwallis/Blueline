@@ -300,11 +300,11 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 									var row = leadHead,
 										k = 0, kLim = this.notation.parsed.length;
 									if( j == 0 ) {
-										ctx.fillText( row.join( '' ), i*(rowWidth+sidePadding), topPadding+(j*kLim*rowHeight), rowWidth );
+										ctx.fillText( row.join( '' ), i*(rowWidth+sidePadding), topPadding+(j*kLim*rowHeight) );
 									}
 									while( k < kLim ) {
 										row = PlaceNotation.apply( this.notation.parsed[k], row );
-										ctx.fillText( row.join( '' ), i*(rowWidth+sidePadding), topPadding+(j*kLim*rowHeight)+(++k*rowHeight), rowWidth );
+										ctx.fillText( row.join( '' ), i*(rowWidth+sidePadding), topPadding+(j*kLim*rowHeight)+(++k*rowHeight) );
 									}
 									leadHead = row;
 								}
