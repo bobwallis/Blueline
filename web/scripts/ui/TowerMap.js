@@ -9,7 +9,7 @@ define( ['require'], function( require ) {
 		$top = $( '#top' ),
 		$bottom = $( '#bottom' ),
 		$content = $( '#content' )
-		$towerMap = $( '<div id="towerMap"><div class="map"></div></div>' );
+		$towerMap = $( '<div id="towerMap" style="display:none"><div class="map"></div></div>' );
 	
 	$( function() {
 		$( document.body ).append( $towerMap );
