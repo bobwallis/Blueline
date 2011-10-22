@@ -6,3 +6,7 @@
 {% set search_big = true %}
 {% set search_action = path( 'Blueline_Towers_search' ) %}
 {% set search_placeholder = 'Search towers' %}
+
+{% block body %}
+	{% render path('Blueline_Towers_welcome', {'snippet':true}) with {}, {'standalone':true} %}
+{% endblock %}
