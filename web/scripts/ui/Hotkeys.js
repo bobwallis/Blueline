@@ -84,10 +84,12 @@ define( function() {
 					if( $bigQ.is( ':visible:not(:focus)' ) ) {
 						e.preventDefault();
 						$bigQ.focus();
+						$bigQ.select();
 					}
 					else if( $smallQ.is( ':visible:not(:focus)' ) ) {
 						e.preventDefault();
 						$smallQ.focus();
+						$smallQ.select();
 					}
 					break;
 			}
