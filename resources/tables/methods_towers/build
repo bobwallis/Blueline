@@ -37,4 +37,8 @@ rm -f "$d/methods_towers.sql.gz"
 # Create SQL
 echo "Parsing data"
 php "$d/db2sql.php" "$database_host" "$database_name" "$database_user" "$database_password" > "$d/methods_towers.sql"
-gzip -9c "$d/methods_towers.sql" > "$d/methods_towers.sql.gz"
+
+# gzip only if no error
+if [ "`tail -n 1 "$d/methods_towers.sql"`" = "-- End" ]; then
+	gzip -9c "$d/methods_towers.sql" > "$d/methods_towers.sql.gz"
+fi

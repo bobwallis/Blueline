@@ -17,4 +17,8 @@ curl --progress-bar --referer "http://dove.cccbr.org.uk" --user-agent "Mozilla/5
 # Create SQL
 echo "Parsing data"
 php "$d/txt2sql.php" > "$d/towers.sql"
-gzip -9c "$d/towers.sql" > "$d/towers.sql.gz"
+
+# gzip only if no error
+if [ "`tail -n 1 "$d/towers.sql"`" = "-- End" ]; then
+	gzip -9c "$d/towers.sql" > "$d/towers.sql.gz"
+fi

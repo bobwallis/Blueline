@@ -17,4 +17,8 @@ unzip -q -u -d "$d/data" -o "$d/data/allmeths-xml.zip"
 # Create SQL
 echo "Parsing data"
 php "$d/xml2sql.php" > "$d/methods.sql"
-gzip -9c "$d/methods.sql" > "$d/methods.sql.gz"
+
+# gzip only if no error
+if [ "`tail -n 1 "$d/methods.sql"`" = "-- End" ]; then
+	gzip -9c "$d/methods.sql" > "$d/methods.sql.gz"
+fi
