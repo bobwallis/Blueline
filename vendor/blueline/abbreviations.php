@@ -86,6 +86,7 @@ $welshAreas = array(
 	'Ceredigion' => 'Ceredigion',
 	'Conwy' => 'Conwy',
 	'Denbighs' => 'Denbighshire',
+	'Dyfed' => 'Dyfed',
 	'Flints' => 'Flintshire',
 	'Gwynedd' => 'Gwynedd',
 	'Ynys Mon' => 'Isle of Anglesey',
