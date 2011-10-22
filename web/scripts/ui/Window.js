@@ -22,7 +22,7 @@ define( function() {
 			
 			if( section == pageTitle ) { pageTitle = ''; }
 			
-			Window.title( ( pageTitle	+ ' | ' + section + ' | Blueline' ).replace( '| |', '|' ).replace( /^[\s\|]*/, '' ).replace( /[\s\|]*$/, '' ) );
+			Window.title( ( pageTitle	+ ' | ' + section + ' | Blueline' ).replace( /^[\s\|]*/, '' ).replace( /[\s\|]*$/, '' ).replace( '| |', '|' ) );
 		},
 		title: function( set ) {
 			if( typeof set === 'string' ) {
