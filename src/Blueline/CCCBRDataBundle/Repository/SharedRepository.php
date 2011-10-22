@@ -18,7 +18,7 @@ class SharedRepository extends EntityRepository {
 		$searchVariables = array();
 		
 		foreach( array_merge( array( 'q' ), $searchable ) as $key ) {
-			$value = $request->query->get( $key );
+			$value = trim( $request->query->get( $key ) );
 			if( !empty( $value ) ) { $searchVariables[$key] = $value; }
 		}
 	
