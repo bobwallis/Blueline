@@ -14,7 +14,7 @@ define( function() {
 			$bigQ = $( '#bigQ' ),
 			$smallQ = $( '#smallQ' );
 		
-		$( window ).keydown( function( e ) {
+		$window.keydown( function( e ) {
 			switch( e.which ) {
 				// Hotkeys to control paging links
 				case HOME:
