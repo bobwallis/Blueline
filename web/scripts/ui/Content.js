@@ -2,11 +2,11 @@
 define( ['../helpers/Can', '../helpers/ContentGetter', './Header', './Window'], function( Can, ContentGetter, Header, Window ) {
 	var $loading = $( '<div id="loading"></div>' ),
 		loadingSetter = false,
-		$content = $( '#content' ),
-		$towerMap = [],
+		$content = [], $towerMap = [],
 		towerMapRegexp = /\/(associations|towers)\/view/;
 
 	$( function() {
+		// Attach #loading
 		$( document.body ).append( $loading );
 	} );
 
@@ -21,6 +21,10 @@ define( ['../helpers/Can', '../helpers/ContentGetter', './Header', './Window'], 
 			}
 		},
 		update: function( url ) {
+			// Get DOM objects
+			if( $content.length == 0 ) { $content = $( '#content' ); }
+			if( $towerMap.length == 0 ) { $towerMap = $( '#towerMap' ); }
+			
 			// Show a loading animation if we're not doing instant results
 			if( History.getState().data.type !== 'keyup' || $content.is( ':empty' ) ) {
 				$content.empty();
@@ -28,7 +32,6 @@ define( ['../helpers/Can', '../helpers/ContentGetter', './Header', './Window'], 
 			}
 			
 			// Hide the tower map if it won't be needed, and reset content width
-			if( $towerMap.length == 0 ) { $towerMap = $( '#towerMap' ); }
 			if( towerMapRegexp.exec( url ) === null ) {
 				$towerMap.hide();
 				$loading.css( 'width', '100%' );
@@ -50,16 +53,6 @@ define( ['../helpers/Can', '../helpers/ContentGetter', './Header', './Window'], 
 					console.log('fail lol');
 				}
 			);
-		},
-		clear: function() {
-			if( typeof window['MethodGrids'] === 'object' ) {
-				window['MethodGrids'].forEach( function( g ) { g.destroy(); } );
-			}
-			window['MethodGrids'] = [];
-			$content.empty();
-		},
-		isEmpty: function() {
-			return $content.is( ':empty' );
 		}
 	};
 	
