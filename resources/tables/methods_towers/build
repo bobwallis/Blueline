@@ -3,7 +3,7 @@
 dWhich=`which "$0"`
 d=`dirname "$dWhich"`
 
-echo "Updating methods_towers.sql:"
+echo "methods_towers.sql:"
 
 # Read configuration file
 function cfg.parser ()
@@ -35,8 +35,9 @@ rm -f "$d/methods_towers.sql"
 rm -f "$d/methods_towers.sql.gz"
 
 # Create SQL
-echo "Parsing data"
+echo -n "Parsing data..."
 php "$d/db2sql.php" "$database_host" "$database_name" "$database_user" "$database_password" > "$d/methods_towers.sql"
+echo "Done"
 
 # gzip only if no error
 if [ "`tail -n 1 "$d/methods_towers.sql"`" = "-- End" ]; then

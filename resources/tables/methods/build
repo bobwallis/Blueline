@@ -3,7 +3,7 @@
 dWhich=`which "$0"`
 d=`dirname "$dWhich"`
 
-echo "Updating methods.sql:"
+echo "methods.sql:"
 
 # Remove old files
 rm -f "$d/methods.sql"
@@ -15,8 +15,9 @@ curl --progress-bar -o "$d/data/allmeths-xml.zip" "http://methods.org.uk/method-
 unzip -q -u -d "$d/data" -o "$d/data/allmeths-xml.zip"
 
 # Create SQL
-echo "Parsing data"
+echo -n "Parsing data..."
 php "$d/xml2sql.php" > "$d/methods.sql"
+echo "Done"
 
 # gzip only if no error
 if [ "`tail -n 1 "$d/methods.sql"`" = "-- End" ]; then
