@@ -267,7 +267,7 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 					// Set up the context
 					ctx.textAlign = 'left';
 					ctx.textBaseline = 'middle';
-					ctx.font = "14px 'Droid Sans Mono', Consolas, monospace";
+					ctx.font = 'normal 14px "Droid Sans Mono", "Andale Mono", Consolas, monospace';
 					
 					// We need this
 					var Array_unique = function( array ) {
