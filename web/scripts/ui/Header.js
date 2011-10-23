@@ -1,14 +1,14 @@
 /*global require: false, define: false, google: false, History: false */
 define( function() {
-	var $window = $( window ),
-		$breadcrumbContainer = false, $topSearchContainer, $topSearch, $topSearchInput, $bigSearchContainer, $bigSearch, $bigSearchInput,
+	var $window = false, $breadcrumbContainer, $topSearchContainer, $topSearch, $topSearchInput, $bigSearchContainer, $bigSearch, $bigSearchInput,
 		sectionRegexp = /^(.*)\/(associations|methods|towers)($|\/)/,
 		topSearchRegexp = /\/view\//,
 		bigSearchRegexp = /\/(associations\/search|((methods|towers)($|\/search)))/;
 	return {
 		update: function( url ) {
 			// Initialise jQuery objects if not already done
-			if( $breadcrumbContainer === false ) {
+			if( $window === false ) {
+				$window = $( window );
 				$breadcrumbContainer = $( '#breadcrumbContainer' );
 				$topSearchContainer = $( '#topSearchContainer' );
 				$topSearch = $( '#topSearch' );
