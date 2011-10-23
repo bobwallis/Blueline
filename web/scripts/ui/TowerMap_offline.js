@@ -1,64 +1,36 @@
 /*global require: false, define: false, google: false */
 define( function() {
-	// Create some reusable variables
-	var $window = $( window ),
-		$top = $( '#top' ),
-		$bottom = $( '#bottom' ),
-		$content = $( '#content' )
-		$towerMap = $( '<div id="towerMap"><div class="map"><p class="unavailable">Maps unavailable while offline.</p></div></div>' );
+	/** @const */ var SMALL_MAP_LIMIT = 600;
 	
-	$( function() {
-		$( document.body ).append( $towerMap );
-	} );
+	// Create the tower map container
+	var $towerMap = $( '<div id="towerMap"><div class="map"><p class="unavailable">Maps unavailable while offline.</p></div></div>' );
 	
-	// Create the TowerMap object
-	var TowerMap = {
-		show: function() {
-			$towerMap.show();
-			$( '#loading' ).css( 'width', '40%' );
-			$content.css( 'width', '40%' );
-			towerMapAdjust();
-		},
-		hide: function() {
-			$towerMap.hide();
-			$( '#loading' ).css( 'width', '100%' );
-			$content.css( 'width', '100%' );
-		},
-		set: function() {
-			this.show();
-			$( '.staticMap' ).html( '<p>Maps unavailable while offline.</p>' );
-		}
-	};
+	// Variables used by functions below
+	var $window, $top, $bottom, $content,
+		towerMapAdjustLastFired = 0,
+		towerMapHiddenForSmallScreen = false;
 	
-	// Function adjust the tower map's size and location on window changes
-	var towerMapAdjustLastFired = 0,
-	towerMapVisibleCheck = false,
-	towerMapHiddenForSmallScreen = false,
-	towerMapAdjust = function( e ) {
+	// Function to adjust the tower map's size and location on window changes
+	var towerMapAdjust = function( e ) {
+		// Fire at most once every 100ms
 		var nowTime = (new Date()).getTime();
-		// Fire at most once every 300ms
 		if( typeof e !== 'undefined' && e.type !== 'scroll' ) {
-			if( nowTime - towerMapAdjustLastFired < 300 ) { return; }
+			if( nowTime - towerMapAdjustLastFired < 100 ) { return; }
 			else { towerMapAdjustLastFired = nowTime; }
 		}
 		
-		// Update tower map visibility check at most once every 300ms too
-		if( nowTime - towerMapAdjustLastFired > 300 ) { towerMapVisibleCheck = $towerMap.is( ':visible' ); }
-		
 		// Hide on small screens
 		var pageWidth = $window.width();
-		if( pageWidth < 600 ) {
+		if( pageWidth < SMALL_MAP_LIMIT ) {
 			towerMapHiddenForSmallScreen = true;
-			towerMapVisibleCheck = false;
 			return TowerMap.hide();
 		}
 		else if( towerMapHiddenForSmallScreen ) {
 			towerMapHiddenForSmallScreen = false;
-			towerMapVisibleCheck = true;
 			return TowerMap.show();
 		}
 		
-		if( towerMapVisibleCheck ) {
+		if( $towerMap.is( ':visible' ) ) {
 			var pageHeight = $window.height(),
 				scrollTop = $window.scrollTop(),
 				topHeight = $top.height(),
@@ -75,9 +47,44 @@ define( function() {
 			} );
 		}
 	};
-	$window.resize( towerMapAdjust );
-	$window.scroll( towerMapAdjust );
-	towerMapAdjust();
+	
+	// Attach to the page in various ways on load
+	$( function() {
+		// Append the tower map container
+		$( document.body ).append( $towerMap );
+		
+		// Add text to the static maps tab (for small screens)
+		$( '.staticMap' ).html( '<p>Maps unavailable while offline.</p>' );
+		
+		// Get DOM elements
+		$window = $( window );
+		$top = $( '#top' );
+		$bottom = $( '#bottom' );
+		$content = $( '#content' );
+		
+		// Attach events
+		$window.resize( towerMapAdjust );
+		$window.scroll( towerMapAdjust );
+		towerMapAdjust();
+	} );
+	
+	// Create the TowerMap object
+	var TowerMap = {
+		show: function() {
+			$towerMap.show();
+			$( '#loading' ).css( 'width', '40%' );
+			$content.css( 'width', '40%' );
+			towerMapAdjust();
+		},
+		hide: function() {
+			$towerMap.hide();
+			$( '#loading' ).css( 'width', '100%' );
+			$content.css( 'width', '100%' );
+		},
+		set: function() {
+			$( this.show );
+		}
+	};
 
 	return TowerMap;
 } );
