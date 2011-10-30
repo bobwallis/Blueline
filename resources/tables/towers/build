@@ -15,7 +15,7 @@ curl --progress-bar --referer "http://dove.cccbr.org.uk" --user-agent "Mozilla/5
 curl --progress-bar --referer "http://dove.cccbr.org.uk" --user-agent "Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.224 Safari/534.10" -o "$d/data/newpks.txt" "http://dove.cccbr.org.uk/downloads.php?download=newpks.txt"
 
 # Create SQL
-echo -n "Parsing data"
+echo -n "Parsing data..."
 php "$d/txt2sql.php" > "$d/towers.sql"
 echo "Done"
 
