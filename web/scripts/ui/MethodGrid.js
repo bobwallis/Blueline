@@ -258,7 +258,7 @@ define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMo
 				// Use Canvas if the browser supports canvas text
 				else if( paper !== false && paper.type == 'canvas' && paper.canvasText == true ) {
 					// We don't have to worry about adding text in a sensible way to make it highlight-able, which makes things easier here
-					var ctx = paper.canvas.getContext( '2d' ),
+					var ctx = paper.context,
 						rowWidth = this.display.dimensions.row.x,
 						rowHeight = this.display.dimensions.row.y,
 						topPadding = rowHeight/2,

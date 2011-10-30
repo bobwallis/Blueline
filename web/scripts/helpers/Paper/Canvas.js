@@ -97,7 +97,7 @@ define( ['../Can'], function( Can ) {
 						break;
 					case 'text':
 						if( typeof attributes.content !== 'undefined' && typeof attributes.x === 'number' && typeof attributes.y === 'number' ) {
-							this.context.font = ((typeof attributes['font-size'] !== 'undefined')?attributes['font-size']+' ':'') + ((typeof attributes['font-family'] !== 'undefined')?attributes['font-family']:'');
+							this.context.font = ((typeof attributes['font-size'] !== 'undefined')?attributes['font-size']+' ':'') + ((typeof attributes['font-family'] !== 'undefined')?attributes['font-family']:'sans-serif');
 							switch( (typeof attributes['text-anchor'] === 'string')? attributes['text-anchor'] : '' ) {
 								case 'middle':
 									this.context.textAlign = 'center';
