@@ -17,7 +17,10 @@ define( function() {
 				title += 'Search | ';
 			}
 			if( section !== null ) {
-				title += section[1].charAt(0).toUpperCase() + section[1].slice( 1 ) + ' | ';
+				var sectionTitle = section[1].charAt(0).toUpperCase() + section[1].slice( 1 );
+				if( pageTitle != sectionTitle ) {
+					title += sectionTitle + ' | ';
+				}
 			}
 			Window.title( title + 'Blueline' );
 		},
