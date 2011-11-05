@@ -1,7 +1,5 @@
 /*global require: false, define: false, google: false */
 define( function() {
-	var $window = $( window );
-
 	var tabClick = function( e ) {
 		var target = $( e.target );
 		if( !target.is( 'li' ) ) { return; }
@@ -13,7 +11,7 @@ define( function() {
 			var tab = $( tab ).removeClass( 'active' );
 			$( '#'+tab.attr( 'id' ).replace( /^tab_/, '' ) ).hide();
 		} );
-		$window.scroll();
+		$( window ).scroll();
 	};
 
 	var TabBar = function( options ) {
