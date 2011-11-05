@@ -1,14 +1,13 @@
 {% extends 'BluelineCCCBRDataBundle::base.html.twig' %}
 
 {% block title %}{{ status_text }} | {{ parent() }}{% endblock %}
-{% set search_header = true %}
 
 {% block body %}
-{% import 'BluelineCCCBRDataBundle:Macros:content.html.twig' as content %}
-<section>
-	{{ content.header( status_text ) }}
-	<div class="content">
-		<p>Try a search, or visit the homepage to find what you're looking for.</p>
-	</div>
-</section>
+	{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
+	<section class="text">
+		{{ header( status_text ) }}
+		<div class="wrap">
+			<p>Visit the homepage to find what you're looking for.</p>
+		</div>
+	</section>
 {% endblock %}
