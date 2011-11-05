@@ -48,7 +48,7 @@ define( function() {
 							else if( prevOffsetBottom > windowScrollBottom ) { $( 'html, body' ).animate( { scrollTop: windowScrollTop+2+(prevOffsetBottom-windowScrollBottom) }, 75 ); }
 						}
 						else {
-							bigQ.focus();
+							$bigQ.focus();
 						}
 					}
 					break;
