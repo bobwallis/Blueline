@@ -1,14 +1,18 @@
-{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
-<section class="welcome">
-	<ul>
-		<li>
-			<h2><a href="{{ path('Blueline_Associations_welcome') }}">Associations</a></h2>
-		</li>
-		<li>
-			<h2><a href="{{ path('Blueline_Methods_welcome') }}">Methods</a></h2>
-		</li>
-		<li>
-			<h2><a href="{{ path('Blueline_Towers_welcome') }}">Towers</a></h2>
-		</li>
-	</ul>
-</section>
+{% extends 'BluelineCCCBRDataBundle::base.html.twig' %}
+
+{% block body %}
+	{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
+	<section class="welcome">
+		<ul>
+			<li>
+				<h2><a href="{{ path('Blueline_Associations_welcome') }}">Associations</a></h2>
+			</li>
+			<li>
+				<h2><a href="{{ path('Blueline_Methods_welcome') }}">Methods</a></h2>
+			</li>
+			<li>
+				<h2><a href="{{ path('Blueline_Towers_welcome') }}">Towers</a></h2>
+			</li>
+		</ul>
+	</section>
+{% endblock %}

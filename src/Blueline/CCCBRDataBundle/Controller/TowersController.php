@@ -9,14 +9,9 @@ class TowersController extends Controller {
 	public function welcomeAction() {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isLayout = $format == 'html' && !$request->query->get( 'snippet' );
+		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
 		
-		if( $isLayout ) {
-			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:welcome.layout.'.$format.'.twig' );
-		}
-		else {
-			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:welcome.'.$format.'.twig' );
-		}
+		$response = $this->render( 'BluelineCCCBRDataBundle:Towers:welcome.'.$format.'.twig', compact( 'isSnippet' ) );
 		
 		// Caching headers
 		$response->setPublic();
@@ -29,41 +24,36 @@ class TowersController extends Controller {
 	public function viewAction( $doveid ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isLayout = $format == 'html' && !$request->query->get( 'snippet' );
+		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
 		
 		$doveids = explode( '|', $doveid );
 		
 		$em = $this->getDoctrine()->getEntityManager();
 		
 		// Check we are at the canonical URL for the content
-		if( ( !$isLayout && $format != 'html' ) || $isLayout ) {
-			$towers = $em->createQuery( '
-				SELECT partial t.{doveid,place,dedication} FROM BluelineCCCBRDataBundle:Towers t
-				LEFT JOIN t.oldpk t2
-				WHERE t.doveid IN (:doveid) OR t2.oldpk IN (:doveid)' )
-				->setParameter( 'doveid', $doveids )
-				->setMaxResults( count( $doveids ) )
-				->getArrayResult();
-			if( empty( $towers ) || count( $towers ) < count( $doveids ) ) {
-				throw $this->createNotFoundException( 'The tower does not exist' );
-			}
-			$url = $this->generateUrl( 'Blueline_Towers_view', array( 'doveid' => implode( '|', array_map( function( $t ) { return $t['doveid']; }, $towers ) ), '_format' => $format ) );
-			$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $t ) { return $t['place'].(($t['dedication']!='Unknown')?' ('.$t['dedication'].')':''); }, $towers ) );
+		$towers = $em->createQuery( '
+			SELECT partial t.{doveid,place,dedication} FROM BluelineCCCBRDataBundle:Towers t
+			LEFT JOIN t.oldpk t2
+			WHERE t.doveid IN (:doveid) OR t2.oldpk IN (:doveid)' )
+			->setParameter( 'doveid', $doveids )
+			->setMaxResults( count( $doveids ) )
+			->getArrayResult();
+		if( empty( $towers ) || count( $towers ) < count( $doveids ) ) {
+			throw $this->createNotFoundException( 'The tower does not exist' );
+		}
+		$url = $this->generateUrl( 'Blueline_Towers_view', array( 'snippet' => ($isSnippet?1:null), 'snippet' => ($isSnippet?1:null), 'doveid' => implode( '|', array_map( function( $t ) { return $t['doveid']; }, $towers ) ), '_format' => $format ) );
+	
+		if( $request->getRequestUri() !== $url ) {
+			return $this->redirect( $url, 301 );
+		}
+
+		$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $t ) { return $t['place'].(($t['dedication']!='Unknown')?' ('.$t['dedication'].')':''); }, $towers ) );
+		$towers = array();
+		$ids = array();
 		
-			if( $request->getRequestUri() !== $url ) {
-				return $this->redirect( $url, 301 );
-			}
-		}
-		
-		if( $isLayout ) {
-			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:view.layout.'.$format.'.twig', compact( 'doveids', 'pageTitle' ) );
-		}
-		elseif( count( $doveids ) > 1 ){
-			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:view.'.$format.'.twig', compact( 'doveids' ) );
-		}
-		else {
+		foreach( $doveids  as $doveid ) {
 			// Create a HTML-safe id
-			$id = preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $doveid ) ) );
+			$ids[] = preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $doveid ) ) );
 			
 			// Get information about the tower, its affiliations, and first pealed methods
 			$tower = $em->createQuery( '
@@ -90,9 +80,12 @@ class TowersController extends Controller {
 					->getArrayResult() );
 			}
 			
-			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:view.'.$format.'.twig', compact( 'tower', 'id' ) );
+			$towers[] = $tower;
 		}
 		
+		// Create response
+		$response = $this->render( 'BluelineCCCBRDataBundle:Towers:view.'.$format.'.twig', compact( 'pageTitle', 'towers', 'ids', 'isSnippet' ) );
+
 		// Caching headers
 		$response->setPublic();
 		$response->setMaxAge( 129600 );
@@ -104,21 +97,16 @@ class TowersController extends Controller {
 	public function searchAction( $searchVariables = array() ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isLayout = $format == 'html' && !$request->query->get( 'snippet' );
+		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
 		
 		$towersRepository = $this->getDoctrine()->getEntityManager()->getRepository( 'BluelineCCCBRDataBundle:Towers' );
 		$searchVariables = empty( $searchVariables )? $towersRepository->requestToSearchVariables( $request ) : $searchVariables;
 		
-		if( $isLayout ) {
-			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:search.layout.'.$format.'.twig', compact( 'searchVariables' ) );
-		}
-		else {
-			$towers = $towersRepository->search( $searchVariables );
-			$count = (count( $towers ) > 0)? $towersRepository->searchCount( $searchVariables ) : 0;
-			$pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
-			$pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
-			$response = $this->render( 'BluelineCCCBRDataBundle:Towers:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'towers' ) );
-		}
+		$towers = $towersRepository->search( $searchVariables );
+		$count = (count( $towers ) > 0)? $towersRepository->searchCount( $searchVariables ) : 0;
+		$pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
+		$pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Towers:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'towers', 'isSnippet' ) );
 		
 		// Caching headers
 		$response->setPublic();

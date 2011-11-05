@@ -1,3 +1,4 @@
+{% if isSnippet is not defined or not isSnippet %}
 <!DOCTYPE html>
 <html>
 	<head>
@@ -38,7 +39,7 @@
 					<h2><a href="{{ crumb.href }}">{{ crumb.title }}</a></h2>
 					{% endfor %}
 				</div>
-				<div id="topSearchContainer"{{ search_header|default(false) ? '' : 'style="display: none;"' }}>
+				<div id="topSearchContainer"{{ search_header|default(false) ? '' : ' style="display: none;"' }}>
 					<span class="headerSep">&raquo;</span>
 					<form id="topSearch" role="search" action="{{ search_action|default('') }}">
 						<input type="text" accesskey="/" name="q" id="smallQ" spellcheck="false" autocomplete="off" placeholder="{{ search_placeholder|default('Search') }}" />
@@ -46,7 +47,7 @@
 					</form>
 				</div>
 			</header>
-			<div id="bigSearchContainer"{{ search_big|default(false) ? '' : 'style="display: none;"' }}>
+			<div id="bigSearchContainer"{{ search_big|default(false) ? '' : ' style="display: none;"' }}>
 				<form id="bigSearch" role="search" action="{{ search_action|default('') }}">
 					<div>
 					<input type="text" accesskey="/" name="q" id="bigQ" spellcheck="false" autocomplete="off" placeholder="{{ search_placeholder|default('Search') }}" value="{{ searchVariables['q']|default('') }}" />
@@ -55,7 +56,9 @@
 				</form>
 			</div>
 			<div id="content" role="main">
+{% endif %}
 				{% block body %}{% endblock %}
+{% if isSnippet is not defined or not isSnippet %}
 			</div>
 			<div id="push"></div>
 		</div>
@@ -65,3 +68,4 @@
 		</footer>
 	</body>
 </html>
+{% endif %}

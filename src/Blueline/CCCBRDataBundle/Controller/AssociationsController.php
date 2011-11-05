@@ -9,15 +9,10 @@ class AssociationsController extends Controller {
 	public function welcomeAction() {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isLayout = $format == 'html' && !$request->query->get( 'snippet' );
+		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
 		
-		if( $isLayout ) {
-			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:welcome.layout.'.$format.'.twig' );
-		}
-		else {
-			$associations = $this->getDoctrine()->getEntityManager()->createQuery( 'SELECT partial a.{abbreviation,name} FROM BluelineCCCBRDataBundle:Associations a' )->getArrayResult();
-			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:welcome.'.$format.'.twig', compact( 'associations' ) );
-		}
+		$associations = $this->getDoctrine()->getEntityManager()->createQuery( 'SELECT partial a.{abbreviation,name} FROM BluelineCCCBRDataBundle:Associations a' )->getArrayResult();
+		$response = $this->render( 'BluelineCCCBRDataBundle:Associations:welcome.'.$format.'.twig', compact( 'associations', 'isSnippet' ) );
 		
 		// Caching headers
 		$response->setPublic();
@@ -30,40 +25,35 @@ class AssociationsController extends Controller {
 	public function viewAction( $abbreviation ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isLayout = $format == 'html' && !$request->query->get( 'snippet' );
+		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
 		
 		$abbreviations = explode( '|', $abbreviation );
 		
 		$em = $this->getDoctrine()->getEntityManager();
 		
 		// Check we are at the canonical URL for the content
-		if( ( !$isLayout && $format != 'html' ) || $isLayout ) {
-			$associations = $em->createQuery( '
-				SELECT partial a.{abbreviation,name} FROM BluelineCCCBRDataBundle:Associations a
-				WHERE a.abbreviation IN (:abbreviation)' )
-				->setParameter( 'abbreviation', $abbreviations )
-				->setMaxResults( count( $abbreviations ) )
-				->getArrayResult();
-			if( empty( $associations ) || count( $associations ) < count( $abbreviations ) ) {
-				throw $this->createNotFoundException( 'The association does not exist' );
-			}
-			$url = $this->generateUrl( 'Blueline_Associations_view', array( 'abbreviation' => implode( '|', array_map( function( $a ) { return $a['abbreviation']; }, $associations ) ), '_format' => $format ) );
-			$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $a ) { return $a['name']; }, $associations ) );
+		$associations = $em->createQuery( '
+			SELECT partial a.{abbreviation,name} FROM BluelineCCCBRDataBundle:Associations a
+			WHERE a.abbreviation IN (:abbreviation)' )
+			->setParameter( 'abbreviation', $abbreviations )
+			->setMaxResults( count( $abbreviations ) )
+			->getArrayResult();
+		if( empty( $associations ) || count( $associations ) < count( $abbreviations ) ) {
+			throw $this->createNotFoundException( 'The association does not exist' );
+		}
+		$url = $this->generateUrl( 'Blueline_Associations_view', array( 'snippet' => ($isSnippet?1:null), 'abbreviation' => implode( '|', array_map( function( $a ) { return $a['abbreviation']; }, $associations ) ), '_format' => $format ) );
 			
-			if( $request->getRequestUri() !== $url && $request->getRequestUri() !== urldecode( $url ) ) {
-				return $this->redirect( $url, 301 );
-			}
+		if( $request->getRequestUri() !== $url && $request->getRequestUri() !== urldecode( $url ) ) {
+			return $this->redirect( $url, 301 );
 		}
 		
-		if( $isLayout ) {
-			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:view.layout.'.$format.'.twig', compact( 'abbreviations', 'pageTitle' ) );
-		}
-		elseif( count( $abbreviations ) > 1 ){
-			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:view.'.$format.'.twig', compact( 'abbreviations' ) );
-		}
-		else {
+		$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $a ) { return $a['name']; }, $associations ) );
+		$associations = array();
+		$ids = array();
+		
+		foreach( $abbreviations as $abbreviation ) {
 			// Create a HTML-safe id
-			$id = preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $abbreviation ) ) );
+			$ids[] = preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $abbreviation ) ) );
 			
 			// Get information about the association and its towers
 			$association = $em->createQuery( '
@@ -83,9 +73,11 @@ class AssociationsController extends Controller {
 				->setParameter( 'abbreviation', $abbreviation )
 				->getSingleResult();
 			}
-			
-			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:view.'.$format.'.twig', compact( 'association', 'id' ) );
+			$associations[] = $association;
 		}
+		
+		// Create response
+		$response = $this->render( 'BluelineCCCBRDataBundle:Associations:view.'.$format.'.twig', compact( 'pageTitle', 'associations', 'ids', 'isSnippet' ) );
 		
 		// Caching headers
 		$response->setPublic();
@@ -98,21 +90,16 @@ class AssociationsController extends Controller {
 	public function searchAction( $searchVariables = array() ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isLayout = $format == 'html' && !$request->query->get( 'snippet' );
+		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
 		
 		$associationsRepository = $this->getDoctrine()->getEntityManager()->getRepository( 'BluelineCCCBRDataBundle:Associations' );
 		$searchVariables = empty( $searchVariables )? $associationsRepository->requestToSearchVariables( $request ) : $searchVariables;
 		
-		if( $isLayout ) {
-			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:search.layout.'.$format.'.twig', compact( 'searchVariables' ) );
-		}
-		else {
-			$associations = $associationsRepository->search( $searchVariables );
-			$count = (count( $associations ) > 0)? $associationsRepository->searchCount( $searchVariables ) : 0;
-			$pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
-			$pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
-			$response = $this->render( 'BluelineCCCBRDataBundle:Associations:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'associations' ) );
-		}
+		$associations = $associationsRepository->search( $searchVariables );
+		$count = (count( $associations ) > 0)? $associationsRepository->searchCount( $searchVariables ) : 0;
+		$pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
+		$pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Associations:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'associations', 'isSnippet' ) );
 		
 		// Caching headers
 		$response->setPublic();

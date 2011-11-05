@@ -1,2 +1,12 @@
-<section class="search">
-</section>
+{% extends 'BluelineCCCBRDataBundle::base.html.twig' %}
+
+{% block title %}Towers | {{ parent() }}{% endblock %}
+{% set breadcrumb = [ {'title':'Towers', 'href':path('Blueline_Towers_welcome')} ] %}
+{% set search_opensearch = 'towers' %}
+{% set search_big = true %}
+{% set search_action = path( 'Blueline_Towers_search' ) %}
+{% set search_placeholder = 'Search towers' %}
+
+{% block body %}
+	<section class="search"></section>
+{% endblock %}

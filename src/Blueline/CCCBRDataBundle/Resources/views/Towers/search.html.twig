@@ -1,11 +1,22 @@
-{% from 'BluelineCCCBRDataBundle:Macros:paging.html.twig' import paging %}
-<section class="search">
-	<ol>
-	{% for tower in towers %}
-		<li><a href="{{ path( 'Blueline_Towers_view', { 'doveid': tower.doveid } ) }}">{{ tower.place }} <small>({{ tower.dedication }})</small></a></li>
-	{% else %}
-		<li>No results</li>
-	{% endfor %}
-	</ol>
-	{{ paging( 'Blueline_Towers_search', searchVariables, pageActive, pageCount ) }}
-</section>
+{% extends 'BluelineCCCBRDataBundle::base.html.twig' %}
+
+{% block title %}Search | Towers | {{ parent() }}{% endblock %}
+{% set breadcrumb = [ {'title': 'Towers', 'href': path( 'Blueline_Towers_welcome' ) } ] %}
+{% set search_opensearch = 'towers' %}
+{% set search_big = true %}
+{% set search_action = path( 'Blueline_Towers_search' ) %}
+{% set search_placeholder = 'Search towers' %}
+
+{% block body %}
+	{% from 'BluelineCCCBRDataBundle:Macros:paging.html.twig' import paging %}
+	<section class="search">
+		<ol>
+		{% for tower in towers %}
+			<li><a href="{{ path( 'Blueline_Towers_view', { 'doveid': tower.doveid } ) }}">{{ tower.place }} <small>({{ tower.dedication }})</small></a></li>
+		{% else %}
+			<li>No results</li>
+		{% endfor %}
+		</ol>
+		{{ paging( 'Blueline_Towers_search', searchVariables, pageActive, pageCount ) }}
+	</section>
+{% endblock %}

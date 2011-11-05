@@ -10,14 +10,9 @@ class MethodsController extends Controller {
 	public function welcomeAction() {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isLayout = $format == 'html' && !$request->query->get( 'snippet' );
+		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
 		
-		if( $isLayout ) {
-			$response = $this->render( 'BluelineCCCBRDataBundle:Methods:welcome.layout.'.$format.'.twig' );
-		}
-		else {
-			$response = $this->render( 'BluelineCCCBRDataBundle:Methods:welcome.'.$format.'.twig' );
-		}
+		$response = $this->render( 'BluelineCCCBRDataBundle:Methods:welcome.'.$format.'.twig', compact( 'isSnippet' ) );
 		
 		// Caching headers
 		$response->setPublic();
@@ -30,42 +25,40 @@ class MethodsController extends Controller {
 	public function viewAction( $title ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isLayout = $format == 'html' && !$request->query->get( 'snippet' );
+		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
 		
 		$titles = explode( '|', str_replace( '_', ' ', $title ) );
 		
 		$em = $this->getDoctrine()->getEntityManager();
 		
 		// Check we are at the canonical URL for the content
-		if( ( !$isLayout && $format != 'html' ) || $isLayout ) {
-			$methods = $em->createQuery( '
-				SELECT m.title FROM BluelineCCCBRDataBundle:Methods m
-				WHERE m.title IN (:title)' )
-				->setParameter( 'title', $titles )
-				->setMaxResults( count( $titles ) )
-				->getArrayResult();
-			if( empty( $methods ) || count( $methods ) < count( $methods ) ) {
-				throw $this->createNotFoundException( 'The method does not exist' );
-			}
-			$url = $this->generateUrl( 'Blueline_Methods_view', array( 'title' => implode( '|', array_map( function( $m ) { return str_replace( ' ', '_', $m['title'] ); }, $methods ) ), '_format' => $format ) );
-			$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $m ) { return $m['title']; }, $methods ) );
-			
-			if( $request->getRequestUri() !== $url && $request->getRequestUri() !== urldecode( $url ) ) {
-				return $this->redirect( $url, 301 );
-			}
+		$methods = $em->createQuery( '
+			SELECT m.title FROM BluelineCCCBRDataBundle:Methods m
+			WHERE m.title IN (:title)' )
+			->setParameter( 'title', $titles )
+			->setMaxResults( count( $titles ) )
+			->getArrayResult();
+		
+		if( empty( $methods ) || count( $methods ) < count( $titles ) ) {
+			throw $this->createNotFoundException( 'The method does not exist' );
 		}
 		
-		if( $isLayout ) {
-			$response = $this->render( 'BluelineCCCBRDataBundle:Methods:view.layout.'.$format.'.twig', compact( 'titles', 'pageTitle' ) );
+		$titlesFound = array_map( function( $m ) { return str_replace( ' ', '_', $m['title'] ); }, $methods );
+		$url = $this->generateUrl( 'Blueline_Methods_view', array( 'snippet' => ($isSnippet?1:null), 'title' => implode( '|', $titlesFound ), '_format' => $format ) );
+		
+		if( $request->getRequestUri() !== $url && $request->getRequestUri() !== urldecode( $url ) ) {
+			return $this->redirect( $url, 301 );
 		}
-		elseif( count( $titles ) > 1 ){
-			$response = $this->render( 'BluelineCCCBRDataBundle:Methods:view.'.$format.'.twig', compact( 'titles' ) );
-		}
-		else {
+		
+		$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $m ) { return $m['title']; }, $methods ) );
+		$methods = array();
+		$ids = array();
+		
+		foreach( $titles as $title ) {
 			// We don't have _ in the database
 			$title = str_replace( '_', ' ', $title );
 			// Create a HTML-safe id
-			$id = preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $title ) ) );
+			$ids[] = preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $title ) ) );
 			
 			$query = $em->createQuery(
 				'SELECT m, partial e.{id,calls,ruleOffs}, t FROM BluelineCCCBRDataBundle:Methods m 
@@ -74,10 +67,11 @@ class MethodsController extends Controller {
 				WHERE m.title LIKE :title' )
 				->setParameter( 'title', $title );
 			
-			$method = $query->getSingleResult();
-
-			$response = $this->render( 'BluelineCCCBRDataBundle:Methods:view.'.$format.'.twig', compact( 'method', 'id' ) );
+			$methods[] = $query->getSingleResult();
 		}
+		
+		// Create response
+		$response = $this->render( 'BluelineCCCBRDataBundle:Methods:view.'.$format.'.twig', compact( 'pageTitle', 'methods', 'ids', 'isSnippet' ) );
 		
 		// Caching headers
 		$response->setPublic();
@@ -90,21 +84,16 @@ class MethodsController extends Controller {
 	public function searchAction( $searchVariables = array() ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isLayout = $format == 'html' && !$request->query->get( 'snippet' );
+		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
 		
 		$methodsRepository = $this->getDoctrine()->getEntityManager()->getRepository( 'BluelineCCCBRDataBundle:Methods' );
 		$searchVariables = empty( $searchVariables )? $methodsRepository->requestToSearchVariables( $request ) : $searchVariables;
 		
-		if( $isLayout ) {
-			$response = $this->render( 'BluelineCCCBRDataBundle:Methods:search.layout.'.$format.'.twig', compact( 'searchVariables' ) );
-		}
-		else {
-			$methods = $methodsRepository->search( $searchVariables );
-			$count = (count( $methods ) > 0)? $methodsRepository->searchCount( $searchVariables ) : 0;
-			$pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
-			$pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
-			$response = $this->render( 'BluelineCCCBRDataBundle:Methods:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'methods' ) );
-		}
+		$methods = $methodsRepository->search( $searchVariables );
+		$count = (count( $methods ) > 0)? $methodsRepository->searchCount( $searchVariables ) : 0;
+		$pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
+		$pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Methods:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'methods', 'isSnippet' ) );
 		
 		// Caching headers
 		$response->setPublic();

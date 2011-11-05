@@ -8,9 +8,9 @@ class PagesController extends Controller {
 	public function pageAction( $page ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isLayout = $format == 'html' && !$request->query->get( 'snippet' );
+		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
 		
-		$response = $this->render( 'BluelineCCCBRDataBundle:Pages:'.$page.($isLayout?'.layout':'').'.'.$format.'.twig' );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Pages:'.$page.'.'.$format.'.twig', compact( 'isSnippet' ) );
 		
 		// Caching headers
 		$response->setPublic();
