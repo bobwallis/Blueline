@@ -8,6 +8,9 @@ define( function() {
 	/** @const */ var UP = 38;
 	/** @const */ var DOWN = 40;
 	/** @const */ var RETURN = 13;
+	/** @const */ var a = 65;
+	/** @const */ var m = 77;
+	/** @const */ var t = 84;
 	
 	$( function() {
 		var $window = $( window ),
@@ -16,6 +19,15 @@ define( function() {
 		
 		$window.keydown( function( e ) {
 			switch( e.which ) {
+				// Hotkeys to open sections when on home page
+				case a:
+					$( 'section.welcome a:first' ).click();
+				case m:
+					$($( 'section.welcome a' )[1]).click();
+					break;
+				case t:
+					$( 'section.welcome a:last' ).click();
+					break;
 				// Hotkeys to control paging links
 				case HOME:
 					$( "div.pagingLinks:first a:contains('1'):first" ).click();
