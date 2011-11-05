@@ -2,7 +2,7 @@
 define( function() {
 	var $window = false, $breadcrumbContainer, $topSearchContainer, $topSearch, $topSearchInput, $bigSearchContainer, $bigSearch, $bigSearchInput,
 		sectionRegexp = /^(.*)\/(associations|methods|towers)($|\/)/,
-		topSearchRegexp = /\/view\//,
+		topSearchRegexp = /(associations|\/view\/)/,
 		bigSearchRegexp = /\/(associations\/search|((methods|towers)($|\/search)))/;
 	return {
 		update: function( url ) {
