@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false */
-define( ['require'], function( require ) {
+define( ['require', 'jquery'], function( require, $ ) {
 	// Constants
 	/** @const */ var FUSION_TABLE_ID = 916439;
 	/** @const */ var SMALL_MAP_LIMIT = 600;

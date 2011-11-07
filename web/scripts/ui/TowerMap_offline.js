@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false */
-define( function() {
+define( ['jquery'], function( $ ) {
 	/** @const */ var SMALL_MAP_LIMIT = 600;
 	
 	// Create the tower map container

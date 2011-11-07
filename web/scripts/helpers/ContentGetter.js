@@ -1,4 +1,4 @@
-define( ['./ContentCache'], function( ContentCache ) {
+define( ['jquery', './ContentCache'], function( $, ContentCache ) {
 	var ContentGetter_XMLHTTPRequest = function( url, success, failure ) {
 		AJAXContentRequest = $.ajax( {
 			url: url,

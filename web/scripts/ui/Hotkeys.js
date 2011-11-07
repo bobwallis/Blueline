@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false */
-define( function() {
+define( ['jquery'], function( $ ) {
 	/** @const */ var HOME = 36;
 	/** @const */ var END = 35;
 	/** @const */ var PGUP = 33;

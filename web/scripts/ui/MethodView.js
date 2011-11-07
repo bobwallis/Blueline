@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false */
-define( ['./MethodGrid', '../helpers/PlaceNotation'], function( MethodGrid, PlaceNotation ) {
+define( ['jquery', './MethodGrid', '../helpers/PlaceNotation'], function( $, MethodGrid, PlaceNotation ) {
 	// Reusable
 	var $window = $( window ),
 		$body = $( document.body );

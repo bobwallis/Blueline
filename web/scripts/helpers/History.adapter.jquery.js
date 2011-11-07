@@ -6,12 +6,10 @@
  */
 
 
-define( function() {
-	"use strict";
+define( ['jquery'], function( jQuery ) {
 	// Localise Globals
 	var
-		History = window.History = window.History||{},
-		jQuery = window.jQuery;
+		History = window.History = window.History||{};
 
 	// Check Existence
 	if ( typeof History.Adapter !== 'undefined' ) {

@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false, History: false */
-require( [ 'helpers/Can', 'helpers/History', 'ui/Window', 'ui/Header', 'ui/Content' ], function( Can, History, Window, Header, Content ) {
+require( [ 'jquery', 'helpers/Can', 'helpers/History', 'ui/Window', 'ui/Header', 'ui/Content' ], function( $, Can, History, Window, Header, Content ) {
 	var baseURL = location.protocol+'//'+location.host,
 		baseURLRegexp = new RegExp( '^'+location.protocol+'\/\/'+location.host );
 

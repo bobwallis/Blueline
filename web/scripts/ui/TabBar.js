@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false */
-define( function() {
+define( ['jquery'], function( $ ) {
 	var tabClick = function( e ) {
 		var target = $( e.target );
 		if( !target.is( 'li' ) ) { return; }

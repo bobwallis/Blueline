@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false, History: false */
-define( function() {
+define( ['jquery'], function( $ ) {
 	var sectionRegExp = /\/(associations|methods|towers)(\/|$)/,
 		searchRegExp = /\/(associations|methods|towers)\/search/;
 	

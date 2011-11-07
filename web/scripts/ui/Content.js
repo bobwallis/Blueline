@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false */
-define( ['../helpers/Can', '../helpers/ContentGetter', './Header', './Window'], function( Can, ContentGetter, Header, Window ) {
+define( ['jquery', '../helpers/Can', '../helpers/ContentGetter', './Header', './Window'], function( $, Can, ContentGetter, Header, Window ) {
 	var $loading = $( '<div id="loading"></div>' ),
 		loadingSetter = false,
 		$content = [], $towerMap = [],

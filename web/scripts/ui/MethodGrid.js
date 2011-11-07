@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false */
-define( ['../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMono'], function( PlaceNotation, Paper, Font ) {
+define( ['jquery', '../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMono'], function( $, PlaceNotation, Paper, Font ) {
 	/* MethodGrid
 	 * options object:
 	 * .id: An identifier for use in HTML id attributes
