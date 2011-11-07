@@ -4,74 +4,6 @@ define( ['require', 'jquery'], function( require, $ ) {
 	/** @const */ var FUSION_TABLE_ID = 916439;
 	/** @const */ var SMALL_MAP_LIMIT = 600;
 
-	// Create the tower map container
-	var $towerMap = $( '<div id="towerMap" style="display:none"><div class="map"></div></div>' );
-	
-	// Variables used by functions below
-	var $window, $top, $bottom, $content, towerMapAdjustLastFired = 0,
-	towerMapHiddenForSmallScreen = false;
-	
-	// Function adjust the tower map's size and location on window changes
-	var towerMapAdjust = function( e ) {
-		var nowTime = (new Date()).getTime();
-		// Fire at most once every 100ms
-		if( typeof e !== 'undefined' && e.type !== 'scroll' ) {
-			if( nowTime - towerMapAdjustLastFired < 100 ) { return; }
-			else { towerMapAdjustLastFired = nowTime; }
-		}
-		
-		// Hide on small screens
-		var pageWidth = $window.width();
-		if( pageWidth < SMALL_MAP_LIMIT ) {
-			towerMapHiddenForSmallScreen = true;
-			return TowerMap.hide();
-		}
-		else if( towerMapHiddenForSmallScreen ) {
-			towerMapHiddenForSmallScreen = false;
-			return TowerMap.show();
-		}
-		
-		if( $towerMap.is( ':visible' ) ) {
-			var mapCenter = (TowerMap.map !== false)? TowerMap.map.getCenter() : 0,
-				pageHeight = $window.height(),
-				scrollTop = $window.scrollTop(),
-				topHeight = $top.height(),
-				topVisible = (scrollTop < topHeight)? topHeight - scrollTop : 0,
-				bottomHeight = $bottom.height(),
-				bottomTop = $bottom.offset().top,
-				bottomVisible = ( (scrollTop+pageHeight) > bottomTop )? (scrollTop+pageHeight) - bottomTop : 0,
-				newHeight = pageHeight - bottomVisible - topVisible;
-
-			$towerMap.css( {
-				width: (pageWidth*0.6)+'px',
-				height: newHeight+'px',
-				top: topVisible+'px'
-			} );
-
-			if( TowerMap.map !== false ) {
-				google.maps.event.trigger( TowerMap.map, 'resize' );
-				TowerMap.map.setCenter( mapCenter );
-			}
-		}
-	};
-	
-	// Attach to the page in various ways on load
-	$( function() {
-		// Append the tower map container
-		$( document.body ).append( $towerMap );
-		
-		// Get DOM elements
-		$window = $( window );
-		$top = $( '#top' );
-		$bottom = $( '#bottom' );
-		$content = $( '#content' );
-		
-		// Attach events
-		$window.resize( towerMapAdjust );
-		$window.scroll( towerMapAdjust );
-		towerMapAdjust();
-	} );
-	
 	// Create the TowerMap object
 	var TowerMapInitialised = false,
 	TowerMap = {
@@ -244,6 +176,74 @@ define( ['require', 'jquery'], function( require, $ ) {
 			} );
 		}
 	}
+	
+	// Create the tower map container
+	var $towerMap = $( '<div id="towerMap" style="display:none"><div class="map"></div></div>' );
+	
+	// Variables used by functions below
+	var $window, $top, $bottom, $content, towerMapAdjustLastFired = 0,
+	towerMapHiddenForSmallScreen = false;
+	
+	// Function adjust the tower map's size and location on window changes
+	var towerMapAdjust = function( e ) {
+		var nowTime = (new Date()).getTime();
+		// Fire at most once every 100ms
+		if( typeof e !== 'undefined' && e.type !== 'scroll' ) {
+			if( nowTime - towerMapAdjustLastFired < 100 ) { return; }
+			else { towerMapAdjustLastFired = nowTime; }
+		}
+		
+		// Hide on small screens
+		var pageWidth = $window.width();
+		if( pageWidth < SMALL_MAP_LIMIT ) {
+			towerMapHiddenForSmallScreen = true;
+			return TowerMap.hide();
+		}
+		else if( towerMapHiddenForSmallScreen ) {
+			towerMapHiddenForSmallScreen = false;
+			return TowerMap.show();
+		}
+		
+		if( $towerMap.is( ':visible' ) ) {
+			var mapCenter = (TowerMap.map !== false)? TowerMap.map.getCenter() : 0,
+				pageHeight = $window.height(),
+				scrollTop = $window.scrollTop(),
+				topHeight = $top.height(),
+				topVisible = (scrollTop < topHeight)? topHeight - scrollTop : 0,
+				bottomHeight = $bottom.height(),
+				bottomTop = $bottom.offset().top,
+				bottomVisible = ( (scrollTop+pageHeight) > bottomTop )? (scrollTop+pageHeight) - bottomTop : 0,
+				newHeight = pageHeight - bottomVisible - topVisible;
+
+			$towerMap.css( {
+				width: (pageWidth*0.6)+'px',
+				height: newHeight+'px',
+				top: topVisible+'px'
+			} );
+
+			if( TowerMap.map !== false ) {
+				google.maps.event.trigger( TowerMap.map, 'resize' );
+				TowerMap.map.setCenter( mapCenter );
+			}
+		}
+	};
+	
+	// Attach to the page in various ways on load
+	$( function() {
+		// Append the tower map container
+		$( document.body ).append( $towerMap );
+		
+		// Get DOM elements
+		$window = $( window );
+		$top = $( '#top' );
+		$bottom = $( '#bottom' );
+		$content = $( '#content' );
+		
+		// Attach events
+		$window.resize( towerMapAdjust );
+		$window.scroll( towerMapAdjust );
+		towerMapAdjust();
+	} );
 
 	return TowerMap;
 } );
