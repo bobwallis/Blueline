@@ -11,23 +11,11 @@
 	{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
 	{% for association in associations %}
 	<section class="association">
-		{{ header( association.name, null, { 'id': 'association_'~ids[loop.index-1]~'_tabBar', 'tabs': [
-			{ 'title': 'Details', 'content': 'association_details_'~ids[loop.index-1] },
-			{ 'title': 'Towers', 'content': 'association_towers_'~ids[loop.index-1] }
+		{{ header( association.name, null, { 'id': 'association_'~association.ID~'_tabBar', 'tabs': [
+			{ 'title': 'Details', 'content': 'association_details_'~association.ID },
+			{ 'title': 'Towers', 'content': 'association_towers_'~association.ID }
 		], 'active': 0 } ) }}
-		<script>
-		{% autoescape false %}
-		//<![CDATA[
-			require( ['ui/TowerMap'], function( TowerMap ) {
-				TowerMap.set( {
-					fitBounds: [{{ association.bbox.lat_min }},{{ association.bbox.long_min }},{{ association.bbox.lat_max }},{{ association.bbox.long_max }}],
-					fusionTableQuery: "affiliations contains '{{ association.abbreviation|e('js') }}'"
-				} );
-			} );
-		{% endautoescape %}
-		//]]>
-		</script>
-		<div id="association_details_{{ ids[loop.index-1] }}" class="details">
+		<div id="association_details_{{ association.ID }}" class="details">
 			<noscript><h2>Details</h2></noscript>
 			<table>
 			{% if association.link is not empty %}
@@ -42,7 +30,7 @@
 				</tr>
 			</table>
 		</div>
-		<div id="association_towers_{{ ids[loop.index-1] }}" class="affiliations">
+		<div id="association_towers_{{ association.ID }}" class="affiliations">
 			<noscript><h2>Affiliated Towers</h2></noscript>
 			<ol>
 			{% for tower in association.affiliatedTowers %}
@@ -54,4 +42,16 @@
 		</div>
 	</section>
 	{% endfor %}
+	<script>
+	{% autoescape false %}
+	//<![CDATA[
+		require( ['ui/TowerMap'], function( TowerMap ) {
+			TowerMap.set( {
+				fitBounds: [{{ bbox.lat_min }},{{ bbox.long_min }},{{ bbox.lat_max }},{{ bbox.long_max }}],
+				fusionTableQuery: "{% for association in associations %}affiliations contains '{{ association.abbreviation|e('js') }}'{{ (not loop.last)? ' or ':'' }}{% endfor %}"
+			} );
+		} );
+	{% endautoescape %}
+	//]]>
+	</script>
 {% endblock %}

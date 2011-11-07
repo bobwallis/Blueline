@@ -11,6 +11,18 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="Blueline\CCCBRDataBundle\Repository\AssociationsRepository")
  */
 class Associations {
+
+	public function __construct() {
+    	$this->affiliatedTowers = new \Doctrine\Common\Collections\ArrayCollection();
+	}
+	
+	/**
+	 * Generate a string for safe use in HTML id
+	 */
+	public function getID() {
+		return preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $this->getAbbreviation() ) ) );
+	}
+	
 	/**
 	 * @var string $abbreviation
 	 *
@@ -55,8 +67,4 @@ class Associations {
 	private $affiliatedTowers;
 	public function addAffiliatedTower( \Blueline\CCCBRDataBundle\Entity\Towers $affiliatedTowers ) { $this->affiliatedTowers[] = $affiliatedTowers; }
 	public function getAffiliatedTowers() { return $this->affiliatedTowers; }
-
-	public function __construct() {
-    	$this->affiliatedTowers = new \Doctrine\Common\Collections\ArrayCollection();
-	}
 }

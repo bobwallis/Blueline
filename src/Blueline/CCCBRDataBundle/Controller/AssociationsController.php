@@ -34,8 +34,8 @@ class AssociationsController extends Controller {
 		// Check we are at the canonical URL for the content
 		$associations = $em->createQuery( '
 			SELECT partial a.{abbreviation,name} FROM BluelineCCCBRDataBundle:Associations a
-			WHERE a.abbreviation IN (:abbreviation)' )
-			->setParameter( 'abbreviation', $abbreviations )
+			WHERE a.abbreviation IN (:abbreviations)' )
+			->setParameter( 'abbreviations', $abbreviations )
 			->setMaxResults( count( $abbreviations ) )
 			->getArrayResult();
 		if( empty( $associations ) || count( $associations ) < count( $abbreviations ) ) {
@@ -49,35 +49,30 @@ class AssociationsController extends Controller {
 		
 		$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $a ) { return $a['name']; }, $associations ) );
 		$associations = array();
-		$ids = array();
 		
-		foreach( $abbreviations as $abbreviation ) {
-			// Create a HTML-safe id
-			$ids[] = preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $abbreviation ) ) );
-			
+		foreach( $abbreviations as $abbreviation ) {			
 			// Get information about the association and its towers
-			$association = $em->createQuery( '
+			$associations[] = $em->createQuery( '
 				SELECT a, partial t.{doveid,place,dedication} FROM BluelineCCCBRDataBundle:Associations a
 				JOIN a.affiliatedTowers t
 				WHERE a.abbreviation = :abbreviation' )
 			->setParameter( 'abbreviation', $abbreviation )
-			->getArrayResult();
-			$association = $association[0];
-			
-			// Get the bounding box for the tower map if needed
-			if( $format == 'html' ) {
-				$association['bbox'] = $em->createQuery( '
-					SELECT MAX(t.latitude) as lat_max, MIN(t.latitude) as lat_min, MAX(t.longitude) as long_max, MIN(t.longitude) as long_min FROM BluelineCCCBRDataBundle:Associations a
-					JOIN a.affiliatedTowers t
-					WHERE a.abbreviation = :abbreviation' )
-				->setParameter( 'abbreviation', $abbreviation )
-				->getSingleResult();
-			}
-			$associations[] = $association;
+			->getSingleResult();
+		}
+		
+		// Get the bounding box for the tower map if needed
+		$bbox = array();
+		if( $format == 'html' ) {
+			$bbox = $em->createQuery( '
+				SELECT MAX(t.latitude) as lat_max, MIN(t.latitude) as lat_min, MAX(t.longitude) as long_max, MIN(t.longitude) as long_min FROM BluelineCCCBRDataBundle:Associations a
+				JOIN a.affiliatedTowers t
+				WHERE a.abbreviation IN (:abbreviations)' )
+			->setParameter( 'abbreviations', $abbreviations )
+			->getSingleResult();
 		}
 		
 		// Create response
-		$response = $this->render( 'BluelineCCCBRDataBundle:Associations:view.'.$format.'.twig', compact( 'pageTitle', 'associations', 'ids', 'isSnippet' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Associations:view.'.$format.'.twig', compact( 'pageTitle', 'associations', 'bbox', 'isSnippet' ) );
 		
 		// Caching headers
 		$response->setPublic();
