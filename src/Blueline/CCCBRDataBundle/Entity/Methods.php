@@ -14,7 +14,14 @@ class Methods {
 	public function __construct() {
 		$this->firstTowerbellPealTower = new \Doctrine\Common\Collections\ArrayCollection();
 	}
-
+	
+	/**
+	 * Generate a string for safe use in HTML id
+	 */
+	public function getID() {
+		return  preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $this->getTitle() ) ) );
+	}
+	
 	/**
 	 * @var string $title
 	 *

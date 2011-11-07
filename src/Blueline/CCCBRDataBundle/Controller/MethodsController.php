@@ -52,13 +52,10 @@ class MethodsController extends Controller {
 		
 		$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $m ) { return $m['title']; }, $methods ) );
 		$methods = array();
-		$ids = array();
 		
 		foreach( $titles as $title ) {
 			// We don't have _ in the database
 			$title = str_replace( '_', ' ', $title );
-			// Create a HTML-safe id
-			$ids[] = preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $title ) ) );
 			
 			$query = $em->createQuery(
 				'SELECT m, partial e.{id,calls,ruleOffs}, t FROM BluelineCCCBRDataBundle:Methods m 
@@ -71,7 +68,7 @@ class MethodsController extends Controller {
 		}
 		
 		// Create response
-		$response = $this->render( 'BluelineCCCBRDataBundle:Methods:view.'.$format.'.twig', compact( 'pageTitle', 'methods', 'ids', 'isSnippet' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Methods:view.'.$format.'.twig', compact( 'pageTitle', 'methods', 'isSnippet' ) );
 		
 		// Caching headers
 		$response->setPublic();

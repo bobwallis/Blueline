@@ -11,12 +11,12 @@
 	{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
 	{% for method in methods|default([]) %}
 	<section class="method">
-		{{ header( method.title, null, { 'id': 'method_'~ids[loop.index-1]~'_tabBar', 'tabs': [
-			{ 'title': 'Details', 'content': 'method_details_'~ids[loop.index-1] },
-			{ 'title': 'Line', 'content': 'method_line_'~ids[loop.index-1] },
-			{ 'title': 'Grid', 'content': 'method_grid_'~ids[loop.index-1] }
+		{{ header( method.title, null, { 'id': 'method_'~method.ID~'_tabBar', 'tabs': [
+			{ 'title': 'Details', 'content': 'method_details_'~method.ID },
+			{ 'title': 'Line', 'content': 'method_line_'~method.ID },
+			{ 'title': 'Grid', 'content': 'method_grid_'~method.ID }
 		], 'active': 1 } ) }}
-		<div id="method_details_{{ ids[loop.index-1] }}" class="details">
+		<div id="method_details_{{ method.ID }}" class="details">
 			<noscript><h2>Details</h2></noscript>
 			<table>
 				<tr>
@@ -67,16 +67,16 @@
 	{% endif %}
 			</table>
 		</div>
-		<div id="method_line_{{ ids[loop.index-1] }}" class="line"></div>
-		<div id="method_grid_{{ ids[loop.index-1] }}" class="grid"></div>
+		<div id="method_line_{{ method.ID }}" class="line"></div>
+		<div id="method_grid_{{ method.ID }}" class="grid"></div>
 		<script>
 		{% autoescape false %}
 		//<![CDATA[
 			require( ['ui/MethodView'], function( MethodView ) {
 				new MethodView( {
-					id: '{{ ids[loop.index-1] }}',
-					numbersContainer: '#method_line_{{ ids[loop.index-1] }}',
-					gridContainer: '#method_grid_{{ ids[loop.index-1] }}',
+					id: '{{ method.ID }}',
+					numbersContainer: '#method_line_{{ method.ID }}',
+					gridContainer: '#method_grid_{{ method.ID }}',
 					stage: {{ method.stage }},
 					notation: '{{ method.notationExpanded }}',
 					calls: {{ method.calls|json_encode }},
