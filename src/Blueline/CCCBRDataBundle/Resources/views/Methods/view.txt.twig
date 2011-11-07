@@ -1,12 +1,8 @@
-{% if titles is defined %}
-{% for title in titles %}
-{% render path('Blueline_Methods_view', {'title':title|replace({' ':'_'}), '_format':'txt'}) with {}, {'standalone':true} %}
-{% endfor %}
-{% else %}
 {% autoescape false %}
+{% for method in methods %}
 {{ method.title }}
 	Classification:      	{{ (method.differential? 'Differential ':'') ~ (method.little? 'Little ':'') ~ method.classification ~ ' ' ~ method.stageText }}
-	Place Notation:      	{{ method.notationExpanded }}
+	Place Notation:      	{{ method.notation }}
 	Lead Head:           	{{ (method.leadHead ~ (method.leadHeadCode? ' (Code: ' ~ method.leadHeadCode ~ ')' : '')) }}
 {% if method.palindromic or method.doubleSym or method.rotational %}
 	Symmetry:            	{{ method.symmetryText }}
@@ -26,5 +22,5 @@
 	First handbell peal: 	{{ method.firstHandbellpealDate|date('jS M Y') }}
 {% endif %}
 
+{% endfor %}
 {% endautoescape %}
-{% endif %}

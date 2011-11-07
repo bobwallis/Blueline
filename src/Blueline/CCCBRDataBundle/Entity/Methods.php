@@ -14,6 +14,38 @@ class Methods {
 	public function __construct() {
 		$this->firstTowerbellPealTower = new \Doctrine\Common\Collections\ArrayCollection();
 	}
+
+	public function toArray() {
+		return array_filter( array(
+			'title' => $this->getTitle(),
+			'stage' => $this->getStage(),
+			'classification' => $this->getClassification(),
+			'nameMetaphone' => $this->getNameMetaphone(),
+			'notation' => $this->getNotation(),
+			'notationExpanded' => $this->getNotationExpanded(),
+			'leadHeadCode' => $this->getLeadHeadCode(),
+			'leadHead' => $this->getLeadHead(),
+			'fchGroups' => $this->getFchGroups(),
+			'rwRef' => $this->getRwRef(),
+			'bnRef' => $this->getBnRef(),
+			'tdmmRef' => $this->getTdmmRef(),
+			'pmmRef' => $this->getPmmRef(),
+			'lengthOfLead' => $this->getLengthOfLead(),
+			'numberOfHunts' => $this->getNumberOfHunts(),
+			'hunts' => $this->getHunts(),
+			'little' => $this->getLittle(),
+			'differential' => $this->getDifferential(),
+			'plain' => $this->getPlain(),
+			'trebleDodging' => $this->getTrebleDodging(),
+			'palindromic' => $this->getPalindromic(),
+			'double' => $this->getDoubleSym(),
+			'rotational' => $this->getRotational(),
+			'firstTowerbellPealDate' => $this->getFirstTowerbellPealDate()? $this->getFirstTowerbellPealDate()->format( 'r' ) : null,
+			'firstTowerbellPealLocation' => $this->getFirstTowerbellPealLocation(),
+			'firstHandbellPealDate' => $this->getFirstHandbellPealDate()? $this->getFirstHandbellPealDate()->format( 'r' ) : null,
+//			'firstTowerbellPealTower' => $this->getFirstTowerbellPealTower()->toArray(),
+		), function( $x ) { return !empty( $x ); } );
+	}
 	
 	/**
 	 * Generate a string for safe use in HTML id

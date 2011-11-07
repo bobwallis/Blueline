@@ -13,7 +13,16 @@ use Doctrine\ORM\Mapping as ORM;
 class Associations {
 
 	public function __construct() {
-    	$this->affiliatedTowers = new \Doctrine\Common\Collections\ArrayCollection();
+		$this->affiliatedTowers = new \Doctrine\Common\Collections\ArrayCollection();
+	}
+	
+	public function toArray() {
+		return array_filter( array(
+			'abbreviation' => $this->getAbbreviation(),
+			'name' => $this->getName(),
+			'link' => $this->getLink(),
+//			'affiliatedTowers' => array_map( function( $t ) { return $t->toArray(); }, $this->getAffiliatedTowers()->toArray() )
+		), function( $x ) { return !empty( $x ); } );
 	}
 	
 	/**
@@ -65,6 +74,6 @@ class Associations {
 	 * )
 	 */
 	private $affiliatedTowers;
-	public function addAffiliatedTower( \Blueline\CCCBRDataBundle\Entity\Towers $affiliatedTowers ) { $this->affiliatedTowers[] = $affiliatedTowers; }
+	public function addAffiliatedTower( \Blueline\CCCBRDataBundle\Entity\Towers $affiliatedTower ) { $this->affiliatedTowers[] = $affiliatedTower; }
 	public function getAffiliatedTowers() { return $this->affiliatedTowers; }
 }

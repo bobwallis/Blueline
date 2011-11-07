@@ -16,11 +16,27 @@ class All extends \Twig_Extension {
 		return array(
 			'count'          => new \Twig_Filter_Function( 'count' ),
 			'addAccidentals' => new \Twig_Filter_Method( $this, 'addAccidentals' ),
+			'toArray'        => new \Twig_Filter_Method( $this, 'toArray' )
 		);
 	}
 
 	public function addAccidentals( $str ) {
 		return str_replace( array( 'b', '#' ), array( '♭', '♯' ), $str );
+	}
+
+	public function toArray( $obj ) {
+		if( is_array( $obj ) ) {
+			foreach( $obj as &$value ) {
+				$value = $this->toArray( $value );
+			}
+			return $obj;
+		}
+		else if( method_exists( $obj, 'toArray' ) ) {
+			return $obj->toArray();
+		}
+		else {
+			return array();
+		}
 	}
 
 	public static function toList( array $list, $glue = ', ', $last = ' and ' ) {

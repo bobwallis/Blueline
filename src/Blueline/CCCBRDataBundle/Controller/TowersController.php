@@ -49,23 +49,19 @@ class TowersController extends Controller {
 
 		$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $t ) { return $t['place'].(($t['dedication']!='Unknown')?' ('.$t['dedication'].')':''); }, $towers ) );
 		$towers = array();
-		$ids = array();
 		
 		foreach( $doveids  as $doveid ) {
-			// Create a HTML-safe id
-			$ids[] = preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $doveid ) ) );
-			
 			// Get information about the tower, its affiliations, and first pealed methods
-			$tower = $em->createQuery( '
+			$towers[] = $em->createQuery( '
 				SELECT t, partial a.{abbreviation,name}, partial m.{title,firstTowerbellPealDate} FROM BluelineCCCBRDataBundle:Towers t
 				LEFT JOIN t.affiliations a
 				LEFT JOIN t.firstPealedMethods m
 				WHERE t.doveid = :doveid' )
 			->setParameter( 'doveid', $doveid )
-			->getArrayResult();
-			$tower = $tower[0];
+			->getSingleResult();
 			
 			// Get nearby tower data
+			/*
 			if( $format == 'html' ) {
 				$distance = '( 6371 * acos( cos( radians(:near_lat) ) * cos( radians( t.latitude ) ) * cos( radians( t.longitude ) - radians(:near_long) ) + sin( radians(:near_lat) ) * sin( radians( t.latitude ) ) ) )';
 				$tower['nearbyTowers'] = array_map( function( $t ) { return array_merge( $t[0], array( 'distance' => $t['distance'] ) ); }, $em->createQuery( '
@@ -79,12 +75,11 @@ class TowersController extends Controller {
 					->setParameter( 'near_long', $tower['longitude'] )
 					->getArrayResult() );
 			}
-			
-			$towers[] = $tower;
+			*/
 		}
 		
 		// Create response
-		$response = $this->render( 'BluelineCCCBRDataBundle:Towers:view.'.$format.'.twig', compact( 'pageTitle', 'towers', 'ids', 'isSnippet' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Towers:view.'.$format.'.twig', compact( 'pageTitle', 'towers', 'isSnippet' ) );
 
 		// Caching headers
 		$response->setPublic();

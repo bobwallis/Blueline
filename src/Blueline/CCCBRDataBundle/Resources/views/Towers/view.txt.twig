@@ -1,9 +1,5 @@
-{% if doveids is defined %}
-{% for doveid in doveids %}
-{% render path('Blueline_Towers_view', {'doveid':doveid, '_format':'txt'}) with {}, {'standalone':true} %}
-{% endfor %}
-{% else %}
 {% autoescape false %}
+{% for tower in towers %}
 {{ tower.place }} ({{ tower.dedication }})
 {% if tower.country in ['USA','Australia'] %}
 	State:     	{{ tower.county }}
@@ -43,5 +39,5 @@
 	Practice:    	{{ dayToString( tower.practiceNight ) }}{{ tower.practiceStart is not empty?', '~tower.practiceStart : '' }}{{ tower.practiceNotes is not empty? ' - '~tower.practiceNotes : '' }}
 {% endif %}
 
+{% endfor %}
 {% endautoescape %}
-{% endif %}

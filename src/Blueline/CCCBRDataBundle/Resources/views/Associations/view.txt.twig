@@ -1,9 +1,5 @@
-{% if abbreviations is defined %}
-{% for abbreviation in abbreviations %}
-{% render path('Blueline_Associations_view', {'abbreviation':abbreviation, '_format':'txt'}) with {}, {'standalone':true} %}
-{% endfor %}
-{% else %}
 {% autoescape false %}
+{% for association in associations %}
 {{ association.name }}
 {% if association.link is not empty %}
 	Link:  	{{ association.link }}
@@ -13,5 +9,5 @@
 	       	{{ tower.place }} ({{ tower.dedication }})
 {% endfor %}
 
+{% endfor %}
 {% endautoescape %}
-{% endif %}

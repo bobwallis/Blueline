@@ -11,12 +11,12 @@
 	{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
 	{% for tower in towers %}
 	<section class="tower">
-		{{ header( { 'title': tower.place, 'title2': (tower.dedication != 'Unknown')? tower.dedication : null }, list( [tower.county, tower.country],', ',', ' ), { 'id': 'tower_'~ids[loop.index-1]~'_tabBar', 'tabs': [
-			{ 'title': 'Details', 'content': 'tower_details_'~ids[loop.index-1] },
-			{ 'title': 'Map', 'content': 'tower_map_'~ids[loop.index-1], 'className': 'l600' },
-			{ 'title': 'Methods First Pealed', 'content': 'tower_peals_'~ids[loop.index-1] }
+		{{ header( { 'title': tower.place, 'title2': (tower.dedication != 'Unknown')? tower.dedication : null }, list( [tower.county, tower.country],', ',', ' ), { 'id': 'tower_'~tower.ID~'_tabBar', 'tabs': [
+			{ 'title': 'Details', 'content': 'tower_details_'~tower.ID },
+			{ 'title': 'Map', 'content': 'tower_map_'~tower.ID, 'className': 'l600' },
+			{ 'title': 'Methods First Pealed', 'content': 'tower_peals_'~tower.ID }
 		] } ) }}
-		<div id="tower_map_{{ ids[loop.index-1] }}" class="staticMap">
+		<div id="tower_map_{{ tower.ID }}" class="staticMap">
 			<noscript>
 				<h2>Map</h2>
 				<img width="310px" height="380px" src="//maps.google.com/maps/api/staticmap?format=png&amp;scale=2&amp;size=310x380&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center={{ tower.latitude }},{{ tower.longitude }}&amp;markers=size:small|color:red|{{ tower.latitude }},{{ tower.longitude }}" />
@@ -34,7 +34,7 @@
 		{% endautoescape %}
 		//]]>
 		</script>
-		<div id="tower_details_{{ ids[loop.index-1] }}" class="details">
+		<div id="tower_details_{{ tower.ID }}" class="details">
 			<noscript><h2>Details</h2></noscript>
 			<table>
 				<tr>
@@ -102,7 +102,7 @@
 	{% endfor %}
 			</ol>
 		</div>
-		<div id="tower_peals_{{ ids[loop.index-1] }}" class="firstPeals">
+		<div id="tower_peals_{{ tower.ID }}" class="firstPeals">
 			<noscript><h2>First Peals</h2></noscript>
 			<ol>
 				{% for method in tower.firstPealedMethods %}

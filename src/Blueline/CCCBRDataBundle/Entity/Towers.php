@@ -10,8 +10,58 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="towers")
  * @ORM\Entity(repositoryClass="Blueline\CCCBRDataBundle\Repository\TowersRepository")
  */
-class Towers
-{
+class Towers {
+
+	public function __construct() {
+		$this->affiliations = new \Doctrine\Common\Collections\ArrayCollection();
+		$this->firstPealedMethods = new \Doctrine\Common\Collections\ArrayCollection();
+	}
+	
+	public function toArray() {
+		return array_filter( array(
+			'doveid' => $this->getDoveid(),
+			'gridReference' => $this->getGridReference(),
+			'latitude' => $this->getLatitude(),
+			'longitude' => $this->getLongitude(),
+			'latitudeSatNav' => $this->getLatitudeSatNav(),
+			'longitudeSatNav' => $this->getLongitudeSatNav(),
+			'postcode' => $this->getPostcode(),
+			'country' => $this->getCountry(),
+			'county' => $this->getCounty(),
+			'diocese' => $this->getDiocese(),
+			'place' => $this->getPlace(),
+			'altName' => $this->getAltName(),
+			'dedication' => $this->getDedication(),
+			'bells' => $this->getBells(),
+			'weight' => $this->getWeight(),
+			'weightApprox' => $this->getWeightApprox(),
+			'weightText' => $this->getWeightText(),
+			'note' => $this->getNote(),
+			'hz' => $this->getHz(),
+			'practiceNight' => $this->getPracticeNight(),
+			'practiceStart' => $this->getPracticeStart(),
+			'practiceNotes' => $this->getPracticeNotes(),
+			'groundFloor' => $this->getGroundFloor(),
+			'toilet' => $this->getToilet(),
+			'unringable' => $this->getUnringable(),
+			'simulator' => $this->getSimulator(),
+			'overhaulYear' => $this->getOverhaulYear(),
+			'contractor' => $this->getContractor(),
+			'tuned' => $this->getTuned(),
+			'extraInfo' => $this->getExtraInfo(),
+			'webPage' => $this->getWebPage(),
+//			'affiliations' => array_map( function( $a ) { return $a->toArray(); }, $this->getAffiliations()->toArray() ),
+//			'firstPealedMethods' => array_map( function( $m ) { return $m->toArray(); }, $this->getFirstPealedMethods()->toArray() )
+		), function( $x ) { return !empty( $x ); } );
+	}
+	
+	/**
+	 * Generate a string for safe use in HTML id
+	 */
+	public function getID() {
+		return  preg_replace( '/\s*/', '', preg_replace( '/[^a-z0-9]/', '', strtolower( $this->getDoveid() ) ) );
+	}
+
 	/**
 	 * @var string $doveid
 	 *
@@ -310,11 +360,6 @@ class Towers
 	private $firstPealedMethods;
 	public function addFirstPealedMethod( \Blueline\CCCBRDataBundle\Entity\Methods $method ) { $this->firstPealedMethods[] = $method; }
 	public function getFirstPealedMethods() { return $this->firstPealedMethods; }
-
-	public function __construct() {
-		$this->affiliation = new \Doctrine\Common\Collections\ArrayCollection();
-		$this->firstPealedMethod = new \Doctrine\Common\Collections\ArrayCollection();
-	}
 	
 	/**
 	 * @ORM\OneToOne(targetEntity="TowerOldpks")
