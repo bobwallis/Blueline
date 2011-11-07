@@ -12,6 +12,7 @@
 		<meta name="msapplication-starturl" content="{{ url( 'Blueline_welcome' ) }}" />
 		<link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" sizes="any" />
 		<link rel="alternate shortcut icon" type="image/x-ixon" href="{{ asset('favicon.ico') }}" sizes="16x16,24x24,48x48" />
+		<link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/ohgpoagcfmlbkdniokohgicofokpbpae" />
 {% if search_opensearch is defined %}
 		<link rel="search" type="application/opensearchdescription+xml" href="{{ path( 'Blueline_Opensearch_description', { 'type': search_opensearch, '_format': 'xml' } ) }}" title="{{ search_opensearch|title }} | Blueline" />
 {% endif %}
