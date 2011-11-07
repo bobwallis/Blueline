@@ -1,10 +1,10 @@
 {
   "name": "Blueline",
   "description": "Information for bellringers. Includes a blueline generator, tower listings and more.",
-  "version": "1",
+  "version": "1.0.2",
   "app": {
     "urls": [
-      "*://blueline.rsw.me.uk/"
+      "http://blueline.rsw.me.uk/"
     ],
     "launch": {
       "web_url": "http://blueline.rsw.me.uk/"
