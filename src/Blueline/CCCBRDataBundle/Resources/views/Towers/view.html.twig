@@ -22,18 +22,6 @@
 				<img width="310px" height="380px" src="//maps.google.com/maps/api/staticmap?format=png&amp;scale=2&amp;size=310x380&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center={{ tower.latitude }},{{ tower.longitude }}&amp;markers=size:small|color:red|{{ tower.latitude }},{{ tower.longitude }}" />
 			</noscript>
 		</div>
-		<script>
-		{% autoescape false %}
-		//<![CDATA[
-			require( ['ui/TowerMap'], function( TowerMap ) {
-				TowerMap.set( {
-					zoom: 15,
-					center: [{{ tower.latitude }},{{ tower.longitude }}]
-				} );
-			} );
-		{% endautoescape %}
-		//]]>
-		</script>
 		<div id="tower_details_{{ tower.ID }}" class="details">
 			<noscript><h2>Details</h2></noscript>
 			<table>
@@ -95,11 +83,12 @@
 			</table>
 			<h3>Nearby Towers:</h3>
 			<ol>
-	{% for tower2 in tower.nearbyTowers|default([]) %}
+{% set nearbyTowers2 = nearbyTowers[loop.index0]|default([]) %}
+{% for tower2 in nearbyTowers2 %}
 				<li><a href="{{ path( 'Blueline_Towers_view', {'doveid':tower2.doveid} ) }}">{{ tower2.place}} <small>({{ tower2.dedication }})</small></a> <small>{{ round( tower2.distance, 1 ) }} miles</small></li>
-	{% else %}
+{% else %}
 				<li>None</li>
-	{% endfor %}
+{% endfor %}
 			</ol>
 		</div>
 		<div id="tower_peals_{{ tower.ID }}" class="firstPeals">
@@ -114,4 +103,20 @@
 		</div>
 	</section>
 	{% endfor %}
+	<script>
+	{% autoescape false %}
+	//<![CDATA[
+		require( ['ui/TowerMap'], function( TowerMap ) {
+			TowerMap.set( {
+{% if count(towers) > 1 %}
+				fitBounds: [{{ bbox.lat_min }},{{ bbox.long_min }},{{ bbox.lat_max }},{{ bbox.long_max }}],
+{% else %}
+				zoom: 15,
+				center: [{{ towers[0].latitude }},{{ towers[0].longitude }}]
+{% endif %}
+			} );
+		} );
+	{% endautoescape %}
+	//]]>
+	</script>
 {% endblock %}

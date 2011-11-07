@@ -28,6 +28,7 @@ class TowersController extends Controller {
 		
 		$doveids = explode( '|', $doveid );
 		
+		$towersRepository = $this->getDoctrine()->getEntityManager()->getRepository( 'BluelineCCCBRDataBundle:Towers' );
 		$em = $this->getDoctrine()->getEntityManager();
 		
 		// Check we are at the canonical URL for the content
@@ -49,10 +50,11 @@ class TowersController extends Controller {
 
 		$pageTitle = \Blueline\Helpers\Text::toList( array_map( function( $t ) { return $t['place'].(($t['dedication']!='Unknown')?' ('.$t['dedication'].')':''); }, $towers ) );
 		$towers = array();
+		$nearbyTowers = array();
 		
 		foreach( $doveids  as $doveid ) {
 			// Get information about the tower, its affiliations, and first pealed methods
-			$towers[] = $em->createQuery( '
+			$tower = $em->createQuery( '
 				SELECT t, partial a.{abbreviation,name}, partial m.{title,firstTowerbellPealDate} FROM BluelineCCCBRDataBundle:Towers t
 				LEFT JOIN t.affiliations a
 				LEFT JOIN t.firstPealedMethods m
@@ -60,26 +62,20 @@ class TowersController extends Controller {
 			->setParameter( 'doveid', $doveid )
 			->getSingleResult();
 			
-			// Get nearby tower data
-			/*
-			if( $format == 'html' ) {
-				$distance = '( 6371 * acos( cos( radians(:near_lat) ) * cos( radians( t.latitude ) ) * cos( radians( t.longitude ) - radians(:near_long) ) + sin( radians(:near_lat) ) * sin( radians( t.latitude ) ) ) )';
-				$tower['nearbyTowers'] = array_map( function( $t ) { return array_merge( $t[0], array( 'distance' => $t['distance'] ) ); }, $em->createQuery( '
-						SELECT partial t.{doveid,place,dedication,latitude,longitude}, '.$distance.' as distance FROM BluelineCCCBRDataBundle:Towers t
-						WHERE t.latitude IS NOT NULL
-						HAVING '.$distance.' < 20
-						ORDER BY distance ASC' )
-					->setFirstResult( 1 )
-					->setMaxResults( 7 )
-					->setParameter( 'near_lat', $tower['latitude'] )
-					->setParameter( 'near_long', $tower['longitude'] )
-					->getArrayResult() );
-			}
-			*/
+			$nearbyTowers[] = array_slice( $towersRepository->nearbyTowers( $tower->getLatitude(), $tower->getLongitude(), 7 ), 1 );
+			$towers[] = $tower;
+		}
+		
+		$bbox = array();
+		if( count( $towers ) > 1 && $format == 'html' ) {
+			$bbox['lat_min'] = min( array_map( function( $t ) { return $t->getLatitude(); }, $towers ) );
+			$bbox['long_min'] = min( array_map( function( $t ) { return $t->getLongitude(); }, $towers ) );
+			$bbox['lat_max'] = max( array_map( function( $t ) { return $t->getLatitude(); }, $towers ) );
+			$bbox['long_max'] = max( array_map( function( $t ) { return $t->getLongitude(); }, $towers ) );
 		}
 		
 		// Create response
-		$response = $this->render( 'BluelineCCCBRDataBundle:Towers:view.'.$format.'.twig', compact( 'pageTitle', 'towers', 'isSnippet' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Towers:view.'.$format.'.twig', compact( 'pageTitle', 'towers', 'nearbyTowers', 'bbox', 'isSnippet' ) );
 
 		// Caching headers
 		$response->setPublic();
