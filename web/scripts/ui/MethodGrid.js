@@ -1,5 +1,8 @@
 /*global require: false, define: false, google: false */
 define( ['jquery', '../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMono'], function( $, PlaceNotation, Paper, Font ) {
+	// Constants
+	var MONOSPACEFONT = 'normal 14px ' + ((navigator.userAgent.toLowerCase().indexOf('android') > -1)?'':'"Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
+	
 	/* MethodGrid
 	 * options object:
 	 * .id: An identifier for use in HTML id attributes
@@ -267,7 +270,7 @@ define( ['jquery', '../helpers/PlaceNotation', '../helpers/Paper', '../helpers/D
 					// Set up the context
 					ctx.textAlign = 'left';
 					ctx.textBaseline = 'middle';
-					ctx.font = 'normal 14px "Andale Mono", Consolas, monospace';
+					ctx.font = MONOSPACEFONT;
 					
 					// We need this
 					var Array_unique = function( array ) {
@@ -335,7 +338,7 @@ define( ['jquery', '../helpers/PlaceNotation', '../helpers/Paper', '../helpers/D
 						text += leadHead.join( '' )+'</td>';
 					}
 				
-					numbersTable = $( '<table id="'+this.id+'_numbers" class="mono"><tr>'+text+'</tr></table>' );
+					numbersTable = $( '<table id="'+this.id+'_numbers" style="font:'+MONOSPACEFONT+'"><tr>'+text+'</tr></table>' );
 					numbersTable.css( {
 						marginTop: (paper === false)? 0 : '-'+this.display.dimensions.paper.y+'px', // Apply negative margin so this sits on top of the paper
 						lineHeight: this.display.dimensions.row.y+'px',

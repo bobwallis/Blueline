@@ -1,5 +1,8 @@
 /*global require: false, define: false, google: false */
 define( ['jquery', './MethodGrid', '../helpers/PlaceNotation'], function( $, MethodGrid, PlaceNotation ) {
+	// Constants
+	var MONOSPACEFONT = 'normal 14px '+((navigator.userAgent.toLowerCase().indexOf('android') > -1)?'':'"Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
+	
 	// Reusable
 	var $window = $( window ),
 		$body = $( document.body );
@@ -169,7 +172,7 @@ define( ['jquery', './MethodGrid', '../helpers/PlaceNotation'], function( $, Met
 			
 			// Determine the correct bell width
 			var bellWidth = (function() {
-				var testText = $( '<span class="mono">123456</span>' );
+				var testText = $( '<span style="font:'+MONOSPACEFONT+';">123456</span>' );
 				testText.css( { fontSize: numbersFontSize+'px' } );
 				$body.append( testText );
 				var bellWidth = testText.width() / 6;
