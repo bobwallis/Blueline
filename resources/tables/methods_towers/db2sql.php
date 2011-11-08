@@ -87,6 +87,7 @@ try {
 		
 		// Place
 		if( strpos( $location, ',' ) === FALSE ) {
+			// Problem towers
 			if( $location == 'Barnsley' ) { $doveid = 'BARNSLEY_Y'; }
 			elseif( $location == 'Barrow on Humber' ) { $doveid = 'BARROW_UH'; }
 			elseif( $location == 'Birstall' ) { $doveid = 'BIRSTALL_Y'; }
@@ -134,7 +135,7 @@ try {
 					'Bell Foundry',
 				), $locationE[0] );
 				
-				// Some problem towers
+				// Problem towers
 				if( $locationE[0] == 'Cape Town' && $locationE[1] == 'Woodstock' ) { $doveid = 'CAPE_TOWNW'; break; }
 				if( $locationE[0] == 'Christchurch' && $locationE[1] == 'Hants' ) { $doveid = 'CHRISTCH_D'; break; }
 				if( $locationE[1] == 'Dublin' && $locationE[0] == 'Christ Church Cathedral' ) { $doveid = 'DUBLIN__DC'; break; }
@@ -177,6 +178,7 @@ try {
 				break;
 			
 			case 3:
+				// Problem towers
 				if( $locationE[0] == 'Sullivans Island' ) { $doveid = 'CHARLESTNS'; break; }
 			
 				// Dedication, Place, County
@@ -193,7 +195,7 @@ try {
 				break;
 			
 			case 4:
-				// Special cases
+				// Problem towers
 				if( $locationE[0] == 'St Peter\'s Cathedral' && $locationE[1] == 'Adelaide' ) { $doveid = 'ADELA___CA'; break; }
 				if( $locationE[0] == 'St Mary\'s Cathedral' && $locationE[1] == 'Sydney' ) { $doveid = 'SYDNEY___R'; break; }
 				if( $locationE[0] == 'St Andrew\'s Cathedral' && $locationE[1] == 'Sydney' ) { $doveid = 'SYDNEY___A'; break; }
@@ -315,7 +317,7 @@ function mysql_escape_mimic( $inp ) {
 	if( !empty( $inp ) && is_string( $inp ) ) {
 		return str_replace( array( '\\', "\0", "\n", "\r", "'", '"', "\x1a" ), array( '\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z' ), $inp );
 	}
-return $inp;
+	return $inp;
 }
 ?>
 -- End
