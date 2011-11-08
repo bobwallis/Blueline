@@ -34,10 +34,10 @@
 			<header id="top" role="banner">
 				<h1><a href="{{ path('Blueline_welcome') }}">Blueline</a></h1>
 				<div id="breadcrumbContainer">
-					{% for crumb in breadcrumb|default([]) %}
+{% for crumb in breadcrumb|default([]) %}
 					<span class="headerSep">&raquo;</span>
 					<h2><a href="{{ crumb.href }}">{{ crumb.title }}</a></h2>
-					{% endfor %}
+{% endfor %}
 				</div>
 				<div id="topSearchContainer"{{ search_header|default(false) ? '' : ' style="display: none;"' }}>
 					<span class="headerSep">&raquo;</span>

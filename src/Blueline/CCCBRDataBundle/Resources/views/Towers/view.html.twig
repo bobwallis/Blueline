@@ -8,8 +8,8 @@
 {% set search_placeholder = 'Search towers' %}
 
 {% block body %}
-	{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
-	{% for tower in towers %}
+{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
+{% for tower in towers %}
 	<section class="tower">
 		{{ header( { 'title': tower.place, 'title2': (tower.dedication != 'Unknown')? tower.dedication : null }, list( [tower.county, tower.country],', ',', ' ), { 'id': 'tower_'~tower.ID~'_tabBar', 'tabs': [
 			{ 'title': 'Details', 'content': 'tower_details_'~tower.ID },
@@ -33,33 +33,33 @@
 					<th>Tenor:</th>
 					<td><strong>{{ (tower.weightApprox?'~':'')~tower.weightText }}</strong> in {{ tower.note|addAccidentals }}{{ tower.hz is not empty? ' ('~tower.hz~'Hz)' : '' }}</td>
 				</tr>
-	{% if tower.affiliations is not empty %}
+{% if tower.affiliations is not empty %}
 				<tr>
 					<th>Affiliations:</th>
 					<td>{% for association in tower.affiliations %}{% if not loop.first %}{{ loop.last? ' and ' : ', ' }}{% endif %}<a href="{{ path( 'Blueline_Associations_view', { 'abbreviation': association.abbreviation } ) }}">{{ association.name }}</a>{% endfor %}</td>
 				</tr>
-	{% endif %}
+{% endif %}
 				<tr>
 					<th>Diocese:</th>
 					<td>{{ tower.diocese }}</td>
 				</tr>
-	{% if tower.postcode is not empty %}
+{% if tower.postcode is not empty %}
 				<tr>
-	{% if tower.country in ['USA'] %}
+{% if tower.country in ['USA'] %}
 					<th>Zip&nbsp;Code:</th>
-	{% else %}
+{% else %}
 					<th>Postcode:</th>
-	{% endif %}
+{% endif %}
 					<td>{{ tower.postcode }}</td>
 				</tr>
-	{% endif %}
-	{% if tower.gridReference is not empty %}
+{% endif %}
+{% if tower.gridReference is not empty %}
 				<tr>
 					<th>Grid&nbsp;Reference:</th>
 					<td>{{ tower.gridReference }}</td>
 				</tr>
-	{% endif %}
-	{% if tower.toilet or tower.simulator %}
+{% endif %}
+{% if tower.toilet or tower.simulator %}
 				<tr>
 					<th>Facilities:</th>
 					<td>
@@ -67,7 +67,7 @@
 						{% if tower.simulator %}Has a simulator.<br />{% endif %}
 					</td>
 				</tr>
-	{% endif %}
+{% endif %}
 				<tr>
 					<th>Information:</th>
 					<td>
@@ -102,9 +102,9 @@
 			</ol>
 		</div>
 	</section>
-	{% endfor %}
+{% endfor %}
 	<script>
-	{% autoescape false %}
+{% autoescape false %}
 	//<![CDATA[
 		require( ['ui/TowerMap'], function( TowerMap ) {
 			TowerMap.set( {
@@ -116,7 +116,7 @@
 {% endif %}
 			} );
 		} );
-	{% endautoescape %}
+{% endautoescape %}
 	//]]>
 	</script>
 {% endblock %}

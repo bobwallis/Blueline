@@ -8,8 +8,8 @@
 {% set search_placeholder = 'Search associations' %}
 
 {% block body %}
-	{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
-	{% for association in associations %}
+{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
+{% for association in associations %}
 	<section class="association">
 		{{ header( association.name, null, { 'id': 'association_'~association.ID~'_tabBar', 'tabs': [
 			{ 'title': 'Details', 'content': 'association_details_'~association.ID },
@@ -41,9 +41,9 @@
 			</ol>
 		</div>
 	</section>
-	{% endfor %}
+{% endfor %}
 	<script>
-	{% autoescape false %}
+{% autoescape false %}
 	//<![CDATA[
 		require( ['ui/TowerMap'], function( TowerMap ) {
 			TowerMap.set( {
@@ -51,7 +51,7 @@
 				fusionTableQuery: "{% for association in associations %}affiliations contains '{{ association.abbreviation|e('js') }}'{{ (not loop.last)? ' or ':'' }}{% endfor %}"
 			} );
 		} );
-	{% endautoescape %}
+{% endautoescape %}
 	//]]>
 	</script>
 {% endblock %}
