@@ -1,9 +1,9 @@
-/sql
 .directory
 error.log
 *.sql.gz
 resources/tables/methods/methods.sql
 resources/tables/towers/towers.sql
+resources/tables/towers/dove.csv
 resources/tables/methods_towers/methods_towers.sql
 *.tmp
 
