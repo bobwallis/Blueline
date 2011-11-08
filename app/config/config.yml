@@ -22,6 +22,7 @@ twig:
     strict_variables: %kernel.debug%
     globals:
         admin_email: %admin_email%
+        top_uri: %top_uri%
         database_update: %database_update%
 
 # Twig Extensions
