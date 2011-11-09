@@ -40,17 +40,31 @@ define( ['jquery', '../helpers/Can', '../helpers/ContentGetter', './Header', './
 			
 			// Request page content
 			ContentGetter( url,
-				function( content ) {
+				function( data ) {
 					// Check the content requested hasn't arrived after some more recently requested content
 					if( History.getState().url === url ) {
 						Content.loading.hide();
-						$content.html( content );
+						$content.html( data );
 						Window.update( url );
 					}
 				},
-				function() {
+				function( jqXHR, textStatus, errorThrown ) {
+					var errorMessage;
 					Content.loading.hide();
-					console.log('fail lol');
+					switch( textStatus ) {
+						case 'offline':
+							$content.html( '<section class="text"><div class="wrap"><p class="appError">Content is unavailable while offline.</p></div></section>' );
+							Window.title( 'Offline | Blueline' );
+							break;
+						case 'timeout':
+							$content.html( '<section class="text"><div class="wrap"><p class="appError">Request timed out. Refresh to retry.</p></div></section>' );
+							Window.title( 'Timeout | Blueline' );
+							break;
+						default:
+							$content.html( '<section class="text"><header><h1>'+errorThrown+'</h1></header><div class="wrap"><p>Visit the homepage to find what you\'re looking for.</p></div></section>' );
+							Window.title( errorThrown+' | Blueline' );
+							break;
+					}
 				}
 			);
 		}
