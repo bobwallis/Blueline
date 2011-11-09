@@ -56,7 +56,7 @@
 {% if method.firstTowerbellPealDate is not empty %}
 				<tr>
 					<th>First&nbsp;towerbell&nbsp;peal:</th>
-					<td>{{ method.firstTowerbellPealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}{% if method.firstTowerbellPealLocation is not empty %} at <a href="{{ path( 'Blueline_Towers_view', { 'doveid': method.firstTowerBellPealTower.doveid } ) }}">{{ method.firstTowerbellPealLocation }}</a>{% endif %}</td>
+					<td>{{ method.firstTowerbellPealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}{% if method.firstTowerbellPealLocation is not empty %} at {% if method.firstTowerbellPealTower.doveid is defined %}<a href="{{ path( 'Blueline_Towers_view', { 'doveid': method.firstTowerBellPealTower.doveid } ) }}">{{ method.firstTowerbellPealLocation }}</a>{% else %}{{ method.firstTowerbellPealLocation }}{% endif %}{% endif %}</td>
 				</tr>
 {% endif %}
 {% if method.firstHandbellpealDate is not empty %}
