@@ -63,28 +63,28 @@ if [[ ( -z "$1" || "$1" != "nodata" ) && ( -z "$2" || "$2" != "nodata" ) ]]
 	echo -e "\n\033[1mImporting generated SQL\033[0m"
 	echo -en "associations.sql..."
 	if [ -e "./resources/tables/associations.sql" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/associations.sql"
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "./resources/tables/associations.sql"
 		echo "Done"
 	else
 		echo "Skipped"
 	fi
 	echo -en "methods_extras.sql..."
 	if [ -e "./resources/tables/methods_extras.sql" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/methods_extras.sql"
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "./resources/tables/methods_extras.sql"
 		echo "Done"
 	else
 		echo "Skipped"
 	fi
 	echo -en "methods.sql..."
 	if [ -e "./resources/tables/methods/methods.sql" -a "`tail -n 1 "./resources/tables/methods/methods.sql"`" = "-- End" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/methods/methods.sql"
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "./resources/tables/methods/methods.sql"
 		echo "Done"
 	else
 		echo "Skipped"
 	fi
 	echo -en "towers.sql..."
 	if [ -e "./resources/tables/towers/towers.sql" -a "`tail -n 1 "./resources/tables/towers/towers.sql"`" = "-- End" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/towers/towers.sql"
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "./resources/tables/towers/towers.sql"
 		echo "Done"
 	else
 		echo "Skipped"
@@ -98,7 +98,7 @@ if [[ ( -z "$1" || "$1" != "nodata" ) && ( -z "$2" || "$2" != "nodata" ) ]]
 	echo -e "\n\033[1mImporting generated SQL\033[0m"
 	echo -en "methods_towers.sql..."
 	if [ -e "./resources/tables/methods_towers/methods_towers.sql" -a "`tail -n 1 "./resources/tables/methods_towers/methods_towers.sql"`" = "-- End" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/methods_towers/methods_towers.sql"
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "./resources/tables/methods_towers/methods_towers.sql"
 		echo "Done"
 	else
 		echo "Skipped"
