@@ -6,11 +6,11 @@ d=`dirname "$dWhich"`
 cd "$d"
 
 # Pull latest version
-if [ ! -n "$1" ]
+if [[ -z "$1" || "$1" != "nopull" ]]
 then
 	echo -e "\n\033[1mPulling latest version\033[0m"
 	git pull
-	./update nopull
+	./update nopull $@
 	exit
 fi
 
@@ -52,54 +52,57 @@ echo -e "\n\033[1mClearing Symfony cache\033[0m"
 echo -e "\n\033[1mRebuilding assets\033[0m"
 ./resources/scripts/buildWWW
 
-# Update SQL generated from online sources
-echo -e "\n\033[1mUpdating SQL generated from online data\033[0m"
-./resources/tables/methods/build
-./resources/tables/towers/build
+if [[ ( -z "$1" || "$1" != "nodata" ) && ( -z "$2" || "$2" != "nodata" ) ]]
+	then
+	# Update SQL generated from online sources
+	echo -e "\n\033[1mUpdating SQL generated from online data\033[0m"
+	./resources/tables/methods/build
+	./resources/tables/towers/build
 
-# Import generated SQL into the database
-echo -e "\n\033[1mImporting generated SQL\033[0m"
-echo -en "associations.sql..."
-if [ -e "./resources/tables/associations.sql" ]; then
-	mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/associations.sql"
-	echo "Done"
-else
-	echo "Skipped"
-fi
-echo -en "methods_extras.sql..."
-if [ -e "./resources/tables/methods_extras.sql" ]; then
-	mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/methods_extras.sql"
-	echo "Done"
-else
-	echo "Skipped"
-fi
-echo -en "methods.sql..."
-if [ -e "./resources/tables/methods/methods.sql" -a "`tail -n 1 "./resources/tables/methods/methods.sql"`" = "-- End" ]; then
-	mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/methods/methods.sql"
-	echo "Done"
-else
-	echo "Skipped"
-fi
-echo -en "towers.sql..."
-if [ -e "./resources/tables/towers/towers.sql" -a "`tail -n 1 "./resources/tables/towers/towers.sql"`" = "-- End" ]; then
-	mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/towers/towers.sql"
-	echo "Done"
-else
-	echo "Skipped"
-fi
+	# Import generated SQL into the database
+	echo -e "\n\033[1mImporting generated SQL\033[0m"
+	echo -en "associations.sql..."
+	if [ -e "./resources/tables/associations.sql" ]; then
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/associations.sql"
+		echo "Done"
+	else
+		echo "Skipped"
+	fi
+	echo -en "methods_extras.sql..."
+	if [ -e "./resources/tables/methods_extras.sql" ]; then
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/methods_extras.sql"
+		echo "Done"
+	else
+		echo "Skipped"
+	fi
+	echo -en "methods.sql..."
+	if [ -e "./resources/tables/methods/methods.sql" -a "`tail -n 1 "./resources/tables/methods/methods.sql"`" = "-- End" ]; then
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/methods/methods.sql"
+		echo "Done"
+	else
+		echo "Skipped"
+	fi
+	echo -en "towers.sql..."
+	if [ -e "./resources/tables/towers/towers.sql" -a "`tail -n 1 "./resources/tables/towers/towers.sql"`" = "-- End" ]; then
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/towers/towers.sql"
+		echo "Done"
+	else
+		echo "Skipped"
+	fi
 
-# Update SQL generated from Blueline database
-echo -e "\n\033[1mUpdating SQL generated from Blueline database\033[0m"
-./resources/tables/methods_towers/build
+	# Update SQL generated from Blueline database
+	echo -e "\n\033[1mUpdating SQL generated from Blueline database\033[0m"
+	./resources/tables/methods_towers/build
 
-# Import generated SQL into the database
-echo -e "\n\033[1mImporting generated SQL\033[0m"
-echo -en "methods_towers.sql..."
-if [ -e "./resources/tables/methods_towers/methods_towers.sql" -a "`tail -n 1 "./resources/tables/methods_towers/methods_towers.sql"`" = "-- End" ]; then
-	mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/methods_towers/methods_towers.sql"
-	echo "Done"
-else
-	echo "Skipped"
+	# Import generated SQL into the database
+	echo -e "\n\033[1mImporting generated SQL\033[0m"
+	echo -en "methods_towers.sql..."
+	if [ -e "./resources/tables/methods_towers/methods_towers.sql" -a "`tail -n 1 "./resources/tables/methods_towers/methods_towers.sql"`" = "-- End" ]; then
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" < "./resources/tables/methods_towers/methods_towers.sql"
+		echo "Done"
+	else
+		echo "Skipped"
+	fi
 fi
 
 # Invalidate old Varnish caches
