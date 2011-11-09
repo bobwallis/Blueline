@@ -103,6 +103,13 @@ if [[ ( -z "$1" || "$1" != "nodata" ) && ( -z "$2" || "$2" != "nodata" ) ]]
 	else
 		echo "Skipped"
 	fi
+	
+	# Update database_update parameter in parameters.ini
+	if [ ! -h "$d/app/config/parameters.ini" ]
+	then
+		echo -e "\n\033[1mUpdating database_update parameter\033[0m"
+		sed -i -e"s/    database_update=.*/    database_update=\"`date --rfc-3339=seconds`\"/" "$d/app/config/parameters.ini"
+	fi
 fi
 
 # Invalidate old Varnish caches

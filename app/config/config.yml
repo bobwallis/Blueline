@@ -24,6 +24,7 @@ twig:
         admin_email: %admin_email%
         top_uri: %top_uri%
         database_update: %database_update%
+        web_update: %web_update%
 
 # Twig Extensions
 services:
