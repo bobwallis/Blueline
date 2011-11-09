@@ -13,7 +13,7 @@ require( [ 'jquery', 'helpers/Can', 'helpers/History', 'ui/Window', 'ui/Header',
 				if( href.indexOf( '/' ) === 0 ) {
 					href = baseURL+href;
 				}
-				else if( href.indexOf( '//' ) !== 0 && href.indexOf( 'http://' ) !== 0 && href.indexOf( 'https://' ) !== 0 ) {
+				else if( href.indexOf( 'javascript:' ) !== 0 && href.indexOf( '//' ) !== 0 && href.indexOf( 'http://' ) !== 0 && href.indexOf( 'https://' ) !== 0 ) {
 					var url = History.getState().url;
 					href = url.substr( 0, url.lastIndexOf( '/' ) )+'/'+href;
 				}

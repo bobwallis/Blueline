@@ -25,10 +25,6 @@
 			exclude: ["jquery"]
 		},
 		{
-			name: "ui/TowerMap_offline",
-			exclude: ["jquery"]
-		},
-		{
 			name: "ui/MethodView",
 			exclude: ["jquery", "helpers/Can"]
 		}

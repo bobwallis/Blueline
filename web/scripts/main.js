@@ -5,6 +5,14 @@ require( { paths: { jquery: '/scripts/helpers/jquery' } }, ['require', 'helpers/
 		require( ['app'] );
 	}
 	
+	// Update application cache when supported
+	if( Can.applicationCache() ) {
+		$applicationCache = $( window.applicationCache );
+		$applicationCache.bind( 'updateready', function( e ) {
+			$applicationCache.swapCache();
+		} );
+	}
+	
 	// Placeholder for browsers that don't support it
 	if( !Can.placeholder() ) {
 		var addPlaceholder = function() {

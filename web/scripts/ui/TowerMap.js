@@ -2,12 +2,19 @@
 define( ['require', 'jquery'], function( require, $ ) {
 	// Constants
 	/** @const */ var FUSION_TABLE_ID = 916439;
-	/** @const */ var SMALL_MAP_LIMIT = 600;
-
+	/** @const */ var SMALL_MAP_LIMIT = 700;
+	
+	// Detect whether or not we are offline
+	var navigatorOffLine = ( typeof navigator.onLine === 'boolean' && !navigator.onLine );
+	
+	// Create the tower map container
+	var $towerMap = $( '<div id="towerMap" style="display:none"><div class="map"></div></div>' );
+	
 	// Create the TowerMap object
-	var TowerMapInitialised = false,
-	TowerMap = {
-		map: false,
+	var TowerMap = {
+		map: null,
+		fusionTableLayer: null,
+		fusionTableInfoWindow: null,
 		show: function() {
 			$towerMap.show();
 			$( '#loading' ).css( 'width', '40%' );
@@ -19,17 +26,53 @@ define( ['require', 'jquery'], function( require, $ ) {
 			$( '#loading' ).css( 'width', '100%' );
 			$content.css( 'width', '100%' );
 		},
+		lastSetOptions: false,
 		set: function( options ) {
+			// Save the last used options for use when switching between online and offline
+			if( typeof options === 'object' ) {
+				TowerMap.lastSetOptions = options;
+			}
+			
 			$( function() {
 				// If we're on a small screen then show the static map
 				if( $window.width() < SMALL_MAP_LIMIT ) {
-					$( '.staticMap noscript' ).each( function( i, e ) {
-						e = $( e );
-						e.parent().html( e.text().replace( /^(.|\n)*(<img.*\/>)(.|\n)*/, '$2' ) );
+					$( '.staticMap' ).each( function( i, e ) {
+						var $e = $( e );
+						if( navigatorOffLine ) {
+							$e.html( '<p>Maps unavailable while offline.</p>' );
+						}
+						else {
+							$e.html( '<img width="310px" height="380px" src="'+$e.data( 'image' )+'" />' );
+						}
 					} );
 					return;
 				}
-			
+				
+				if( navigatorOffLine ) {
+					// Delete Fusion Table layer
+					if( TowerMap.fusionTableLayer !== null ) {
+						TowerMap.fusionTableLayer.setMap( null );
+						TowerMap.fusionTableLayer = null;
+					}
+					
+					// Delete Fusion Table info window
+					if( TowerMap.fusionTableInfoWindow !== null ) {
+						TowerMap.fusionTableInfoWindow.close();
+						TowerMap.fusionTableInfoWindow = null;
+					}
+					
+					// Delete map
+					TowerMap.map = null;
+					
+					// Set HTML to offline message
+					$towerMap.html( '<div class="map"><p class="unavailable">Maps unavailable while offline.</p></div>' );
+					
+					// Show map
+					TowerMap.show();
+					return;
+				}
+				
+				// Otherwise display the normal map
 				require( ['../plugins/google!maps/3/sensor=false'], function() {
 					// Create Google options from passed numbers
 					if( typeof options.center === 'object' && typeof options.center.length === 'number' ) {
@@ -40,7 +83,7 @@ define( ['require', 'jquery'], function( require, $ ) {
 					}
 			
 					// Initialise the tower map if it hasn't been done already
-					if( !TowerMapInitialised ) {
+					if( TowerMap.map === null ) {
 						// Initialise the map with default options
 						TowerMap.map = new google.maps.Map( $( 'div.map', $towerMap ).get( 0 ), {
 							scrollwheel: true,
@@ -50,7 +93,7 @@ define( ['require', 'jquery'], function( require, $ ) {
 								mapTypeIds: [google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID, 'openStreetMap', 'osMap', google.maps.MapTypeId.ROADMAP]
 							},
 							mapTypeId: google.maps.MapTypeId.ROADMAP,
-							noClear: true,
+							noClear: false,
 							streetViewControl: true,
 							scaleControl: true,
 							fusionTable: FUSION_TABLE_ID,
@@ -110,27 +153,29 @@ define( ['require', 'jquery'], function( require, $ ) {
 						if( navigator.geolocation ) {
 							var currentPositionMarker = false;
 							navigator.geolocation.watchPosition( function( position ) {
-								if( currentPositionMarker === false ) {
-									currentPositionMarker = new google.maps.Marker( {
-										position: new google.maps.LatLng( position.coords.latitude, position.coords.longitude ),
-										map: map,
-										title: 'Your location'
-									} );
+								if( TowerMap.map !== null ) {
+									if( currentPositionMarker === false ) {
+										currentPositionMarker = new google.maps.Marker( {
+											position: new google.maps.LatLng( position.coords.latitude, position.coords.longitude ),
+											map: map,
+											title: 'Your location'
+										} );
+									}
+									else {
+										currentPositionMarker.setPosition( new google.maps.LatLng( position.coords.latitude, position.coords.longitude ) );
+									}
 								}
 								else {
-									currentPositionMarker.setPosition( new google.maps.LatLng( position.coords.latitude, position.coords.longitude ) );
+									currentPositionMarker = false;
 								}
 							} );
 						}
-				
-						// So we don't try and do this again
-						TowerMapInitialised = true;
 					}
 					var map = TowerMap.map;
 			
 					// Show the map
 					TowerMap.show();
-			
+					
 					// Close the info window
 					TowerMap.fusionTableInfoWindow.close();
 			
@@ -177,12 +222,8 @@ define( ['require', 'jquery'], function( require, $ ) {
 		}
 	}
 	
-	// Create the tower map container
-	var $towerMap = $( '<div id="towerMap" style="display:none"><div class="map"></div></div>' );
-	
 	// Variables used by functions below
-	var $window, $top, $bottom, $content, towerMapAdjustLastFired = 0,
-	towerMapHiddenForSmallScreen = false;
+	var $window, $top, $bottom, $content, towerMapAdjustLastFired = 0;
 	
 	// Function adjust the tower map's size and location on window changes
 	var towerMapAdjust = function( e ) {
@@ -196,16 +237,21 @@ define( ['require', 'jquery'], function( require, $ ) {
 		// Hide on small screens
 		var pageWidth = $window.width();
 		if( pageWidth < SMALL_MAP_LIMIT ) {
-			towerMapHiddenForSmallScreen = true;
+			TowerMap.set( false );
 			return TowerMap.hide();
 		}
-		else if( towerMapHiddenForSmallScreen ) {
-			towerMapHiddenForSmallScreen = false;
-			return TowerMap.show();
+		// If the tower map is hidden and it shouldn't be, then show it
+		else if( !$towerMap.is( ':visible' ) ) {
+			if( $( '.tower, .association' ).length > 0 ) {
+				// Stop both a static map tab and the big map from being displayed at the same time
+				$( 'ul.tabBar li:first', $( '.staticMap:visible' ).parent() ).click();
+				// Show the map
+				return TowerMap.show();
+			}
 		}
-		
-		if( $towerMap.is( ':visible' ) ) {
-			var mapCenter = (TowerMap.map !== false)? TowerMap.map.getCenter() : 0,
+		// Otherwise just do a normal resize
+		else {
+			var mapCenter = (TowerMap.map !== null)? TowerMap.map.getCenter() : 0,
 				pageHeight = $window.height(),
 				scrollTop = $window.scrollTop(),
 				topHeight = $top.height(),
@@ -221,7 +267,7 @@ define( ['require', 'jquery'], function( require, $ ) {
 				top: topVisible+'px'
 			} );
 
-			if( TowerMap.map !== false ) {
+			if( TowerMap.map !== null ) {
 				google.maps.event.trigger( TowerMap.map, 'resize' );
 				TowerMap.map.setCenter( mapCenter );
 			}
@@ -230,8 +276,7 @@ define( ['require', 'jquery'], function( require, $ ) {
 	
 	// Attach to the page in various ways on load
 	$( function() {
-		// Append the tower map container
-		$( document.body ).append( $towerMap );
+		var $body = $( document.body );
 		
 		// Get DOM elements
 		$window = $( window );
@@ -239,7 +284,20 @@ define( ['require', 'jquery'], function( require, $ ) {
 		$bottom = $( '#bottom' );
 		$content = $( '#content' );
 		
-		// Attach events
+		// Append the tower map container
+		$body.append( $towerMap );
+		
+		// Attach on/off line change events
+		$body.on( 'online', function() {
+			navigatorOffLine = false;
+			TowerMap.set( TowerMap.lastSetOptions );
+		} )
+		.on( 'offline', function() {
+			navigatorOffLine = true;
+			TowerMap.set( false );
+		});
+		
+		// Attach resize and scroll events
 		$window.resize( towerMapAdjust );
 		$window.scroll( towerMapAdjust );
 		towerMapAdjust();

@@ -16,7 +16,7 @@
 			{ 'title': 'Map', 'content': 'tower_map_'~tower.ID, 'className': 'l600' },
 			{ 'title': 'Methods First Pealed', 'content': 'tower_peals_'~tower.ID }
 		] } ) }}
-		<div id="tower_map_{{ tower.ID }}" class="staticMap">
+		<div id="tower_map_{{ tower.ID }}" class="staticMap" data-image="//maps.google.com/maps/api/staticmap?format=png&amp;scale=2&amp;size=310x380&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center={{ tower.latitude }},{{ tower.longitude }}&amp;markers=size:small|color:red|{{ tower.latitude }},{{ tower.longitude }}">
 			<noscript>
 				<h2>Map</h2>
 				<img width="310px" height="380px" src="//maps.google.com/maps/api/staticmap?format=png&amp;scale=2&amp;size=310x380&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center={{ tower.latitude }},{{ tower.longitude }}&amp;markers=size:small|color:red|{{ tower.latitude }},{{ tower.longitude }}" />

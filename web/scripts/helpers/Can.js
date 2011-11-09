@@ -40,5 +40,8 @@ define( {
 	},
 	placeholder: function() {
 		return !!( 'placeholder' in document.createElement( 'input' ) );
+	},
+	applicationCache: function() {
+		return !!window.applicationCache;
 	}
 } );

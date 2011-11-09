@@ -53,11 +53,11 @@ define( ['jquery', '../helpers/Can', '../helpers/ContentGetter', './Header', './
 					Content.loading.hide();
 					switch( textStatus ) {
 						case 'offline':
-							$content.html( '<section class="text"><div class="wrap"><p class="appError">Content is unavailable while offline.</p></div></section>' );
+							$content.html( '<section class="text"><div class="wrap"><p class="appError">Content is unavailable while offline. <a href="javascript:history.go(-1)">Go back</a>.</p></div></section>' );
 							Window.title( 'Offline | Blueline' );
 							break;
 						case 'timeout':
-							$content.html( '<section class="text"><div class="wrap"><p class="appError">Request timed out. Refresh to retry.</p></div></section>' );
+							$content.html( '<section class="text"><div class="wrap"><p class="appError">Request timed out. <a href="javascript:location.reload(true)">Refresh</a> to retry.</p></div></section>' );
 							Window.title( 'Timeout | Blueline' );
 							break;
 						default:
