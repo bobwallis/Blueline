@@ -37,5 +37,8 @@ define( {
 	},
 	history: function() {
 		return !!( window.history && window.history.pushState );
+	},
+	placeholder: function() {
+		return !!( 'placeholder' in document.createElement( 'input' ) );
 	}
 } );
