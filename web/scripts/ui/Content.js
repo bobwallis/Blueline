@@ -60,6 +60,13 @@ define( ['jquery', '../helpers/Can', '../helpers/ContentGetter', './Header', './
 							$content.html( '<section class="text"><div class="wrap"><p class="appError">Request timed out. <a href="javascript:location.reload(true)">Refresh</a> to retry.</p></div></section>' );
 							Window.title( 'Timeout | Blueline' );
 							break;
+						case 'error':
+							if( !errorThrown ) {
+								// Assume any undefined errors are due to being offline
+								$content.html( '<section class="text"><div class="wrap"><p class="appError">Content is unavailable while offline. <a href="javascript:history.go(-1)">Go back</a>.</p></div></section>' );
+								Window.title( 'Offline | Blueline' );
+								break;
+							}
 						default:
 							$content.html( '<section class="text"><header><h1>'+errorThrown+'</h1></header><div class="wrap"><p>Visit the homepage to find what you\'re looking for.</p></div></section>' );
 							Window.title( errorThrown+' | Blueline' );
