@@ -290,7 +290,9 @@ define( ['require', 'jquery'], function( require, $ ) {
 		// Attach on/off line change events
 		$body.on( 'online', function() {
 			navigatorOffLine = false;
-			TowerMap.set( TowerMap.lastSetOptions );
+			if( $( '.tower, .association' ).length > 0 ) {
+				TowerMap.set( TowerMap.lastSetOptions );
+			}
 		} )
 		.on( 'offline', function() {
 			navigatorOffLine = true;
