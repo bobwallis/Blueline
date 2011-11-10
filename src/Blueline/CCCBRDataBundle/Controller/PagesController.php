@@ -12,6 +12,14 @@ class PagesController extends Controller {
 		
 		$response = $this->render( 'BluelineCCCBRDataBundle:Pages:'.$page.'.'.$format.'.twig', compact( 'isSnippet' ) );
 		
+		// Set correct content type for manifests
+		if( $format == 'manifest' ) {
+			$response->headers->set( 'Content-Type', 'text/cache-manifest' );
+		}
+		else {
+		
+		}
+		
 		// Caching headers
 		$response->setPublic();
 		$response->setMaxAge( 129600 );

@@ -1,6 +1,10 @@
 {% if isSnippet is not defined or not isSnippet %}
 <!DOCTYPE html>
+{% if manifest is defined %}
+<html manifest="site.manifest">
+{% else %}
 <html>
+{% endif %}
 	<head>
 		<meta charset="utf-8" />
 		<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
