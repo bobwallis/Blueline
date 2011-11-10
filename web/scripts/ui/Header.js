@@ -33,8 +33,8 @@ define( ['jquery'], function( $ ) {
 					$topSearchContainer.show();
 				}
 				else {
+					$topSearchInput.blur();
 					$topSearchContainer.hide();
-					$topSearch.blur();
 				}
 				
 				// Update and show the main search box if needed
@@ -48,8 +48,8 @@ define( ['jquery'], function( $ ) {
 					$bigSearchContainer.show();
 				}
 				else {
+					$bigSearchInput.blur();
 					$bigSearchContainer.hide();
-					$bigSearch.blur();
 				}
 				
 				// Update the text breadcrumb in the header
