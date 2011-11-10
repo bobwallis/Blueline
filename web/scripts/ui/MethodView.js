@@ -91,7 +91,7 @@ define( ['jquery', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can']
 					// Parse notation
 					var notationParsed = PlaceNotation.parse( PlaceNotation.implode( notationExploded ), this.method.stage );
 			
-					// Slice out the notation
+					// Slice out the notation we want
 					call.notation = {
 						text: PlaceNotation.implode( notationExploded.slice( start, end ) ),
 						exploded: notationExploded.slice( start, end ),
@@ -101,7 +101,7 @@ define( ['jquery', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can']
 					// Calculate what the start row of the part we chopped out is (used to match up colours with the plain lead, and to display meaningful numbers relative to the plain course)
 					call.startRow = (start === 0)? PlaceNotation.rounds( this.method.stage ) : PlaceNotation.apply( notationParsed.slice( 0, start ), PlaceNotation.rounds( this.method.stage ) );
 			
-					// Adjust rule offs
+					// Adjust rule offs to compensate for the fact we just sliced off some of the start of the method
 					call.ruleOffs = $.extend( {}, this.method.ruleOffs );
 					call.ruleOffs.from -= start;
 					
@@ -135,20 +135,26 @@ define( ['jquery', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can']
 	
 	MethodView.prototype = {
 		drawNumbers: function() {
-			// Choose colours to use for the lines
-			var colours = ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'],
-				toFollow = this.method.workGroups.map( function( g ) { return Math.max.apply( Math, g ); } ),
+			// Colours to use to draw lines of working bells (in order of preference)
+			var colours = ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'];
+			
+			// For the plain course image, draw a line through the heaviest working bell of each type, and the hunt bells
+			var toFollow = this.method.workGroups.map( function( g ) { return Math.max.apply( Math, g ); } ),
 				plainLines = [];
 			for( var i = 0, j = 0; i < this.method.stage; ++i ) {
 				plainLines.push( {
 					'stroke-linejoin': 'round',
 					'stroke-linecap': 'round',
-					'stroke-width': (this.method.huntBells.indexOf( i ) !== -1)? 1.2 : 2,
+					'stroke-width': (this.method.huntBells.indexOf( i ) !== -1)? 1.2 : 2, // Make the hunt bell lines slightly thinner
 					fill: 'none',
 					stroke: (this.method.huntBells.indexOf( i ) !== -1)? '#D11' : ((toFollow.indexOf( i ) !== -1)? colours[j++] || colours[j = 0, j++] : 'transparent')
 				} );
 			}
 			
+			// Decide which bells get place starts drawn on the plain course image (hint: the ones that have lines being drawn that aren't hunt bells)
+			var plainPlaceStarts = plainLines.map( function( l, i ) { return (l.stroke !== 'transparent' && this.method.huntBells.indexOf( i ) === -1)? i : -1; }, this ).filter( function( l ) { return l !== -1; } );
+			
+			// For calls, draw lines through affected bells, and hunt bells
 			var callLines = [];
 			this.options.calls.forEach( function( call, k ) {
 				callLines[k] = [];
@@ -156,26 +162,22 @@ define( ['jquery', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can']
 					callLines[k].push( {
 						'stroke-linejoin': 'round',
 						'stroke-linecap': 'round',
-						'stroke-width': (this.method.huntBells.indexOf( i ) !== -1)? 1.2 : 2,
+						'stroke-width': (this.method.huntBells.indexOf( i ) !== -1)? 1.2 : 2, // Make the hunt bell lines slightly thinner
 						fill: 'none',
 						stroke: (this.method.huntBells.indexOf( i ) !== -1)? '#D11' : ((call.affected.indexOf( i ) !== -1)? colours[j++] || colours[j = 0, j++] : 'transparent')
 					} );
 				}
 			}, this );
 			
-			// Choose a font size, and column padding
-			var numbersFontSize = 14,
-				numbersColumnPadding = 15;
+			// Choose a column (side) padding and row height
+			var numbersColumnPadding = 15
+				rowHeight = 14;
 			
-			// Decide which bells get place starts drawn
-			var plainPlaceStarts = plainLines.map( function( l, i ) { return (l.stroke !== 'transparent' && this.method.huntBells.indexOf( i ) === -1)? i : -1; }, this ).filter( function( l ) { return l !== -1; } );
-			
-			// Determine the correct bell width
+			// Determine the width of the letters we will be drawing
 			var bellWidth = (function() {
 				var bellWidth;
-				// If the text will be drawn in SVG, measure it in SVG
-				if( Can.SVG() ) {
-				 // TO IMPLEMENT
+				// If the text will be drawn in SVG or HTML, measure it in HTML
+				if( Can.SVG() || !Can.canvas() ) {
 					var testText = $( '<span>123</span>' );
 					testText.css( 'font', MONOSPACEFONT );
 					$body.append( testText );
@@ -189,18 +191,10 @@ define( ['jquery', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can']
 					ctx.font = MONOSPACEFONT;
 					bellWidth = ctx.measureText( '123' ).width / 3;
 				}
-				// If the text will be drawn as HTML, measure it as HTML
-				else {
-					var testText = $( '<span>123</span>' );
-					testText.css( 'font', MONOSPACEFONT );
-					$body.append( testText );
-					bellWidth = testText.width() / 3;
-					testText.remove();
-				}
 				return bellWidth;
 			})();
 			
-			// Determine the appropriate lead distribution for the plain course to ensure a fit
+			// Determine the appropriate lead distribution for the plain course to ensure it fits on the page
 			var determineLeadsPerColumn = (function( view ) {
 				var numberOfLeads = view.method.numberOfLeads,
 					numberOfCalls = view.options.calls.length,
@@ -224,7 +218,7 @@ define( ['jquery', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can']
 			})( this );
 			var leadsPerColumn = determineLeadsPerColumn();
 			
-			// Plain course
+			// Options object for the plain course
 			var plainCourseOptions = $.extend( true, {}, this.options.plainCourse, {
 				id: 'numbers'+this.id+'_plain',
 				callingPositions: this.method.callingPositions,
@@ -236,17 +230,19 @@ define( ['jquery', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can']
 				display: {
 					numberOfLeads: this.method.numberOfLeads,
 					leadsPerColumn: leadsPerColumn,
-					dimensions: { rowHeight: numbersFontSize, bellWidth: bellWidth, columnPadding: numbersColumnPadding },
+					dimensions: { rowHeight: rowHeight, bellWidth: bellWidth, columnPadding: numbersColumnPadding },
 					lines: plainLines,
 					numbers: plainLines.map( function( l ) { return (l.stroke !== 'transparent')? 'transparent' : false; } ),
 					placeStarts: plainPlaceStarts
 				}
 			} );
 			
+			// Create the plain course image
 			var plainCourseContainer = this.container.numbers;
 			var plainCourseGrid = new MethodGrid( plainCourseOptions );
 			plainCourseContainer.append( plainCourseGrid.container );
-			// Update the plain course when resizing
+			
+			// Redistribute the plain course's leads across the required number of columns to fit the page when resizing
 			var plainCourseResizedLastFired = 0;
 			$window.resize( function() {
 				// Fire at most once every 200ms
@@ -264,7 +260,7 @@ define( ['jquery', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can']
 				}
 			} );
 			
-			// Calls
+			// Create images for the calls. These will not be redrawn when resizing the window, so don't store the options for later use
 			this.options.calls.forEach( function( call, i ) {
 				this.container.numbers.append( new MethodGrid( $.extend( true, {}, call, {
 					id: 'numbers'+this.id+'_'+call.id,
@@ -275,7 +271,7 @@ define( ['jquery', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can']
 					},
 					display: {
 						numberOfLeads: 1,
-						dimensions: { rowHeight: numbersFontSize, bellWidth: bellWidth },
+						dimensions: { rowHeight: rowHeight, bellWidth: bellWidth },
 						lines: callLines[i],
 						numbers: callLines[i].map( function( l ) { return (l.stroke !== 'transparent')? 'transparent' : false; } )
 					}
