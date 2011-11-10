@@ -1,7 +1,7 @@
 /*global require: false, define: false, google: false */
 define( ['jquery', '../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMono'], function( $, PlaceNotation, Paper, Font ) {
 	// Constants
-	var MONOSPACEFONT = 'normal 14px ' + ((navigator.userAgent.toLowerCase().indexOf('android') > -1)?'':'"Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
+	var MONOSPACEFONT = '14px ' + ((navigator.userAgent.toLowerCase().indexOf('android') > -1)?'':'"Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
 	
 	/* MethodGrid
 	 * options object:
@@ -338,11 +338,11 @@ define( ['jquery', '../helpers/PlaceNotation', '../helpers/Paper', '../helpers/D
 						text += leadHead.join( '' )+'</td>';
 					}
 				
-					numbersTable = $( '<table id="'+this.id+'_numbers" style="font:'+MONOSPACEFONT+'"><tr>'+text+'</tr></table>' );
+					numbersTable = $( '<table id="'+this.id+'_numbers"><tr>'+text+'</tr></table>' );
 					numbersTable.css( {
 						marginTop: (paper === false)? 0 : '-'+this.display.dimensions.paper.y+'px', // Apply negative margin so this sits on top of the paper
-						lineHeight: this.display.dimensions.row.y+'px',
-						fontSize: this.display.dimensions.row.y+'px'
+						font: MONOSPACEFONT,
+						lineHeight: this.display.dimensions.row.y+'px'
 					} );
 				}
 			}

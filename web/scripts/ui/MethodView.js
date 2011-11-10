@@ -1,7 +1,7 @@
 /*global require: false, define: false, google: false */
-define( ['jquery', './MethodGrid', '../helpers/PlaceNotation'], function( $, MethodGrid, PlaceNotation ) {
+define( ['jquery', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can'], function( $, MethodGrid, PlaceNotation, Can ) {
 	// Constants
-	var MONOSPACEFONT = 'normal 14px '+((navigator.userAgent.toLowerCase().indexOf('android') > -1)?'':'"Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
+	var MONOSPACEFONT = '14px '+((navigator.userAgent.toLowerCase().indexOf('android') > -1)?'':'"Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
 	
 	// Reusable
 	var $window = $( window ),
@@ -172,11 +172,31 @@ define( ['jquery', './MethodGrid', '../helpers/PlaceNotation'], function( $, Met
 			
 			// Determine the correct bell width
 			var bellWidth = (function() {
-				var testText = $( '<span style="font:'+MONOSPACEFONT+';">123456</span>' );
-				testText.css( { fontSize: numbersFontSize+'px' } );
-				$body.append( testText );
-				var bellWidth = testText.width() / 6;
-				testText.remove();
+				var bellWidth;
+				// If the text will be drawn in SVG, measure it in SVG
+				if( Can.SVG() ) {
+				 // TO IMPLEMENT
+					var testText = $( '<span>123</span>' );
+					testText.css( 'font', MONOSPACEFONT );
+					$body.append( testText );
+					bellWidth = testText.width() / 3;
+					testText.remove();
+				}
+				// If the text will be drawn on canvas, measure it on canvas
+				else if( Can.canvas() ) {
+					var testCanvas = $( '<canvas></canvas>' ).get( 0 ),
+						ctx = testCanvas.getContext( '2d' );
+					ctx.font = MONOSPACEFONT;
+					bellWidth = ctx.measureText( '123' ).width / 3;
+				}
+				// If the text will be drawn as HTML, measure it as HTML
+				else {
+					var testText = $( '<span>123</span>' );
+					testText.css( 'font', MONOSPACEFONT );
+					$body.append( testText );
+					bellWidth = testText.width() / 3;
+					testText.remove();
+				}
 				return bellWidth;
 			})();
 			
