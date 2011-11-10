@@ -1,6 +1,6 @@
 {% if isSnippet is not defined or not isSnippet %}
 <!DOCTYPE html>
-{% if manifest is defined %}
+{% if manifest is defined and cache_manifest == "yes" %}
 <html manifest="site.manifest">
 {% else %}
 <html>
