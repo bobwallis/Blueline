@@ -69,6 +69,7 @@ define( ['jquery'], function( $ ) {
 					if( $bigQ.is( ':visible:focus' ) || current.length == 0 ) {
 						next = $( 'section.search:first ol:first li:first' );
 						$bigQ.blur();
+						$smallQ.blur();
 					}
 					else {
 						next = current.next( 'li ' );
