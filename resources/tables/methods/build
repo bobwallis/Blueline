@@ -15,7 +15,7 @@ curl --progress-bar -o "$d/data/allmeths-xml.zip" "http://methods.org.uk/method-
 unzip -q -u -d "$d/data" -o "$d/data/allmeths-xml.zip"
 
 # Create SQL
-echo -n "Parsing data..."
+echo -n "Parsing data to SQL..."
 php "$d/xml2sql.php" > "$d/methods.sql"
 echo "Done"
 

@@ -35,7 +35,7 @@ rm -f "$d/methods_towers.sql"
 rm -f "$d/methods_towers.sql.gz"
 
 # Create SQL
-echo -n "Parsing data..."
+echo -n "Parsing data to SQL..."
 php "$d/db2sql.php" "$database_host" "$database_name" "$database_user" "$database_password" > "$d/methods_towers.sql"
 echo "Done"
 
