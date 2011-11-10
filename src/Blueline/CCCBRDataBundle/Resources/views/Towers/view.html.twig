@@ -13,7 +13,7 @@
 	<section class="tower">
 		{{ header( { 'title': tower.place, 'title2': (tower.dedication != 'Unknown')? tower.dedication : null }, list( [tower.county, tower.country],', ',', ' ), { 'id': 'tower_'~tower.ID~'_tabBar', 'tabs': [
 			{ 'title': 'Details', 'content': 'tower_details_'~tower.ID },
-			{ 'title': 'Map', 'content': 'tower_map_'~tower.ID, 'className': 'l600' },
+			{ 'title': 'Map', 'content': 'tower_map_'~tower.ID, 'className': 'l700' },
 			{ 'title': 'Methods First Pealed', 'content': 'tower_peals_'~tower.ID }
 		] } ) }}
 		<div id="tower_map_{{ tower.ID }}" class="staticMap" data-image="//maps.google.com/maps/api/staticmap?format=png&amp;scale=2&amp;size=310x380&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center={{ tower.latitude }},{{ tower.longitude }}&amp;markers=size:small|color:red|{{ tower.latitude }},{{ tower.longitude }}">
