@@ -9,7 +9,7 @@ class PagesController extends Controller {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
 		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
-		$isAndroid = is_string( $request->query->get( 'android' ) );
+		$isAndroid = is_string( $request->query->get( 'android' ) ) || ( strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false );
 		
 		$response = $this->render( 'BluelineCCCBRDataBundle:Pages:'.$page.'.'.$format.'.twig', compact( 'isSnippet', 'isAndroid' ) );
 		

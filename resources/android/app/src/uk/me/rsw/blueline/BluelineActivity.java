@@ -19,7 +19,7 @@ public class BluelineActivity extends Activity {
         
         BluelineWebView = (WebView) findViewById(R.id.webview);
         BluelineHeader = (TextView) findViewById(R.id.header);
-        
+
         WebSettings webSettings = BluelineWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setAppCacheMaxSize(524288);
@@ -33,9 +33,10 @@ public class BluelineActivity extends Activity {
         webSettings.setGeolocationEnabled(true);
         webSettings.setSupportZoom(true);
         webSettings.setSaveFormData(false);
+        webSettings.setUserAgentString("Blueline "+webSettings.getUserAgentString());
         
         BluelineWebView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
-        
+               
         BluelineWebView.loadUrl("http://blueline.rsw.me.uk/?android");
     }
     
