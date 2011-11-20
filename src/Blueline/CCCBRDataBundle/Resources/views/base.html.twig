@@ -1,3 +1,4 @@
+{% spaceless %}
 {% if isSnippet is not defined or not isSnippet %}
 <!DOCTYPE html>
 {% if manifest is defined and cache_manifest == "yes" %}
@@ -67,9 +68,10 @@
 			<div id="push"></div>
 		</div>
 		<footer id="bottom">
-			<nav role="navigation"><a href="{{ path('Blueline_welcome') }}">Home</a> | <a href="{{ path('Blueline_Associations_welcome') }}">Associations</a> | 	<a href="{{ path('Blueline_Methods_welcome') }}">Methods</a> | <a href="{{ path('Blueline_Towers_welcome') }}">Towers</a></nav>
+			<nav role="navigation"><a href="{{ path('Blueline_welcome') }}">Home</a> | <a href="{{ path('Blueline_Associations_welcome') }}">Associations</a> | <a href="{{ path('Blueline_Methods_welcome') }}">Methods</a> | <a href="{{ path('Blueline_Towers_welcome') }}">Towers</a></nav>
 			<p role="contentinfo"><a href="{{ path('Blueline_page', { 'page':'about' }) }}">About</a> | <a href="{{ path('Blueline_page', { 'page':'copyright' }) }}">Copyright</a> | Blueline &copy; MMXI</p>
 		</footer>
 	</body>
 </html>
 {% endif %}
+{% endspaceless %}
