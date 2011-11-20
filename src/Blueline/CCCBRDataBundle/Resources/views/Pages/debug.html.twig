@@ -1,0 +1,26 @@
+{% extends 'BluelineCCCBRDataBundle::base.html.twig' %}
+
+{% block title %}Debug | {{ parent() }}{% endblock %}
+
+{% block body %}
+	{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
+	<section class="text">
+		{{ header('Debug Information') }}
+		<ul id="debug"></ul>
+		<script>
+{% autoescape false %}
+		//<![CDATA[
+			require( { paths: { jquery: '/scripts/helpers/jquery' } }, ['jquery', 'helpers/Can'], function( $, Can ) {
+				var html = '<li>User Agent: '+navigator.userAgent+'</li>';
+				for( can in Can ) {
+					if( Can.hasOwnProperty( can ) ) {
+						html += '<li>'+can+': '+(Can[can]()?'Yes':'No')+'</li>';
+					}
+				}
+				$( '#debug' ).html( html );
+			} );
+		//]]>
+{% endautoescape %}
+		</script>
+	</section>
+{% endblock %}
