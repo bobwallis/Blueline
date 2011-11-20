@@ -12,7 +12,7 @@
 		<title>{% block title %}Blueline{% endblock %}</title>
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="format-detection" content="telephone=no" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.25" />
 		<meta name="application-name" content="Blueline" />
 		<meta name="msapplication-starturl" content="{{ url( 'Blueline_welcome' ) }}" />
 		<link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" sizes="any" />
@@ -36,7 +36,7 @@
 	</head>
 	<body>
 		<div id="wrapper">
-			<header id="top" role="banner">
+			<header id="top" role="banner"{{ header|default(true)? '' : ' style="display:none"' }}>
 				<h1><a href="{{ path('Blueline_welcome') }}">Blueline</a></h1>
 				<div id="breadcrumbContainer">
 {% for crumb in breadcrumb|default([]) %}
@@ -65,9 +65,9 @@
 				{% block body %}{% endblock %}
 {% if isSnippet is not defined or not isSnippet %}
 			</div>
-			<div id="push"></div>
+			<div id="push"{{ footer|default(true)? '' : ' style="display:none"' }}></div>
 		</div>
-		<footer id="bottom">
+		<footer id="bottom"{{ footer|default(true)? '' : ' style="display:none"' }}>
 			<nav role="navigation"><a href="{{ path('Blueline_welcome') }}">Home</a> | <a href="{{ path('Blueline_Associations_welcome') }}">Associations</a> | <a href="{{ path('Blueline_Methods_welcome') }}">Methods</a> | <a href="{{ path('Blueline_Towers_welcome') }}">Towers</a></nav>
 			<p role="contentinfo"><a href="{{ path('Blueline_page', { 'page':'about' }) }}">About</a> | <a href="{{ path('Blueline_page', { 'page':'copyright' }) }}">Copyright</a> | Blueline &copy; MMXI</p>
 		</footer>

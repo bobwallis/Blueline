@@ -9,8 +9,9 @@ class PagesController extends Controller {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
 		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
+		$isAndroid = is_string( $request->query->get( 'android' ) );
 		
-		$response = $this->render( 'BluelineCCCBRDataBundle:Pages:'.$page.'.'.$format.'.twig', compact( 'isSnippet' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Pages:'.$page.'.'.$format.'.twig', compact( 'isSnippet', 'isAndroid' ) );
 		
 		// Set correct content type for manifests
 		if( $format == 'manifest' ) {

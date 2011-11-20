@@ -1,6 +1,10 @@
 {% extends 'BluelineCCCBRDataBundle::base.html.twig' %}
 
 {% set manifest = 'true' %}
+{% if isAndroid %}
+	{% set header = 0 %}
+	{% set footer = 0 %}
+{% endif %}
 
 {% block body %}
 	{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
