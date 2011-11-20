@@ -14,11 +14,14 @@
  */
 define( {
 	indexedDB: function() {
-		// Initialise the window.IndexedDB Object
-		window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB;
+		// Initialise window.IndexedDB by copying in prefixed versions
+		window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 		window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
 		window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
 		return !!window.indexedDB;
+	},
+	webSQL: function() {
+		return !!window.openDatabase;
 	},
 	localStorage: function() {
 		try { return !!localStorage.getItem; }

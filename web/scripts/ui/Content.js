@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false */
-define( ['jquery', '../helpers/Can', '../helpers/ContentGetter', './Header', './Window'], function( $, Can, ContentGetter, Header, Window ) {
+define( ['jquery', '../helpers/Can', '../helpers/Page', './Header', './Window'], function( $, Can, Page, Header, Window ) {
 	var $loading = $( '<div id="loading"></div>' ),
 		loadingSetter = false,
 		$content = [], $towerMap = [],
@@ -39,7 +39,7 @@ define( ['jquery', '../helpers/Can', '../helpers/ContentGetter', './Header', './
 			}
 			
 			// Request page content
-			ContentGetter( url,
+			Page( url,
 				function( data ) {
 					// Check the content requested hasn't arrived after some more recently requested content
 					if( History.getState().url === url ) {

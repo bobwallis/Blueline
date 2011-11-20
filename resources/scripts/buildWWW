@@ -9,7 +9,7 @@ rm -rf "$d/../../web/bundles"
 rm -rf "$d/../../web/css"
 
 # Update the clear parameter in ContentCache.js
-sed -i -e"s/var clearBefore = (new Date(.*$/var clearBefore = (new Date( `date "+%Y, %-m-1, %-d"` ).toDateString());/" "$d/../../web/scripts/helpers/ContentCache.js"
+sed -i -e"s/var contentCache_born = (new Date(.*$/var contentCache_born = (new Date( `date "+%Y, %-m-1, %-d"` ).toDateString());/" "$d/../../web/scripts/helpers/ContentCache.js"
 
 # Execute RequireJS builder
 node "$d/helpers/r.js" -o "$d/app.build.js"
