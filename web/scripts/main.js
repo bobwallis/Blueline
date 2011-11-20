@@ -9,7 +9,7 @@ require( { paths: { jquery: '/scripts/helpers/jquery' } }, ['require', 'helpers/
 	if( Can.applicationCache() ) {
 		$applicationCache = $( window.applicationCache );
 		$applicationCache.bind( 'updateready', function( e ) {
-			applicationCache.swapCache();
+			window.applicationCache.swapCache();
 		} );
 	}
 	
