@@ -1,6 +1,7 @@
 package uk.me.rsw.blueline;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class BluelineActivity extends Activity {
 	WebView BluelineWebView;
@@ -43,6 +45,7 @@ public class BluelineActivity extends Activity {
 	        webSettings.setUserAgentString("Blueline "+webSettings.getUserAgentString());
 	        
 	        BluelineWebView.setWebViewClient(new BluelineWebViewClient());
+	        BluelineWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
 	        BluelineWebView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
 	               
 	        BluelineWebView.loadUrl("http://blueline.rsw.me.uk/?android");
@@ -60,6 +63,24 @@ public class BluelineActivity extends Activity {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             startActivity(intent);
             return true;
+        }
+    }
+    
+    /** Javascript interface */
+    public class JavaScriptInterface {
+        Context mContext;
+        JavaScriptInterface(Context c) {
+            mContext = c;
+        }
+
+        /** Show a toast from the web page */
+        public void showToast(String toast) {
+            Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
+        }
+
+        /** Update the header text */
+        public void headerTitle(String title) {
+            BluelineHeader.setText(title);
         }
     }
     
