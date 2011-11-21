@@ -13,7 +13,7 @@ class MethodsController extends Controller {
 		$chromeless = 0;
 		if( $format == 'html' ) {
 			$chromeless = intval( $request->query->get( 'chromeless' ) );
-			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 2 : (($chromeless > 2)? 2 : $chromeless);
+			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 1 : (($chromeless > 2)? 2 : $chromeless);
 		}
 		
 		$response = $this->render( 'BluelineCCCBRDataBundle:Methods:welcome.'.$format.'.twig', compact( 'chromeless' ) );
@@ -32,7 +32,7 @@ class MethodsController extends Controller {
 		$chromeless = 0;
 		if( $format == 'html' ) {
 			$chromeless = intval( $request->query->get( 'chromeless' ) );
-			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 2 : (($chromeless > 2)? 2 : $chromeless);
+			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 1 : (($chromeless > 2)? 2 : $chromeless);
 		}
 		
 		$titles = explode( '|', str_replace( '_', ' ', $title ) );
@@ -92,7 +92,7 @@ class MethodsController extends Controller {
 		$chromeless = 0;
 		if( $format == 'html' ) {
 			$chromeless = intval( $request->query->get( 'chromeless' ) );
-			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 2 : (($chromeless > 2)? 2 : $chromeless);
+			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 1 : (($chromeless > 2)? 2 : $chromeless);
 		}
 		
 		$methodsRepository = $this->getDoctrine()->getEntityManager()->getRepository( 'BluelineCCCBRDataBundle:Methods' );
