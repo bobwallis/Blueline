@@ -9,9 +9,13 @@ class TowersController extends Controller {
 	public function welcomeAction() {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
+		$chromeless = 0;
+		if( $format == 'html' ) {
+			$chromeless = intval( $request->query->get( 'chromeless' ) );
+			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 2 : (($chromeless > 2)? 2 : $chromeless);
+		}
 		
-		$response = $this->render( 'BluelineCCCBRDataBundle:Towers:welcome.'.$format.'.twig', compact( 'isSnippet' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Towers:welcome.'.$format.'.twig', compact( 'chromeless' ) );
 		
 		// Caching headers
 		$response->setPublic();
@@ -24,7 +28,11 @@ class TowersController extends Controller {
 	public function viewAction( $doveid ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
+		$chromeless = 0;
+		if( $format == 'html' ) {
+			$chromeless = intval( $request->query->get( 'chromeless' ) );
+			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 2 : (($chromeless > 2)? 2 : $chromeless);
+		}
 		
 		$doveids = explode( '|', $doveid );
 		
@@ -42,7 +50,7 @@ class TowersController extends Controller {
 		if( empty( $towers ) || count( $towers ) < count( $doveids ) ) {
 			throw $this->createNotFoundException( 'The tower does not exist' );
 		}
-		$url = $this->generateUrl( 'Blueline_Towers_view', array( 'snippet' => ($isSnippet?1:null), 'snippet' => ($isSnippet?1:null), 'doveid' => implode( '|', array_map( function( $t ) { return $t['doveid']; }, $towers ) ), '_format' => $format ) );
+		$url = $this->generateUrl( 'Blueline_Towers_view', array( 'chromeless' => ($chromeless?:null), 'doveid' => implode( '|', array_map( function( $t ) { return $t['doveid']; }, $towers ) ), '_format' => $format ) );
 	
 		if( $request->getRequestUri() !== $url ) {
 			return $this->redirect( $url, 301 );
@@ -75,7 +83,7 @@ class TowersController extends Controller {
 		}
 		
 		// Create response
-		$response = $this->render( 'BluelineCCCBRDataBundle:Towers:view.'.$format.'.twig', compact( 'pageTitle', 'towers', 'nearbyTowers', 'bbox', 'isSnippet' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Towers:view.'.$format.'.twig', compact( 'pageTitle', 'towers', 'nearbyTowers', 'bbox', 'chromeless' ) );
 
 		// Caching headers
 		$response->setPublic();
@@ -88,7 +96,11 @@ class TowersController extends Controller {
 	public function searchAction( $searchVariables = array() ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
+		$chromeless = 0;
+		if( $format == 'html' ) {
+			$chromeless = intval( $request->query->get( 'chromeless' ) );
+			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 2 : (($chromeless > 2)? 2 : $chromeless);
+		}
 		
 		$towersRepository = $this->getDoctrine()->getEntityManager()->getRepository( 'BluelineCCCBRDataBundle:Towers' );
 		$searchVariables = empty( $searchVariables )? $towersRepository->requestToSearchVariables( $request ) : $searchVariables;
@@ -97,7 +109,7 @@ class TowersController extends Controller {
 		$count = (count( $towers ) > 0)? $towersRepository->searchCount( $searchVariables ) : 0;
 		$pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
 		$pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
-		$response = $this->render( 'BluelineCCCBRDataBundle:Towers:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'towers', 'isSnippet' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Towers:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'towers', 'chromeless' ) );
 		
 		// Caching headers
 		$response->setPublic();

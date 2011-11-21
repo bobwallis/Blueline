@@ -9,10 +9,14 @@ class AssociationsController extends Controller {
 	public function welcomeAction() {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
+		$chromeless = 0;
+		if( $format == 'html' ) {
+			$chromeless = intval( $request->query->get( 'chromeless' ) );
+			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 2 : (($chromeless > 2)? 2 : $chromeless);
+		}
 		
 		$associations = $this->getDoctrine()->getEntityManager()->createQuery( 'SELECT partial a.{abbreviation,name} FROM BluelineCCCBRDataBundle:Associations a' )->getArrayResult();
-		$response = $this->render( 'BluelineCCCBRDataBundle:Associations:welcome.'.$format.'.twig', compact( 'associations', 'isSnippet' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Associations:welcome.'.$format.'.twig', compact( 'associations', 'chromeless' ) );
 		
 		// Caching headers
 		$response->setPublic();
@@ -25,7 +29,11 @@ class AssociationsController extends Controller {
 	public function viewAction( $abbreviation ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
+		$chromeless = 0;
+		if( $format == 'html' ) {
+			$chromeless = intval( $request->query->get( 'chromeless' ) );
+			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 2 : (($chromeless > 2)? 2 : $chromeless);
+		}
 		
 		$abbreviations = explode( '|', $abbreviation );
 		
@@ -41,7 +49,7 @@ class AssociationsController extends Controller {
 		if( empty( $associations ) || count( $associations ) < count( $abbreviations ) ) {
 			throw $this->createNotFoundException( 'The association does not exist' );
 		}
-		$url = $this->generateUrl( 'Blueline_Associations_view', array( 'snippet' => ($isSnippet?1:null), 'abbreviation' => implode( '|', array_map( function( $a ) { return $a['abbreviation']; }, $associations ) ), '_format' => $format ) );
+		$url = $this->generateUrl( 'Blueline_Associations_view', array( 'chromeless' => ($chromeless?:null), 'abbreviation' => implode( '|', array_map( function( $a ) { return $a['abbreviation']; }, $associations ) ), '_format' => $format ) );
 			
 		if( $request->getRequestUri() !== $url && $request->getRequestUri() !== urldecode( $url ) ) {
 			return $this->redirect( $url, 301 );
@@ -72,7 +80,7 @@ class AssociationsController extends Controller {
 		}
 		
 		// Create response
-		$response = $this->render( 'BluelineCCCBRDataBundle:Associations:view.'.$format.'.twig', compact( 'pageTitle', 'associations', 'bbox', 'isSnippet' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Associations:view.'.$format.'.twig', compact( 'pageTitle', 'associations', 'bbox', 'chromeless' ) );
 		
 		// Caching headers
 		$response->setPublic();
@@ -85,7 +93,11 @@ class AssociationsController extends Controller {
 	public function searchAction( $searchVariables = array() ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
+		$chromeless = 0;
+		if( $format == 'html' ) {
+			$chromeless = intval( $request->query->get( 'chromeless' ) );
+			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 2 : (($chromeless > 2)? 2 : $chromeless);
+		}
 		
 		$associationsRepository = $this->getDoctrine()->getEntityManager()->getRepository( 'BluelineCCCBRDataBundle:Associations' );
 		$searchVariables = empty( $searchVariables )? $associationsRepository->requestToSearchVariables( $request ) : $searchVariables;
@@ -94,7 +106,7 @@ class AssociationsController extends Controller {
 		$count = (count( $associations ) > 0)? $associationsRepository->searchCount( $searchVariables ) : 0;
 		$pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
 		$pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
-		$response = $this->render( 'BluelineCCCBRDataBundle:Associations:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'associations', 'isSnippet' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Associations:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'associations', 'chromeless' ) );
 		
 		// Caching headers
 		$response->setPublic();

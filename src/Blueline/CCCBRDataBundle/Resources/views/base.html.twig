@@ -1,7 +1,7 @@
 {% spaceless %}
-{% if isSnippet is not defined or not isSnippet %}
+{% if chromeless|default(0) < 2 %}
 <!DOCTYPE html>
-{% if manifest is defined and cache_manifest == "yes" %}
+{% if manifest|default(0) and cache_manifest|default(0) %}
 <html manifest="site.manifest">
 {% else %}
 <html>
@@ -18,31 +18,31 @@
 		<link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" sizes="any" />
 		<link rel="alternate shortcut icon" type="image/x-ixon" href="{{ asset('favicon.ico') }}" sizes="16x16,24x24,48x48" />
 		<link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/ohgpoagcfmlbkdniokohgicofokpbpae" />
-{% if search_opensearch is defined %}
-		<link rel="search" type="application/opensearchdescription+xml" href="{{ path( 'Blueline_Opensearch_description', { 'type': search_opensearch, '_format': 'xml' } ) }}" title="{{ search_opensearch|title }} | Blueline" />
-{% endif %}
+		{% if search_opensearch is defined %}
+			<link rel="search" type="application/opensearchdescription+xml" href="{{ path( 'Blueline_Opensearch_description', { 'type': search_opensearch, '_format': 'xml' } ) }}" title="{{ search_opensearch|title }} | Blueline" />
+		{% endif %}
 		<link type="text/plain" rel="author" href="{{ path( 'Blueline_page', {'page':'humans','_format':'txt'} ) }}" />
 		<!--[if lt IE 9]><script src="/scripts/ieCompat.js"></script><![endif]-->
-{% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/normalize.css' '@BluelineCCCBRDataBundle/Resources/public/css/default.less' output='css/default.css' filter='less, ?yui_css' %}
-		<link rel="stylesheet" href="{{ asset_url }}" />
-{% endstylesheets %}
-{% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/normalize.css' '@BluelineCCCBRDataBundle/Resources/public/css/print.less' output='css/print.css' filter='less, ?yui_css' %}
-		<link rel="stylesheet" media="print" href="{{ asset_url }}" />
-{% endstylesheets %}
+		{% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/normalize.css' '@BluelineCCCBRDataBundle/Resources/public/css/default.less' output='css/default.css' filter='less, ?yui_css' %}
+			<link rel="stylesheet" href="{{ asset_url }}" />
+		{% endstylesheets %}
+		{% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/normalize.css' '@BluelineCCCBRDataBundle/Resources/public/css/print.less' output='css/print.css' filter='less, ?yui_css' %}
+			<link rel="stylesheet" media="print" href="{{ asset_url }}" />
+		{% endstylesheets %}
 		<script data-main="/scripts/main" src="/scripts/require.js"></script>
-{% if ga_trackingCode is defined and ga_trackingCode is not empty %}
-		<script>var _gaq=[['_setAccount','{{ ga_trackingCode }}'],['_trackPageview']];(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.src='//www.google-analytics.com/ga.js';s.parentNode.insertBefore(g,s)}(document,'script'))</script>
-{% endif %}
+		{% if ga_trackingCode is defined and ga_trackingCode is not empty %}
+			<script>var _gaq=[['_setAccount','{{ ga_trackingCode }}'],['_trackPageview']];(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.src='//www.google-analytics.com/ga.js';s.parentNode.insertBefore(g,s)}(document,'script'))</script>
+		{% endif %}
 	</head>
 	<body>
-		<div id="wrapper">
-			<header id="top" role="banner"{{ header|default(true)? '' : ' style="display:none"' }}>
+		<div id="wrapper"{{ (chromeless|default(0) > 0)? ' style="margin-bottom:0"' : '' }}>
+			<header id="top" role="banner"{{ (chromeless|default(0) > 0)? ' style="display:none"' : '' }}>
 				<h1><a href="{{ path('Blueline_welcome') }}">Blueline</a></h1>
 				<div id="breadcrumbContainer">
-{% for crumb in breadcrumb|default([]) %}
-					<span class="headerSep">&raquo;</span>
-					<h2><a href="{{ crumb.href }}">{{ crumb.title }}</a></h2>
-{% endfor %}
+					{% for crumb in breadcrumb|default([]) %}
+						<span class="headerSep">&raquo;</span>
+						<h2><a href="{{ crumb.href }}">{{ crumb.title }}</a></h2>
+					{% endfor %}
 				</div>
 				<div id="topSearchContainer"{{ search_header|default(false) ? '' : ' style="display: none;"' }}>
 					<span class="headerSep">&raquo;</span>
@@ -63,11 +63,11 @@
 			<div id="content" role="main">
 {% endif %}
 				{% block body %}{% endblock %}
-{% if isSnippet is not defined or not isSnippet %}
+{% if chromeless|default(0) < 2 %}
 			</div>
-			<div id="push"{{ footer|default(true)? '' : ' style="display:none"' }}></div>
+			<div id="push"{{ (chromeless|default(0) > 0)? ' style="display:none"' : '' }}></div>
 		</div>
-		<footer id="bottom"{{ footer|default(true)? '' : ' style="display:none"' }}>
+		<footer id="bottom"{{ (chromeless|default(0) > 0)? ' style="display:none"' : '' }}>
 			<nav role="navigation"><a href="{{ path('Blueline_welcome') }}">Home</a> | <a href="{{ path('Blueline_Associations_welcome') }}">Associations</a> | <a href="{{ path('Blueline_Methods_welcome') }}">Methods</a> | <a href="{{ path('Blueline_Towers_welcome') }}">Towers</a></nav>
 			<p role="contentinfo"><a href="{{ path('Blueline_page', { 'page':'about' }) }}">About</a> | <a href="{{ path('Blueline_page', { 'page':'copyright' }) }}">Copyright</a> | Blueline &copy; MMXI</p>
 		</footer>

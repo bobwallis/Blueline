@@ -10,9 +10,13 @@ class MethodsController extends Controller {
 	public function welcomeAction() {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
+		$chromeless = 0;
+		if( $format == 'html' ) {
+			$chromeless = intval( $request->query->get( 'chromeless' ) );
+			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 2 : (($chromeless > 2)? 2 : $chromeless);
+		}
 		
-		$response = $this->render( 'BluelineCCCBRDataBundle:Methods:welcome.'.$format.'.twig', compact( 'isSnippet' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Methods:welcome.'.$format.'.twig', compact( 'chromeless' ) );
 		
 		// Caching headers
 		$response->setPublic();
@@ -25,7 +29,11 @@ class MethodsController extends Controller {
 	public function viewAction( $title ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
+		$chromeless = 0;
+		if( $format == 'html' ) {
+			$chromeless = intval( $request->query->get( 'chromeless' ) );
+			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 2 : (($chromeless > 2)? 2 : $chromeless);
+		}
 		
 		$titles = explode( '|', str_replace( '_', ' ', $title ) );
 		
@@ -44,7 +52,7 @@ class MethodsController extends Controller {
 		}
 		
 		$titlesFound = array_map( function( $m ) { return str_replace( ' ', '_', $m['title'] ); }, $methods );
-		$url = $this->generateUrl( 'Blueline_Methods_view', array( 'snippet' => ($isSnippet?1:null), 'title' => implode( '|', $titlesFound ), '_format' => $format ) );
+		$url = $this->generateUrl( 'Blueline_Methods_view', array( 'chromeless' => ($chromeless?:null), 'title' => implode( '|', $titlesFound ), '_format' => $format ) );
 		
 		if( $request->getRequestUri() !== $url && $request->getRequestUri() !== urldecode( $url ) ) {
 			return $this->redirect( $url, 301 );
@@ -68,7 +76,7 @@ class MethodsController extends Controller {
 		}
 		
 		// Create response
-		$response = $this->render( 'BluelineCCCBRDataBundle:Methods:view.'.$format.'.twig', compact( 'pageTitle', 'methods', 'isSnippet' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Methods:view.'.$format.'.twig', compact( 'pageTitle', 'methods', 'chromeless' ) );
 		
 		// Caching headers
 		$response->setPublic();
@@ -81,7 +89,11 @@ class MethodsController extends Controller {
 	public function searchAction( $searchVariables = array() ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
+		$chromeless = 0;
+		if( $format == 'html' ) {
+			$chromeless = intval( $request->query->get( 'chromeless' ) );
+			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 2 : (($chromeless > 2)? 2 : $chromeless);
+		}
 		
 		$methodsRepository = $this->getDoctrine()->getEntityManager()->getRepository( 'BluelineCCCBRDataBundle:Methods' );
 		$searchVariables = empty( $searchVariables )? $methodsRepository->requestToSearchVariables( $request ) : $searchVariables;
@@ -90,7 +102,7 @@ class MethodsController extends Controller {
 		$count = (count( $methods ) > 0)? $methodsRepository->searchCount( $searchVariables ) : 0;
 		$pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
 		$pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
-		$response = $this->render( 'BluelineCCCBRDataBundle:Methods:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'methods', 'isSnippet' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Methods:search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'methods', 'chromeless' ) );
 		
 		// Caching headers
 		$response->setPublic();

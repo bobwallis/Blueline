@@ -8,10 +8,13 @@ class PagesController extends Controller {
 	public function pageAction( $page ) {
 		$request = $this->getRequest();
 		$format = $request->getRequestFormat();
-		$isSnippet = $format == 'html' && $request->query->get( 'snippet' );
-		$isAndroid = is_string( $request->query->get( 'android' ) ) || ( strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false );
+		$chromeless = 0;
+		if( $format == 'html' ) {
+			$chromeless = intval( $request->query->get( 'chromeless' ) );
+			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 2 : (($chromeless > 2)? 2 : $chromeless);
+		}
 		
-		$response = $this->render( 'BluelineCCCBRDataBundle:Pages:'.$page.'.'.$format.'.twig', compact( 'isSnippet', 'isAndroid' ) );
+		$response = $this->render( 'BluelineCCCBRDataBundle:Pages:'.$page.'.'.$format.'.twig', compact( 'chromeless' ) );
 		
 		// Set correct content type for manifests
 		if( $format == 'manifest' ) {

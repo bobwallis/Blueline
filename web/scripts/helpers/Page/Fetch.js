@@ -9,7 +9,7 @@ define( ['jquery', './Cache'], function( $, Cache ) {
 			AJAXContentRequest = $.ajax( {
 				url: url,
 				dataType: 'html',
-				data: 'snippet=1',
+				data: 'chromeless=2',
 				cache: Cache.hasStore? false: true, // Bypass the browser's cache if our own is implemented
 				success: [success, function( content ) { Cache.set( url, content ); }],
 				error: failure

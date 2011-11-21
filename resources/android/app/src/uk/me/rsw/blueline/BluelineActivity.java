@@ -25,30 +25,29 @@ public class BluelineActivity extends Activity {
         BluelineWebView = (WebView) findViewById(R.id.webview);
         BluelineHeader = (TextView) findViewById(R.id.header);
 
+        WebSettings webSettings = BluelineWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setAppCacheMaxSize(524288);
+        webSettings.setAppCachePath("/data/data/uk.me.rsw.blueline/cache");
+        webSettings.setAllowFileAccess(true);
+        webSettings.setAppCacheEnabled(true);
+        webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        webSettings.setDatabasePath("/data/data/uk.me.rsw.blueline/cache");
+        webSettings.setDatabaseEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setSupportZoom(true);
+        webSettings.setSaveFormData(false);
+        webSettings.setUserAgentString("Blueline "+webSettings.getUserAgentString());
+        
+        BluelineWebView.setWebViewClient(new BluelineWebViewClient());
+        BluelineWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
+        BluelineWebView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
+        
         if (savedInstanceState != null) {
         	BluelineWebView.restoreState(savedInstanceState);
         }
         else {
-	        WebSettings webSettings = BluelineWebView.getSettings();
-	        webSettings.setJavaScriptEnabled(true);
-	        webSettings.setAppCacheMaxSize(524288);
-	        webSettings.setAppCachePath("/data/data/uk.me.rsw.blueline/cache");
-	        webSettings.setAllowFileAccess(true);
-	        webSettings.setAppCacheEnabled(true);
-	        webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
-	        webSettings.setDatabasePath("/data/data/uk.me.rsw.blueline/cache");
-	        webSettings.setDatabaseEnabled(true);
-	        webSettings.setDomStorageEnabled(true);
-	        webSettings.setGeolocationEnabled(true);
-	        webSettings.setSupportZoom(true);
-	        webSettings.setSaveFormData(false);
-	        webSettings.setUserAgentString("Blueline "+webSettings.getUserAgentString());
-	        
-	        BluelineWebView.setWebViewClient(new BluelineWebViewClient());
-	        BluelineWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
-	        BluelineWebView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
-	               
-	        BluelineWebView.loadUrl("http://blueline.rsw.me.uk/?android");
+	        BluelineWebView.loadUrl("http://blueline.rsw.me.uk/");
         }
     }
     
