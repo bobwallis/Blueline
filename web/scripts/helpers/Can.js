@@ -1,4 +1,4 @@
-/*!
+/*
  * The code below is largely (if not entirely) a subset of the Modernizr library
  * developer and licenser information is below:
  *
