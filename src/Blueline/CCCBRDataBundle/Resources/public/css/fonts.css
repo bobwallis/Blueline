@@ -1,0 +1,6 @@
+@font-face {
+	font-family: 'BluelineMono';
+	src: url('fonts/Blueline.woff') format('woff'), url('fonts/Blueline.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}

@@ -25,7 +25,7 @@
 		{% endif %}
 		<link type="text/plain" rel="author" href="{{ path( 'Blueline_page', {'page':'humans','_format':'txt'} ) }}" />
 		<!--[if lt IE 9]><script src="/scripts/ieCompat.js"></script><![endif]-->
-		{% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/normalize.css' '@BluelineCCCBRDataBundle/Resources/public/css/default.less' output='css/default.css' filter='less, ?yui_css' %}
+		{% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/normalize.css' '@BluelineCCCBRDataBundle/Resources/public/css/fonts.css' '@BluelineCCCBRDataBundle/Resources/public/css/default.less' output='css/default.css' filter='less, ?yui_css' %}
 			<link rel="stylesheet" href="{{ asset_url }}" />
 		{% endstylesheets %}
 		{% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/normalize.css' '@BluelineCCCBRDataBundle/Resources/public/css/print.less' output='css/print.css' filter='less, ?yui_css' %}
