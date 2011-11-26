@@ -59,8 +59,7 @@
 		display: block;
 		float: right;
 		background-color: #FFF;
-		background-image: url(../../images/search.png);
-		background-image: url(../../images/search.svg), url(../../images/search.png);
+		background-image: url(../../images/search.svg);
 		border: 0;
 		width: 19px;
 		height: 19px;
@@ -77,13 +76,13 @@
 /* Big search */
 @bigSearchWidth: 350px;
 @bigSearchWidth_smallScreen: 304px;
-div#bigSearchContainer {
+#bigSearchContainer {
 	clear: both;
 	border-bottom: 1px solid @lightGrey;
 	background-color: #FAFAFA;
 	padding: 8px;
 }
-form#bigSearch {
+#bigSearch {
 	display: block;
 	overflow: hidden;
 	width: @bigSearchWidth;
@@ -109,15 +108,14 @@ form#bigSearch {
 	}
 	button {
 		float: left;
-		background: #FFF url(../../images/search.png) no-repeat center center;
-		background-image: url(../../images/search.svg), url(../../images/search.png);
+		background: #FFF url(../../images/search.svg) no-repeat center center;
 		border: 0;
 		width: 25px;
 		height: 25px;
 	}
 }
 @media screen and (max-width: 480px) {
-form#bigSearch {
+#bigSearch {
 	width: @bigSearchWidth_smallScreen;
 	input {
 		width: @bigSearchWidth_smallScreen - 40;
