@@ -1,4 +1,4 @@
-;(function(window,document,undefined){
+(function(window,document,undefined){
 function h(a){return function(){return this[a]}}var i;function j(a,b){var c=arguments.length>2?Array.prototype.slice.call(arguments,2):[];return function(){c.push.apply(c,arguments);return b.apply(a,c)}};function l(a,b){this.l=a;this.a=b}l.prototype.createElement=function(a,b,c){a=this.l.createElement(a);if(b)for(var d in b)if(b.hasOwnProperty(d))if(d=="style"&&this.a.getName()=="MSIE")a.style.cssText=b[d];else a.setAttribute(d,b[d]);c&&a.appendChild(this.l.createTextNode(c));return a};function m(a,b,c){a=a.l.getElementsByTagName(b)[0];if(!a)a=document.documentElement;if(a&&a.lastChild){a.insertBefore(c,a.lastChild);return true}return false}
 function n(a,b){if(b.parentNode){b.parentNode.removeChild(b);return true}return false}function o(a,b,c){a=b.className.split(/\s+/);for(var d=0,e=a.length;d<e;d++)if(a[d]==c)return;a.push(c);b.className=a.join(" ").replace(/^\s+/,"")}function p(a,b,c){a=b.className.split(/\s+/);for(var d=[],e=0,f=a.length;e<f;e++)a[e]!=c&&d.push(a[e]);b.className=d.join(" ").replace(/^\s+/,"").replace(/\s+$/,"")}
 function s(a,b,c){a=b.className.split(/\s+/);b=0;for(var d=a.length;b<d;b++)if(a[b]==c)return true;return false};function t(a,b,c,d,e,f,g,k){this.fa=a;this.la=b;this.Q=c;this.P=d;this.ia=e;this.ha=f;this.O=g;this.ma=k}i=t.prototype;i.getName=h("fa");i.$=h("la");i.W=h("Q");i.X=h("P");i.Y=h("ia");i.Z=h("ha");i.V=h("O");i.o=h("ma");function u(a,b){this.a=a;this.g=b}var v=new t("Unknown","Unknown","Unknown","Unknown","Unknown","Unknown",undefined,false);u.prototype.parse=function(){return this.a.indexOf("MSIE")!=-1?x(this):this.a.indexOf("Opera")!=-1?y(this):this.a.indexOf("AppleWebKit")!=-1?A(this):this.a.indexOf("Gecko")!=-1?B(this):v};
@@ -15,4 +15,22 @@ function W(a,b,c){var d=a.U.expand(a.w);b=a.b.createElement("span",{style:"posit
 function fa(a,b,c){c=ca(a.A,c);a.p=a.q=c.length;for(var d=new O(a.b,b,{n:function(k){return k.offsetWidth}},a.h,function(){return(new Date).getTime()}),e=0,f=c.length;e<f;e++){var g=c[e];ga(g,a.a,j(a,a.ca,g,b,d))}};function K(a){this.da=a||ha}var ha="-";K.prototype.d=function(){for(var a=[],b=0;b<arguments.length;b++)a.push(arguments[b].replace(/[\W_]+/g,"").toLowerCase());return a.join(this.da)};function R(){this.J="'"}R.prototype.quote=function(a){var b=[];a=a.split(/,\s*/);for(var c=0;c<a.length;c++){var d=a[c].replace(/['"]/g,"");d.indexOf(" ")==-1?b.push(d):b.push(this.J+d+this.J)}return b.join(",")};function S(){this.I=ia;this.k=ja}var ia=["font-style","font-weight"],ja={"font-style":[["n","normal"],["i","italic"],["o","oblique"]],"font-weight":[["1","100"],["2","200"],["3","300"],["4","400"],["5","500"],["6","600"],["7","700"],["8","800"],["9","900"],["4","normal"],["7","bold"]]};function Z(a,b,c){this.ba=a;this.ja=b;this.k=c}Z.prototype.expand=function(a,b){for(var c=0;c<this.k.length;c++)if(b==this.k[c][0]){a[this.ba]=this.ja+":"+this.k[c][1];return}};
 S.prototype.expand=function(a){if(a.length!=2)return null;for(var b=[null,null],c=0,d=this.I.length;c<d;c++){var e=this.I[c],f=a.substr(c,1);(new Z(c,e,this.k[e])).expand(b,f)}return b[0]&&b[1]?b.join(";")+";":null};window.WebFont=function(){var a=(new u(navigator.userAgent,document)).parse();return new Y(new l(document,a),new ba,document.documentElement,function(b,c){setTimeout(b,c)},a)}();window.WebFont.load=window.WebFont.load;window.WebFont.addModule=window.WebFont.r;t.prototype.getName=t.prototype.getName;t.prototype.getVersion=t.prototype.$;t.prototype.getEngine=t.prototype.W;t.prototype.getEngineVersion=t.prototype.X;t.prototype.getPlatform=t.prototype.Y;t.prototype.getPlatformVersion=t.prototype.Z;
 t.prototype.getDocumentMode=t.prototype.V;t.prototype.isSupportingWebFont=t.prototype.o;function $(a,b){this.b=a;this.u=b}$.prototype.load=function(a){for(var b=this.u.urls||[],c=this.u.families||[],d=0,e=b.length;d<e;d++)m(this.b,"head",this.b.createElement("link",{rel:"stylesheet",href:b[d]}));a(c)};function ga(a,b,c){return c(b.o())}window.WebFont.r("custom",function(a){var b=(new u(navigator.userAgent,document)).parse();return new $(new l(document,b),a)});window.WebFontConfig&&window.WebFont.load(window.WebFontConfig);
-})(this,document);
+
+define( {
+	load: function( name, req, load, config ) {
+		if( config.isBuild ) {
+			load( null );
+		}
+		else {
+			window.WebFont.load( {
+				custom: {
+					families: [name],
+					urls: ['/css/default.css']
+				},
+				active: function() { load( true ); },
+				inactive: function() { load( false ); }
+			} );
+		}
+	}
+} );
+})(window,document);

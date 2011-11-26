@@ -5,7 +5,7 @@
 	optimize: "uglify",
 	optimizeCss: "none",
 	paths: {
-		"jquery": "helpers/jquery"
+		"jquery": "lib/jquery"
 	},
 	modules: [
 		{
