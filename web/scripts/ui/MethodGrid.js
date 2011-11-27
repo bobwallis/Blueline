@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false */
-define( ['jquery', 'plugins/font!BluelineMono', '../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMono'], function( $, customFontLoaded, PlaceNotation, Paper, Font ) {
+define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMono'], function( $, customFontLoaded, PlaceNotation, Paper, Font ) {
 	// Constants
 	var MONOSPACEFONT = '14px ' + ((navigator.userAgent.toLowerCase().indexOf('android') > -1)?'':'"Droid Sans Mono", BluelineMono, "Andale Mono", Consolas, ')+'monospace';
 	
