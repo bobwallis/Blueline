@@ -51,6 +51,7 @@ $counties = array(
 	'Worcs' => 'Worcestershire',
 	'Yorks' => 'Yorkshire',
 	'N Yks' => 'North Yorkshire',
+	'W Yorks' => 'West Yorkshire',
 	'ER Yks' => 'East Riding of Yorkshire',
 	'W Yks' => 'West Yorkshire',
 	'S Yks' => 'South Yorkshire',
