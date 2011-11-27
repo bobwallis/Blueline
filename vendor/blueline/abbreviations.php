@@ -16,6 +16,7 @@ $counties = array(
 	'Essex' => 'Essex',
 	'Glos' => 'Gloucestershire',
 	'Gr Lon' => 'Greater London',
+	'Gr London' => 'Greater London',
 	'Gr Man' => 'Greater Manchester',
 	'Hants' => 'Hampshire',
 	'Herefs' => 'Herefordshire',
