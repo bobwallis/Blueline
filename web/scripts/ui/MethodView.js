@@ -1,7 +1,7 @@
 /*global require: false, define: false, google: false */
 define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can'], function( $, customFontLoaded, MethodGrid, PlaceNotation, Can ) {
 	// Constants
-	var MONOSPACEFONT = '14px '+((navigator.userAgent.toLowerCase().indexOf('android') > -1)?'':'"Droid Sans Mono", BluelineMono, "Andale Mono", Consolas, ')+'monospace';
+	var MONOSPACEFONT = '14px ' + ((navigator.userAgent.toLowerCase().indexOf('android') > -1)?'':'BluelineMono, "Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
 	
 	// Reusable
 	var $window = $( window ),
@@ -178,10 +178,10 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 				var bellWidth;
 				// If the text will be drawn in SVG or HTML, measure it in HTML
 				if( Can.SVG() || !Can.canvas() ) {
-					var testText = $( '<span>123</span>' );
+					var testText = $( '<div>123456</div>' );
 					testText.css( 'font', MONOSPACEFONT );
 					$body.append( testText );
-					bellWidth = testText.width() / 3;
+					bellWidth = testText.width() / 6;
 					testText.remove();
 				}
 				// If the text will be drawn on canvas, measure it on canvas
@@ -189,7 +189,7 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 					var testCanvas = $( '<canvas></canvas>' ).get( 0 ),
 						ctx = testCanvas.getContext( '2d' );
 					ctx.font = MONOSPACEFONT;
-					bellWidth = ctx.measureText( '123' ).width / 3;
+					bellWidth = ctx.measureText( '123456' ).width / 6;
 				}
 				return bellWidth;
 			})();
