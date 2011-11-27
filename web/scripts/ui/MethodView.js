@@ -178,7 +178,7 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 				var bellWidth;
 				// If the text will be drawn in SVG or HTML, measure it in HTML
 				if( Can.SVG() || !Can.canvas() ) {
-					var testText = $( '<div>123456</div>' );
+					var testText = $( '<span style="inline-block">123456</span>' );
 					testText.css( 'font', MONOSPACEFONT );
 					$body.append( testText );
 					bellWidth = testText.width() / 6;
