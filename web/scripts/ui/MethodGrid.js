@@ -254,8 +254,8 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			// Draw numbers if needed
 			if( this.show.numbers ) {
 				var numbersTable = false;
-				// Use SVG if possible
-				if( Can.fastSVG() && paper !== false && paper.type == 'SVG' ) {
+				// Use SVG if there's not very much text. If there's lots this is painfully slow
+				if( this.stage < 9 && paper !== false && paper.type == 'SVG' ) {
 					// A text container
 					var textContainer = document.createElementNS( paper.ns, 'svg:text' ),
 						row = this.leadHeads[0].map( function( b ) {
