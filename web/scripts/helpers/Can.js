@@ -30,6 +30,9 @@ define( {
 	SVG: function() {
 		return window.SVGAngle || document.implementation.hasFeature( 'http://www.w3.org/TR/SVG11/feature#BasicStructure', '1.1' );
 	},
+	fastSVG: function() {
+		return RegExp(" AppleWebKit/").test(navigator.userAgent);
+	},
 	canvas: function() {
 			var elem = document.createElement( 'canvas' );
 			return !!( elem.getContext && elem.getContext( '2d' ) );

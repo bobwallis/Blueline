@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false */
-define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '../helpers/Paper', '../helpers/DroidSansMono'], function( $, customFontLoaded, PlaceNotation, Paper, Font ) {
+define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '../helpers/Paper', '../helpers/Can', '../helpers/DroidSansMono'], function( $, customFontLoaded, PlaceNotation, Paper, Can, Font ) {
 	// Constants
 	var MONOSPACEFONT = '14px ' + ((navigator.userAgent.toLowerCase().indexOf('android') > -1)?'':'BluelineMono, "Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
 	
@@ -255,8 +255,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			if( this.show.numbers ) {
 				var numbersTable = false;
 				// Use SVG if possible
-				if( false && paper !== false && paper.type == 'SVG' ) {
-					/* This works, but it's a bit too slow to be usable (in Firefox in particular)
+				if( Can.fastSVG() && paper !== false && paper.type == 'SVG' ) {
 					// A text container
 					var textContainer = document.createElementNS( paper.ns, 'svg:text' ),
 						row = this.leadHeads[0].map( function( b ) {
@@ -328,7 +327,6 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 					
 					// Append the container to the SVG element
 					paper.canvas.appendChild( textContainer );
-					*/
 				}
 				// Use Canvas if the browser supports canvas text
 				else if( paper !== false && paper.type == 'canvas' && paper.canvasText == true ) {
