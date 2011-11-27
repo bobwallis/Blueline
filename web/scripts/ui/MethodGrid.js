@@ -151,7 +151,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 						for( var j = 0; j < this.display.leadsPerColumn && (i*this.display.leadsPerColumn)+j < this.display.numberOfLeads; ++j ) {
 							for( var k = this.ruleOffs.from; k <= this.notation.parsed.length; k += this.ruleOffs.every ) {
 								if( k > 0 ) {
-									path += 'M'+(i*totalRowAndColumnWidth)+','+(((j*this.notation.parsed.length)+k)*this.display.dimensions.row.y)+'l'+this.display.dimensions.row.x+',0';
+									path += 'M'+(i*totalRowAndColumnWidth)+','+((((j*this.notation.parsed.length)+k)*this.display.dimensions.row.y)-0.5)+'l'+this.display.dimensions.row.x+',0';
 								}
 							}
 						}
