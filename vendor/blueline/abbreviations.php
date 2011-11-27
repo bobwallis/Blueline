@@ -56,6 +56,7 @@ $counties = array(
 	'ER Yks' => 'East Riding of Yorkshire',
 	'W Yks' => 'West Yorkshire',
 	'S Yks' => 'South Yorkshire',
+	'S Yorks' => 'South Yorkshire',
 	'Scilly' => 'Isles of Scilly'
 );
 
