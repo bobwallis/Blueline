@@ -21,6 +21,7 @@ html, body {
 	font-size: 12px;
 	line-height: 15px;
 	-webkit-font-smoothing: antialiased;
+	-webkit-tap-highlight-color: #F60;
 	min-width: 320px;
 }
 h1, h2 {
@@ -44,9 +45,9 @@ h1, h2 {
 a {
 	text-decoration: none;
 	border-bottom: 1px solid #A1C4D0;
-	transition-property: border-bottom-color, color; -webkit-transition-property: border-bottom-color, color; -moz-transition-property: border-bottom-color, color;
-	transition-duration: .4s; -webkit-transition-duration: .4s; -moz-transition-duration: .4s;
-	&:link { color: #29404C; -webkit-tap-highlight-color: #FF6600; }
+	.transition-property(border-bottom-color, color);
+	.transition-duration(.4s);
+	&:link { color: #29404C; }
 	&:visited { color: #4C2940; }
 	&:hover { border-bottom-color: #29404C; }
 	&:active { color: #404C29; }
