@@ -9,6 +9,7 @@ class All extends \Twig_Extension {
 			'round' => new \Twig_Function_Function( 'round' ),
 			'list' => new \Twig_Function_Method( $this, 'toList' ),
 			'dayToString' => new \Twig_Function_Method( $this, 'dayToString' ),
+			'browserDoesntSupportSVGInCSSBackground' => new \Twig_Function_Method( $this, 'browserDoesntSupportSVGInCSSBackground' )
 		);
 	}
 
@@ -55,6 +56,17 @@ class All extends \Twig_Extension {
 	private static $days = array( '', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' );
 	public function dayToString( $day ) {
 		return self::$days[intval( $day )];
+	}
+	
+	public function browserDoesntSupportSVGInCSSBackground() {
+		$ua = strtolower( $_SERVER['HTTP_USER_AGENT'] );
+		if( true || strpos( 'android', $ua ) ) {
+			$version = preg_match( '/android ([\d|\.]*)/', $ua, $matches );
+			if( $version == 1 && floatval( $matches[1] ) < 3 ) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public function getName() {

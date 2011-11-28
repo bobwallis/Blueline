@@ -15,13 +15,16 @@ CACHE:
 
 /favicon.ico
 /favicon.svg
-/images/search.svg
-/images/search.png
-/images/selectIndicator.svg
-/images/selectIndicator.png
 /images/loading.gif
-/images/external.svg
+{% if browserDoesntSupportSVGInCSSBackground() %}
+/images/search.png
+/images/selectIndicator.png
 /images/external.png
+{% else %}
+/images/search.svg
+/images/selectIndicator.svg
+/images/external.svg
+{% endif %}
 
 /fonts/Blueline.woff
 /fonts/Blueline.ttf
