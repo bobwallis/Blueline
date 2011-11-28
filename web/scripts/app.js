@@ -90,6 +90,10 @@ require( [ 'jquery', 'helpers/Can', 'lib/History', 'ui/Window', 'ui/Header', 'ui
 			$( '#bigSearch' ).keyup( historyInputChange );
 			$( '#bigSearch' ).bind( 'cut',  historyInputClipboard )
 				.bind( 'paste', historyInputClipboard );
+			
+			// Finish fading out #overlay
+			$( '#overlay' ).css( 'opacity', 0 );
+			setTimeout( function() { $( '#opacity' ).remove() }, 150 );
 		} );
 	}
 

@@ -40,6 +40,10 @@
 		{% endif %}
 	</head>
 	<body>
+		{% if appStartPage|default(0) %}
+			<script>if((('standalone' in navigator)&&navigator.standalone)||typeof window['Android']=='object'){document.write('<div id="overlay"></div>');}</script>
+		{% endif %}
+		<script></script>
 		<div id="wrapper"{{ (chromeless|default(0) > 0)? ' style="margin-bottom:0"' : '' }}>
 			<header id="top" role="banner"{{ (chromeless|default(0) > 0)? ' style="display:none"' : '' }}>
 				<h1><a href="{{ path('Blueline_welcome') }}">Blueline</a></h1>

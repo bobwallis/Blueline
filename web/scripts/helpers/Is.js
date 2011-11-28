@@ -14,6 +14,9 @@ define( function() {
 				return true;
 			}
 			return false;
+		},
+		app: function() {
+			return ( (('standalone' in navigator) && navigator.standalone) || typeof window['Android'] === 'object' );
 		}
 	};
 } );
