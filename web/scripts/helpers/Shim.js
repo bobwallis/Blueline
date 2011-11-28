@@ -5,7 +5,8 @@ define( ['jquery', './Is', './Can'], function( $, Is, Can ) {
 	
 	// Fallback to PNG for browsers that don't support SVG in CSS backgrounds.
 	// (IE is done by the old_ie.css stylesheet, Android <3 is only other culprit)
-	if( Is.android() < 3 ) {
+	var isAndroid = Is.android();
+	if( typeof isAndroid == 'number' && isAndroid < 3 ) {
 		$( '<style>#topSearch button, #bigSearch button{background-image:url(../../images/search.png) !important}a.external{background-image:url(../../images/external.png) !important}.search li.selected{background-image: url(../../images/selectIndicator.png) !important}</style>' ).appendTo( 'head' );
 	}
 	
