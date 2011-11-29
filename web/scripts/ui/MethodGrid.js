@@ -1,7 +1,7 @@
 /*global require: false, define: false, google: false */
 define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '../helpers/Paper', '../helpers/Can', '../helpers/DroidSansMono'], function( $, customFontLoaded, PlaceNotation, Paper, Can, Font ) {
 	// Constants
-	var MONOSPACEFONT = '13px ' + ((navigator.userAgent.toLowerCase().indexOf('android') > -1)?'':'BluelineMono, "Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
+	var MONOSPACEFONT = '13px ' + ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : (customFontLoaded?'BluelineMono, ':'')+'"Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
 	
 	/* MethodGrid
 	 * options object:
@@ -284,7 +284,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 					Array_unique( this.display.numbers ).map( function( e, i ) { // For each color of text
 						if( e !== 'transparent' ) { // Only bother drawing at all if not transparent
 							// Set color
-							ctx.fillStyle = (e == 'normal')? '#000': e;
+							//ctx.fillStyle = (e == 'normal')? '#000': e;
 							
 							// Produce the start row
 							var row = this.leadHeads[0].map( function( b, i ) {

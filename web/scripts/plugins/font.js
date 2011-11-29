@@ -18,43 +18,38 @@
 	
 	// Compare the width of a test string in a serif font against the test string 
 	// using the custom font, and wait for them to be different
-	var styleString = "position:absolute;top:-999px;left:-999px;font-size:300px;width:auto;height:auto;line-height:normal;margin:0;padding:0;font-variant:normal;font-family:",
-    testAgainstA = "arial,'URW Gothic L',sans-serif",
-		testAgainstB = "Georgia,'Century Schoolbook L',serif",
+	var styleString = "position:absolute;display:block;top:-999px;left:0;font-size:500px;line-height:normal;margin:0;padding:0;font-variant:normal;font-family:",
+    testAgainst = "arial,'URW Gothic L',sans-serif",
 		testString = "BES",
-		testAgainstAWidth = 0, testAgainstBWidth = 0;
+		differenceLimit = 0, testAgainstWidth;
 	
 	var measureFont = function( $container, family ) {
 		var $testContainer = $( '<div style="' + styleString + family + '">' + testString + '</div>' ), width;
 		$container.append( $testContainer );
 		width = $testContainer.width();
-		$testContainer.remove();
+		//$testContainer.remove();
 		return width;
 	};
 	
 	var fontWatcher = function( family, req, load, config ) {
 		req( ['jquery'], function( $ ) {
 			var $body = $( document.body );
-			if( testAgainstAWidth == 0 ) {
-				testAgainstAWidth = measureFont( $body, testAgainstA );
-				testAgainstBWidth = measureFont( $body, testAgainstB );
+			if( differenceLimit == 0 ) {
+				testAgainstWidth = measureFont( $body, testAgainst );
+				differenceLimit = testAgainstWidth*0.1;
 			}
 			var calls = 0,
 			checkIfLoaded = function() {
 				var testWidth;
 				++calls;
-				testWidth = measureFont( $body, family+','+testAgainstA );
-				if( testWidth != testAgainstAWidth ) {
-					load( true );
-					return;
-				}
-				testWidth = measureFont( $body, family+','+testAgainstB );
-				if( testWidth != testAgainstBWidth ) {
+				testWidth = measureFont( $body, family+','+testAgainst );
+				if( Math.abs( testWidth - testAgainstWidth ) > differenceLimit ) {
 					load( true );
 					return;
 				}
 				if( calls > 20 ) {
 					load( false );
+					return;
 				}
 				else {
 					setTimeout( checkIfLoaded, 200 );

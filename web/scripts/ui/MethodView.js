@@ -1,7 +1,7 @@
 /*global require: false, define: false, google: false */
 define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can'], function( $, customFontLoaded, MethodGrid, PlaceNotation, Can ) {
 	// Constants
-	var MONOSPACEFONT = '13px ' + ((navigator.userAgent.toLowerCase().indexOf('android') > -1)?'':'BluelineMono, "Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
+	var MONOSPACEFONT = '13px ' + ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : (customFontLoaded?'BluelineMono, ':'')+'"Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
 	
 	// Reusable
 	var $window = $( window ),
