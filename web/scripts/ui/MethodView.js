@@ -176,20 +176,20 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 			// Determine the width of the letters we will be drawing
 			var bellWidth = (function() {
 				var bellWidth;
-				// If the text will be drawn in SVG or HTML, measure it in HTML
-				if( Can.SVG() || !Can.canvas() ) {
+				// If the text will be drawn on canvas, measure it on canvas
+				if( Can.canvas() ) {
+					var testCanvas = $( '<canvas></canvas>' ).get( 0 ),
+						ctx = testCanvas.getContext( '2d' );
+					ctx.font = MONOSPACEFONT;
+					bellWidth = ctx.measureText( '123456' ).width / 6;
+				}
+				// Otherwise measure in HTML
+				else {
 					var testText = $( '<span>123456</span>' );
 					testText.css( 'font', MONOSPACEFONT );
 					$body.append( testText );
 					bellWidth = testText.width() / 6;
 					testText.remove();
-				}
-				// If the text will be drawn on canvas, measure it on canvas
-				else if( Can.canvas() ) {
-					var testCanvas = $( '<canvas></canvas>' ).get( 0 ),
-						ctx = testCanvas.getContext( '2d' );
-					ctx.font = MONOSPACEFONT;
-					bellWidth = ctx.measureText( '123456' ).width / 6;
 				}
 				return bellWidth;
 			})();
