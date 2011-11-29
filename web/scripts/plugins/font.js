@@ -27,7 +27,7 @@
 		var $testContainer = $( '<div style="' + styleString + family + '">' + testString + '</div>' ), width;
 		$container.append( $testContainer );
 		width = $testContainer.width();
-		//$testContainer.remove();
+		$testContainer.remove();
 		return width;
 	};
 	
@@ -36,7 +36,7 @@
 			var $body = $( document.body );
 			if( differenceLimit == 0 ) {
 				testAgainstWidth = measureFont( $body, testAgainst );
-				differenceLimit = testAgainstWidth*0.1;
+				differenceLimit = testAgainstWidth*0.05;
 			}
 			var calls = 0,
 			checkIfLoaded = function() {
