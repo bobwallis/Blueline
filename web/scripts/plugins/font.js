@@ -18,13 +18,12 @@
 	
 	// Compare the width of a test string in a serif font against the test string 
 	// using the custom font, and wait for them to be different
-	var styleString = "position:absolute;display:block;top:-999px;left:0;font-size:500px;line-height:normal;margin:0;padding:0;font-variant:normal;font-family:",
-    testAgainst = "arial,'URW Gothic L',sans-serif",
+	var testAgainst = "arial,'URW Gothic L',sans-serif",
 		testString = "BES",
-		differenceLimit = 0, testAgainstWidth;
+		differenceLimit = -1, testAgainstWidth;
 	
 	var measureFont = function( $container, family ) {
-		var $testContainer = $( '<div style="' + styleString + family + '">' + testString + '</div>' ), width;
+		var $testContainer = $( '<div class="fontPreload" style="font-family:' + family + '">' + testString + '</div>' ), width;
 		$container.append( $testContainer );
 		width = $testContainer.width();
 		$testContainer.remove();
@@ -34,7 +33,7 @@
 	var fontWatcher = function( family, req, load, config ) {
 		req( ['jquery'], function( $ ) {
 			var $body = $( document.body );
-			if( differenceLimit == 0 ) {
+			if( differenceLimit == -1 ) {
 				testAgainstWidth = measureFont( $body, testAgainst );
 				differenceLimit = testAgainstWidth*0.05;
 			}
@@ -42,14 +41,14 @@
 			checkIfLoaded = function() {
 				var testWidth;
 				++calls;
-				testWidth = measureFont( $body, family+','+testAgainst );
-				if( Math.abs( testWidth - testAgainstWidth ) > differenceLimit ) {
+				difference = Math.abs( measureFont( $body, family+','+testAgainst ) - testAgainstWidth );
+				if( difference == 0 ) { differenceLimit = 0; }
+				if( difference > differenceLimit ) {
 					load( true );
 					return;
 				}
 				if( calls > 20 ) {
 					load( false );
-					return;
 				}
 				else {
 					setTimeout( checkIfLoaded, 200 );

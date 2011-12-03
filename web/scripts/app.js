@@ -1,5 +1,5 @@
 /*global require: false, define: false, google: false, History: false */
-require( [ 'jquery', 'helpers/Can', 'lib/History', 'ui/Window', 'ui/Header', 'ui/Content' ], function( $, Can, History, Window, Header, Content ) {
+require( [ 'require', 'jquery', 'helpers/Can', 'lib/History', 'ui/Window', 'ui/Header', 'ui/Content' ], function( require, $, Can, History, Window, Header, Content ) {
 	var baseURL = location.protocol+'//'+location.host,
 		baseURLRegexp = new RegExp( '^'+location.protocol+'\/\/'+location.host );
 
@@ -79,22 +79,27 @@ require( [ 'jquery', 'helpers/Can', 'lib/History', 'ui/Window', 'ui/Header', 'ui
 
 		// DOM Ready/Load event
 		$( function() {
+			var $body = $( document.body );
+		
 			// Attach listeners to click events
-			$( document.body ).click( historyClick );
+			$body.click( historyClick );
 
-			// Attach listeners to the big and little search form's submit events
+			// Attach listeners to little search form's submit event
 			$( '#topSearch' ).submit( historyFormSubmit );
-			$( '#bigSearch' ).submit( historyFormSubmit );
 
-			// Auto-submit bigSearch on input change
-			$( '#bigSearch' ).keyup( historyInputChange );
-			$( '#bigSearch' ).bind( 'cut',  historyInputClipboard )
+			// Attach listeners to big search form's submit event, and input change events
+			$( '#bigSearch' ).submit( historyFormSubmit )
+				.keyup( historyInputChange )
+				.bind( 'cut',  historyInputClipboard )
 				.bind( 'paste', historyInputClipboard );
 			
 			// Finish fading out #overlay
 			$( '#overlay' ).css( 'opacity', 0 );
 			setTimeout( function() { $( '#opacity' ).remove() }, 150 );
 		} );
+		
+		
+		// Preload font used to draw methods
+		require( ['plugins/font!BluelineMono'] );
 	}
-
 } );
