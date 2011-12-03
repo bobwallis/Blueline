@@ -20,7 +20,7 @@
 	// using the custom font, and wait for them to be different
 	var testAgainst = "arial,'URW Gothic L',sans-serif",
 		testString = "BES",
-		differenceLimit = -1, testAgainstWidth;
+		testAgainstWidth = -1;
 	
 	var measureFont = function( $container, family ) {
 		var $testContainer = $( '<div class="fontPreload" style="font-family:' + family + '">' + testString + '</div>' ), width;
@@ -32,17 +32,13 @@
 	
 	var fontWatcher = function( family, req, load, config ) {
 		req( ['jquery'], function( $ ) {
-			var $body = $( document.body );
-			if( differenceLimit == -1 ) {
-				testAgainstWidth = measureFont( $body, testAgainst );
-				differenceLimit = testAgainstWidth*0.05;
-			}
-			var calls = 0,
+			var $body = $( document.body ),
+				calls = 0,
 			checkIfLoaded = function() {
-				var testWidth;
+				var testWidth, differenceLimit = 50; // WebKit seems to give slightly different widths even if the font hasn't loaded. Compensate by only confirming load if the difference is large
 				++calls;
 				difference = Math.abs( measureFont( $body, family+','+testAgainst ) - testAgainstWidth );
-				if( difference == 0 ) { differenceLimit = 0; }
+				console.log(difference);
 				if( difference > differenceLimit ) {
 					load( true );
 					return;
@@ -51,9 +47,15 @@
 					load( false );
 				}
 				else {
-					setTimeout( checkIfLoaded, 200 );
+					setTimeout( checkIfLoaded, 100 );
 				}
 			};
+			
+			// Find out what we're measuring against
+			if( testAgainstWidth == -1 ) {
+				testAgainstWidth = measureFont( $body, testAgainst );
+			}
+			
 			checkIfLoaded();
 		} );
 	};
