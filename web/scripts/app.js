@@ -95,7 +95,7 @@ require( [ 'require', 'jquery', 'helpers/Can', 'lib/History', 'ui/Window', 'ui/H
 			
 			// Finish fading out #overlay
 			$( '#overlay' ).css( 'opacity', 0 );
-			setTimeout( function() { $( '#opacity' ).remove() }, 150 );
+			setTimeout( function() { $( '#overlay' ).remove() }, 200 );
 		} );
 		
 		

@@ -5,13 +5,10 @@ require( { paths: { jquery: '/scripts/lib/jquery' } }, ['require', 'helpers/Is',
 		require( ['app'] );
 	}
 	
-	// Hide loading overlay and enable alternative footer if in an app
-	if( true || Is.app() ) {
+	// Fallback app loading overlay hiding
+	if( Is.app() ) {
 		$( 'body > script' ).remove();
-		setTimeout( function() { $( '#overlay' ).remove(); }, 500 ); // Fallback. It will be faded nicely from app.js after it has loaded
-		$( function() {
-			$( '#bottom' ).addClass( 'touch' );
-		} );
+		setTimeout( function() { $( '#overlay' ).remove(); }, 1500 ); // Fallback. It will be faded nicely from app.js after it has loaded
 	}
 	
 	// Listen for application cache updates if the browser supports it
