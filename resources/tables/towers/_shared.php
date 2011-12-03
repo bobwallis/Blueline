@@ -2,7 +2,8 @@
 require( dirname(__FILE__).'/../../../vendor/blueline/abbreviations.php' );
 
 function longCounty( $lookup, array $array ) {
-	if( array_key_exists( $lookup, $array ) ) { return $array[$lookup]; 	}
+	if( empty( $lookup ) ) { return ''; }
+	elseif( array_key_exists( $lookup, $array ) ) { return $array[$lookup]; 	}
 	elseif( in_array( $lookup, $array ) ) { return $lookup; }
 	else {
 		trigger_error( 'No full county for: '.$lookup, E_USER_ERROR );
