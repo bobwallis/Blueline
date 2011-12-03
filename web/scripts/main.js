@@ -5,9 +5,11 @@ require( { paths: { jquery: '/scripts/lib/jquery' } }, ['require', 'helpers/Is',
 		require( ['app'] );
 	}
 	
+	// Cleanup scripts
+	$( function() { $( 'body > script' ).remove() } );
+	
 	// Fallback app loading overlay hiding
 	if( Is.app() ) {
-		$( 'body > script' ).remove();
 		setTimeout( function() { $( '#overlay' ).remove(); }, 1500 ); // Fallback. It will be faded nicely from app.js after it has loaded
 	}
 	
