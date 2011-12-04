@@ -38,7 +38,6 @@
 				var testWidth, differenceLimit = 50; // WebKit seems to give slightly different widths even if the font hasn't loaded. Compensate by only confirming load if the difference is large
 				++calls;
 				difference = Math.abs( measureFont( $body, family+','+testAgainst ) - testAgainstWidth );
-				console.log(difference);
 				if( difference > differenceLimit ) {
 					load( true );
 					return;
