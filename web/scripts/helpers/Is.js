@@ -16,7 +16,7 @@ define( function() {
 			return false;
 		},
 		app: function() {
-			return ( (('standalone' in navigator) && navigator.standalone) || typeof window['Android'] === 'object' );
+			return ( (('chrome' in window) && window.chrome.isInstalled) || (('standalone' in navigator) && navigator.standalone) || typeof window['Android'] === 'object' );
 		}
 	};
 } );
