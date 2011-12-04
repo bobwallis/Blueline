@@ -1,0 +1,24 @@
+#loading, #overlay {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	z-index: 99;
+	background: transparent url(../../images/loading.gif) no-repeat center top;
+	.background-size(18px);
+	opacity: 1;
+	.transition-duration( .2s );
+	.transition-property( "opacity" );
+}
+
+#loading {
+	display: none;
+	top: 100px;
+	height: 48px;
+}
+
+#overlay {
+	top: 0;
+	height: 100%;
+	background-color: #FFF;
+	background-position: center center;
+}
