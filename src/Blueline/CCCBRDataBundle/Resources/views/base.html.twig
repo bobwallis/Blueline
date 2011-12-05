@@ -2,9 +2,9 @@
 {% if chromeless|default(0) < 2 %}
 <!DOCTYPE html>
 {% if appStartPage|default(0) and cache_manifest|default(0) %}
-<html manifest="site.manifest">
+<html lang="en" manifest="site.manifest">
 {% else %}
-<html>
+<html lang="en">
 {% endif %}
 	<head>
 		<meta charset="utf-8" />
