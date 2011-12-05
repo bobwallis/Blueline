@@ -10,7 +10,7 @@ define( ['jquery'], function( $ ) {
 		container: $loading,
 		show: function() {
 			loadingShower = setTimeout( function() {
-				$loading.fadeIn( 200 );
+				$loading.show();
 			} , 150 );
 		},
 		hide: function() {

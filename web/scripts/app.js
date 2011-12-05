@@ -94,8 +94,8 @@ require( [ 'require', 'jquery', 'helpers/Can', 'lib/History', 'ui/Window', 'ui/H
 				.bind( 'paste', historyInputClipboard );
 			
 			// Finish fading out #overlay
-			$( '#overlay' ).css( 'opacity', 0 );
-			setTimeout( function() { $( '#overlay' ).remove() }, 200 );
+			$( '#appStart' ).css( 'opacity', 0 );
+			setTimeout( function() { $( '#appStart' ).remove() }, 200 );
 		} );
 		
 		

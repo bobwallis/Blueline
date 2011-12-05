@@ -10,7 +10,7 @@ require( { paths: { jquery: '/scripts/lib/jquery' } }, ['require', 'helpers/Is',
 	
 	// Fallback app loading overlay hiding
 	if( Is.app() ) {
-		setTimeout( function() { $( '#overlay' ).remove(); }, 1500 ); // Fallback. It will be faded nicely from app.js after it has loaded
+		setTimeout( function() { $( '#appStart' ).remove(); }, 10000 ); // Fallback. It will be faded nicely from app.js after it has loaded
 	}
 	
 	// Listen for application cache updates if the browser supports it
