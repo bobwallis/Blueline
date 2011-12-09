@@ -1,360 +1,379 @@
 /*global require: false, define: false, google: false */
-define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '../helpers/Paper', '../helpers/Can', '../helpers/DroidSansMono'], function( $, customFontLoaded, PlaceNotation, Paper, Can, Font ) {
+define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '../helpers/Canvas', '../helpers/Can'], function( $, customFontLoaded, PlaceNotation, Canvas, Can ) {
 	// Constants
-	var MONOSPACEFONT = '13px ' + ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : (customFontLoaded?'BluelineMono, ':'')+'"Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
+	var MONOSPACEFONT = ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : (customFontLoaded?'BluelineMono, ':'')+'"Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace',
+		SANSFONT = '"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif';
 	
-	/* MethodGrid
-	 * options object:
-	 * .id: An identifier for use in HTML id attributes
-	 * .title: A title to display above the line (infers show.title)
-	 * .notation: A notation object, containing text, parsed, exploded objects
-	 * .stage: An integer
-	 * .ruleOffs: An object containing 'from' and every' as integer values. (infers show.ruleOffs)
-	 * .callingPositions
-	 * .placeStarts: (infers show.placeStarts)
-	 * .show:
-	 *  .notation
-	 *  .title
-	 *  .lines
-	 *  .ruleOffs
-	 *  .placeStarts
-	 *  .numbers
-	 *  .callingPositions
-	 * .display
-	 *  .numberOfLeads
-	 *  .numberOfColumns
-	 *  .leadsPerColumn
-	 *  .dimensions
-	 *   .rowHeight
-	 *   .rowWidth
-	 * 
-	 */
-	var MethodGrid = function( options ) {
-		$.extend( true, this, options );
-		
-		// Set unset show options
-		['notation', 'title', 'lines', 'ruleOffs', 'placeStarts', 'numbers', 'callingPositions'].forEach( function( e ) {
-			if( typeof this.show[e] !== 'boolean' ) {
-				this.show[e] = (typeof this[e] !== 'undefined' || typeof this.display[e] !== 'undefined')? true : false;
+	
+	// Vertical positioning of text within its bounding box is inconsistent across
+	// browsers. This is a problem when trying to get pixel perfect alignments of
+	// text and lines. This function, given a font and size, will measure the top 
+	// and bottom padding between the text's bounding box, and where the text 
+	// actually starts, using alphabetic baseline, and caching in localStorage.
+	var measureTopAndBottomTextPadding = function( size, font ) {
+		var padding = { top: null, bottom: null },
+			width = size*5,
+			height = size*3;
+			
+		if( Can.localStorage() ) {
+			padding.top = localStorage.getItem( 'metrics.top'+size+'.'+font, padding.top );
+			padding.bottom = localStorage.getItem( 'metrics.bottom'+size+'.'+font, padding.top );
+		}
+		if( padding.top === null || padding.bottom === null ) {
+			var canvas = new Canvas( {
+				id: 'metric',
+				width: width,
+				height: height
+			} );
+			if( canvas !== false ) {
+				try {
+					var context = canvas.context;
+					context.font = size+'px '+font;
+					context.baseLine = 'alphabetic';
+					context.fillStyle = '#F00';
+					context.fillText( '0', size*2, size*2 );
+				
+					var imageData = context.getImageData( 0, 0, width*canvas.scale, height*canvas.scale ),
+						bottomOfText = false,
+						topOfText = false,
+						row, column;
+				
+					// Find bottom
+					for( row = size*2*canvas.scale; !bottomOfText && row > size*canvas.scale; --row ) {
+						for( column = 0; column < imageData.width ; ++column ) {
+							if(imageData.data[((row*(imageData.width*4)) + (column*4))] > 0 ) {
+								bottomOfText = row / canvas.scale;
+								break;
+							}
+						}
+					}
+					padding.bottom = Math.abs( size*2 - ((bottomOfText !== false)? bottomOfText : size*2) );
+					// Find top
+					for( row = size*canvas.scale; !topOfText && row < size*2*canvas.scale; ++row ) {
+						for( column = 0; column < imageData.width ; ++column ) {
+							if(imageData.data[((row*(imageData.width*4)) + (column*4))] > 0 ) {
+								topOfText = row / canvas.scale;
+								break;
+							}
+						}
+					}
+					padding.top = Math.abs( size - ((topOfText !== false)? topOfText : size) );
+				
+					if( Can.localStorage() ) {
+						localStorage.setItem( 'metrics.top'+size+'.'+font, padding.top );
+						localStorage.setItem( 'metrics.bottom'+size+'.'+font, padding.bottom );
+					}
+				}
+				catch( e ) {
+					padding.top = padding.bottom = 0;
+				}
 			}
-		}, this );
-		
-		// Set unset display options
-		if( typeof this.display.numberOfLeads !== 'number' ) {
-			this.display.numberOfLeads = 1;
-		}
-		if( typeof this.display.numberOfColumns !== 'number' ) {
-			this.display.numberOfColumns = (typeof this.display.leadsPerColumn === 'number')? Math.ceil( this.display.numberOfLeads / this.display.leadsPerColumn ) : 1;
-		}
-		if( typeof this.display.leadsPerColumn !== 'number' ) {
-			this.display.leadsPerColumn = Math.ceil( this.display.numberOfLeads / this.display.numberOfColumns );
-		}
-		if( typeof this.display.lines !== 'object' ) {
-			this.display.lines = [];
-		}
-		if( typeof this.display.numbers !== 'object' ) {
-			this.display.numbers = [];
-		}
-		if( typeof this.display.placeStarts !== 'object' ) {
-			this.display.placeStarts = [];
+			canvas = null;
 		}
 		else {
-			this.display.placeStarts.sort();
+			padding.top = parseFloat( padding.top );
+			padding.bottom = parseFloat( padding.bottom );
 		}
+		return padding;
+	};
+	
+	var MethodGrid = function( options ) {
+		// Prevent errors being thrown when accessing empty options objects
+		if( typeof options.layout !== 'object' ) {
+			options.layout = {};
+		}
+		if( typeof options.dimensions !== 'object' ) {
+			options.dimensions = {};
+		}
+		
+		var i, j, k, l, m, x, y,
+			twoPi = Math.PI*2,
+			
+			id = options.id,
+			notation = options.notation,
+			stage = options.stage,
+			
+			startRow = (typeof options.startRow == 'object')? options.startRow : PlaceNotation.rounds( stage ),
+			leadHeads = [startRow],
+			
+			leadLength = notation.parsed.length,
+			numberOfLeads = (typeof options.layout.numberOfLeads == 'number')? options.layout.numberOfLeads : 1,
+			numberOfColumns = (typeof options.layout.numberOfColumns == 'number')? options.layout.numberOfColumns : ((typeof options.layout.leadsPerColumn == 'number')? Math.ceil( numberOfLeads / options.layout.leadsPerColumn ): 1),
+			leadsPerColumn = (typeof options.layout.leadsPerColumn == 'number')? options.layout.leadsPerColumn : Math.ceil( numberOfLeads / numberOfColumns ),
+			rowsPerColumn = leadsPerColumn * leadLength,
+			title = (typeof options.display.title == 'string')? options.display.title : '',
+			
+			callingPositions = (typeof options.display.callingPositions == 'object')? options.display.callingPositions : {},
+			lines = (typeof options.display.lines == 'object')? options.display.lines : {},
+			numbers = (typeof options.display.numbers == 'object')? options.display.numbers : {},
+			placeStarts = (typeof options.display.placeStarts == 'object')? options.display.placeStarts : {},
+			ruleOffs = (typeof options.display.ruleOffs == 'object')? options.display.ruleOffs : {},
+			
+			show = {
+				callingPositions: (typeof callingPositions.every == 'number' && typeof callingPositions.from == 'number' && typeof callingPositions.titles.length == 'number')? true : false,
+				lines: (typeof options.display.lines == 'object')? true : false,
+				notation: (typeof options.display.notation == 'boolean')? options.display.notation : false,
+				numbers: (typeof options.display.numbers == 'object')? true : false,
+				placeStarts: (typeof options.display.placeStarts == 'object')? true : false,
+				ruleOffs: (typeof ruleOffs.every == 'number' && typeof ruleOffs.from == 'number')? true : false,
+				title: (title === '')? false : true
+			};
 		
 		// If we're displaying multiple leads, pre-calculate the lead heads for later use
-		this.leadHeads = [];
-		this.leadHeads.push( this.startRow || PlaceNotation.rounds( this.stage ) );
-		if( this.display.numberOfLeads > 1 ) {
-			for( var i = 1; i < this.display.numberOfLeads; ++i ) {
-				this.leadHeads.push( PlaceNotation.apply( this.notation.parsed, this.leadHeads[i-1] ) );
+		if( numberOfLeads > 1 ) {
+			for( i = 1; i < numberOfLeads; ++i ) {
+				leadHeads.push( PlaceNotation.apply( notation.parsed, leadHeads[i-1] ) );
 			}
 		}
 		
-		// Calculate dimensions
-		if( typeof this.display.dimensions !== 'object' ) { this.display.dimensions = {}; }
-		this.display.dimensions.row = {};
-		this.display.dimensions.bell = {};
-		this.display.dimensions.paper = {};
-		// Calculate bell/row widths from each other
-		if( typeof this.display.dimensions.rowWidth === 'number' ) {
-			this.display.dimensions.row.x = this.display.dimensions.rowWidth;
-			this.display.dimensions.bell.x = this.display.dimensions.rowWidth / this.stage;
+		// Dimensions		
+		var canvasWidth, canvasHeight,
+			rowWidth = 10*stage,
+			rowHeight = 14,
+			bellWidth = 10,
+			interColumnPadding = 0,
+			columnLeftPadding = 0,
+			columnRightPadding = 0,
+			canvasTopPadding = 0,
+			canvasLeftPadding = 0;
+		
+		// Bell/row dimensions
+		if( typeof options.dimensions.rowWidth === 'number' ) {
+			rowWidth = options.dimensions.rowWidth;
+			bellWidth = options.dimensions.rowWidth / stage;
 		}
-		else if( typeof this.display.dimensions.bellWidth === 'number' ) {
-			this.display.dimensions.row.x = this.display.dimensions.bellWidth * this.stage;
-			this.display.dimensions.bell.x = this.display.dimensions.bellWidth;
+		else if( typeof options.dimensions.bellWidth === 'number' ) {
+			rowWidth = options.dimensions.bellWidth * stage;
+			bellWidth = options.dimensions.bellWidth;
 		}
-		if( typeof this.display.dimensions.rowHeight === 'number' ) {
-			this.display.dimensions.row.y = this.display.dimensions.bell.y = this.display.dimensions.rowHeight;
+		if( typeof options.dimensions.rowHeight === 'number' ) {
+			rowHeight = options.dimensions.rowHeight;
 		}
-		else if( typeof this.display.dimensions.bellHeight === 'number' ) {
-			this.display.dimensions.row.y = this.display.dimensions.bell.y = this.display.dimensions.bellHeight;
-		}
-		// Set any padding
-		this.display.dimensions.padding = {
-			interColumn: 0,
-			columnRight: 0,
-			columnLeft: 0
-		};
-		if( typeof this.display.dimensions.columnPadding === 'number' ) {
-			this.display.dimensions.padding.interColumn += this.display.dimensions.columnPadding;
-		}
-		// Set any padding due to place start display
-		if( typeof this.display.placeStarts[0] === 'number' ) {
-			this.display.dimensions.padding.columnRight += 10 + ( this.display.placeStarts.length * 12 );
+		else if( typeof options.dimensions.bellHeight === 'number' ) {
+			rowHeight = options.dimensions.bellHeight;
 		}
 		
-		// Calculate paper dimensions
-		this.display.dimensions.paper.x = ((this.display.dimensions.row.x+this.display.dimensions.padding.columnLeft+this.display.dimensions.padding.columnRight)*this.display.numberOfColumns) + (this.display.dimensions.padding.interColumn*(this.display.numberOfColumns-1));
-		this.display.dimensions.paper.y = this.display.dimensions.row.y * ((this.display.leadsPerColumn * this.notation.exploded.length)+1);
+		// Column padding
+		if( typeof options.dimensions.columnPadding === 'number' ) {
+			interColumnPadding = options.dimensions.columnPadding;
+		}
+		if( show.placeStarts ) {
+			columnRightPadding = Math.max( columnRightPadding, 10 + ( placeStarts.length * 12 ) );
+		}
+		if( show.callingPositions ) {
+			columnRightPadding = Math.max( columnRightPadding, 15 );
+		}
+		var rowWidthWithPadding = interColumnPadding + columnLeftPadding + columnRightPadding + rowWidth;
 		
-		this.draw();
+		// Canvas padding
+		if( show.title ) {
+			canvasTopPadding += show.numbers? 18 : 12;
+		}
 		
-		return this;
-	};
-
-	MethodGrid.prototype = {
-		draw: function() {
-			// Set up the container
-			var html = '';
-			// If we're including a title or place notation then wrap everything in a table
-			if( this.show.title || this.show.notation ) {
-				html = '<table class="_grid" id="'+this.id+'"><tr>' + 
-				(this.show.title? '<td colspan="2" class="_gridTitle">'+this.title+':</td></tr><tr>' : '') + 
-				(this.show.notation? '<td class="_gridNotation" style="padding-top: '+(this.display.dimensions.row.y/2)+'px; padding-bottom: '+(this.display.dimensions.row.y/2)+'px;line-height: '+this.display.dimensions.row.y+'px;">'+this.notation.exploded.join( '<br />' )+'</td>' : '') +
-				'<td class="_gridLine"></td></tr></table>';
-			}
-			// Otherwise wrap in a div
-			else {
-				html = '<div class="_grid" id="'+this.id+'"></div>';
-			}
-			this.container = $( html );
+		// Canvas dimensions
+		canvasWidth = canvasLeftPadding + ((rowWidth + columnLeftPadding + columnRightPadding)*numberOfColumns) + (interColumnPadding*(numberOfColumns-1));
+		canvasHeight = canvasTopPadding + (rowHeight * ((leadsPerColumn * leadLength)+1));
+	
+		// Set up canvas
+		var canvas =  new Canvas( {
+			id: id,
+			width: canvasWidth,
+			height: canvasHeight
+		} );
 			
-			// Set up paper
-			var paper =  new Paper( {
-				id: this.id+'_paper',
-				width: this.display.dimensions.paper.x,
-				height: this.display.dimensions.paper.y
-			} );
-			if( paper === false ) {
-				// TO IMPLEMENT: png fallback
-			}
-			else {
-				// Precalculate some reusable numbers
-				var totalRowAndColumnWidth = this.display.dimensions.padding.interColumn+this.display.dimensions.padding.columnLeft+this.display.dimensions.padding.columnRight+this.display.dimensions.row.x;
+		if( canvas === false ) {
+			// TO IMPLEMENT: png fallback
+		}
+		else {
+			var context = canvas.context;
 			
-				// Draw rule offs
-				if( this.show.ruleOffs ) {
-					var path = '';
-					for( var i = 0; i < this.display.numberOfColumns; ++i ) {
-						for( var j = 0; j < this.display.leadsPerColumn && (i*this.display.leadsPerColumn)+j < this.display.numberOfLeads; ++j ) {
-							for( var k = this.ruleOffs.from; k <= this.notation.parsed.length; k += this.ruleOffs.every ) {
-								if( k > 0 ) {
-									path += 'M'+(i*totalRowAndColumnWidth)+','+((((j*this.notation.parsed.length)+k)*this.display.dimensions.row.y)-0.5)+'l'+this.display.dimensions.row.x+',0';
-								}
+			// Draw title
+			if( show.title ) {
+				context.fillStyle = '#000';
+				context.font = '11.5px '+SANSFONT;
+				context.textAlign = 'left';
+				context.textBaseline = 'top';
+				context.fillText( title, 0, 0 );
+			}
+			
+			// Draw notation down side
+			if( show.notation ) {
+			
+			}
+			
+			// Draw rule offs
+			if( show.ruleOffs ) {
+				context.lineWidth = 1;
+				context.lineCap = 'round';
+				context.strokeStyle = '#999';
+				context.beginPath();
+				for( i = 0; i < numberOfColumns; ++i ) {
+					for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
+						for( k = ruleOffs.from; k <= leadLength; k += ruleOffs.every ) {
+							if( k > 0 ) {
+								x = i*rowWidthWithPadding;
+								y = canvasTopPadding + (((j*leadLength)+k)*rowHeight) - 0.5;
+								context.moveTo( x, y );
+								context.lineTo( x + rowWidth, y );
 							}
 						}
 					}
-					if( path !== '' ) {
-						paper.add( 'path', { 'stroke-width': 1, 'stroke-linecap': 'round', 'stroke-dasharray': '4,2', stroke: '#999', d: path } );
-					}
 				}
-			
-				// Draw lines
-				if( this.show.lines ) {
-					var i = this.stage;
-					while( i-- ) {
-						var j = (typeof this.startRow === 'object')? this.startRow[i] : i;
-						if( typeof this.display.lines[j] === 'object' && this.display.lines[j].stroke !== 'transparent' ) {
-							var path = '';
-							for( var k = 0; k < this.display.numberOfColumns; ++k ) {
-								var columnNotation = this.notation.parsed;
-								for( var l = 1; l < this.display.leadsPerColumn && (k*this.display.leadsPerColumn)+l < this.display.numberOfLeads; ++l ) {
-									columnNotation = columnNotation.concat( this.notation.parsed );
-								}
-								path += 'M'+(k*totalRowAndColumnWidth)+',0' + PlaceNotation.pathString( this.leadHeads[k*this.display.leadsPerColumn].indexOf( j ), columnNotation, this.display.dimensions.bell.x, this.display.dimensions.bell.y, ((k*this.display.leadsPerColumn)+l < this.display.numberOfLeads)? true : false );
-							}
-							paper.add( 'path', $.extend( this.display.lines[j], { d: path } ) );
-						}
-					}
-				}
-				
-				// Draw place starts
-				if( this.show.placeStarts ) {
-					var textPath = '';
-					this.display.placeStarts.forEach( function( i, pos ) {
-						var j = (typeof this.startRow === 'object')? this.startRow[i] : i;
-						for( var k = 0; k < this.display.numberOfColumns; ++k ) {
-							for( var l = 0; l < this.display.leadsPerColumn && (k*this.display.leadsPerColumn)+l < this.display.numberOfLeads; ++l ) {
-								var positionInLeadHead = this.leadHeads[(k*this.display.leadsPerColumn)+l].indexOf( j ),
-									yPos = (l*this.display.dimensions.row.y*this.notation.parsed.length)+(this.display.dimensions.row.y/2);
-								// The little circle
-								paper.add( 'circle', {
-									cx: (k*totalRowAndColumnWidth) + ((positionInLeadHead+0.5)*this.display.dimensions.bell.x),
-									cy: yPos,
-									r: 2,
-									fill: this.display.lines[j].stroke,
-									'stroke-width': 0,
-									stroke: this.display.lines[j].stroke
-								} );
-								// The big circle
-								var xPos = (k*totalRowAndColumnWidth) + this.display.dimensions.row.x + 11*pos + 10;
-								paper.add( 'circle', {
-									cx: xPos,
-									cy: yPos,
-									r: 6,
-									fill: 'none',
-									'stroke-width': 1,
-									stroke: this.display.lines[j].stroke,
-									opacity: 0.8
-								} );
-								// The text
-								var numberToDraw = positionInLeadHead + 1;
-								if( numberToDraw < 10 ) {
-									textPath += 'M'+xPos+','+yPos+Font.medium[numberToDraw];
-								}
-								else {
-									textPath += 'M'+(xPos-2)+','+yPos+Font.small[Math.floor(numberToDraw/10)];
-									textPath += 'M'+(xPos+2)+','+yPos+Font.small[numberToDraw%10];
-								}
-							}
-						}
-					}, this );
-					// Add the finished text path
-					paper.add( 'path', {
-						'stroke': 'none',
-						'fill': '#000',
-						'd': textPath
-					} );
-				}
-				
-				// Draw calling positions
-				if( this.show.callingPositions && typeof this.callingPositions.every == 'number' && typeof this.callingPositions.from == 'number' && typeof this.callingPositions.titles.length == 'number' ) {
-					var rowsPerColumn = this.display.leadsPerColumn * this.notation.parsed.length;
-					for( var i = 0; i < this.callingPositions.titles.length; ++i ) {
-						if( this.callingPositions.titles[i] !== null ) {
-							var rowInMethod = this.callingPositions.from + ( this.callingPositions.every * (i+1) ) - 2,
-								row = rowInMethod % rowsPerColumn,
-								column = Math.floor( rowInMethod/rowsPerColumn );
-							paper.add( 'text', {
-								content: '-'+this.callingPositions.titles[i],
-								x: (column*totalRowAndColumnWidth)+this.display.dimensions.row.x+3,
-								y: (row+0.5)*this.display.dimensions.row.y,
-								fill: '#000',
-								'font-size': '10px',
-								'font-family': 'sans-serif',
-								'dominant-baseline': 'central'
-							} );
-						}
-					}
-				}
+				context.stroke();
 			}
 			
-			// Draw numbers if needed
-			if( this.show.numbers ) {
-				var numbersTable = false;
-				if( paper !== false && paper.type == 'canvas' && paper.canvasText == true ) {
-					// We don't have to worry about adding text in a sensible way to make it highlight-able, which makes things easier here
-					var ctx = paper.context,
-						rowWidth = this.display.dimensions.row.x,
-						rowHeight = this.display.dimensions.row.y,
-						topPadding = rowHeight/2,
-						sidePadding = this.display.dimensions.padding.interColumn + this.display.dimensions.padding.columnRight;
-					
-					// Set up the context
-					ctx.textAlign = 'left';
-					ctx.textBaseline = 'middle';
-					ctx.font = MONOSPACEFONT;
-					
-					// We'll need this
-					var Array_unique = function( array ) {
-						var a = [], l = array.length, i = 0, j;
-						for( ; i < l; i++ ) {
-							for( j = i+1; j < l; j++ ) {
-								if( array[i] === array[j] ) {
-									j = ++i;
-								}
+			// Draw lines
+			if( show.lines ) {
+				context.lineCap = 'round';
+				context.lineJoin = 'round';
+				i = stage;
+				while( i-- ) {
+					j = startRow[i];
+					if( typeof lines[j] === 'object' && lines[j].stroke !== 'transparent' ) {
+						context.beginPath();
+						for( k = 0; k < numberOfColumns; ++k ) {
+							var columnNotation = notation.parsed;
+							for( l = 1; l < leadsPerColumn && (k*leadsPerColumn)+l < numberOfLeads; ++l ) {
+								columnNotation = columnNotation.concat( notation.parsed );
 							}
-							a.push( array[i] );
-						}
-						return a;
-					};
-
-					Array_unique( this.display.numbers ).map( function( e, i ) { // For each color of text
-						if( e !== 'transparent' ) { // Only bother drawing at all if not transparent
-							// Set color
-							//ctx.fillStyle = (e == 'normal')? '#000': e;
 							
-							// Produce the start row
-							var row = this.leadHeads[0].map( function( b, i ) {
-								var j = (typeof this.startRow === 'object')? this.startRow[i] : i;
-								return (this.display.numbers[j] === e)? PlaceNotation.bellToChar( b ) : ' ';
-							}, this );
+							var bell = leadHeads[k*leadsPerColumn].indexOf( j ),
+								position = bell, newPosition;
 							
-							for( var i = 0; i < this.display.numberOfColumns; ++i ) {
-								for( var j = 0; j < this.display.leadsPerColumn && (i*this.display.leadsPerColumn)+j < this.display.numberOfLeads; ++j ) {
-									var k = 0, kLim = this.notation.parsed.length;
-									if( j == 0 ) {
-										ctx.fillText( row.join( '' ), i*(rowWidth+sidePadding), topPadding );
-									}
-									while( k < kLim ) {
-										row = PlaceNotation.apply( this.notation.parsed[k], row );
-										ctx.fillText( row.join( '' ), i*(rowWidth+sidePadding), topPadding+(j*kLim*rowHeight)+(++k*rowHeight) );
-									}
-								}
+							x = (k*rowWidthWithPadding)+(bell*bellWidth)+(bellWidth/2);
+							y = canvasTopPadding + (rowHeight/2);
+							
+							context.moveTo( x, y );
+							for( m = 0; m < columnNotation.length; ++m ) {
+								newPosition = columnNotation[m].indexOf( position );
+								x += (newPosition-position)*bellWidth;
+								y += rowHeight;
+								context.lineTo( x, y );
+								position = newPosition;
+							}
+
+							if( (k*leadsPerColumn)+l < numberOfLeads ) {
+								newPosition = columnNotation[0].indexOf( position );
+								context.lineTo( x + (((newPosition-position)*bellWidth)/4), y + (rowHeight/4) );
 							}
 						}
-					}, this );
-				}
-				// Otherwise use a HTML table
-				else {
-					// Styling information for a bell will persist across the whole line, so add it in as soon as possible
-					var startRow = this.leadHeads[0].map( function( b, i ) {
-						var j = (typeof this.startRow === 'object')? this.startRow[i] : i;
-						return (typeof this.display.numbers[j] === 'string')? '<span '+((this.display.numbers[j] === 'transparent')? 'class="transparent"':'style="color: '+this.display.numbers[j]+';"')+'>' + PlaceNotation.bellToChar( b ) + '</span>' : PlaceNotation.bellToChar( b );
-					}, this ),
-						// Variable to store accumulated text in
-						text = '';
-				
-					var leadHead = startRow,
-						rowJoiner = function( r ) { return r.join( '' ); };
-					// Begin each column in a new table cell
-					for( var i = 0; i < this.display.numberOfColumns; ++i ) {
-						text += '<td style="padding:0 '+(((i<this.display.numberOfColumns-1)?this.display.dimensions.padding.interColumn:0)+this.display.dimensions.padding.columnRight)+'px 0 '+this.display.dimensions.padding.columnLeft+'px">';
-						for( var j = 0; j < this.display.leadsPerColumn && (i*this.display.leadsPerColumn)+j < this.display.numberOfLeads; ++j ) {
-							var allRows = PlaceNotation.allRows( this.notation.parsed, leadHead );
-							leadHead = allRows.pop();
-							text += allRows.map( rowJoiner ).join( '<br/>' ) + '<br/>';
-						}
-						text += leadHead.join( '' )+'</td>';
+						context.strokeStyle = lines[j].stroke;
+						context.lineWidth = lines[j].lineWidth;
+						context.stroke();
 					}
+				}
+			}
 				
-					numbersTable = $( '<table id="'+this.id+'_numbers"><tr>'+text+'</tr></table>' );
-					numbersTable.css( {
-						marginTop: (paper === false)? 0 : '-'+this.display.dimensions.paper.y+'px', // Apply negative margin so this sits on top of the paper
-						font: MONOSPACEFONT,
-						lineHeight: this.display.dimensions.row.y+'px'
-					} );
+			// Draw place starts
+			if( show.placeStarts ) {
+				placeStarts.sort();
+				context.lineWidth = 1;
+				placeStarts.forEach( function( i, pos ) {
+					var j = (typeof startRow === 'object')? startRow[i] : i,
+						k, l;
+					for( k = 0; k < numberOfColumns; ++k ) {
+						for( l = 0; l < leadsPerColumn && (k*leadsPerColumn)+l < numberOfLeads; ++l ) {
+							var positionInLeadHead = leadHeads[(k*leadsPerColumn)+l].indexOf( j );
+							
+							// The little circle
+							var x = (k*rowWidthWithPadding) + ((positionInLeadHead+0.5)*bellWidth),
+								y = canvasTopPadding + (l*rowHeight*leadLength)+(rowHeight/2);
+							context.fillStyle = lines[j].stroke;
+							context.beginPath();
+							context.arc( x, y, 2, 0, twoPi, true);
+							context.closePath();
+							context.fill();
+						
+							// The big circle
+							x = (k*rowWidthWithPadding) + rowWidth + 11*pos + 10;
+							context.strokeStyle = lines[j].stroke;
+							context.beginPath();
+							context.arc( x, y, 6, 0, twoPi, true );
+							context.closePath();
+							context.stroke();
+
+							// The text inside the big circle
+							context.fillStyle = '#000';
+							context.font = ((positionInLeadHead<9)?10:9)+'px '+MONOSPACEFONT;
+							context.textAlign = 'center';
+							context.textBaseline = 'alphabetic';
+							var textMetrics = measureTopAndBottomTextPadding( ((positionInLeadHead<9)?10:9), MONOSPACEFONT );
+							context.fillText( (positionInLeadHead+1).toString(), x, (y+5.5)-((textMetrics.bottom + textMetrics.top)/2)-textMetrics.bottom );
+						}
+					}
+				}, this );
+			}
+			
+			// Draw calling positions
+			if( show.callingPositions && typeof context.fillText === 'function' ) {
+				context.fillStyle = '#000';
+				context.font = '9.5px '+SANSFONT;
+				context.textAlign = 'left';
+				context.textBaseline = 'bottom';
+				
+				for( i = 0; i < callingPositions.titles.length; ++i ) {
+					if( callingPositions.titles[i] !== null ) {
+						var rowInMethod = callingPositions.from + ( callingPositions.every * (i+1) ) - 2;
+						x = (Math.floor( rowInMethod/rowsPerColumn )*rowWidthWithPadding)+rowWidth+4;
+						y = canvasTopPadding + ((rowInMethod % rowsPerColumn) + 1)*rowHeight;
+						context.fillText( '-'+callingPositions.titles[i], x, y );
+					}
 				}
 			}
 			
-			// Append the paper (and text table if it exists) to the appropriate container
-			if( this.show.title || this.show.notation ) {
-				$( 'td._gridLine', this.container ).append( paper.canvas )
-					.append( numbersTable );
+			// Draw numbers
+			if( show.numbers && typeof context.fillText === 'function' ) {
+				// Measure the actual text position (for pixel perfect positioning)
+				var textMetrics = measureTopAndBottomTextPadding( 13, MONOSPACEFONT ),
+					topPadding = canvasTopPadding + rowHeight - ((textMetrics.bottom + textMetrics.top)/2) - textMetrics.bottom,
+					sidePadding = interColumnPadding + columnRightPadding;
+			
+				// Set up the context
+				context.textAlign = 'left';
+				context.textBaseline = 'alphabetic';
+				context.font = '13px '+MONOSPACEFONT;
+			
+				// We'll need this
+				var Array_unique = function( array ) {
+					var a = [], l = array.length, i = 0, j;
+					for( ; i < l; i++ ) {
+						for( j = i+1; j < l; j++ ) {
+							if( array[i] === array[j] ) {
+								j = ++i;
+							}
+						}
+						a.push( array[i] );
+					}
+					return a;
+				};
+
+				Array_unique( numbers ).map( function( e, i ) { // For each color of text
+					if( e !== 'transparent' ) { // Only bother drawing at all if not transparent
+						context.fillStyle = '#000';
+					
+						// Produce the start row
+						var row = leadHeads[0].map( function( b, i ) {
+							var j = startRow[i];
+							return (numbers[j] === e)? PlaceNotation.bellToChar( b ) : ' ';
+						}, this );
+					
+						for( i = 0; i < numberOfColumns; ++i ) {
+							for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
+								if( j == 0 ) {
+									context.fillText( row.join( '' ), i*(rowWidth+sidePadding), topPadding );
+								}
+								for( k = 0; k < leadLength; ) {
+									row = PlaceNotation.apply( notation.parsed[k], row );
+									context.fillText( row.join( '' ), i*(rowWidth+sidePadding), topPadding+(j*leadLength*rowHeight)+(++k*rowHeight) );
+								}
+							}
+						}
+					}
+				} );
 			}
-			else {
-				this.container.append( paper.canvas )
-					.append( numbersTable );
-			}
-		},
-		redraw: function() {
-			this.destroy();
-			this.draw();
-		},
-		destroy: function() {
-			this.container.remove();
+			
+			// Return the image
+			return canvas.element;
 		}
 	};
 	

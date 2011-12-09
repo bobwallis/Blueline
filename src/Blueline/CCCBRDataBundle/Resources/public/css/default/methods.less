@@ -2,35 +2,9 @@
 	.details, .grid {
 		display: none;
 	}
-}
-
-.method {
-	._grid {	
-		margin-left: 15px;
-	}
-	.line {
-		padding: 0 @contentXPadding;
-		._grid:first-child {
-			margin-left: 0;
-		}
-	}
-}
-._grid {
-	float: left;
-	margin: @contentYPadding 0;
-	text-rendering: optimizeSpeed;
-	svg, canvas {
+	canvas {
 		display: block;
+		float: left;
+		margin: @contentYPadding @contentXPadding;
 	}
-}
-
-td._gridNotation {
-	font-size: 10px;
-	color: #666;
-	text-align: right;
-	padding-right: 5px;
-}
-td._gridTitle {
-	font-size: 13px;
-	padding-bottom: 3px;
 }

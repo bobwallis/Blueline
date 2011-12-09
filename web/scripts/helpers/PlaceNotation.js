@@ -89,24 +89,6 @@ define( {
 	explode: function( notation ) {
 		return (typeof notation === 'string')? notation.replace( /x/gi, '.x.' ).split( '.' ).filter( function( e ) { return e !== ''; } ) : notation;
 	},
-	pathString: function( bell, notation, dX, dY, flicks ) {
-		if( typeof flicks !== 'boolean' ) { flicks = false; }
-		var position = bell,
-			newPosition,
-			path = 'm'+((bell*dX)+(dX/2))+','+(dY/2)+'l',
-			i = 0, iLim = notation.length;
-		while( i < iLim ) {
-			newPosition = notation[i].indexOf( position );
-			path += ((newPosition-position)*dX)+','+dY+' ';
-			position = newPosition;
-			i++;
-		}
-		if( flicks ) {
-			newPosition = notation[0].indexOf( position );
-			path += (((newPosition-position)*dX)/4)+','+(dY/4)+' ';
-		}
-		return path;
-	},
 	rounds: function( stage ) {
 		var row = new Array( stage ), i = stage;
 		while( i-- ) { row[i] = i; }

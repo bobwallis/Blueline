@@ -63,7 +63,7 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 		this.options.plainCourse = {
 			notation: $.extend( true, {}, this.method.notation ),
 			stage: this.method.stage,
-			ruleOffs: $.extend( {}, this.method.ruleOffs )
+			display: {ruleOffs: $.extend( {}, this.method.ruleOffs )}
 		};
 		
 		// Calls
@@ -116,11 +116,13 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 					// Create an options object for the call
 					this.options.calls.push( {
 						id: callTitle.replace( ' ', '_' ).replace( /[^A-Za-z0-9_]/, '' ).toLowerCase(),
-						title: callTitle,
 						notation: call.notation,
 						stage: this.method.stage,
-						ruleOffs: call.ruleOffs,
 						startRow: call.startRow,
+						display: {
+							ruleOffs: call.ruleOffs,
+							title: callTitle+':'
+						},
 						affected: affectedBells
 					} );
 				}
@@ -143,10 +145,7 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 				plainLines = [];
 			for( var i = 0, j = 0; i < this.method.stage; ++i ) {
 				plainLines.push( {
-					'stroke-linejoin': 'round',
-					'stroke-linecap': 'round',
-					'stroke-width': (this.method.huntBells.indexOf( i ) !== -1)? 1.2 : 2, // Make the hunt bell lines slightly thinner
-					fill: 'none',
+					lineWidth: (this.method.huntBells.indexOf( i ) !== -1)? 1.2 : 2, // Make the hunt bell lines slightly thinner
 					stroke: (this.method.huntBells.indexOf( i ) !== -1)? '#D11' : ((toFollow.indexOf( i ) !== -1)? colours[j++] || colours[j = 0, j++] : 'transparent')
 				} );
 			}
@@ -160,10 +159,7 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 				callLines[k] = [];
 				for( var i = 0, j = 0; i < this.method.stage; ++i ) {
 					callLines[k].push( {
-						'stroke-linejoin': 'round',
-						'stroke-linecap': 'round',
-						'stroke-width': (this.method.huntBells.indexOf( i ) !== -1)? 1.2 : 2, // Make the hunt bell lines slightly thinner
-						fill: 'none',
+						lineWidth: (this.method.huntBells.indexOf( i ) !== -1)? 1.2 : 2, // Make the hunt bell lines slightly thinner
 						stroke: (this.method.huntBells.indexOf( i ) !== -1)? '#D11' : ((call.affected.indexOf( i ) !== -1)? colours[j++] || colours[j = 0, j++] : 'transparent')
 					} );
 				}
@@ -176,20 +172,12 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 			// Determine the width of the letters we will be drawing
 			var bellWidth = (function() {
 				var bellWidth;
-				// If the text will be drawn on canvas, measure it on canvas
+				// Measure the text
 				if( Can.canvas() ) {
 					var testCanvas = $( '<canvas></canvas>' ).get( 0 ),
 						ctx = testCanvas.getContext( '2d' );
 					ctx.font = MONOSPACEFONT;
 					bellWidth = ctx.measureText( '123456' ).width / 6;
-				}
-				// Otherwise measure in HTML
-				else {
-					var testText = $( '<span>123456</span>' );
-					testText.css( 'font', MONOSPACEFONT );
-					$body.append( testText );
-					bellWidth = testText.width() / 6;
-					testText.remove();
 				}
 				return bellWidth;
 			})();
@@ -221,16 +209,13 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 			// Options object for the plain course
 			var plainCourseOptions = $.extend( true, {}, this.options.plainCourse, {
 				id: 'numbers'+this.id+'_plain',
-				callingPositions: this.method.callingPositions,
-				show: {
-					notation: false,
-					numbers: true,
-					lines: true
+				dimensions: { rowHeight: rowHeight, bellWidth: bellWidth, columnPadding: numbersColumnPadding },
+				layout: {
+					numberOfLeads: this.method.numberOfLeads,
+					leadsPerColumn: leadsPerColumn
 				},
 				display: {
-					numberOfLeads: this.method.numberOfLeads,
-					leadsPerColumn: leadsPerColumn,
-					dimensions: { rowHeight: rowHeight, bellWidth: bellWidth, columnPadding: numbersColumnPadding },
+					callingPositions: this.method.callingPositions,
 					lines: plainLines,
 					numbers: plainLines.map( function( l ) { return (l.stroke !== 'transparent')? 'transparent' : false; } ),
 					placeStarts: plainPlaceStarts
@@ -239,8 +224,7 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 			
 			// Create the plain course image
 			var plainCourseContainer = this.container.numbers;
-			var plainCourseGrid = new MethodGrid( plainCourseOptions );
-			plainCourseContainer.append( plainCourseGrid.container );
+			plainCourseContainer.append( new MethodGrid( plainCourseOptions ) );
 			
 			// Redistribute the plain course's leads across the required number of columns to fit the page when resizing
 			var plainCourseResizedLastFired = 0;
@@ -252,10 +236,9 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 				var currentLeadsPerColumn = leadsPerColumn,
 					newLeadsPerColumn = determineLeadsPerColumn();
 				if( currentLeadsPerColumn !== newLeadsPerColumn ) {
-					plainCourseGrid.destroy();
-					plainCourseOptions.display.leadsPerColumn = newLeadsPerColumn;
-					plainCourseGrid = new MethodGrid( plainCourseOptions );
-					plainCourseContainer.prepend( plainCourseGrid.container );
+					$( '#'+plainCourseOptions.id ).remove();
+					plainCourseOptions.layout.leadsPerColumn = newLeadsPerColumn;
+					plainCourseContainer.prepend( new MethodGrid( plainCourseOptions ) );
 					leadsPerColumn = newLeadsPerColumn;
 				}
 			} );
@@ -264,18 +247,13 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 			this.options.calls.forEach( function( call, i ) {
 				this.container.numbers.append( new MethodGrid( $.extend( true, {}, call, {
 					id: 'numbers'+this.id+'_'+call.id,
-					show: {
-						notation: false,
-						numbers: true,
-						lines: true
-					},
+					dimensions: { rowHeight: rowHeight, bellWidth: bellWidth },
+					numberOfLeads: 1,
 					display: {
-						numberOfLeads: 1,
-						dimensions: { rowHeight: rowHeight, bellWidth: bellWidth },
 						lines: callLines[i],
 						numbers: callLines[i].map( function( l ) { return (l.stroke !== 'transparent')? 'transparent' : false; } )
 					}
-				} ) ).container );
+				} ) ) );
 			}, this );
 		},
 		drawGrids: function() {
@@ -284,10 +262,7 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 				lines = [];
 			for( var i = 0, j = 0; i < this.method.stage; ++i ) {
 				lines.push( {
-					'stroke-linejoin': 'round',
-					'stroke-linecap': 'round',
-					'stroke-width': (this.method.huntBells.indexOf( i ) !== -1)? 1.5 : 2,
-					fill: 'none',
+					lineWidth: (this.method.huntBells.indexOf( i ) !== -1)? 1.5 : 2,
 					stroke: (this.method.huntBells.indexOf( i ) !== -1)? '#D11' : colours[j++] || colours[j = 0, j++]
 				} );
 			}
@@ -297,29 +272,23 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 			// Plain lead
 			this.container.grid.append( new MethodGrid( $.extend( true, {}, this.options.plainCourse, {
 				id: 'grid'+this.id+'_plain',
-				title: 'Plain Lead',
-				show: {
-					notation: true,
-					lines: true
-				},
+				dimensions: gridDimensions,
 				display: {
-					dimensions: gridDimensions,
+					notation: true,
+					title: 'Plain Lead:',
 					lines: lines
 				}
-			} ) ).container );
+			} ) ) );
 			// Calls
 			for( var i = 0; i < this.options.calls.length; i++ ) {
 				this.container.grid.append( new MethodGrid( $.extend( true, {}, this.options.calls[i], {
 					id: 'grid'+this.id+'_'+this.options.calls[i].id,
-					show: {
-						notation: true,
-						lines: true
-					},
+					dimensions: gridDimensions,
 					display: {
-						dimensions: gridDimensions,
+						notation: true,
 						lines: lines
 					}
-				} ) ).container );
+				} ) ) );
 			}
 		}
 	};
