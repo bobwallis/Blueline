@@ -16,8 +16,8 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			height = size*3;
 			
 		if( Can.localStorage() ) {
-			padding.top = localStorage.getItem( 'metrics.top'+size+'.'+font, padding.top );
-			padding.bottom = localStorage.getItem( 'metrics.bottom'+size+'.'+font, padding.top );
+			padding.top = localStorage.getItem( 'Metrics.top'+size+'.'+font, padding.top );
+			padding.bottom = localStorage.getItem( 'Metrics.bottom'+size+'.'+font, padding.top );
 		}
 		if( padding.top === null || padding.bottom === null ) {
 			var canvas = new Canvas( {
@@ -60,8 +60,8 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 					padding.top = Math.abs( size - ((topOfText !== false)? topOfText : size) );
 				
 					if( Can.localStorage() ) {
-						localStorage.setItem( 'metrics.top'+size+'.'+font, padding.top );
-						localStorage.setItem( 'metrics.bottom'+size+'.'+font, padding.bottom );
+						localStorage.setItem( 'Metrics.top'+size+'.'+font, padding.top );
+						localStorage.setItem( 'Metrics.bottom'+size+'.'+font, padding.bottom );
 					}
 				}
 				catch( e ) {
