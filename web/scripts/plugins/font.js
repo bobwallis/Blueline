@@ -48,7 +48,7 @@
 				load( null );
 			}
 			else {
-				req( ['../helpers/Can'], function( Can ) {
+				req( ['helpers/Can'], function( Can ) {
 					// Special case to help out Android
 					if( name == 'BluelineMono' && navigator.userAgent.toLowerCase().indexOf( 'android' ) != -1 ) {
 						load( false );
