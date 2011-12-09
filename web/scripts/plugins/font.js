@@ -47,18 +47,20 @@
 			if( config.isBuild ) {
 				load( null );
 			}
-			req( ['../helpers/Can'], function( Can ) {
-				// Special case to help out Android
-				if( name == 'BluelineMono' && navigator.userAgent.toLowerCase().indexOf( 'android' ) != -1 ) {
-					load( false );
-				}
-				if( Can.webFont() ) {
-					fontWatcher( name, req, load, config );
-				}
-				else {
-					load( false );
-				}
-			} );
+			else {
+				req( ['../helpers/Can'], function( Can ) {
+					// Special case to help out Android
+					if( name == 'BluelineMono' && navigator.userAgent.toLowerCase().indexOf( 'android' ) != -1 ) {
+						load( false );
+					}
+					if( Can.webFont() ) {
+						fontWatcher( name, req, load, config );
+					}
+					else {
+						load( false );
+					}
+				} );
+			}
 		}
 	} );
 })();
