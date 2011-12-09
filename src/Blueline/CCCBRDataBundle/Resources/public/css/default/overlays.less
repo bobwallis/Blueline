@@ -17,8 +17,29 @@
 	top: 0;
 	height: 100%;
 	background-color: #FFF;
-	background-position: center center;
+	background-position: center 150px;
 	opacity: 1;
 	.transition-duration( .2s );
 	.transition-property( "opacity" );
+	header {
+		width: 100%;
+		background: @headerBackground;
+		background-image: -moz-linear-gradient(top, lighten(@headerBackground,3%) 0%, darken(@headerBackground,3%) 100%); /* FF3.6+ */
+		background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,lighten(@headerBackground,3%)), color-stop(100%,darken(@headerBackground,3%))); /* Chrome,Safari4+ */
+		background-image: -webkit-linear-gradient(top, lighten(@headerBackground,3%) 0%,darken(@headerBackground,3%) 100%); /* Chrome10+,Safari5.1+ */
+		background-image: -o-linear-gradient(top, lighten(@headerBackground,3%) 0%,darken(@headerBackground,3%) 100%); /* Opera 11.10+ */
+		background-image: -ms-linear-gradient(top, lighten(@headerBackground,3%) 0%,darken(@headerBackground,3%) 100%); /* IE10+ */
+		background-image: linear-gradient(top, lighten(@headerBackground,3%) 0%,darken(@headerBackground,3%) 100%); /* W3C */
+		height: @headerHeight;
+	}
+	p {
+		position: absolute;
+		left: 0;
+		top: 172px;
+		padding: 0;
+		margin: 0;
+		width: 100%;
+		text-align: center;
+		color: #666;
+	}
 }

@@ -1,9 +1,12 @@
 #top {
-	display: block;
 	width: 100%;
 	background: @headerBackground;
-	background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0, darken(@headerBackground,3%)),color-stop(1, lighten(@headerBackground,3%)));
-	background-image: -moz-linear-gradient(center bottom,darken(@headerBackground,3%) 0%,lighten(@headerBackground,3%) 100%);
+	background-image: -moz-linear-gradient(top, lighten(@headerBackground,3%) 0%, darken(@headerBackground,3%) 100%); /* FF3.6+ */
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,lighten(@headerBackground,3%)), color-stop(100%,darken(@headerBackground,3%))); /* Chrome,Safari4+ */
+	background-image: -webkit-linear-gradient(top, lighten(@headerBackground,3%) 0%,darken(@headerBackground,3%) 100%); /* Chrome10+,Safari5.1+ */
+	background-image: -o-linear-gradient(top, lighten(@headerBackground,3%) 0%,darken(@headerBackground,3%) 100%); /* Opera 11.10+ */
+	background-image: -ms-linear-gradient(top, lighten(@headerBackground,3%) 0%,darken(@headerBackground,3%) 100%); /* IE10+ */
+	background-image: linear-gradient(top, lighten(@headerBackground,3%) 0%,darken(@headerBackground,3%) 100%); /* W3C */
 	color: @lightGrey;
 	height: @headerHeight;
 	line-height: @headerHeight;
