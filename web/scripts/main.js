@@ -20,4 +20,13 @@ require( { paths: { jquery: '/scripts/lib/jquery' } }, ['require', 'helpers/Is',
 			window.applicationCache.swapCache();
 		} );
 	}
+	
+	// Wipe out localStorage if the browser has changed
+	if( Can.localStorage() ) {
+		var storageUA = localStorage.getItem( 'ua' );
+		if( storageUA !== navigator.userAgent ) {
+			localStorage.clear();
+			localStorage.setItem( 'ua', navigator.userAgent );
+		}
+	}
 } );

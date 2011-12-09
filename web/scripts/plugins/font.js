@@ -1,21 +1,4 @@
 (function(){
-	// Check this browser actually supports web fonts (borrowed from Modernizr)
-	var webFontSupport;
-	try {
-		var div = document.createElement( 'div' ),
-			webFontTestRule = '@font-face {font-family:"font";src:url("https://")}';
-		div.id = 'ffTest';
-		div.innerHTML += '&shy;<style>'+webFontTestRule+'</style>';
-		document.body.appendChild( div );
-		var style = document.styleSheets[document.styleSheets.length - 1],
-			cssText = style.cssRules && style.cssRules[0] ? style.cssRules[0].cssText : style.cssText || "",
-		webFontSupport = /src/i.test( cssText ) && cssText.indexOf( webFontTestRule.split( ' ' )[0] ) === 0;
-		div.parentNode.removeChild( div );
-	}
-	catch( e ) {
-		webFontSupport = false;
-	}
-	
 	// Compare the width of a test string in a serif font against the test string 
 	// using the custom font, and wait for them to be different
 	var testAgainst = "arial,'URW Gothic L',sans-serif",
@@ -64,12 +47,18 @@
 			if( config.isBuild ) {
 				load( null );
 			}
-			else if( webFontSupport ) {
-				fontWatcher( name, req, load, config );
-			}
-			else {
-				load( false );
-			}
+			req( ['../helpers/Can'], function( Can ) {
+				// Special case to help out Android
+				if( name == 'BluelineMono' && navigator.userAgent.toLowerCase().indexOf( 'android' ) != -1 ) {
+					load( false );
+				}
+				if( Can.webFont() ) {
+					fontWatcher( name, req, load, config );
+				}
+				else {
+					load( false );
+				}
+			} );
 		}
 	} );
 })();
