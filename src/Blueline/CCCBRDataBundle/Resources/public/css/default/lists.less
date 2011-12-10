@@ -2,13 +2,35 @@ ol, ul {
 	margin: @contentYPadding @contentXPadding;
 	padding: 0;
 	list-style: none;
-}
-li {
-	padding: 2px 0;
-	&:first-child {
-		padding-top: 0;
+	li {
+		padding: 4px 0;
+		&:first-child {
+			padding-top: 0;
+		}
+		&:last-child {
+			padding-bottom: 0;
+		}
 	}
-	&:last-child {
-		padding-bottom: 0;
+	small.extra {
+		color: #000 !important;
+	}
+}
+
+@media screen and (max-width: 500px) {
+	ol, ul {
+		margin: 0;
+		li {
+			padding: 0;
+			border-bottom: 1px solid @lightGrey;
+			a {
+				display: block;
+				padding: (@contentYPadding - 2) @contentXPadding;
+				border: 0 !important;
+			}
+			small.extra:before {
+				content: '\a';
+				white-space: pre;
+			}
+		}
 	}
 }

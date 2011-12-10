@@ -13,17 +13,8 @@
 	#associationsList, .affiliations ol {
 		margin: 0;
 		column-count: 1; -webkit-column-count: 1; -moz-column-count: 3;
-		li {
-			padding: 0;
-			border-bottom: 1px solid @lightGrey;
-			&:last-child {
-				border: 0;
-			}
-			a {
-				display: block;
-				padding: (@contentYPadding - 2) @contentXPadding;
-				border: 0 !important;
-			}
+		li:last-child {
+			border: 0;
 		}
 	}
 }
