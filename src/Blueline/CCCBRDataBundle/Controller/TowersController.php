@@ -66,7 +66,8 @@ class TowersController extends Controller {
 				SELECT t, partial a.{abbreviation,name}, partial m.{title,firstTowerbellPealDate} FROM BluelineCCCBRDataBundle:Towers t
 				LEFT JOIN t.affiliations a
 				LEFT JOIN t.firstPealedMethods m
-				WHERE t.doveid = :doveid' )
+				WHERE t.doveid = :doveid
+				ORDER BY m.firstTowerbellPealDate DESC' )
 			->setParameter( 'doveid', $doveid )
 			->getSingleResult();
 			
