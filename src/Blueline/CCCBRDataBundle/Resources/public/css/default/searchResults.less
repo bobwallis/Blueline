@@ -1,13 +1,9 @@
 .search {
 	min-height: 250px;
 	ol {
-		padding: 0;
-		margin: @contentYPadding @contentXPadding;
 		color: #555;
-		list-style: none;
 		li {
-			padding: 2px 0;
-			margin: 0;
+			padding: 4px 0;
 			&.selected {
 				padding-left: 8px;
 				margin-left: -8px;
@@ -18,19 +14,7 @@
 					border-bottom-color: #29404C;
 				}
 			}
-			&:first-child {
-				padding-top: 0;
-			}
-			&:last-child {
-				padding-bottom: 0;
-			}
 		}
-	}
-}
-
-@media screen and (max-width: 480px) {
-	.search ol li {
-		padding: 4px 0 4px;
 	}
 }
 
@@ -45,5 +29,26 @@ div.pagingLinks {
 	}
 	a {
 		margin: 0 6px;
+	}
+}
+
+@media screen and (max-width: 500px) {
+	.search {
+		ol, ul {
+			margin: 0;
+		}
+		li {
+			padding: 0 !important;
+			border-bottom: 1px solid @lightGrey;
+			a {
+				display: block;
+				padding: (@contentYPadding - 2) @contentXPadding;
+				border: 0 !important;
+			}
+		}
+	}
+	
+	div.paging {
+		text-align: center;
 	}
 }
