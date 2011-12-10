@@ -4,6 +4,7 @@ define( ['jquery'], function( $ ) {
 		sectionRegexp = /^(.*)\/(associations|methods|towers)($|\/)/,
 		topSearchRegexp = /(associations|\/view\/)/,
 		bigSearchRegexp = /\/(associations\/search|((methods|towers)($|\/search)))/;
+	
 	return {
 		update: function( url ) {
 			// Initialise jQuery objects if not already done

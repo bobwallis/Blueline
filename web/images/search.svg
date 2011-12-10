@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" preserveAspectRatio="xMidYMid">
-	<rect fill="#FFF" x="0" y="0" width="20" height="20" />
 	<path fill="none" stroke="#DDD" stroke-width="1" stroke-linecap="round" d="M0,3L0,17" />
 	<rect fill="#CCC" stroke="#999" stroke-width="1" x="14" y="10" width="6" height="3" rx="1" ry="1" transform="rotate(45 14 10)" />
 	<circle fill="#EEE" stroke="#999" stroke-width="1" cx="10" cy="8" r="5" />
