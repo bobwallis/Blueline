@@ -290,6 +290,13 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 					}
 				} ) ) );
 			}
+			
+			// Give all the grids the same width
+			var widths = $( 'canvas', this.container.grid ).map( function( i, e ) { return $(e).width(); } ).toArray(),
+				maxWidth = Math.max.apply( Math, widths );
+			$( 'canvas', this.container.grid ).map( function( i, e ) {
+				$(e).css( 'margin-left', (maxWidth - widths[i])+'px' );
+			} );
 		}
 	};
 	
