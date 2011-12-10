@@ -180,7 +180,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 				}
 				var testCanvas = document.createElement( 'canvas' ),
 					ctx = testCanvas.getContext( '2d' );
-				ctx.font = '11px '+SANSFONT;
+				ctx.font = '10px '+SANSFONT;
 				width = ctx.measureText( text ).width + 2;
 				testCanvas = ctx = null;
 				return width;
@@ -216,12 +216,12 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			
 			// Draw notation down side
 			if( show.notation ) {
-				textMetrics = measureTopAndBottomTextPadding( 11, SANSFONT );
+				textMetrics = measureTopAndBottomTextPadding( 10, SANSFONT );
 				context.fillStyle = '#000';
-				context.font = '11px '+SANSFONT;
+				context.font = '10px '+SANSFONT;
 				context.textAlign = 'right';
 				context.textBaseline = 'alphabetic';
-				y = canvasTopPadding + rowHeight + textMetrics.bottom + ((rowHeight - 11)/2);
+				y = canvasTopPadding + rowHeight + textMetrics.bottom + ((rowHeight - 10)/2);
 				for( i = 0; i < notation.exploded.length; ++i ) {
 					context.fillText( notation.exploded[i], canvasLeftPadding - 2, (i*rowHeight)+y );
 				}
