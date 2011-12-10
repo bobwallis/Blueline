@@ -6,17 +6,93 @@
 	{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
 	<section class="text">
 		{{ header('Debug Information') }}
-		<ul id="debug"></ul>
+		<div class="wrap">
+			<h2>Browser</h2>
+			<ul id="browserDebug"></ul>
+			<h2>Can.js</h2>
+			<ul id="canDebug"></ul>
+			<h2>Databases</h2>
+			<h3>WebSQL</h3>
+			<ul id="webSQLDebug"></ul>
+			<h3>IndexedDB</h3>
+			<ul id="indexedDBDebug"></ul>
+		</div>
 		<script>
 {% autoescape false %}
 		//<![CDATA[
 			require( { paths: { jquery: '/scripts/lib/jquery' } }, ['jquery', 'helpers/Can'], function( $, Can ) {
-				var html = '<li>User Agent: '+navigator.userAgent+'</li>',
-					cans = ['canvas', 'history', 'indexedDB', 'localStorage', 'placeholder', 'applicationCache', 'SVG', 'webFont', 'webSQL'];
+				// #browser
+				$( '#browserDebug' ).html( '<li>User Agent: '+navigator.userAgent+'</li>' );
+				
+				// #can
+				var html = '', cans = ['canvas', 'history', 'indexedDB', 'localStorage', 'placeholder', 'applicationCache', 'SVG', 'webFont', 'webSQL'];
 				for( var i = 0; i < cans.length; ++i ) {
 					html += '<li>'+cans[i]+': '+(Can[cans[i]]()?'Yes':'No')+'</li>';
 				}
-				$( '#debug' ).html( html );
+				$( '#canDebug' ).html( html );
+				
+				// #webSQL
+				if( Can.webSQL() ) {
+					var db = openDatabase( 'Blueline', '1.0', '', 5242880 );
+					if( db ) {
+						db.readTransaction( function( tx ) {
+							tx.executeSql( 'SELECT tbl_name from sqlite_master WHERE type = "table"', [], function( tx, results ) {
+								if( results.rows.length === 0 ) {
+									$( '#webSQLDebug' ).html( '<li>No tables</li>' );
+								}
+								else {
+									var html = '<li>Tables: ';
+									for( var i = 0; i < results.rows.length; ++i ) {
+										if( results.rows.item(i).tbl_name == 'versions' ) {
+											tx.executeSql( 'SELECT * from versions;', [], function( tx, results ) {
+												var html = '<li>Versions: ';
+												for( var i = 0; i < results.rows.length; ++i ) {
+													html += '[ ' + results.rows.item(i).name + ', ' + results.rows.item(i).version+' ], ';
+												}
+												$( '#webSQLDebug' ).append( html.replace( /, $/, '' )+'</li>' );
+											} );
+										}
+										if( results.rows.item(i).tbl_name == 'pages' ) {
+											tx.executeSql( 'SELECT COUNT(*) as count from pages;', [], function( tx, results ) {
+												var html = '<li>Pages Cached: ';
+												if( results.rows.length !== 0 ) {
+													html += results.rows.item(0).count;
+												}
+												$( '#webSQLDebug' ).append( html+'</li>' );
+											} );
+										}
+										html += results.rows.item(i).tbl_name+', ';
+									}
+									$( '#webSQLDebug' ).prepend( html.replace( /, $/, '' )+'</li>' );
+								}
+							} );							
+						}, function() { $( '#webSQLDebug').html( '<li>Error getting tables</li>' ); } );
+					}
+				}
+				
+				// #indexedDB
+				if( Can.indexedDB() ) {
+					var request = indexedDB.open( 'Cache' );
+					request.onsuccess = function( e ) {
+						var db = e.target.result, stores = '';
+						for( var i = 0; i < db.objectStoreNames.length; ++i ) {
+							stores += db.objectStoreNames[i]+', ';
+						}
+						$( '#indexedDBDebug' ).prepend( '<li>Stores: '+stores.replace( /, $/, '' )+'</li>' );
+						$( '#indexedDBDebug' ).prepend( '<li>Version: '+db.version+'</li>' );
+						
+						if( db.objectStoreNames.contains( 'page' ) ) {
+							var transaction = db.transaction(['page'], IDBTransaction.READ_ONLY, 0 ),
+								store = transaction.objectStore( 'page' );
+							var count = 0;
+							store.openCursor().onsuccess = function( e ) {
+								if( e.target.result ) { ++count; }
+								else { $( '#indexedDBDebug' ).append( '<li>Pages Cached: '+count+'</li>' ); }
+							};
+						}
+					};
+					request.onfailure = function() { $().html( '<li>Error opening database</li>' ); };
+				}
 			} );
 		//]]>
 {% endautoescape %}
