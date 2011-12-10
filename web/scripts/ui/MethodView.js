@@ -3,6 +3,15 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 	// Constants
 	var MONOSPACEFONT = '13px ' + ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : (customFontLoaded?'BluelineMono, ':'')+'"Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
 	
+	// Display messages if canvas is not supported
+	if( !Can.canvas() ) {
+		return function( options ) {
+			var message = '<p class="nothing">Your browser doesn\'t support canvas elements, and so can\'t draw the method.</p>';
+			$( options.numbersContainer ).html( message );
+			$( options.gridContainer ).html( message );
+		};
+	}
+	
 	// Reusable
 	var $window = $( window ),
 		$body = $( document.body );
