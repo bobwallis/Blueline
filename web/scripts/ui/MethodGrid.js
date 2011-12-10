@@ -216,11 +216,12 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			
 			// Draw notation down side
 			if( show.notation ) {
+				textMetrics = measureTopAndBottomTextPadding( 11, SANSFONT );
 				context.fillStyle = '#000';
 				context.font = '11px '+SANSFONT;
 				context.textAlign = 'right';
 				context.textBaseline = 'alphabetic';
-				y = canvasTopPadding + rowHeight + measureTopAndBottomTextPadding( 11, SANSFONT ).bottom + ((rowHeight - 11)/2);
+				y = canvasTopPadding + rowHeight + textMetrics.bottom + ((rowHeight - 11)/2);
 				for( i = 0; i < notation.exploded.length; ++i ) {
 					context.fillText( notation.exploded[i], canvasLeftPadding - 2, (i*rowHeight)+y );
 				}

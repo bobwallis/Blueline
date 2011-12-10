@@ -17,6 +17,8 @@ require( { paths: { jquery: '/scripts/lib/jquery' } }, ['require', 'helpers/Is',
 	if( Can.applicationCache() ) {
 		$applicationCache = $( window.applicationCache );
 		$applicationCache.bind( 'updateready', function( e ) {
+			localStorage.clear();
+			localStorage.setItem( 'ua', navigator.userAgent );
 			window.applicationCache.swapCache();
 		} );
 	}
