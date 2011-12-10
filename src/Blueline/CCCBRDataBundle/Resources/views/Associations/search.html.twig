@@ -10,13 +10,15 @@
 {% block body %}
 	{% from 'BluelineCCCBRDataBundle:Macros:paging.html.twig' import paging %}
 	<section class="search">
+		{% if associations is not empty %}
 		<ol>
 		{% for association in associations %}
 			<li><a href="{{ path( 'Blueline_Associations_view', { 'abbreviation': association.abbreviation } ) }}">{{ association.name }}</a></li>
-		{% else %}
-			<li>No results</li>
 		{% endfor %}
 		</ol>
 		{{ paging( 'Blueline_Associations_search', searchVariables, pageActive, pageCount ) }}
+		{% else %}
+		<p class="nothing">No results</p>
+		{% endif %}
 	</section>
 {% endblock %}

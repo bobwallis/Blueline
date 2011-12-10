@@ -29,7 +29,9 @@ section {
 		line-height: 15px;
 	}
 }
-#content section:first-child header { border-top: 0; }
+#content section:first-child header {
+	border-top: 0;
+}
 
 // Tab bars
 @import 'tabBar.less';
@@ -71,6 +73,16 @@ section .details {
 // Error messages
 .appError {
 	color: #666;
+}
+.nothing {
+	color: #666;
+	padding: 0 @contentXPadding;
+}
+
+@media screen and (max-width: 500px) {
+	.nothing {
+		text-align: center;
+	}
 }
 
 // Lists
