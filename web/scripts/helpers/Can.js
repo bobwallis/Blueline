@@ -5,7 +5,9 @@ define( function() {
 		try {
 			var test = localStorage.getItem( 'Can.'+name );
 			if( test === null ) {
-				localStorage.setItem( 'Can.'+name, f()?'y':'n' );
+				test = f();
+				localStorage.setItem( 'Can.'+name, test?'y':'n' );
+				return test;
 			}
 			else if( test === 'y' ) {
 				return true;
