@@ -10,12 +10,11 @@
 		<script>
 {% autoescape false %}
 		//<![CDATA[
-			require( { paths: { jquery: '/scripts/helpers/jquery' } }, ['jquery', 'helpers/Can'], function( $, Can ) {
-				var html = '<li>User Agent: '+navigator.userAgent+'</li>';
-				for( can in Can ) {
-					if( Can.hasOwnProperty( can ) ) {
-						html += '<li>'+can+': '+(Can[can]()?'Yes':'No')+'</li>';
-					}
+			require( { paths: { jquery: '/scripts/lib/jquery' } }, ['jquery', 'helpers/Can'], function( $, Can ) {
+				var html = '<li>User Agent: '+navigator.userAgent+'</li>',
+					cans = ['canvas', 'history', 'indexedDB', 'localStorage', 'placeholder', 'applicationCache', 'SVG', 'webFont', 'webSQL'];
+				for( var i = 0; i < cans.length; ++i ) {
+					html += '<li>'+cans[i]+': '+(Can[cans[i]]()?'Yes':'No')+'</li>';
 				}
 				$( '#debug' ).html( html );
 			} );
