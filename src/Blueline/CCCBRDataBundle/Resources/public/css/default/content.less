@@ -39,11 +39,13 @@ section {
 
 // Sections with lots of text
 section {
-	.wrap {
+	.wrap, .wrap_wide {
 		margin: @contentYPadding @contentXPadding;
-		max-width: 600px;
 		text-align: justify;
 		.hyphens(auto);
+	}
+	.wrap {
+		max-width: 600px;
 	}
 }
 

@@ -6,11 +6,13 @@
 	{% from 'BluelineCCCBRDataBundle:Macros:header.html.twig' import header %}
 	<section class="debug">
 		{{ header('Debug Information') }}
-		<div class="wrap">
+		<div class="wrap_wide">
 			<h2>Browser</h2>
 			<ul id="browserDebug"></ul>
 			<h2>Can.js</h2>
 			<ul id="canDebug"></ul>
+			<h2>LocalStorage</h2>
+			<ul id="localStorageDebug"></ul>
 			<h2>Databases</h2>
 			<h3>WebSQL</h3>
 			<ul id="webSQLDebug"></ul>
@@ -30,6 +32,16 @@
 					html += '<li>'+cans[i]+': '+(Can[cans[i]]()?'Yes':'No')+'</li>';
 				}
 				$( '#canDebug' ).html( html );
+				
+				// #localStorage
+				if( Can.localStorage() ) {
+					for( var i = 0; i < localStorage.length; ++i ){
+						$( '#localStorageDebug' ).append( '<li>'+localStorage.key( i )+' : '+localStorage.getItem( localStorage.key( i ) )+'</li>' );
+					}
+				}
+				else {
+					$( '#localStorageDebug' ).html( '<li>localStorage not available</li>' );
+				}
 				
 				// #webSQL
 				if( Can.webSQL() ) {
@@ -69,6 +81,9 @@
 						}, function() { $( '#webSQLDebug').html( '<li>Error getting tables</li>' ); } );
 					}
 				}
+				else {
+					$( '#webSQLDebug' ).html( '<li>webSQL not available</li>' );
+				}
 				
 				// #indexedDB
 				if( Can.indexedDB() ) {
@@ -92,6 +107,9 @@
 						}
 					};
 					request.onfailure = function() { $().html( '<li>Error opening database</li>' ); };
+				}
+				else {
+					$( '#indexedDBDebug' ).html( '<li>indexedDB not available</li>' );
 				}
 			} );
 		//]]>
