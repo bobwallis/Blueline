@@ -169,6 +169,23 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 		if( show.title ) {
 			canvasTopPadding += show.numbers? 18 : 12;
 		}
+		if( show.notation ) {
+			canvasLeftPadding += (function() {
+				var longest = 0, text = '', i, width;
+				for( i = 0; i < notation.exploded.length; ++i ) {
+					if( notation.exploded[i].length > longest ) {
+						longest = notation.exploded[i].length;
+						text = notation.exploded[i];
+					}
+				}
+				var testCanvas = document.createElement( 'canvas' ),
+					ctx = testCanvas.getContext( '2d' );
+				ctx.font = '11px '+SANSFONT;
+				width = ctx.measureText( text ).width + 2;
+				testCanvas = ctx = null;
+				return width;
+			})();
+		}
 		
 		// Canvas dimensions
 		canvasWidth = canvasLeftPadding + ((rowWidth + columnLeftPadding + columnRightPadding)*numberOfColumns) + (interColumnPadding*(numberOfColumns-1));
@@ -185,7 +202,8 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			// TO IMPLEMENT: png fallback
 		}
 		else {
-			var context = canvas.context;
+			var context = canvas.context,
+				textMetrics;
 			
 			// Draw title
 			if( show.title ) {
@@ -198,7 +216,14 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			
 			// Draw notation down side
 			if( show.notation ) {
-			
+				context.fillStyle = '#000';
+				context.font = '11px '+SANSFONT;
+				context.textAlign = 'right';
+				context.textBaseline = 'alphabetic';
+				y = canvasTopPadding + rowHeight + measureTopAndBottomTextPadding( 11, SANSFONT ).bottom + ((rowHeight - 11)/2);
+				for( i = 0; i < notation.exploded.length; ++i ) {
+					context.fillText( notation.exploded[i], canvasLeftPadding - 2, (i*rowHeight)+y );
+				}
 			}
 			
 			// Draw rule offs
@@ -211,7 +236,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 					for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
 						for( k = ruleOffs.from; k <= leadLength; k += ruleOffs.every ) {
 							if( k > 0 ) {
-								x = i*rowWidthWithPadding;
+								x = canvasLeftPadding + (i*rowWidthWithPadding);
 								y = canvasTopPadding + (((j*leadLength)+k)*rowHeight) - 0.5;
 								context.moveTo( x, y );
 								context.lineTo( x + rowWidth, y );
@@ -240,7 +265,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 							var bell = leadHeads[k*leadsPerColumn].indexOf( j ),
 								position = bell, newPosition;
 							
-							x = (k*rowWidthWithPadding)+(bell*bellWidth)+(bellWidth/2);
+							x = canvasLeftPadding + (k*rowWidthWithPadding) + (bell*bellWidth) + (bellWidth/2);
 							y = canvasTopPadding + (rowHeight/2);
 							
 							context.moveTo( x, y );
@@ -276,7 +301,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 							var positionInLeadHead = leadHeads[(k*leadsPerColumn)+l].indexOf( j );
 							
 							// The little circle
-							var x = (k*rowWidthWithPadding) + ((positionInLeadHead+0.5)*bellWidth),
+							var x = canvasLeftPadding + (k*rowWidthWithPadding) + ((positionInLeadHead+0.5)*bellWidth),
 								y = canvasTopPadding + (l*rowHeight*leadLength)+(rowHeight/2);
 							context.fillStyle = lines[j].stroke;
 							context.beginPath();
@@ -285,7 +310,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 							context.fill();
 						
 							// The big circle
-							x = (k*rowWidthWithPadding) + rowWidth + 11*pos + 10;
+							x = canvasLeftPadding + (k*rowWidthWithPadding) + rowWidth + 11*pos + 10;
 							context.strokeStyle = lines[j].stroke;
 							context.beginPath();
 							context.arc( x, y, 6, 0, twoPi, true );
@@ -297,7 +322,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 							context.font = ((positionInLeadHead<9)?10:9)+'px '+MONOSPACEFONT;
 							context.textAlign = 'center';
 							context.textBaseline = 'alphabetic';
-							var textMetrics = measureTopAndBottomTextPadding( ((positionInLeadHead<9)?10:9), MONOSPACEFONT );
+							textMetrics = measureTopAndBottomTextPadding( ((positionInLeadHead<9)?10:9), MONOSPACEFONT );
 							context.fillText( (positionInLeadHead+1).toString(), x, (y+5.5)-((textMetrics.bottom + textMetrics.top)/2)-textMetrics.bottom );
 						}
 					}
@@ -314,7 +339,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 				for( i = 0; i < callingPositions.titles.length; ++i ) {
 					if( callingPositions.titles[i] !== null ) {
 						var rowInMethod = callingPositions.from + ( callingPositions.every * (i+1) ) - 2;
-						x = (Math.floor( rowInMethod/rowsPerColumn )*rowWidthWithPadding)+rowWidth+4;
+						x = canvasLeftPadding + (Math.floor( rowInMethod/rowsPerColumn )*rowWidthWithPadding) + rowWidth + 4;
 						y = canvasTopPadding + ((rowInMethod % rowsPerColumn) + 1)*rowHeight;
 						context.fillText( '-'+callingPositions.titles[i], x, y );
 					}
@@ -360,11 +385,11 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 						for( i = 0; i < numberOfColumns; ++i ) {
 							for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
 								if( j == 0 ) {
-									context.fillText( row.join( '' ), i*(rowWidth+sidePadding), topPadding );
+									context.fillText( row.join( '' ), canvasLeftPadding + i*(rowWidth+sidePadding), topPadding );
 								}
 								for( k = 0; k < leadLength; ) {
 									row = PlaceNotation.apply( notation.parsed[k], row );
-									context.fillText( row.join( '' ), i*(rowWidth+sidePadding), topPadding+(j*leadLength*rowHeight)+(++k*rowHeight) );
+									context.fillText( row.join( '' ), canvasLeftPadding + i*(rowWidth+sidePadding), topPadding+(j*leadLength*rowHeight)+(++k*rowHeight) );
 								}
 							}
 						}
