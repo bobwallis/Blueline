@@ -25,11 +25,16 @@ define( ['jquery', '../helpers/Can', '../helpers/Page', './Loading', './Header',
 			// Request page content
 			Page( url,
 				function( data ) {
+					var state = History.getState();
 					// Check the content requested hasn't arrived after some more recently requested content
-					if( History.getState().url === url ) {
+					if( state.url === url ) {
 						Loading.hide();
 						$content.html( data );
 						Window.update( url );
+						// Push a pageview to Google Analytics
+						if( typeof _gaq !== 'undefined' && state.data.type !== 'keyup' ) {
+							_gaq.push( ['_trackPageview'] );
+						}
 					}
 				},
 				function( jqXHR, textStatus, errorThrown ) {

@@ -71,9 +71,6 @@ require( [ 'require', 'jquery', 'helpers/Can', 'lib/History', 'ui/Window', 'ui/H
 				e.preventDefault();
 				Header.update( state.url );
 				Content.update( state.url );
-				if( typeof _gaq !== 'undefined' ) {
-					_gaq.push( ['_trackPageview'] );
-				}
 			}
 		} );
 
