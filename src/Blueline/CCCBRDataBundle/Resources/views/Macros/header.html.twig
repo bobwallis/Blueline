@@ -11,7 +11,7 @@
 				TabBar( {
 					landmark: '{{ tabs.id }}',
 					tabs: [
-{% for tab in tabs.tabs %}
+{% for tab in tabs.tabs|nonEmpty %}
 						{ title: '{{ tab.title }}', content: '{{ tab.content }}'{{ (tab.className is defined)? ', className: \''~tab.className~'\'' : '' }} }{{ not loop.last ? ',' : '' }}
 {% endfor %}
 					],

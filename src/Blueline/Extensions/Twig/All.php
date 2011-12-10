@@ -17,6 +17,7 @@ class All extends \Twig_Extension {
 		return array(
 			'count'          => new \Twig_Filter_Function( 'count' ),
 			'addAccidentals' => new \Twig_Filter_Method( $this, 'addAccidentals' ),
+			'nonEmpty'        => new \Twig_Filter_Method( $this, 'nonEmpty' ),
 			'toArray'        => new \Twig_Filter_Method( $this, 'toArray' )
 		);
 	}
@@ -39,7 +40,16 @@ class All extends \Twig_Extension {
 			return array();
 		}
 	}
-
+	
+	public function nonEmpty( $obj ) {
+		if( is_array( $obj ) ) {
+			return array_filter( $obj, function( $e ) { return !empty( $e ); } );
+		}
+		else {
+			return empty( $obj )? false : $obj;
+		}
+	}
+	
 	public static function toList( array $list, $glue = ', ', $last = ' and ' ) {
 		$list = array_filter( $list );
 		if( empty( $list ) ) {
