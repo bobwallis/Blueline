@@ -24,7 +24,7 @@ define( ['jquery', './Null'], function( $, ContentCache_null ) {
 			var transaction = db.transaction(['page'], IDBTransaction.READ_WRITE ),
 				request = transaction.objectStore( 'page' ).clear();
 			request.onsuccess = success;
-			request.onfailure = failure;
+			request.onblocked = request.onerror = request.onfailure = failure;
 		}
 		else {
 			success();
@@ -34,7 +34,7 @@ define( ['jquery', './Null'], function( $, ContentCache_null ) {
 	// Sets the database version, and creates/clears the page object store as appropriate
 	var setDatabaseVersion = function( version, success, failure ) {
 		if( version != db.version ) {
-			var request = db.setVersion( version );
+			var request = db.setVersion( version.toString() );
 			request.onsuccess = function() {
 				// Create the object store if it doesn't exist
 				if( !db.objectStoreNames.contains( 'page' ) ) {
@@ -46,7 +46,7 @@ define( ['jquery', './Null'], function( $, ContentCache_null ) {
 					clearDatabase( success, failure );
 				}
 			};
-			request.onfailure = failure;
+			request.onblocked = request.onerror = request.onfailure = failure;
 		}
 		else {
 			success();
@@ -71,7 +71,7 @@ define( ['jquery', './Null'], function( $, ContentCache_null ) {
 							failure();
 						}
 					};
-					request.onerror = function( e ) {
+					request.onblocked = request.onerror = request.onfailure = function( e ) {
 						transaction.abort();
 						failure();
 					};

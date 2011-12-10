@@ -98,12 +98,17 @@
 						
 						if( db.objectStoreNames.contains( 'page' ) ) {
 							var transaction = db.transaction(['page'], IDBTransaction.READ_ONLY, 0 ),
-								store = transaction.objectStore( 'page' );
-							var count = 0;
-							store.openCursor().onsuccess = function( e ) {
-								if( e.target.result ) { ++count; }
+								store = transaction.objectStore( 'page' ),
+								count = 0,
+								request = store.openCursor();
+							request.onsuccess = function( e ) {
+								if( e.target.result ) {
+									++count;
+									e.target.result.continue();
+								}
 								else { $( '#indexedDBDebug' ).append( '<li>Pages Cached: '+count+'</li>' ); }
 							};
+							request.onerror = request.onblocked = function( e ) { console.log(e); };
 						}
 					};
 					request.onfailure = function() { $().html( '<li>Error opening database</li>' ); };
