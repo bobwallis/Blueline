@@ -2,7 +2,7 @@ define( ['./Can'], function( Can ) {
 	if( Can.canvas() ) {
 		var Canvas = function( options ) {
 			// Create canvas element
-			var pixelRatio = (typeof window.devicePixelRatio == 'number')? window.devicePixelRatio : 1,
+			var pixelRatio = (typeof options.scale == 'number')? options.scale : ((typeof window.devicePixelRatio == 'number')? window.devicePixelRatio : 1),
 				canvas = document.createElement( 'canvas' );
 			canvas.setAttribute( 'id', options.id );
 			canvas.setAttribute( 'width', options.width * pixelRatio );

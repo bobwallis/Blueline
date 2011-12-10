@@ -295,7 +295,7 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 			var widths = $( 'canvas', this.container.grid ).map( function( i, e ) { return $(e).width(); } ).toArray(),
 				maxWidth = Math.max.apply( Math, widths );
 			$( 'canvas', this.container.grid ).map( function( i, e ) {
-				$(e).css( 'margin-left', (maxWidth - widths[i])+'px' );
+				$(e).css( 'margin-left', (12 + maxWidth - widths[i])+'px' );
 			} );
 		}
 	};

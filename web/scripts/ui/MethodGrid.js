@@ -16,14 +16,15 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			height = size*3;
 			
 		if( Can.localStorage() ) {
-			padding.top = localStorage.getItem( 'Metrics.top'+size+'.'+font, padding.top );
-			padding.bottom = localStorage.getItem( 'Metrics.bottom'+size+'.'+font, padding.top );
+			padding.top = localStorage.getItem( 'Metrics.top.'+size+'.'+font, padding.top );
+			padding.bottom = localStorage.getItem( 'Metrics.bottom.'+size+'.'+font, padding.top );
 		}
 		if( padding.top === null || padding.bottom === null ) {
 			var canvas = new Canvas( {
 				id: 'metric',
 				width: width,
-				height: height
+				height: height,
+				scale: (typeof window.devicePixelRatio == 'number')? window.devicePixelRatio*8 : 8,
 			} );
 			if( canvas !== false ) {
 				try {
@@ -42,7 +43,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 					for( row = size*2*canvas.scale; !bottomOfText && row > size*canvas.scale; --row ) {
 						for( column = 0; column < imageData.width ; ++column ) {
 							if(imageData.data[((row*(imageData.width*4)) + (column*4))] > 0 ) {
-								bottomOfText = row / canvas.scale;
+								bottomOfText = (row-1) / canvas.scale;
 								break;
 							}
 						}
@@ -60,8 +61,8 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 					padding.top = Math.abs( size - ((topOfText !== false)? topOfText : size) );
 				
 					if( Can.localStorage() ) {
-						localStorage.setItem( 'Metrics.top'+size+'.'+font, padding.top );
-						localStorage.setItem( 'Metrics.bottom'+size+'.'+font, padding.bottom );
+						localStorage.setItem( 'Metrics.top.'+size+'.'+font, padding.top );
+						localStorage.setItem( 'Metrics.bottom.'+size+'.'+font, padding.bottom );
 					}
 				}
 				catch( e ) {
@@ -181,7 +182,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 				var testCanvas = document.createElement( 'canvas' ),
 					ctx = testCanvas.getContext( '2d' );
 				ctx.font = '10px '+SANSFONT;
-				width = ctx.measureText( text ).width + 2;
+				width = ctx.measureText( text ).width + 4;
 				testCanvas = ctx = null;
 				return width;
 			})();
@@ -221,9 +222,9 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 				context.font = '10px '+SANSFONT;
 				context.textAlign = 'right';
 				context.textBaseline = 'alphabetic';
-				y = canvasTopPadding + rowHeight + textMetrics.bottom + ((rowHeight - 10)/2);
+				y = canvasTopPadding + rowHeight + textMetrics.bottom + ((10 - (textMetrics.bottom + textMetrics.top))/2);
 				for( i = 0; i < notation.exploded.length; ++i ) {
-					context.fillText( notation.exploded[i], canvasLeftPadding - 2, (i*rowHeight)+y );
+					context.fillText( notation.exploded[i], canvasLeftPadding - 4, (i*rowHeight)+y );
 				}
 			}
 			
@@ -238,7 +239,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 						for( k = ruleOffs.from; k <= leadLength; k += ruleOffs.every ) {
 							if( k > 0 ) {
 								x = canvasLeftPadding + (i*rowWidthWithPadding);
-								y = canvasTopPadding + (((j*leadLength)+k)*rowHeight) - 0.5;
+								y = canvasTopPadding + (((j*leadLength)+k)*rowHeight);
 								context.moveTo( x, y );
 								context.lineTo( x + rowWidth, y );
 							}
@@ -324,7 +325,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 							context.textAlign = 'center';
 							context.textBaseline = 'alphabetic';
 							textMetrics = measureTopAndBottomTextPadding( ((positionInLeadHead<9)?10:9), MONOSPACEFONT );
-							context.fillText( (positionInLeadHead+1).toString(), x, (y+5.5)-((textMetrics.bottom + textMetrics.top)/2)-textMetrics.bottom );
+							context.fillText( (positionInLeadHead+1).toString(), x, y + 6 + textMetrics.bottom - ((12-(((positionInLeadHead<9)?10:9)-(textMetrics.bottom + textMetrics.top)))/2) );
 						}
 					}
 				}, this );
@@ -351,9 +352,9 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			if( show.numbers && typeof context.fillText === 'function' ) {
 				// Measure the actual text position (for pixel perfect positioning)
 				var textMetrics = measureTopAndBottomTextPadding( 13, MONOSPACEFONT ),
-					topPadding = canvasTopPadding + rowHeight - ((textMetrics.bottom + textMetrics.top)/2) - textMetrics.bottom,
+					topPadding = canvasTopPadding + rowHeight + textMetrics.bottom - ((rowHeight-(13-(textMetrics.top+textMetrics.bottom)))/2),
 					sidePadding = interColumnPadding + columnRightPadding;
-			
+				
 				// Set up the context
 				context.textAlign = 'left';
 				context.textBaseline = 'alphabetic';
