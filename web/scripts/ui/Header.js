@@ -2,8 +2,8 @@
 define( ['jquery'], function( $ ) {
 	var $window = false, $breadcrumbContainer, $topSearchContainer, $topSearch, $topSearchInput, $bigSearchContainer, $bigSearch, $bigSearchInput,
 		sectionRegexp = /^(.*)\/(associations|methods|towers)($|\/)/,
-		topSearchRegexp = /(associations|\/view\/)/,
-		bigSearchRegexp = /\/(associations\/search|((methods|towers)($|\/search)))/;
+		topSearchRegexp = /\/view\//,
+		bigSearchRegexp = /\/(associations|methods|towers)($|\/search)/;
 	
 	return {
 		update: function( url ) {
@@ -39,10 +39,15 @@ define( ['jquery'], function( $ ) {
 				}
 				
 				// Update and show the main search box if needed
-				if( bigSearchRegexp.exec( url ) !== null ) {
+				var bigSearchRegexpResult = bigSearchRegexp.exec( url );
+				if( bigSearchRegexpResult !== null ) {
 					$bigSearch.attr( 'action', section[1]+'/'+section[2]+'/search' );
 					$bigSearchInput.attr( 'placeholder', 'Search '+section[2] );
-					if( !$bigSearchInput.is( ':focus' ) ) {
+					if( bigSearchRegexpResult[2] === '' ) {
+						$bigSearchInput.val( '' );
+						$bigSearchInput.blur();
+					}
+					else if( !$bigSearchInput.is( ':focus' ) ) {
 						var queryString = url.replace( /^.*?(\?|$)/, '' );
 						$bigSearchInput.val( (queryString.indexOf( 'q=' ) !== -1)? decodeURI( queryString.replace( /^.*q=(.*?)(&.*$|$)/, '$1' ).replace( /\+/g, '%20' ) ) : '' );
 					}
