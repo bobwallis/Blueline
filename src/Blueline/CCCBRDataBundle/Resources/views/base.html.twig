@@ -10,15 +10,18 @@
 		<meta charset="utf-8" />
 		<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
 		<title>{% block title %}Blueline{% endblock %}</title>
+		{% if appStartPage|default(0) %}
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
 		<meta name="format-detection" content="telephone=no" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+		<link rel="apple-touch-startup-image" sizes="640x960" href="{{ asset('images/appStart/640x960.png') }}" />
+		<link rel="apple-touch-startup-image" href="{{ asset('images/appStart/320x480.png') }}" />
+		{% endif %}
 		<meta name="application-name" content="Blueline" />
 		<meta name="msapplication-starturl" content="{{ url( 'Blueline_welcome' ) }}" />
 		<link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" sizes="any" />
 		<link rel="alternate shortcut icon" type="image/x-ixon" href="{{ asset('favicon.ico') }}" sizes="16x16,24x24,48x48" />
-		<link rel="apple-touch-startup-image" href="{{ asset('images/iStartup.png') }}" />
 		<link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/ohgpoagcfmlbkdniokohgicofokpbpae" />
 		{% if search_opensearch is defined %}
 			<link rel="search" type="application/opensearchdescription+xml" href="{{ path( 'Blueline_Opensearch_description', { 'type': search_opensearch, '_format': 'xml' } ) }}" title="{{ search_opensearch|title }} | Blueline" />
