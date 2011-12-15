@@ -12,12 +12,10 @@
 		<title>{% block title %}Blueline{% endblock %}</title>
 		<meta name="format-detection" content="telephone=no" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-		{% if appStartPage|default(0) %}
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
 		<link rel="apple-touch-startup-image" sizes="640x960" href="{{ asset('images/appStart/640x960.png') }}" />
 		<link rel="apple-touch-startup-image" href="{{ asset('images/appStart/320x480.png') }}" />
-		{% endif %}
 		<meta name="application-name" content="Blueline" />
 		<meta name="msapplication-starturl" content="{{ url( 'Blueline_welcome' ) }}" />
 		<link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" sizes="any" />
