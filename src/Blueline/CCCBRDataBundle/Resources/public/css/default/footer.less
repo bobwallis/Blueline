@@ -30,7 +30,7 @@ footer {
 		color: lighten(#29404C,25%) !important;
 		border-bottom: 0;
 		text-decoration: underline;
-		padding: @footerHeight*0.275 0;
+		padding: @footerHeight*0.275 2px;
 	}
 }
 
@@ -43,7 +43,11 @@ footer {
 		height: @footerHeight*2;
 	}
 		footer p, footer nav {
-			float: left;
+			float: none;
 			clear: both;
+			text-align: center;
+		}
+		footer a {
+			padding: @footerHeight*0.275 5px;
 		}
 }
