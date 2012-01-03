@@ -2,6 +2,7 @@
 error.log
 *.sql.gz
 resources/tables/methods/methods.sql
+resources/tables/methods_duplicates/methods_duplicates.sql
 resources/tables/towers/towers.sql
 resources/tables/towers/dove.csv
 resources/tables/methods_towers/methods_towers.sql

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+dWhich=`which "$0"`
+d=`dirname "$dWhich"`
+
+echo "methods_duplicates.sql:"
+
+# Remove old files
+rm -f "$d/methods_duplicates.sql"
+rm -f "$d/methods_duplicates.sql.gz"
+
+# Download and unzip data
+echo "Downloading data"
+curl --progress-bar -o "$d/data/data.html" "http://methods.org.uk/other/duplicate.htm"
+
+# Create SQL
+echo -n "Parsing data to SQL..."
+php "$d/html2sql.php" > "$d/methods_duplicates.sql"
+echo "Done"
+
+# gzip only if no error
+if [ "`tail -n 1 "$d/methods_duplicates.sql"`" = "-- End" ]; then
+	gzip -9c "$d/methods_duplicates.sql" > "$d/methods_duplicates.sql.gz"
+fi

@@ -57,6 +57,7 @@ if [[ ( -z "$1" || "$1" != "nodata" ) && ( -z "$2" || "$2" != "nodata" ) ]]
 	# Update SQL generated from online sources
 	echo -e "\n\033[1mUpdating SQL generated from online data\033[0m"
 	./resources/tables/methods/build
+	./resources/tables/methods_duplicates/build
 	./resources/tables/towers/build
 
 	# Import generated SQL into the database
@@ -78,6 +79,13 @@ if [[ ( -z "$1" || "$1" != "nodata" ) && ( -z "$2" || "$2" != "nodata" ) ]]
 	echo -en "methods.sql..."
 	if [ -e "./resources/tables/methods/methods.sql" -a "`tail -n 1 "./resources/tables/methods/methods.sql"`" = "-- End" ]; then
 		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "./resources/tables/methods/methods.sql"
+		echo "Done"
+	else
+		echo "Skipped"
+	fi
+	echo -en "methods_duplicates.sql..."
+	if [ -e "./resources/tables/methods_duplicates/methods_duplicates.sql" -a "`tail -n 1 "./resources/tables/methods_duplicates/methods_duplicates.sql"`" = "-- End" ]; then
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "./resources/tables/methods_duplicates/methods_duplicates.sql"
 		echo "Done"
 	else
 		echo "Skipped"
