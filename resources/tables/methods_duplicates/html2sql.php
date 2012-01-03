@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `methods_duplicates` (
 
 <?php
 
-$fp = fopen( './data/data.html', 'r' ) or die( "Could not open data.html" );
+$fp = fopen( __DIR__.'/data/data.html', 'r' ) or die( "Could not open data.html" );
 while( $line = fgets( $fp ) ) {
 	if( strpos( $line, '<p><b><i>' ) === 0 ) {
 		preg_match( '/^<p><b><i>(.*?)<\/i><\/b> .*?(on|at|as) (.*?) on (.*?) (was|(\(.*\)?) was) <b><i>(.*?)<\/i>/', $line, $matches );
