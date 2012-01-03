@@ -4,6 +4,16 @@
 		// Remove top margin for nearby towers ol
 		&+ol {
 			margin-top: 0;
+			margin-left: @contentXPadding*2;
+			li {
+				padding: 2px 0;
+				&:first-child {
+					padding-top: 0;
+				}
+				&:last-child {
+					padding-bottom: 0;
+				}
+			}
 		}
 	}
 
@@ -17,5 +27,24 @@
 	.firstPeals {
 		display: none;
 	}
+}
 
+@media screen and (max-width: 500px) {
+	.tower h3 {
+		margin: 0;
+		padding: (@contentYPadding - 2) @contentXPadding 2px @contentXPadding;
+		border-top: 1px solid @lightGrey;
+		&+ol {
+			margin-left: 0;
+			li {
+				border-color: lighten(@lightGrey, 6%) !important;
+				a {
+					padding: 4px @contentXPadding 4px (@contentXPadding*2);
+				}
+				&:last-child {
+					padding-bottom: (@contentYPadding - 4);
+				}
+			}
+		}
+	}
 }

@@ -24,63 +24,47 @@
 		</div>
 		<div id="tower_details_{{ tower.ID }}" class="details">
 			<noscript><h2>Details</h2></noscript>
-			<table>
-				<tr>
-					<th>Bells:</th>
-					<td><strong>{{ tower.bells }}</strong>{% if tower.unringable %} (Unringable){% endif %}</td>
-				</tr>
-				<tr>
-					<th>Tenor:</th>
-					<td><strong>{{ (tower.weightApprox?'~':'')~tower.weightText }}</strong> in {{ tower.note|addAccidentals }}{{ tower.hz is not empty? ' ('~tower.hz~'Hz)' : '' }}</td>
-				</tr>
+			<dl>
+				<dt>Bells</dt>
+				<dd><big><strong>{{ tower.bells }}</strong>{% if tower.unringable %} (Unringable){% endif %}</big></dd>
+				<dt>Tenor</dt>
+				<dd><big><strong>{{ (tower.weightApprox?'~':'')~tower.weightText }}</strong> in {{ tower.note|addAccidentals }}{{ (tower.hz is not empty? ' <small>('~tower.hz~'Hz)</small>' : '')|raw }}</big></dd>
 {% if tower.affiliations is not empty %}
-				<tr>
-					<th>Affiliations:</th>
-					<td>{% for association in tower.affiliations %}{% if not loop.first %}{{ loop.last? ' and ' : ', ' }}{% endif %}<a href="{{ path( 'Blueline_Associations_view', { 'abbreviation': association.abbreviation } ) }}">{{ association.name }}</a>{% endfor %}</td>
-				</tr>
+				<dt>Affiliations</dt>
+				<dd>{% for association in tower.affiliations %}{% if not loop.first %}{{ loop.last? ' and ' : ', ' }}{% endif %}<a href="{{ path( 'Blueline_Associations_view', { 'abbreviation': association.abbreviation } ) }}">{{ association.name }}</a>{% endfor %}</dd>
 {% endif %}
-				<tr>
-					<th>Diocese:</th>
-					<td>{{ tower.diocese }}</td>
-				</tr>
+				<dt>Diocese</dt>
+				<dd>{{ tower.diocese }}</dd>
 {% if tower.postcode is not empty %}
-				<tr>
 {% if tower.country in ['USA'] %}
-					<th>Zip&nbsp;Code:</th>
+				<dt>Zip&nbsp;Code</dt>
 {% else %}
-					<th>Postcode:</th>
+				<dt>Postcode</dt>
 {% endif %}
-					<td>{{ tower.postcode }}</td>
-				</tr>
+				<dd>{{ tower.postcode }}</dd>
 {% endif %}
 {% if tower.gridReference is not empty %}
-				<tr>
-					<th>Grid&nbsp;Reference:</th>
-					<td>{{ tower.gridReference }}</td>
-				</tr>
+				<dt>Grid&nbsp;Reference</dt>
+				<dd>{{ tower.gridReference }}</dd>
 {% endif %}
 {% if tower.toilet or tower.simulator %}
-				<tr>
-					<th>Facilities:</th>
-					<td>
-						{% if tower.toilet %}Toilet available.<br />{% endif %}
-						{% if tower.simulator %}Has a simulator.<br />{% endif %}
-					</td>
-				</tr>
+				<dt>Facilities</dt>
+				<dd>
+					{% if tower.toilet %}Toilet available.<br />{% endif %}
+					{% if tower.simulator %}Has a simulator.<br />{% endif %}
+				</dd>
 {% endif %}
-				<tr>
-					<th>Information:</th>
-					<td>
-						{% if tower.extraInfo is not empty %}{{ tower.extraInfo }}<br />{% endif %}
-						{% if tower.overhaulYear %}Overhauled in {{ tower.overhaulYear }}{{ tower.contractor is not empty? ' by '~tower.contractor : '' }}.<br />{% endif %}
-						{% if tower.tuned %}Tuned in {{ tower.tuned }}.<br />{% endif %}
-						{% if tower.practiceNight > 0 or tower.practiceNotes is not empty %}
-						Practice: {{ dayToString( tower.practiceNight ) }}{{ tower.practiceStart is not empty?', '~tower.practiceStart : '' }}{{ tower.practiceNotes is not empty? ' - '~tower.practiceNotes : '' }}<br />
-						{% endif %}
-						{% if tower.webPage is not empty %}<a href="http://{{ tower.webPage }}" class="external">Tower Website</a>, {% endif %}<a href="http://dove.cccbr.org.uk/detail.php?DoveID={{ tower.doveid }}&showFrames=true" class="external">Dove Entry</a>
-					</td>
-				</tr>
-			</table>
+				<dt>Information</dt>
+				<dd>
+					{% if tower.extraInfo is not empty %}{{ tower.extraInfo }}<br />{% endif %}
+					{% if tower.overhaulYear %}Overhauled in {{ tower.overhaulYear }}{{ tower.contractor is not empty? ' by '~tower.contractor : '' }}.<br />{% endif %}
+					{% if tower.tuned %}Tuned in {{ tower.tuned }}.<br />{% endif %}
+					{% if tower.practiceNight > 0 or tower.practiceNotes is not empty %}
+					Practice: {{ dayToString( tower.practiceNight ) }}{{ tower.practiceStart is not empty?', '~tower.practiceStart : '' }}{{ tower.practiceNotes is not empty? ' - '~tower.practiceNotes : '' }}<br />
+					{% endif %}
+					{% if tower.webPage is not empty %}<a href="http://{{ tower.webPage }}" class="external">Tower Website</a>, {% endif %}<a href="http://dove.cccbr.org.uk/detail.php?DoveID={{ tower.doveid }}&showFrames=true" class="external">Dove Entry</a>
+				</dd>
+			</dl>
 			<h3>Nearby Towers:</h3>
 			<ol>
 {% set nearbyTowers2 = nearbyTowers[loop.index0]|default([]) %}

@@ -16,6 +16,27 @@ ol, ul {
 	}
 }
 
+dl {
+	margin: @contentYPadding @contentXPadding;
+	padding: 0;
+	dt {
+		padding: 2px 0 0 0;
+		margin: 0;
+		font-weight: bold;
+		&:first-child {
+			padding-top: 0;
+		}
+	}
+	dd {
+		padding: 0 0 2px @contentXPadding;
+		margin: 0;
+		text-align: left;
+		&:last-child {
+			padding-bottom: 0;
+		}
+	}
+}
+
 @media screen and (max-width: 500px) {
 	ol, ul {
 		margin: 0;
@@ -30,6 +51,24 @@ ol, ul {
 			small.extra:before {
 				content: '\a';
 				white-space: pre;
+			}
+		}
+	}
+	
+	dl {
+		margin: 0;
+		dt {
+			padding: (@contentYPadding - 2) 0 0 @contentXPadding;
+			border-top: 1px solid @lightGrey;
+			&:first-child {
+				border: 0;
+				padding-top: @contentYPadding;
+			}
+		}
+		dd {
+			padding: 0 @contentXPadding (@contentYPadding - 2) (@contentXPadding * 2);
+			&:last-child {
+				padding-bottom: @contentYPadding;
 			}
 		}
 	}

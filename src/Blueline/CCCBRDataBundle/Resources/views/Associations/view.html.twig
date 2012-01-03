@@ -17,18 +17,14 @@
 		], 'active': 0 } ) }}
 		<div id="association_details_{{ association.ID }}" class="details">
 			<noscript><h2>Details</h2></noscript>
-			<table>
+			<dl>
 			{% if association.link is not empty %}
-				<tr>
-					<th>Link:</th>
-					<td><a href="{{ association.link }}" class="external">{{ association.link }}</a></td>
-				</tr>
+				<dt>Link</dt>
+				<dd><a href="{{ association.link }}" class="external">{{ association.link }}</a></dd>
 			{% endif %}
-				<tr>
-					<th>Towers:</th>
-					<td>{{ count( association.affiliatedTowers ) }}</td>
-				</tr>
-			</table>
+				<dt>Towers</dt>
+				<dd>{{ count( association.affiliatedTowers ) }}</dd>
+			</dl>
 		</div>
 		<div id="association_towers_{{ association.ID }}" class="affiliations">
 			<noscript><h2>Affiliated Towers</h2></noscript>

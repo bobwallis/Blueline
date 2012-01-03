@@ -18,54 +18,36 @@
 		], 'active': 1 } ) }}
 		<div id="method_details_{{ method.ID }}" class="details">
 			<noscript><h2>Details</h2></noscript>
-			<table>
-				<tr>
-					<th>Classification:</th>
-					<td>{{ (method.differential? 'Differential ':'') ~ (method.little? 'Little ':'') ~ method.classification ~ ' ' ~ method.stageText }}</td>
-				</tr>
-				<tr>
-					<th>Place&nbsp;Notation:</th>
-					<td><abbr title="{{ method.notationExpanded }}">{{ method.notation }}</abbr></td>
-				</tr>
-				<tr>
-					<th>Lead&nbsp;Head:</th>
-					<td>{{ (method.leadHead ~ (method.leadHeadCode? ' <small>(Code: ' ~ method.leadHeadCode ~ ')</small>' : ''))|raw }}</td>
-				</tr>
+			<dl>
+				<dt>Classification</dt>
+				<dd>{{ (method.differential? 'Differential ':'') ~ (method.little? 'Little ':'') ~ method.classification ~ ' ' ~ method.stageText }}</dd>
+				<dt>Place&nbsp;Notation</dt>
+				<dd><abbr title="{{ method.notationExpanded }}">{{ method.notation }}</abbr></dd>
+				<dt>Lead&nbsp;Head</dt>
+				<dd>{{ (method.leadHead ~ (method.leadHeadCode? ' <small>(Code: ' ~ method.leadHeadCode ~ ')</small>' : ''))|raw }}</dd>
 {% if method.palindromic or method.doubleSym or method.rotational %}
-				<tr>
-					<th>Symmetry:</th>
-					<td>{{ method.symmetryText }}</td>
-				</tr>
+				<dt>Symmetry</dt>
+				<dd>{{ method.symmetryText }}</dd>
 {% endif %}
 {% if method.fchGroups is not empty %}
-				<tr>
-					<th><abbr title="False Course Head">FCH</abbr>&nbsp;Groups:</th>
-					<td>{{ method.fchGroups }}</td>
-				</tr>
+				<dt><abbr title="False Course Head">FCH</abbr>&nbsp;Groups</dt>
+				<dd>{{ method.fchGroups }}</dd>
 {% endif %}
-				<tr>
-					<th>Hunt&nbsp;Bells:</th>
-					<td>{{ ( method.numberOfHunts > 0 )? method.hunts|join(', ') : 'None' }}</td>
-				</tr>
+				<dt>Hunt&nbsp;Bells</dt>
+				<dd>{{ ( method.numberOfHunts > 0 )? method.hunts|join(', ') : 'None' }}</dd>
 {% if method.lengthOfLead > 0 %}
-				<tr>
-					<th>Lead&nbsp;Length:</th>
-					<td>{{ method.lengthOfLead }} rows</td>
-				</tr>
+				<dt>Lead&nbsp;Length</dt>
+				<dd>{{ method.lengthOfLead }} rows</dd>
 {% endif %}
 {% if method.firstTowerbellPealDate is not empty %}
-				<tr>
-					<th>First&nbsp;towerbell&nbsp;peal:</th>
-					<td>{{ method.firstTowerbellPealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}{% if method.firstTowerbellPealLocation is not empty %} at {% if method.firstTowerbellPealTower.doveid is defined %}<a href="{{ path( 'Blueline_Towers_view', { 'doveid': method.firstTowerBellPealTower.doveid } ) }}">{{ method.firstTowerbellPealLocation }}</a>{% else %}{{ method.firstTowerbellPealLocation }}{% endif %}{% endif %}</td>
-				</tr>
+				<dt>First&nbsp;towerbell&nbsp;peal</dt>
+				<dd>{{ method.firstTowerbellPealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}{% if method.firstTowerbellPealLocation is not empty %} at {% if method.firstTowerbellPealTower.doveid is defined %}<a href="{{ path( 'Blueline_Towers_view', { 'doveid': method.firstTowerBellPealTower.doveid } ) }}">{{ method.firstTowerbellPealLocation }}</a>{% else %}{{ method.firstTowerbellPealLocation }}{% endif %}{% endif %}</dd>
 {% endif %}
 {% if method.firstHandbellpealDate is not empty %}
-				<tr>
-					<th>First&nbsp;handbell&nbsp;peal:</th>
-					<td>{{ method.firstHandbellpealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</td>
-				</tr>
+				<dt>First&nbsp;handbell&nbsp;peal</dt>
+				<dd>{{ method.firstHandbellpealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</dd>
 {% endif %}
-			</table>
+			</dl>
 		</div>
 		<div id="method_line_{{ method.ID }}" class="line"></div>
 		<div id="method_grid_{{ method.ID }}" class="grid"></div>
