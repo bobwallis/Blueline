@@ -522,7 +522,7 @@ class Methods {
 	 * @ORM\OneToMany(targetEntity="MethodsDuplicates", mappedBy="method")
 	 */
 	private $duplicates;
-	public function addDuplicate( \Blueline\CCCBRDataBundle\Entity\MethodDuplicates $duplicate ) { $this->duplicates[] = $duplicate; }
+	public function addDuplicate( \Blueline\CCCBRDataBundle\Entity\MethodsDuplicates $duplicate ) { $this->duplicates[] = $duplicate; }
 	public function getDuplicates() { return $this->duplicates; }
 	
 }
