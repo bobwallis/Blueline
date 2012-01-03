@@ -68,6 +68,7 @@ class MethodsController extends Controller {
 			$query = $em->createQuery(
 				'SELECT m, partial e.{id,calls,ruleOffs}, t FROM BluelineCCCBRDataBundle:Methods m 
 				LEFT JOIN m.extras e
+				LEFT JOIN m.duplicates d
 				LEFT JOIN m.firstTowerbellPealTower t 
 				WHERE m.title LIKE :title' )
 				->setParameter( 'title', $title );

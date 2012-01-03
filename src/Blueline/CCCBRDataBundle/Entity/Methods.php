@@ -13,6 +13,7 @@ class Methods {
 
 	public function __construct() {
 		$this->firstTowerbellPealTower = new \Doctrine\Common\Collections\ArrayCollection();
+		$this->duplicates = new \Doctrine\Common\Collections\ArrayCollection();
 	}
 
 	public function toArray() {
@@ -516,4 +517,12 @@ class Methods {
 		}
 		return $this->callingPositions? : array();
 	}
+	
+	/**
+	 * @ORM\OneToMany(targetEntity="MethodsDuplicates", mappedBy="method")
+	 */
+	private $duplicates;
+	public function addDuplicate( \Blueline\CCCBRDataBundle\Entity\MethodDuplicates $duplicate ) { $this->duplicates[] = $duplicate; }
+	public function getDuplicates() { return $this->duplicates; }
+	
 }

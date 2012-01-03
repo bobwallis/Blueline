@@ -47,6 +47,14 @@
 				<dt>First&nbsp;handbell&nbsp;peal</dt>
 				<dd>{{ method.firstHandbellpealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</dd>
 {% endif %}
+{% if method.duplicates is not empty %}
+				<dt>Method pealed as</dt>
+				<dd>
+				{% for duplicate in method.duplicates %}
+					'{{ duplicate.rung }}'{{ (duplicate.rungLocation != 'handbells')? ' in '~duplicate.rungLocation : ' on handbells' }}{{ ((duplicate.rungDate is not empty)? ' on '~duplicate.rungDate|date('j<\\s\\up>S</\\s\\up> M Y') : '')|raw }}{{ (duplicate.rungRWRef is not empty)? ' ('~duplicate.rungRWRef~')' : '' }}<br />
+				{% endfor %}
+				</dd>
+{% endif %}
 			</dl>
 		</div>
 		<div id="method_line_{{ method.ID }}" class="line"></div>
