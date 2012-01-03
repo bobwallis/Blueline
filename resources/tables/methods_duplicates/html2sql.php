@@ -13,11 +13,14 @@ header( 'Content-Disposition: inline; filename="methods_duplicates.sql"' );
 -- Set up table
 DROP TABLE IF EXISTS `methods_duplicates`;
 CREATE TABLE IF NOT EXISTS `methods_duplicates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `actual` varchar(255) NOT NULL DEFAULT '',
   `rung` varchar(255) NOT NULL DEFAULT '',
   `rung_location` varchar(255) DEFAULT NULL,
   `rung_date` date DEFAULT NULL,
-  `rung_rwRef` varchar(30) DEFAULT NULL
+  `rung_rwRef` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `actual` (`actual`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 <?php
