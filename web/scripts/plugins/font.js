@@ -1,11 +1,12 @@
-(function(){
+/*global define:false */
+(function() {
 	// Compare the width of a test string in a serif font against the test string 
 	// using the custom font, and wait for them to be different
 	var testAgainst = "arial,'URW Gothic L',sans-serif",
 		testString = "BES",
 		testAgainstWidth = -1;
 	
-	var measureFont = function( $container, family ) {
+	var measureFont = function( $, $container, family ) {
 		var $testContainer = $( '<div class="fontPreload" style="font-family:' + family + '">' + testString + '</div>' ), width;
 		$container.append( $testContainer );
 		width = $testContainer.width();
@@ -18,9 +19,9 @@
 			var $body = $( document.body ),
 				calls = 0,
 			checkIfLoaded = function() {
-				var testWidth, differenceLimit = 50; // WebKit seems to give slightly different widths even if the font hasn't loaded. Compensate by only confirming load if the difference is large
+				var testWidth, differenceLimit = 50, // WebKit seems to give slightly different widths even if the font hasn't loaded. Compensate by only confirming load if the difference is large
+					difference = Math.abs( measureFont( $, $body, family+','+testAgainst ) - testAgainstWidth );
 				++calls;
-				difference = Math.abs( measureFont( $body, family+','+testAgainst ) - testAgainstWidth );
 				if( difference > differenceLimit ) {
 					load( true );
 					return;
@@ -34,7 +35,7 @@
 			};
 			
 			// Find out what we're measuring against
-			if( testAgainstWidth == -1 ) {
+			if( testAgainstWidth === -1 ) {
 				testAgainstWidth = measureFont( $body, testAgainst );
 			}
 			
@@ -50,7 +51,7 @@
 			else {
 				req( ['helpers/Can'], function( Can ) {
 					// Special case to help out Android
-					if( name == 'BluelineMono' && navigator.userAgent.toLowerCase().indexOf( 'android' ) != -1 ) {
+					if( name === 'BluelineMono' && navigator.userAgent.toLowerCase().indexOf( 'android' ) !== -1 ) {
 						load( false );
 					}
 					if( Can.webFont() ) {

@@ -1,4 +1,4 @@
-/*global require: false, define: false, google: false, History: false */
+/*global define: false */
 define( ['jquery'], function( $ ) {
 	var $window = false, $breadcrumbContainer, $topSearchContainer, $topSearch, $topSearchInput, $bigSearchContainer, $bigSearch, $bigSearchInput,
 		sectionRegexp = /^(.*)\/(associations|methods|towers)($|\/)/,

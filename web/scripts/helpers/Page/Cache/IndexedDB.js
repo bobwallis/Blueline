@@ -1,10 +1,11 @@
+/*global define:false */
 define( ['jquery', './Null'], function( $, ContentCache_null ) {
 	var db, ContentCache;
 	
 	// Revert ContentCache back to the null version
 	var unsetup = function() {
 		db = null;
-		ContentCache = $.extend( {}, ContentCache_null )
+		ContentCache = $.extend( {}, ContentCache_null );
 	};
 	unsetup();
 	
@@ -33,7 +34,7 @@ define( ['jquery', './Null'], function( $, ContentCache_null ) {
 	
 	// Sets the database version, and creates/clears the page object store as appropriate
 	var setDatabaseVersion = function( version, success, failure ) {
-		if( version != db.version ) {
+		if( version !== db.version ) {
 			var request = db.setVersion( version.toString() );
 			request.onsuccess = function() {
 				// Create the object store if it doesn't exist

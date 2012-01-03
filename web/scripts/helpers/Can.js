@@ -1,3 +1,4 @@
+/*global define:false */
 define( function() {
 
 	// Non-trivial items will be cached using localStorage
@@ -64,7 +65,7 @@ define( function() {
 				div.innerHTML += '&shy;<style>'+webFontTestRule+'</style>';
 				document.body.appendChild( div );
 				var style = document.styleSheets[document.styleSheets.length - 1],
-					cssText = style.cssRules && style.cssRules[0] ? style.cssRules[0].cssText : style.cssText || "",
+					cssText = style.cssRules && style.cssRules[0] ? style.cssRules[0].cssText : style.cssText || "";
 				webFontSupport = /src/i.test( cssText ) && cssText.indexOf( webFontTestRule.split( ' ' )[0] ) === 0;
 				div.parentNode.removeChild( div );
 			}

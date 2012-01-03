@@ -1,3 +1,4 @@
+/*global define: false */
 define( ['jquery', './Is', './Can'], function( $, Is, Can ) {
 	// Most things used should fallback themselves to less functional, but still 
 	// workable behaviour.
@@ -6,7 +7,7 @@ define( ['jquery', './Is', './Can'], function( $, Is, Can ) {
 	// Fallback to PNG for browsers that don't support SVG in CSS backgrounds.
 	// (IE is done by the old_ie.css stylesheet, Android <3 is only other culprit)
 	var isAndroid = Is.android();
-	if( typeof isAndroid == 'number' && isAndroid < 3 ) {
+	if( typeof isAndroid === 'number' && isAndroid < 3 ) {
 		$( '<style>#topSearch button, #bigSearch button{background-image:url(/images/search.png) !important}a.external{background-image:url(/images/external.png) !important}.search li.selected{background-image: url(/images/selectIndicator.png) !important}</style>' ).appendTo( 'head' );
 	}
 	
@@ -14,13 +15,13 @@ define( ['jquery', './Is', './Can'], function( $, Is, Can ) {
 	if( !Can.placeholder() ) {
 		var addPlaceholder = function() {
 			var $this = $( this );
-			if( $this.val() == '' ) {
+			if( $this.val() === '' ) {
 				$this.val( $this.attr( 'placeholder' ) ).addClass( 'placeholder' );
 			}           
 		},
 		removePlaceholder = function() {
 			var $this = $( this );
-			if( $this.val() == $this.attr( 'placeholder' ) ) {
+			if( $this.val() === $this.attr( 'placeholder' ) ) {
 				$this.val( '' ).removeClass( 'placeholder' );
 			}
 		};

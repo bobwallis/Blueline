@@ -1,10 +1,11 @@
+/*global define:false */
 define( ['jquery', './Null'], function( $, ContentCache_null ) {
 	var db, ContentCache;
 	
 	// Revert ContentCache back to the null version
 	var unsetup = function() {
 		db = null;
-		ContentCache = $.extend( {}, ContentCache_null )
+		ContentCache = $.extend( {}, ContentCache_null );
 	};
 	unsetup();
 	
@@ -18,7 +19,7 @@ define( ['jquery', './Null'], function( $, ContentCache_null ) {
 					tx.executeSql( 'CREATE TABLE IF NOT EXISTS pages (url UNIQUE, content TEXT)' );
 					// Clear the table and update the version if needed
 					tx.executeSql( 'SELECT version from versions WHERE name ="pages";', [], function( tx, results ) {
-						if( results.rows.length == 0 || results.rows.item(0).version != contentCache_born ) {
+						if( results.rows.length === 0 || results.rows.item(0).version != contentCache_born ) {
 							tx.executeSql( 'DELETE FROM pages' );
 							tx.executeSql( 'DELETE FROM versions WHERE name=?', ['pages'], function( tx, results ) {
 								tx.executeSql( 'INSERT INTO versions (name,version) VALUES (?,?)', ['pages', contentCache_born] );
@@ -33,7 +34,7 @@ define( ['jquery', './Null'], function( $, ContentCache_null ) {
 					ContentCache.get = function( url, success, failure ) {
 						db.readTransaction( function( tx ) {
 							tx.executeSql( 'SELECT content FROM pages WHERE url=?', [url], function( tx, results ) {
-								if( results.rows.length == 0 ) {
+								if( results.rows.length === 0 ) {
 									failure();
 								}
 								else {

@@ -1,4 +1,4 @@
-/*global require: false, define: false, google: false */
+/*global define: false */
 define( {
 	bellToChar: function( bell ) {
 		bell = parseInt( bell, 10 );
@@ -50,7 +50,7 @@ define( {
 			xPermutation = new Array( stage );
 		// Construct the X permutation for stage
 		for( var i = 0; i < stage; i+=2 ) { xPermutation[i] = i+1; xPermutation[i+1] = i; }
-		if( i-1 == stage ) { xPermutation[i-1] = i-1; }
+		if( i-1 === stage ) { xPermutation[i-1] = i-1; }
 		for( i = 0; i < exploded.length; i++ ) {
 			// For an x, push our pregenerated x permutation
 			if( exploded[i] === 'x' ) {
@@ -67,8 +67,8 @@ define( {
 				}
 				// Then 'x' what's left
 				for( j = 0; j < stage; j++ ) {
-					if( typeof( permutation[j] ) == 'undefined' ) {
-						if( typeof( permutation[j+1] ) == 'undefined' && j+1 < stage ) {
+					if( typeof( permutation[j] ) === 'undefined' ) {
+						if( typeof( permutation[j+1] ) === 'undefined' && j+1 < stage ) {
 							permutation[j] = j+1;
 							permutation[j+1] = j;
 							j++;
@@ -96,7 +96,7 @@ define( {
 	},
 	rowsEqual: function( row1, row2 ) {
 		var i = row1.length;
-		if( i != row2.length) {
+		if( i !== row2.length) {
 			return false;
 		}
 		while( i-- ) {
@@ -116,14 +116,15 @@ define( {
 		return rows;
 	},
 	apply: function( permutation, row ) {
+		var permuted;
 		if( typeof permutation[0].forEach === 'function' ) {
-			var permuted = row;
-			permutation.forEach( function( p ) { permuted = this.apply( p, permuted ) }, this );
+			permuted = row;
+			permutation.forEach( function( p ) { permuted = this.apply( p, permuted ); }, this );
 			return permuted;
 		}
 		var i = permutation.length,
-			j = row.length,
-			permuted = new Array( j );
+			j = row.length;
+		permuted = new Array( j );
 		while( j-- > i ) {
 			permuted[j] = row[j];
 		}
@@ -140,7 +141,7 @@ define( {
 		while( i-- ) {
 			if( rounds[i] === -1 ) { continue; }
 			cycle = [rounds[i]];
-			for( calcRow = permutation; calcRow[i] != rounds[i]; calcRow = this.apply( permutation, calcRow ) ) {
+			for( calcRow = permutation; calcRow[i] !== rounds[i]; calcRow = this.apply( permutation, calcRow ) ) {
 				cycle.push( calcRow[i] );
 				rounds[calcRow[i]] = -1;
 			}

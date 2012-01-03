@@ -1,3 +1,4 @@
+/*global define:false */
 define( {
 	get: function( url, success, failure ) {
 		failure();

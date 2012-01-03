@@ -1,4 +1,4 @@
-/*global require: false, define: false, google: false */
+/*global define: false */
 define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can'], function( $, customFontLoaded, MethodGrid, PlaceNotation, Can ) {
 	// Constants
 	var MONOSPACEFONT = '13px ' + ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : (customFontLoaded?'BluelineMono, ':'')+'"Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
@@ -175,7 +175,7 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 			}, this );
 			
 			// Choose a column (side) padding and row height
-			var numbersColumnPadding = 15
+			var numbersColumnPadding = 15,
 				rowHeight = 14;
 			
 			// Determine the width of the letters we will be drawing

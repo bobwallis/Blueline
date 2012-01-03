@@ -1,4 +1,4 @@
-/*global require: false, define: false, google: false */
+/*global define: false */
 define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '../helpers/Canvas', '../helpers/Can'], function( $, customFontLoaded, PlaceNotation, Canvas, Can ) {
 	// Constants
 	var MONOSPACEFONT = ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : (customFontLoaded?'BluelineMono, ':'')+'"Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace',
@@ -24,7 +24,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 				id: 'metric',
 				width: width,
 				height: height,
-				scale: (typeof window.devicePixelRatio == 'number')? window.devicePixelRatio*8 : 8,
+				scale: (typeof window.devicePixelRatio === 'number')? (window.devicePixelRatio*8) : 8
 			} );
 			if( canvas !== false ) {
 				try {
@@ -94,29 +94,29 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			notation = options.notation,
 			stage = options.stage,
 			
-			startRow = (typeof options.startRow == 'object')? options.startRow : PlaceNotation.rounds( stage ),
+			startRow = (typeof options.startRow === 'object')? options.startRow : PlaceNotation.rounds( stage ),
 			leadHeads = [startRow],
 			
 			leadLength = notation.parsed.length,
-			numberOfLeads = (typeof options.layout.numberOfLeads == 'number')? options.layout.numberOfLeads : 1,
-			numberOfColumns = (typeof options.layout.numberOfColumns == 'number')? options.layout.numberOfColumns : ((typeof options.layout.leadsPerColumn == 'number')? Math.ceil( numberOfLeads / options.layout.leadsPerColumn ): 1),
-			leadsPerColumn = (typeof options.layout.leadsPerColumn == 'number')? options.layout.leadsPerColumn : Math.ceil( numberOfLeads / numberOfColumns ),
+			numberOfLeads = (typeof options.layout.numberOfLeads === 'number')? options.layout.numberOfLeads : 1,
+			numberOfColumns = (typeof options.layout.numberOfColumns === 'number')? options.layout.numberOfColumns : ((typeof options.layout.leadsPerColumn === 'number')? Math.ceil( numberOfLeads / options.layout.leadsPerColumn ): 1),
+			leadsPerColumn = (typeof options.layout.leadsPerColumn === 'number')? options.layout.leadsPerColumn : Math.ceil( numberOfLeads / numberOfColumns ),
 			rowsPerColumn = leadsPerColumn * leadLength,
-			title = (typeof options.display.title == 'string')? options.display.title : '',
+			title = (typeof options.display.title === 'string')? options.display.title : '',
 			
-			callingPositions = (typeof options.display.callingPositions == 'object')? options.display.callingPositions : {},
-			lines = (typeof options.display.lines == 'object')? options.display.lines : {},
-			numbers = (typeof options.display.numbers == 'object')? options.display.numbers : {},
-			placeStarts = (typeof options.display.placeStarts == 'object')? options.display.placeStarts : {},
-			ruleOffs = (typeof options.display.ruleOffs == 'object')? options.display.ruleOffs : {},
+			callingPositions = (typeof options.display.callingPositions === 'object')? options.display.callingPositions : {},
+			lines = (typeof options.display.lines === 'object')? options.display.lines : {},
+			numbers = (typeof options.display.numbers === 'object')? options.display.numbers : {},
+			placeStarts = (typeof options.display.placeStarts === 'object')? options.display.placeStarts : {},
+			ruleOffs = (typeof options.display.ruleOffs === 'object')? options.display.ruleOffs : {},
 			
 			show = {
-				callingPositions: (typeof callingPositions.every == 'number' && typeof callingPositions.from == 'number' && typeof callingPositions.titles.length == 'number')? true : false,
-				lines: (typeof options.display.lines == 'object')? true : false,
-				notation: (typeof options.display.notation == 'boolean')? options.display.notation : false,
-				numbers: (typeof options.display.numbers == 'object')? true : false,
-				placeStarts: (typeof options.display.placeStarts == 'object')? true : false,
-				ruleOffs: (typeof ruleOffs.every == 'number' && typeof ruleOffs.from == 'number')? true : false,
+				callingPositions: (typeof callingPositions.every === 'number' && typeof callingPositions.from === 'number' && typeof callingPositions.titles.length === 'number')? true : false,
+				lines: (typeof options.display.lines === 'object')? true : false,
+				notation: (typeof options.display.notation === 'boolean')? options.display.notation : false,
+				numbers: (typeof options.display.numbers === 'object')? true : false,
+				placeStarts: (typeof options.display.placeStarts === 'object')? true : false,
+				ruleOffs: (typeof ruleOffs.every === 'number' && typeof ruleOffs.from === 'number')? true : false,
 				title: (title === '')? false : true
 			};
 		
@@ -386,7 +386,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 					
 						for( i = 0; i < numberOfColumns; ++i ) {
 							for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
-								if( j == 0 ) {
+								if( j === 0 ) {
 									context.fillText( row.join( '' ), canvasLeftPadding + i*(rowWidth+sidePadding), topPadding );
 								}
 								for( k = 0; k < leadLength; ) {

@@ -1,13 +1,13 @@
-/*global require: false, define: false, google: false */
-define( ['jquery', '../helpers/Can', '../helpers/Page', './Loading', './Header', './Window'], function( $, Can, Page, Loading, Header, Window ) {
+/*global define: false, _gaq: false */
+define( ['jquery', '../lib/History', '../helpers/Can', '../helpers/Page', './Loading', './Header', './Window'], function( $, History, Can, Page, Loading, Header, Window ) {
 	var $content = [], $towerMap = [],
 		towerMapRegexp = /\/(associations|towers)\/view/;
 
 	var Content = {
 		update: function( url ) {
 			// Get DOM objects
-			if( $content.length == 0 ) { $content = $( '#content' ); }
-			if( $towerMap.length == 0 ) { $towerMap = $( '#towerMap' ); }
+			if( $content.length === 0 ) { $content = $( '#content' ); }
+			if( $towerMap.length === 0 ) { $towerMap = $( '#towerMap' ); }
 			
 			// Show a loading animation if we're not doing instant results
 			if( History.getState().data.type !== 'keyup' || $content.is( ':empty' ) ) {

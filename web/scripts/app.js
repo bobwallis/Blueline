@@ -1,5 +1,5 @@
-/*global require: false, define: false, google: false, History: false */
-require( [ 'require', 'jquery', 'helpers/Can', 'lib/History', 'ui/Window', 'ui/Header', 'ui/Content' ], function( require, $, Can, History, Window, Header, Content ) {
+/*global define: false */
+define( [ 'require', 'jquery', 'helpers/Can', 'lib/History', 'ui/Window', 'ui/Header', 'ui/Content' ], function( require, $, Can, History, Window, Header, Content ) {
 	var baseURL = location.protocol+'//'+location.host,
 		baseURLRegexp = new RegExp( '^'+location.protocol+'\/\/'+location.host );
 
@@ -63,7 +63,7 @@ require( [ 'require', 'jquery', 'helpers/Can', 'lib/History', 'ui/Window', 'ui/H
 					History.pushState( { type: 'clipboard' }, null, href );
 				}, 5 );
 			}
-		}
+		};
 
 		History.Adapter.bind( window, 'statechange', function( e ) {
 			var state = History.getState();
@@ -92,11 +92,13 @@ require( [ 'require', 'jquery', 'helpers/Can', 'lib/History', 'ui/Window', 'ui/H
 			
 			// Finish fading out #overlay
 			$( '#appStart' ).css( 'opacity', 0 );
-			setTimeout( function() { $( '#appStart' ).remove() }, 200 );
+			setTimeout( function() { $( '#appStart' ).remove(); }, 200 );
 		} );
 		
 		
 		// Preload font used to draw methods
 		require( ['plugins/font!BluelineMono'] );
 	}
+	
+	return true;
 } );

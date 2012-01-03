@@ -1,4 +1,4 @@
-/*global require: false, define: false, google: false */
+/*global define: false */
 define( ['jquery'], function( $ ) {
 	/** @const */ var HOME = 36;
 	/** @const */ var END = 35;
@@ -18,10 +18,17 @@ define( ['jquery'], function( $ ) {
 			$smallQ = $( '#smallQ' );
 		
 		$window.keydown( function( e ) {
+			var current,
+				next, nextOffsetTop, nextOffsetBottom,
+				prev, prevOffsetTop, prevOffsetBottom,
+				windowScrollTop = $window.scrollTop(),
+				windowScrollBottom = windowScrollTop + $window.height();
+			
 			switch( e.which ) {
 				// Hotkeys to open sections when on home page
 				case a:
 					$( 'section.welcome a:first' ).click();
+					break;
 				case m:
 					$($( 'section.welcome a' )[1]).click();
 					break;
@@ -44,18 +51,16 @@ define( ['jquery'], function( $ ) {
 				
 				// Hotkeys to control search navigation using the keyboard
 				case UP:
-					var current = $( 'li.selected:first' ),
-						prev = current.prev( 'li' );
+					current = $( 'li.selected:first' );
+					prev = current.prev( 'li' );
 					if( current.length > 0 ) {
 						e.preventDefault();
 						if( prev.length > 0 ) {
 							current.removeClass( 'selected' );
 							prev.addClass( 'selected' );
 						// Scroll into view if not visible
-							var prevOffsetTop = prev.offset().top,
-								prevOffsetBottom = prevOffsetTop + prev.outerHeight(),
-								windowScrollTop = $window.scrollTop(),
-								windowScrollBottom = windowScrollTop + $window.height();
+							prevOffsetTop = prev.offset().top;
+							prevOffsetBottom = prevOffsetTop + prev.outerHeight();
 							if( prevOffsetTop < windowScrollTop ) { $( 'html, body' ).animate( { scrollTop: prevOffsetTop-2 }, 75 ); }
 							else if( prevOffsetBottom > windowScrollBottom ) { $( 'html, body' ).animate( { scrollTop: windowScrollTop+2+(prevOffsetBottom-windowScrollBottom) }, 75 ); }
 						}
@@ -65,8 +70,8 @@ define( ['jquery'], function( $ ) {
 					}
 					break;
 				case DOWN:
-					var current = $( 'li.selected:first' ), next;
-					if( $bigQ.is( ':visible:focus' ) || current.length == 0 ) {
+					current = $( 'li.selected:first' );
+					if( $bigQ.is( ':visible:focus' ) || current.length === 0 ) {
 						next = $( 'section.search:first ol:first li:first' );
 						$bigQ.blur();
 						$smallQ.blur();
@@ -79,10 +84,8 @@ define( ['jquery'], function( $ ) {
 						current.removeClass( 'selected' );
 						next.addClass( 'selected' );
 						// Scroll into view if not visible
-						var nextOffsetTop = next.offset().top,
-							nextOffsetBottom = nextOffsetTop + next.outerHeight(),
-							windowScrollTop = $window.scrollTop(),
-							windowScrollBottom = windowScrollTop + $window.height();
+						nextOffsetTop = next.offset().top;
+						nextOffsetBottom = nextOffsetTop + next.outerHeight();
 						if( nextOffsetTop < windowScrollTop ) { $( 'html, body' ).animate( { scrollTop: nextOffsetTop-2 }, 75 ); }
 						else if( nextOffsetBottom > windowScrollBottom ) { $( 'html, body' ).animate( { scrollTop: windowScrollTop+2+(nextOffsetBottom-windowScrollBottom) }, 75 ); }
 					}

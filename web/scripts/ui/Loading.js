@@ -1,3 +1,4 @@
+/*global define: false */
 define( ['jquery'], function( $ ) {
 	var $loading = $( '<div id="loading"></div>' ),
 		loadingShower = false;

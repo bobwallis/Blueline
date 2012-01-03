@@ -1,12 +1,12 @@
-/*global require: false, define: false, google: false */
-require( { paths: { jquery: '/scripts/lib/jquery' } }, ['require', 'helpers/Is', 'helpers/Can', 'helpers/Shim', 'ui/Hotkeys'], function( require, Is, Can, Shim, Hotkeys ) {
+/*global require: false, define: false */
+require( { paths: { jquery: '/scripts/lib/jquery' } }, ['require', 'jquery', 'helpers/Is', 'helpers/Can', 'helpers/Shim', 'ui/Hotkeys'], function( require, $, Is, Can, Shim, Hotkeys ) {
 	// Initialise single session mode if the browser supports it
 	if( Can.history() ) {
 		require( ['app'] );
 	}
 	
 	// Cleanup scripts
-	$( function() { $( 'body > script' ).remove() } );
+	$( function() { $( 'body > script' ).remove(); } );
 	
 	// Fallback app loading overlay hiding
 	if( Is.app() ) {
@@ -15,7 +15,7 @@ require( { paths: { jquery: '/scripts/lib/jquery' } }, ['require', 'helpers/Is',
 	
 	// Listen for application cache updates if the browser supports it
 	if( Can.applicationCache() ) {
-		$applicationCache = $( window.applicationCache );
+		var $applicationCache = $( window.applicationCache );
 		$applicationCache.bind( 'updateready', function( e ) {
 			localStorage.clear();
 			localStorage.setItem( 'ua', navigator.userAgent );

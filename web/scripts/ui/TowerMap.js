@@ -1,4 +1,4 @@
-/*global require: false, define: false, google: false */
+/*global define: false, google: false */
 define( ['require', 'jquery'], function( require, $ ) {
 	// Constants
 	/** @const */ var FUSION_TABLE_ID = 916439;
@@ -7,8 +7,9 @@ define( ['require', 'jquery'], function( require, $ ) {
 	// Detect whether or not we are offline
 	var navigatorOffLine = ( typeof navigator.onLine === 'boolean' && !navigator.onLine );
 	
-	// Create the tower map container
-	var $towerMap = $( '<div id="towerMap" style="display:none"><div class="map"></div></div>' );
+	// Create the tower map container, and define variables for other jQuery objects
+	var $towerMap = $( '<div id="towerMap" style="display:none"><div class="map"></div></div>' ),
+		$content, $window, $top, $bottom;
 	
 	// Create the TowerMap object
 	var TowerMap = {
@@ -220,10 +221,10 @@ define( ['require', 'jquery'], function( require, $ ) {
 				} );
 			} );
 		}
-	}
+	};
 	
-	// Variables used by functions below
-	var $window, $top, $bottom, $content, towerMapAdjustLastFired = 0;
+	// Variable used by functions below
+	var towerMapAdjustLastFired = 0;
 	
 	// Function adjust the tower map's size and location on window changes
 	var towerMapAdjust = function( e ) {

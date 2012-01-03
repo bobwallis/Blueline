@@ -1,8 +1,9 @@
+/*global define:false */
 define( ['./Can'], function( Can ) {
 	if( Can.canvas() ) {
 		var Canvas = function( options ) {
 			// Create canvas element
-			var pixelRatio = (typeof options.scale == 'number')? options.scale : ((typeof window.devicePixelRatio == 'number')? window.devicePixelRatio : 1),
+			var pixelRatio = (typeof options.scale === 'number')? options.scale : ((typeof window.devicePixelRatio === 'number')? window.devicePixelRatio : 1),
 				canvas = document.createElement( 'canvas' );
 			canvas.setAttribute( 'id', options.id );
 			canvas.setAttribute( 'width', options.width * pixelRatio );
@@ -16,7 +17,7 @@ define( ['./Can'], function( Can ) {
 			this.scale = pixelRatio;
 			
 			// Scale for high pixel ratios
-			if( pixelRatio != 1 ) {
+			if( pixelRatio !== 1 ) {
 				this.context.scale( pixelRatio, pixelRatio );
 			}
 			
