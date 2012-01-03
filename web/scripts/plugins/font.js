@@ -36,7 +36,7 @@
 			
 			// Find out what we're measuring against
 			if( testAgainstWidth === -1 ) {
-				testAgainstWidth = measureFont( $body, testAgainst );
+				testAgainstWidth = measureFont( $, $body, testAgainst );
 			}
 			
 			checkIfLoaded();
