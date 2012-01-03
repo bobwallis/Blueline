@@ -12,7 +12,7 @@ class MethodsRepository extends SharedRepository {
 		if( is_null( $query ) ) { $query = $this->createQueryBuilder( 'm' )->select( 'partial m.{title}' ); }
 		
 		if( isset( $searchVariables['q'] ) ) {
-			if( strpos( $searchVariables['q'], '/' ) === 0 ) {
+			if( strpos( $searchVariables['q'], '/' ) === 0 && strlen( $searchVariables['q'] > 1 ) ) {
 				$query->andWhere( 'REGEXP(m.title, :qRegexp) = TRUE' )
 					->setParameter( 'qRegexp', trim( $searchVariables['q'], '/' ) );
 			}
@@ -77,7 +77,7 @@ class MethodsRepository extends SharedRepository {
 		// String variables
 		foreach( array( 'title', 'classification', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef' ) as $key ) {
 			if( isset(  $searchVariables[$key] ) ) {
-				if( strpos( $searchVariables[$key], '/' ) === 0 ) {
+				if( strpos( $searchVariables[$key], '/' ) === 0 && strlen( $searchVariables[$key] ) > 1 ) {
 					$query->andWhere( 'REGEXP(m.'.$key.', :'.$key.'Regexp) = 1' )
 						->setParameter( $key.'Regexp', trim( $searchVariables[$key], '/' ) );
 				}

@@ -13,9 +13,9 @@ class AssociationsRepository extends SharedRepository {
 		if( is_null( $query ) ) { $query = $this->createQueryBuilder( 'a' )->select( 'partial a.{name, abbreviation}' ); }
 		
 		if( isset( $searchVariables['q'] ) ) {
-			if( strpos( $searchVariables['q'], '/' ) === 0 ) {
+			if( strpos( $searchVariables['q'], '/' ) === 0 && strlen( $searchVariables['q'] ) > 1 ) {
 				$query->andWhere( 'REGEXP(a.name, :qRegexp) = TRUE' )
-					->setParameter( 'qRegexp', trim( $searchVariables['q'], '/' ) ); // This doesn't work, and won't until Doctrine allows adding custom conditionals
+					->setParameter( 'qRegexp', trim( $searchVariables['q'], '/' ) );
 			}
 			else {
 				$query->andWhere( $query->expr()->orx(
@@ -28,9 +28,9 @@ class AssociationsRepository extends SharedRepository {
 		
 		foreach( array( 'abbreviation', 'name' ) as $key ) {
 			if( isset(  $searchVariables[$key] ) ) {
-				if( strpos( $searchVariables[$key], '/' ) === 0 ) {
+				if( strpos( $searchVariables[$key], '/' ) === 0 && strlen( $searchVariables[$key] ) > 1 ) {
 					$query->andWhere( 'REGEXP(a.'.$key.', :'.$key.'Regexp) = TRUE' )
-						->setParameter( $key.'Regexp', trim( $searchVariables[$key], '/' ) ); // This doesn't work, and won't until Doctrine allows adding custom conditionals
+						->setParameter( $key.'Regexp', trim( $searchVariables[$key], '/' ) );
 				}
 				else {
 					$query->andWhere( 'a.'.$key.' LIKE :'.$key.'Like' )
