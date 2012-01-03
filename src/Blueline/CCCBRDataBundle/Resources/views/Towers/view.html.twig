@@ -26,39 +26,37 @@
 			<noscript><h2>Details</h2></noscript>
 			<dl>
 				<dt>Bells</dt>
-				<dd><big><strong>{{ tower.bells }}</strong>{% if tower.unringable %} (Unringable){% endif %}</big></dd>
-				<dt>Tenor</dt>
-				<dd><big><strong>{{ (tower.weightApprox?'~':'')~tower.weightText }}</strong> in {{ tower.note|addAccidentals }}{{ (tower.hz is not empty? ' <small>('~tower.hz~'Hz)</small>' : '')|raw }}</big></dd>
+				<dd>
+					<strong>{{ tower.bells }}</strong> bells{% if tower.unringable %} (Unringable){% endif %}<br />
+					<strong>{{ (tower.weightApprox?'~':'')~tower.weightText }}</strong> in {{ tower.note|addAccidentals }}{{ (tower.hz is not empty? ' <small>('~tower.hz~'Hz)</small>' : '')|raw }}
+				</dd>
 {% if tower.affiliations is not empty %}
 				<dt>Affiliations</dt>
 				<dd>{% for association in tower.affiliations %}{% if not loop.first %}{{ loop.last? ' and ' : ', ' }}{% endif %}<a href="{{ path( 'Blueline_Associations_view', { 'abbreviation': association.abbreviation } ) }}">{{ association.name }}</a>{% endfor %}</dd>
 {% endif %}
-				<dt>Diocese</dt>
-				<dd>{{ tower.diocese }}</dd>
+{% if tower.diocese is not empty or tower.postcode is not empty or tower.gridReference is not empty %}
+				<dt>Location</dt>
+				<dd>
+					Diocese: {{ tower.diocese }}<br />
 {% if tower.postcode is not empty %}
 {% if tower.country in ['USA'] %}
-				<dt>Zip&nbsp;Code</dt>
+					Zip&nbsp;Code {{ tower.postcode }}<br />
 {% else %}
-				<dt>Postcode</dt>
+					Postcode: {{ tower.postcode }}<br />
 {% endif %}
-				<dd>{{ tower.postcode }}</dd>
 {% endif %}
 {% if tower.gridReference is not empty %}
-				<dt>Grid&nbsp;Reference</dt>
-				<dd>{{ tower.gridReference }}</dd>
+					Grid&nbsp;Reference: {{ tower.gridReference }}<br />
 {% endif %}
-{% if tower.toilet or tower.simulator %}
-				<dt>Facilities</dt>
-				<dd>
-					{% if tower.toilet %}Toilet available.<br />{% endif %}
-					{% if tower.simulator %}Has a simulator.<br />{% endif %}
+{% endif %}
 				</dd>
-{% endif %}
 				<dt>Information</dt>
 				<dd>
-					{% if tower.extraInfo is not empty %}{{ tower.extraInfo }}<br />{% endif %}
+					{% if tower.extraInfo is not empty %}{{ tower.extraInfo|addAccidentals }}<br />{% endif %}
 					{% if tower.overhaulYear %}Overhauled in {{ tower.overhaulYear }}{{ tower.contractor is not empty? ' by '~tower.contractor : '' }}.<br />{% endif %}
 					{% if tower.tuned %}Tuned in {{ tower.tuned }}.<br />{% endif %}
+					{% if tower.toilet %}Toilet available.<br />{% endif %}
+					{% if tower.simulator %}Has a simulator.<br />{% endif %}
 					{% if tower.practiceNight > 0 or tower.practiceNotes is not empty %}
 					Practice: {{ dayToString( tower.practiceNight ) }}{{ tower.practiceStart is not empty?', '~tower.practiceStart : '' }}{{ tower.practiceNotes is not empty? ' - '~tower.practiceNotes : '' }}<br />
 					{% endif %}

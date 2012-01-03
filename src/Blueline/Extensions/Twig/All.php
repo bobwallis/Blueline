@@ -23,7 +23,7 @@ class All extends \Twig_Extension {
 	}
 
 	public function addAccidentals( $str ) {
-		return str_replace( array( 'b', '#' ), array( '♭', '♯' ), $str );
+		return preg_replace( array( '/(^|\s)([A-G1-9]{1})b($|\s)/', '/(^|\s)([A-G1-9]{1})#($|\s)/' ), array( '$1$2♭$3', '$1$2♯$3' ), $str );
 	}
 
 	public function toArray( $obj ) {
