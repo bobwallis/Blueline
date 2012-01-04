@@ -1,79 +1,95 @@
 /*global define: false */
 define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '../helpers/Canvas', '../helpers/Can'], function( $, customFontLoaded, PlaceNotation, Canvas, Can ) {
-	// Constants
-	var MONOSPACEFONT = ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : (customFontLoaded?'BluelineMono, ':'')+'"Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace',
-		SANSFONT = '"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif';
-	
-	
 	// Vertical positioning of text within its bounding box is inconsistent across
 	// browsers. This is a problem when trying to get pixel perfect alignments of
-	// text and lines. This function, given a font and size, will measure the top 
-	// and bottom padding between the text's bounding box, and where the text 
-	// actually starts, using alphabetic baseline, and caching in localStorage.
-	var measureTopAndBottomTextPadding = function( size, font ) {
-		var padding = { top: null, bottom: null },
-			width = size*5,
-			height = size*3;
+	// text and lines. This function, given a font and size, will return the offset
+	// needed to be applied to x and y to centre text of size n in an nxn box when
+	// drawing with textAlign=center and baseLine=alphabetic
+	var measureXAndYTextPadding = function( size, font ) {
+		var padding = { x: null, y: null };
 			
 		if( Can.localStorage() ) {
-			padding.top = localStorage.getItem( 'Metrics.top.'+size+'.'+font, padding.top );
-			padding.bottom = localStorage.getItem( 'Metrics.bottom.'+size+'.'+font, padding.top );
+			padding.x = localStorage.getItem( 'Metrics.x.'+size+'.'+font );
+			padding.y = localStorage.getItem( 'Metrics.y.'+size+'.'+font );
 		}
-		if( padding.top === null || padding.bottom === null ) {
+		if( padding.x === null || padding.y === null ) {
 			var canvas = new Canvas( {
 				id: 'metric',
-				width: width,
-				height: height,
+				width: size*3,
+				height: size*3,
 				scale: (typeof window.devicePixelRatio === 'number')? (window.devicePixelRatio*8) : 8
 			} );
 			if( canvas !== false ) {
 				try {
 					var context = canvas.context;
 					context.font = size+'px '+font;
+					context.textAlign = 'center';
 					context.baseLine = 'alphabetic';
 					context.fillStyle = '#F00';
-					context.fillText( '0', size*2, size*2 );
+					context.fillText( '0', size*1.5, size*2 );
 				
-					var imageData = context.getImageData( 0, 0, width*canvas.scale, height*canvas.scale ),
+					var dim = size*3*canvas.scale,
+						imageData = context.getImageData( 0, 0, dim, dim ),
 						bottomOfText = false,
 						topOfText = false,
+						leftOfText = false,
+						rightOfText = false,
 						row, column;
 				
-					// Find bottom
-					for( row = size*2*canvas.scale; !bottomOfText && row > size*canvas.scale; --row ) {
-						for( column = 0; column < imageData.width ; ++column ) {
-							if(imageData.data[((row*(imageData.width*4)) + (column*4))] > 0 ) {
-								bottomOfText = (row-1) / canvas.scale;
-								break;
-							}
-						}
-					}
-					padding.bottom = Math.abs( size*2 - ((bottomOfText !== false)? bottomOfText : size*2) );
 					// Find top
-					for( row = size*canvas.scale; !topOfText && row < size*2*canvas.scale; ++row ) {
-						for( column = 0; column < imageData.width ; ++column ) {
-							if(imageData.data[((row*(imageData.width*4)) + (column*4))] > 0 ) {
-								topOfText = row / canvas.scale;
+					for( row = 0; !topOfText && row < dim; ++row ) {
+						for( column = 0; column < dim ; ++column ) {
+							if(imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
+								topOfText = row;
 								break;
 							}
 						}
 					}
-					padding.top = Math.abs( size - ((topOfText !== false)? topOfText : size) );
-				
+					// Find bottom
+					for( row = dim; !bottomOfText && row > 0; --row ) {
+						for( column = 0; column < dim ; ++column ) {
+							if( imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
+								bottomOfText = row + 1;
+								break;
+							}
+						}
+					}
+					// Find left
+					for( column = 0; !leftOfText && column < dim; ++column ) {
+						for( row = 0; row < dim ; ++row ) {
+							if( imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
+								leftOfText = column;
+								break;
+							}
+						}
+					}
+					// Find right
+					for( column = dim; !rightOfText && column > 0; --column ) {
+						for( row = 0; row < dim ; ++row ) {
+							if( imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
+								rightOfText = column + 1;
+								break;
+							}
+						}
+					}
+					
+					padding.x = ((dim - rightOfText) - leftOfText) / (canvas.scale*2);
+					padding.y = ((dim - bottomOfText) - topOfText) / (canvas.scale*2);
+					
 					if( Can.localStorage() ) {
-						localStorage.setItem( 'Metrics.top.'+size+'.'+font, padding.top );
-						localStorage.setItem( 'Metrics.bottom.'+size+'.'+font, padding.bottom );
+						localStorage.setItem( 'Metrics.x.'+size+'.'+font, padding.x );
+						localStorage.setItem( 'Metrics.y.'+size+'.'+font, padding.y );
 					}
 				}
 				catch( e ) {
-					padding.top = padding.bottom = 0;
+					padding.x = padding.y = 0;
 				}
 			}
 			canvas = null;
 		}
 		else {
-			padding.top = parseFloat( padding.top );
-			padding.bottom = parseFloat( padding.bottom );
+			padding.x = parseFloat( padding.x );
+			padding.y = parseFloat( padding.y );
 		}
 		return padding;
 	};
@@ -118,6 +134,11 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 				placeStarts: (typeof options.display.placeStarts === 'object')? true : false,
 				ruleOffs: (typeof ruleOffs.every === 'number' && typeof ruleOffs.from === 'number')? true : false,
 				title: (title === '')? false : true
+			},
+			
+			font = {
+				numbers: (typeof options.display.numbersFont === 'string')? options.display.numbersFont : 'monospace',
+				text: (typeof options.display.textFont === 'string')? options.display.textFont : 'sans-serif'
 			};
 		
 		// If we're displaying multiple leads, pre-calculate the lead heads for later use
@@ -181,7 +202,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 				}
 				var testCanvas = document.createElement( 'canvas' ),
 					ctx = testCanvas.getContext( '2d' );
-				ctx.font = '10px '+SANSFONT;
+				ctx.font = '10px '+font.text;
 				width = ctx.measureText( text ).width + 4;
 				testCanvas = ctx = null;
 				return width;
@@ -209,7 +230,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			// Draw title
 			if( show.title ) {
 				context.fillStyle = '#000';
-				context.font = '11.5px '+SANSFONT;
+				context.font = '11.5px '+font.text;
 				context.textAlign = 'left';
 				context.textBaseline = 'top';
 				context.fillText( title, 0, 0 );
@@ -217,12 +238,12 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			
 			// Draw notation down side
 			if( show.notation ) {
-				textMetrics = measureTopAndBottomTextPadding( 10, SANSFONT );
+				textMetrics = measureXAndYTextPadding( 10, font.text );
 				context.fillStyle = '#000';
-				context.font = '10px '+SANSFONT;
+				context.font = '10px '+font.text;
 				context.textAlign = 'right';
 				context.textBaseline = 'alphabetic';
-				y = canvasTopPadding + rowHeight + textMetrics.bottom + ((10 - (textMetrics.bottom + textMetrics.top))/2);
+				y = canvasTopPadding + (rowHeight*1.5) + textMetrics.y - ((rowHeight - 10)/2);
 				for( i = 0; i < notation.exploded.length; ++i ) {
 					context.fillText( notation.exploded[i], canvasLeftPadding - 4, (i*rowHeight)+y );
 				}
@@ -320,12 +341,13 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 							context.stroke();
 
 							// The text inside the big circle
+							var placeStartFontSize = ((positionInLeadHead<9)?10:8);
 							context.fillStyle = '#000';
-							context.font = ((positionInLeadHead<9)?10:9)+'px '+MONOSPACEFONT;
+							context.font = placeStartFontSize+'px '+font.numbers;
 							context.textAlign = 'center';
 							context.textBaseline = 'alphabetic';
-							textMetrics = measureTopAndBottomTextPadding( ((positionInLeadHead<9)?10:9), MONOSPACEFONT );
-							context.fillText( (positionInLeadHead+1).toString(), x, y + 6 + textMetrics.bottom - ((12-(((positionInLeadHead<9)?10:9)-(textMetrics.bottom + textMetrics.top)))/2) );
+							textMetrics = measureXAndYTextPadding( placeStartFontSize, font.numbers );
+							context.fillText( (positionInLeadHead+1).toString(), x + textMetrics.x, y + 6 + textMetrics.y - ((12-placeStartFontSize)/2) );
 						}
 					}
 				}, this );
@@ -334,7 +356,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			// Draw calling positions
 			if( show.callingPositions && typeof context.fillText === 'function' ) {
 				context.fillStyle = '#000';
-				context.font = '9.5px '+SANSFONT;
+				context.font = '9.5px '+font.text;
 				context.textAlign = 'left';
 				context.textBaseline = 'bottom';
 				
@@ -351,14 +373,14 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			// Draw numbers
 			if( show.numbers && typeof context.fillText === 'function' ) {
 				// Measure the actual text position (for pixel perfect positioning)
-				var textMetrics = measureTopAndBottomTextPadding( 13, MONOSPACEFONT ),
-					topPadding = canvasTopPadding + rowHeight + textMetrics.bottom - ((rowHeight-(13-(textMetrics.top+textMetrics.bottom)))/2),
+				var textMetrics = measureXAndYTextPadding( 12, font.numbers ),
+					topPadding = canvasTopPadding + rowHeight + textMetrics.y - ((rowHeight-12)/2),
 					sidePadding = interColumnPadding + columnRightPadding;
 				
 				// Set up the context
 				context.textAlign = 'left';
 				context.textBaseline = 'alphabetic';
-				context.font = '13px '+MONOSPACEFONT;
+				context.font = '12px '+font.numbers;
 			
 				// We'll need this
 				var Array_unique = function( array ) {

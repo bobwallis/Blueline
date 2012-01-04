@@ -1,8 +1,5 @@
 /*global define: false */
-define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can'], function( $, customFontLoaded, MethodGrid, PlaceNotation, Can ) {
-	// Constants
-	var MONOSPACEFONT = '13px ' + ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : (customFontLoaded?'BluelineMono, ':'')+'"Droid Sans Mono", "Andale Mono", Consolas, ')+'monospace';
-	
+define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can', '../helpers/Settings'], function( $, customFontLoaded, MethodGrid, PlaceNotation, Can, Settings ) {
 	// Display messages if canvas is not supported
 	if( !Can.canvas() ) {
 		return function( options ) {
@@ -146,16 +143,32 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 	
 	MethodView.prototype = {
 		drawNumbers: function() {
-			// Colours to use to draw lines of working bells (in order of preference)
-			var colours = ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'];
+			// Get settings
+			var numbersFont = Settings.get( 'M.numbersFont' ),
+				textFont = Settings.get( 'M.textFont' ),
+				numbersFontSize = 12,
+				workingBellColor = ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'],
+				huntBellColor = '#D11',
+				workingBellWidth = 2,
+				huntBellWidth = 1.2,
+				columnPadding = 15,
+				rowHeight = 14,
+				rowWidth = ( function( stage ) {
+					// Measure the text
+					var testCanvas = $( '<canvas></canvas>' ).get( 0 ),
+						ctx = testCanvas.getContext( '2d' );
+					ctx.font = numbersFontSize+'px '+numbersFont;
+					return ctx.measureText( Array( stage + 1 ).join( '0' ) ).width;
+				} )( this.method.stage ),
+				leadsPerColumn;
 			
 			// For the plain course image, draw a line through the heaviest working bell of each type, and the hunt bells
 			var toFollow = this.method.workGroups.map( function( g ) { return Math.max.apply( Math, g ); } ),
 				plainLines = [];
 			for( var i = 0, j = 0; i < this.method.stage; ++i ) {
 				plainLines.push( {
-					lineWidth: (this.method.huntBells.indexOf( i ) !== -1)? 1.2 : 2, // Make the hunt bell lines slightly thinner
-					stroke: (this.method.huntBells.indexOf( i ) !== -1)? '#D11' : ((toFollow.indexOf( i ) !== -1)? colours[j++] || colours[j = 0, j++] : 'transparent')
+					lineWidth: (this.method.huntBells.indexOf( i ) !== -1)? huntBellWidth : workingBellWidth,
+					stroke: (this.method.huntBells.indexOf( i ) !== -1)? huntBellColor : ((toFollow.indexOf( i ) !== -1)? workingBellColor[j++] || workingBellColor[j = 0, j++] : 'transparent')
 				} );
 			}
 			
@@ -168,44 +181,26 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 				callLines[k] = [];
 				for( var i = 0, j = 0; i < this.method.stage; ++i ) {
 					callLines[k].push( {
-						lineWidth: (this.method.huntBells.indexOf( i ) !== -1)? 1.2 : 2, // Make the hunt bell lines slightly thinner
-						stroke: (this.method.huntBells.indexOf( i ) !== -1)? '#D11' : ((call.affected.indexOf( i ) !== -1)? colours[j++] || colours[j = 0, j++] : 'transparent')
+						lineWidth: (this.method.huntBells.indexOf( i ) !== -1)? huntBellWidth : workingBellWidth,
+						stroke: (this.method.huntBells.indexOf( i ) !== -1)? huntBellColor : ((call.affected.indexOf( i ) !== -1)? workingBellColor[j++] || workingBellColor[j = 0, j++] : 'transparent')
 					} );
 				}
 			}, this );
-			
-			// Choose a column (side) padding and row height
-			var numbersColumnPadding = 15,
-				rowHeight = 14;
-			
-			// Determine the width of the letters we will be drawing
-			var bellWidth = (function() {
-				var bellWidth;
-				// Measure the text
-				if( Can.canvas() ) {
-					var testCanvas = $( '<canvas></canvas>' ).get( 0 ),
-						ctx = testCanvas.getContext( '2d' );
-					ctx.font = MONOSPACEFONT;
-					bellWidth = ctx.measureText( '123456' ).width / 6;
-				}
-				return bellWidth;
-			})();
 			
 			// Determine the appropriate lead distribution for the plain course to ensure it fits on the page
 			var determineLeadsPerColumn = (function( view ) {
 				var numberOfLeads = view.method.numberOfLeads,
 					numberOfCalls = view.options.calls.length,
 					maxWidth = view.container.numbers.width(),
-					rowWidth = bellWidth*view.method.stage,
 					callWidth = 15 + rowWidth,
 					placeStartWidth = (10 + plainPlaceStarts.length*12);
 				return function() {
 					var leadsPerColumn = 1;
 					maxWidth = view.container.numbers.width() - 30;
 					// Check that the window isn't plenty big enough before bothering to look at adjusting
-					if( maxWidth <= 2*callWidth + 5 + (rowWidth + placeStartWidth + numbersColumnPadding)*numberOfLeads ) {
+					if( maxWidth <= 2*callWidth + 5 + (rowWidth + placeStartWidth + columnPadding)*numberOfLeads ) {
 						for( leadsPerColumn = 1; leadsPerColumn < numberOfLeads; ++leadsPerColumn ) {
-							if( maxWidth > ((leadsPerColumn>1)?callWidth:numberOfCalls*callWidth) + Math.ceil( numberOfLeads/leadsPerColumn )*(numbersColumnPadding + rowWidth + placeStartWidth ) ) {
+							if( maxWidth > ((leadsPerColumn>1)?callWidth:numberOfCalls*callWidth) + Math.ceil( numberOfLeads/leadsPerColumn )*(columnPadding + rowWidth + placeStartWidth ) ) {
 								break;
 							}
 						}
@@ -213,17 +208,23 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 					return leadsPerColumn;
 				};
 			})( this );
-			var leadsPerColumn = determineLeadsPerColumn();
+			leadsPerColumn = determineLeadsPerColumn();
 			
 			// Options object for the plain course
 			var plainCourseOptions = $.extend( true, {}, this.options.plainCourse, {
 				id: 'numbers'+this.id+'_plain',
-				dimensions: { rowHeight: rowHeight, bellWidth: bellWidth, columnPadding: numbersColumnPadding },
+				dimensions: {
+					rowHeight: rowHeight,
+					rowWidth: rowWidth,
+					columnPadding: columnPadding
+				},
 				layout: {
 					numberOfLeads: this.method.numberOfLeads,
 					leadsPerColumn: leadsPerColumn
 				},
 				display: {
+					numbersFont: numbersFont,
+					textFont: textFont,
 					callingPositions: this.method.callingPositions,
 					lines: plainLines,
 					numbers: plainLines.map( function( l ) { return (l.stroke !== 'transparent')? 'transparent' : false; } ),
@@ -256,9 +257,14 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 			this.options.calls.forEach( function( call, i ) {
 				this.container.numbers.append( new MethodGrid( $.extend( true, {}, call, {
 					id: 'numbers'+this.id+'_'+call.id,
-					dimensions: { rowHeight: rowHeight, bellWidth: bellWidth },
+					dimensions: {
+						rowHeight: rowHeight,
+						rowWidth: rowWidth
+					},
 					numberOfLeads: 1,
 					display: {
+						numbersFont: numbersFont,
+						textFont: textFont,
 						lines: callLines[i],
 						numbers: callLines[i].map( function( l ) { return (l.stroke !== 'transparent')? 'transparent' : false; } )
 					}

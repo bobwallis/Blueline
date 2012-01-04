@@ -1,7 +1,15 @@
 /*global define:false */
 define( ['./Can'], function( Can, undefined ) {
 	var Defaults = {
-		
+	/** Methods **/
+		'M.numbersFont': function() {
+			return ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : 'BluelineMono, "Andale Mono", Consolas, ')+'monospace'
+		},
+		'M.textFont': function() {
+			return '"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif';
+		},
+	/** Methods.numbers **/
+	/** Methods.grids **/
 	};
 
 	var Settings;
