@@ -1,5 +1,5 @@
 /*global require: false, define: false */
-require( { paths: { jquery: '/scripts/lib/jquery' } }, ['require', 'jquery', 'helpers/Is', 'helpers/Can', 'helpers/Shim', 'ui/Hotkeys'], function( require, $, Is, Can, Shim, Hotkeys ) {
+require( { paths: { jquery: '/scripts/lib/jquery' } }, ['require', 'jquery', 'helpers/Is', 'helpers/Can', 'helpers/Settings', 'helpers/Shim', 'ui/Hotkeys'], function( require, $, Is, Can, Settings, Shim, Hotkeys ) {
 	// Initialise single session mode if the browser supports it
 	if( Can.history() ) {
 		require( ['app'] );
@@ -17,7 +17,9 @@ require( { paths: { jquery: '/scripts/lib/jquery' } }, ['require', 'jquery', 'he
 	if( Can.applicationCache() ) {
 		var $applicationCache = $( window.applicationCache );
 		$applicationCache.bind( 'updateready', function( e ) {
+			var settings = Settings.getCached();
 			localStorage.clear();
+			Settings.restore( settings );
 			localStorage.setItem( 'ua', navigator.userAgent );
 			window.applicationCache.swapCache();
 		} );
@@ -27,7 +29,9 @@ require( { paths: { jquery: '/scripts/lib/jquery' } }, ['require', 'jquery', 'he
 	if( Can.localStorage() ) {
 		var storageUA = localStorage.getItem( 'ua' );
 		if( storageUA !== navigator.userAgent ) {
+			var settings = Settings.getCached();
 			localStorage.clear();
+			Settings.restore( settings );
 			localStorage.setItem( 'ua', navigator.userAgent );
 		}
 	}

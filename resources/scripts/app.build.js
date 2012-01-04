@@ -10,7 +10,7 @@
 	modules: [
 		{
 			name: "app",
-			exclude: ["jquery", "helpers/Can"]
+			exclude: ["jquery", "helpers/Can", "helpers/Settings"]
 		},
 		{
 			name: "main",
@@ -22,11 +22,11 @@
 		},
 		{
 			name: "ui/TowerMap",
-			exclude: ["jquery"]
+			exclude: ["jquery", "helpers/Settings"]
 		},
 		{
 			name: "ui/MethodView",
-			exclude: ["jquery", "helpers/Can"]
+			exclude: ["jquery", "helpers/Can", "helpers/Settings"]
 		}
 	]
 } )
