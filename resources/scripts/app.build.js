@@ -3,6 +3,8 @@
 	baseUrl: "./",
 	dir: "../../web/scripts.built",
 	optimize: "uglify",
+	uglify: {
+	},
 	optimizeCss: "none",
 	paths: {
 		"jquery": "lib/jquery"
