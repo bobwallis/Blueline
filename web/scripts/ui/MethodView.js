@@ -158,9 +158,23 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 					var testCanvas = $( '<canvas></canvas>' ).get( 0 ),
 						ctx = testCanvas.getContext( '2d' );
 					ctx.font = numbersFontSize+'px '+numbersFont;
-					return ctx.measureText( Array( stage + 1 ).join( '0' ) ).width;
+					return ctx.measureText( Array( stage + 1 ).join( '0' ) ).width + stage;
 				} )( this.method.stage ),
-				leadsPerColumn;
+				leadsPerColumn,
+				
+				sharedOptions = {
+					dimensions: {
+						rowHeight: rowHeight,
+						rowWidth: rowWidth,
+					},
+					display: {
+						fonts: {
+							numbers: numbersFont,
+							numbersSize: numbersFontSize,
+							text: textFont
+						}
+					}
+				};
 			
 			// For the plain course image, draw a line through the heaviest working bell of each type, and the hunt bells
 			var toFollow = this.method.workGroups.map( function( g ) { return Math.max.apply( Math, g ); } ),
@@ -211,11 +225,9 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 			leadsPerColumn = determineLeadsPerColumn();
 			
 			// Options object for the plain course
-			var plainCourseOptions = $.extend( true, {}, this.options.plainCourse, {
+			var plainCourseOptions = $.extend( true, {}, this.options.plainCourse, sharedOptions, {
 				id: 'numbers'+this.id+'_plain',
 				dimensions: {
-					rowHeight: rowHeight,
-					rowWidth: rowWidth,
 					columnPadding: columnPadding
 				},
 				layout: {
@@ -223,8 +235,6 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 					leadsPerColumn: leadsPerColumn
 				},
 				display: {
-					numbersFont: numbersFont,
-					textFont: textFont,
 					callingPositions: this.method.callingPositions,
 					lines: plainLines,
 					numbers: plainLines.map( function( l ) { return (l.stroke !== 'transparent')? 'transparent' : false; } ),
@@ -255,54 +265,57 @@ define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/P
 			
 			// Create images for the calls. These will not be redrawn when resizing the window, so don't store the options for later use
 			this.options.calls.forEach( function( call, i ) {
-				this.container.numbers.append( new MethodGrid( $.extend( true, {}, call, {
+				this.container.numbers.append( new MethodGrid( $.extend( true, {}, call, sharedOptions, {
 					id: 'numbers'+this.id+'_'+call.id,
-					dimensions: {
-						rowHeight: rowHeight,
-						rowWidth: rowWidth
-					},
 					numberOfLeads: 1,
 					display: {
-						numbersFont: numbersFont,
-						textFont: textFont,
 						lines: callLines[i],
 						numbers: callLines[i].map( function( l ) { return (l.stroke !== 'transparent')? 'transparent' : false; } )
 					}
 				} ) ) );
 			}, this );
 		},
+		
 		drawGrids: function() {
-			// Choose colours to use for the lines
-			var colours = ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'],
-				lines = [];
-			for( var i = 0, j = 0; i < this.method.stage; ++i ) {
-				lines.push( {
-					lineWidth: (this.method.huntBells.indexOf( i ) !== -1)? 1.5 : 2,
-					stroke: (this.method.huntBells.indexOf( i ) !== -1)? '#D11' : colours[j++] || colours[j = 0, j++]
-				} );
-			}
-			// Decide how big to draw them
-			var gridDimensions = ($window.width() > 600)? { rowHeight: 14, bellWidth: 12 } : { rowHeight: 11, bellWidth: 9 };
+			// Get settings
+			var i,
+				workingBellColor = ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'],
+				huntBellColor = '#D11',
+				workingBellWidth = 2,
+				huntBellWidth = 1.8,
+				
+				sharedOptions = {
+					dimensions: ($window.width() > 600)? { rowHeight: 14, bellWidth: 12 } : { rowHeight: 11, bellWidth: 9 },
+					display: {
+						fonts: {
+							text: Settings.get( 'M.textFont' )
+						},
+						lines: ( function( iLim, huntBells ) {
+							var lines = [], i = 0, j = 0;
+							for(; i < iLim; ++i ) {
+								var isHuntBell = (huntBells.indexOf( i ) !== -1);
+								lines.push( {
+									lineWidth: isHuntBell? huntBellWidth : workingBellWidth,
+									stroke: isHuntBell? huntBellColor : workingBellColor[j++] || workingBellColor[j = 0, j++]
+								} );
+							}
+							return lines;
+						} )( this.method.stage, this.method.huntBells ),
+						notation: true
+					}
+				};
 			
 			// Plain lead
-			this.container.grid.append( new MethodGrid( $.extend( true, {}, this.options.plainCourse, {
+			this.container.grid.append( new MethodGrid( $.extend( true, {}, this.options.plainCourse, sharedOptions, {
 				id: 'grid'+this.id+'_plain',
-				dimensions: gridDimensions,
 				display: {
-					notation: true,
-					title: 'Plain Lead:',
-					lines: lines
+					title: 'Plain Lead:'
 				}
 			} ) ) );
 			// Calls
-			for( var i = 0; i < this.options.calls.length; i++ ) {
-				this.container.grid.append( new MethodGrid( $.extend( true, {}, this.options.calls[i], {
-					id: 'grid'+this.id+'_'+this.options.calls[i].id,
-					dimensions: gridDimensions,
-					display: {
-						notation: true,
-						lines: lines
-					}
+			for( i = 0; i < this.options.calls.length; i++ ) {
+				this.container.grid.append( new MethodGrid( $.extend( true, {}, this.options.calls[i], sharedOptions, {
+					id: 'grid'+this.id+'_'+this.options.calls[i].id
 				} ) ) );
 			}
 			

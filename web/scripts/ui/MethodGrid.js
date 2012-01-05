@@ -96,12 +96,12 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 	
 	var MethodGrid = function( options ) {
 		// Prevent errors being thrown when accessing empty options objects
-		if( typeof options.layout !== 'object' ) {
-			options.layout = {};
-		}
-		if( typeof options.dimensions !== 'object' ) {
-			options.dimensions = {};
-		}
+		['layout', 'dimensions', 'display'].forEach( function( e ) {
+			if( typeof options[e] !== 'object' ) {
+				options[e] = {};
+			}
+		} );
+		if( typeof options.display.fonts !== 'object' ) { options.display.fonts = {}; }
 		
 		var i, j, k, l, m, x, y,
 			twoPi = Math.PI*2,
@@ -137,8 +137,9 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			},
 			
 			font = {
-				numbers: (typeof options.display.numbersFont === 'string')? options.display.numbersFont : 'monospace',
-				text: (typeof options.display.textFont === 'string')? options.display.textFont : 'sans-serif'
+				numbers: (typeof options.display.fonts.numbers === 'string')? options.display.fonts.numbers : 'monospace',
+				numbersSize: (typeof options.display.fonts.numbers === 'number')? options.display.fonts.numbersSize : 12,
+				text: (typeof options.display.fonts.text === 'string')? options.display.fonts.text : 'sans-serif'
 			};
 		
 		// If we're displaying multiple leads, pre-calculate the lead heads for later use
@@ -356,7 +357,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			// Draw calling positions
 			if( show.callingPositions && typeof context.fillText === 'function' ) {
 				context.fillStyle = '#000';
-				context.font = '9.5px '+font.text;
+				context.font = (font.numbersSize-2)+'px '+font.text;
 				context.textAlign = 'left';
 				context.textBaseline = 'bottom';
 				
@@ -373,47 +374,31 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 			// Draw numbers
 			if( show.numbers && typeof context.fillText === 'function' ) {
 				// Measure the actual text position (for pixel perfect positioning)
-				var textMetrics = measureXAndYTextPadding( 12, font.numbers ),
-					topPadding = canvasTopPadding + rowHeight + textMetrics.y - ((rowHeight-12)/2),
-					sidePadding = interColumnPadding + columnRightPadding;
+				var textMetrics = measureXAndYTextPadding( font.numbersSize, font.numbers ),
+					topPadding = canvasTopPadding + rowHeight + textMetrics.y - ((rowHeight-font.numbersSize)/2),
+					sidePadding = canvasLeftPadding + (bellWidth/2) + textMetrics.x,
+					columnSidePadding = interColumnPadding + columnRightPadding;
 				
 				// Set up the context
-				context.textAlign = 'left';
+				context.textAlign = 'center';
 				context.textBaseline = 'alphabetic';
-				context.font = '12px '+font.numbers;
-			
-				// We'll need this
-				var Array_unique = function( array ) {
-					var a = [], l = array.length, i = 0, j;
-					for( ; i < l; i++ ) {
-						for( j = i+1; j < l; j++ ) {
-							if( array[i] === array[j] ) {
-								j = ++i;
-							}
-						}
-						a.push( array[i] );
-					}
-					return a;
-				};
-
-				Array_unique( numbers ).map( function( e, i ) { // For each color of text
-					if( e !== 'transparent' ) { // Only bother drawing at all if not transparent
+				context.font = font.numbersSize+'px '+font.numbers;
+				
+				numbers.forEach( function( color, bell ) { // For each number
+					if( color !== 'transparent' ) { // Only bother drawing at all if not transparent
 						context.fillStyle = '#000';
 					
-						// Produce the start row
-						var row = leadHeads[0].map( function( b, i ) {
-							var j = startRow[i];
-							return (numbers[j] === e)? PlaceNotation.bellToChar( b ) : ' ';
-						}, this );
+						var char = PlaceNotation.bellToChar( bell ),
+							row = startRow;
 					
 						for( i = 0; i < numberOfColumns; ++i ) {
 							for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
 								if( j === 0 ) {
-									context.fillText( row.join( '' ), canvasLeftPadding + i*(rowWidth+sidePadding), topPadding );
+									context.fillText( char, sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding), topPadding );
 								}
 								for( k = 0; k < leadLength; ) {
 									row = PlaceNotation.apply( notation.parsed[k], row );
-									context.fillText( row.join( '' ), canvasLeftPadding + i*(rowWidth+sidePadding), topPadding+(j*leadLength*rowHeight)+(++k*rowHeight) );
+									context.fillText( char, sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding), topPadding+(j*leadLength*rowHeight)+(++k*rowHeight) );
 								}
 							}
 						}
