@@ -41,11 +41,11 @@
 {% endif %}
 {% if method.firstTowerbellPealDate is not empty %}
 				<dt>First&nbsp;towerbell&nbsp;peal</dt>
-				<dd>{{ method.firstTowerbellPealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}{% if method.firstTowerbellPealLocation is not empty %} at {% if method.firstTowerbellPealTower.doveid is defined %}<a href="{{ path( 'Blueline_Towers_view', { 'doveid': method.firstTowerBellPealTower.doveid } ) }}">{{ method.firstTowerbellPealLocation }}</a>{% else %}{{ method.firstTowerbellPealLocation }}{% endif %}{% endif %}</dd>
+				<dd><time datetime="{{ method.firstTowerbellpealDate|date('Y-m-d') }}">{{ method.firstTowerbellPealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time>{% if method.firstTowerbellPealLocation is not empty %} at {% if method.firstTowerbellPealTower.doveid is defined %}<a href="{{ path( 'Blueline_Towers_view', { 'doveid': method.firstTowerBellPealTower.doveid } ) }}">{{ method.firstTowerbellPealLocation }}</a>{% else %}{{ method.firstTowerbellPealLocation }}{% endif %}{% endif %}</dd>
 {% endif %}
 {% if method.firstHandbellpealDate is not empty %}
 				<dt>First&nbsp;handbell&nbsp;peal</dt>
-				<dd>{{ method.firstHandbellpealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</dd>
+				<dd><time datetime="{{ method.firstHandbellpealDate|date('Y-m-d') }}">{{ method.firstHandbellpealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time></dd>
 {% endif %}
 {% if method.duplicates is not empty %}
 				<dt>Method pealed as</dt>
