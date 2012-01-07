@@ -10,9 +10,8 @@
 	display: block;
 	top: -999px;
 	left: 0;
-	font-size: 500px;
-	line-height: normal;
 	margin: 0;
 	padding: 0;
+	font-size: 500px;
 	font-variant: normal;
 }
