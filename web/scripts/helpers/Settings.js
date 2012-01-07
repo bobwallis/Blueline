@@ -3,7 +3,7 @@ define( ['./Can'], function( Can, undefined ) {
 	var Defaults = {
 	/** Methods **/
 		'M.numbersFont': function() {
-			return ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : 'BluelineMono, "Andale Mono", Consolas, ')+'monospace'
+			return ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : 'BluelineMono, "Andale Mono", Consolas, ')+'monospace';
 		},
 		'M.textFont': function() {
 			return '"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif';
@@ -27,8 +27,8 @@ define( ['./Can'], function( Can, undefined ) {
 			},
 			getCached: function() {
 				var pairs = {};
-				for( var i = 0, key = localStorage.key( 0 ); key = localStorage.key( ++i ); key !== null ) {
-					if( key.split( '.' )[0] == 'Settings' ) {
+				for( var i = 0, key = localStorage.key( 0 ); key !== null; key = localStorage.key( ++i ) ) {
+					if( key.split( '.' )[0] === 'Settings' ) {
 						pairs[key] = localStorage.getItem( key );
 					}
 				}
@@ -53,6 +53,7 @@ define( ['./Can'], function( Can, undefined ) {
 			restore: function( pairs ) {}
 		};
 	}
+	
 	window['Settings'] = Settings;
 	return Settings;
 } );
