@@ -17,7 +17,7 @@ define( ['jquery', './Is', './Can'], function( $, Is, Can ) {
 			var $this = $( this );
 			if( $this.val() === '' ) {
 				$this.val( $this.attr( 'placeholder' ) ).addClass( 'placeholder' );
-			}           
+			}
 		},
 		removePlaceholder = function() {
 			var $this = $( this );
