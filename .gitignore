@@ -11,6 +11,7 @@ resources/tables/methods_towers/methods_towers.sql
 app/config/parameters.ini
 */logs/*
 */cache/*
+jshint/
 web/uploads/*
 web/bundles/*
 web/scripts.built
