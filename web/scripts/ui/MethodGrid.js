@@ -345,7 +345,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '
 							
 							// The little circle
 							var x = canvasLeftPadding + (k*rowWidthWithPadding) + ((positionInLeadHead+0.5)*bellWidth),
-								y = canvasTopPadding + (l*rowHeight*leadLength)+(rowHeight/2);
+								y = canvasTopPadding + (l*rowHeight*leadLength) + (rowHeight/2);
 							context.fillStyle = lines[j].stroke;
 							context.beginPath();
 							context.arc( x, y, 2, 0, twoPi, true);
