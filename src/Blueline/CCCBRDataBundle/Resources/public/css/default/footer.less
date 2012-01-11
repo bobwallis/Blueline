@@ -4,16 +4,17 @@
 	height: 100%;
 	margin-bottom: (@footerHeight*(-1))-1;
 }
-footer, #push {
+#bottom, #push {
 	height: @footerHeight;
 }
-footer {
+#bottom {
 	display: block;
 	clear: both;
 	width: 100%;
 	border-top: 1px solid @lightGrey;
 	font-size: @footerHeight*0.45;
 	line-height: @footerHeight;
+	.user-select(none);
 	p, nav {
 		clear: none;
 		color: darken(@lightGrey,20%);
@@ -39,15 +40,15 @@ footer {
 	#wrapper {
 		margin-bottom: (@footerHeight*(-2))-1;
 	}
-	footer, #push {
+	#bottom, #push {
 		height: @footerHeight*2;
 	}
-		footer p, footer nav {
+		#bottom p, #bottom nav {
 			float: none;
 			clear: both;
 			text-align: center;
 		}
-		footer a {
+		#bottom a {
 			padding: @footerHeight*0.275 5px;
 		}
 }
