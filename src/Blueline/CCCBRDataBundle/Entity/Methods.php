@@ -144,7 +144,9 @@ class Methods {
 	private $leadHeadCode;
 	public function setLeadHeadCode( $leadHeadCode ) {
 		$this->leadHeadCode = $leadHeadCode;
-		$this->leadHead = \Blueline\Helpers\LeadHeadCodes::fromCode( $leadHeadCode, $this->getStage() )? : '';
+		if( !$this->leadHead ) {
+			$this->leadHead = \Blueline\Helpers\LeadHeadCodes::fromCode( $leadHeadCode, $this->getStage() )? : '';
+		}
 		$this->leadHeads = false;
 	}
 	public function getLeadHeadCode() {
@@ -164,6 +166,10 @@ class Methods {
 		$leadHeads = false;
 	}
 	public function getLeadHead() {
+		if( !$this->leadHead ) {
+			$firstLead = $this->getFirstLead();
+			$this->leadHead = implode( array_pop( $firstLead ) );
+		}
 		return $this->leadHead;
 	}
 	private $leadHeads;
