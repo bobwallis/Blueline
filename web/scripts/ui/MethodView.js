@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Blueline.  If not, see <http://www.gnu.org/licenses/>.
  */
-define( ['jquery', '../plugins/font!BluelineMono', './MethodGrid', '../helpers/PlaceNotation', '../helpers/Can', '../helpers/Settings'], function( $, customFontLoaded, MethodGrid, PlaceNotation, Can, Settings ) {
+define( ['jquery', '../plugins/font!BluelineMono', '../helpers/Method/Grid', '../helpers/Method/PlaceNotation', '../helpers/Can', '../helpers/Settings'], function( $, customFontLoaded, MethodGrid, PlaceNotation, Can, Settings ) {
 	// Display messages if canvas is not supported
 	if( !Can.canvas() ) {
 		return function( options ) {

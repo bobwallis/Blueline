@@ -1,5 +1,5 @@
 /*
- * Blueline - MethodGrid.js
+ * Blueline - Grid.js
  * http://blueline.rsw.me.uk
  *
  * Copyright 2012, Robert Wallis
@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Blueline.  If not, see <http://www.gnu.org/licenses/>.
  */
-define( ['jquery', '../plugins/font!BluelineMono', '../helpers/PlaceNotation', '../helpers/Canvas', '../helpers/Can'], function( $, customFontLoaded, PlaceNotation, Canvas, Can ) {
+define( ['jquery', '../../plugins/font!BluelineMono', './PlaceNotation', '../Canvas', '../Can'], function( $, customFontLoaded, PlaceNotation, Canvas, Can ) {
 	// Vertical positioning of text within its bounding box is inconsistent across
 	// browsers. This is a problem when trying to get pixel perfect alignments of
 	// text and lines. This function, given a font and size, will return the offset
