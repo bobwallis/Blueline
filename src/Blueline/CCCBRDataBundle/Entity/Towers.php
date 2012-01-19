@@ -71,6 +71,9 @@ class Towers {
 	 */
 	private $doveid;
 	public function getDoveid() { return $this->doveid; }
+	public function getDoveLink() {
+		return 'http://dove.cccbr.org.uk/detail.php?DoveID='. str_replace( '_', '+', $this->getDoveid() ) . '&showFrames=true';
+	}
 
 	/**
 	 * @var string $gridReference
