@@ -41,6 +41,14 @@ define( function() {
 		aApp: function() {
 			return (typeof window['Android'] === 'object');
 		},
+		cApp: function() {
+			try {
+				return chrome.app.isInstalled;
+			}
+			catch( e ) {
+				return false;
+			}
+		},
 		iApp: function() {
 			return (('standalone' in navigator) && navigator.standalone);
 		}
