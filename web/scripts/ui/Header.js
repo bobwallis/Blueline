@@ -90,7 +90,7 @@ define( ['jquery', '../helpers/Is', '../lib/History'], function( $, Is, History 
 		$bigSearchInput = $( '#bigQ' );
 		
 		// Convert to iPhone header if needed
-		if( true || Is.iApp() ) {
+		if( Is.iApp() ) {
 			$backButton = $( '<div id="back"></div>' )
 				.on( 'click', History.back )
 				.css( 'opacity', (location.href.split('/')[3] === '')? 0 : 1 );
