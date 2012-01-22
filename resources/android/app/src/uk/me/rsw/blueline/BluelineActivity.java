@@ -3,18 +3,18 @@ package uk.me.rsw.blueline;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class BluelineActivity extends Activity {
 	WebView BluelineWebView;
-	TextView BluelineHeader;
 	
     /** Called when the activity is first created. */
     @Override
@@ -23,7 +23,6 @@ public class BluelineActivity extends Activity {
         setContentView(R.layout.main);
         
         BluelineWebView = (WebView) findViewById(R.id.webview);
-        BluelineHeader = (TextView) findViewById(R.id.header);
 
         WebSettings webSettings = BluelineWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -37,11 +36,15 @@ public class BluelineActivity extends Activity {
         webSettings.setDomStorageEnabled(true);
         webSettings.setSupportZoom(true);
         webSettings.setSaveFormData(false);
-        webSettings.setUserAgentString("Blueline "+webSettings.getUserAgentString());
+        try {
+			webSettings.setUserAgentString(getString(R.string.app_name)+" "+getPackageManager().getPackageInfo(getPackageName(), 0).versionName+" "+webSettings.getUserAgentString());
+		} catch (NameNotFoundException e) {
+			Log.e("tag", e.getMessage());
+		}
         
         BluelineWebView.setWebViewClient(new BluelineWebViewClient());
         BluelineWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
-        BluelineWebView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
+        BluelineWebView.setScrollBarStyle(WebView.SCROLLBARS_INSIDE_OVERLAY);
         
         if (savedInstanceState != null) {
         	BluelineWebView.restoreState(savedInstanceState);
@@ -75,11 +78,6 @@ public class BluelineActivity extends Activity {
         /** Show a toast from the web page */
         public void showToast(String toast) {
             Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
-        }
-
-        /** Update the header text */
-        public void headerTitle(String title) {
-            BluelineHeader.setText(title);
         }
     }
     

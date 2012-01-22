@@ -12,7 +12,6 @@ class AssociationsController extends Controller {
 		$chromeless = 0;
 		if( $format == 'html' ) {
 			$chromeless = intval( $request->query->get( 'chromeless' ) );
-			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 1 : (($chromeless > 2)? 2 : $chromeless);
 		}
 		
 		$associations = $this->getDoctrine()->getEntityManager()->createQuery( 'SELECT partial a.{abbreviation,name} FROM BluelineCCCBRDataBundle:Associations a' )->getArrayResult();
@@ -32,7 +31,6 @@ class AssociationsController extends Controller {
 		$chromeless = 0;
 		if( $format == 'html' ) {
 			$chromeless = intval( $request->query->get( 'chromeless' ) );
-			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 1 : (($chromeless > 2)? 2 : $chromeless);
 		}
 		
 		$abbreviations = explode( '|', $abbreviation );
@@ -96,7 +94,6 @@ class AssociationsController extends Controller {
 		$chromeless = 0;
 		if( $format == 'html' ) {
 			$chromeless = intval( $request->query->get( 'chromeless' ) );
-			$chromeless = ($chromeless == 0 && strpos( $_SERVER['HTTP_USER_AGENT'], 'Blueline' ) !== false)? 1 : (($chromeless > 2)? 2 : $chromeless);
 		}
 		
 		$associationsRepository = $this->getDoctrine()->getEntityManager()->getRepository( 'BluelineCCCBRDataBundle:Associations' );
