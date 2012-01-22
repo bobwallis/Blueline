@@ -9,7 +9,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Light.NoTitleBar"
-        android:debuggable="true" >
+        android:debuggable="false" >
         <activity
             android:label="@string/app_name"
             android:name="BluelineActivity"
