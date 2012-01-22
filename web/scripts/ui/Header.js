@@ -18,36 +18,33 @@
  * You should have received a copy of the GNU General Public License
  * along with Blueline.  If not, see <http://www.gnu.org/licenses/>.
  */
-define( ['jquery'], function( $ ) {
-	var $window = false, $breadcrumbContainer, $topSearchContainer, $topSearch, $topSearchInput, $bigSearchContainer, $bigSearch, $bigSearchInput,
+define( ['jquery', '../helpers/Is', '../lib/History'], function( $, Is, History ) {
+	var $window = false, $backButton, $title, $breadcrumbContainer, $topSearchContainer, $topSearch, $topSearchInput, $bigSearchContainer, $bigSearch, $bigSearchInput,
 		sectionRegexp = /^(.*)\/(associations|methods|towers)($|\/)/,
 		topSearchRegexp = /\/view\//,
 		bigSearchRegexp = /\/(associations|methods|towers)($|\/search)/;
 	
-	return {
+	var Header = {
 		update: function( url ) {
-			// Initialise jQuery objects if not already done
-			if( $window === false ) {
-				$window = $( window );
-				$breadcrumbContainer = $( '#breadcrumbContainer' );
-				$topSearchContainer = $( '#topSearchContainer' );
-				$topSearch = $( '#topSearch' );
-				$topSearchInput = $( '#smallQ' );
-				$bigSearchContainer = $( '#bigSearchContainer' );
-				$bigSearch = $( '#bigSearch' );
-				$bigSearchInput = $( '#bigQ' );
+			// Hide/show the back button if needed
+			if( $backButton.length > 0 && url.split('/')[3] === '' ) {
+				$backButton.css( 'opacity', 0 );
+			}
+			else {
+				$backButton.css( 'opacity', 1 );
 			}
 			
 			// Apply the default header if needed
 			var section = sectionRegexp.exec( url );
 			if( section === null ) {
+				$title.html( '<a href="/">BLUELINE</a>' );
 				$breadcrumbContainer.empty();
 				$topSearchContainer.hide();
 				$bigSearchContainer.hide();
 			}
 			else {
 				// Update and show the search bar in the header if needed
-				if( $window.width() > 480 && topSearchRegexp.exec( url ) !== null ) {
+				if( $topSearch.length > 0 && $window.width() > 480 && topSearchRegexp.exec( url ) !== null ) {
 					$topSearch.attr( 'action', section[1]+'/'+section[2]+'/search' );
 					$topSearchInput.attr( 'placeholder', 'Search '+section[2] ).val( '' );
 					$topSearchContainer.show();
@@ -56,15 +53,15 @@ define( ['jquery'], function( $ ) {
 					$topSearchInput.blur();
 					$topSearchContainer.hide();
 				}
-				
+			
 				// Update and show the main search box if needed
 				var bigSearchRegexpResult = bigSearchRegexp.exec( url );
 				if( bigSearchRegexpResult !== null ) {
 					$bigSearch.attr( 'action', section[1]+'/'+section[2]+'/search' );
 					$bigSearchInput.attr( 'placeholder', 'Search '+section[2] );
 					if( bigSearchRegexpResult[2] === '' ) {
-						$bigSearchInput.val( '' );
-						$bigSearchInput.blur();
+						$bigSearchInput.val( '' )
+							.blur();
 					}
 					else if( !$bigSearchInput.is( ':focus' ) ) {
 						var queryString = url.replace( /^.*?(\?|$)/, '' );
@@ -76,23 +73,49 @@ define( ['jquery'], function( $ ) {
 					$bigSearchInput.blur();
 					$bigSearchContainer.hide();
 				}
-				
-				// Update the text breadcrumb in the header
-				switch( section[2] ) {
-					case 'associations':
-						$breadcrumbContainer.html( '<span class="headerSep">&raquo;</span><h2><a href="'+section[1]+'/associations">Associations</a></h2>' );
-						break;
-					case 'methods':
-						$breadcrumbContainer.html( '<span class="headerSep">&raquo;</span><h2><a href="'+section[1]+'/methods">Methods</a></h2>' );
-						break;
-					case 'towers':
-						$breadcrumbContainer.html( '<span class="headerSep">&raquo;</span><h2><a href="'+section[1]+'/towers">Towers</a></h2>' );
-						break;
-					default:
-						$breadcrumbContainer.empty();
-						break;
-				}
+			
+				// Update the text in the header
+				$breadcrumbContainer.html( '<span class="headerSep">&raquo;</span><h2><a href="'+section[1]+'/'+section[2]+'">'+section[2].charAt(0).toUpperCase()+section[2].slice(1)+'</a></h2>' );
+				$title.html( '<a href="'+section[1]+'/'+section[2]+'">'+section[2].charAt(0).toUpperCase()+section[2].slice(1)+'</a>' );
 			}
 		}
 	};
+	
+	// Initialise
+	$( function() {
+		// Initialise jQuery objects
+		$window = $( window );
+		$bigSearchContainer = $( '#bigSearchContainer' );
+		$bigSearch = $( '#bigSearch' );
+		$bigSearchInput = $( '#bigQ' );
+		
+		// Convert to iPhone header if needed
+		if( true || Is.iApp() ) {
+			$backButton = $( '<div id="back"></div>' )
+				.on( 'click', History.back )
+				.css( 'opacity', (location.href.split('/')[3] === '')? 0 : 1 );
+			$( '#top' ).before( $backButton );
+			$( '#breadcrumbContainer' ).remove();
+			$( '#topSearchContainer' ).remove();
+			$title = $( '#top h1:first' ).css( {
+				'float': 'none',
+				'text-align': 'center',
+				'text-transform': 'none'
+			} );
+			$breadcrumbContainer = $topSearchContainer = $topSearch = $topSearchInput = $( '#nothing' );
+		}
+		else {
+			// We only need these jQuery objects if the header is normal
+			$title = $backButton = $( '#nothing' );
+			$breadcrumbContainer = $( '#breadcrumbContainer' );
+			$topSearchContainer = $( '#topSearchContainer' );
+			$topSearch = $( '#topSearch' );
+			$topSearchInput = $( '#smallQ' );
+		}
+		
+		// Update header for the current page
+		Header.update( location.href );
+	} );
+	
+	return Header;
 } );

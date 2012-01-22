@@ -1,3 +1,17 @@
+#back {
+	position: absolute;
+	display: block;
+	top: 0;
+	left: 0;
+	height: @headerHeight;
+	width: 45px;
+	margin: 0 5px 0 5px;
+	background: transparent url(../images/back.svg) no-repeat center center;
+	cursor: pointer;
+	.transition-property("opacity");
+	.transition-duration(.2s);
+}
+
 #top {
 	width: 100%;
 	background: @headerBackground;

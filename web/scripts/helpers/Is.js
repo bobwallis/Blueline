@@ -37,6 +37,12 @@ define( function() {
 		},
 		app: function() {
 			return ( (('standalone' in navigator) && navigator.standalone) || typeof window['Android'] === 'object' );
+		},
+		aApp: function() {
+			return (typeof window['Android'] === 'object');
+		},
+		iApp: function() {
+			return (('standalone' in navigator) && navigator.standalone);
 		}
 	};
 } );
