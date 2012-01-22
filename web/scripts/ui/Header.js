@@ -93,6 +93,7 @@ define( ['jquery', '../helpers/Is', '../lib/History'], function( $, Is, History 
 		if( Is.iApp() ) {
 			$backButton = $( '<div id="back"></div>' )
 				.on( 'click', History.back )
+				.on( 'dblclick', function() { History.pushState( { type: 'click' }, null, location.protocol+'//'+location.host+'/' ); } )
 				.css( 'opacity', (location.href.split('/')[3] === '')? 0 : 1 );
 			$( '#top' ).before( $backButton );
 			$( '#breadcrumbContainer' ).remove();
