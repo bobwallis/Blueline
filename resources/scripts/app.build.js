@@ -12,7 +12,7 @@
 	modules: [
 		{
 			name: "app",
-			exclude: ["jquery", "helpers/Can", "helpers/Settings"],
+			exclude: ["jquery", "helpers/Can", "helpers/Is", "helpers/Settings"],
 			include: ["plugins/font"]
 		},
 		{
