@@ -99,6 +99,7 @@ define( ['jquery', '../helpers/Is', '../lib/History'], function( $, Is, History 
 			$( '#topSearchContainer' ).remove();
 			$title = $( '#top h1:first' ).css( {
 				'float': 'none',
+				'margin': 0,
 				'text-align': 'center',
 				'text-transform': 'none'
 			} );
