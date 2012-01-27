@@ -12,9 +12,12 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
 public class BluelineActivity extends Activity {
-	WebView BluelineWebView;
+	private ViewSwitcher BluelineSwitcher;
+	private WebView BluelineWebView;
+	private boolean LoadingHidden = false;
 	
     /** Called when the activity is first created. */
     @Override
@@ -22,6 +25,7 @@ public class BluelineActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
+        BluelineSwitcher = (ViewSwitcher) findViewById(R.id.viewSwitcher);
         BluelineWebView = (WebView) findViewById(R.id.webview);
 
         WebSettings webSettings = BluelineWebView.getSettings();
@@ -50,7 +54,7 @@ public class BluelineActivity extends Activity {
         	BluelineWebView.restoreState(savedInstanceState);
         }
         else {
-	        BluelineWebView.loadUrl("http://blueline.rsw.me.uk/");
+	        BluelineWebView.loadUrl("http://blueline.rsw.me.uk");
         }
     }
     
@@ -69,15 +73,23 @@ public class BluelineActivity extends Activity {
     }
     
     /** Javascript interface */
-    public class JavaScriptInterface {
+    private class JavaScriptInterface {
         Context mContext;
         JavaScriptInterface(Context c) {
             mContext = c;
         }
-
+        
         /** Show a toast from the web page */
         public void showToast(String toast) {
             Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
+        }
+        
+        /** Switch the view to the BluelineWebView */
+        public void hideLoading() {
+        	if( !LoadingHidden ) {
+        		BluelineSwitcher.showNext();
+        		LoadingHidden = true;
+        	}
         }
     }
     

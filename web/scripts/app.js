@@ -18,10 +18,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Blueline.  If not, see <http://www.gnu.org/licenses/>.
  */
-define( [ 'require', 'jquery', 'helpers/Can', 'helpers/Is', 'lib/History', 'ui/Window', 'ui/Header', 'ui/Content' ], function( require, $, Can, Is, History, Window, Header, Content ) {
+define( [ 'require', 'jquery', 'helpers/Android', 'helpers/Can', 'helpers/Is', 'lib/History', 'ui/Window', 'ui/Header', 'ui/Content' ], function( require, $, Android, Can, Is, History, Window, Header, Content ) {
 	var baseURL = location.protocol+'//'+location.host,
 		baseURLRegexp = new RegExp( '^'+location.protocol+'\/\/'+location.host );
-
+	
 	if( Can.history() && History.enabled ) {
 
 		// Capture link clicks
@@ -109,25 +109,28 @@ define( [ 'require', 'jquery', 'helpers/Can', 'helpers/Is', 'lib/History', 'ui/W
 				.bind( 'cut',  historyInputClipboard )
 				.bind( 'paste', historyInputClipboard );
 			
-			// Finish fading out #overlay
+			// Swap out loading screens
 			$( '#appStart' ).css( 'opacity', 0 );
 			setTimeout( function() { $( '#appStart' ).remove(); }, 200 );
+			Android.hideLoading();
 			
 			// Preload font used to draw methods
 			require( ['plugins/font!BluelineMono'] );
 			
 			// Track app startup
-			if( Is.iApp() ) {
-				_gaq.push( ['_trackEvent', 'Startup', 'iOS'] );
-			}
-			else if( Is.aApp() ) {
-				_gaq.push( ['_trackEvent', 'Startup', 'Android'] );
-			}
-			else if( Is.cApp() ) {
-				_gaq.push( ['_trackEvent', 'Startup', 'Chrome'] );
-			}
-			else {
-				_gaq.push( ['_trackEvent', 'Startup', 'Other'] );
+			if( typeof _gaq === 'object' ) {
+				if( Is.iApp() ) {
+					_gaq.push( ['_trackEvent', 'Startup', 'iOS'] );
+				}
+				else if( Is.aApp() ) {
+					_gaq.push( ['_trackEvent', 'Startup', 'Android'] );
+				}
+				else if( Is.cApp() ) {
+					_gaq.push( ['_trackEvent', 'Startup', 'Chrome'] );
+				}
+				else {
+					_gaq.push( ['_trackEvent', 'Startup', 'Other'] );
+				}
 			}
 		} );
 	}
