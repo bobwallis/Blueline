@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.WebSettings;
@@ -15,59 +16,60 @@ import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 public class BluelineActivity extends Activity {
-	private ViewSwitcher BluelineSwitcher;
-	private WebView BluelineWebView;
-	private boolean LoadingHidden = false;
+	protected WebView BluelineWebView;
+	protected ViewSwitcher BluelineViewSwitcher;
+	protected Handler BluelineHandler;
 	
     /** Called when the activity is first created. */
     @Override
-    public void onCreate(final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+    public void onCreate( final Bundle savedInstanceState ) {
+        super.onCreate( savedInstanceState );
+        setContentView( R.layout.main );
         
-        BluelineSwitcher = (ViewSwitcher) findViewById(R.id.viewSwitcher);
-        BluelineWebView = (WebView) findViewById(R.id.webview);
+        BluelineWebView = (WebView) findViewById( R.id.webview );
+        BluelineViewSwitcher = (ViewSwitcher) findViewById( R.id.viewSwitcher );
+        BluelineHandler = new Handler();
 
         WebSettings webSettings = BluelineWebView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setAppCacheMaxSize(524288);
-        webSettings.setAppCachePath("/data/data/uk.me.rsw.blueline/cache");
-        webSettings.setAllowFileAccess(true);
-        webSettings.setAppCacheEnabled(true);
-        webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
-        webSettings.setDatabasePath("/data/data/uk.me.rsw.blueline/cache");
-        webSettings.setDatabaseEnabled(true);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setSupportZoom(true);
-        webSettings.setSaveFormData(false);
+        webSettings.setJavaScriptEnabled( true );
+        webSettings.setAppCacheMaxSize( 524288 );
+        webSettings.setAppCachePath( "/data/data/uk.me.rsw.blueline/cache" );
+        webSettings.setAllowFileAccess( true );
+        webSettings.setAppCacheEnabled( true );
+        webSettings.setCacheMode( WebSettings.LOAD_DEFAULT );
+        webSettings.setDatabasePath( "/data/data/uk.me.rsw.blueline/cache" );
+        webSettings.setDatabaseEnabled( true );
+        webSettings.setDomStorageEnabled( true );
+        webSettings.setSupportZoom( true );
+        webSettings.setSaveFormData( false );
         try {
-			webSettings.setUserAgentString(getString(R.string.app_name)+" "+getPackageManager().getPackageInfo(getPackageName(), 0).versionName+" "+webSettings.getUserAgentString());
+			webSettings.setUserAgentString( getString( R.string.app_name )+" "+getPackageManager().getPackageInfo(getPackageName(), 0).versionName+" "+webSettings.getUserAgentString() );
 		} catch (NameNotFoundException e) {
 			Log.e("tag", e.getMessage());
 		}
         
-        BluelineWebView.setWebViewClient(new BluelineWebViewClient());
-        BluelineWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
-        BluelineWebView.setScrollBarStyle(WebView.SCROLLBARS_INSIDE_OVERLAY);
+        BluelineWebView.setWebViewClient( new BluelineWebViewClient() );
+        BluelineWebView.addJavascriptInterface( new JavaScriptInterface( this ), "Android");
+        BluelineWebView.setScrollBarStyle( WebView.SCROLLBARS_INSIDE_OVERLAY );
         
-        if (savedInstanceState != null) {
-        	BluelineWebView.restoreState(savedInstanceState);
+        if( savedInstanceState != null ) {
+        	BluelineWebView.restoreState( savedInstanceState );
         }
         else {
-	        BluelineWebView.loadUrl("http://blueline.rsw.me.uk");
+	        BluelineWebView.loadUrl( "http://blueline.rsw.me.uk" );
         }
     }
     
     /** Web Client */
     private class BluelineWebViewClient extends WebViewClient {
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            if (Uri.parse(url).getHost().equals("blueline.rsw.me.uk")) {
+        public boolean shouldOverrideUrlLoading( WebView view, String url ) {
+            if( Uri.parse( url ).getHost().equals( "blueline.rsw.me.uk" ) ) {
                 // Don't override local links
                 return false;
             }
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            startActivity(intent);
+            Intent intent = new Intent( Intent.ACTION_VIEW, Uri.parse( url ) );
+            startActivity( intent );
             return true;
         }
     }
@@ -75,19 +77,25 @@ public class BluelineActivity extends Activity {
     /** Javascript interface */
     private class JavaScriptInterface {
         Context mContext;
-        JavaScriptInterface(Context c) {
+    	boolean LoadingHidden = false;
+    	
+        JavaScriptInterface( Context c ) {
             mContext = c;
         }
         
         /** Show a toast from the web page */
-        public void showToast(String toast) {
-            Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
+        public void showToast( String toast ) {
+            Toast.makeText( mContext, toast, Toast.LENGTH_SHORT ).show();
         }
         
         /** Switch the view to the BluelineWebView */
         public void hideLoading() {
         	if( !LoadingHidden ) {
-        		BluelineSwitcher.showNext();
+        		BluelineHandler.post( new Runnable() {
+					public void run() {
+						BluelineViewSwitcher.showNext();
+					}
+				} );
         		LoadingHidden = true;
         	}
         }
