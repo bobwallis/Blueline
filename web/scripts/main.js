@@ -20,7 +20,7 @@
  */
 require( { paths: { jquery: '/scripts/lib/jquery' } }, ['require', 'jquery', 'helpers/Is', 'helpers/Can', 'helpers/Settings', 'helpers/Shim', 'ui/Hotkeys'], function( require, $, Is, Can, Settings, Shim, Hotkeys ) {
 	// Initialise single session mode if the browser supports it
-	if( Can.history() ) {
+	if( Is.app() || Can.history() ) {
 		require( ['app'] );
 	}
 	
