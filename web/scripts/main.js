@@ -27,11 +27,6 @@ require( { paths: { jquery: '/scripts/lib/jquery' } }, ['require', 'jquery', 'he
 	// Cleanup scripts
 	$( function() { $( 'body > script' ).remove(); } );
 	
-	// Fallback app loading overlay hiding
-	if( Is.app() ) {
-		setTimeout( function() { $( '#appStart' ).remove(); }, 10000 ); // Fallback. It will be faded nicely from app.js after it has loaded
-	}
-	
 	// Listen for application cache updates if the browser supports it
 	if( Can.applicationCache() ) {
 		var $applicationCache = $( window.applicationCache );

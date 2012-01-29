@@ -23,7 +23,6 @@ define( [ 'require', 'jquery', 'helpers/Android', 'helpers/Can', 'helpers/Is', '
 		baseURLRegexp = new RegExp( '^'+location.protocol+'\/\/'+location.host );
 	
 	if( History.enabled ) {
-
 		// Capture link clicks
 		var historyClick = function( e ) {
 			var target = $( e.target ).closest( 'a' );
@@ -95,10 +94,8 @@ define( [ 'require', 'jquery', 'helpers/Android', 'helpers/Can', 'helpers/Is', '
 
 		// DOM Ready/Load event
 		$( function() {
-			var $body = $( document.body );
-		
 			// Attach listeners to click events
-			$body.click( historyClick );
+			$( document.body ).click( historyClick );
 
 			// Attach listeners to little search form's submit event
 			$( '#topSearch' ).submit( historyFormSubmit );
@@ -134,6 +131,4 @@ define( [ 'require', 'jquery', 'helpers/Android', 'helpers/Can', 'helpers/Is', '
 			}
 		} );
 	}
-	
-	return true;
 } );
