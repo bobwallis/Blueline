@@ -22,7 +22,7 @@ define( [ 'require', 'jquery', 'helpers/Android', 'helpers/Can', 'helpers/Is', '
 	var baseURL = location.protocol+'//'+location.host,
 		baseURLRegexp = new RegExp( '^'+location.protocol+'\/\/'+location.host );
 	
-	if( Can.history() && History.enabled ) {
+	if( History.enabled ) {
 
 		// Capture link clicks
 		var historyClick = function( e ) {
