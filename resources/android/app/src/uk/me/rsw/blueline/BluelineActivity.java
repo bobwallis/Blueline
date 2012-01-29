@@ -56,7 +56,7 @@ public class BluelineActivity extends Activity {
         	BluelineWebView.restoreState( savedInstanceState );
         }
         else {
-	        BluelineWebView.loadUrl( "http://blueline.rsw.me.uk" );
+	        BluelineWebView.loadUrl( "http://blueline.rsw.me.uk/" );
         }
     }
     
