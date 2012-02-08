@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -93,6 +94,7 @@ public class BluelineActivity extends Activity {
         	if( !LoadingHidden ) {
         		BluelineHandler.post( new Runnable() {
 					public void run() {
+						BluelineWebView.requestFocus(View.FOCUS_DOWN);
 						BluelineViewSwitcher.showNext();
 					}
 				} );
