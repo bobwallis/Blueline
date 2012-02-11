@@ -80,7 +80,7 @@ define( ['jquery', './Null'], function( $, ContentCache_null ) {
 			setDatabaseVersion( contentCache_born, function() {
 				// If everything works, update the ContentCache object to use the opened database
 				ContentCache.get = function( url, success, failure ) {
-					var transaction = db.transaction(['page'], IDBTransaction.READ_ONLY, 0 ),
+					var transaction = db.transaction(['page'], IDBTransaction.READ_ONLY ),
 						store = transaction.objectStore( 'page' ),
 						request = store.get( url );
 					request.onsuccess = function( e ) {
@@ -98,7 +98,7 @@ define( ['jquery', './Null'], function( $, ContentCache_null ) {
 				};
 				ContentCache.set = function( url, content ) {
 					// Don't worry about catching errors, this can fail if it wants
-					db.transaction(['page'], IDBTransaction.READ_WRITE, 0 )
+					db.transaction(['page'], IDBTransaction.READ_WRITE )
 						.objectStore( 'page' )
 						.put( { content: content, url: url } );
 				};
