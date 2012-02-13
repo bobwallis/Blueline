@@ -1,7 +1,7 @@
 {
   "name": "Blueline",
   "description": "Information for bellringers. Includes a blueline generator, tower listings and more.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "app": {
     "urls": [
       "http://blueline.rsw.me.uk/"
@@ -16,5 +16,6 @@
   "permissions": [
     "geolocation",
     "unlimitedStorage"
-  ]
+  ],
+  "offline_enabled": true
 }
