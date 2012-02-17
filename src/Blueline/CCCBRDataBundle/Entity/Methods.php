@@ -422,7 +422,7 @@ class Methods {
 					break;
 				case 1:
 					if( $stage % 2 == 0 ) {
-						if( $leadEndChange == '12' || ($leadEndChange == '1'.$n && ($stage == 6 || $stage == 8) && $this->classification == 'Surprise') ) {
+						if( $leadEndChange == '12' ) {
 							$this->calls = array( 'Bob' => '14::', 'Single' => '1234::' );
 						}
 						elseif( $leadEndChange == '1'.$n ) {
