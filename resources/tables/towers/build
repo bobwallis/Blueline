@@ -6,9 +6,7 @@ d=`dirname "$dWhich"`
 echo "towers.sql:"
 
 # Remove old files
-rm -f "$d/towers.sql"
-rm -f "$d/towers.sql.gz"
-rm -f "$d/towers/dove.csv"
+rm -f "$d/towers.sql" "$d/towers.sql.gz" "$d/towers/dove.csv"
 
 # Download data
 echo "Downloading data..."

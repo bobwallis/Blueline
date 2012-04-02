@@ -3,10 +3,11 @@ require( dirname(__FILE__).'/../../../vendor/blueline/abbreviations.php' );
 
 function longCounty( $lookup, array $array ) {
 	if( empty( $lookup ) ) { return ''; }
+	elseif( empty( $array) ) { return $lookup; }
 	elseif( array_key_exists( $lookup, $array ) ) { return $array[$lookup]; 	}
 	elseif( in_array( $lookup, $array ) ) { return $lookup; }
 	else {
-		trigger_error( 'No full county for: '.$lookup, E_USER_ERROR );
+		trigger_error( 'No full county for: '.$lookup, E_USER_ERROR );die();
 	}
 }
 
@@ -35,9 +36,18 @@ function mysql_escape_mimic( $inp ) {
 // Tidy up data values
 function tidyTower( $tower ) {
 	global $counties, $welshAreas, $scottishAreas, $irishAreas, $states, $canadianStates, $australianAreas, $newZealandAreas, $southAfricanAreas;
-
+	
 	// Expand shortened county/region names
-	if( empty( $tower['Country'] ) ) { $tower['Country'] = 'England'; }
+	if( empty( $tower['Country'] ) ) {
+		if( $tower['County'] == 'Zimbabwe' || $tower['County'] == 'Kenya' ) {
+			// Cheers Dove. Some more ridiculous special cases.
+			$tower['Country'] = $tower['County'];
+			$tower['County'] = '';
+		}
+		else {
+			$tower['Country'] = 'England';
+		}
+	}
 	if( $tower['Country'] == 'Channel Is' ) { $tower['Country'] = 'Channel Isles'; }
 	
 	if( $tower['County'] == '(none)' ) { $tower['County'] = ''; }
