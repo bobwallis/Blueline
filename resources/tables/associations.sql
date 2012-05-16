@@ -39,11 +39,11 @@ INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('L&M', 'Lland
 INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('Lancs', 'Lancashire Association', 'http://www.lacr.org.uk/');
 INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('LeiDG', 'Leicester Diocesan Guild', 'http://www.leicesterdg.org.uk/');
 INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('LinDG', 'Lincoln Diocesan Guild', 'http://ldgcb.org.uk/');
-INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('LivUS', 'Liverpool Universities Society', 'http://www.luscr.org.uk/liv_index.html');
+INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('LivUS', 'Liverpool Universities Society', 'http://luscr.org.uk/');
 INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('Lundy', 'Lundy Island Society', 'http://www.btinternet.com/~bob.caton/');
 INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('LWAS', 'Lichfield and Walsall Archdeaconries Society', 'http://www.lwascr.org.uk/');
 INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('Middx', 'Middlesex County Association', 'http://www.mcaldg.org.uk/');
-INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('MUG', 'Manchester University Guild', 'http://compsoc.man.ac.uk/~mowen/mugcr/mugcr.html');
+INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('MUG', 'Manchester University Guild', 'http://www.mugcr.org/');
 INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('NAG', 'North American Guild', 'http://www.nagcr.org/');
 INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('NDA', 'Norwich Diocesan Association', 'http://www.norwich-diocese-ringers.org.uk/');
 INSERT INTO `associations` (`abbreviation`, `name`, `link`) VALUES('NSA', 'North Staffordshire Association', 'http://www.nsacr.org.uk/');
