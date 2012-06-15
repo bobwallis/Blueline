@@ -1,2 +1,2 @@
-Build with: g++ -I /usr/include/mysql/ -o levenshteinRatio.so -fPIC -shared levenshteinRatio.cc 
-or similar, and install.
+Build using the ./build script and install into the MySQL plugin folder as
+guided, then import the install.sql file (you'll need root acces to do this).
