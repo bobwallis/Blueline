@@ -1,4 +1,4 @@
-.background-size(@size) {
+.background-size (@size) {
 	-moz-background-size: @size;
 	-webkit-background-size: @size;
 	-o-background-size: @size;
@@ -6,7 +6,7 @@
 	background-size: @size;
 }
 
-.border-radius(@radius: 5px) {
+.border-radius (@radius: 5px) {
   -moz-border-radius: @radius;
   -webkit-border-radius: @radius;
   -o-border-radius: @radius;
@@ -14,19 +14,19 @@
   border-radius: @radius;
 }
 
-.box-shadow () {
+.box-shadow (...) {
 	box-shadow: @arguments;
 	-moz-box-shadow: @arguments;
 	-webkit-box-shadow: @arguments;
 }
 
-.column-count(@count) {
+.column-count (@count) {
   -moz-column-count: @count;
   -webkit-column-count: @count;
   column-count: @count;
 }
 
-.column-gap(@gap) {
+.column-gap (@gap) {
   -moz-column-gap: @gap;
   -webkit-column-gap: @gap;
   column-gap: @gap;
@@ -38,11 +38,12 @@
 	-o-transition-duration: @time;
 	transition-duration: @time;
 }
-.transition-property () {
-	-webkit-transition-property: ~"@{arguments}";
-	-moz-transition-property: ~"@{arguments}";
-	-o-transition-property: ~"@{arguments}";
-	transition-property: ~"@{arguments}";
+.transition-property (...) {
+	@props: ~`"@{arguments}".replace(/[\[\]]/g, '')`;
+	-webkit-transition-property: @props;
+	-moz-transition-property: @props;
+	-o-transition-property: @props;
+	transition-property: @props;
 }
 
 .hyphens (@type: auto) {
