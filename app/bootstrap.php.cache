@@ -433,7 +433,6 @@ use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\HttpKernel\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\MergeExtensionConfigurationPass;
 use Symfony\Component\HttpKernel\DependencyInjection\AddClassesToCachePass;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension as DIExtension;
 use Symfony\Component\HttpKernel\Debug\ErrorHandler;
 use Symfony\Component\HttpKernel\Debug\ExceptionHandler;
 use Symfony\Component\Config\Loader\LoaderResolver;
@@ -456,7 +455,12 @@ abstract class Kernel implements KernelInterface
     protected $startTime;
     protected $classes;
 
-    const VERSION = '2.0.12';
+    const VERSION         = '2.0.15';
+    const VERSION_ID      = '20015';
+    const MAJOR_VERSION   = '2';
+    const MINOR_VERSION   = '0';
+    const RELEASE_VERSION = '15';
+    const EXTRA_VERSION   = '';
 
     
     public function __construct($environment, $debug)
@@ -663,7 +667,7 @@ abstract class Kernel implements KernelInterface
     {
         if (null === $this->rootDir) {
             $r = new \ReflectionObject($this);
-            $this->rootDir = dirname($r->getFileName());
+            $this->rootDir = str_replace('\\', '/', dirname($r->getFileName()));
         }
 
         return $this->rootDir;
