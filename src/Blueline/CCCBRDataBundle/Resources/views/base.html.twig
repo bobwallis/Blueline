@@ -35,7 +35,7 @@
 		{% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/old_ie.less' output='css/old_ie.css' filter='less, ?yui_css' %}
 			<!--[if lt IE 9]><link rel="stylesheet" href="{{ asset_url }}" /><![endif]-->
 		{% endstylesheets %}
-		<script data-main="/scripts/main" src="/scripts/require.js"></script>
+		<script data-main="{{ asset('scripts/main') }}" src="{{ asset('scripts/require.js') }}"></script>
 		{% if ga_trackingCode is defined and ga_trackingCode is not empty %}
 			<script>var _gaq=[['_setAccount','{{ ga_trackingCode }}'],['_trackPageview']];(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.src='//www.google-analytics.com/ga.js';s.parentNode.insertBefore(g,s)}(document,'script'))</script>
 		{% endif %}

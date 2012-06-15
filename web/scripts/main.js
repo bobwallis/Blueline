@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Blueline.  If not, see <http://www.gnu.org/licenses/>.
  */
-require( { paths: { jquery: '/scripts/lib/jquery' } }, ['require', 'jquery', 'helpers/Is', 'helpers/Can', 'helpers/Settings', 'helpers/Shim', 'ui/Hotkeys'], function( require, $, Is, Can, Settings, Shim, Hotkeys ) {
+require( { paths: { jquery: '/blueline/scripts/lib/jquery' } }, ['require', 'jquery', 'helpers/Is', 'helpers/Can', 'helpers/Settings', 'helpers/Shim', 'ui/Hotkeys'], function( require, $, Is, Can, Settings, Shim, Hotkeys ) {
 	// Initialise single session mode if the browser supports it
 	if( Is.app() || Can.history() ) {
 		require( ['app'] );
