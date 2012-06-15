@@ -1,18 +1,44 @@
 #!/bin/bash
 
-dWhich=`which "$0"`
-d=`dirname "$dWhich"`
-
+# Get script directory, and cd to it
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
+d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 cd "$d"
 
+# Parse options
+usage()
+{
+cat << EOF
+
+Usage: $0 [options]
+This script updates Blueline.
+
+Options:
+ --nodata  Updates code without also updating the database with external data
+ --help    Shows this message
+EOF
+}
+source "$d/resources/scripts/getopts_long.sh"
+CCCBRDATA=true
+OPTLIND=1
+while getopts_long :dh opt \
+	nodata no_argument \
+	help 0 "" "$@"
+	do
+		case "$opt" in
+			d|nodata) CCCBRDATA=false;;
+			h|help) usage; exit 0;;
+			:) printf >&2 '%s: %s\n' "${0##*/}" "$OPTLERR"
+				usage
+				exit 1;;
+		esac
+	done
+shift "$(($OPTLIND - 1))"
+
 # Pull latest version
-if [[ -z "$1" || "$1" != "nopull" ]]
-then
-	echo -e "\n\033[1mPulling latest version\033[0m"
-	git pull
-	./update nopull $@
-	exit
-fi
+echo -e "\n\033[1mPulling latest version of Blueline\033[0m"
+git pull
 
 # Read configuration file
 echo -e "\n\033[1mReading configuration file\033[0m"
@@ -37,22 +63,22 @@ function cfg.parser ()
     ini[${#ini[*]} + 1]='}'    # add the last brace
     eval "$(echo "${ini[*]}")" # eval the result
 }
-cfg.parser "app/config/parameters.ini"
+cfg.parser "$d/app/config/parameters.ini"
 cfg.section.parameters
 
 # Update vendors
-echo -e "\n\033[1mUpdating vendors\033[0m"
+echo -e "\n\033[1mUpdating vendors for Blueline\033[0m"
 php bin/vendors install
 
 # Clear cache
-echo -e "\n\033[1mClearing Symfony cache\033[0m"
+echo -e "\n\033[1mClearing Symfony cache for Blueline\033[0m"
 ./app/console cache:clear --env=prod
 
 # Rebuild web assets
 echo -e "\n\033[1mRebuilding assets\033[0m"
 ./resources/scripts/buildWWW
 
-if [[ ( -z "$1" || "$1" != "nodata" ) && ( -z "$2" || "$2" != "nodata" ) ]]
+if [[ $CCCBRDATA = true ]]
 	then
 	# Update SQL generated from online sources
 	echo -e "\n\033[1mUpdating SQL generated from online data\033[0m"
@@ -63,36 +89,36 @@ if [[ ( -z "$1" || "$1" != "nodata" ) && ( -z "$2" || "$2" != "nodata" ) ]]
 	# Import generated SQL into the database
 	echo -e "\n\033[1mImporting generated SQL\033[0m"
 	echo -en "associations.sql..."
-	if [ -e "./resources/tables/associations.sql" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "./resources/tables/associations.sql"
+	if [ -e "$d/resources/tables/associations.sql" ]; then
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "$d/resources/tables/associations.sql"
 		echo "Done"
 	else
 		echo "Skipped"
 	fi
 	echo -en "methods_extras.sql..."
-	if [ -e "./resources/tables/methods_extras.sql" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "./resources/tables/methods_extras.sql"
+	if [ -e "$d/resources/tables/methods_extras.sql" ]; then
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "$d/resources/tables/methods_extras.sql"
 		echo "Done"
 	else
 		echo "Skipped"
 	fi
 	echo -en "methods.sql..."
-	if [ -e "./resources/tables/methods/methods.sql" -a "`tail -n 1 "./resources/tables/methods/methods.sql"`" = "-- End" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "./resources/tables/methods/methods.sql"
+	if [ -e "$d/resources/tables/methods/methods.sql" -a "`tail -n 1 "$d/resources/tables/methods/methods.sql"`" = "-- End" ]; then
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "$d/resources/tables/methods/methods.sql"
 		echo "Done"
 	else
 		echo "Skipped"
 	fi
 	echo -en "methods_duplicates.sql..."
-	if [ -e "./resources/tables/methods_duplicates/methods_duplicates.sql" -a "`tail -n 1 "./resources/tables/methods_duplicates/methods_duplicates.sql"`" = "-- End" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "./resources/tables/methods_duplicates/methods_duplicates.sql"
+	if [ -e "$d/resources/tables/methods_duplicates/methods_duplicates.sql" -a "`tail -n 1 "$d/resources/tables/methods_duplicates/methods_duplicates.sql"`" = "-- End" ]; then
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "$d/resources/tables/methods_duplicates/methods_duplicates.sql"
 		echo "Done"
 	else
 		echo "Skipped"
 	fi
 	echo -en "towers.sql..."
-	if [ -e "./resources/tables/towers/towers.sql" -a "`tail -n 1 "./resources/tables/towers/towers.sql"`" = "-- End" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "./resources/tables/towers/towers.sql"
+	if [ -e "$d/resources/tables/towers/towers.sql" -a "`tail -n 1 "$d/resources/tables/towers/towers.sql"`" = "-- End" ]; then
+		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "$d/resources/tables/towers/towers.sql"
 		echo "Done"
 	else
 		echo "Skipped"
@@ -103,9 +129,9 @@ if [[ ( -z "$1" || "$1" != "nodata" ) && ( -z "$2" || "$2" != "nodata" ) ]]
 	./resources/tables/methods_towers/build
 
 	# Import generated SQL into the database
-	echo -e "\n\033[1mImporting generated SQL\033[0m"
+	echo -e "\n\033[1mImporting generated SQL into Blueline database\033[0m"
 	echo -en "methods_towers.sql..."
-	if [ -e "./resources/tables/methods_towers/methods_towers.sql" -a "`tail -n 1 "./resources/tables/methods_towers/methods_towers.sql"`" = "-- End" ]; then
+	if [ -e "$d/resources/tables/methods_towers/methods_towers.sql" -a "`tail -n 1 "$d/resources/tables/methods_towers/methods_towers.sql"`" = "-- End" ]; then
 		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "./resources/tables/methods_towers/methods_towers.sql"
 		echo "Done"
 	else
@@ -115,12 +141,8 @@ if [[ ( -z "$1" || "$1" != "nodata" ) && ( -z "$2" || "$2" != "nodata" ) ]]
 	# Update database_update parameter in parameters.ini
 	if [ ! -h "$d/app/config/parameters.ini" ]
 	then
-		echo -e "\n\033[1mUpdating database_update parameter\033[0m"
+		echo -e "\n\033[1mUpdating parameters.ini for Blueline\033[0m"
 		sed -i -e"s/    database_update=.*/    database_update=\"`date --rfc-3339=seconds`\"/" "$d/app/config/parameters.ini"
 	fi
 fi
-
-# Invalidate old Varnish caches
-echo -e "\n\033[1mAdding Varnish ban\033[0m"
-curl -I -s -X BAN "http://blueline.rsw.me.uk/" | grep "HTTP"
 
