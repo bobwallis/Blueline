@@ -4,15 +4,15 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 
 
-A number of Javascript libraries are used in the development of Blueline, and
-stored in this repository. They all have their own copyright/licensing
-information in their respective files.
+A number of libraries are used in the development of Blueline, and stored in 
+this repository. They all have their own copyright/licensing information in 
+their respective files.
 
 
 The backend of Blueline is written using the Symfony framework, and the
 following copyright and permission notice applies to all files in the ./app and
-./bin folders, and the files deps and deps.lock only. See http://symfony.com
-for more details:
+./bin folders, and the files deps and deps.lock. See http://symfony.com for 
+more details:
 Copyright (c) 2004-2011 Fabien Potencier
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
