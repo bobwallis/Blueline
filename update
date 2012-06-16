@@ -21,13 +21,16 @@ EOF
 }
 source "$d/resources/scripts/getopts_long.sh"
 CCCBRDATA=true
+GITPULL=true
 OPTLIND=1
-while getopts_long :dh opt \
+while getopts_long :dph opt \
 	nodata no_argument \
+	nopull no_argument \
 	help 0 "" "$@"
 	do
 		case "$opt" in
 			d|nodata) CCCBRDATA=false;;
+			p|nopull) GITPULL=false;;
 			h|help) usage; exit 0;;
 			:) printf >&2 '%s: %s\n' "${0##*/}" "$OPTLERR"
 				usage
@@ -36,9 +39,14 @@ while getopts_long :dh opt \
 	done
 shift "$(($OPTLIND - 1))"
 
-# Pull latest version
-echo -e "\n\033[1mPulling latest version of Blueline\033[0m"
-git pull
+# Pull latest version and restart update script (to allow it to update itself)
+if [[ $GITPULL = true ]]
+	then
+	echo -e "\n\033[1mPulling latest version of Blueline\033[0m"
+	git pull
+	"$d/update" --nopull
+	exit
+fi
 
 # Read configuration file
 echo -e "\n\033[1mReading configuration file\033[0m"
