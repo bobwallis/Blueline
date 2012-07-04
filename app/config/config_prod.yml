@@ -1,9 +1,6 @@
 imports:
     - { resource: config.yml }
 
-assetic:
-    use_controller: true
-
 twig:
     globals:
         ga_trackingCode: %ga_trackingCode%
