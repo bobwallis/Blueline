@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Blueline.  If not, see <http://www.gnu.org/licenses/>.
  */
-define( ['http://www.google.com/jsapi?key=ABQIAAAAsHJGcx2ntv993hmfnp9RUxSKTQnQ5SFZ1y3T8JIF3ZKhvws7bhQeEX_bZiQrw9Fb925kIkJLnnQfkA&callback=define'], {
+define( ['https://www.google.com/jsapi?key=ABQIAAAAsHJGcx2ntv993hmfnp9RUxSKTQnQ5SFZ1y3T8JIF3ZKhvws7bhQeEX_bZiQrw9Fb925kIkJLnnQfkA&callback=define'], {
 	load: function( name, req, load, config ) {
 		var request = name.split( '/' );
 		if( config.isBuild ) {
