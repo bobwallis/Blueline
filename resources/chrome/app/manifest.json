@@ -17,7 +17,7 @@
       "web_url": "https://rsw.me.uk/blueline/"
     }
   },
-  "offline_enabled": true,
+  "offline_enabled": false,
   "permissions": ["unlimitedStorage"],
   "optional_permissions": ["geolocation"]
 }
