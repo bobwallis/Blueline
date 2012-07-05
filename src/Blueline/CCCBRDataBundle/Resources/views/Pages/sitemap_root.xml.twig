@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
- <url><loc>{{ top_uri }}{{ path('Blueline_welcome') }}</loc></url>
+ <url><loc>{{ url('Blueline_welcome') }}</loc></url>
 {% for page in ['about', 'copyright'] %}
- <url><loc>{{ top_uri }}{{ path('Blueline_page', {'page':page}) }}</loc></url>
+ <url><loc>{{ url('Blueline_page', {'page':page}) }}</loc></url>
 {% endfor %}
- <url><loc>{{ top_uri }}{{ path('Blueline_Associations_welcome') }}</loc></url>
- <url><loc>{{ top_uri }}{{ path('Blueline_Methods_welcome') }}</loc></url>
- <url><loc>{{ top_uri }}{{ path('Blueline_Towers_welcome') }}</loc></url>
+ <url><loc>{{ url('Blueline_Associations_welcome') }}</loc></url>
+ <url><loc>{{ url('Blueline_Methods_welcome') }}</loc></url>
+ <url><loc>{{ url('Blueline_Towers_welcome') }}</loc></url>
 </urlset>

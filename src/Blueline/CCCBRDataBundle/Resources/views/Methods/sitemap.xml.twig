@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 {% for method in methods|default([]) %}
- <url><loc>{{ top_uri }}{{ path( 'Blueline_Methods_view', { 'title': method.title|replace({' ':'_'}) } ) }}</loc></url>
+ <url><loc>{{ url( 'Blueline_Methods_view', { 'title': method.title|replace({' ':'_'}) } ) }}</loc></url>
 {% endfor %}
 </urlset>
