@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 {% for association in associations|default([]) %}
- <url><loc>{{ url('Blueline_Associations_view',{'abbreviation':association.abbreviation}) }}</loc></url>
+ <url><loc>{{ top_uri }}{{ path('Blueline_Associations_view',{'abbreviation':association.abbreviation}) }}</loc></url>
 {% endfor %}
 </urlset>
