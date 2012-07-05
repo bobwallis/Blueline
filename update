@@ -81,6 +81,7 @@ php bin/vendors install
 # Clear cache
 echo -e "\n\033[1mClearing Symfony cache for Blueline\033[0m"
 ./app/console cache:clear --env=prod
+./app/console cache:warm --env=prod
 
 # Rebuild web assets
 echo -e "\n\033[1mRebuilding assets\033[0m"
@@ -145,7 +146,7 @@ if [[ $CCCBRDATA = true ]]
 	else
 		echo "Skipped"
 	fi
-	
+
 	# Update database_update parameter in parameters.ini
 	if [ ! -h "$d/app/config/parameters.ini" ]
 	then
