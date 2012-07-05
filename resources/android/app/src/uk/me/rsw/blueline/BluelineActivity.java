@@ -57,7 +57,7 @@ public class BluelineActivity extends Activity {
         	BluelineWebView.restoreState( savedInstanceState );
         }
         else {
-	        BluelineWebView.loadUrl( "http://blueline.rsw.me.uk/" );
+	        BluelineWebView.loadUrl( "https://rsw.me.uk/blueline/" );
         }
     }
     
@@ -65,7 +65,7 @@ public class BluelineActivity extends Activity {
     private class BluelineWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading( WebView view, String url ) {
-            if( Uri.parse( url ).getHost().equals( "blueline.rsw.me.uk" ) ) {
+            if( Uri.parse( url ).getHost().equals( "rsw.me.uk" ) ) {
                 // Don't override local links
                 return false;
             }
