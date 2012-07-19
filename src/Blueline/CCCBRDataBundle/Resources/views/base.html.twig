@@ -25,7 +25,7 @@
 			<link rel="search" type="application/opensearchdescription+xml" href="{{ path( 'Blueline_Opensearch_description', { 'type': search_opensearch, '_format': 'xml' } ) }}" title="{{ search_opensearch|title }} | Blueline" />
 		{% endif %}
 		<link type="text/plain" rel="author" href="{{ path( 'Blueline_page', {'page':'humans','_format':'txt'} ) }}" />
-		<!--[if lt IE 9]><script src="/scripts/ieCompat.js"></script><![endif]-->
+		<!--[if lt IE 9]><script src="{{ asset('scripts/ieCompat.js') }}"></script><![endif]-->
 		{% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/normalize.css' '@BluelineCCCBRDataBundle/Resources/public/css/fonts.css' '@BluelineCCCBRDataBundle/Resources/public/css/default.less' output='css/default.css' filter='less, ?yui_css' %}
 			<link rel="stylesheet" href="{{ asset_url }}" />
 		{% endstylesheets %}
