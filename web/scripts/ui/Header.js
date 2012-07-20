@@ -20,14 +20,16 @@
  */
 define( ['jquery', '../helpers/Is', '../lib/History'], function( $, Is, History ) {
 	var $window = false, $backButton, $title, $breadcrumbContainer, $topSearchContainer, $topSearch, $topSearchInput, $bigSearchContainer, $bigSearch, $bigSearchInput,
+		homeURL = '',
 		sectionRegexp = /^(.*)\/(associations|methods|towers)($|\/)/,
 		topSearchRegexp = /\/view\//,
 		bigSearchRegexp = /\/(associations|methods|towers)($|\/search)/;
 	
 	var Header = {
 		update: function( url ) {
+		console.log(url);
 			// Hide/show the back button if needed
-			if( $backButton.length > 0 && url.split('/')[3] === '' ) {
+			if( url === homeURL ) {
 				$backButton.css( 'opacity', 0 );
 			}
 			else {
@@ -37,7 +39,7 @@ define( ['jquery', '../helpers/Is', '../lib/History'], function( $, Is, History 
 			// Apply the default header if needed
 			var section = sectionRegexp.exec( url );
 			if( section === null ) {
-				$title.html( '<a href="/">BLUELINE</a>' );
+				$title.html( '<a href="'+homeURL+'">BLUELINE</a>' );
 				$breadcrumbContainer.empty();
 				$topSearchContainer.hide();
 				$bigSearchContainer.hide();
@@ -88,6 +90,9 @@ define( ['jquery', '../helpers/Is', '../lib/History'], function( $, Is, History 
 		$bigSearchContainer = $( '#bigSearchContainer' );
 		$bigSearch = $( '#bigSearch' );
 		$bigSearchInput = $( '#bigQ' );
+		
+		// Work out what the home URL is
+		homeURL = ocation.protocol+'//'+location.host+ $( '#top h1 a' ).attr( 'href' );
 		
 		// Convert to iPhone header if needed
 		if( Is.iApp() ) {
