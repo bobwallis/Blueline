@@ -16,7 +16,7 @@
 			{ 'title': 'Map', 'content': 'tower_map_'~tower.ID, 'className': 'l700' },
 			(tower.firstPealedMethods is not empty)? { 'title': 'Methods First Pealed', 'content': 'tower_peals_'~tower.ID } : {}
 		] } ) }}
-		<div id="tower_map_{{ tower.ID }}" class="staticMap" data-image="//maps.google.com/maps/api/staticmap?format=png&amp;scale=2&amp;size=310x380&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center={{ tower.latitude }},{{ tower.longitude }}&amp;markers=size:small|color:red|{{ tower.latitude }},{{ tower.longitude }}">
+		<div id="tower_map_{{ tower.ID }}" class="staticMap" data-ll="{{ tower.latitude }},{{ tower.longitude }}" data-image="//maps.google.com/maps/api/staticmap?format=png&amp;scale=2&amp;size=310x380&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center={{ tower.latitude }},{{ tower.longitude }}&amp;markers=size:small|color:red|{{ tower.latitude }},{{ tower.longitude }}">
 			<noscript>
 				<h2>Map</h2>
 				<img width="310" height="380" alt="Map of tower location" src="//maps.google.com/maps/api/staticmap?format=png&amp;scale=2&amp;size=310x380&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center={{ tower.latitude }},{{ tower.longitude }}&amp;markers=size:small|color:red|{{ tower.latitude }},{{ tower.longitude }}" />

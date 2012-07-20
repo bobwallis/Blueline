@@ -62,7 +62,7 @@ define( ['require', 'jquery'], function( require, $ ) {
 							$e.html( '<p>Maps unavailable while offline.</p>' );
 						}
 						else {
-							$e.html( '<img width="310px" height="380px" src="'+$e.data( 'image' )+'" />' );
+							$e.html( '<a href="http://maps.google.com/maps?ll='+$e.data( 'll' )+'"><img width="310px" height="380px" src="'+$e.data( 'image' )+'" /></a>' );
 						}
 					} );
 					return;
