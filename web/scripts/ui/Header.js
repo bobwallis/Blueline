@@ -92,7 +92,7 @@ define( ['jquery', '../helpers/Is', '../lib/History'], function( $, Is, History 
 		$bigSearchInput = $( '#bigQ' );
 		
 		// Work out what the home URL is
-		homeURL = ocation.protocol+'//'+location.host+ $( '#top h1 a' ).attr( 'href' );
+		homeURL = location.protocol+'//'+location.host+ $( '#top h1 a' ).attr( 'href' );
 		
 		// Convert to iPhone header if needed
 		if( Is.iApp() ) {
