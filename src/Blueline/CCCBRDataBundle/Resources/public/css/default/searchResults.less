@@ -1,16 +1,14 @@
 .search {
 	min-height: 80px;
-	ol {
-		li {
-			&.selected {
-				padding-left: 8px;
-				margin-left: -8px;
-				background-repeat: no-repeat;
-				background-position: left center;
-				background-image: url(../images/selectIndicator.svg);
-				a {
-					border-bottom-color: #29404C;
-				}
+	li {
+		&.selected {
+			padding-left: 8px;
+			margin-left: -8px;
+			background-repeat: no-repeat;
+			background-position: left center;
+			background-image: url(../images/selectIndicator.svg);
+			a {
+				border-bottom-color: #29404C;
 			}
 		}
 	}
@@ -33,5 +31,10 @@ div.pagingLinks {
 @media screen and (max-width: 500px) {
 	div.paging {
 		text-align: center;
+	}
+	.search {
+		li.selected {
+			background-position-x: 12px;
+		}
 	}
 }
