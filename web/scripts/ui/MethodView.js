@@ -22,7 +22,7 @@ define( ['jquery', '../plugins/font!BluelineMono', '../helpers/Method/Grid', '..
 	// Display messages if canvas is not supported
 	if( !Can.canvas() ) {
 		return function( options ) {
-			var message = '<p class="nothing">Your browser doesn\'t support canvas elements, and so can\'t draw the method.</p>';
+			var message = '<p class="nothing">Your browser doesn\'t support canvas elements, and so can\'t draw methods. Consider upgrading to a more modern browser.</p>';
 			$( options.numbersContainer ).html( message );
 			$( options.gridContainer ).html( message );
 		};
