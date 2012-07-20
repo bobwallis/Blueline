@@ -14,8 +14,11 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
-		<link rel="apple-touch-startup-image" sizes="640x920" href="{{ asset('images/appStart/640x920.png') }}" />
-		<link rel="apple-touch-startup-image" href="{{ asset('images/appStart/320x460.png') }}" />
+		<link rel="apple-touch-startup-image" sizes="640x920" href="{{ asset('images/i/start_2x.png') }}" />
+		<link rel="apple-touch-startup-image" href="{{ asset('images/i/start.png') }}" />
+		<link rel="apple-touch-icon" href="{{ asset('images/i/icon57.png') }}" />
+		<link rel="apple-touch-icon" sizes="72x72" href="{{ asset('images/i/icon72.png') }}" />
+		<link rel="apple-touch-icon" sizes="114x114" href="{{ asset('images/i/icon114.png') }}" />
 		<meta name="application-name" content="Blueline" />
 		<meta name="msapplication-starturl" content="{{ url( 'Blueline_welcome' ) }}" />
 		<link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" sizes="any" />
@@ -25,7 +28,6 @@
 			<link rel="search" type="application/opensearchdescription+xml" href="{{ path( 'Blueline_Opensearch_description', { 'type': search_opensearch, '_format': 'xml' } ) }}" title="{{ search_opensearch|title }} | Blueline" />
 		{% endif %}
 		<link type="text/plain" rel="author" href="{{ path( 'Blueline_page', {'page':'humans','_format':'txt'} ) }}" />
-		<!--[if lt IE 9]><script src="{{ asset('scripts/ieCompat.js') }}"></script><![endif]-->
 		{% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/normalize.css' '@BluelineCCCBRDataBundle/Resources/public/css/fonts.css' '@BluelineCCCBRDataBundle/Resources/public/css/default.less' output='css/default.css' filter='less, ?yui_css' %}
 			<link rel="stylesheet" href="{{ asset_url }}" />
 		{% endstylesheets %}
@@ -35,6 +37,7 @@
 		{% stylesheets '@BluelineCCCBRDataBundle/Resources/public/css/old_ie.less' output='css/old_ie.css' filter='less, ?yui_css' %}
 			<!--[if lt IE 9]><link rel="stylesheet" href="{{ asset_url }}" /><![endif]-->
 		{% endstylesheets %}
+		<!--[if lt IE 9]><script src="{{ asset('scripts/ieCompat.js') }}"></script><![endif]-->
 		<script data-main="{{ asset('scripts/main') }}" src="{{ asset('scripts/require.js') }}"></script>
 		{% if ga_trackingCode is defined and ga_trackingCode is not empty %}
 			<script>var _gaq=[['_setAccount','{{ ga_trackingCode }}'],['_trackPageview']];(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.src='//www.google-analytics.com/ga.js';s.parentNode.insertBefore(g,s)}(document,'script'))</script>
