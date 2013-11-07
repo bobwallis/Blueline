@@ -15,15 +15,15 @@ $associations = array (
   ),
   2 => 
   array (
-    'abbreviation' => 'B&W',
-    'name' => 'Bath and Wells Diocesan Association',
-    'link' => 'http://www.bath-wells.org.uk/',
-  ),
-  3 => 
-  array (
     'abbreviation' => 'Beds',
     'name' => 'Bedfordshire Association',
     'link' => 'http://www.bacr.co.uk/',
+  ),
+  3 => 
+  array (
+    'abbreviation' => 'B&W',
+    'name' => 'Bath and Wells Diocesan Association',
+    'link' => 'http://www.bath-wells.org.uk/',
   ),
   4 => 
   array (
@@ -45,21 +45,21 @@ $associations = array (
   ),
   7 => 
   array (
-    'abbreviation' => 'D&N',
-    'name' => 'Durham and Newcastle Diocesan Association',
-    'link' => 'http://dandn.org/',
-  ),
-  8 => 
-  array (
     'abbreviation' => 'DDA',
     'name' => 'Derby Diocesan Association',
     'link' => 'http://derbyda.org.uk/',
   ),
-  9 => 
+  8 => 
   array (
     'abbreviation' => 'DevAs',
     'name' => 'Devon Association',
     'link' => 'http://www.devonbells.co.uk/',
+  ),
+  9 => 
+  array (
+    'abbreviation' => 'D&N',
+    'name' => 'Durham and Newcastle Diocesan Association',
+    'link' => 'http://dandn.org/',
   ),
   10 => 
   array (
@@ -129,33 +129,33 @@ $associations = array (
   ),
   21 => 
   array (
-    'abbreviation' => 'L&M',
-    'name' => 'Llandaff and Monmouth Diocesan Association',
-    'link' => 'http://www.llanmon.org.uk/',
-  ),
-  22 => 
-  array (
     'abbreviation' => 'Lancs',
     'name' => 'Lancashire Association',
     'link' => 'http://www.lacr.org.uk/',
   ),
-  23 => 
+  22 => 
   array (
     'abbreviation' => 'LeiDG',
     'name' => 'Leicester Diocesan Guild',
     'link' => 'http://www.leicesterdg.org.uk/',
   ),
-  24 => 
+  23 => 
   array (
     'abbreviation' => 'LinDG',
     'name' => 'Lincoln Diocesan Guild',
     'link' => 'http://ldgcb.org.uk/',
   ),
-  25 => 
+  24 => 
   array (
     'abbreviation' => 'LivUS',
     'name' => 'Liverpool Universities Society',
     'link' => 'http://luscr.org.uk/',
+  ),
+  25 => 
+  array (
+    'abbreviation' => 'L&M',
+    'name' => 'Llandaff and Monmouth Diocesan Association',
+    'link' => 'http://www.llanmon.org.uk/',
   ),
   26 => 
   array (
@@ -231,27 +231,27 @@ $associations = array (
   ),
   38 => 
   array (
-    'abbreviation' => 'S&B',
-    'name' => 'Swansea and Brecon Diocesan Guild',
-    'link' => 'http://myweb.tiscali.co.uk/pckmj/sbdg/',
-  ),
-  39 => 
-  array (
     'abbreviation' => 'SAG',
     'name' => 'South African Guild',
     'link' => 'http://www.scifac.ru.ac.za/cathedral/bellguild.htm',
   ),
-  40 => 
+  39 => 
   array (
     'abbreviation' => 'Salis',
     'name' => 'Salisbury Diocesan Guild',
     'link' => 'http://www.sdgr.org.uk/',
   ),
-  41 => 
+  40 => 
   array (
     'abbreviation' => 'Salop',
     'name' => 'Shropshire Association',
     'link' => 'http://www.sacbr.org.uk/',
+  ),
+  41 => 
+  array (
+    'abbreviation' => 'S&B',
+    'name' => 'Swansea and Brecon Diocesan Guild',
+    'link' => 'http://myweb.tiscali.co.uk/pckmj/sbdg/',
   ),
   42 => 
   array (
@@ -327,15 +327,15 @@ $associations = array (
   ),
   54 => 
   array (
-    'abbreviation' => 'W&P',
-    'name' => 'Winchester and Portsmouth Diocesan Guild',
-    'link' => 'http://www.wp-ringers.org.uk/',
-  ),
-  55 => 
-  array (
     'abbreviation' => 'WDA',
     'name' => 'Worcestershire & Districts Association',
     'link' => 'http://www.wdcra.org.uk/',
+  ),
+  55 => 
+  array (
+    'abbreviation' => 'W&P',
+    'name' => 'Winchester and Portsmouth Diocesan Guild',
+    'link' => 'http://www.wp-ringers.org.uk/',
   ),
   56 => 
   array (
