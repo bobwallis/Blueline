@@ -76,6 +76,6 @@
 	</section>
 {% endfor %}
 {% autoescape false %}
-<script>require(['shared/ui/Map'],function(a){a.set({{% if count(towers) > 1 %}fitBounds:[{{ bbox.lat_min }},{{ bbox.long_min }},{{ bbox.lat_max }},{{ bbox.long_max }}],{% else %}zoom:15,center:[{{ towers[0].latitude }},{{ towers[0].longitude }}]{% endif %}});});</script>
+<script>require(['shared/ui/Map'],function(a){a.set({ {% if count(towers) > 1 %}fitBounds:[{{ bbox.lat_min }},{{ bbox.long_min }},{{ bbox.lat_max }},{{ bbox.long_max }}],{% else %}zoom:15,center:[{{ towers[0].latitude }},{{ towers[0].longitude }}]{% endif %} });});</script>
 {% endautoescape %}
 {% endblock %}
