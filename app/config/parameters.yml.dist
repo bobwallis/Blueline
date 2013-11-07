@@ -20,7 +20,7 @@ parameters:
 # System paths
     java_path:         /usr/bin/java
     node_path:         /usr/bin/node
-    node_module_path:  /usr/lib/node_modules
+    node_modules_path: /usr/lib/node_modules
 
 # Blueline
     admin_email:       blueline@example.com
