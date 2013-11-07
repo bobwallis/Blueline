@@ -1,0 +1,45 @@
+{% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
+
+{% block title %}{{ pageTitle }} | Associations | {{ parent() }}{% endblock %}
+
+{% block og_title %}{{ pageTitle }}{% endblock %}
+{% block og_description %}Association information for bellringers{% endblock %}
+
+{% set breadcrumb = { 'title': 'Associations', 'href': path('Blueline_Associations_welcome') } %}
+
+{% set search = false %}
+
+{% block body %}
+{% from 'BluelineBundle:Macros:header.html.twig' import header %}
+{% for association in associations %}
+	<section class="association">
+		{{ header( association.name, null, { 'id': 'association_'~association.id~'_tabBar', 'tabs': [
+			{ 'title': 'Details', 'content': 'association_details_'~association.id },
+			{ 'title': 'Towers', 'content': 'association_towers_'~association.id }
+		], 'active': 0 } ) }}
+		<div id="association_details_{{ association.id }}" class="details">
+			<noscript><h2>Details</h2></noscript>
+			<dl>
+			{% if association.link is not empty %}
+				<dt>Link</dt>
+				<dd><a href="{{ association.link }}" class="external">{{ association.link }}</a></dd>
+			{% endif %}
+				<dt>Towers</dt>
+				<dd>{{ count( association.towers ) }}</dd>
+			</dl>
+		</div>
+		<div id="association_towers_{{ association.id }}" class="affiliations">
+			<noscript><h2>Affiliated Towers</h2></noscript>
+			<ol>
+			{% for tower in association.towers %}
+				<li><a href="{{ path( 'Blueline_Towers_view', { 'id': tower.id } ) }}">{{ tower.place }} <small> ({{ tower.dedication }})</small></a></li>
+			{% else %}
+				<li>None</li>
+			{% endfor %}
+			</ol>
+		</div>
+	</section>
+{% endfor %}
+{% autoescape false %}<script>require(['shared/ui/Map'],function(a){a.set({fitBounds:[{{ bbox.lat_min }},{{ bbox.long_min }},{{ bbox.lat_max }},{{ bbox.long_max }}],fusionTableQuery:"{% for association in associations %}affiliations contains '{{ association.abbreviation|e('js') }}'{{ (not loop.last)? ' or ':'' }}{% endfor %}"});});</script>
+{% endautoescape %}
+{% endblock %}

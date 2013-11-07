@@ -1,5 +1,6 @@
 imports:
     - { resource: config.yml }
+    - { resource: blueline_dev.yml }
 
 framework:
     router:   { resource: "%kernel.root_dir%/config/routing_dev.yml" }
@@ -18,3 +19,11 @@ monolog:
         firephp:
             type:  firephp
             level: info
+
+assetic:
+    use_controller: true
+
+blueline:
+    admin_email: blueline@example.com
+    cache_manifest: false
+    analytics_code: false

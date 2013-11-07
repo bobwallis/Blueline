@@ -1,0 +1,16 @@
+{% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
+
+{% block title %}Towers | {{ parent() }}{% endblock %}
+
+{% block og_title %}Towers{% endblock %}
+{% block og_description %}Tower information for bellringers{% endblock %}
+
+{% set breadcrumb = { 'title': 'Tower', 'href': path('Blueline_Towers_welcome') } %}
+
+{% set search = true %}
+{% set search_action = path( 'Blueline_Towers_search' ) %}
+{% set search_placeholder = 'Search towers' %}
+
+{% block body %}
+	<section class="blank"></section>
+{% endblock %}

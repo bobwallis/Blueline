@@ -1,0 +1,99 @@
+{% spaceless %}
+<!DOCTYPE html>
+<html lang="en"{{ isAppStartPage ? ' manifest="site.manifest"' : '' }} data-age="{{ html_age }}">
+	<head>
+		<meta charset="utf-8" />
+		<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
+		<title>{% block title %}Blueline{% endblock %}</title>
+
+		{# Icons #}
+		<link rel="icon" type="image/svg+xml" sizes="any" href="{{ path( 'Blueline_favicon', { _format: 'svg' } ) }}" />
+		<link rel="alternate icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="{{ path( 'Blueline_favicon', { _format: 'ico' } ) }}" />
+
+		{# Chrome web app link #}
+		<link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/blueline/ohgpoagcfmlbkdniokohgicofokpbpae" />
+
+		{# Mobile web tags #}
+		<meta name="format-detection" content="telephone=no" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+		<meta name="HandheldFriendly" content="true" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+		<meta name="apple-mobile-web-app-title" content="Blueline" />
+		{% for size in [57, 72, 114, 144] %}
+			<link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="apple-touch-icon-{{ size }}x{{ size }}.png" />
+		{% endfor %}
+
+		{# IE Pinned Sites tags #}
+		<meta name="application-name" content="Blueline" />
+		<meta name="msapplication-tooltip" content="Blueline - Information for bellringers" />
+		<meta name="msapplication-starturl" content="{{ app.request.scheme ~  '://' ~ app.request.host ~ path( 'Blueline_welcome' ) }}" />
+		<meta name="msapplication-navbutton-color" content="#002147" />
+
+		{# Opengraph tags #}
+		<meta property="og:title" content="{% block og_title %}Blueline{% endblock %}" />
+		<meta property="og:description" content="{% block og_description %}Information for bellringers{% endblock %}" />
+		<meta property="og:url" content="{{ url( app.request.attributes.get( '_route' ), app.request.attributes.get( '_route_params' ) ) }}" />
+		<meta property="og:type" content="{% block og_type %}website{% endblock %}" />
+		<meta property="og:site_name" content="Blueline" />
+
+		{# Stylesheets #}
+		{% stylesheets '@BluelineBundle/Resources/public/css/lib/normalize.css' '@BluelineBundle/Resources/public/css/all.less' output='css/all.css' filter='less, ?yui_css' %}
+			<link rel="stylesheet" media="all" href="{{ asset_url }}" />
+		{% endstylesheets %}
+		{% stylesheets '@BluelineBundle/Resources/public/css/lib/normalize.css' '@BluelineBundle/Resources/public/css/print.less' output='css/print.css' filter='less, yui_css' %}
+			<link rel="stylesheet" media="print" href="{{ asset_url }}" />
+		{% endstylesheets %}
+		{% stylesheets '@BluelineBundle/Resources/public/css/old_ie.less' output='css/old_ie.css' filter='less, ?yui_css' %}
+			<!--[if lt IE 9]><link rel="stylesheet" href="{{ asset_url }}" /><![endif]-->
+		{% endstylesheets %}
+
+		{# HTML5 Shiv #}
+		{% javascripts '%kernel.root_dir%/Resources/public/js/html5shiv.js' output="js/html5shiv.js" filter="?closure" %}
+			<!--[if lt IE 9]><script src="{{ asset_url }}"></script><![endif]-->
+		{% endjavascripts %}
+
+		{#  Load RequireJS/Modernizr and start.js (this is a little bit fiddly because you don't seem to be able to optmize both the RequireJS modules and RequireJS itself at the same time using the usual method) #}
+		{% set mainModuleURL = '' %}
+		{% javascripts '@BluelineBundle/Resources/public/js/main.js' output="js/main.js" filter='?requirejs' %}
+			{% set mainModuleURL = asset_url %}
+		{% endjavascripts %}
+
+		{% javascripts '@BluelineBundle/Resources/public/js/lib/modernizr.js' '%kernel.root_dir%/Resources/public/js/require.js' output="js/modreq.js" filter="?closure" %}
+			<script>var require={{ require_js_config|json_encode|raw }};</script>
+			<script data-main="{{ mainModuleURL }}" src="{{ asset_url }}"></script>
+		{% endjavascripts %}
+
+		{# Analytics code #}
+		{% if analytics_code is not empty %}
+			<script>var _gaq=[['_setAccount','{{ analytics_code }}'],['_trackPageview']];(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.src='//www.google-analytics.com/ga.js';s.parentNode.insertBefore(g,s)}(document,'script'))</script>
+		{% endif %}
+	</head>
+	<body>
+		{% if isAppStartPage %}
+			<script>if(('standalone' in navigator)&&navigator.standalone){document.write('<div id="appStart"><header></header><p>Loading</p></div>');}</script>
+		{% endif %}
+		<header id="top" role="banner">
+			<h1><a href="{{ path('Blueline_welcome') }}">Blueline</a></h1>
+			{% if breadcrumb is defined %}
+				<h2 id="breadcrumb_sep">&raquo;</h2>
+				<h2 id="breadcrumb"><a href="{{ breadcrumb.href }}">{{ breadcrumb.title}}</a></h2>
+			{% endif %}
+			<div id="menuButton"></div>
+		</header>
+		<form id="search" role="search" action="{{ search_action|default('/') }}"{{ search|default(false) ? '' : ' style="display:none"' }}>
+			<div>
+				<input type="text" accesskey="/" name="q" id="q" spellcheck="false" autocomplete="off" placeholder="{{ search_placeholder|default('Search') }}" value="{{ searchVariables['q']|default('') }}" />
+				<button type="submit" title="Search"><span class="hide">Search</span></button>
+			</div>
+		</form>
+		<div id="content" role="main"{{ search|default(false) ? ' class="searchable"' : '' }}>
+			{% block body %}{% endblock %}
+		</div>
+		<ul id="menu">
+			<li class="first"><a href="{{ path( 'Blueline_Pages_view', { 'page': 'about' } ) }}">About</a></li>
+			<li><a href="{{ path( 'Blueline_Pages_view', { 'page': 'copyright' } ) }}">Copyright</a></li>
+		</ul>
+	</body>
+</html>
+{% endspaceless %}

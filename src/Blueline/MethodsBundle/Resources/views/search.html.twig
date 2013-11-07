@@ -1,0 +1,28 @@
+{% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
+
+{% block title %}Search | Methods | {{ parent() }}{% endblock %}
+
+{% block og_title %}Methods{% endblock %}
+{% block og_description %}Method information for bellringers{% endblock %}
+
+{% set breadcrumb = { 'title': 'Methods', 'href': path('Blueline_Methods_welcome') } %}
+
+{% set search = true %}
+{% set search_action = path( 'Blueline_Methods_search' ) %}
+{% set search_placeholder = 'Search methods' %}
+
+{% block body %}
+	{% from 'BluelineBundle:Macros:paging.html.twig' import paging %}
+	<section class="search">
+		{% if methods is not empty %}
+		<ol>
+		{% for method in methods %}
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'title': method.title|replace({' ':'_'}) } ) }}">{{ method.title }}</a></li>
+		{% endfor %}
+		</ol>
+		{{ paging( 'Blueline_Methods_search', searchVariables, pageActive, pageCount ) }}
+		{% else %}
+		<p class="nothing">No results</p>
+		{% endif %}
+	</section>
+{% endblock %}

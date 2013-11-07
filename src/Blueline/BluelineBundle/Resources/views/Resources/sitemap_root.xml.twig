@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+ <url><loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_welcome') }}</loc></url>
+{% for page in ['about', 'copyright'] %}
+ <url><loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_Pages_view', {'page':page}) }}</loc></url>
+{% endfor %}
+ <url><loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_Associations_welcome') }}</loc></url>
+ <url><loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_Methods_welcome') }}</loc></url>
+ <url><loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_Towers_welcome') }}</loc></url>
+</urlset>

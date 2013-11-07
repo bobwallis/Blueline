@@ -1,0 +1,13 @@
+Blueline\MethodsBundle\Entity\Method:
+    properties:
+        stage:
+            - GreaterThanOrEqual:
+                value: 4
+        lengthOfLead:
+            - GreaterThanOrEqual:
+                value: 1
+        numberOfHunts:
+            - GreaterThanOrEqual:
+                value: 0
+        ruleOffs:
+            - Regex: "/^-?\d+:-?\d+$/"

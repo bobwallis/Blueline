@@ -1,2 +1,7 @@
 Build using the ./build script and install into the MySQL plugin folder as
-guided, then import the install.sql file (you'll need root acces to do this).
+guided, then import the install.sql file (you'll need root access to do this).
+
+Building uses GCC, and the MySQL development libraries.
+I tend to use PostgreSQL now, so this isn't well-tested in recent versions of
+MySQL. It isn't the most complicated code though, so probably won't break
+unless there are some breaking API changes on MySQL's side.

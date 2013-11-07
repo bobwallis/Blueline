@@ -1,0 +1,29 @@
+#towerMap {
+	position: fixed;
+	right: 0;
+	top: @headerHeight;
+	padding: 0;
+	width: 60%;
+	height: 450px;
+	border-left: 1px solid @lightGrey;
+	background: #FAFAFA;
+	z-index: 41;
+	.map {
+		width: 100%;
+		height: 100%;
+		position: relative;
+		right: 0;
+		a {
+			border: 0;
+		}
+		p.unavailable {
+			text-align: center;
+			margin-top: 45px;
+			color: #999;
+			font-size: 14px;
+		}
+	}
+}
+.staticMap img {
+	border: 1px solid @lightGrey;
+}

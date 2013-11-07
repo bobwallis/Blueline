@@ -1,0 +1,12 @@
+{% macro header( title, subtitle, tabs ) %}
+<header>
+	<h1>{% if title.title is defined %}{{ title.title }}{% if title.title2 is defined and title.title2 is not empty %} <span class="normalweight">({{ title.title2 }})</span>{% endif %}{% else %}{{ title }}{% endif %}</h1>
+	{% if subtitle is not empty %}<h2>{{ subtitle }}</h2>{% endif %}
+	{% if tabs is not empty %}
+		<span id="{{ tabs.id }}"></span>
+{% autoescape false %}
+		<script>require(['shared/ui/TabBar'],function(t){t({landmark:'{{ tabs.id }}',tabs:[{% for tab in tabs.tabs %}{% if tab.title is defined and tab.content is defined %}{title:'{{ tab.title }}',content:'{{ tab.content }}'{{ (tab.className is defined)? ',className:\''~tab.className~'\'' : '' }} }{{ not loop.last ? ',' : '' }}{% endif %}{% endfor %}],active:{{ tabs.active|default(0) }}});});</script>
+{% endautoescape %}
+	{% endif %}
+</header>
+{% endmacro %}

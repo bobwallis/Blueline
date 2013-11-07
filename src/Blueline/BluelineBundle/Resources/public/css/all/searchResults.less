@@ -1,0 +1,42 @@
+.search {
+	li {
+		&.selected {
+			padding-left: 8px;
+			margin-left: -8px;
+			background-repeat: no-repeat;
+			background-position: left center;
+			background-image: url(../images/select.svg);
+			a {
+				border-bottom-color: #29404C;
+			}
+		}
+	}
+	p.nothing {
+		margin: @contentYPadding @contentXPadding;
+	}
+}
+
+div.paging {
+	margin: @contentYPadding @contentXPadding;
+}
+div.pagingLinks {
+	color: #CCC;
+	span {
+		color: #000;
+		margin: 0 6px;
+	}
+	a {
+		margin: 0 6px;
+	}
+}
+
+@media screen and (max-width: 500px) {
+	div.paging {
+		text-align: center;
+	}
+	.search {
+		li.selected {
+			background-position-x: 12px;
+		}
+	}
+}

@@ -1,14 +1,10 @@
 imports:
     - { resource: config.yml }
 
-twig:
-    globals:
-        ga_trackingCode: %ga_trackingCode%
-
 doctrine:
     orm:
         metadata_cache_driver: apc
-#        result_cache_driver: apc
+        result_cache_driver: apc
         query_cache_driver: apc
 
 monolog:
@@ -21,3 +17,7 @@ monolog:
             type:  stream
             path:  %kernel.logs_dir%/%kernel.environment%.log
             level: debug
+
+hearsay_require_js:
+    optimizer:
+        hide_unoptimized_assets: true

@@ -1,0 +1,78 @@
+{% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
+
+{% block title %}{{ pageTitle }} | Methods | {{ parent() }}{% endblock %}
+
+{% block og_title %}{{ pageTitle }}{% endblock %}
+{% block og_description %}Method information for bellringers{% endblock %}
+
+{% set breadcrumb = { 'title': 'Methods', 'href': path('Blueline_Methods_welcome') } %}
+
+{% set search = false %}
+
+{% block body %}
+{% from 'BluelineBundle:Macros:header.html.twig' import header %}
+{% for method in methods %}
+	<section class="method">
+		{{ header( { 'title': method.title }, null, { 'id': 'method_'~loop.index~'_tabBar', 'active': 1, 'tabs': [
+			{ 'title': 'Details', 'content': 'method_details_'~loop.index },
+			{ 'title': 'Line', 'content': 'method_line_'~loop.index },
+			{ 'title': 'Grid', 'content': 'method_grid_'~loop.index }
+		] } ) }}
+		<div id="method_details_{{ loop.index }}" class="details">
+			<dl>
+				<dt>Classification</dt>
+				<dd>{{ (method.differential? 'Differential ':'') ~ (method.little? 'Little ':'') ~ method.classification ~ ' ' ~ method.stageText }}</dd>
+				<dt>Place&nbsp;Notation</dt>
+				<dd><abbr title="{{ method.notationExpanded }}">{{ method.notation }}</abbr></dd>
+				<dt>Lead&nbsp;Head</dt>
+				<dd>{{ (method.leadHead ~ (method.leadHeadCode? ' <small>(Code: ' ~ method.leadHeadCode ~ ')</small>' : ''))|raw }}</dd>
+{% if method.palindromic or method.doubleSym or method.rotational %}
+				<dt>Symmetry</dt>
+				<dd>{{ method.symmetryText }}</dd>
+{% endif %}
+{% if method.fchGroups is not empty %}
+				<dt><abbr title="False Course Head">FCH</abbr>&nbsp;Groups</dt>
+				<dd>{{ method.fchGroups }}</dd>
+{% endif %}
+				<dt>Hunt&nbsp;Bells</dt>
+				<dd>{{ ( method.numberOfHunts > 0 )? method.hunts|join(', ') : 'None' }}</dd>
+{% if method.lengthOfLead > 0 %}
+				<dt>Lead&nbsp;Length</dt>
+				<dd>{{ method.lengthOfLead }} rows</dd>
+{% endif %}
+{% if method.firstTowerbellPealDate is not empty %}
+				<dt>First&nbsp;towerbell&nbsp;peal</dt>
+				<dd><time datetime="{{ method.firstTowerbellpealDate|date('Y-m-d') }}">{{ method.firstTowerbellPealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time>{% if method.firstTowerbellPealLocation is not empty %} at {% if method.firstTowerbellPealTower.doveid is defined %}<a href="{{ path( 'Blueline_Towers_view', { 'doveid': method.firstTowerBellPealTower.doveid } ) }}">{{ method.firstTowerbellPealLocation }}</a>{% else %}{{ method.firstTowerbellPealLocation }}{% endif %}{% endif %}</dd>
+{% endif %}
+{% if method.firstHandbellpealDate is not empty %}
+				<dt>First&nbsp;handbell&nbsp;peal</dt>
+				<dd><time datetime="{{ method.firstHandbellpealDate|date('Y-m-d') }}">{{ method.firstHandbellpealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time></dd>
+{% endif %}
+{% if method.duplicate is not empty %}
+				<dt>Method pealed as</dt>
+				<dd>
+				{% for duplicate in method.duplicate %}
+					'{{ duplicate.rung }}'{{ (duplicate.rungLocation != 'handbells')? ' in '~duplicate.rungLocation : ' on handbells' }}{{ ((duplicate.rungDate is not empty)? ' on '~duplicate.rungDate|date('j<\\s\\up>S</\\s\\up> M Y') : '')|raw }}{{ (duplicate.rungRWRef is not empty)? ' ('~duplicate.rungRWRef~')' : '' }}<br />
+				{% endfor %}
+				</dd>
+{% endif %}
+			</dl>
+		</div>
+		<div id="method_line_{{ loop.index }}" class="line"></div>
+		<div id="method_grid_{{ loop.index }}" class="grid"></div>
+		{% autoescape false %}
+		<script>require(['methods/ui/MethodView'],function(a){
+			new a( {
+					id: '{{ loop.index }}',
+					numbersContainer: '#method_line_{{ loop.index }}',
+					gridContainer: '#method_grid_{{ loop.index }}',
+					stage: {{ method.stage }},
+					notation: '{{ method.notationExpanded }}',
+					calls: {{ method.calls|json_encode }},
+					callingPositions: {{ method.callingPositions|json_encode }},
+					ruleOffs: {{ method.ruleOffs|json_encode }}
+				} );});</script>
+		{% endautoescape %}
+	</section>
+{% endfor %}
+{% endblock %}

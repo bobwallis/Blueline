@@ -1,0 +1,28 @@
+{% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
+
+{% block title %}Search | Associations | {{ parent() }}{% endblock %}
+
+{% block og_title %}Associations{% endblock %}
+{% block og_description %}Association information for bellringers{% endblock %}
+
+{% set breadcrumb = { 'title': 'Associations', 'href': path('Blueline_Associations_welcome') } %}
+
+{% set search = true %}
+{% set search_action = path( 'Blueline_Associations_search' ) %}
+{% set search_placeholder = 'Search associations' %}
+
+{% block body %}
+	{% from 'BluelineBundle:Macros:paging.html.twig' import paging %}
+	<section class="search">
+		{% if associations is not empty %}
+		<ol>
+		{% for association in associations %}
+			<li><a href="{{ path( 'Blueline_Associations_view', { 'abbreviation': association.abbreviation } ) }}">{{ association.name }}</a></li>
+		{% endfor %}
+		</ol>
+		{{ paging( 'Blueline_Associations_search', searchVariables, pageActive, pageCount ) }}
+		{% else %}
+		<p class="nothing">No results</p>
+		{% endif %}
+	</section>
+{% endblock %}

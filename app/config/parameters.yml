@@ -1,0 +1,14 @@
+# This file is auto-generated during the composer install
+parameters:
+    database_driver: pdo_pgsql
+    database_host: localhost
+    database_port: null
+    database_name: blueline
+    database_user: blueline
+    database_password: password
+    mailer_transport: smtp
+    mailer_host: localhost
+    mailer_user: null
+    mailer_password: null
+    locale: en
+    secret: 73ba1dd211708f5adfc44f88e2a10bf9a

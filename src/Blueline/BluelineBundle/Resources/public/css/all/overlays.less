@@ -1,0 +1,36 @@
+#loading, #appStart {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	background: transparent url(../images/loading.gif) no-repeat center top;
+	.background-size(18px);
+}
+
+#loading {
+	z-index: 50;
+	display: none;
+	top: 100px;
+	height: 48px;
+}
+
+#appStart {
+	z-index: 52;
+	top: 0;
+	height: 100%;
+	background-color: #FFF;
+	background-position: center 150px;
+	header {
+		/* See background image setting in header.less */
+		z-index: 51;
+	}
+	p {
+		position: absolute;
+		left: 0;
+		top: 172px;
+		padding: 0;
+		margin: 0;
+		width: 100%;
+		text-align: center;
+		color: #666;
+	}
+}

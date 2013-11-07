@@ -13,14 +13,19 @@ class AppKernel extends Kernel
             new Symfony\Bundle\TwigBundle\TwigBundle(),
             new Symfony\Bundle\MonologBundle\MonologBundle(),
             new Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle(),
-            new Symfony\Bundle\DoctrineBundle\DoctrineBundle(),
             new Symfony\Bundle\AsseticBundle\AsseticBundle(),
+            new Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
-            new JMS\SecurityExtraBundle\JMSSecurityExtraBundle(),
-            new Blueline\CCCBRDataBundle\BluelineCCCBRDataBundle(),
+            new Hearsay\RequireJSBundle\HearsayRequireJSBundle(),
+            new Blueline\BluelineBundle\BluelineBundle(),
+            new Blueline\PagesBundle\BluelinePagesBundle(),
+            new Blueline\AssociationsBundle\BluelineAssociationsBundle(),
+            new Blueline\MethodsBundle\BluelineMethodsBundle(),
+            new Blueline\TowersBundle\BluelineTowersBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {
+            //$bundles[] = new Acme\DemoBundle\AcmeDemoBundle();
             $bundles[] = new Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
             $bundles[] = new Sensio\Bundle\DistributionBundle\SensioDistributionBundle();
             $bundles[] = new Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle();

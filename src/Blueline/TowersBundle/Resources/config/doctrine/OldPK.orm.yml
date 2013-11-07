@@ -1,0 +1,15 @@
+Blueline\TowersBundle\Entity\OldPK:
+    type: entity
+    table: towers_oldpks
+    id:
+        oldpk:
+            type: string
+            length: 10
+    manyToOne:
+        tower:
+            targetEntity: Tower
+            inversedBy: oldpks
+            joinColumn:
+                name: tower_id
+                referencedColumnName: id
+                onDelete: CASCADE

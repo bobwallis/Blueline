@@ -1,0 +1,35 @@
+
+// Initial tab display
+section.association {
+	.details {
+		display: block;
+	}
+	.affiliations {
+		display: none;
+	}
+}
+
+// Columns of the associations list
+.associations {
+	ol {
+		.column-count(2);
+		.column-gap(20px);
+	}
+}
+@media screen and (min-width: 850px) {
+	.associations {
+		ol {
+			.column-count(3);
+		}
+	}
+}
+@media screen and (max-width: 500px) {
+	.associations {
+		ol {
+			.column-count(1);
+			li:last-child {
+			border: 0;
+			}
+		}
+	}
+}

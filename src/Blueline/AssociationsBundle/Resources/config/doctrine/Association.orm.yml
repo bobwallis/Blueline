@@ -1,0 +1,23 @@
+Blueline\AssociationsBundle\Entity\Association:
+    type: entity
+    repositoryClass: Blueline\AssociationsBundle\Entity\AssociationRepository
+    table: associations
+    id:
+        id:
+            type: integer
+            generator: { strategy: AUTO }
+    fields:
+        abbreviation:
+            type: string
+            length: 8
+            unique: true
+        name:
+            type: string
+            length: 255
+            unique: true
+        link:
+            type: text
+    manyToMany:
+        towers:
+            targetEntity: Blueline\TowersBundle\Entity\Tower
+            mappedBy: associations

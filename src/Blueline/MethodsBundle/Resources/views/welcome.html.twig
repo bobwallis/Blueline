@@ -1,0 +1,16 @@
+{% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
+
+{% block title %}Methods | {{ parent() }}{% endblock %}
+
+{% block og_title %}Methods{% endblock %}
+{% block og_description %}Method information for bellringers{% endblock %}
+
+{% set breadcrumb = { 'title': 'Methods', 'href': path('Blueline_Methods_welcome') } %}
+
+{% set search = true %}
+{% set search_action = path( 'Blueline_Methods_search' ) %}
+{% set search_placeholder = 'Search methods' %}
+
+{% block body %}
+	<section class="blank"></section>
+{% endblock %}

@@ -1,0 +1,64 @@
+#content {
+	padding-top: @headerHeight;
+}
+#content.searchable {
+	padding-top: @headerHeight + @searchBoxHeight;
+}
+
+section {
+	font-size: 12px;
+	h1, h2, h3 {
+		font-weight: bold;
+	}
+	header {
+		clear: both;
+		border-color: @lightGrey;
+		border-width: 1px 0;
+		border-style: solid;
+		background-color: @titleBackground;
+		.box-shadow(0 1px 4px rgba(0,0,0,0.05));
+		padding: 10px;
+		h1 {
+			font-size: 25px;
+			line-height: 25px;
+			margin: 0;
+		}
+		h2 {
+			font-size: 18px;
+			line-height: 20px;
+			margin: 0 0 0 5px;
+		}
+	}
+	h3 {
+		font-size: 12px;
+		line-height: 15px;
+	}
+	.wrap {
+		margin: @contentYPadding @contentXPadding;
+		text-align: justify;
+		.hyphens(auto);
+		max-width: 600px;
+	}
+	&:first-child {
+		header {
+			border-top: 0;
+		}
+	}
+}
+
+
+blockquote {
+	margin: 1em 0 1em 2em;
+}
+
+// Error messages
+.appError {
+	color: #666;
+}
+
+// Search results and paging
+@import 'searchResults.less';
+// Lists
+@import 'lists.less';
+// Tab bars
+@import 'tabBar.less';

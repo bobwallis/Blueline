@@ -1,0 +1,11 @@
+{% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
+
+{% set search = false %}
+
+{% block body %}
+	<section class="welcome">
+		<h2 id="welcome_associations"><a href="{{ path( 'Blueline_Associations_welcome' ) }}">Associations</a></h2>
+		<h2 id="welcome_methods"><a href="{{ path( 'Blueline_Methods_welcome' ) }}">Methods</a></h2>
+		<h2 id="welcome_towers"><a href="{{ path( 'Blueline_Towers_welcome' ) }}">Towers</a></h2>
+	</section>
+{% endblock %}

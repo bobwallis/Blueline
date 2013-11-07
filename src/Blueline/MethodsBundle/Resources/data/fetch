@@ -1,0 +1,31 @@
+#!/bin/bash
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
+d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+cd "$d"
+
+# Download data
+echo "Downloading method data..."
+urls=( "http://www.methods.org.uk/method-collections/xml-zip-files/plain-xml.zip"
+       "http://www.methods.org.uk/method-collections/xml-zip-files/surprise-xml.zip"
+       "http://www.methods.org.uk/method-collections/xml-zip-files/delight-xml.zip"
+       "http://www.methods.org.uk/method-collections/xml-zip-files/trebob-xml.zip"
+       "http://www.methods.org.uk/method-collections/xml-zip-files/alliance-xml.zip"
+       "http://www.methods.org.uk/method-collections/xml-zip-files/treplace-xml.zip"
+       "http://www.methods.org.uk/method-collections/xml-zip-files/hybrid-xml.zip"
+       "http://www.methods.org.uk/method-collections/xml-zip-files/principl-xml.zip"
+       "http://www.methods.org.uk/method-collections/xml-zip-files/diferntl-xml.zip"
+       "http://www.methods.org.uk/method-collections/xml-zip-files/difhuntr-xml.zip"
+       "http://methods.org.uk/other/renamed.htm"
+       "http://methods.org.uk/other/duplicate.htm"
+     )
+for url in "${urls[@]}"; do
+      curl --progress-bar --referer "http://www.methods.org.uk" --user-agent "Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.224 Safari/534.10" -o "$d/`basename "$url"`" "$url"
+done
+
+# Unzip all zip files
+unzip -qq -u -d "$d" -o "$d/*.zip"
+find . -name "*.zip" -exec rm -rf "{}" \;
+
+echo "Done"

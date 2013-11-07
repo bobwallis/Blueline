@@ -1,0 +1,15 @@
+Blueline\MethodsBundle\Entity\Renamed:
+    type: entity
+    table: methods_renamed
+    id:
+        old_title:
+            type: string
+            length: 255
+    manyToOne:
+        method:
+            targetEntity: Method
+            inversedBy: renamed
+            joinColumn:
+                name: method_title
+                referencedColumnName: title
+                onDelete: CASCADE

@@ -1,0 +1,15 @@
+Blueline\MethodsBundle\Entity\Duplicate:
+    type: entity
+    table: methods_duplicates
+    id:
+        duplicate_title:
+            type: string
+            length: 255
+    manyToOne:
+        method:
+            targetEntity: Method
+            inversedBy: duplicate
+            joinColumn:
+                name: method_title
+                referencedColumnName: title
+                onDelete: CASCADE

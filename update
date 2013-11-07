@@ -15,22 +15,27 @@ Usage: $0 [options]
 This script updates Blueline.
 
 Options:
- --nodata  Updates code without also updating the database with external data
+ --nopull  Prevents the pulling of new application code.
+ --nodata  Prevents the update of association/method/tower data
+ --force   Prevents the confirmation message
  --help    Shows this message
 EOF
 }
 source "$d/resources/scripts/getopts_long.sh"
 CCCBRDATA=true
 GITPULL=true
+CONFIRM=true
 OPTLIND=1
-while getopts_long :dph opt \
+while getopts_long :dpfh opt \
 	nodata no_argument \
 	nopull no_argument \
+	force no_argument \
 	help 0 "" "$@"
 	do
 		case "$opt" in
 			d|nodata) CCCBRDATA=false;;
 			p|nopull) GITPULL=false;;
+			f|force) CONFIRM=false;;
 			h|help) usage; exit 0;;
 			:) printf >&2 '%s: %s\n' "${0##*/}" "$OPTLERR"
 				usage
@@ -39,119 +44,83 @@ while getopts_long :dph opt \
 	done
 shift "$(($OPTLIND - 1))"
 
-# Pull latest version and restart update script (to allow it to update itself)
+if [[ $CONFIRM = true ]]
+	then
+	echo -e "\033[1mUse of this script in a production environment is discouraged\033[0m"
+	echo -e "\033[1mIf a step fails, later steps will have undefined consequences\033[0m"
+	read -p "Press 'Y' to contiue running the script. Any other key will exit: " -n 1 -r
+	if [[ ! $REPLY =~ ^[Yy]$ ]]
+	then
+	    exit
+	fi
+fi
+
+
+# Update composer.phar
+if [[ ! ( -e "$d/composer.phar" ) ]]
+	then
+	echo -e "\n\033[1mInstalling Composer\033[0m"
+	curl -sS https://getcomposer.org/installer | php
+fi
+echo -e "\n\033[1mUpdating Composer\033[0m"
+php "$d/composer.phar" self-update
+
+
+# Pull latest version
 if [[ $GITPULL = true ]]
 	then
 	echo -e "\n\033[1mPulling latest version of Blueline\033[0m"
-	git pull
-	"$d/update" --nopull
+	#git pull
+	# Restart update script (to allow it to update itself)
+	"$d/update" --nopull --force
 	exit
 fi
 
-# Read configuration file
-echo -e "\n\033[1mReading configuration file\033[0m"
-function cfg.parser ()
-{
-    ini="$(<$1)"                # read the file
-    ini="${ini//[/\[}"          # escape [
-    ini="${ini//]/\]}"          # escape ]
-    IFS=$'\n' && ini=( ${ini} ) # convert to line-array
-    ini=( ${ini[*]//;*/} )      # remove comments with ;
-    ini=( ${ini[*]/\    =/=} )  # remove tabs before =
-    ini=( ${ini[*]/=\   /=} )   # remove tabs be =
-    ini=( ${ini[*]/\ =\ /=} )   # remove anything with a space around =
-    ini=( ${ini[*]/#\\[/\}$'\n'cfg.section.} ) # set section prefix
-    ini=( ${ini[*]/%\\]/ \(} )    # convert text2function (1)
-    ini=( ${ini[*]/=/=\( } )    # convert item to array
-    ini=( ${ini[*]/%/ \)} )     # close array parenthesis
-    ini=( ${ini[*]/%\\ \)/ \\} ) # the multiline trick
-    ini=( ${ini[*]/%\( \)/\(\) \{} ) # convert text2function (2)
-    ini=( ${ini[*]/%\} \)/\}} ) # remove extra parenthesis
-    ini[0]="" # remove first element
-    ini[${#ini[*]} + 1]='}'    # add the last brace
-    eval "$(echo "${ini[*]}")" # eval the result
-}
-cfg.parser "$d/app/config/parameters.ini"
-cfg.section.parameters
 
 # Update vendors
 echo -e "\n\033[1mUpdating vendors for Blueline\033[0m"
-php bin/vendors install
+php "$d/composer.phar" install
+
 
 # Clear cache
-echo -e "\n\033[1mClearing Symfony cache for Blueline\033[0m"
-./app/console cache:clear --env=prod
-./app/console cache:warm --env=prod
+echo -e "\n\033[1mClearing Symfony cache\033[0m"
+php "$d/app/console" cache:clear --env=prod
+php "$d/app/console" cache:warm --env=prod
+php "$d/app/console" doctrine:cache:clear-metadata
+php "$d/app/console" doctrine:cache:clear-query
+php "$d/app/console" doctrine:cache:clear-result
+
+
+# Verify that Doctrine is properly configured for a production environment, and mappings are up to date
+echo -e "\n\033[1mChecking Doctrine configuration\033[0m"
+php "$d/app/console" doctrine:ensure-production-settings --env=prod
+php "$d/app/console" doctrine:schema:validate
+
 
 # Rebuild web assets
-echo -e "\n\033[1mRebuilding assets\033[0m"
-./resources/scripts/buildWWW
+echo -e "\n\033[1mRebuilding CSS and JS assets\033[0m"
+rm -rf "$d/web/css"
+rm -rf "$d/web/js"
+php "$d/app/console" assetic:dump --env=prod --no-debug
+sed -i -e"s/asset_update: .*/asset_update: `date --rfc-3339=seconds`/" "$d/app/config/blueline.yml"
+
 
 if [[ $CCCBRDATA = true ]]
 	then
-	# Update SQL generated from online sources
-	echo -e "\n\033[1mUpdating SQL generated from online data\033[0m"
-	./resources/tables/methods/build
-	./resources/tables/methods_duplicates/build
-	./resources/tables/towers/build
+	# Download external data
+	echo -e "\n\033[1mDownloading external data\033[0m"
+	"$d/src/Blueline/MethodsBundle/Resources/data/fetch"
+	"$d/src/Blueline/TowersBundle/Resources/data/fetch"
 
-	# Import generated SQL into the database
-	echo -e "\n\033[1mImporting generated SQL\033[0m"
-	echo -en "associations.sql..."
-	if [ -e "$d/resources/tables/associations.sql" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "$d/resources/tables/associations.sql"
-		echo "Done"
-	else
-		echo "Skipped"
-	fi
-	echo -en "methods_extras.sql..."
-	if [ -e "$d/resources/tables/methods_extras.sql" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "$d/resources/tables/methods_extras.sql"
-		echo "Done"
-	else
-		echo "Skipped"
-	fi
-	echo -en "methods.sql..."
-	if [ -e "$d/resources/tables/methods/methods.sql" -a "`tail -n 1 "$d/resources/tables/methods/methods.sql"`" = "-- End" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "$d/resources/tables/methods/methods.sql"
-		echo "Done"
-	else
-		echo "Skipped"
-	fi
-	echo -en "methods_duplicates.sql..."
-	if [ -e "$d/resources/tables/methods_duplicates/methods_duplicates.sql" -a "`tail -n 1 "$d/resources/tables/methods_duplicates/methods_duplicates.sql"`" = "-- End" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "$d/resources/tables/methods_duplicates/methods_duplicates.sql"
-		echo "Done"
-	else
-		echo "Skipped"
-	fi
-	echo -en "towers.sql..."
-	if [ -e "$d/resources/tables/towers/towers.sql" -a "`tail -n 1 "$d/resources/tables/towers/towers.sql"`" = "-- End" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "$d/resources/tables/towers/towers.sql"
-		echo "Done"
-	else
-		echo "Skipped"
-	fi
+	# Import updated association data
+	php "$d/app/console" blueline:importAssociations
 
-	# Update SQL generated from Blueline database
-	echo -e "\n\033[1mUpdating SQL generated from Blueline database\033[0m"
-	./resources/tables/methods_towers/build
+	# Import updated tower data
+	php "$d/app/console" blueline:importTowers
+	php "$d/app/console" blueline:importOldPKs
 
-	# Import generated SQL into the database
-	echo -e "\n\033[1mImporting generated SQL into Blueline database\033[0m"
-	echo -en "methods_towers.sql..."
-	if [ -e "$d/resources/tables/methods_towers/methods_towers.sql" -a "`tail -n 1 "$d/resources/tables/methods_towers/methods_towers.sql"`" = "-- End" ]; then
-		mysql -u "$database_user" -p"$database_password" -h "$database_host" "$database_name" --default_character_set utf8 < "./resources/tables/methods_towers/methods_towers.sql"
-		echo "Done"
-	else
-		echo "Skipped"
-	fi
+	# Import updated method data
+	php "$d/app/console" blueline:importMethods
 
-	# Update database_update parameter in parameters.ini
-	if [ ! -h "$d/app/config/parameters.ini" ]
-	then
-		echo -e "\n\033[1mUpdating parameters.ini for Blueline\033[0m"
-		sed -i -e"s/    database_update=.*/    database_update=\"`date --rfc-3339=seconds`\"/" "$d/app/config/parameters.ini"
-	fi
+	sed -i -e"s/database_update: .*/database_update: `date --rfc-3339=seconds`/" "$d/app/config/blueline.yml"
 fi
-

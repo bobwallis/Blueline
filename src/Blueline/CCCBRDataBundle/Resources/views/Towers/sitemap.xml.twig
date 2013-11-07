@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-{% for tower in towers|default([]) %}
- <url><loc>{{ top_uri }}{{ path( 'Blueline_Towers_view', { 'doveid': tower.doveid } ) }}</loc></url>
-{% endfor %}
-</urlset>

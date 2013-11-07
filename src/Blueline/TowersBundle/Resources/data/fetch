@@ -1,0 +1,10 @@
+#!/bin/bash
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
+d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+# Download data
+echo "Downloading tower data..."
+#curl --progress-bar --referer "http://dove.cccbr.org.uk" --user-agent "Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.224 Safari/534.10" -o "$d/dove.txt" -X POST -d "download=dove.txt&copyright=agree" "http://dove.cccbr.org.uk/downloads.php"
+curl --progress-bar --referer "http://dove.cccbr.org.uk" --user-agent "Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.224 Safari/534.10" -o "$d/newpks.txt" -X POST -d "download=newpks.txt&copyright=agree" "http://dove.cccbr.org.uk/downloads.php"

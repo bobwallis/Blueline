@@ -1,0 +1,17 @@
+# Add parameter
+parameters:
+    blueline: ~
+
+# Configure services
+services:
+    blueline.twig:
+        class: Blueline\BluelineBundle\Twig\Extension\BluelineExtension
+        tags:
+            - { name: twig.extension }
+        arguments:
+            - @service_container
+            - %blueline%
+    blueline.listener.requuest:
+        class: Blueline\BluelineBundle\RequestListener
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }

@@ -1,0 +1,8 @@
+Blueline\AssociationsBundle\Entity\Association:
+    properties:
+        abbreviation:
+            - NotBlank: ~
+        name:
+            - NotBlank: ~
+        link:
+            - Url: ~
