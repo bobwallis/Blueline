@@ -18,22 +18,23 @@ Then, use the `install` command in the root directory to install Blueline's PHP 
 
     php composer.phar install
 
+Blueline also needs a few other files/runtimes to function. Follow the instructions in 
+`app/Resources/java` and `app/Resources/js`. Also install [Node][5], and the [LESS][4] 
+module.
+
 
 2) Checking your System Configuration
 -------------------------------------
 
-Create a virtual server pointing to ./web, and redirect all non-existant file requests to app.php,
-then make sure that your local system is properly configured for Symfony.
+Copy `./app/config/parameters.yml.dist` to `./app/config/parameters.yml` and fill in the configuration
+options.
 
+Create a virtual server pointing to ./web, and redirect all non-existent file requests to app.php.
+
+Make sure that your local system is properly configured for Symfony: 
 Execute the `check.php` script from the command line:
 
     php app/check.php
-
-Access the `config.php` script from a browser:
-
-    http://blueline.local/config.php
-
-and configure Symfony's `./app/config/parameters.yml`. Modify `./app/config/blueline.yml` as required.
 
 If you get any warnings or recommendations, fix them before moving on.
 The [Symfony installation notes][3] will help.
@@ -79,3 +80,5 @@ Don't blindly run the script in a production environment though, as things may b
 [1]:  http://symfony.com/
 [2]:  http://getcomposer.org/
 [3]:  http://symfony.com/doc/current/book/installation.html
+[4]:  http://lesscss.org/
+[5]:  http://nodejs.org/

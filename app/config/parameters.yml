@@ -1,14 +1,27 @@
-# This file is auto-generated during the composer install
 parameters:
+# Database connection options
     database_driver: pdo_pgsql
     database_host: localhost
     database_port: null
     database_name: blueline
     database_user: blueline
     database_password: password
+
+# SMTP server options. Blueline doesn't need these
     mailer_transport: smtp
     mailer_host: localhost
     mailer_user: null
     mailer_password: null
+
+# The secret is used by Symfony's security, make it something random
     locale: en
     secret: 73ba1dd211708f5adfc44f88e2a10bf9a
+
+# System paths
+    java_path: /usr/bin/java
+    node_path: /usr/bin/node
+    node_module_path: /usr/lib/node_modules
+
+# Blueline
+    admin_email: blueline@example.com
+    analytics_code: false

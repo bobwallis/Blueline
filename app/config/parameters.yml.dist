@@ -1,4 +1,5 @@
 parameters:
+# Database connection options
     database_driver:   pdo_mysql
     database_host:     127.0.0.1
     database_port:     ~
@@ -6,10 +7,21 @@ parameters:
     database_user:     root
     database_password: ~
 
+# SMTP server options. Blueline doesn't need these
     mailer_transport:  smtp
     mailer_host:       127.0.0.1
     mailer_user:       ~
     mailer_password:   ~
 
+# The secret is used by Symfony's security, make it something random
     locale:            en
     secret:            ThisTokenIsNotSoSecretChangeIt
+
+# System paths
+    java_path:         /usr/bin/java
+    node_path:         /usr/bin/node
+    node_module_path:  /usr/lib/node_modules
+
+# Blueline
+    admin_email:       blueline@example.com
+    analytics_code:    false

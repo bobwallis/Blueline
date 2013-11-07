@@ -23,6 +23,5 @@ assetic:
     use_controller: true
 
 blueline:
-    admin_email: blueline@example.com
     cache_manifest: false
     analytics_code: false
