@@ -3,7 +3,7 @@ blueline.error.log
 blueline.access.log
 composer.phar
 
-app/config/parameters.ini
+app/config/parameters.yml
 */logs/*
 */cache/*
 web/bundles/*
