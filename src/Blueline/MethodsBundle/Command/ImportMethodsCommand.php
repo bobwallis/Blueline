@@ -14,8 +14,14 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+
 use Blueline\MethodsBundle\Helpers\MethodXMLIterator;
+use Blueline\MethodsBundle\Helpers\RenamedHTMLIterator;
+use Blueline\MethodsBundle\Helpers\DuplicateHTMLIterator;
+
 use Blueline\MethodsBundle\Entity\Method;
+use Blueline\MethodsBundle\Entity\Renamed;
+use Blueline\MethodsBundle\Entity\Duplicate;
 
 class ImportMethodsCommand extends ContainerAwareCommand
 {
@@ -25,7 +31,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
             ->setDescription( 'Imports method data with the most recent data which has been fetched' );
     }
 
-    protected function execute( InputInterface $input, OutputInterface $output )
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         // Set up styles
         $output->getFormatter()
@@ -35,9 +41,11 @@ class ImportMethodsCommand extends ContainerAwareCommand
         $output->writeln( '<title>Updating method data</title>' );
 
         // Get access to the entity manager and validator
-        $em         = $this->getContainer()->get( 'doctrine' )->getEntityManager();
-        $repository = $em->getRepository( 'BluelineMethodsBundle:Method' );
-        $validator  = $this->getContainer()->get( 'validator' );
+        $em                  = $this->getContainer()->get( 'doctrine' )->getEntityManager();
+        $repository          = $em->getRepository( 'BluelineMethodsBundle:Method' );
+        $renamedRepository   = $em->getRepository( 'BluelineMethodsBundle:Renamed' );
+        $duplicateRepository = $em->getRepository( 'BluelineMethodsBundle:Duplicate' );
+        $validator           = $this->getContainer()->get( 'validator' );
 
         // The method data isn't presented in a sensible order in the XML files, so detecting
         // deletion will require an extra step.
@@ -128,7 +136,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
         $em->clear();
 
         if ( file_exists(__DIR__.'/../Resources/data/method_extras.php') ) {
-            $output->writeln( 'Adding extra information...' );
+            $output->writeln( 'Adding extra method data...' );
             require( __DIR__.'/../Resources/data/method_extras.php' );
             $method_extras = new \ArrayObject( $method_extras );
             $extrasIterator   = $method_extras->getIterator();
@@ -160,6 +168,58 @@ class ImportMethodsCommand extends ContainerAwareCommand
             $em->clear();
         }
 
-        $output->writeln( '<info>Finished updating method data. Peak memory usage: '.number_format( memory_get_peak_usage() ).' bytes.</info>' );
+        // Import data about renamed methods
+        $output->writeln( "\n<info>Importing renamed method data...</info>" );
+        $renamedIterator = new RenamedHTMLIterator( __DIR__.'/../Resources/data/renamed.htm' );
+        foreach ($renamedIterator as $renamedRow) {
+            $renamed = $renamedRepository->findOneById( $renamedRow['id'] );
+            $method  = $repository->findOneByTitle( $renamedRow['method'] );
+
+            if (! $method) {
+                $output->writeln( '<comment>  "'.$renamedRow['method'].'" not found in methods table</comment>' );
+            } else {
+                $renamedRow['method'] = $method;
+                if ($renamed) {
+                    // If the title exists, update it
+                    $renamed->setAll( $renamedRow );
+                } else {
+                    // Otherwise, insert a new entry
+                    $renamed = new Renamed();
+                    $renamed->setAll( $renamedRow );
+                }
+                $em->persist( $renamed );
+            }
+        }
+        $em->flush();
+        $em->clear();
+        unset( $renamedIterator, $renamed, $method );
+
+        // Import data about renamed methods
+        $output->writeln( "\n<info>Importing duplicate method data...</info>" );
+        $duplicateIterator = new DuplicateHTMLIterator( __DIR__.'/../Resources/data/duplicate.htm' );
+        foreach ($duplicateIterator as $duplicateRow) {
+            $duplicate = $duplicateRepository->findOneById( $duplicateRow['id'] );
+            $method  = $repository->findOneByTitle( $duplicateRow['method'] );
+
+            if (! $method) {
+                $output->writeln( '<comment>  "'.$duplicateRow['method'].'" not found in methods table</comment>' );
+            } else {
+                $duplicateRow['method'] = $method;
+                if ($duplicate) {
+                    // If the title exists, update it
+                    $duplicate->setAll( $duplicateRow );
+                } else {
+                    // Otherwise, insert a new entry
+                    $duplicate = new Duplicate();
+                    $duplicate->setAll( $duplicateRow );
+                }
+                $em->persist( $duplicate );
+            }
+        }
+        $em->flush();
+        $em->clear();
+        unset( $duplicateIterator, $duplicate, $method );
+
+        $output->writeln( "\n<info>Finished updating method data. Peak memory usage: ".number_format( memory_get_peak_usage() ).' bytes.</info>' );
     }
 }

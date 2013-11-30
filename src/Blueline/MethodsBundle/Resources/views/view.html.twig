@@ -20,6 +20,14 @@
 		] } ) }}
 		<div id="method_details_{{ loop.index }}" class="details">
 			<dl>
+{% if method.renamed is not empty %}
+				<dt>Originally named</dt>
+				<dd>
+				{% for renamed in method.renamed %}
+					{{ renamed.title }}<br />
+				{% endfor %}
+				</dd>
+{% endif %}
 				<dt>Classification</dt>
 				<dd>{{ (method.differential? 'Differential ':'') ~ (method.little? 'Little ':'') ~ method.classification ~ ' ' ~ method.stageText }}</dd>
 				<dt>Place&nbsp;Notation</dt>
@@ -49,10 +57,10 @@
 				<dd><time datetime="{{ method.firstHandbellpealDate|date('Y-m-d') }}">{{ method.firstHandbellpealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time></dd>
 {% endif %}
 {% if method.duplicate is not empty %}
-				<dt>Method pealed as</dt>
+				<dt>Method also pealed as</dt>
 				<dd>
 				{% for duplicate in method.duplicate %}
-					'{{ duplicate.rung }}'{{ (duplicate.rungLocation != 'handbells')? ' in '~duplicate.rungLocation : ' on handbells' }}{{ ((duplicate.rungDate is not empty)? ' on '~duplicate.rungDate|date('j<\\s\\up>S</\\s\\up> M Y') : '')|raw }}{{ (duplicate.rungRWRef is not empty)? ' ('~duplicate.rungRWRef~')' : '' }}<br />
+					'{{ duplicate.title }}'{{ (duplicate.location != 'handbells')? ' in '~duplicate.location : ' on handbells' }}{{ ((duplicate.date is not empty)? ' on '~duplicate.date|date('j<\\s\\up>S</\\s\\up> M Y') : '')|raw }}{{ (duplicate.rWRef is not empty)? ' ('~duplicate.rWRef~')' : '' }}<br />
 				{% endfor %}
 				</dd>
 {% endif %}

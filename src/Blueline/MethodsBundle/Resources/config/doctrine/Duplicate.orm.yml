@@ -2,7 +2,21 @@ Blueline\MethodsBundle\Entity\Duplicate:
     type: entity
     table: methods_duplicates
     id:
-        duplicate_title:
+        id:
+            type: string
+            length: 32
+    fields:
+        title:
+            type: string
+            length: 255
+        date:
+            type: date
+            nullable: true
+        location:
+            type: string
+            length: 255
+            nullable: true
+        rwRef:
             type: string
             length: 255
     manyToOne:
@@ -10,6 +24,6 @@ Blueline\MethodsBundle\Entity\Duplicate:
             targetEntity: Method
             inversedBy: duplicate
             joinColumn:
-                name: method_title
+                name: actual_title
                 referencedColumnName: title
                 onDelete: CASCADE
