@@ -102,5 +102,5 @@ blueline:
     analytics_code: %analytics_code%
 
     # The below parameters will automatically update themselves
-    asset_update: 2012-08-30 19:21:36+01:00
-    database_update: 2012-08-30 19:22:30+01:00
+    asset_update: %asset_update%
+    database_update: %database_update%
