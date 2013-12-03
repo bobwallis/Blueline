@@ -21,7 +21,7 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
 		<meta name="apple-mobile-web-app-title" content="Blueline" />
 		{% for size in [57, 72, 76, 114, 120, 144, 152] %}
-			<link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="apple-touch-icon-{{ size }}x{{ size }}.png" />
+			<link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="{{ path( 'Blueline_iOS_icon', { 'size': size~'x'~size, '_format': 'png' } ) }}" />
 		{% endfor %}
 
 		{# IE Pinned Sites tags #}
