@@ -6,7 +6,7 @@ use Blueline\BluelineBundle\Helpers\Search;
 
 class TowerRepository extends EntityRepository
 {
-    private function createQueryForFindBySearchVariables( $searchVariables, $initialQuery = null )
+    private function createQueryForFindBySearchVariables($searchVariables, $initialQuery = null)
     {
         $query = ($initialQuery === null)? $this->createQueryBuilder( 't' )->select( 'partial t.{id, place, dedication}' ) : $initialQuery;
 
@@ -35,7 +35,7 @@ class TowerRepository extends EntityRepository
         return $query;
     }
 
-    public function findBySearchVariables( $searchVariables )
+    public function findBySearchVariables($searchVariables)
     {
         $query = $this->createQueryForFindBySearchVariables( $searchVariables );
 
@@ -50,7 +50,7 @@ class TowerRepository extends EntityRepository
         return $query->getQuery()->getResult();
     }
 
-    public function findCountBySearchVariables( $searchVariables )
+    public function findCountBySearchVariables($searchVariables)
     {
         $query = $this->createQueryForFindBySearchVariables( $searchVariables, $this->createQueryBuilder( 't' )->select( 'COUNT(t.id) as num' ) );
         $result = $query->getQuery()->getArrayResult();
@@ -58,13 +58,13 @@ class TowerRepository extends EntityRepository
         return intval( $result[0]['num'] );
     }
 
-    public function findNearbyTowers( $latitude, $longitude, $count = 7 )
+    public function findNearbyTowers($latitude, $longitude, $count = 7)
     {
         $distance = '( 6371 * acos( cos( radians(:near_lat) ) * cos( radians( t.latitude ) ) * cos( radians( t.longitude ) - radians(:near_long) ) + sin( radians(:near_lat) ) * sin( radians( t.latitude ) ) ) )';
 
-        return array_map( function( $t ) { return array_merge( $t[0], array( 'distance' => $t['distance'] ) ); }, $this->createQueryBuilder( 't' )
+        return array_map( function ($t) { return array_merge( $t[0], array( 'distance' => $t['distance'] ) ); }, $this->createQueryBuilder( 't' )
             ->select( 'partial t.{id,place,dedication,latitude,longitude}, '.$distance.' as distance' )
-            ->where( 't.latitude IS NOT NULL' )
+            ->where( 't.latitude IS NOT NULL AND (t.latitude <> :near_lat OR t.longitude <> :near_long)' )
             ->having( $distance.' < 20' )
             ->groupBy( 't.id' )
             ->orderBy( 'distance', 'ASC' )
