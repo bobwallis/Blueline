@@ -6,7 +6,7 @@ Blueline_Towers_view:
     pattern: /view/{id}.{_format}
     defaults: { _controller: BluelineTowersBundle:Towers:view, _format: html }
     requirements:
-        title: ^(?(?=.*\.(html|txt|json|xml)$).*(?=\.)|.*$)
+        id: ^(?(?=.*\.(html|txt|json|xml)$).*(?=\.)|.*$)
         _format: html|txt|json
 
 Blueline_Towers_search:
