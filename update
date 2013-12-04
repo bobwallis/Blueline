@@ -70,7 +70,7 @@ php "$d/composer.phar" self-update
 if [[ $GITPULL = true ]]
 	then
 	echo -e "\n\033[1mPulling latest version of Blueline\033[0m"
-	#git pull
+	git pull
 	# Restart update script (to allow it to update itself)
 	"$d/update" --nopull --force
 	exit
