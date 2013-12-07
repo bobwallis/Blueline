@@ -111,16 +111,20 @@ if [[ $CCCBRDATA = true ]]
 	echo -e "\n\033[1mDownloading external data\033[0m"
 	"$d/src/Blueline/MethodsBundle/Resources/data/fetch"
 	"$d/src/Blueline/TowersBundle/Resources/data/fetch"
+	echo ""
 
 	# Import updated association data
 	php "$d/app/console" blueline:importAssociations
+	echo ""
 
 	# Import updated tower data
 	php "$d/app/console" blueline:importTowers
 	php "$d/app/console" blueline:importOldPKs
+	echo ""
 
 	# Import updated method data
 	php "$d/app/console" blueline:importMethods
+	echo ""
 
 	sed -i -e"s/database_update: .*/database_update: `date --rfc-3339=seconds`/" "$d/app/config/parameters.yml"
 fi

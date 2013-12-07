@@ -25,10 +25,11 @@ class ImportOldPKsCommand extends ContainerAwareCommand
             ->setDescription( 'Imports tower old primary key data with the most recent data which has been fetched' );
     }
 
-    protected function execute( InputInterface $input, OutputInterface $output )
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         // Set up styles
-        $output->getFormatter()->setStyle( 'title', new OutputFormatterStyle( 'white', null, array( 'bold' ) ) );
+        $output->getFormatter()
+               ->setStyle( 'title', new OutputFormatterStyle( 'white', null, array( 'bold' ) ) );
 
         // Print title
         $output->writeln( '<title>Updating tower old primary key data</title>' );
@@ -47,7 +48,7 @@ class ImportOldPKsCommand extends ContainerAwareCommand
             // Try to find the tower that is being referenced
             $tower = $towerRepository->findOneById( $txtRow['tower_id'] );
             if (!$tower) {
-                $output->writeln( '<comment>DoveID \''.$txtRow['oldpk'].'\' is a target in newpks.txt, but isn\'t in the tower table</comment>' );
+                $output->writeln( '<comment>  DoveID \''.$txtRow['oldpk'].'\' is a target in newpks.txt, but isn\'t in the tower table</comment>' );
                 continue;
             }
 
@@ -60,6 +61,6 @@ class ImportOldPKsCommand extends ContainerAwareCommand
 
         // Flush all changes to the database, and finish
         $em->flush();
-        $output->writeln( '<info>Finished updating old primary key data.. Peak memory usage: '.number_format( memory_get_peak_usage() ).' bytes.</info>' );
+        $output->writeln( "\n<info>Finished updating old primary key data.. Peak memory usage: ".number_format( memory_get_peak_usage() ).' bytes.</info>' );
     }
 }

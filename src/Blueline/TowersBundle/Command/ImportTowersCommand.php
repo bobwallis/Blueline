@@ -26,14 +26,14 @@ class ImportTowersCommand extends ContainerAwareCommand
             ->setDescription( 'Imports tower data with the most recent data which has been fetched' );
     }
 
-    protected function execute( InputInterface $input, OutputInterface $output )
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         // Set up styles
         $output->getFormatter()
                ->setStyle( 'title', new OutputFormatterStyle( 'white', null, array( 'bold' ) ) );
 
         // Print title
-        $output->writeln( '<title>Updating tower data from dove.txt</title>' );
+        $output->writeln( '<title>Updating tower data</title>' );
 
         // Get access to the entity manager and validator
         $em        = $this->getContainer()->get( 'doctrine' )->getEntityManager();
@@ -81,7 +81,7 @@ class ImportTowersCommand extends ContainerAwareCommand
                 // Validate the tower object, and persist if it passes
                 $errors = $validator->validate( $tower );
                 if ( count( $errors ) > 0 ) {
-                    $output->writeln( '<error>Invalid data for '.$txtRow['id'].":\n".$errors.'</error>' );
+                    $output->writeln( '<error>  Invalid data for '.$txtRow['id'].":\n".$errors.'</error>' );
                 } else {
                     $em->persist( $tower );
                 }
@@ -100,7 +100,7 @@ class ImportTowersCommand extends ContainerAwareCommand
                 if ($affiliationsChanged) {
                     $newAffiliations = array_filter( explode( ',', $dbRow[0]->getAffiliations() ) );
                     $oldAffiliationsObjects = $dbRow[0]->getAssociations();
-                    $oldAffiliations = $oldAffiliationsObjects->map( function( $a ) { return $a->getAbbreviation(); } )->toArray();
+                    $oldAffiliations = $oldAffiliationsObjects->map( function ($a) { return $a->getAbbreviation(); } )->toArray();
                     // Add any new ones not in the old
                     foreach ($newAffiliations as $affiliation) {
                         if ( !in_array( $affiliation, $oldAffiliations ) ) {
@@ -118,7 +118,7 @@ class ImportTowersCommand extends ContainerAwareCommand
                 // reaching the database
                 $errors = $validator->validate( $dbRow[0] );
                 if ( count( $errors ) > 0 ) {
-                    $output->writeln( '<error>Invalid data for '.$txtRow['id'].":\n".$errors.'</error>' );
+                    $output->writeln( '<error>  Invalid data for '.$txtRow['id'].":\n".$errors.'</error>' );
                     $em->detach( $dbRow[0] );
                 }
                 // Move on to the next rows
@@ -138,11 +138,11 @@ class ImportTowersCommand extends ContainerAwareCommand
         if ( count( $notFoundAffiliations ) > 0 ) {
             $notFoundAffiliations = array_unique( $notFoundAffiliations );
             sort( $notFoundAffiliations );
-            $output->writeln( '<comment>Association with abbreviation(s) '.implode( ', ', $notFoundAffiliations ).' not found.</comment>' );
+            $output->writeln( '<comment>  Association with abbreviation(s) '.implode( ', ', $notFoundAffiliations ).' not found.</comment>' );
         }
 
         // Flush all changes to the database, and finish
         $em->flush();
-        $output->writeln( '<info>Finished updating tower data.. Peak memory usage: '.number_format( memory_get_peak_usage() ).' bytes.</info>' );
+        $output->writeln( "\n<info>Finished updating tower data.. Peak memory usage: ".number_format( memory_get_peak_usage() ).' bytes.</info>' );
     }
 }

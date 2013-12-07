@@ -15,11 +15,11 @@ class ImportAssociationsCommand extends ContainerAwareCommand
             ->setDescription( 'Imports association data with the most recent data in the repository' );
     }
 
-    protected function execute( InputInterface $input, OutputInterface $output )
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         // Set up styles
-        $style = new OutputFormatterStyle( 'white', null, array( 'bold' ) );
-        $output->getFormatter()->setStyle( 'title', $style );
+        $output->getFormatter()
+               ->setStyle( 'title', new OutputFormatterStyle( 'white', null, array( 'bold' ) ) );
 
         $output->writeln( '<title>Updating association data</title>' );
 
@@ -53,7 +53,7 @@ class ImportAssociationsCommand extends ContainerAwareCommand
                 $association->setLink( $txtRow['link'] );
                 $errors = $validator->validate( $association );
                 if ( count( $errors ) > 0 ) {
-                    $output->writeln( '<error>Invalid data for '.$txtRow['name'].":\n".$errors.'</error>' );
+                    $output->writeln( '<error>  Invalid data for '.$txtRow['name'].":\n".$errors.'</error>' );
                 } else {
                     $em->persist( $association );
                 }
@@ -65,7 +65,7 @@ class ImportAssociationsCommand extends ContainerAwareCommand
                 $dbRow[0]->setLink( $txtRow['link'] );
                 $errors = $validator->validate( $dbRow[0] );
                 if ( count( $errors ) > 0 ) {
-                    $output->writeln( '<error>Invalid data for '.$txtRow['name'].":\n".$errors.'</error>' );
+                    $output->writeln( '<error>  Invalid data for '.$txtRow['name'].":\n".$errors.'</error>' );
                     $em->detach( $dbRow[0] );
                 }
                 $txtIterator->next();
@@ -74,6 +74,6 @@ class ImportAssociationsCommand extends ContainerAwareCommand
         }
         // Flush all changes to the database, and finish
         $em->flush();
-        $output->writeln( '<info>Finished updating associaton data.. Peak memory usage: '.number_format( memory_get_peak_usage() ).' bytes.</info>' );
+        $output->writeln( "\n<info>Finished updating associaton data.. Peak memory usage: ".number_format( memory_get_peak_usage() ).' bytes.</info>' );
     }
 }

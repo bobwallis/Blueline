@@ -47,6 +47,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
         $duplicateRepository = $em->getRepository( 'BluelineMethodsBundle:Duplicate' );
         $validator           = $this->getContainer()->get( 'validator' );
 
+        $output->writeln( "<info>Importing basic method data...</info>" );
         // The method data isn't presented in a sensible order in the XML files, so detecting
         // deletion will require an extra step.
         // We'll read data from the XML file line by line, update/insert each method we get to, and
@@ -59,7 +60,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
         $dataFiles = new \GlobIterator( __DIR__.'/../Resources/data/*.xml' );
         foreach ($dataFiles as $file) {
             // Print title
-            $output->writeln( 'Importing '.$file->getFilename().'...' );
+            $output->writeln( '  Importing '.$file->getFilename().'...' );
 
             // Create the iterator, and begin
             $xmlIterator = new MethodXMLIterator( __DIR__.'/../Resources/data/'.$file->getFilename() );
@@ -82,7 +83,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
                 // reaching the database
                 $errors = $validator->validate( $method );
                 if ( count( $errors ) > 0 ) {
-                    $output->writeln( '<error>Invalid data for '.$xmlRow['title'].":\n".$errors.'</error>' );
+                    $output->writeln( '<error>  Invalid data for '.$xmlRow['title'].":\n".$errors.'</error>' );
                     $em->detach( $method );
                 } else {
                     $em->persist( $method );
@@ -105,7 +106,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
         }
 
         // Now begin the removal process
-        $output->writeln( 'Deleting old data...' );
+        $output->writeln( '<info>Deleting old data...</info>' );
         // Ideally we'd do this by sorting the two lists (the method titles we just imported, and the
         // method titles in the database) by the same algorithm, and advance through the lists
         // concurrently. This is non-trivial it seems, since MySQL and PHP disagree on how to order
@@ -118,7 +119,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
         while ( $dbIterator->valid() ) {
             // If the entry found in the database wasn't just imported, remove it
             if ( !in_array( $dbRow[0]->getTitle(), $importedMethods ) ) {
-                $output->writeln( '<comment>Removed "'.$dbRow[0]->getTitle().'"</comment>' );
+                $output->writeln( '<comment>  Removed "'.$dbRow[0]->getTitle().'"</comment>' );
                 $em->remove( $dbRow[0] );
             }
 
@@ -136,7 +137,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
         $em->clear();
 
         if ( file_exists(__DIR__.'/../Resources/data/method_extras.php') ) {
-            $output->writeln( 'Adding extra method data...' );
+            $output->writeln( '<info>Adding extra method data...</info>' );
             require( __DIR__.'/../Resources/data/method_extras.php' );
             $method_extras = new \ArrayObject( $method_extras );
             $extrasIterator   = $method_extras->getIterator();
@@ -148,14 +149,14 @@ class ImportMethodsCommand extends ContainerAwareCommand
                     $method->setCalls( $txtRow['calls'] );
                     $method->setRuleOffs( $txtRow['ruleOffs'] );
                 } else {
-                    $output->writeln( '<warning>Extra data provided for '.$xmlRow['title'].', which isn\'t in the database</warning>' );
+                    $output->writeln( '<warning>  Extra data provided for '.$xmlRow['title'].', which isn\'t in the database</warning>' );
                 }
 
                 // Validate the new data, and detach the invalid object if needed to prevent the bad data
                 // reaching the database
                 $errors = $validator->validate( $method );
                 if ( count( $errors ) > 0 ) {
-                    $output->writeln( '<error>Invalid extra data for '.$txtRow['title'].":\n".$errors.'</error>' );
+                    $output->writeln( '<error>  Invalid extra data for '.$txtRow['title'].":\n".$errors.'</error>' );
                     $em->detach( $method );
                 } else {
                     $em->persist( $method );
@@ -169,7 +170,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
         }
 
         // Import data about renamed methods
-        $output->writeln( "\n<info>Importing renamed method data...</info>" );
+        $output->writeln( "<info>Importing renamed method data...</info>" );
         $renamedIterator = new RenamedHTMLIterator( __DIR__.'/../Resources/data/renamed.htm' );
         foreach ($renamedIterator as $renamedRow) {
             $renamed = $renamedRepository->findOneById( $renamedRow['id'] );
@@ -195,7 +196,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
         unset( $renamedIterator, $renamed, $method );
 
         // Import data about renamed methods
-        $output->writeln( "\n<info>Importing duplicate method data...</info>" );
+        $output->writeln( "<info>Importing duplicate method data...</info>" );
         $duplicateIterator = new DuplicateHTMLIterator( __DIR__.'/../Resources/data/duplicate.htm' );
         foreach ($duplicateIterator as $duplicateRow) {
             $duplicate = $duplicateRepository->findOneById( $duplicateRow['id'] );
