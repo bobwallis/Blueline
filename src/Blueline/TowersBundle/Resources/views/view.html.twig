@@ -50,7 +50,7 @@
 					{% if tower.practiceNight > 0 or tower.practiceNotes is not empty %}
 					Practice: {{ dayToString( tower.practiceNight ) }}{{ tower.practiceStart is not empty?', '~tower.practiceStart : '' }}{{ tower.practiceNotes is not empty? ' - '~tower.practiceNotes : '' }}<br />
 					{% endif %}
-					{% if tower.webPage is not empty %}<a href="http://{{ tower.webPage }}" class="external">Tower Website</a>, {% endif %}<a href="{{ tower.doveLink }}" class="external">Dove Entry</a>
+					{% if tower.webPage is not empty %}<a href="{{ tower.webPage }}" class="external">Tower Website</a>, {% endif %}<a href="{{ tower.doveLink }}" class="external">Dove Entry</a>
 				</dd>
 			</dl>
 			<h3>Nearby Towers</h3>
