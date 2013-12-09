@@ -72,7 +72,12 @@ if [[ $GITPULL = true ]]
 	echo -e "\n\033[1mPulling latest version of Blueline\033[0m"
 	git pull
 	# Restart update script (to allow it to update itself)
-	"$d/update" --nopull --force
+	if [[ $CCCBRDATA = true ]]
+	then
+		"$d/update" --nopull --force
+	else
+		"$d/update" --nopull --nodata --force
+	fi
 	exit
 fi
 
