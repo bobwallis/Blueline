@@ -1,5 +1,6 @@
 (function ( window ) {
     'use strict';
+if( Modernizr.indexeddb ) {
     var indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.oIndexedDB || window.msIndexedDB,
         IDBDatabase = window.IDBDatabase || window.webkitIDBDatabase,
         IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange,
@@ -393,4 +394,5 @@
         // Browser global
         window.db = db;
     }
+}
 })( window );
