@@ -3,16 +3,16 @@ namespace Blueline\BluelineBundle\Helpers;
 
 class Search
 {
-    public static function prepareStringForLike( $string )
+    public static function prepareStringForLike($string)
     {
         return preg_replace( '/%+/', '%', str_replace(
             array( '*', '?', ',', '.', ' ' ),
             array( '%', '_', ' ', ' ', '%' ),
-            '%'.$string.'%'
+            '%'.strtolower( $string ).'%'
         ) );
     }
 
-    public static function requestToSearchVariables( $request, $searchable )
+    public static function requestToSearchVariables($request, $searchable)
     {
         $searchVariables = array();
 
