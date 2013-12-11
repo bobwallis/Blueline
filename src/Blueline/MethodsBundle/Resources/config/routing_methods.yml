@@ -16,7 +16,7 @@ Blueline_Methods_search:
         _format: html|txt|json|atom
 
 Blueline_Methods_sitemap:
-    pattern:  sitemap.{_format}
+    pattern:  /sitemap.{_format}
     defaults: { _controller: BluelineMethodsBundle:Methods:sitemap }
     requirements:
         _format: xml
