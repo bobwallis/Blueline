@@ -48,7 +48,7 @@ class TowersController extends Controller
         return $response;
     }
 
-    public function viewAction( $id )
+    public function viewAction($id)
     {
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
@@ -73,13 +73,13 @@ class TowersController extends Controller
         if ( empty( $towers ) || count( $towers ) < count( $ids ) ) {
             throw $this->createNotFoundException( 'The tower does not exist' );
         }
-        $url = $this->generateUrl( 'Blueline_Towers_view', array( 'chromeless' => ($chromeless?:null), 'id' => implode( '|', array_map( function( $t ) { return $t['id']; }, $towers ) ), '_format' => $format ) );
+        $url = $this->generateUrl( 'Blueline_Towers_view', array( 'chromeless' => ($chromeless?:null), 'id' => implode( '|', array_map( function ($t) { return $t['id']; }, $towers ) ), '_format' => $format ) );
 
         if ( $request->getRequestUri() !== $url ) {
             return $this->redirect( $url, 301 );
         }
 
-        $pageTitle = Text::toList( array_map( function( $t ) { return $t['place'].(($t['dedication']!='Unknown')?' ('.$t['dedication'].')':''); }, $towers ) );
+        $pageTitle = Text::toList( array_map( function ($t) { return $t['place'].(($t['dedication']!='Unknown')?' ('.$t['dedication'].')':''); }, $towers ) );
         $towers = array();
         $nearbyTowers = array();
 
@@ -100,10 +100,10 @@ class TowersController extends Controller
 
         $bbox = array();
         if ( count( $towers ) > 1 && $format == 'html' ) {
-            $bbox['lat_min'] = min( array_map( function( $t ) { return $t->getLatitude(); }, $towers ) );
-            $bbox['long_min'] = min( array_map( function( $t ) { return $t->getLongitude(); }, $towers ) );
-            $bbox['lat_max'] = max( array_map( function( $t ) { return $t->getLatitude(); }, $towers ) );
-            $bbox['long_max'] = max( array_map( function( $t ) { return $t->getLongitude(); }, $towers ) );
+            $bbox['lat_min'] = min( array_map( function ($t) { return $t->getLatitude(); }, $towers ) );
+            $bbox['long_min'] = min( array_map( function ($t) { return $t->getLongitude(); }, $towers ) );
+            $bbox['lat_max'] = max( array_map( function ($t) { return $t->getLatitude(); }, $towers ) );
+            $bbox['long_max'] = max( array_map( function ($t) { return $t->getLongitude(); }, $towers ) );
         }
 
         // Create response
@@ -114,6 +114,25 @@ class TowersController extends Controller
             $response->setMaxAge( 129600 );
             $response->setSharedMaxAge( 129600 );
             $response->setPublic();
+        }
+
+        return $response;
+    }
+
+    public function sitemapAction()
+    {
+        $request = $this->getRequest();
+        $format = $request->getRequestFormat();
+
+        $towers = $this->getDoctrine()->getManager()->createQuery( 'SELECT partial t.{id} FROM BluelineTowersBundle:Tower t' )->getArrayResult();
+
+        $response = $this->render( 'BluelineTowersBundle::sitemap.'.$format.'.twig', compact( 'towers' ) );
+
+        // Caching headers
+        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
+            $response->setPublic();
+            $response->setMaxAge( 129600 );
+            $response->setSharedMaxAge( 129600 );
         }
 
         return $response;
