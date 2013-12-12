@@ -18,7 +18,7 @@ Blueline_resource:
     pattern:  /{page}.{_format}
     defaults: { _controller: BluelineBundle:Default:resource }
     requirements:
-        page: robots|humans|site|sitemap|sitemap_root
+        page: robots|humans|site|sitemap|sitemap_root|browserconfig
         _format: txt|xml|manifest
 
 Blueline_favicon:

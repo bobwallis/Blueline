@@ -26,9 +26,11 @@
 
 		{# IE Pinned Sites tags #}
 		<meta name="application-name" content="Blueline" />
-		<meta name="msapplication-tooltip" content="Blueline - Information for bellringers" />
-		<meta name="msapplication-starturl" content="{{ app.request.scheme ~  '://' ~ app.request.host ~ path( 'Blueline_welcome' ) }}" />
 		<meta name="msapplication-navbutton-color" content="#002856" />
+		<meta name="msapplication-starturl" content="{{ app.request.scheme ~  '://' ~ app.request.host ~ path( 'Blueline_welcome' ) }}" />
+		<meta name="msapplication-TileColor" content="#EFE5BD">
+		<meta name="msapplication-TileImage" content="{{ path( 'Blueline_favicon', { size: 144, _format: 'png' } ) }}">
+		<meta name="msapplication-tooltip" content="Blueline - Information for bellringers" />
 
 		{# Opengraph tags #}
 		<meta property="og:title" content="{% block og_title %}Blueline{% endblock %}" />

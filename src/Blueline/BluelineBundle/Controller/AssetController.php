@@ -8,7 +8,7 @@ class AssetController extends Controller
 {
     private $cacheTime = 604800;
 
-    public function fontAction( $font )
+    public function fontAction($font)
     {
         $format   = $this->getRequest()->getRequestFormat();
         $fontPath = __DIR__.'/../Resources/public/fonts/'.$font.'.'.$format;
@@ -29,36 +29,71 @@ class AssetController extends Controller
 
     public function faviconAction()
     {
-        $format  = $this->getRequest()->getRequestFormat();
+        $request = $this->getRequest();
+        $format  = $request->getRequestFormat();
+        $size =    intval( $request->get( 'size' )?:32 );
 
-        // Output the image
+        $response = new Response();
+        if ( $this->container->getParameter( 'kernel.environment' ) == 'prod' ) {
+            $response->setMaxAge( $this->cacheTime );
+            $response->setSharedMaxAge( $this->cacheTime );
+            $response->setPublic();
+        }
+
+        // Create the image
         switch ($format) {
             case 'svg':
+                $response->setContent( file_get_contents( __DIR__.'/../Resources/public/images/favicon.svg' ) );
+                break;
             case 'png':
             case 'gif':
             case 'jpg':
             case 'bmp':
-                return $this->createImageResponse( __DIR__.'/../Resources/public/images/favicon.svg', $format, 48, 48 );
-            case 'ico':
-                $response = new Response();
-                if ( $this->container->getParameter( 'kernel.environment' ) == 'prod' ) {
-                    $response->setMaxAge( $this->cacheTime );
-                    $response->setSharedMaxAge( $this->cacheTime );
-                    $response->setPublic();
+                $image = new \Imagick();
+                $image->setResolution( $size*1.2, $size*1.2 );
+                $image->setBackgroundColor( ($format == 'jpg' || $format == 'bmp')? new \ImagickPixel( 'white' ) : new \ImagickPixel( 'transparent' ) );;
+                $image->readImage( __DIR__.'/../Resources/public/images/favicon.svg' );
+                $image->scaleImage($size, $size);
+                switch ($format) {
+                    case 'png':
+                        $image->setImageFormat( 'png32' );
+                        break;
+                    case 'gif':
+                        $image->setImageFormat( 'gif' );
+                        break;
+                    case 'jpg':
+                        $image->setImageFormat( 'jpeg' );
+                        $image->setCompression( \Imagick::COMPRESSION_JPEG );
+                        $image->setImageCompressionQuality( 90 );
+                        $image->setImageFormat( 'jpeg' );
+                        break;
+                    case 'bmp':
+                        $image->setImageFormat( 'bmp' );
+                        break;
                 }
-                $response->setContent( passthru( 'convert -background none "'.realpath( __DIR__.'/../Resources/public/images/favicon.svg' ).'" \( -clone 0 -resize 16x16 \) \( -clone 0 -resize 32x32 \) \( -clone 0 -resize 48x48 \) -delete 0 -alpha on -background none -colors 512 ico:-' ) );
-
-                return $response;
+                $image->stripImage();
+                $response->setContent( $image );
+                $image->destroy();
+                break;
+            case 'ico':
+                ob_start();
+                passthru( 'convert -background none "'.realpath( __DIR__.'/../Resources/public/images/favicon.svg' ).'" \( -clone 0 -resize 16x16 \) \( -clone 0 -resize 32x32 \) \( -clone 0 -resize 48x48 \) -delete 0 -alpha on -background none -colors 512 ico:-' );
+                $response->setContent( ob_get_contents() );
+                ob_end_clean();
+                break;
         }
+
+        return $response;
     }
 
-    public function iOS_iconAction( $size )
+    public function iOS_iconAction($size)
     {
         $size = intval( $size );
         $image = new \Imagick();
         $image->setBackgroundColor( new \ImagickPixel( '#EFE5BD' ) );
-        $image->setresolution( $size, $size );
+        $image->setResolution( $size*1.2, $size*1.2 );
         $image->readImage( __DIR__.'/../Resources/public/images/favicon.svg' );
+        $image->scaleImage($size, $size);
         $image->setImageFormat( 'png32' );
         $image->stripImage();
 
@@ -75,7 +110,7 @@ class AssetController extends Controller
         return $response;
     }
 
-    public function imageAction( $image )
+    public function imageAction($image)
     {
         $format  = $this->getRequest()->getRequestFormat();
         $file = false;
@@ -102,7 +137,7 @@ class AssetController extends Controller
         }
     }
 
-    private function createImageResponse( $imagePath, $format, $width = null, $height = null )
+    private function createImageResponse($imagePath, $format, $width = null, $height = null)
     {
         // Create response
         $response = new Response();
@@ -124,11 +159,14 @@ class AssetController extends Controller
 
         // Output the image
         $image = new \Imagick();
-        $image->setBackgroundColor( ($format == 'jpg' || $format == 'bmp')? new \ImagickPixel( 'white' ) : new \ImagickPixel( 'transparent' ) );
         if ( is_int( $width ) && is_int( $height ) ) {
-            $image->setresolution( $width, $height );
+            $image->setResolution($width, $height);
         }
+        $image->setBackgroundColor( ($format == 'jpg' || $format == 'bmp')? new \ImagickPixel( 'white' ) : new \ImagickPixel( 'transparent' ) );
         $image->readImage( $imagePath );
+        if ( is_int( $width ) && is_int( $height ) ) {
+            $image->scaleImage($width, $height);
+        }
         $image->stripImage();
         switch ($format) {
             case 'svg':
