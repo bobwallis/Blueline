@@ -76,10 +76,7 @@ class AssetController extends Controller
                 $image->destroy();
                 break;
             case 'ico':
-                ob_start();
-                passthru( 'convert -background none "'.realpath( __DIR__.'/../Resources/public/images/favicon.svg' ).'" \( -clone 0 -resize 16x16 \) \( -clone 0 -resize 32x32 \) \( -clone 0 -resize 48x48 \) -delete 0 -alpha on -background none -colors 512 ico:-' );
-                $response->setContent( ob_get_contents() );
-                ob_end_clean();
+                $response->setContent( file_get_contents( __DIR__.'/../Resources/public/images/favicon.ico' ) );
                 break;
         }
 
