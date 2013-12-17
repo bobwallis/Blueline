@@ -629,12 +629,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hearsayit/HearsayRequireJSBundle.git",
-                "reference": "0805bcb486cbd37a36cd4e1be486306d8e7075b8"
+                "reference": "b3abfe277cbe9188919d63bf4bfb5747f871b118"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hearsayit/HearsayRequireJSBundle/zipball/0805bcb486cbd37a36cd4e1be486306d8e7075b8",
-                "reference": "0805bcb486cbd37a36cd4e1be486306d8e7075b8",
+                "url": "https://api.github.com/repos/hearsayit/HearsayRequireJSBundle/zipball/b3abfe277cbe9188919d63bf4bfb5747f871b118",
+                "reference": "b3abfe277cbe9188919d63bf4bfb5747f871b118",
                 "shasum": ""
             },
             "require": {
@@ -643,6 +643,9 @@
                 "symfony/finder": ">=2.0",
                 "symfony/framework-bundle": ">=2.0.9",
                 "symfony/yaml": ">=2.0"
+            },
+            "require-dev": {
+                "twig/extensions": "v1.0.0"
             },
             "type": "symfony-bundle",
             "extra": {
@@ -672,7 +675,7 @@
                 "requirejs",
                 "rjs"
             ],
-            "time": "2013-09-10 10:44:09"
+            "time": "2013-12-14 19:51:41"
         },
         {
             "name": "incenteev/composer-parameter-handler",

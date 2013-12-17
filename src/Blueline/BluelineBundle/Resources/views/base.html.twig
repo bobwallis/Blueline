@@ -62,7 +62,7 @@
 		{% endjavascripts %}
 
 		{% javascripts '@BluelineBundle/Resources/public/js/lib/modernizr.js' '%kernel.root_dir%/Resources/public/js/require.js' output="js/modreq.js" filter="?closure" %}
-			<script>var require={{ require_js_config|json_encode|raw }};</script>
+			<script>var require={{ require_js.config|json_encode|raw }};</script>
 			<script data-main="{{ mainModuleURL }}" src="{{ asset_url }}"></script>
 		{% endjavascripts %}
 
