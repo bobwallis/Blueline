@@ -85,6 +85,7 @@ fi
 # Update vendors
 echo -e "\n\033[1mUpdating vendors for Blueline\033[0m"
 php "$d/composer.phar" install
+php "$d/composer.phar" dump-autoload --optimize
 
 
 # Clear cache
