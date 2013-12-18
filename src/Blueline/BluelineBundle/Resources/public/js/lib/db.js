@@ -122,7 +122,7 @@
                     store = transaction.objectStore( table ),
                     promise = new Promise();
 
-                var req = store.delete( key );
+                var req = store['delete']( key );
                 req.onsuccess = function ( e ) {
                     promise.resolve( key );
                 };
