@@ -205,7 +205,7 @@
 
                     if ( cursor ) {
                         results.push( cursor.value );
-                        cursor.continue();
+                        cursor['continue']();
                     }
                 };
 
@@ -281,7 +281,7 @@
                             }
                         }
 
-                        cursor.continue();
+                        cursor['continue']();
                     } else {
                         promise.resolve( records );
                     }
