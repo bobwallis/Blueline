@@ -13,22 +13,23 @@ define( ['jquery', 'eve', '../lib/fastclick', '../helpers/URL', '../data/Page', 
 		$('body script:first-child').remove();
 	} );
 
-	// Listen at the document.body level for click events, and request new pages without reload
-	$( document.body ).on( 'click', 'a', function( e ) {
-		var $target = $( e.target ).closest( 'a' );
-		if( $target.length > 0 ) {
-			// Get the href of the link
-			var href = $target.attr( 'href' );
-			// If the URL is internal, push it (which will trigger a statechange)
-			if( href && URL.isInternal( href ) !== null ) {
-				e.preventDefault();
-				Page.request( href, 'click' );
-			}
-		}
-	} );
-
-	// If the browser supports the history API, capture and process back/forward events
+	// If the browser supports the history API...
 	if( Modernizr.history ) {
+		// Listen at the document.body level for click events, and request new pages without reload
+		$( document.body ).on( 'click', 'a', function( e ) {
+			var $target = $( e.target ).closest( 'a' );
+			if( $target.length > 0 ) {
+				// Get the href of the link
+				var href = $target.attr( 'href' );
+				// If the URL is internal, push it (which will trigger a statechange)
+				if( href && URL.isInternal( href ) !== null ) {
+					e.preventDefault();
+					Page.request( href, 'click' );
+				}
+			}
+		} );
+
+		// Capture and process back/forward events
 		window.history.replaceState( { url: location.href, type: 'load' }, null, location.href );
 		$( function() {
 			$( window ).on( 'popstate', function( e ) {

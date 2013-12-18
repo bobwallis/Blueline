@@ -9,8 +9,13 @@ define( ['eve', 'jquery', './Page/Cache', '../helpers/URL'], function ( eve, $, 
 			// Check the URL is absolute
 			url = URL.absolutise( url );
 
+			if( !Modernizr.history ) {
+				location.href = url;
+				return;
+			}
+
 			// Update the history object, and other things that rely on knowing the current URL
-			if( Modernizr.history && type !== 'popstate') {
+			if( type !== 'popstate') {
 				// If the last state type was 'keyup' and this one was too, 
 				// then replace that state in the history
 				if( type === 'keyup' && window.history.state !== null && window.history.state.type === 'keyup' ) {
