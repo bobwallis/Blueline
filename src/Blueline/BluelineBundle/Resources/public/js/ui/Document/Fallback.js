@@ -1,12 +1,12 @@
 // In general, we rely on the browser's own fallback mechanisms, and use progressive enhancement.
 // In some cases though, a modern browser feature is so important to the UI that having it missing
 // is a problem. This file will fix such problems.
-define( ['jquery'], function( $ ) {
+define( ['jquery', '../../helpers/URL'], function( $, URL ) {
 	$( function() {
 		// PNG background images instead of SVG where the browser doesn't support SVG
 		if( !Modernizr.svg ) {
 			var sharedText = '{background-image:url(' + $( '#top h1 a' ).attr( 'href' );
-			$( '<style>#search div'+sharedText+'images/search.png) !important}a.external'+topURL+'images/external.png) !important}.search li.selected'+topURL+'images/selectIndicator.png) !important}</style>' ).appendTo( 'head' );
+			$( '<style>#search div'+sharedText+'images/search.png) !important}a.external'+URL.baseURL+'images/external.png) !important}.search li.selected'+URL.baseURL+'images/selectIndicator.png) !important}</style>' ).appendTo( 'head' );
 		}
 
 		// Placeholders in input fields
