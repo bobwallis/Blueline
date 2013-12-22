@@ -104,12 +104,12 @@ if [[ $DEV = true ]]; then
 
 	# Get latest html5shiv
 	echo -e "\n\033[1mUpdating html5shiv\033[0m..."
-	curl -s -o "$d/app/Resources/public/js/html5shiv.js" "https://raw.github.com/aFarkas/html5shiv/master/src/html5shiv.js"
+	curl -s -o "$d/app/Resources/public/js/html5shiv.js" "https://raw.github.com/aFarkas/html5shiv/master/src/html5shiv-printshiv.js"
 	echo "Done"
 
 	# Get latest eve
 	echo -e "\n\033[1mUpdating eve\033[0m..."
-	curl -s -o "$d/app/Resources/public/js/eve.js" "https://raw.github.com/adobe-webplatform/eve/master/eve.js"
+	#curl -s -o "$d/app/Resources/public/js/eve.js" "https://raw.github.com/adobe-webplatform/eve/master/eve.js"
 	echo "Done"
 
 	# Get latest FastClick
