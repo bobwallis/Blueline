@@ -31,6 +31,7 @@
 		<meta name="msapplication-TileColor" content="#EFE5BD">
 		<meta name="msapplication-TileImage" content="{{ path( 'Blueline_favicon', { size: 144, _format: 'png' } ) }}">
 		<meta name="msapplication-tooltip" content="Blueline - Information for bellringers" />
+		<meta name="msapplication-config" content="{{ path( 'Blueline_resource', { page: 'browserconfig', _format: 'xml' } ) }}" />
 
 		{# Opengraph tags #}
 		<meta property="og:title" content="{% block og_title %}Blueline{% endblock %}" />
