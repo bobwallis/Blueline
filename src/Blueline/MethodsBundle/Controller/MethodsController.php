@@ -48,7 +48,7 @@ class MethodsController extends Controller
         return $response;
     }
 
-    public function viewAction( $title )
+    public function viewAction($title)
     {
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
@@ -58,7 +58,8 @@ class MethodsController extends Controller
         }
 
         $titlesUnderscore = explode( '|', $title );
-        $titles = array_map( function( $t ) { return str_replace( '_', ' ', $t ); }, $titlesUnderscore );
+        $titles = array_map( function ($t) { return str_replace( '_', ' ', $t ); }, $titlesUnderscore );
+        $titlesLower = array_map( function ($t) { return strtolower( $t ); }, $titles );
 
         $methodRepository = $this->getDoctrine()->getManager()->getRepository( 'BluelineMethodsBundle:Method' );
         $em = $this->getDoctrine()->getManager();
@@ -66,19 +67,19 @@ class MethodsController extends Controller
         // Check we are at the canonical URL for the content
         $methods = $em->createQuery( '
             SELECT partial m.{title} FROM BluelineMethodsBundle:Method m
-            WHERE m.title IN (:titles)' )
-            ->setParameter( 'titles', $titles )
-            ->setMaxResults( count( $titles ) )
+            WHERE LOWER(m.title) IN (:titles)' )
+            ->setParameter( 'titles', $titlesLower )
+            ->setMaxResults( count( $titlesLower ) )
             ->getArrayResult();
         if ( empty( $methods ) || count( $methods ) < count( $methods ) ) {
             throw $this->createNotFoundException( 'The method does not exist' );
         }
-        $url = $this->generateUrl( 'Blueline_Methods_view', array( 'chromeless' => ($chromeless?:null), 'title' => implode( '|', array_map( function( $m ) { return str_replace( ' ', '_', $m['title'] ); }, $methods ) ), '_format' => $format ) );
+        $url = $this->generateUrl( 'Blueline_Methods_view', array( 'chromeless' => ($chromeless?:null), 'title' => implode( '|', array_map( function ($m) { return str_replace( ' ', '_', $m['title'] ); }, $methods ) ), '_format' => $format ) );
         if ( $request->getRequestUri() !== urldecode( $url ) ) {
             return $this->redirect( $url, 301 );
         }
 
-        $pageTitle = Text::toList( array_map( function( $m ) { return $m['title']; }, $methods ) );
+        $pageTitle = Text::toList( array_map( function ($m) { return $m['title']; }, $methods ) );
         $methods = array();
 
         foreach ($titles  as $title) {
