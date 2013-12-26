@@ -11,7 +11,7 @@ class BluelineExtension extends Twig_Extension
     protected $environment;
     protected $config;
 
-    public function __construct( ContainerInterface $container, $config )
+    public function __construct(ContainerInterface $container, $config)
     {
         try {
             $request          = $container->get( 'request' );
@@ -55,11 +55,11 @@ class BluelineExtension extends Twig_Extension
             'analytics_code' => $this->config['analytics_code'],
             'chromeless'     => $this->chromeless,
             'html_age'       => ($this->environment == 'prod')? $this->config['asset_update'] : 'dev',
-            'isAppStartPage' => ($this->environment == 'prod' && $this->path == '/')
+            'isAppStartPage' => $this->path == '/'
         );
     }
 
-    public function toList( array $list, $glue = ', ', $last = ' and ' )
+    public function toList(array $list, $glue = ', ', $last = ' and ')
     {
         $list = array_filter( $list );
         if ( empty( $list ) ) {
@@ -72,13 +72,13 @@ class BluelineExtension extends Twig_Extension
         }
     }
 
-    public function addAccidentals( $str )
+    public function addAccidentals($str)
     {
         return preg_replace( array( '/(^|\s)([A-G1-9]{1})b($|\s)/', '/(^|\s)([A-G1-9]{1})#($|\s)/' ), array( '$1$2♭$3', '$1$2♯$3' ), $str );
     }
 
     private static $days = array( '', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' );
-    public function dayToString( $day )
+    public function dayToString($day)
     {
         return self::$days[intval( $day )];
     }

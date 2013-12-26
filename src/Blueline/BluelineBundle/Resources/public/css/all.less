@@ -2,6 +2,7 @@
 @import 'lib/vendor.less';
 
 // Layout
+@standaloneStatusBarHeight: 18px;
 @headerHeight: 35px;
 @searchBoxHeight: 46px;
 @contentXPadding: 12px;
@@ -72,12 +73,12 @@ a {
 .hide { display: none; }
 .normalweight { font-weight: normal; }
 
-
 // Import general CSS styles
 @import 'all/overlays.less';
 @import 'all/header.less';
 @import 'all/content.less';
 @import 'all/map.less';
+@import 'all/standalone.less';
 
 // Import bundle specific CSS
 @import '../../../../PagesBundle/Resources/public/css/all.less';

@@ -1,0 +1,17 @@
+/* Standalone overrides */
+.standalone #top, #appStart header {
+	padding-top: @standaloneStatusBarHeight;
+}
+.standalone #menuButton {
+	background-position: (@headerHeight - 20px)/2 (@standaloneStatusBarHeight + (@headerHeight - 20px)/2);
+	padding-top: @standaloneStatusBarHeight;
+}
+.standalone #search, .standalone #towerMap {
+	top: @headerHeight + @standaloneStatusBarHeight;
+}
+.standalone #content {
+	padding-top: @headerHeight + @standaloneStatusBarHeight;
+}
+.standalone #content.searchable {
+	padding-top: @headerHeight + @standaloneStatusBarHeight + @searchBoxHeight;
+}

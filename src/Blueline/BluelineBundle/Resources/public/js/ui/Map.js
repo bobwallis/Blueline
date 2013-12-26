@@ -246,7 +246,7 @@ define( ['require', 'eve', 'jquery', '../lib/gmaps'], function( require, eve, $ 
 			var mapCenter = (TowerMap.map !== null)? TowerMap.map.getCenter() : 0;
 			$towerMap.css( {
 				width: (pageWidth*0.6)+'px',
-				height: ($window.height() - $top.height())+'px'
+				height: ($window.height() - $top.outerHeight())+'px'
 			} );
 			if( TowerMap.map !== null ) {
 				google.maps.event.trigger( TowerMap.map, 'resize' );

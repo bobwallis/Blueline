@@ -51,7 +51,7 @@ class AssetController extends Controller
             case 'bmp':
                 $image = new \Imagick();
                 $image->setResolution( $size*1.2, $size*1.2 );
-                $image->setBackgroundColor( ($format == 'jpg' || $format == 'bmp')? new \ImagickPixel( 'white' ) : new \ImagickPixel( 'transparent' ) );;
+                $image->setBackgroundColor( ($format == 'jpg' || $format == 'bmp')? new \ImagickPixel( 'white' ) : new \ImagickPixel( 'transparent' ) );
                 $image->readImage( __DIR__.'/../Resources/public/images/favicon.svg' );
                 $image->scaleImage($size, $size);
                 switch ($format) {
@@ -90,6 +90,34 @@ class AssetController extends Controller
         $image->setResolution( $size*1.2, $size*1.2 );
         $image->readImage( __DIR__.'/../Resources/public/images/iosicon.svg' );
         $image->scaleImage($size, $size);
+        $image->setImageFormat( 'png32' );
+        $image->stripImage();
+
+        // Create response
+        $response = new Response();
+        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
+            $response->setMaxAge( $this->cacheTime );
+            $response->setSharedMaxAge( $this->cacheTime );
+            $response->setPublic();
+        }
+        $response->setContent( $image );
+        $image->destroy();
+
+        return $response;
+    }
+
+    public function iOSstartupAction($size, $ratio)
+    {
+        $sizes = array_map( function ($s) { return intval( $s ); }, explode( 'x', $size ) );
+        $image = new \Imagick();
+        $image->newImage( $sizes[0], $sizes[1], '#002856' );
+        $image->setGravity( \Imagick::GRAVITY_NORTHWEST );
+        $draw = new \ImagickDraw();
+        $draw->setFont( __DIR__.'/../Resources/public/fonts/logo.ttf' );
+        $draw->setFontSize( 20*$ratio );
+        $draw->setFillColor( new \ImagickPixel( 'white' ) );
+        $drawSize = $image->queryFontMetrics( $draw, "BLUELINE" );
+        $image->annotateImage( $draw, intval( ($sizes[0]-$drawSize['textWidth'])/2 ), 100*$ratio, 0 ,'BLUELINE' );
         $image->setImageFormat( 'png32' );
         $image->stripImage();
 

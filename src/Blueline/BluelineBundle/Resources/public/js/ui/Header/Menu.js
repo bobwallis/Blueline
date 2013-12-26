@@ -15,7 +15,7 @@ define( ['jquery'], function( $ ) {
 		show: function() {
 			if( !Menu.visible ) {
 				$menuButton.css( 'background-color', '#002147' );
-				$menu.stop( true ).animate( { top: $top.height() + 'px' }, 175 );
+				$menu.stop( true ).animate( { top: $top.outerHeight() + 'px' }, 175 );
 				Menu.visible = true;
 			}
 		}

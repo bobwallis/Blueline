@@ -13,16 +13,30 @@
 		{# Chrome web app link #}
 		<link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/blueline/ohgpoagcfmlbkdniokohgicofokpbpae" />
 
-		{# Mobile web tags #}
+		{# iOS meta tags #}
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-title" content="Blueline" />
 		<meta name="format-detection" content="telephone=no" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-		<meta name="HandheldFriendly" content="true" />
-		<meta name="apple-mobile-web-app-capable" content="yes" />
-		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
-		<meta name="apple-mobile-web-app-title" content="Blueline" />
+		{# The number of tags for this is just absurd... #}
 		{% for size in [57, 72, 76, 114, 120, 144, 152] %}
-			<link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="{{ path( 'Blueline_iOS_icon', { 'size': size~'x'~size, '_format': 'png' } ) }}" />
+			<link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="{{ path( 'Blueline_iOSicon', { 'size': size~'x'~size, '_format': 'png' } ) }}" />
 		{% endfor %}
+		{# iOS 6 & 7 iPhone 5 #}
+		<link href="{{ path( 'Blueline_iOSstartup', { 'size': '640x1096', ratio: 2, '_format': 'png' } ) }}" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)" rel="apple-touch-startup-image" />
+		{# iOS 6 & 7 iPhone (retina) #}
+		<link href="{{ path( 'Blueline_iOSstartup', { 'size': '640x920', ratio: 2, '_format': 'png' } ) }}" media="(device-width:320px) and (device-height:480px) and (-webkit-device-pixel-ratio:2)" rel="apple-touch-startup-image" />
+		{# iOS 6 iPhone #}
+		<link href="{{ path( 'Blueline_iOSstartup', { 'size': '320x460', ratio: 1, '_format': 'png' } ) }}" media="(device-width:320px) and (device-height:480px) and (-webkit-device-pixel-ratio:1)" rel="apple-touch-startup-image" />
+		{# iOS 6 & 7 iPad (retina, portrait) #}
+		<link href="{{ path( 'Blueline_iOSstartup', { 'size': '1536x2008', ratio: 2, '_format': 'png' } ) }}" media="(device-width:768px) and (device-height:1024px) and (orientation:portrait) and (-webkit-device-pixel-ratio:2)" rel="apple-touch-startup-image" />
+		{# iOS 6 & 7 iPad (retina, landscape) #}
+		<link href="{{ path( 'Blueline_iOSstartup', { 'size': '1496x2048', ratio: 2, '_format': 'png' } ) }}" media="(device-width:768px) and (device-height:1024px) and (orientation:landscape) and (-webkit-device-pixel-ratio:2)" rel="apple-touch-startup-image" />
+		{# iOS 6 iPad (portrait) #}
+		<link href="{{ path( 'Blueline_iOSstartup', { 'size': '768x1004', ratio: 1, '_format': 'png' } ) }}" media="(device-width:768px) and (device-height:1024px) and (orientation:portrait) and (-webkit-device-pixel-ratio:1)" rel="apple-touch-startup-image" />
+		{# iOS 6 iPad (landscape) #}
+		<link href="{{ path( 'Blueline_iOSstartup', { 'size': '748x1024', ratio: 1, '_format': 'png' } ) }}" media="(device-width:768px) and (device-height:1024px) and (orientation:landscape) and (-webkit-device-pixel-ratio:1)" rel="apple-touch-startup-image" />
 
 		{# IE Pinned Sites tags #}
 		<meta name="application-name" content="Blueline" />
@@ -74,7 +88,7 @@
 	</head>
 	<body>
 		{% if isAppStartPage %}
-			<script>if(('standalone' in navigator)&&navigator.standalone){document.write('<div id="appStart"><header></header><p>Loading</p></div>');}</script>
+			<script>if(('standalone' in navigator)&&navigator.standalone){document.write('<div id="appStart"><header></header><p>Loading</p></div>');document.body.className="standalone";}</script>
 		{% endif %}
 		<header id="top" role="banner">
 			<h1><a href="{{ path('Blueline_welcome') }}">Blueline</a></h1>

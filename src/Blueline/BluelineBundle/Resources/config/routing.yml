@@ -34,6 +34,14 @@ Blueline_iOSicon:
         size: 57x57|72x72|76x76|114x114|120x120|144x144|152x152
         _format: png
 
+Blueline_iOSstartup:
+    pattern:  /apple-startup-image-{ratio}-{size}.{_format}
+    defaults: { _controller: BluelineBundle:Asset:iOSstartup }
+    requirements:
+        size: 640x1096|640x920|320x460|1536x2008|1496x2048|768x1004|748x1024
+        ratio: 1|2
+        _format: png
+
 Blueline_image:
     pattern:  /images/{image}.{_format}
     defaults: { _controller: BluelineBundle:Asset:image }
