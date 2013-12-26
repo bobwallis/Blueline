@@ -83,13 +83,12 @@ class AssetController extends Controller
         return $response;
     }
 
-    public function iOS_iconAction($size)
+    public function iOSiconAction($size)
     {
         $size = intval( $size );
         $image = new \Imagick();
-        $image->setBackgroundColor( new \ImagickPixel( '#EFE5BD' ) );
         $image->setResolution( $size*1.2, $size*1.2 );
-        $image->readImage( __DIR__.'/../Resources/public/images/favicon.svg' );
+        $image->readImage( __DIR__.'/../Resources/public/images/iosicon.svg' );
         $image->scaleImage($size, $size);
         $image->setImageFormat( 'png32' );
         $image->stripImage();
