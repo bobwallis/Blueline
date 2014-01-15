@@ -55,7 +55,7 @@ class BluelineExtension extends Twig_Extension
             'analytics_code' => $this->config['analytics_code'],
             'chromeless'     => $this->chromeless,
             'html_age'       => ($this->environment == 'prod')? $this->config['asset_update'] : 'dev',
-            'isAppStartPage' => $this->path == '/'
+            'isAppStartPage' => ($this->path == '/') && ($this->environment == 'prod')
         );
     }
 
