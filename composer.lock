@@ -629,12 +629,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hearsayit/HearsayRequireJSBundle.git",
-                "reference": "8347506d8915fd05ebf38540a9343e0cfcee1aca"
+                "reference": "3c2ce461eaa081e89eeb061034532ea71db4d1f2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hearsayit/HearsayRequireJSBundle/zipball/8347506d8915fd05ebf38540a9343e0cfcee1aca",
-                "reference": "8347506d8915fd05ebf38540a9343e0cfcee1aca",
+                "url": "https://api.github.com/repos/hearsayit/HearsayRequireJSBundle/zipball/3c2ce461eaa081e89eeb061034532ea71db4d1f2",
+                "reference": "3c2ce461eaa081e89eeb061034532ea71db4d1f2",
                 "shasum": ""
             },
             "require": {
@@ -645,6 +645,8 @@
                 "symfony/yaml": ">=2.0"
             },
             "require-dev": {
+                "phpunit/phpunit": "3.7.*",
+                "squizlabs/php_codesniffer": "1.*",
                 "twig/extensions": "v1.0.0"
             },
             "type": "symfony-bundle",
@@ -675,7 +677,7 @@
                 "requirejs",
                 "rjs"
             ],
-            "time": "2014-01-05 00:01:03"
+            "time": "2014-01-11 22:37:19"
         },
         {
             "name": "incenteev/composer-parameter-handler",
@@ -731,16 +733,16 @@
         },
         {
             "name": "jdorn/sql-formatter",
-            "version": "v1.2.16",
+            "version": "v1.2.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jdorn/sql-formatter.git",
-                "reference": "8859d664737492d313c34796731b35eca851b362"
+                "reference": "64990d96e0959dff8e059dfcdc1af130728d92bc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jdorn/sql-formatter/zipball/8859d664737492d313c34796731b35eca851b362",
-                "reference": "8859d664737492d313c34796731b35eca851b362",
+                "url": "https://api.github.com/repos/jdorn/sql-formatter/zipball/64990d96e0959dff8e059dfcdc1af130728d92bc",
+                "reference": "64990d96e0959dff8e059dfcdc1af130728d92bc",
                 "shasum": ""
             },
             "require": {
@@ -777,7 +779,7 @@
                 "highlight",
                 "sql"
             ],
-            "time": "2013-11-27 22:51:13"
+            "time": "2014-01-12 16:20:24"
         },
         {
             "name": "kriswallsmith/assetic",
