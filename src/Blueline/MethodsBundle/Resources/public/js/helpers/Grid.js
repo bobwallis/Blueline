@@ -97,7 +97,6 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas'], func
 			padding.x = parseFloat( padding.x );
 			padding.y = parseFloat( padding.y );
 		}
-		console.log(padding);
 		return padding;
 	};
 
