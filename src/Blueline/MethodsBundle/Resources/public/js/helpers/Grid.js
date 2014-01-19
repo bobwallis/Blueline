@@ -21,7 +21,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas'], func
 				id: 'metric',
 				width: size*3,
 				height: size*3,
-				scale: (typeof window.devicePixelRatio === 'number')? (window.devicePixelRatio*8) : 8
+				scale: (typeof window.devicePixelRatio === 'number')? Math.round(window.devicePixelRatio*8) : 8
 			} );
 			if( canvas !== false ) {
 				try {
@@ -41,7 +41,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas'], func
 						row, column;
 
 					// Find top
-					for( row = 0; !topOfText && row < dim; ++row ) {
+					for( row = 0; topOfText === false && row < dim; ++row ) {
 						for( column = 0; column < dim ; ++column ) {
 							if(imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
 								topOfText = row;
@@ -50,7 +50,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas'], func
 						}
 					}
 					// Find bottom
-					for( row = dim; !bottomOfText && row > 0; --row ) {
+					for( row = dim; bottomOfText === false && row > 0; --row ) {
 						for( column = 0; column < dim ; ++column ) {
 							if( imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
 								bottomOfText = row + 1;
@@ -59,7 +59,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas'], func
 						}
 					}
 					// Find left
-					for( column = 0; !leftOfText && column < dim; ++column ) {
+					for( column = 0; leftOfText === false && column < dim; ++column ) {
 						for( row = 0; row < dim ; ++row ) {
 							if( imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
 								leftOfText = column;
@@ -68,7 +68,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas'], func
 						}
 					}
 					// Find right
-					for( column = dim; !rightOfText && column > 0; --column ) {
+					for( column = dim; rightOfText === false && column > 0; --column ) {
 						for( row = 0; row < dim ; ++row ) {
 							if( imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
 								rightOfText = column + 1;
@@ -87,6 +87,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas'], func
 					}
 				}
 				catch( e ) {
+					console.log(e);
 					padding.x = padding.y = 0;
 				}
 			}
@@ -96,6 +97,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas'], func
 			padding.x = parseFloat( padding.x );
 			padding.y = parseFloat( padding.y );
 		}
+		console.log(padding);
 		return padding;
 	};
 
