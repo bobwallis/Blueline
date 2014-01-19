@@ -6,11 +6,15 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas'], func
 	// needed to be applied to x and y to centre text of size n in an nxn box when
 	// drawing with textAlign=center and baseLine=alphabetic
 	var measureXAndYTextPadding = function( size, font ) {
-		var padding = { x: null, y: null };
+		var padding = { x: null, y: null },
+			age = $( 'html' ).data( 'age' );
 
-		if( Modernizr.localstorage ) {
-			padding.x = localStorage.getItem( 'Metrics.x.'+size+'.'+font );
-			padding.y = localStorage.getItem( 'Metrics.y.'+size+'.'+font );
+		if( age != 'dev' && Modernizr.localstorage ) {
+			var metricAge = localStorage.getItem( 'Metrics.age.'+size+'.'+font );
+			if( metricAge !== null && parseInt( metricAge, 10) == age ) {
+				padding.x = localStorage.getItem( 'Metrics.x.'+size+'.'+font );
+				padding.y = localStorage.getItem( 'Metrics.y.'+size+'.'+font );
+			}
 		}
 		if( padding.x === null || padding.y === null ) {
 			var canvas = new Canvas( {
@@ -79,6 +83,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas'], func
 					if( Modernizr.localstorage ) {
 						localStorage.setItem( 'Metrics.x.'+size+'.'+font, padding.x );
 						localStorage.setItem( 'Metrics.y.'+size+'.'+font, padding.y );
+						localStorage.setItem( 'Metrics.age.'+size+'.'+font, age );
 					}
 				}
 				catch( e ) {
