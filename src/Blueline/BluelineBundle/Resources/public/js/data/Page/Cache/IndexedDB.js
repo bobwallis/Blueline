@@ -69,16 +69,6 @@ define( ['jquery', '../../../lib/db', './Null'], function( $, db, Null ) {
 						} );
 					} );
 				};
-
-				// Clear the cache if needed
-				var age = $( 'html' ).data( 'age' );
-				if( age == 'dev' ) {
-					IndexedDB.clear();
-				}
-				else {
-					// TODO
-					//tx.executeSql( 'DELETE FROM pages WHERE timestamp < ' + ((new Date( parseInt( age, 10 ) )).getTime()) );
-				}
 			} );
 		}
 	}

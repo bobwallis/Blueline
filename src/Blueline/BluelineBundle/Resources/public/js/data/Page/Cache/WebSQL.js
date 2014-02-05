@@ -59,17 +59,6 @@ define( ['jquery', './Null'], function( $, Null ) {
 								tx.executeSql( 'DELETE FROM pages' );
 							}, failure, success );
 						};
-
-						// Clear the cache if needed
-						var age = $( 'html' ).data( 'age' );
-						if( age == 'dev' ) {
-							WebSQL.clear();
-						}
-						else {
-							db.transaction( function( tx ) {
-								tx.executeSql( 'DELETE FROM pages WHERE timestamp < ' + ((new Date( parseInt( age, 10 ) )).getTime()) );
-							} );
-						}
 					}
 				);
 			}
