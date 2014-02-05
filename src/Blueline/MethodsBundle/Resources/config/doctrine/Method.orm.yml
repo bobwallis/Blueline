@@ -7,6 +7,9 @@ Blueline\MethodsBundle\Entity\Method:
             type: string
             length: 255
     fields:
+        url:
+            type: string
+            length: 255
         stage:
             type: smallint
         classification:

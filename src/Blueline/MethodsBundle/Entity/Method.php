@@ -169,7 +169,7 @@ class Method
      *
      * @param array $map
      */
-    public function setAll( $map )
+    public function setAll($map)
     {
         foreach ($map as $key => $value) {
             $method = 'set'.str_replace( ' ', '', ucwords( str_replace( '_', ' ', $key ) ) );
@@ -533,7 +533,7 @@ class Method
     {
         if (!$this->hunts) {
             $hunts = array();
-            $leadHead = array_map( function( $n ) { return PlaceNotation::bellToInt( $n ); }, str_split( $this->getLeadHead() ) );
+            $leadHead = array_map( function ($n) { return PlaceNotation::bellToInt( $n ); }, str_split( $this->getLeadHead() ) );
             for ( $i = 0, $iLim = count( $leadHead ); $i < $iLim; ++$i ) {
                 if ( ($i+1) == $leadHead[$i] ) { array_push( $hunts, $leadHead[$i] ); }
             }
@@ -1037,14 +1037,14 @@ class Method
                     $notation = PlaceNotation::explodedToPermutations( $this->getStage(), PlaceNotation::explode( $this->getNotationExpanded() ) );
                     $notation[$lengthOfLead-1] = $bobNotation[0];
                     $bobbedLead = PlaceNotation::apply( $notation, PlaceNotation::rounds( $stage ) );
-                    $bobbedLeadHeadPermutation = array_map( function( $b ) { return PlaceNotation::bellToInt( $b ) - 1; }, array_pop( $bobbedLead ) );
+                    $bobbedLeadHeadPermutation = array_map( function ($b) { return PlaceNotation::bellToInt( $b ) - 1; }, array_pop( $bobbedLead ) );
                     // Collect an array of what happens at each lead if a bob is called
                     $bobbedLeadHeads = array( PlaceNotation::permute( PlaceNotation::rounds( $stage ), $bobbedLeadHeadPermutation ) );
                     for ( $i = 1; $i < count( $leadHeads ); $i++ ) {
                         array_push( $bobbedLeadHeads, PlaceNotation::permute( $leadHeads[$i-1], $bobbedLeadHeadPermutation ) );
                     }
                     // Convert the array of lead heads into calling position names
-                    $this->callingPositions = array( 'from' => 0, 'every' => $lengthOfLead, 'titles' => array_map( function( $leadEnd ) use ( $stage ) {
+                    $this->callingPositions = array( 'from' => 0, 'every' => $lengthOfLead, 'titles' => array_map( function ($leadEnd) use ($stage) {
                         $position = array_search( PlaceNotation::intToBell( $stage ), $leadEnd );
                         switch ($position+1) {
                             case 2:
@@ -1078,7 +1078,7 @@ class Method
         if (!$this->leadHeads) {
             $rounds = PlaceNotation::rounds( $this->getStage() );
             $tmp = str_split( $this->getLeadHead() );
-            $leadHeadPermutation = array_map( function( $b ) { return PlaceNotation::bellToInt( $b ) - 1; }, $tmp );
+            $leadHeadPermutation = array_map( function ($b) { return PlaceNotation::bellToInt( $b ) - 1; }, $tmp );
             $leadHeads = array( $tmp );
             while ( !PlaceNotation::rowsEqual( $rounds, $tmp ) ) {
                 $tmp = PlaceNotation::permute( $tmp, $leadHeadPermutation );
@@ -1088,5 +1088,32 @@ class Method
         }
 
         return $this->leadHeads;
+    }
+    /**
+     * @var string
+     */
+    private $url;
+
+    /**
+     * Set url
+     *
+     * @param  string $url
+     * @return Method
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+
+        return $this;
+    }
+
+    /**
+     * Get url
+     *
+     * @return string
+     */
+    public function getUrl()
+    {
+        return $this->url;
     }
 }

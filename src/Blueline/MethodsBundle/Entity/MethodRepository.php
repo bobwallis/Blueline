@@ -8,9 +8,9 @@ use Blueline\MethodsBundle\Helpers\Classifications;
 
 class MethodRepository extends EntityRepository
 {
-    private function createQueryForFindBySearchVariables( $searchVariables, $initialQuery = null )
+    private function createQueryForFindBySearchVariables($searchVariables, $initialQuery = null)
     {
-        $query = ($initialQuery === null)? $this->createQueryBuilder( 'm' )->select( 'partial m.{title}' ) : $initialQuery;
+        $query = ($initialQuery === null)? $this->createQueryBuilder( 'm' )->select( 'partial m.{title,url}' ) : $initialQuery;
 
         if ( isset( $searchVariables['q'] ) ) {
             if ( strpos( $searchVariables['q'], '/' ) === 0 && strlen( $searchVariables['q'] ) > 1 ) {
@@ -86,7 +86,7 @@ class MethodRepository extends EntityRepository
         return $query;
     }
 
-    public function findBySearchVariables( $searchVariables )
+    public function findBySearchVariables($searchVariables)
     {
         $query = $this->createQueryForFindBySearchVariables( $searchVariables );
 
@@ -101,7 +101,7 @@ class MethodRepository extends EntityRepository
         return $query->getQuery()->getResult();
     }
 
-    public function findCountBySearchVariables( $searchVariables )
+    public function findCountBySearchVariables($searchVariables)
     {
         $query = $this->createQueryForFindBySearchVariables( $searchVariables, $this->createQueryBuilder( 'm' )->select( 'COUNT(m.title) as num' ) );
         $result = $query->getQuery()->getArrayResult();
