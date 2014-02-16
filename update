@@ -99,7 +99,7 @@ fi
 if [[ $DEV = true ]]; then
 	# Get latest jQuery
 	echo -e "\n\033[1mUpdating jQuery\033[0m..."
-	curl -s -o "$d/app/Resources/public/js/jquery.js" "http://code.jquery.com/jquery-latest.js"
+	#curl -s -o "$d/app/Resources/public/js/jquery.js" "http://code.jquery.com/jquery-latest.js"
 	echo "Done"
 
 	# Get latest html5shiv
