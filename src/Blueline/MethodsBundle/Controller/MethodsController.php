@@ -2,6 +2,7 @@
 namespace Blueline\MethodsBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Response;
 use Blueline\BluelineBundle\Helpers\Search;
 use Blueline\BluelineBundle\Helpers\Text;
 
@@ -12,20 +13,32 @@ class MethodsController extends Controller
     {
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
-        $response = $this->render( 'BluelineMethodsBundle::welcome.'.$format.'.twig' );
 
+        // Create basic response object
+        $response = new Response();
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( 129600 );
             $response->setPublic();
         }
+        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
+        if ( $response->isNotModified( $request ) ) { return $response; }
 
-        return $response;
+        return $this->render( 'BluelineMethodsBundle::welcome.'.$format.'.twig', array(), $response );
     }
 
     public function searchAction( $searchVariables = array() )
     {
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
+
+        // Create basic response object
+        $response = new Response();
+        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
+            $response->setMaxAge( 129600 );
+            $response->setPublic();
+        }
+        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
+        if ( $response->isNotModified( $request ) ) { return $response; }
 
         $methodRepository = $this->getDoctrine()->getManager()->getRepository( 'BluelineMethodsBundle:Method' );
         $searchVariables = empty( $searchVariables )? Search::requestToSearchVariables( $request, array( 'title', 'stage', 'classification', 'notation', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef', 'tdmmRef', 'pmmRef', 'lengthOfLead', 'numberOfHunts', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational', 'firstTowerbellPeal_date', 'firstTowerbellPeal_location', 'firstHandbellPeal_date', 'firstHandbellPeal_location' ) ) : $searchVariables;
@@ -35,25 +48,23 @@ class MethodsController extends Controller
 
         $pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
         $pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
-        $response = $this->render( 'BluelineMethodsBundle::search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'methods' ) );
 
-        // Caching headers
-        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
-            $response->setMaxAge( 129600 );
-            $response->setPublic();
-        }
-
-        return $response;
+        return $this->render( 'BluelineMethodsBundle::search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'methods' ), $response );
     }
 
     public function viewAction($title)
     {
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
-        $chromeless = 0;
-        if ($format == 'html') {
-            $chromeless = intval( $request->query->get( 'chromeless' ) );
+
+        // Create basic response object
+        $response = new Response();
+        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
+            $response->setMaxAge( 129600 );
+            $response->setPublic();
         }
+        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
+        if ( $response->isNotModified( $request ) ) { return $response; }
 
         $urls = array_map( "urldecode", explode( '|', $title ) );
         $titles = array_map( function ($m) { return str_replace( '_', ' ', $m ); }, $urls );
@@ -74,7 +85,7 @@ class MethodsController extends Controller
         if ( empty( $methodsCheck ) || count( $methodsCheck ) < count( $methodsCheck ) ) {
             throw $this->createNotFoundException( 'The method does not exist' );
         }
-        $url = $this->generateUrl( 'Blueline_Methods_view', array( 'chromeless' => ($chromeless?:null), 'title' => implode( '|', array_map( function ($m) { return $m['url']; }, $methodsCheck ) ), '_format' => $format ) );
+        $url = $this->generateUrl( 'Blueline_Methods_view', array( 'chromeless' => (($format == 'html')? intval( $request->query->get( 'chromeless' ) )?:null : null), 'title' => implode( '|', array_map( function ($m) { return $m['url']; }, $methodsCheck ) ), '_format' => $format ) );
         if ( $request->getRequestUri() !== urldecode( $url ) ) {
             return $this->redirect( $url, 301 );
         }
@@ -94,15 +105,7 @@ class MethodsController extends Controller
         }
 
         // Create response
-        $response = $this->render( 'BluelineMethodsBundle::view.'.$format.'.twig', compact( 'pageTitle', 'methods' ) );
-
-        // Caching headers
-        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
-            $response->setMaxAge( 129600 );
-            $response->setPublic();
-        }
-
-        return $response;
+        return $this->render( 'BluelineMethodsBundle::view.'.$format.'.twig', compact( 'pageTitle', 'methods' ), $response );
     }
 
     public function sitemapAction()
@@ -110,16 +113,17 @@ class MethodsController extends Controller
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
+        // Create basic response object
+        $response = new Response();
+        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
+            $response->setMaxAge( 129600 );
+            $response->setPublic();
+        }
+        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
+        if ( $response->isNotModified( $request ) ) { return $response; }
+
         $methods = $this->getDoctrine()->getManager()->createQuery( 'SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m' )->getArrayResult();
 
-        $response = $this->render( 'BluelineMethodsBundle::sitemap.'.$format.'.twig', compact( 'methods' ) );
-
-        // Caching headers
-        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
-            $response->setPublic();
-            $response->setMaxAge( 129600 );
-        }
-
-        return $response;
+        return $this->render( 'BluelineMethodsBundle::sitemap.'.$format.'.twig', compact( 'methods' ), $response );
     }
 }

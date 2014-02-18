@@ -2,6 +2,7 @@
 namespace Blueline\TowersBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Response;
 use Blueline\BluelineBundle\Helpers\Search;
 use Blueline\BluelineBundle\Helpers\Text;
 
@@ -12,20 +13,32 @@ class TowersController extends Controller
     {
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
-        $response = $this->render( 'BluelineTowersBundle::welcome.'.$format.'.twig' );
 
+        // Create basic response object
+        $response = new Response();
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( 129600 );
             $response->setPublic();
         }
+        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
+        if ( $response->isNotModified( $request ) ) { return $response; }
 
-        return $response;
+        return $response = $this->render( 'BluelineTowersBundle::welcome.'.$format.'.twig', array(), $response );
     }
 
     public function searchAction( $searchVariables = array() )
     {
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
+
+        // Create basic response object
+        $response = new Response();
+        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
+            $response->setMaxAge( 129600 );
+            $response->setPublic();
+        }
+        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
+        if ( $response->isNotModified( $request ) ) { return $response; }
 
         $towerRepository = $this->getDoctrine()->getManager()->getRepository( 'BluelineTowersBundle:Tower' );
         $searchVariables = empty( $searchVariables )? Search::requestToSearchVariables( $request, array( 'id', 'gridReference', 'postcode', 'country', 'county', 'diocese', 'place', 'dedication', 'note', 'contractor' ) ) : $searchVariables;
@@ -35,27 +48,25 @@ class TowersController extends Controller
 
         $pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
         $pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
-        $response = $this->render( 'BluelineTowersBundle::search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'towers' ) );
 
-        // Caching headers
-        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
-            $response->setMaxAge( 129600 );
-            $response->setPublic();
-        }
-
-        return $response;
+        return $this->render( 'BluelineTowersBundle::search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'towers' ), $response );
     }
 
     public function viewAction($id)
     {
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
-        $chromeless = 0;
-        if ($format == 'html') {
-            $chromeless = intval( $request->query->get( 'chromeless' ) );
-        }
 
-        $ids = explode( '|', $id );
+        // Create basic response object
+        $response = new Response();
+        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
+            $response->setMaxAge( 129600 );
+            $response->setPublic();
+        }
+        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
+        if ( $response->isNotModified( $request ) ) { return $response; }
+
+        $ids = array_map( 'strtoupper', explode( '|', $id ) );
 
         $towersRepository = $this->getDoctrine()->getManager()->getRepository( 'BluelineTowersBundle:Tower' );
         $em = $this->getDoctrine()->getManager();
@@ -71,7 +82,7 @@ class TowersController extends Controller
         if ( empty( $towers ) || count( $towers ) < count( $ids ) ) {
             throw $this->createNotFoundException( 'The tower does not exist' );
         }
-        $url = $this->generateUrl( 'Blueline_Towers_view', array( 'chromeless' => ($chromeless?:null), 'id' => implode( '|', array_map( function ($t) { return $t['id']; }, $towers ) ), '_format' => $format ) );
+        $url = $this->generateUrl( 'Blueline_Towers_view', array( 'chromeless' => (($format == 'html')? intval( $request->query->get( 'chromeless' ) )?:null : null), 'id' => implode( '|', array_map( function ($t) { return $t['id']; }, $towers ) ), '_format' => $format ) );
 
         if ( $request->getRequestUri() !== $url ) {
             return $this->redirect( $url, 301 );
@@ -105,15 +116,7 @@ class TowersController extends Controller
         }
 
         // Create response
-        $response = $this->render( 'BluelineTowersBundle::view.'.$format.'.twig', compact( 'pageTitle', 'towers', 'nearbyTowers', 'bbox' ) );
-
-        // Caching headers
-        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
-            $response->setMaxAge( 129600 );
-            $response->setPublic();
-        }
-
-        return $response;
+        return $this->render( 'BluelineTowersBundle::view.'.$format.'.twig', compact( 'pageTitle', 'towers', 'nearbyTowers', 'bbox' ), $response );
     }
 
     public function sitemapAction()
@@ -121,16 +124,17 @@ class TowersController extends Controller
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
+        // Create basic response object
+        $response = new Response();
+        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
+            $response->setMaxAge( 129600 );
+            $response->setPublic();
+        }
+        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
+        if ( $response->isNotModified( $request ) ) { return $response; }
+
         $towers = $this->getDoctrine()->getManager()->createQuery( 'SELECT partial t.{id} FROM BluelineTowersBundle:Tower t' )->getArrayResult();
 
-        $response = $this->render( 'BluelineTowersBundle::sitemap.'.$format.'.twig', compact( 'towers' ) );
-
-        // Caching headers
-        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
-            $response->setPublic();
-            $response->setMaxAge( 129600 );
-        }
-
-        return $response;
+        return $this->render( 'BluelineTowersBundle::sitemap.'.$format.'.twig', compact( 'towers' ), $response );
     }
 }

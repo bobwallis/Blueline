@@ -2,6 +2,7 @@
 namespace Blueline\BluelineBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Response;
 
 class DefaultController extends Controller
 {
@@ -10,9 +11,8 @@ class DefaultController extends Controller
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
-        $response = $this->render( 'BluelineBundle:Resources:'.$page.'.'.$format.'.twig' );
-
-        // Set caching headers differently for manifest
+        // Create basic response object
+        $response = new Response();
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             if ($format == 'manifest') {
                 $response->setMaxAge( 21600 );
@@ -21,7 +21,9 @@ class DefaultController extends Controller
             }
             $response->setPublic();
         }
+        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
+        if ( $response->isNotModified( $request ) ) { return $response; }
 
-        return $response;
+        return $this->render( 'BluelineBundle:Resources:'.$page.'.'.$format.'.twig', array(), $response );
     }
 }

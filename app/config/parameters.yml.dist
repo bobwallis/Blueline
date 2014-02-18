@@ -25,5 +25,4 @@ parameters:
 # Blueline
     admin_email:       blueline@example.com
     analytics_code:    false
-    asset_update:      2012-08-30 19:21:36+01:00
-    database_update:   2012-08-30 19:21:36+01:00
+    asset_update:      1392761954

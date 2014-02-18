@@ -10,17 +10,22 @@ class AssetController extends Controller
 
     public function fontAction($font)
     {
-        $format   = $this->getRequest()->getRequestFormat();
+        $request = $this->getRequest();
+        $format = $request->getRequestFormat();
         $fontPath = __DIR__.'/../Resources/public/fonts/'.$font.'.'.$format;
         if ( !file_exists( $fontPath ) ) {
             throw $this->createNotFoundException( 'The font does not exist' );
         }
 
+        // Create basic response object
         $response = new Response();
-        if ( $this->container->getParameter( 'kernel.environment' ) == 'prod' ) {
+        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( $this->cacheTime );
             $response->setPublic();
         }
+        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
+        if ( $response->isNotModified( $request ) ) { return $response; }
+
         $response->setContent( file_get_contents( $fontPath ) );
 
         return $response;
@@ -32,11 +37,14 @@ class AssetController extends Controller
         $format  = $request->getRequestFormat();
         $size =    intval( $request->get( 'size' )?:32 );
 
+        // Create basic response object
         $response = new Response();
-        if ( $this->container->getParameter( 'kernel.environment' ) == 'prod' ) {
+        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( $this->cacheTime );
             $response->setPublic();
         }
+        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
+        if ( $response->isNotModified( $request ) ) { return $response; }
 
         // Create the image
         switch ($format) {
@@ -91,12 +99,15 @@ class AssetController extends Controller
         $image->setImageFormat( 'png32' );
         $image->stripImage();
 
-        // Create response
+        // Create basic response object
         $response = new Response();
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( $this->cacheTime );
             $response->setPublic();
         }
+        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
+        if ( $response->isNotModified( $this->getRequest() ) ) { return $response; }
+
         $response->setContent( $image );
         $image->destroy();
 
@@ -118,12 +129,15 @@ class AssetController extends Controller
         $image->setImageFormat( 'png32' );
         $image->stripImage();
 
-        // Create response
+        // Create basic response object
         $response = new Response();
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( $this->cacheTime );
             $response->setPublic();
         }
+        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
+        if ( $response->isNotModified( $this->getRequest() ) ) { return $response; }
+
         $response->setContent( $image );
         $image->destroy();
 
@@ -132,8 +146,9 @@ class AssetController extends Controller
 
     public function imageAction($image)
     {
-        $format  = $this->getRequest()->getRequestFormat();
-        $file = false;
+        $request = $this->getRequest();
+        $format  = $request->getRequestFormat();
+        $file    = false;
 
         switch ($image) {
             case 'external':
@@ -151,22 +166,22 @@ class AssetController extends Controller
         }
 
         if ($file) {
-            return $this->createImageResponse( $file, $format );
+            return $this->createImageResponse( $request, $file, $format );
         } else {
             throw $this->createNotFoundException( 'Image not found' );
         }
     }
 
-    private function createImageResponse($imagePath, $format, $width = null, $height = null)
+    private function createImageResponse($request, $imagePath, $format, $width = null, $height = null)
     {
-        // Create response
+        // Create basic response object
         $response = new Response();
-
-        // Set cache headers
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( $this->cacheTime );
             $response->setPublic();
         }
+        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
+        if ( $response->isNotModified( $request ) ) { return $response; }
 
         // Check we actually need to convert
         $pathInfo = pathinfo( $imagePath );

@@ -10,8 +10,9 @@ class PagesController extends Controller
     {
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
+
+        // Create basic response object
         $response = new Response();
-        // Set caching
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( 129600 );
             $response->setPublic();
