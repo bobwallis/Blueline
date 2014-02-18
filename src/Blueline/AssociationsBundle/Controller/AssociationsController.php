@@ -19,7 +19,6 @@ class AssociationsController extends Controller
 
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( 129600 );
-            $response->setSharedMaxAge( 129600 );
             $response->setPublic();
         }
 
@@ -44,14 +43,13 @@ class AssociationsController extends Controller
         // Caching headers
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( 129600 );
-            $response->setSharedMaxAge( 129600 );
             $response->setPublic();
         }
 
         return $response;
     }
 
-    public function viewAction( $abbreviation )
+    public function viewAction($abbreviation)
     {
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
@@ -74,13 +72,13 @@ class AssociationsController extends Controller
         if ( empty( $associations ) || count( $associations ) < count( $abbreviations ) ) {
             throw $this->createNotFoundException( 'The association does not exist' );
         }
-        $url = $this->generateUrl( 'Blueline_Associations_view', array( 'chromeless' => ($chromeless?:null), 'abbreviation' => implode( '|', array_map( function( $a ) { return $a['abbreviation']; }, $associations ) ), '_format' => $format ) );
+        $url = $this->generateUrl( 'Blueline_Associations_view', array( 'chromeless' => ($chromeless?:null), 'abbreviation' => implode( '|', array_map( function ($a) { return $a['abbreviation']; }, $associations ) ), '_format' => $format ) );
 
         if ( $request->getRequestUri() !== $url && $request->getRequestUri() !== urldecode( $url ) ) {
             return $this->redirect( $url, 301 );
         }
 
-        $pageTitle = Text::toList( array_map( function( $a ) { return $a['name']; }, $associations ) );
+        $pageTitle = Text::toList( array_map( function ($a) { return $a['name']; }, $associations ) );
         $associations = array();
 
         foreach ($abbreviations as $abbreviation) {
@@ -110,7 +108,6 @@ class AssociationsController extends Controller
         // Caching headers
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( 129600 );
-            $response->setSharedMaxAge( 129600 );
             $response->setPublic();
         }
 
@@ -130,7 +127,6 @@ class AssociationsController extends Controller
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setPublic();
             $response->setMaxAge( 129600 );
-            $response->setSharedMaxAge( 129600 );
         }
 
         return $response;

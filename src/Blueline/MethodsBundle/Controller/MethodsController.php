@@ -16,7 +16,6 @@ class MethodsController extends Controller
 
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( 129600 );
-            $response->setSharedMaxAge( 129600 );
             $response->setPublic();
         }
 
@@ -41,7 +40,6 @@ class MethodsController extends Controller
         // Caching headers
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( 129600 );
-            $response->setSharedMaxAge( 129600 );
             $response->setPublic();
         }
 
@@ -101,7 +99,6 @@ class MethodsController extends Controller
         // Caching headers
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( 129600 );
-            $response->setSharedMaxAge( 129600 );
             $response->setPublic();
         }
 
@@ -121,7 +118,6 @@ class MethodsController extends Controller
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setPublic();
             $response->setMaxAge( 129600 );
-            $response->setSharedMaxAge( 129600 );
         }
 
         return $response;

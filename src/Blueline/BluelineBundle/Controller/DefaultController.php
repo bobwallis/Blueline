@@ -5,7 +5,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class DefaultController extends Controller
 {
-    public function resourceAction( $page )
+    public function resourceAction($page)
     {
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
@@ -16,10 +16,8 @@ class DefaultController extends Controller
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             if ($format == 'manifest') {
                 $response->setMaxAge( 21600 );
-                $response->setSharedMaxAge( 21600 );
             } else {
                 $response->setMaxAge( 129600 );
-                $response->setSharedMaxAge( 129600 );
             }
             $response->setPublic();
         }

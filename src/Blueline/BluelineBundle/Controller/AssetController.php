@@ -19,7 +19,6 @@ class AssetController extends Controller
         $response = new Response();
         if ( $this->container->getParameter( 'kernel.environment' ) == 'prod' ) {
             $response->setMaxAge( $this->cacheTime );
-            $response->setSharedMaxAge( $this->cacheTime );
             $response->setPublic();
         }
         $response->setContent( file_get_contents( $fontPath ) );
@@ -36,7 +35,6 @@ class AssetController extends Controller
         $response = new Response();
         if ( $this->container->getParameter( 'kernel.environment' ) == 'prod' ) {
             $response->setMaxAge( $this->cacheTime );
-            $response->setSharedMaxAge( $this->cacheTime );
             $response->setPublic();
         }
 
@@ -97,7 +95,6 @@ class AssetController extends Controller
         $response = new Response();
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( $this->cacheTime );
-            $response->setSharedMaxAge( $this->cacheTime );
             $response->setPublic();
         }
         $response->setContent( $image );
@@ -125,7 +122,6 @@ class AssetController extends Controller
         $response = new Response();
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( $this->cacheTime );
-            $response->setSharedMaxAge( $this->cacheTime );
             $response->setPublic();
         }
         $response->setContent( $image );
@@ -169,7 +165,6 @@ class AssetController extends Controller
         // Set cache headers
         if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
             $response->setMaxAge( $this->cacheTime );
-            $response->setSharedMaxAge( $this->cacheTime );
             $response->setPublic();
         }
 
