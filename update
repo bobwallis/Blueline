@@ -139,7 +139,7 @@ echo -e "\n\033[1mRebuilding CSS and JS assets\033[0m"
 rm -rf "$d/web/css"
 rm -rf "$d/web/js"
 php "$d/app/console" assetic:dump --env=prod --no-debug
-sed -i -e"s/asset_update: .*/asset_update: `date --rfc-3339=seconds`/" "$d/app/config/parameters.yml"
+sed -i -e"s/asset_update: .*/asset_update: `date "+%s"`/" "$d/app/config/parameters.yml"
 
 
 if [[ $CCCBRDATA = true ]]
@@ -163,5 +163,5 @@ if [[ $CCCBRDATA = true ]]
 	php "$d/app/console" blueline:importMethods
 	echo ""
 
-	sed -i -e"s/database_update: .*/database_update: `date --rfc-3339=seconds`/" "$d/app/config/parameters.yml"
+	sed -i -e"s/database_update: .*/database_update: `date "+%s"`/" "$d/app/config/parameters.yml"
 fi
