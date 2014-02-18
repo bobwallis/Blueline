@@ -16,7 +16,7 @@ class PagesController extends Controller
             $response->setMaxAge( 129600 );
             $response->setPublic();
         }
-        $response->setETag( $this->container->getParameter('asset_update') );
+        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
         if ( $response->isNotModified( $request ) ) { return $response; }
 
         return $this->render( 'BluelinePagesBundle::'.$page.'.'.$format.'.twig', array(), $response );
