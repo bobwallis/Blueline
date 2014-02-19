@@ -30,11 +30,14 @@ class ImportAssociationsCommand extends ContainerAwareCommand
         // Get access to the entity manager and validator service
         $em        = $this->getContainer()->get( 'doctrine' )->getEntityManager();
         $validator = $this->getContainer()->get( 'validator' );
+        $progress  = $this->getHelperSet()->get('progress');
 
         // Iterate over the data
         $dbIterator  = $em->createQuery( 'SELECT a FROM Blueline\AssociationsBundle\Entity\Association a ORDER BY a.abbreviation ASC' )->iterate();
         $dbIterator->next(); // For some reason the Doctrine query iterator needs ->next() called before it gives the first row
         $txtIterator = $associations->getIterator();
+        $progress->start( $output, count($associations) );
+        $progress->setRedrawFrequency( max(1,count($associations)/100) );
         while ( $dbIterator->valid() || $txtIterator->valid() ) {
             $dbRow  = $dbIterator->current();
             $txtRow = $txtIterator->current();
@@ -58,6 +61,7 @@ class ImportAssociationsCommand extends ContainerAwareCommand
                     $em->persist( $association );
                 }
                 $txtIterator->next();
+                $progress->advance();
             }
             // If the abbreviations of the database row and the text row match, update the database row with the text one
             elseif ( $dbRow[0]->getAbbreviation() == $txtRow['abbreviation'] ) {
@@ -65,13 +69,15 @@ class ImportAssociationsCommand extends ContainerAwareCommand
                 $dbRow[0]->setLink( $txtRow['link'] );
                 $errors = $validator->validate( $dbRow[0] );
                 if ( count( $errors ) > 0 ) {
-                    $output->writeln( '<error>  Invalid data for '.$txtRow['name'].":\n".$errors.'</error>' );
+                    $output->writeln( '<error> Invalid data for '.$txtRow['name'].":\n".$errors.'</error>' );
                     $em->detach( $dbRow[0] );
                 }
                 $txtIterator->next();
                 $dbIterator->next();
+                $progress->advance();
             }
         }
+        $progress->finish();
         // Flush all changes to the database, and finish
         $em->flush();
         $output->writeln( "\n<info>Finished updating associaton data.. Peak memory usage: ".number_format( memory_get_peak_usage() ).' bytes.</info>' );
