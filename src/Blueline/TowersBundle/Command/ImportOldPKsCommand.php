@@ -54,7 +54,7 @@ class ImportOldPKsCommand extends ContainerAwareCommand
             $tower = $towerRepository->findOneById( $txtRow['tower_id'] );
             if (!$tower) {
                 $progress->clear();
-                $output->writeln( "\r<comment> DoveID '".$txtRow['oldpk']."' is a target in newpks.txt, but isn't in the tower table</comment>" );
+                $output->writeln( "\r<comment> DoveID '".$txtRow['tower_id']."' is a target in newpks.txt, but isn't in the tower table</comment>" );
                 $progress->display();
             } else {
                 // Create the OldPK object, and persist it
