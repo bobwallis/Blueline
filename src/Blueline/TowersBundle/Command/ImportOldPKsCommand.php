@@ -34,30 +34,40 @@ class ImportOldPKsCommand extends ContainerAwareCommand
         // Print title
         $output->writeln( '<title>Updating tower old primary key data</title>' );
 
-        // Get entity manager, and tower repository
+        // Get entity manager, tower repository, and a progress bar
         $em              = $this->getContainer()->get( 'doctrine' )->getEntityManager();
         $towerRepository = $em->getRepository( 'BluelineTowersBundle:Tower' );
+        $progress        = $this->getHelperSet()->get('progress');
 
         // Delete all existing data
         $em->createQuery( 'DELETE FROM BluelineTowersBundle:OldPK' )->getResult();
         $em->flush();
 
         // Iterate over newpks.txt, importing data
-        for ( $txtIterator = new OldPKTxtIterator( __DIR__.'/../Resources/data/newpks.txt' ); $txtIterator->valid(); $txtIterator->next() ) {
+        $txtIterator = new OldPKTxtIterator( __DIR__.'/../Resources/data/newpks.txt' );
+        $oldPKCount = count($txtIterator);
+        $progress->start( $output, $oldPKCount );
+        $progress->setRedrawFrequency( $oldPKCount/100 );
+        while ( $txtIterator->valid() ) {
             $txtRow = $txtIterator->current();
             // Try to find the tower that is being referenced
             $tower = $towerRepository->findOneById( $txtRow['tower_id'] );
             if (!$tower) {
-                $output->writeln( '<comment>  DoveID \''.$txtRow['oldpk'].'\' is a target in newpks.txt, but isn\'t in the tower table</comment>' );
-                continue;
+                $progress->clear();
+                $output->writeln( "\r<comment> DoveID '".$txtRow['oldpk']."' is a target in newpks.txt, but isn't in the tower table</comment>" );
+                $progress->display();
+            } else {
+                // Create the OldPK object, and persist it
+                $oldpk = new OldPK();
+                $oldpk->setOldPK( $txtRow['oldpk'] );
+                $oldpk->setTower( $tower );
+                $em->persist( $oldpk );
             }
 
-            // Create the OldPK object, and persist it
-            $oldpk = new OldPK();
-            $oldpk->setOldPK( $txtRow['oldpk'] );
-            $oldpk->setTower( $tower );
-            $em->persist( $oldpk );
+            $txtIterator->next();
+            $progress->advance();
         }
+        $progress->finish();
 
         // Flush all changes to the database, and finish
         $em->flush();

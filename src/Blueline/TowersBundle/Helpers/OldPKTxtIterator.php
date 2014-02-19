@@ -11,11 +11,11 @@
 
 namespace Blueline\TowersBundle\Helpers;
 
-class OldPKTxtIterator implements \Iterator
+class OldPKTxtIterator implements \Iterator, \Countable
 {
     private $oldPKArray;
 
-    public function __construct( $file )
+    public function __construct($file)
     {
         $this->oldPKArray = array();
 
@@ -62,4 +62,5 @@ class OldPKTxtIterator implements \Iterator
     public function key() { return key( $this->oldPKArray ); }
     public function next() { return next( $this->oldPKArray ); }
     public function valid() { return key( $this->oldPKArray ) !== null; }
+    public function count() { return count( $this->oldPKArray ); }
 }

@@ -35,9 +35,11 @@ class ImportTowersCommand extends ContainerAwareCommand
         // Print title
         $output->writeln( '<title>Updating tower data</title>' );
 
-        // Get access to the entity manager and validator
-        $em        = $this->getContainer()->get( 'doctrine' )->getEntityManager();
-        $validator = $this->getContainer()->get( 'validator' );
+        // Get access to the entity manager, repository, validator and a progress bar
+        $em         = $this->getContainer()->get( 'doctrine' )->getEntityManager();
+        $repository = $em->getRepository( 'BluelineTowersBundle:Tower' );
+        $validator  = $this->getContainer()->get( 'validator' );
+        $progress   = $this->getHelperSet()->get('progress');
 
         // Get an array mapping association abbreviations to their IDs
         $associations = array();
@@ -45,29 +47,52 @@ class ImportTowersCommand extends ContainerAwareCommand
             $associations[$association['abbreviation']] = $association['id'];
         }
 
-        // Read data line by line. The file is in Dove ID order and so is the database, so using the
-        // ordering we can sync the database by running through both lists, updating/adding IDs which
-        // are in the file, and removing entries which are in the database but not in the file.
-        $dbIterator  = $em->createQuery( 'SELECT t FROM Blueline\TowersBundle\Entity\Tower t ORDER BY t.id' )->iterate();
+        $output->writeln( "<info>Importing basic tower data...</info>" );
+        // Read data line by line. The file is in Dove ID order, but the database disagrees on how to
+        // sort data involving spaces, underscores, etc.
+        // We'll read data from the text file line by line, update/insert each tower we get to, and
+        // also keep the DoveId in an array.
+        // Once we've updated/inserted everything, iterate through the database and remove anything
+        // not present in the array.
         $txtIterator = new DoveTxtIterator( __DIR__.'/../Resources/data/dove.txt' );
-        $dbRow       = $dbIterator->next(); // For some reason the Doctrine iterators don't initialise at 0
-        $txtRow      = $txtIterator->current();
         $notFoundAffiliations = array();
-        $towerCount  = 0;
-        while ( $dbIterator->valid() || $txtIterator->valid() ) {
-            $strcmp = ( $dbRow && $txtRow )? strcmp( $txtRow['id'], $dbRow[0]->getId() ) : null;
+        $importedTowers = array();
+        $count  = 0;
+        $towerCount = count($txtIterator);
+        $progress->start( $output, $towerCount );
+        $progress->setRedrawFrequency( $towerCount/100 );
+        while ( $txtIterator->valid() ) {
+            $txtRow = $txtIterator->current();
 
-            // If we run out of text, or the Dove ID of the text row is 'greater' than that of the
-            // database row,  delete any the database entry.
-            if ( !$txtIterator->valid() || $strcmp > 0 ) {
-                $em->remove( $dbRow[0] );
-                $dbRow = $dbIterator->next();
-            }
-
-            // If we run out of database, or the Dove ID of the text row is 'less' than that of the
-            // database row, import the text row.
-            elseif ( !$dbIterator->valid() || $strcmp < 0 ) {
-                // Create a new Tower object and copy in the data from the text file
+            // Lookup the DoveId, and store it in the list of imported towers
+            $tower = $repository->findOneById( $txtRow['id'] );
+            $importedTowers[] = $txtRow['id'];
+            if ($tower) {
+                // If the tower exists, update it
+                // First, check if there are any changes to affiliations
+                $affiliationsChanged = ( $tower->getAffiliations() != $txtRow['affiliations'] );
+                // Copy in data from the text file
+                $tower->setAll( $txtRow );
+                // Make changes to affiliation data
+                if ($affiliationsChanged) {
+                    $newAffiliations = array_filter( explode( ',', $tower->getAffiliations() ) );
+                    $oldAffiliationsObjects = $tower->getAssociations();
+                    $oldAffiliations = $oldAffiliationsObjects->map( function ($a) { return $a->getAbbreviation(); } )->toArray();
+                    // Add any new ones not in the old
+                    foreach ($newAffiliations as $affiliation) {
+                        if ( !in_array( $affiliation, $oldAffiliations ) ) {
+                            $tower->addAssociation( $em->getReference( 'BluelineAssociationsBundle:Association', $associations[$affiliation] ) );
+                        }
+                    }
+                    // Remove any old ones not in the new
+                    foreach ($oldAffiliations as $i => $affiliation) {
+                        if ( !in_array( $affiliation, $newAffiliations ) ) {
+                            $tower->removeAssociation( $oldAffiliationsObjects[$i] );
+                        }
+                    }
+                }
+            } else {
+                // Otherwise, insert a new entry
                 $tower = new Tower();
                 $tower->setAll( $txtRow );
                 // Also create references to the associations table
@@ -78,61 +103,31 @@ class ImportTowersCommand extends ContainerAwareCommand
                         $notFoundAffiliations[] = $affiliation;
                     }
                 }
-                // Validate the tower object, and persist if it passes
-                $errors = $validator->validate( $tower );
-                if ( count( $errors ) > 0 ) {
-                    $output->writeln( '<error>  Invalid data for '.$txtRow['id'].":\n".$errors.'</error>' );
-                } else {
-                    $em->persist( $tower );
-                }
-                // Move on to the next row in the text file
-                $txtRow = $txtIterator->next();
             }
 
-            // If the Dove IDs of the database row and the text row match, update the database row with
-            // the text one.
-            elseif ( $dbRow[0]->getId() === $txtRow['id'] ) {
-                // First, check if there are any changes to affiliations
-                $affiliationsChanged = ( $dbRow[0]->getAffiliations() != $txtRow['affiliations'] );
-                // Copy in data from the text file
-                $dbRow[0]->setAll( $txtRow );
-                // Make changes to affiliation data
-                if ($affiliationsChanged) {
-                    $newAffiliations = array_filter( explode( ',', $dbRow[0]->getAffiliations() ) );
-                    $oldAffiliationsObjects = $dbRow[0]->getAssociations();
-                    $oldAffiliations = $oldAffiliationsObjects->map( function ($a) { return $a->getAbbreviation(); } )->toArray();
-                    // Add any new ones not in the old
-                    foreach ($newAffiliations as $affiliation) {
-                        if ( !in_array( $affiliation, $oldAffiliations ) ) {
-                            $dbRow[0]->addAssociation( $em->getReference( 'BluelineAssociationsBundle:Association', $associations[$affiliation] ) );
-                        }
-                    }
-                    // Remove any old ones not in the new
-                    foreach ($oldAffiliations as $i => $affiliation) {
-                        if ( !in_array( $affiliation, $newAffiliations ) ) {
-                            $dbRow[0]->removeAssociation( $oldAffiliationsObjects[$i] );
-                        }
-                    }
-                }
-                // Validate the new data, and detach the invalid object if needed to prevent the bad data
-                // reaching the database
-                $errors = $validator->validate( $dbRow[0] );
-                if ( count( $errors ) > 0 ) {
-                    $output->writeln( '<error>  Invalid data for '.$txtRow['id'].":\n".$errors.'</error>' );
-                    $em->detach( $dbRow[0] );
-                }
-                // Move on to the next rows
-                $txtRow = $txtIterator->next();
-                $dbRow  = $dbIterator->next();
+            // Validate the tower object, and persist if it passes
+            $errors = $validator->validate( $tower );
+            if ( count( $errors ) > 0 ) {
+                $progress->clear();
+                $output->writeln( "\r<error> Invalid data for ".$txtRow['id'].":\n".$errors.'</error>' );
+                $progress->display();
+            } else {
+                $em->persist( $tower );
             }
+            // Move on to the next row in the text file
+            $txtIterator->next();
+            $progress->advance();
 
             // Flush every so often so we don't run out of memory
-            ++$towerCount;
-            if ($towerCount % 50 == 0) {
+            ++$count;
+            if ($count % 50 == 0) {
                 $em->flush();
                 $em->clear();
             }
         }
+        $progress->finish();
+        $em->flush();
+        $em->clear();
 
         // Print a warning for any affiliations that couldn't be found
         if ( count( $notFoundAffiliations ) > 0 ) {
@@ -141,8 +136,38 @@ class ImportTowersCommand extends ContainerAwareCommand
             $output->writeln( '<comment>  Association with abbreviation(s) '.implode( ', ', $notFoundAffiliations ).' not found.</comment>' );
         }
 
-        // Flush all changes to the database, and finish
+        // Now begin the removal process
+        $output->writeln( '<info>Checking for deletion of old data...</info>' );
+        $dbIterator = $em->createQuery( 'SELECT t FROM Blueline\TowersBundle\Entity\Tower t ORDER BY t.id' )->iterate();
+        $dbRow      = $dbIterator->next(); // For some reason the Doctrine iterators don't initialise at 0
+        $count = 0;
+        $progress->start( $output, $towerCount );
+        $progress->setRedrawFrequency( $towerCount/100 );
+        while ( $dbIterator->valid() ) {
+            // If the entry found in the database wasn't just imported, remove it
+            if ( !in_array( $dbRow[0]->getId(), $importedTowers ) ) {
+                $progress->clear();
+                $output->writeln( "\r<comment> Removed ".$dbRow[0]->getId().'</comment>' );
+                $progress->display();
+                $em->remove( $dbRow[0] );
+            }
+
+            // Advance through the database iterator
+            $dbRow = $dbIterator->next();
+            $progress->advance();
+
+            // Flush every now and again
+            ++$count;
+            if ($count % 20 == 0) {
+                $em->flush();
+                $em->clear();
+            }
+        }
+        $progress->finish();
         $em->flush();
+        $em->clear();
+
+        // Finish
         $output->writeln( "\n<info>Finished updating tower data.. Peak memory usage: ".number_format( memory_get_peak_usage() ).' bytes.</info>' );
     }
 }

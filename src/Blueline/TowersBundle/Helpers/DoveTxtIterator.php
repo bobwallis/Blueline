@@ -12,16 +12,19 @@ namespace Blueline\TowersBundle\Helpers;
 
 use Blueline\TowersBundle\Helpers\LongCounty;
 
-class DoveTxtIterator implements \Iterator
+class DoveTxtIterator implements \Iterator, \Countable
 {
+    private $file;
     private $handle;
     private $columns;
     private $position;
     private $currentTower;
+    private $count = -1;
 
-    public function __construct( $file )
+    public function __construct($file)
     {
         // Open dove.txt, count the number of lines and extract column headings
+        $this->file = $file;
         if ( ( $this->handle = fopen( $file, 'r' ) ) == false ) { return false; }
         if ( ( $this->columns = fgetcsv( $this->handle, 0, "\\" ) ) == false ) { return false; }
         // Read the first tower
@@ -216,5 +219,22 @@ class DoveTxtIterator implements \Iterator
     public function valid()
     {
         return ( $this->currentTower && !!$this->currentTower['id'] );
+    }
+
+    public function count()
+    {
+        if ($this->count === -1) {
+            $count = 0;
+            $handle = fopen( $this->file, 'r' );
+            while ( !feof( $handle ) ) {
+                if ( fgets( $handle ) !== false ) {
+                        $count++;
+                }
+            }
+            fclose( $handle );
+            $this->count = $count - 1;
+        }
+
+        return $this->count;
     }
 }
