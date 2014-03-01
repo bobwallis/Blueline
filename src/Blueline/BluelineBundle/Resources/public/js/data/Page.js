@@ -16,14 +16,19 @@ define( ['eve', 'jquery', './Page/Cache', '../helpers/URL'], function ( eve, $, 
 
 			// Update the history object, and other things that rely on knowing the current URL
 			if( type !== 'popstate') {
-				// If the last state type was 'keyup' and this one was too, 
-				// then replace that state in the history
-				if( type === 'keyup' && window.history.state !== null && window.history.state.type === 'keyup' ) {
-					history.replaceState( { url: url, type: 'keyup' }, null, url );
+				try {
+					// If the last state type was 'keyup' and this one was too, 
+					// then replace that state in the history
+					if( type === 'keyup' && window.history.state !== null && window.history.state.type === 'keyup' ) {
+						history.replaceState( { url: url, type: 'keyup' }, null, url );
+					}
+					// Otherwise make a new one
+					else {
+						history.pushState( { url: url, type: type }, null, url );
+					}
 				}
-				// Otherwise make a new one
-				else {
-					history.pushState( { url: url, type: type }, null, url );
+				catch( e ) {
+					location.href = url;
 				}
 			}
 
