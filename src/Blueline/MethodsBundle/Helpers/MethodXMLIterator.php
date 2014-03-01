@@ -13,7 +13,7 @@ namespace Blueline\MethodsBundle\Helpers;
 use Blueline\MethodsBundle\Helpers\LeadHeadCodes;
 use Blueline\MethodsBundle\Helpers\PlaceNotation;
 
-class MethodXMLIterator implements \Iterator
+class MethodXMLIterator implements \Iterator, \Countable
 {
     private $data;
 
@@ -126,4 +126,5 @@ class MethodXMLIterator implements \Iterator
     public function key() { return key( $this->data ); }
     public function next() { return next( $this->data ); }
     public function valid() { return key( $this->data ) !== null; }
+    public function count() { return count( $this->data ); }
 }

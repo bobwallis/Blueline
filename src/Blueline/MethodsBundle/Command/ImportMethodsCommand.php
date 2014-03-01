@@ -40,12 +40,13 @@ class ImportMethodsCommand extends ContainerAwareCommand
         // Print title
         $output->writeln( '<title>Updating method data</title>' );
 
-        // Get access to the entity manager and validator
+        // Get access to the entity manager,validator and a progress bar indicator
         $em                  = $this->getContainer()->get( 'doctrine' )->getEntityManager();
         $repository          = $em->getRepository( 'BluelineMethodsBundle:Method' );
         $renamedRepository   = $em->getRepository( 'BluelineMethodsBundle:Renamed' );
         $duplicateRepository = $em->getRepository( 'BluelineMethodsBundle:Duplicate' );
         $validator           = $this->getContainer()->get( 'validator' );
+        $progress            = $this->getHelperSet()->get('progress');
 
         $output->writeln( "<info>Importing basic method data...</info>" );
         // The method data isn't presented in a sensible order in the XML files, so detecting
@@ -60,12 +61,15 @@ class ImportMethodsCommand extends ContainerAwareCommand
         $dataFiles = new \GlobIterator( __DIR__.'/../Resources/data/*.xml' );
         foreach ($dataFiles as $file) {
             // Print title
-            $output->writeln( '  Importing '.$file->getFilename().'...' );
+            $output->writeln( ' Importing '.$file->getFilename().'...' );
 
             // Create the iterator, and begin
             $xmlIterator = new MethodXMLIterator( __DIR__.'/../Resources/data/'.$file->getFilename() );
             $xmlRow      = $xmlIterator->current();
-            $methodCount = 0;
+            $count = 0;
+            $methodCount = count($xmlIterator);
+            $progress->start( $output, $methodCount );
+            $progress->setRedrawFrequency( max(1, $methodCount/100) );
             while ( $xmlIterator->valid() ) {
                 // Lookup the title, and store it in the list of imported titles
                 $method = $repository->findOneByTitle( $xmlRow['title'] );
@@ -83,24 +87,26 @@ class ImportMethodsCommand extends ContainerAwareCommand
                 // reaching the database
                 $errors = $validator->validate( $method );
                 if ( count( $errors ) > 0 ) {
-                    $output->writeln( '<error>  Invalid data for '.$xmlRow['title'].":\n".$errors.'</error>' );
+                    $progress->clear();
+                    $output->writeln( "\r<error> Invalid data for ".$xmlRow['title'].":\n".$errors.'</error>' );
+                    $progress->display();
                     $em->detach( $method );
                 } else {
                     $em->persist( $method );
                 }
 
                 // Flush every so often so we don't run out of memory
-                ++$methodCount;
-                if ($methodCount % 20 == 0) {
+                ++$count;
+                if ($count % 20 == 0) {
                     $em->flush();
                     $em->clear();
                 }
 
                 // Get the next row
                 $xmlRow = $xmlIterator->next();
+                $progress->advance();
             }
-
-            // Flush any remaining changes to the database
+            $progress->finish();
             $em->flush();
             $em->clear();
         }
@@ -113,9 +119,12 @@ class ImportMethodsCommand extends ContainerAwareCommand
         // strings containing non-alphanumeric and accented characters.
         // Get around the issue by looking up each title in the array of imported methods.
         // This will obviously be slower than is ideal.
-        $dbIterator = $em->createQuery( 'SELECT m FROM Blueline\MethodsBundle\Entity\Method m ORDER BY m.title' )->iterate();
-        $dbRow      = $dbIterator->next(); // For some reason the Doctrine iterators don't initialise at 0
-        $count      = 0;
+        $dbIterator  = $em->createQuery( 'SELECT m FROM Blueline\MethodsBundle\Entity\Method m ORDER BY m.title' )->iterate();
+        $dbRow       = $dbIterator->next(); // For some reason the Doctrine iterators don't initialise at 0
+        $count       = 0;
+        $methodCount = $em->createQuery( 'SELECT count(m) FROM Blueline\MethodsBundle\Entity\Method m' )->getSingleScalarResult();
+        $progress->start( $output, $methodCount );
+        $progress->setRedrawFrequency( max(1, $methodCount/100) );
         while ( $dbIterator->valid() ) {
             // If the entry found in the database wasn't just imported, remove it
             if ( !in_array( $dbRow[0]->getTitle(), $importedMethods ) ) {
@@ -132,7 +141,9 @@ class ImportMethodsCommand extends ContainerAwareCommand
 
             // Advance through the database iterator
             $dbRow = $dbIterator->next();
+            $progress->advance();
         }
+        $progress->finish();
         $em->flush();
         $em->clear();
 
@@ -156,7 +167,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
                 // reaching the database
                 $errors = $validator->validate( $method );
                 if ( count( $errors ) > 0 ) {
-                    $output->writeln( '<error>  Invalid extra data for '.$txtRow['title'].":\n".$errors.'</error>' );
+                    $output->writeln( '<error> Invalid extra data for '.$txtRow['title'].":\n".$errors.'</error>' );
                     $em->detach( $method );
                 } else {
                     $em->persist( $method );
@@ -177,7 +188,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
             $method  = $repository->findOneByTitle( $renamedRow['method'] );
 
             if (! $method) {
-                $output->writeln( '<comment>  "'.$renamedRow['method'].'" not found in methods table</comment>' );
+                $output->writeln( '<comment> "'.$renamedRow['method'].'" not found in methods table</comment>' );
             } else {
                 $renamedRow['method'] = $method;
                 if ($renamed) {
@@ -203,7 +214,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
             $method  = $repository->findOneByTitle( $duplicateRow['method'] );
 
             if (! $method) {
-                $output->writeln( '<comment>  "'.$duplicateRow['method'].'" not found in methods table</comment>' );
+                $output->writeln( '<comment> "'.$duplicateRow['method'].'" not found in methods table</comment>' );
             } else {
                 $duplicateRow['method'] = $method;
                 if ($duplicate) {
