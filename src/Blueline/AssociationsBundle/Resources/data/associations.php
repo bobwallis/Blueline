@@ -263,7 +263,7 @@ $associations = array (
   array (
     'abbreviation' => 'SDDG',
     'name' => 'St David\'s Diocesan Guild',
-    'link' => 'http://www.rdasouthwales.org.uk/stdavidsringing/',
+    'link' => 'https://sites.google.com/site/stdavidsguild/home',
   ),
   44 =>
   array (
