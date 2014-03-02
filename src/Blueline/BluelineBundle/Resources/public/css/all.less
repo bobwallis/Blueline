@@ -66,6 +66,12 @@ a {
 	}
 }
 
+// Selection styles
+::selection, ::-moz-selection {
+    background: @headerBackground;
+    color: #FFF;
+}
+
 // Placeholder text
 ::-webkit-input-placeholder { color: #999; }
 :-moz-placeholder { color: #999; }
@@ -76,6 +82,7 @@ a {
 .normalweight { font-weight: normal; }
 
 // Import general CSS styles
+@import 'all/scrollbars.less';
 @import 'all/overlays.less';
 @import 'all/header.less';
 @import 'all/content.less';

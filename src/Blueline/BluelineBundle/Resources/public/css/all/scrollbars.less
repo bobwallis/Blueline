@@ -1,0 +1,30 @@
+// Webkit scrollbars
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+::-webkit-scrollbar-button {
+    display: none;
+}
+::-webkit-scrollbar-track:vertical {
+    background: @titleBackground url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAABCAIAAABlidhuAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAEklEQVQI12N8cO+msKgUA14AAGMvAtt9ZH3bAAAAAElFTkSuQmCC') top left repeat-y;
+    border-top: 35px solid @headerBackground;
+}
+::-webkit-scrollbar-track:horizontal {
+    background: @titleBackground;
+    border-top: 1px solid @lightGrey;
+}
+::-webkit-scrollbar-thumb {
+    border: 1px solid #b2b2b2;
+    background: #c8c8c8;
+}
+::-webkit-scrollbar-thumb:vertical {
+    min-height: 100px;
+}
+::-webkit-scrollbar-thumb:horizontal {
+    min-width: 100px;
+}
+::-webkit-scrollbar-thumb:hover, ::-webkit-scrollbar-thumb:active {
+    border: 1px solid #9c9c9c;
+    background: #b2b2b2;
+}
