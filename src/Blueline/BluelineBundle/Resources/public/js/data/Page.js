@@ -16,7 +16,6 @@ define( ['eve', 'jquery', './Page/Cache', '../helpers/URL'], function ( eve, $, 
 
 			// Update the history object, and other things that rely on knowing the current URL
 			if( type !== 'popstate') {
-				try {
 					// If the last state type was 'keyup' and this one was too, 
 					// then replace that state in the history
 					if( type === 'keyup' && window.history.state !== null && window.history.state.type === 'keyup' ) {
@@ -26,10 +25,6 @@ define( ['eve', 'jquery', './Page/Cache', '../helpers/URL'], function ( eve, $, 
 					else {
 						history.pushState( { url: url, type: type }, null, url );
 					}
-				}
-				catch( e ) {
-					location.href = url;
-				}
 			}
 
 			// Generate the information object issued with the page.request event
