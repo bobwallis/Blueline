@@ -98,11 +98,11 @@ Blueline\MethodsBundle\Entity\Method:
             length: 255
             nullable: true
     manyToOne:
-        firstPealTower:
+        firstTowerbellPeal_tower:
             targetEntity: Blueline\TowersBundle\Entity\Tower
             inversedBy: firstPeals
             joinColumn:
-                name: firstPealTower_id
+                name: firstTowerbellPeal_doveid
                 referencedColumnName: id
     oneToMany:
         renamed:

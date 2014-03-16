@@ -113,7 +113,7 @@ Blueline\TowersBundle\Entity\Tower:
             mappedBy: tower
         firstPeals:
             targetEntity: Blueline\MethodsBundle\Entity\Method
-            mappedBy: firstPealTower
+            mappedBy: firstTowerbellPeal_tower
     manyToMany:
         associations:
             targetEntity: Blueline\AssociationsBundle\Entity\Association

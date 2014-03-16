@@ -16,7 +16,7 @@
 		{{ header( { 'title': tower.place, 'title2': (tower.dedication != 'Unknown')? tower.dedication : null }, list( [tower.county, tower.country],', ',', ' ), { 'id': 'tower_'~tower.id~'_tabBar', 'tabs': [
 			{ 'title': 'Details', 'content': 'tower_details_'~tower.id },
 			{ 'title': 'Map', 'content': 'tower_map_'~tower.id, 'className': 'l700' },
-			(tower.firstPealedMethods|default([]) is not empty)? { 'title': 'Methods First Pealed', 'content': 'tower_peals_'~tower.id } : {}
+			(tower.firstPeals|default([]) is not empty)? { 'title': 'Methods First Pealed', 'content': 'tower_peals_'~tower.id } : {}
 		] } ) }}
 		<div id="tower_map_{{ tower.id }}" class="staticMap" data-ll="{{ tower.latitude }},{{ tower.longitude }}" data-image="//maps.google.com/maps/api/staticmap?format=png&amp;scale=2&amp;size=310x380&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center={{ tower.latitude }},{{ tower.longitude }}&amp;markers=size:small|color:red|{{ tower.latitude }},{{ tower.longitude }}">
 			<noscript>
@@ -66,8 +66,8 @@
 		<div id="tower_peals_{{ tower.id }}" class="firstPeals">
 			<noscript><h2>First Peals</h2></noscript>
 			<ol>
-				{% for method in tower.firstPealedMethods|default([]) %}
-					<li><a href="{{ path( 'Blueline_Methods_view', { 'title': method.title|replace({' ':'_'}) } ) }}">{{ method.title }}<small class="extra"> ({{ method.firstTowerbellPealDate|date('Y-m-d') }})</small></a></li>
+				{% for method in tower.firstPeals|default([]) %}
+					<li><a href="{{ path( 'Blueline_Methods_view', { 'title': method.url } ) }}">{{ method.title }}<small class="extra"> ({{ method.firstTowerbellPealDate|date('Y-m-d') }})</small></a></li>
 				{% else %}
 					<li>None</li>
 				{% endfor %}

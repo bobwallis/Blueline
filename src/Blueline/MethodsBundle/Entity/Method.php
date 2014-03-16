@@ -954,29 +954,29 @@ class Method
     /**
      * @var Blueline\TowersBundle\Entity\Tower
      */
-    private $firstPealTower;
+    private $firstTowerbellPeal_tower;
 
     /**
-     * Set firstPealTower
+     * Set firstTowerbellPeal_tower
      *
-     * @param  Blueline\TowersBundle\Entity\Tower $firstPealTower
+     * @param  Blueline\TowersBundle\Entity\Tower $firstTowerbellPeal_tower
      * @return Method
      */
-    public function setFirstPealTower(\Blueline\TowersBundle\Entity\Tower $firstPealTower = null)
+    public function setFirstTowerbellPealTower(\Blueline\TowersBundle\Entity\Tower $firstTowerbellPeal_tower = null)
     {
-        $this->firstPealTower = $firstPealTower;
+        $this->firstTowerbellPeal_tower = $firstTowerbellPeal_tower;
 
         return $this;
     }
 
     /**
-     * Get firstPealTower
+     * Get firstTowerbellPeal_tower
      *
      * @return Blueline\MethodsBundle\Entity\Tower
      */
-    public function getFirstPealTower()
+    public function getFirstTowerbellPealTower()
     {
-        return $this->firstPealTower;
+        return $this->firstTowerbellPeal_tower;
     }
     /**
      * @var \Doctrine\Common\Collections\ArrayCollection

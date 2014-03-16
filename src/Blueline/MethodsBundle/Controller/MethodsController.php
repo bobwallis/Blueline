@@ -100,7 +100,6 @@ class MethodsController extends Controller
                 WHERE m.title = :title' )
             ->setParameter( 'title', $methodTitle['title'] )
             ->getSingleResult();
-
             $methods[] = $method;
         }
 
