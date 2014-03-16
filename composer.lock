@@ -629,12 +629,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hearsayit/HearsayRequireJSBundle.git",
-                "reference": "4f61ee017294917ca640d8c21b00e75b506a5f26"
+                "reference": "650c7a7c7eaffdd6638d24916b3a7b9e89f70d79"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hearsayit/HearsayRequireJSBundle/zipball/4f61ee017294917ca640d8c21b00e75b506a5f26",
-                "reference": "4f61ee017294917ca640d8c21b00e75b506a5f26",
+                "url": "https://api.github.com/repos/hearsayit/HearsayRequireJSBundle/zipball/650c7a7c7eaffdd6638d24916b3a7b9e89f70d79",
+                "reference": "650c7a7c7eaffdd6638d24916b3a7b9e89f70d79",
                 "shasum": ""
             },
             "require": {
@@ -677,7 +677,7 @@
                 "requirejs",
                 "rjs"
             ],
-            "time": "2014-02-05 09:22:03"
+            "time": "2014-03-10 12:49:50"
         },
         {
             "name": "incenteev/composer-parameter-handler",
