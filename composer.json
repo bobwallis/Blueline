@@ -19,7 +19,9 @@
         "sensio/framework-extra-bundle": "~3.0",
         "sensio/generator-bundle": "~2.3",
         "incenteev/composer-parameter-handler": "~2.0",
-        "hearsay/require-js-bundle": "2.0.*@dev"
+        "hearsay/require-js-bundle": "2.0.*@dev",
+        "components/jquery": "1.11.*",
+        "afarkas/html5shiv": "3.7.*"
     },
     "scripts": {
         "post-install-cmd": [
@@ -38,7 +40,8 @@
         ]
     },
     "config": {
-        "bin-dir": "bin"
+        "bin-dir": "bin",
+        "component-dir": "web/components"
     },
     "minimum-stability": "stable",
     "extra": {

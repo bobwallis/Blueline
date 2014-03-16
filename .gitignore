@@ -6,7 +6,10 @@ composer.phar
 app/config/parameters.yml
 */logs/*
 */cache/*
-web/bundles/*
+
+web/bundles
+web/components
 web/css
 web/js
+
 vendor/*
