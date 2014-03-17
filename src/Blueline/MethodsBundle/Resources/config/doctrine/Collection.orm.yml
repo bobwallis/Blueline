@@ -1,0 +1,16 @@
+Blueline\MethodsBundle\Entity\Collection:
+    type: entity
+    repositoryClass: Blueline\MethodsBundle\Entity\CollectionRepository
+    table: collections
+    id:
+        id:
+            type: string
+            length: 255
+    fields:
+        name:
+            type: string
+            length: 255
+    manyToMany:
+        methods:
+            targetEntity: Method
+            mappedBy: collections

@@ -1116,4 +1116,42 @@ class Method
     {
         return $this->url;
     }
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     */
+    private $collections;
+
+
+    /**
+     * Add collections
+     *
+     * @param \Blueline\MethodsBundle\Entity\Collection $collections
+     * @return Method
+     */
+    public function addCollection(\Blueline\MethodsBundle\Entity\Collection $collections)
+    {
+        $this->collections[] = $collections;
+
+        return $this;
+    }
+
+    /**
+     * Remove collections
+     *
+     * @param \Blueline\MethodsBundle\Entity\Collection $collections
+     */
+    public function removeCollection(\Blueline\MethodsBundle\Entity\Collection $collections)
+    {
+        $this->collections->removeElement($collections);
+    }
+
+    /**
+     * Get collections
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getCollections()
+    {
+        return $this->collections;
+    }
 }

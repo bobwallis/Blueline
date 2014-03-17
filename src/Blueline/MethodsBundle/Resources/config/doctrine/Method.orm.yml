@@ -111,3 +111,7 @@ Blueline\MethodsBundle\Entity\Method:
         duplicate:
             targetEntity: Duplicate
             mappedBy: method
+    manyToMany:
+        collections:
+            targetEntity: Collection
+            inversedBy: methods
