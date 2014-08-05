@@ -72,8 +72,8 @@ define( ['jquery'], function( $ ) {
 							if( prev.length > 0 ) {
 								current.removeClass( 'selected' );
 								prev.addClass( 'selected' );
-							// Scroll into view if not visible
-								prevOffsetTop = prev.offset().top;
+								// Scroll into view if not visible
+								prevOffsetTop = prev.offset().top - $('#top').outerHeight() - $('#search').outerHeight();
 								prevOffsetBottom = prevOffsetTop + prev.outerHeight();
 								if( prevOffsetTop < windowScrollTop ) { $( 'html, body' ).animate( { scrollTop: prevOffsetTop-2 }, 75 ); }
 								else if( prevOffsetBottom > windowScrollBottom ) { $( 'html, body' ).animate( { scrollTop: windowScrollTop+2+(prevOffsetBottom-windowScrollBottom) }, 75 ); }
@@ -99,7 +99,7 @@ define( ['jquery'], function( $ ) {
 							current.removeClass( 'selected' );
 							next.addClass( 'selected' );
 							// Scroll into view if not visible
-							nextOffsetTop = next.offset().top;
+							nextOffsetTop = next.offset().top + next.outerHeight();
 							nextOffsetBottom = nextOffsetTop + next.outerHeight();
 							if( nextOffsetTop < windowScrollTop ) { $( 'html, body' ).animate( { scrollTop: nextOffsetTop-2 }, 75 ); }
 							else if( nextOffsetBottom > windowScrollBottom ) { $( 'html, body' ).animate( { scrollTop: windowScrollTop+2+(nextOffsetBottom-windowScrollBottom) }, 75 ); }
