@@ -20,7 +20,7 @@
 			<li><a href="{{ path( 'Blueline_Towers_view', { 'id': tower.id } ) }}">{{ tower.place }} <small>({{ tower.dedication }})</small></a></li>
 		{% endfor %}
 		</ol>
-		{{ paging( 'Blueline_Towers_search', searchVariables, pageActive, pageCount ) }}
+		{{ paging( 'Blueline_Towers_search', searchVariables, pageActive, pageCount, count ) }}
 		{% else %}
 		<p class="nothing">No results</p>
 		{% endif %}

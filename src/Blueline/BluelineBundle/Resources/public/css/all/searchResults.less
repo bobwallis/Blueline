@@ -1,10 +1,8 @@
 .search {
 	li {
 		&.selected {
-			padding-left: 8px;
-			margin-left: -8px;
 			background-repeat: no-repeat;
-			background-position: left center;
+			background-position: 2px center;
 			background-image: url(../images/select.svg);
 			a {
 				border-bottom-color: #29404C;
@@ -18,6 +16,9 @@
 
 div.paging {
 	margin: @contentYPadding @contentXPadding;
+	.extra {
+	color: #666;
+	}
 }
 div.pagingLinks {
 	color: #CCC;
@@ -33,10 +34,5 @@ div.pagingLinks {
 @media screen and (max-width: @smallScreenSize) {
 	div.paging {
 		text-align: center;
-	}
-	.search {
-		li.selected {
-			background-position-x: 12px;
-		}
 	}
 }

@@ -1,6 +1,6 @@
-{% macro paging( searchPath, searchVariables, pageActive, pageCount ) %}
+{% macro paging( searchPath, searchVariables, pageActive, pageCount, results ) %}
 <div class="paging">
-	<p>Page {{ pageActive }} of {{ pageCount }}</p>
+	<p>Page {{ pageActive|number_format }} of {{ pageCount|number_format }}{% if results is not empty %}&nbsp;&nbsp;<small class="extra">( {{ results|number_format }} results )</small>{% endif %}</p>
 {% if pageCount > 1 %}
 	<div class="pagingLinks">
 		{% if pageActive > 1 %}

@@ -24,7 +24,7 @@ class Search
         $searchVariables['offset'] = intval( $request->query->get( 'offset' ) );
         $searchVariables['count'] = intval( $request->query->get( 'count' ) );
         if ($searchVariables['offset'] < 0) { $searchVariables['offset'] = 0; }
-        if ($searchVariables['count'] <= 0) { $searchVariables['count'] = 20; }
+        if ($searchVariables['count'] <= 0) { $searchVariables['count'] = 15; }
 
         return $searchVariables;
     }
