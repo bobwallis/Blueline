@@ -62,7 +62,7 @@
 		{% stylesheets '@BluelineBundle/Resources/public/css/lib/normalize.css' '@BluelineBundle/Resources/public/css/all.less' output='css/all.css' filter='less, ?yui_css' %}
 			<link rel="stylesheet" media="all" href="{{ asset_url }}" />
 		{% endstylesheets %}
-		{% stylesheets '@BluelineBundle/Resources/public/css/lib/normalize.css' '@BluelineBundle/Resources/public/css/print.less' output='css/print.css' filter='less, yui_css' %}
+		{% stylesheets '@BluelineBundle/Resources/public/css/lib/normalize.css' '@BluelineBundle/Resources/public/css/print.less' output='css/print.css' filter='less, ?yui_css' %}
 			<link rel="stylesheet" media="print" href="{{ asset_url }}" />
 		{% endstylesheets %}
 		{% stylesheets '@BluelineBundle/Resources/public/css/old_ie.less' output='css/old_ie.css' filter='less, ?yui_css' %}
