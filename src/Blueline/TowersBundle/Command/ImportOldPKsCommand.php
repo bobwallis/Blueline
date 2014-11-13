@@ -36,7 +36,7 @@ class ImportOldPKsCommand extends ContainerAwareCommand
         $output->writeln( '<title>Updating tower old primary key data</title>' );
 
         // Get entity manager, tower repository, and a progress bar
-        $em              = $this->getContainer()->get( 'doctrine' )->getEntityManager();
+        $em              = $this->getContainer()->get( 'doctrine' )->getManager();
         $towerRepository = $em->getRepository( 'BluelineTowersBundle:Tower' );
         $progress        = $this->getHelperSet()->get('progress');
 

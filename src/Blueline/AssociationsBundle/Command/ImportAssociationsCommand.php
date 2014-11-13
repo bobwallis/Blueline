@@ -30,7 +30,7 @@ class ImportAssociationsCommand extends ContainerAwareCommand
         $associations = new \ArrayObject( $associations );
 
         // Get access to the entity manager and validator service
-        $em        = $this->getContainer()->get( 'doctrine' )->getEntityManager();
+        $em        = $this->getContainer()->get( 'doctrine' )->getManager();
         $validator = $this->getContainer()->get( 'validator' );
         $progress  = $this->getHelperSet()->get('progress');
 

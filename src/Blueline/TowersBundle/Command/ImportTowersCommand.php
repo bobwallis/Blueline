@@ -37,7 +37,7 @@ class ImportTowersCommand extends ContainerAwareCommand
         $output->writeln( '<title>Updating tower data</title>' );
 
         // Get access to the entity manager, repository, validator and a progress bar
-        $em         = $this->getContainer()->get( 'doctrine' )->getEntityManager();
+        $em         = $this->getContainer()->get( 'doctrine' )->getManager();
         $repository = $em->getRepository( 'BluelineTowersBundle:Tower' );
         $validator  = $this->getContainer()->get( 'validator' );
         $progress   = $this->getHelperSet()->get('progress');

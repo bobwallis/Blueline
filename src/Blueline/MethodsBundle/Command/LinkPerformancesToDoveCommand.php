@@ -28,7 +28,7 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
         $output->writeln( '<title>Linking performances to towers</title>' );
 
         // Get access to the entity manager,validator and a progress bar indicator
-        $em                    = $this->getContainer()->get( 'doctrine' )->getEntityManager();
+        $em                    = $this->getContainer()->get( 'doctrine' )->getManager();
         $performanceRepository = $em->getRepository( 'BluelineMethodsBundle:Performance' );
         $towerRepository       = $em->getRepository( 'BluelineTowersBundle:Tower' );
         $validator             = $this->getContainer()->get( 'validator' );

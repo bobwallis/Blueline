@@ -43,7 +43,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
         $output->writeln( '<title>Updating method data</title>' );
 
         // Get access to the entity manager,validator and a progress bar indicator
-        $em                    = $this->getContainer()->get( 'doctrine' )->getEntityManager();
+        $em                    = $this->getContainer()->get( 'doctrine' )->getManager();
         $methodRepository      = $em->getRepository( 'BluelineMethodsBundle:Method' );
         $collectionRepository  = $em->getRepository( 'BluelineMethodsBundle:Collection' );
         $methodInCollectionRepository = $em->getRepository( 'BluelineMethodsBundle:MethodInCollection' );

@@ -29,7 +29,7 @@ class CheckAssociationsLinksCommand extends ContainerAwareCommand
         $output->writeln( '<title>Checking association links</title>' );
 
         // Get an array of association data
-        $associations = $this->getContainer()->get( 'doctrine' )->getEntityManager()
+        $associations = $this->getContainer()->get( 'doctrine' )->getManager()
                              ->createQuery( 'SELECT a.abbreviation, a.link FROM BluelineAssociationsBundle:Association a ORDER BY a.abbreviation' )
                              ->getArrayResult();
         foreach ($associations as $association) {

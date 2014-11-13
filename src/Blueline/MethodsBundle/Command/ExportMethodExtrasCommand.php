@@ -16,7 +16,7 @@ class ExportMethodExtrasCommand extends ContainerAwareCommand
     protected function execute( InputInterface $input, OutputInterface $output )
     {
         // Get an array of method data
-        $methods = $this->getContainer()->get( 'doctrine' )->getEntityManager()
+        $methods = $this->getContainer()->get( 'doctrine' )->getManager()
                              ->createQuery( 'SELECT m.title, m.calls, m.ruleOffs FROM BluelineMethodsBundle:Method m WHERE m.calls IS NOT NULL OR m.ruleOffs IS NOT NULL ORDER BY m.title' )
                              ->getArrayResult();
         // Print it

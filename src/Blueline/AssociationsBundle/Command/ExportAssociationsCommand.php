@@ -16,7 +16,7 @@ class ExportAssociationsCommand extends ContainerAwareCommand
     protected function execute( InputInterface $input, OutputInterface $output )
     {
         // Get an array of association data
-        $associations = $this->getContainer()->get( 'doctrine' )->getEntityManager()
+        $associations = $this->getContainer()->get( 'doctrine' )->getManager()
                              ->createQuery( 'SELECT a.abbreviation, a.name, a.link FROM BluelineAssociationsBundle:Association a ORDER BY a.abbreviation' )
                              ->getArrayResult();
         // Print it
