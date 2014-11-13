@@ -30,6 +30,7 @@ class ImportOldPKsCommand extends ContainerAwareCommand
         // Set up styles
         $output->getFormatter()
                ->setStyle( 'title', new OutputFormatterStyle( 'white', null, array( 'bold' ) ) );
+        $targetConsoleWidth = 75;
 
         // Print title
         $output->writeln( '<title>Updating tower old primary key data</title>' );
@@ -47,6 +48,7 @@ class ImportOldPKsCommand extends ContainerAwareCommand
         $txtIterator = new OldPKTxtIterator( __DIR__.'/../Resources/data/newpks.txt' );
         $oldPKCount = count($txtIterator);
         $progress->start( $output, $oldPKCount );
+        $progress->setBarWidth( $targetConsoleWidth - (strlen((string)$oldPKCount)*2) - 10 );
         $progress->setRedrawFrequency( $oldPKCount/100 );
         while ( $txtIterator->valid() ) {
             $txtRow = $txtIterator->current();
@@ -54,7 +56,7 @@ class ImportOldPKsCommand extends ContainerAwareCommand
             $tower = $towerRepository->findOneById( $txtRow['tower_id'] );
             if (!$tower) {
                 $progress->clear();
-                $output->writeln( "\r<comment> DoveID '".$txtRow['tower_id']."' is a target in newpks.txt, but isn't in the tower table</comment>" );
+                $output->writeln( "\r<comment>".str_pad( " DoveID '".$txtRow['tower_id']."' is a target in newpks.txt, but isn't in the tower table", $targetConsoleWidth, ' ' )."</comment>" );
                 $progress->display();
             } else {
                 // Create the OldPK object, and persist it

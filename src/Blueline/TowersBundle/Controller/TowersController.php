@@ -95,14 +95,16 @@ class TowersController extends Controller
         foreach ($ids  as $id) {
             // Get information about the tower, its affiliations, and first pealed methods
             $tower = $em->createQuery( '
-                SELECT t, partial a.{id,abbreviation,name}, partial m.{title,url,firstTowerbellPeal_date} FROM BluelineTowersBundle:Tower t
+                SELECT t, partial a.{id,abbreviation,name}, partial p.{id,type,date}, partial m.{title,url} FROM BluelineTowersBundle:Tower t
                 LEFT JOIN t.associations a
-                LEFT JOIN t.firstPeals m
+                LEFT JOIN t.performances p WITH p.type = :performanceType
+                LEFT JOIN p.method       m
                 WHERE t.id = :id
-                ORDER BY m.firstTowerbellPeal_date DESC' )
+                ORDER BY p.date DESC' )
             ->setParameter( 'id', $id )
+            ->setParameter( 'performanceType', 'firstTowerbellPeal' )
             ->getSingleResult();
-
+            
             $nearbyTowers[] = array_slice( $towersRepository->findNearbyTowers( $tower->getLatitude(), $tower->getLongitude(), 7 ), 1 );
             $towers[] = $tower;
         }

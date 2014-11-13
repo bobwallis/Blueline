@@ -10,7 +10,9 @@ Blueline\MethodsBundle\Entity\Collection:
         name:
             type: string
             length: 255
-    manyToMany:
+        description:
+            type: text
+    oneToMany:
         methods:
-            targetEntity: Method
-            mappedBy: collections
+            targetEntity: MethodInCollection
+            mappedBy: collection

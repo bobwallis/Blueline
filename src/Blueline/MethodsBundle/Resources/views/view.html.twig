@@ -24,7 +24,7 @@
 				<dt>Originally named</dt>
 				<dd>
 				{% for renamed in method.renamed %}
-					{{ renamed.title }}<br />
+					{{ renamed.rungTitle }}{{ renamed.date ? (' on <time datetime="'~renamed.date|date('Y-m-d')~'">'~renamed.date|date('j<\\s\\up>S</\\s\\up> M Y')~'</time>')|raw }}<br />
 				{% endfor %}
 				</dd>
 {% endif %}
@@ -48,19 +48,19 @@
 				<dt>Lead&nbsp;Length</dt>
 				<dd>{{ method.lengthOfLead }} rows</dd>
 {% endif %}
-{% if method.firstTowerbellPealDate is not empty %}
+{% if method.firstTowerbellPeal is not empty %}
 				<dt>First&nbsp;towerbell&nbsp;peal</dt>
-				<dd><time datetime="{{ method.firstTowerbellpealDate|date('Y-m-d') }}">{{ method.firstTowerbellPealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time>{% if method.firstTowerbellPealLocation is not empty %} at {% if method.firstTowerbellPealTower.id is defined %}<a href="{{ path( 'Blueline_Towers_view', { 'id': method.firstTowerbellPealTower.id } ) }}">{{ method.firstTowerbellPealLocation }}</a>{% else %}{{ method.firstTowerbellPealLocation }}{% endif %}{% endif %}</dd>
+				<dd><time datetime="{{ method.firstTowerbellpeal.date|date('Y-m-d') }}">{{ method.firstTowerbellPeal.date|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time>{% if method.firstTowerbellPeal.location is not empty %} at {% if method.firstTowerbellPeal.locationDoveid is not empty %}<a href="{{ path( 'Blueline_Towers_view', { 'id': method.firstTowerbellPeal.locationDoveid.id } ) }}">{{ method.firstTowerbellPeal.location }}</a>{% else %}{{ method.firstTowerbellPeal.location }}{% endif %}{% endif %}</dd>
 {% endif %}
-{% if method.firstHandbellPealDate is not empty %}
+{% if method.firstHandbellPeal is not empty %}
 				<dt>First&nbsp;handbell&nbsp;peal</dt>
-				<dd><time datetime="{{ method.firstHandbellPealDate|date('Y-m-d') }}">{{ method.firstHandbellpealDate|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time></dd>
+				<dd><time datetime="{{ method.firstHandbellPeal.date|date('Y-m-d') }}">{{ method.firstHandbellPeal.date|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time>{% if method.firstHandbellPeal.location is not empty %} at {% if method.firstHandbellPeal.locationDoveid is not empty %}<a href="{{ path( 'Blueline_Towers_view', { 'id': method.firstHandbellPeal.locationDoveid.id } ) }}">{{ method.firstHandbellPeal.location }}</a>{% else %}{{ method.firstHandbellPeal.location }}{% endif %}{% endif %}</dd>
 {% endif %}
-{% if method.duplicate is not empty %}
+{% if method.duplicates is not empty %}
 				<dt>Method also pealed as</dt>
 				<dd>
-				{% for duplicate in method.duplicate %}
-					'{{ duplicate.title }}'{{ (duplicate.location != 'handbells')? ' in '~duplicate.location : ' on handbells' }}{{ ((duplicate.date is not empty)? ' on '~duplicate.date|date('j<\\s\\up>S</\\s\\up> M Y') : '')|raw }}{{ (duplicate.rWRef is not empty)? ' ('~duplicate.rWRef~')' : '' }}<br />
+				{% for duplicate in method.duplicates %}
+					'{{ duplicate.rungTitle }}'{{ duplicate.date ? (' on <time datetime="'~duplicate.date|date('Y-m-d')~'">'~duplicate.date|date('j<\\s\\up>S</\\s\\up> M Y')~'</time>')|raw }}{{ duplicate.reference ? ' ('~duplicate.reference~')' }}<br />
 				{% endfor %}
 				</dd>
 {% endif %}

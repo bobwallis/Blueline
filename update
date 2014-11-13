@@ -151,6 +151,7 @@ if [[ $CCCBRDATA = true ]]
 	# Import updated method data
 	php "$d/app/console" blueline:importMethods
 	echo ""
+	php "$d/app/console" blueline:linkPerformancesToDove
 fi
 
 

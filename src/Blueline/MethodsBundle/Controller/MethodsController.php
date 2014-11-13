@@ -41,14 +41,14 @@ class MethodsController extends Controller
         if ( $response->isNotModified( $request ) ) { return $response; }
 
         $methodRepository = $this->getDoctrine()->getManager()->getRepository( 'BluelineMethodsBundle:Method' );
-        $searchVariables = empty( $searchVariables )? Search::requestToSearchVariables( $request, array( 'title', 'stage', 'classification', 'notation', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef', 'tdmmRef', 'pmmRef', 'lengthOfLead', 'numberOfHunts', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational', 'firstTowerbellPeal_date', 'firstTowerbellPeal_location', 'firstHandbellPeal_date', 'firstHandbellPeal_location' ) ) : $searchVariables;
+        $searchVariables = empty( $searchVariables )? Search::requestToSearchVariables( $request, array( 'title', 'stage', 'classification', 'notation', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef', 'tdmmRef', 'pmmRef', 'lengthOfLead', 'numberOfHunts', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational' ) ) : $searchVariables;
 
         $methods = $methodRepository->findBySearchVariables( $searchVariables );
         $count = (count( $methods ) > 0)? $methodRepository->findCountBySearchVariables( $searchVariables ) : 0;
 
         $pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
         $pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
-
+        
         return $this->render( 'BluelineMethodsBundle::search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'methods' ), $response );
     }
 
@@ -97,6 +97,8 @@ class MethodsController extends Controller
             // Get information about the method
             $method = $em->createQuery( '
                 SELECT m FROM BluelineMethodsBundle:Method m
+                LEFT JOIN m.performances p
+                LEFT JOIN m.collections c
                 WHERE m.title = :title' )
             ->setParameter( 'title', $methodTitle['title'] )
             ->getSingleResult();

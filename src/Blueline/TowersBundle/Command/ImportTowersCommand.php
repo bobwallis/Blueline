@@ -31,6 +31,7 @@ class ImportTowersCommand extends ContainerAwareCommand
         // Set up styles
         $output->getFormatter()
                ->setStyle( 'title', new OutputFormatterStyle( 'white', null, array( 'bold' ) ) );
+        $targetConsoleWidth = 75;
 
         // Print title
         $output->writeln( '<title>Updating tower data</title>' );
@@ -60,6 +61,7 @@ class ImportTowersCommand extends ContainerAwareCommand
         $count  = 0;
         $towerCount = count($txtIterator);
         $progress->start( $output, $towerCount );
+        $progress->setBarWidth( $targetConsoleWidth - (strlen((string)$towerCount)*2) - 10 );
         $progress->setRedrawFrequency( $towerCount/100 );
         while ( $txtIterator->valid() ) {
             $txtRow = $txtIterator->current();
@@ -109,7 +111,7 @@ class ImportTowersCommand extends ContainerAwareCommand
             $errors = $validator->validate( $tower );
             if ( count( $errors ) > 0 ) {
                 $progress->clear();
-                $output->writeln( "\r<error> Invalid data for ".$txtRow['id'].":\n".$errors.'</error>' );
+                $output->writeln( "\r<error>".str_pad( " Invalid data for ".$txtRow['id'].":\n".$errors, $targetConsoleWidth, ' ' ).'</error>' );
                 $progress->display();
             } else {
                 $em->persist( $tower );
@@ -133,7 +135,7 @@ class ImportTowersCommand extends ContainerAwareCommand
         if ( count( $notFoundAffiliations ) > 0 ) {
             $notFoundAffiliations = array_unique( $notFoundAffiliations );
             sort( $notFoundAffiliations );
-            $output->writeln( '<comment>  Association with abbreviation(s) '.implode( ', ', $notFoundAffiliations ).' not found.</comment>' );
+            $output->writeln( "\r<comment>".str_pad( ' Association with abbreviation(s) '.implode( ', ', $notFoundAffiliations ).' not found.', $targetConsoleWidth, ' ' ).'</comment>' );
         }
 
         // Now begin the removal process
@@ -147,7 +149,7 @@ class ImportTowersCommand extends ContainerAwareCommand
             // If the entry found in the database wasn't just imported, remove it
             if ( !in_array( $dbRow[0]->getId(), $importedTowers ) ) {
                 $progress->clear();
-                $output->writeln( "\r<comment> Removed ".$dbRow[0]->getId().'</comment>' );
+                $output->writeln( "\r<comment>".str_pad( " Removed ".$dbRow[0]->getId(), $targetConsoleWidth, ' ' ).'</comment>' );
                 $progress->display();
                 $em->remove( $dbRow[0] );
             }

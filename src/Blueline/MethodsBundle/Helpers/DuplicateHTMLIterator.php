@@ -29,25 +29,27 @@ class DuplicateHTMLIterator implements \Iterator
 
     public function current()
     {
-        preg_match( '/^<p><b><i>(.*?)<\/i><\/b> .*?(on|at|as) (.*?) on (.*?) (was|(\(.*\)?) was) <b><i>(.*?)<\/i>/', $this->line, $matches );
-
+        // Parse the line
+        preg_match( '/^<p><b><i>(.*?)<\/i><\/b> .*?(on|at|as) (.*?) on (.*?) (was|(\(.*?\)).* was) <b><i>(.*?)<\/i>/', $this->line, $matches );
         if ($matches == null) {
             throw new Exception( "Failed to match on: {$line}" );
         }
+
+        // Get the data out of the match array
         $data = array(
-            'id'       => hash( 'md5', $this->line ),
-            'title'    => html_entity_decode( $matches[1] ),
-            'location' => html_entity_decode( $matches[3] ),
-            'date'     => new \DateTime( date( 'Y-m-d', strtotime( $matches[4] ) ) ),
-            'rwRef'    => trim( $matches[6], '()' ),
+            'type'          => 'duplicateMethod',
+            'rung_title'    => html_entity_decode( $matches[1] ),
+            'location_town' => html_entity_decode( $matches[3] ),
+            'date'          => new \DateTime( date( 'Y-m-d', strtotime( $matches[4] ) ) ),
+            'reference'     => trim( $matches[6], '()' )
         );
 
+        // Try to convert the title into something that will match the method library
         $rungExplode = explode( ' ', $matches[1] );
         $stage = array_pop( $rungExplode );
         $classification = array_pop( $rungExplode );
         $little = false;
         $differential = false;
-
         $last = array_pop( $rungExplode );
         switch ($last) {
             case 'Little':
@@ -61,7 +63,7 @@ class DuplicateHTMLIterator implements \Iterator
         if ($last === 'Differential') {
             $differential = true;
         }
-        $data['method'] = str_replace( '’', "'", html_entity_decode( $matches[7] ) ).($differential?' Differential':'').($little?' Little':'').' '.$classification.' '.$stage;
+        $data['title'] = str_replace( '’', "'", html_entity_decode( $matches[7] ) ).($differential?' Differential':'').($little?' Little':'').' '.$classification.' '.$stage;
 
         return $data;
     }

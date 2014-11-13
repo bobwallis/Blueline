@@ -1,6 +1,4 @@
 Blueline\MethodsBundle\Entity\Method:
-    constraints:
-        - Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity: url
     properties:
         stage:
             - GreaterThanOrEqual:

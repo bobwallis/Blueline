@@ -57,26 +57,6 @@ class Method
     private $fchGroups;
 
     /**
-     * @var string $rwRef
-     */
-    private $rwRef;
-
-    /**
-     * @var string $bnRef
-     */
-    private $bnRef;
-
-    /**
-     * @var integer $tdmmRef
-     */
-    private $tdmmRef;
-
-    /**
-     * @var integer $pmmRef
-     */
-    private $pmmRef;
-
-    /**
      * @var integer $lengthOfLead
      */
     private $lengthOfLead;
@@ -122,26 +102,6 @@ class Method
     private $rotational;
 
     /**
-     * @var \DateTime $firstTowerbellPeal_date
-     */
-    private $firstTowerbellPeal_date;
-
-    /**
-     * @var string $firstTowerbellPeal_location
-     */
-    private $firstTowerbellPeal_location;
-
-    /**
-     * @var \DateTime $firstHandbellPeal_date
-     */
-    private $firstHandbellPeal_date;
-
-    /**
-     * @var string $firstHandbellPeal_location
-     */
-    private $firstHandbellPeal_location;
-
-    /**
      * @var text $calls
      */
     private $calls;
@@ -152,16 +112,13 @@ class Method
     private $ruleOffs;
 
     /**
-     * @var \Doctrine\Common\Collections\ArrayCollection
-     */
-    private $duplicate;
-
-    /**
      * Constructor
      */
-    public function __construct()
+    public function __construct( $firstSet = array() )
     {
-        $this->duplicate = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->collections  = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->performances = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->setAll( $firstSet );
     }
 
     /**
@@ -177,6 +134,18 @@ class Method
                 $this->$method( $value );
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * Get title
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
     }
 
     /**
@@ -190,16 +159,6 @@ class Method
         $this->title = $title;
 
         return $this;
-    }
-
-    /**
-     * Get title
-     *
-     * @return string
-     */
-    public function getTitle()
-    {
-        return $this->title;
     }
 
     /**
@@ -388,98 +347,6 @@ class Method
     public function getFchGroups()
     {
         return $this->fchGroups;
-    }
-
-    /**
-     * Set rwRef
-     *
-     * @param  string $rwRef
-     * @return Method
-     */
-    public function setRwRef($rwRef)
-    {
-        $this->rwRef = $rwRef;
-
-        return $this;
-    }
-
-    /**
-     * Get rwRef
-     *
-     * @return string
-     */
-    public function getRwRef()
-    {
-        return $this->rwRef;
-    }
-
-    /**
-     * Set bnRef
-     *
-     * @param  string $bnRef
-     * @return Method
-     */
-    public function setBnRef($bnRef)
-    {
-        $this->bnRef = $bnRef;
-
-        return $this;
-    }
-
-    /**
-     * Get bnRef
-     *
-     * @return string
-     */
-    public function getBnRef()
-    {
-        return $this->bnRef;
-    }
-
-    /**
-     * Set tdmmRef
-     *
-     * @param  integer $tdmmRef
-     * @return Method
-     */
-    public function setTdmmRef($tdmmRef)
-    {
-        $this->tdmmRef = $tdmmRef;
-
-        return $this;
-    }
-
-    /**
-     * Get tdmmRef
-     *
-     * @return integer
-     */
-    public function getTdmmRef()
-    {
-        return $this->tdmmRef;
-    }
-
-    /**
-     * Set pmmRef
-     *
-     * @param  integer $pmmRef
-     * @return Method
-     */
-    public function setPmmRef($pmmRef)
-    {
-        $this->pmmRef = $pmmRef;
-
-        return $this;
-    }
-
-    /**
-     * Get pmmRef
-     *
-     * @return integer
-     */
-    public function getPmmRef()
-    {
-        return $this->pmmRef;
     }
 
     /**
@@ -710,98 +577,6 @@ class Method
     }
 
     /**
-     * Set firstTowerbellPeal_date
-     *
-     * @param  \DateTime $firstTowerbellPealDate
-     * @return Method
-     */
-    public function setFirstTowerbellPealDate($firstTowerbellPealDate)
-    {
-        $this->firstTowerbellPeal_date = $firstTowerbellPealDate;
-
-        return $this;
-    }
-
-    /**
-     * Get firstTowerbellPeal_date
-     *
-     * @return \DateTime
-     */
-    public function getFirstTowerbellPealDate()
-    {
-        return $this->firstTowerbellPeal_date;
-    }
-
-    /**
-     * Set firstTowerbellPeal_location
-     *
-     * @param  string $firstTowerbellPealLocation
-     * @return Method
-     */
-    public function setFirstTowerbellPealLocation($firstTowerbellPealLocation)
-    {
-        $this->firstTowerbellPeal_location = $firstTowerbellPealLocation;
-
-        return $this;
-    }
-
-    /**
-     * Get firstTowerbellPeal_location
-     *
-     * @return string
-     */
-    public function getFirstTowerbellPealLocation()
-    {
-        return $this->firstTowerbellPeal_location;
-    }
-
-    /**
-     * Set firstHandbellPeal_date
-     *
-     * @param  \DateTime $firstHandbellPealDate
-     * @return Method
-     */
-    public function setFirstHandbellPealDate($firstHandbellPealDate)
-    {
-        $this->firstHandbellPeal_date = $firstHandbellPealDate;
-
-        return $this;
-    }
-
-    /**
-     * Get firstHandbellPeal_date
-     *
-     * @return \DateTime
-     */
-    public function getFirstHandbellPealDate()
-    {
-        return $this->firstHandbellPeal_date;
-    }
-
-    /**
-     * Set firstHandbellPeal_location
-     *
-     * @param  string $firstHandbellPealLocation
-     * @return Method
-     */
-    public function setFirstHandbellPealLocation($firstHandbellPealLocation)
-    {
-        $this->firstHandbellPeal_location = $firstHandbellPealLocation;
-
-        return $this;
-    }
-
-    /**
-     * Get firstHandbellPeal_location
-     *
-     * @return string
-     */
-    public function getFirstHandbellPealLocation()
-    {
-        return $this->firstHandbellPeal_location;
-    }
-
-    /**
      * Set calls
      *
      * @param  text   $calls
@@ -919,104 +694,6 @@ class Method
         }
     }
 
-    /**
-     * Add duplicate
-     *
-     * @param  Blueline\MethodsBundle\Entity\Duplicate $duplicate
-     * @return Method
-     */
-    public function addDuplicate(\Blueline\MethodsBundle\Entity\Duplicate $duplicate)
-    {
-        $this->duplicate[] = $duplicate;
-
-        return $this;
-    }
-
-    /**
-     * Remove duplicate
-     *
-     * @param Blueline\MethodsBundle\Entity\Duplicate $duplicate
-     */
-    public function removeDuplicate(\Blueline\MethodsBundle\Entity\Duplicate $duplicate)
-    {
-        $this->duplicate->removeElement($duplicate);
-    }
-
-    /**
-     * Get duplicate
-     *
-     * @return Doctrine\Common\Collections\Collection
-     */
-    public function getDuplicate()
-    {
-        return $this->duplicate;
-    }
-    /**
-     * @var Blueline\TowersBundle\Entity\Tower
-     */
-    private $firstTowerbellPeal_tower;
-
-    /**
-     * Set firstTowerbellPeal_tower
-     *
-     * @param  Blueline\TowersBundle\Entity\Tower $firstTowerbellPeal_tower
-     * @return Method
-     */
-    public function setFirstTowerbellPealTower(\Blueline\TowersBundle\Entity\Tower $firstTowerbellPeal_tower = null)
-    {
-        $this->firstTowerbellPeal_tower = $firstTowerbellPeal_tower;
-
-        return $this;
-    }
-
-    /**
-     * Get firstTowerbellPeal_tower
-     *
-     * @return Blueline\MethodsBundle\Entity\Tower
-     */
-    public function getFirstTowerbellPealTower()
-    {
-        return $this->firstTowerbellPeal_tower;
-    }
-    /**
-     * @var \Doctrine\Common\Collections\ArrayCollection
-     */
-    private $renamed;
-
-    /**
-     * Add renamed
-     *
-     * @param  Blueline\MethodsBundle\Entity\Renamed $renamed
-     * @return Method
-     */
-    public function addRenamed(\Blueline\MethodsBundle\Entity\Renamed $renamed)
-    {
-        $this->renamed[] = $renamed;
-
-        return $this;
-    }
-
-    /**
-     * Remove renamed
-     *
-     * @param Blueline\MethodsBundle\Entity\Renamed $renamed
-     */
-    public function removeRenamed(\Blueline\MethodsBundle\Entity\Renamed $renamed)
-    {
-        $this->renamed->removeElement($renamed);
-    }
-
-    /**
-     * Get renamed
-     *
-     * @return Doctrine\Common\Collections\Collection
-     */
-    public function getRenamed()
-    {
-        return $this->renamed;
-    }
-
-
     // Non-database methods
 
     private $callingPositions;
@@ -1121,16 +798,15 @@ class Method
      */
     private $collections;
 
-
     /**
      * Add collections
      *
-     * @param \Blueline\MethodsBundle\Entity\Collection $collections
+     * @param  \Blueline\MethodsBundle\Entity\MethodInCollection $collection
      * @return Method
      */
-    public function addCollection(\Blueline\MethodsBundle\Entity\Collection $collections)
+    public function addCollection(\Blueline\MethodsBundle\Entity\MethodInCollection $collection)
     {
-        $this->collections[] = $collections;
+        $this->collections[] = $collection;
 
         return $this;
     }
@@ -1138,20 +814,97 @@ class Method
     /**
      * Remove collections
      *
-     * @param \Blueline\MethodsBundle\Entity\Collection $collections
+     * @param \Blueline\MethodsBundle\Entity\MethodInCollection $collection
      */
-    public function removeCollection(\Blueline\MethodsBundle\Entity\Collection $collections)
+    public function removeCollection(\Blueline\MethodsBundle\Entity\MethodInCollection $collection)
     {
-        $this->collections->removeElement($collections);
+        $this->collections->removeElement($collection);
     }
 
     /**
      * Get collections
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getCollections()
     {
         return $this->collections;
+    }
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     */
+    private $performances;
+
+    /**
+     * Add performances
+     *
+     * @param  \Blueline\MethodsBundle\Entity\Performance $performance
+     * @return Method
+     */
+    public function addPerformance(\Blueline\MethodsBundle\Entity\Performance $performance)
+    {
+        $this->performances[] = $performance;
+
+        return $this;
+    }
+
+    /**
+     * Remove performances
+     *
+     * @param \Blueline\MethodsBundle\Entity\Performance $performance
+     */
+    public function removePerformance(\Blueline\MethodsBundle\Entity\Performance $performance)
+    {
+        $this->performances->removeElement($performance);
+    }
+
+    /**
+     * Get performances
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPerformances()
+    {
+        return $this->performances;
+    }
+
+    /**
+     * Get performances where the method was originally named something else
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getRenamed()
+    {
+        return $this->getPerformances()->filter( function($p) { return $p->getType() == 'renamedMethod'; } );
+    }
+
+    /**
+     * Get performances where the method was duplicate named
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getDuplicates()
+    {
+        return $this->getPerformances()->filter( function($p) { return $p->getType() == 'duplicateMethod'; } );
+    }
+
+    /**
+     * Get the first towerbell peal
+     *
+     * @return \Blueline\MethodsBundle\Entity\Performance
+     */
+    public function getFirstTowerbellPeal()
+    {
+        return $this->getPerformances()->filter( function($p) { return $p->getType() == 'firstTowerbellPeal'; } )->get(0);
+    }
+
+    /**
+     * Get the first handbell peal
+     *
+     * @return \Blueline\MethodsBundle\Entity\Performance
+     */
+    public function getFirstHandbellPeal()
+    {
+        return $this->getPerformances()->filter( function($p) { return $p->getType() == 'firstHandbellPeal'; } )->get(0);
     }
 }

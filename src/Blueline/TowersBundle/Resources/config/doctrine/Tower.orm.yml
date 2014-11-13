@@ -111,9 +111,9 @@ Blueline\TowersBundle\Entity\Tower:
         oldpks:
             targetEntity: OldPK
             mappedBy: tower
-        firstPeals:
-            targetEntity: Blueline\MethodsBundle\Entity\Method
-            mappedBy: firstTowerbellPeal_tower
+        performances:
+            targetEntity: Blueline\MethodsBundle\Entity\Performance
+            mappedBy: location_doveid
     manyToMany:
         associations:
             targetEntity: Blueline\AssociationsBundle\Entity\Association

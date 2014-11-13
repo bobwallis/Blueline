@@ -1,5 +1,8 @@
 <?php
+
 namespace Blueline\MethodsBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Collection
@@ -17,6 +20,11 @@ class Collection
     private $name;
 
     /**
+     * @var string
+     */
+    private $description;
+
+    /**
      * @var \Doctrine\Common\Collections\Collection
      */
     private $methods;
@@ -32,7 +40,7 @@ class Collection
     /**
      * Set id
      *
-     * @param  string     $id
+     * @param string $id
      * @return Collection
      */
     public function setId($id)
@@ -45,7 +53,7 @@ class Collection
     /**
      * Get id
      *
-     * @return string
+     * @return string 
      */
     public function getId()
     {
@@ -55,7 +63,7 @@ class Collection
     /**
      * Set name
      *
-     * @param  string     $name
+     * @param string $name
      * @return Collection
      */
     public function setName($name)
@@ -68,7 +76,7 @@ class Collection
     /**
      * Get name
      *
-     * @return string
+     * @return string 
      */
     public function getName()
     {
@@ -76,14 +84,37 @@ class Collection
     }
 
     /**
-     * Add methods
+     * Set description
      *
-     * @param  \Blueline\MethodsBundle\Entity\Method $methods
+     * @param string $description
      * @return Collection
      */
-    public function addMethod(\Blueline\MethodsBundle\Entity\Method $methods)
+    public function setDescription($description)
     {
-        $this->methods[] = $methods;
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string 
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Add methods
+     *
+     * @param \Blueline\MethodsBundle\Entity\MethodInCollection $methods
+     * @return Collection
+     */
+    public function addMethod(\Blueline\MethodsBundle\Entity\MethodInCollection $method)
+    {
+        $this->methods[] = $method;
 
         return $this;
     }
@@ -91,17 +122,17 @@ class Collection
     /**
      * Remove methods
      *
-     * @param \Blueline\MethodsBundle\Entity\Method $methods
+     * @param \Blueline\MethodsBundle\Entity\MethodInCollection $method
      */
-    public function removeMethod(\Blueline\MethodsBundle\Entity\Method $methods)
+    public function removeMethod(\Blueline\MethodsBundle\Entity\MethodInCollection $method)
     {
-        $this->methods->removeElement($methods);
+        $this->methods->removeElement($method);
     }
 
     /**
      * Get methods
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return \Doctrine\Common\Collections\Collection 
      */
     public function getMethods()
     {

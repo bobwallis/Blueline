@@ -1,5 +1,74 @@
 <?php
-$counties = array(
+//Various location abbreviations, used in Dove data file, and the method's peal location data
+
+$scottishAreas = array(
+	'Arg+Bute' => 'Argyll and Bute',
+	'ArgyllBute' => 'Argyll and Bute',
+	'C Aberdn' => 'City of Aberdeen',
+	'C Aberdeen' => 'City of Aberdeen',
+	'C Dundee' => 'City of Dundee',
+	'C Edin' => 'City of Edinburgh',
+	'C Glas' => 'City of Glasgow',
+	'Clackman' => 'Clackmannanshire',
+	'E Loth' => 'East Lothian',
+	'Fife' => 'Fife',
+	'Highland' => 'Highland',
+	'PthKross' => 'Perth and Kinross',
+	'PerthKross' => 'Perth and Kinross',
+	'Renfrews' => 'Renfrewshire',
+	'Stirling' => 'Stirling'
+);
+
+$welshAreas = array(
+	'Bl Gwent' => 'Blaenau Gwent',
+	'Bridgend' => 'Bridgend',
+	'Caerph\'y' => 'Caerphilly',
+	'Caerphilly' => 'Caerphilly',
+	'Cardiff' => 'Cardiff',
+	'Carms' => 'Carmarthenshire',
+	'Cered\'on' => 'Ceredigion',
+	'Ceredigion' => 'Ceredigion',
+	'Conwy' => 'Conwy',
+	'Denbighs' => 'Denbighshire',
+	'Dyfed' => 'Dyfed',
+	'Flints' => 'Flintshire',
+	'Glam' => 'Glamorgan',
+	'Gwent' => 'Gwent',
+	'Gwynedd' => 'Gwynedd',
+	'Ynys Mon' => 'Isle of Anglesey',
+	'Merthyr' => 'Merthyr Tydfil',
+	'Monmths' => 'Monmouthshire',
+	'Mon' => 'Monmouthshire',
+	'Neath PT' => 'Neath Port Talbot',
+	'Newport' => 'Newport',
+	'Pembs' => 'Pembrokeshire',
+	'Powys' => 'Powys',
+	'RhonCyTa' => 'Rhondda Cynon Taf',
+	'RhonddaCT' => 'Rhondda Cynon Taf',
+	'Swansea' => 'Swansea',
+	'Torfaen' => 'Torfaen',
+	'ValeGlam' => 'The Vale of Glamorgan',
+	'Wrexham' => 'Wrexham'
+);
+
+$irishAreas = array(
+	'Wicklow' => 'Wicklow',
+	'Down' => 'Down',
+	'Antrim' => 'Antrim',
+	'Cork' => 'Cork',
+	'Derry' => 'Londonderry',
+	'Louth' => 'Louth',
+	'Dublin' => 'Dublin',
+	'Ferman' => 'Fermanagh',
+	'Kilk' => 'Kilkenny',
+	'Lim' => 'Limerick',
+	'Armagh' => 'Armagh',
+	'Tip' => 'Tipperary',
+	'Waterfd' => 'Waterford',
+	'Wexford' => 'Wexford'
+);
+
+$counties = array_merge( $scottishAreas, $welshAreas, $irishAreas, array(
 	'Beds' => 'Bedfordshire',
 	'Berks' => 'Berkshire',
 	'Bucks' => 'Buckinghamshire',
@@ -19,6 +88,7 @@ $counties = array(
 	'Gr London' => 'Greater London',
 	'Gr Man' => 'Greater Manchester',
 	'Hants' => 'Hampshire',
+	'Herefords' => 'Herefordshire',
 	'Herefs' => 'Herefordshire',
 	'Herts' => 'Hertfordshire',
 	'Hunts' => 'Huntingdonshire',
@@ -62,71 +132,7 @@ $counties = array(
 	'S Yks' => 'South Yorkshire',
 	'S Yorks' => 'South Yorkshire',
 	'Scilly' => 'Isles of Scilly'
-);
-
-$scottishAreas = array(
-	'Arg+Bute' => 'Argyll and Bute',
-	'ArgyllBute' => 'Argyll and Bute',
-	'C Aberdn' => 'City of Aberdeen',
-	'C Aberdeen' => 'City of Aberdeen',
-	'C Dundee' => 'City of Dundee',
-	'C Edin' => 'City of Edinburgh',
-	'C Glas' => 'City of Glasgow',
-	'Clackman' => 'Clackmannanshire',
-	'E Loth' => 'East Lothian',
-	'Fife' => 'Fife',
-	'Highland' => 'Highland',
-	'PthKross' => 'Perth and Kinross',
-	'PerthKross' => 'Perth and Kinross',
-	'Renfrews' => 'Renfrewshire',
-	'Stirling' => 'Stirling'
-);
-
-$welshAreas = array(
-	'Bl Gwent' => 'Blaenau Gwent',
-	'Bridgend' => 'Bridgend',
-	'Caerph\'y' => 'Caerphilly',
-	'Caerphilly' => 'Caerphilly',
-	'Cardiff' => 'Cardiff',
-	'Carms' => 'Carmarthenshire',
-	'Cered\'on' => 'Ceredigion',
-	'Ceredigion' => 'Ceredigion',
-	'Conwy' => 'Conwy',
-	'Denbighs' => 'Denbighshire',
-	'Dyfed' => 'Dyfed',
-	'Flints' => 'Flintshire',
-	'Gwynedd' => 'Gwynedd',
-	'Ynys Mon' => 'Isle of Anglesey',
-	'Merthyr' => 'Merthyr Tydfil',
-	'Monmths' => 'Monmouthshire',
-	'Neath PT' => 'Neath Port Talbot',
-	'Newport' => 'Newport',
-	'Pembs' => 'Pembrokeshire',
-	'Powys' => 'Powys',
-	'RhonCyTa' => 'Rhondda Cynon Taf',
-	'RhonddaCT' => 'Rhondda Cynon Taf',
-	'Swansea' => 'Swansea',
-	'Torfaen' => 'Torfaen',
-	'ValeGlam' => 'The Vale of Glamorgan',
-	'Wrexham' => 'Wrexham'
-);
-
-$irishAreas = array(
-	'Wicklow' => 'Wicklow',
-	'Down' => 'Down',
-	'Antrim' => 'Antrim',
-	'Cork' => 'Cork',
-	'Derry' => 'Londonderry',
-	'Louth' => 'Louth',
-	'Dublin' => 'Dublin',
-	'Ferman' => 'Fermanagh',
-	'Kilk' => 'Kilkenny',
-	'Lim' => 'Limerick',
-	'Armagh' => 'Armagh',
-	'Tip' => 'Tipperary',
-	'Waterfd' => 'Waterford',
-	'Wexford' => 'Wexford'
-);
+) );
 
 $states = array(
 	'AL' => "Alabama",
@@ -204,6 +210,7 @@ $australianAreas = array(
 	'QLD' => 'Queensland',
 	'ACT' => 'Australian Capital Territory',
 	'Tas' => 'Tasmania',
+	'TAS' => 'Tasmania',
 	'WA' => 'Western Australia'
 );
 
@@ -218,4 +225,10 @@ $southAfricanAreas = array(
 	'EC' => 'Eastern Cape',
 	'Gaut' => 'Gauteng',
 	'North West' => 'North West'
+);
+
+$countries = array(
+	'AU' => 'Australia',
+	'CA' => 'Canada',
+	'US' => 'USA'
 );

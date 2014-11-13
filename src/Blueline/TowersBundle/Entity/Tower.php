@@ -168,7 +168,7 @@ class Tower
      *
      * @param array $map
      */
-    public function setAll( $map )
+    public function setAll($map)
     {
         foreach ($map as $key => $value) {
             $method = 'set'.ucwords( $key );
@@ -867,43 +867,6 @@ class Tower
     {
         return $this->affiliations;
     }
-    /**
-     * @var \Doctrine\Common\Collections\ArrayCollection
-     */
-    private $firstPeals;
-
-    /**
-     * Add firstPeals
-     *
-     * @param  Blueline\MethodsBundle\Entity\Method $firstPeals
-     * @return Tower
-     */
-    public function addFirstPeal(\Blueline\MethodsBundle\Entity\Method $firstPeals)
-    {
-        $this->firstPeals[] = $firstPeals;
-
-        return $this;
-    }
-
-    /**
-     * Remove firstPeals
-     *
-     * @param Blueline\MethodsBundle\Entity\Method $firstPeals
-     */
-    public function removeFirstPeal(\Blueline\MethodsBundle\Entity\Method $firstPeals)
-    {
-        $this->firstPeals->removeElement($firstPeals);
-    }
-
-    /**
-     * Get firstPeals
-     *
-     * @return Doctrine\Common\Collections\Collection
-     */
-    public function getFirstPeals()
-    {
-        return $this->firstPeals;
-    }
 
     /**
      * Add oldpks
@@ -926,5 +889,62 @@ class Tower
     public function removeOldpk(\Blueline\TowersBundle\Entity\OldPK $oldpks)
     {
         $this->oldpks->removeElement($oldpks);
+    }
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     */
+    private $performances;
+
+    /**
+     * Get oldpks
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getOldpks()
+    {
+        return $this->oldpks;
+    }
+
+    /**
+     * Add performances
+     *
+     * @param  \Blueline\MethodsBundle\Entity\Performance $performances
+     * @return Tower
+     */
+    public function addPerformance(\Blueline\MethodsBundle\Entity\Performance $performances)
+    {
+        $this->performances[] = $performances;
+
+        return $this;
+    }
+
+    /**
+     * Remove performances
+     *
+     * @param \Blueline\MethodsBundle\Entity\Performance $performances
+     */
+    public function removePerformance(\Blueline\MethodsBundle\Entity\Performance $performances)
+    {
+        $this->performances->removeElement($performances);
+    }
+
+    /**
+     * Get performances
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPerformances()
+    {
+        return $this->performances;
+    }
+
+    /**
+     * Get performances which were first peals
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getFirstPealPerformances()
+    {
+        return $this->getPerformances()->filter( function($p) { return $p->getType() == 'firstTowerbellPeal'; } );
     }
 }

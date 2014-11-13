@@ -23,9 +23,7 @@ class AssociationsController extends Controller
         $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
         if ( $response->isNotModified( $request ) ) { return $response; }
 
-        $associations = $this->getDoctrine()->getManager()->getRepository( 'BluelineAssociationsBundle:Association')->findAll();
-
-        return $this->render( 'BluelineAssociationsBundle::welcome.'.$format.'.twig', compact( 'associations' ), $response );
+        return $this->render( 'BluelineAssociationsBundle::welcome.'.$format.'.twig', array(), $response );
     }
 
     public function searchAction( $searchVariables = array() )

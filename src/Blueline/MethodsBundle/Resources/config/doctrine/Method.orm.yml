@@ -37,20 +37,6 @@ Blueline\MethodsBundle\Entity\Method:
             type: string
             length: 31
             nullable: true
-        rwRef:
-            type: string
-            length: 255
-            nullable: true
-        bnRef:
-            type: string
-            length: 255
-            nullable: true
-        tdmmRef:
-            type: integer
-            nullable: true
-        pmmRef:
-            type: integer
-            nullable: true
         lengthOfLead:
             type: integer
         numberOfHunts:
@@ -76,20 +62,6 @@ Blueline\MethodsBundle\Entity\Method:
         rotational:
             type: boolean
             nullable: true
-        firstTowerbellPeal_date:
-            type: date
-            nullable: true
-        firstTowerbellPeal_location:
-            type: string
-            length: 255
-            nullable: true
-        firstHandbellPeal_date:
-            type: date
-            nullable: true
-        firstHandbellPeal_location:
-            type: string
-            length: 255
-            nullable: true
         calls:
             type: text
             nullable: true
@@ -97,21 +69,12 @@ Blueline\MethodsBundle\Entity\Method:
             type: string
             length: 255
             nullable: true
-    manyToOne:
-        firstTowerbellPeal_tower:
-            targetEntity: Blueline\TowersBundle\Entity\Tower
-            inversedBy: firstPeals
-            joinColumn:
-                name: firstTowerbellPeal_doveid
-                referencedColumnName: id
     oneToMany:
-        renamed:
-            targetEntity: Renamed
+        performances:
+            targetEntity: Performance
+            cascade: ["persist","remove"]
             mappedBy: method
-        duplicate:
-            targetEntity: Duplicate
-            mappedBy: method
-    manyToMany:
         collections:
-            targetEntity: Collection
-            inversedBy: methods
+            targetEntity: MethodInCollection
+            cascade: ["persist","remove"]
+            mappedBy: method

@@ -20,7 +20,9 @@ class ImportAssociationsCommand extends ContainerAwareCommand
         // Set up styles
         $output->getFormatter()
                ->setStyle( 'title', new OutputFormatterStyle( 'white', null, array( 'bold' ) ) );
+        $targetConsoleWidth = 75;
 
+        // Print title
         $output->writeln( '<title>Updating association data</title>' );
 
         // Load data
@@ -37,6 +39,7 @@ class ImportAssociationsCommand extends ContainerAwareCommand
         $dbIterator->next(); // For some reason the Doctrine query iterator needs ->next() called before it gives the first row
         $txtIterator = $associations->getIterator();
         $progress->start( $output, count($associations) );
+        $progress->setBarWidth( $targetConsoleWidth - (strlen((string)count($associations))*2) - 10 );
         $progress->setRedrawFrequency( max(1,count($associations)/100) );
         while ( $dbIterator->valid() || $txtIterator->valid() ) {
             $dbRow  = $dbIterator->current();
@@ -56,7 +59,9 @@ class ImportAssociationsCommand extends ContainerAwareCommand
                 $association->setLink( $txtRow['link'] );
                 $errors = $validator->validate( $association );
                 if ( count( $errors ) > 0 ) {
-                    $output->writeln( '<error>  Invalid data for '.$txtRow['name'].":\n".$errors.'</error>' );
+                    $progress->clear();
+                    $output->writeln( "\r<error> Invalid data for ".$txtRow['name'].":\n".$errors.'</error>' );
+                    $progress->display();
                 } else {
                     $em->persist( $association );
                 }
@@ -69,7 +74,9 @@ class ImportAssociationsCommand extends ContainerAwareCommand
                 $dbRow[0]->setLink( $txtRow['link'] );
                 $errors = $validator->validate( $dbRow[0] );
                 if ( count( $errors ) > 0 ) {
-                    $output->writeln( '<error> Invalid data for '.$txtRow['name'].":\n".$errors.'</error>' );
+                    $progress->clear();
+                    $output->writeln( "\r<error> Invalid data for ".$txtRow['name'].":\n".$errors.'</error>' );
+                    $progress->display();
                     $em->detach( $dbRow[0] );
                 }
                 $txtIterator->next();

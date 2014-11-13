@@ -1,18 +1,22 @@
 section.tower {
-	// Nearby towers stuff
 	h3 {
-		margin: 0 @contentXPadding 2px;
-		// Adjust top margins, and padding for nearby towers ol
+		margin: 0;
+		padding: (@contentYPadding - 2) @contentXPadding 2px @contentXPadding;
+		border-top: 1px solid @lightGrey;
 		&+ol {
 			margin-top: 0;
-			margin-left: @contentXPadding*2;
+			margin-left: 0;
 			li {
 				padding: 2px 0;
+				border-color: lighten(@lightGrey, 6%) !important;
+				a {
+					padding: 4px @contentXPadding 4px (@contentXPadding*2);
+				}
 				&:first-child {
 					padding-top: 0;
 				}
 				&:last-child {
-					padding-bottom: 0;
+					padding-bottom: (@contentYPadding - 4);
 				}
 			}
 		}
@@ -32,27 +36,6 @@ section.tower {
 		text-align: center;
 		a {
 			border: 0;
-		}
-	}
-}
-
-@media screen and (max-width: @smallScreenSize) {
-	// Borders and padding for nearby towers ol
-	section.tower h3 {
-		margin: 0;
-		padding: (@contentYPadding - 2) @contentXPadding 2px @contentXPadding;
-		border-top: 1px solid @lightGrey;
-		&+ol {
-			margin-left: 0;
-			li {
-				border-color: lighten(@lightGrey, 6%) !important;
-				a {
-					padding: 4px @contentXPadding 4px (@contentXPadding*2);
-				}
-				&:last-child {
-					padding-bottom: (@contentYPadding - 4);
-				}
-			}
 		}
 	}
 }

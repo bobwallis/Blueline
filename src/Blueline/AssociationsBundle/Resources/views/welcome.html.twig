@@ -12,11 +12,5 @@
 {% set search_placeholder = 'Search associations' %}
 
 {% block body %}
-	<section class="associations">
-		<ol>
-		{% for association in associations|default([]) %}
-			<li><a href="{{ path( 'Blueline_Associations_view', { 'abbreviation': association.abbreviation } ) }}">{{ association.name }}</a></li>
-		{% endfor %}
-		</ol>
-	</section>
+	<section class="blank"></section>
 {% endblock %}

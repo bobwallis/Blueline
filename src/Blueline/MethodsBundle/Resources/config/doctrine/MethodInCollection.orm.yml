@@ -1,0 +1,23 @@
+Blueline\MethodsBundle\Entity\MethodInCollection:
+    type: entity
+    repositoryClass: Blueline\MethodsBundle\Entity\CollectionRepository
+    table: methods_collections
+    id:
+        id:
+            type: integer
+            generator: { strategy: AUTO }
+    fields:
+        position:
+            type: integer
+    manyToOne:
+        collection:
+            targetEntity: Collection
+            cascade: ["persist"]
+            inversedBy: methods
+        method:
+            targetEntity: Method
+            cascade: ["persist"]
+            inversedBy: collections
+            joinColumn:
+                name: method_title
+                referencedColumnName: title
