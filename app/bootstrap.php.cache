@@ -333,7 +333,7 @@ foreach (self::$fileKeys as $k) {
 unset($files[$k]);
 }
 foreach (array_keys($data['name']) as $key) {
-$files[$key] = $this->fixPhpFilesArray(array('error'=> $data['error'][$key],'name'=> $data['name'][$key],'type'=> $data['type'][$key],'tmp_name'=> $data['tmp_name'][$key],'size'=> $data['size'][$key]
+$files[$key] = $this->fixPhpFilesArray(array('error'=> $data['error'][$key],'name'=> $data['name'][$key],'type'=> $data['type'][$key],'tmp_name'=> $data['tmp_name'][$key],'size'=> $data['size'][$key],
 ));
 }
 return $files;
@@ -367,12 +367,12 @@ $authorizationHeader = $this->parameters['HTTP_AUTHORIZATION'];
 $authorizationHeader = $this->parameters['REDIRECT_HTTP_AUTHORIZATION'];
 }
 if (null !== $authorizationHeader) {
-if (0 === stripos($authorizationHeader,'basic')) {
-$exploded = explode(':', base64_decode(substr($authorizationHeader, 6)));
+if (0 === stripos($authorizationHeader,'basic ')) {
+$exploded = explode(':', base64_decode(substr($authorizationHeader, 6)), 2);
 if (count($exploded) == 2) {
 list($headers['PHP_AUTH_USER'], $headers['PHP_AUTH_PW']) = $exploded;
 }
-} elseif (empty($this->parameters['PHP_AUTH_DIGEST']) && (0 === stripos($authorizationHeader,'digest'))) {
+} elseif (empty($this->parameters['PHP_AUTH_DIGEST']) && (0 === stripos($authorizationHeader,'digest '))) {
 $headers['PHP_AUTH_DIGEST'] = $authorizationHeader;
 $this->parameters['PHP_AUTH_DIGEST'] = $authorizationHeader;
 }
@@ -594,6 +594,7 @@ $this->getContent();
 }
 public function overrideGlobals()
 {
+$this->server->set('QUERY_STRING', static::normalizeQueryString(http_build_query($this->query->all(), null,'&')));
 $_GET = $this->query->all();
 $_POST = $this->request->all();
 $_SERVER = $this->server->all();
@@ -759,7 +760,12 @@ return 443;
 }
 }
 if ($host = $this->headers->get('HOST')) {
-if (false !== $pos = strrpos($host,':')) {
+if ($host[0] ==='[') {
+$pos = strpos($host,':', strrpos($host,']'));
+} else {
+$pos = strrpos($host,':');
+}
+if (false !== $pos) {
 return intval(substr($host, $pos + 1));
 }
 return'https'=== $this->getScheme() ? 443 : 80;
@@ -768,11 +774,11 @@ return $this->server->get('SERVER_PORT');
 }
 public function getUser()
 {
-return $this->server->get('PHP_AUTH_USER');
+return $this->headers->get('PHP_AUTH_USER');
 }
 public function getPassword()
 {
-return $this->server->get('PHP_AUTH_PW');
+return $this->headers->get('PHP_AUTH_PW');
 }
 public function getUserInfo()
 {
@@ -824,7 +830,8 @@ public function isSecure()
 if (self::$trustedProxies && self::$trustedHeaders[self::HEADER_CLIENT_PROTO] && $proto = $this->headers->get(self::$trustedHeaders[self::HEADER_CLIENT_PROTO])) {
 return in_array(strtolower(current(explode(',', $proto))), array('https','on','ssl','1'));
 }
-return'on'== strtolower($this->server->get('HTTPS')) || 1 == $this->server->get('HTTPS');
+$https = $this->server->get('HTTPS');
+return !empty($https) &&'off'!== strtolower($https);
 }
 public function getHost()
 {
@@ -837,7 +844,7 @@ $host = $this->server->get('SERVER_ADDR','');
 }
 }
 $host = strtolower(preg_replace('/:\d+$/','', trim($host)));
-if ($host && !preg_match('/^\[?(?:[a-zA-Z0-9-:\]_]+\.?)+$/', $host)) {
+if ($host &&''!== preg_replace('/(?:^\[)?[a-zA-Z0-9-:\]_]+\.?/','', $host)) {
 throw new \UnexpectedValueException(sprintf('Invalid Host "%s"', $host));
 }
 if (count(self::$trustedHostPatterns) > 0) {
@@ -897,7 +904,6 @@ if (in_array($mimeType, (array) $mimeTypes)) {
 return $format;
 }
 }
-return null;
 }
 public function setFormat($format, $mimeTypes)
 {
@@ -927,6 +933,10 @@ $this->defaultLocale = $locale;
 if (null === $this->locale) {
 $this->setPhpDefaultLocale($locale);
 }
+}
+public function getDefaultLocale()
+{
+return $this->defaultLocale;
 }
 public function setLocale($locale)
 {
@@ -1312,7 +1322,9 @@ public function prepare(Request $request)
 $headers = $this->headers;
 if ($this->isInformational() || in_array($this->statusCode, array(204, 304))) {
 $this->setContent(null);
-}
+$headers->remove('Content-Type');
+$headers->remove('Content-Length');
+} else {
 if (!$headers->has('Content-Type')) {
 $format = $request->getRequestFormat();
 if (null !== $format && $mimeType = $request->getMimeType($format)) {
@@ -1333,6 +1345,7 @@ $length = $headers->get('Content-Length');
 $this->setContent(null);
 if ($length) {
 $headers->set('Content-Length', $length);
+}
 }
 }
 if ('HTTP/1.0'!= $request->server->get('SERVER_PROTOCOL')) {
@@ -1373,22 +1386,7 @@ $this->sendContent();
 if (function_exists('fastcgi_finish_request')) {
 fastcgi_finish_request();
 } elseif ('cli'!== PHP_SAPI) {
-$previous = null;
-$obStatus = ob_get_status(1);
-while (($level = ob_get_level()) > 0 && $level !== $previous) {
-$previous = $level;
-if ($obStatus[$level - 1]) {
-if (version_compare(PHP_VERSION,'5.4','>=')) {
-if (isset($obStatus[$level - 1]['flags']) && ($obStatus[$level - 1]['flags'] & PHP_OUTPUT_HANDLER_REMOVABLE)) {
-ob_end_flush();
-}
-} else {
-if (isset($obStatus[$level - 1]['del']) && $obStatus[$level - 1]['del']) {
-ob_end_flush();
-}
-}
-}
-}
+static::closeOutputBuffers(0, true);
 flush();
 }
 return $this;
@@ -1532,7 +1530,6 @@ return (int) $this->headers->getCacheControlDirective('max-age');
 if (null !== $this->getExpires()) {
 return $this->getExpires()->format('U') - $this->getDate()->format('U');
 }
-return null;
 }
 public function setMaxAge($value)
 {
@@ -1550,7 +1547,6 @@ public function getTtl()
 if (null !== $maxAge = $this->getMaxAge()) {
 return $maxAge - $this->getAge();
 }
-return null;
 }
 public function setTtl($seconds)
 {
@@ -1641,10 +1637,14 @@ return null !== $this->headers->get('Vary');
 }
 public function getVary()
 {
-if (!$vary = $this->headers->get('Vary')) {
+if (!$vary = $this->headers->get('Vary', null, false)) {
 return array();
 }
-return is_array($vary) ? $vary : preg_split('/[\s,]+/', $vary);
+$ret = array();
+foreach ($vary as $item) {
+$ret = array_merge($ret, preg_split('/[\s,]+/', $item));
+}
+return $ret;
 }
 public function setVary($headers, $replace = true)
 {
@@ -1656,12 +1656,14 @@ public function isNotModified(Request $request)
 if (!$request->isMethodSafe()) {
 return false;
 }
-$lastModified = $request->headers->get('If-Modified-Since');
 $notModified = false;
+$lastModified = $this->headers->get('Last-Modified');
+$modifiedSince = $request->headers->get('If-Modified-Since');
 if ($etags = $request->getEtags()) {
-$notModified = (in_array($this->getEtag(), $etags) || in_array('*', $etags)) && (!$lastModified || $this->headers->get('Last-Modified') == $lastModified);
-} elseif ($lastModified) {
-$notModified = $lastModified == $this->headers->get('Last-Modified');
+$notModified = in_array($this->getEtag(), $etags) || in_array('*', $etags);
+}
+if ($modifiedSince && $lastModified) {
+$notModified = strtotime($modifiedSince) >= strtotime($lastModified) && (!$etags || $notModified);
 }
 if ($notModified) {
 $this->setNotModified();
@@ -1710,7 +1712,26 @@ return in_array($this->statusCode, array(201, 301, 302, 303, 307, 308)) && (null
 }
 public function isEmpty()
 {
-return in_array($this->statusCode, array(201, 204, 304));
+return in_array($this->statusCode, array(204, 304));
+}
+public static function closeOutputBuffers($targetLevel, $flush)
+{
+$status = ob_get_status(true);
+$level = count($status);
+while ($level-- > $targetLevel
+&& (!empty($status[$level]['del'])
+|| (isset($status[$level]['flags'])
+&& ($status[$level]['flags'] & PHP_OUTPUT_HANDLER_REMOVABLE)
+&& ($status[$level]['flags'] & ($flush ? PHP_OUTPUT_HANDLER_FLUSHABLE : PHP_OUTPUT_HANDLER_CLEANABLE))
+)
+)
+) {
+if ($flush) {
+ob_end_flush();
+} else {
+ob_end_clean();
+}
+}
 }
 protected function ensureIEOverSSLCompatibility(Request $request)
 {
@@ -1967,6 +1988,9 @@ if (self::SCOPE_PROTOTYPE === $scope) {
 throw new InvalidArgumentException(sprintf('You cannot set service "%s" of scope "prototype".', $id));
 }
 $id = strtolower($id);
+if ('service_container'=== $id) {
+return;
+}
 if (self::SCOPE_CONTAINER !== $scope) {
 if (!isset($this->scopedServices[$scope])) {
 throw new RuntimeException(sprintf('You cannot set service "%s" of inactive scope.', $id));
@@ -1987,6 +2011,9 @@ unset($this->services[$id]);
 public function has($id)
 {
 $id = strtolower($id);
+if ('service_container'=== $id) {
+return true;
+}
 return isset($this->services[$id])
 || array_key_exists($id, $this->services)
 || isset($this->aliases[$id])
@@ -1998,6 +2025,9 @@ public function get($id, $invalidBehavior = self::EXCEPTION_ON_INVALID_REFERENCE
 foreach (array(false, true) as $strtolower) {
 if ($strtolower) {
 $id = strtolower($id);
+}
+if ('service_container'=== $id) {
+return $this;
 }
 if (isset($this->aliases[$id])) {
 $id = $this->aliases[$id];
@@ -2026,7 +2056,7 @@ $alternatives[] = $key;
 }
 throw new ServiceNotFoundException($id, null, null, $alternatives);
 }
-return null;
+return;
 }
 $this->loading[$id] = true;
 try {
@@ -2037,7 +2067,7 @@ if (array_key_exists($id, $this->services)) {
 unset($this->services[$id]);
 }
 if ($e instanceof InactiveScopeException && self::EXCEPTION_ON_INVALID_REFERENCE !== $invalidBehavior) {
-return null;
+return;
 }
 throw $e;
 }
@@ -2047,6 +2077,9 @@ return $service;
 public function initialized($id)
 {
 $id = strtolower($id);
+if ('service_container'=== $id) {
+return true;
+}
 return isset($this->services[$id]) || array_key_exists($id, $this->services);
 }
 public function getServiceIds()
@@ -2058,6 +2091,7 @@ if (preg_match('/^get(.+)Service$/', $method->name, $match)) {
 $ids[] = self::underscore($match[1]);
 }
 }
+$ids[] ='service_container';
 return array_unique(array_merge($ids, array_keys($this->services)));
 }
 public function enterScope($name)
@@ -2230,16 +2264,16 @@ protected $booted = false;
 protected $name;
 protected $startTime;
 protected $loadClassCache;
-const VERSION ='2.4.2';
-const VERSION_ID ='20402';
+const VERSION ='2.5.6';
+const VERSION_ID ='20506';
 const MAJOR_VERSION ='2';
-const MINOR_VERSION ='4';
-const RELEASE_VERSION ='2';
+const MINOR_VERSION ='5';
+const RELEASE_VERSION ='6';
 const EXTRA_VERSION ='';
 public function __construct($environment, $debug)
 {
 $this->environment = $environment;
-$this->debug = (Boolean) $debug;
+$this->debug = (bool) $debug;
 $this->rootDir = $this->getRootDir();
 $this->name = $this->getName();
 if ($this->debug) {
@@ -2598,21 +2632,33 @@ return $source;
 $rawChunk ='';
 $output ='';
 $tokens = token_get_all($source);
+$ignoreSpace = false;
 for (reset($tokens); false !== $token = current($tokens); next($tokens)) {
 if (is_string($token)) {
 $rawChunk .= $token;
 } elseif (T_START_HEREDOC === $token[0]) {
-$output .= preg_replace(array('/\s+$/Sm','/\n+/S'),"\n", $rawChunk).$token[1];
+$output .= $rawChunk.$token[1];
 do {
 $token = next($tokens);
 $output .= $token[1];
 } while ($token[0] !== T_END_HEREDOC);
 $rawChunk ='';
-} elseif (!in_array($token[0], array(T_COMMENT, T_DOC_COMMENT))) {
+} elseif (T_WHITESPACE === $token[0]) {
+if ($ignoreSpace) {
+$ignoreSpace = false;
+continue;
+}
+$rawChunk .= preg_replace(array('/\n{2,}/S'),"\n", $token[1]);
+} elseif (in_array($token[0], array(T_COMMENT, T_DOC_COMMENT))) {
+$ignoreSpace = true;
+} else {
 $rawChunk .= $token[1];
+if (T_OPEN_TAG === $token[0]) {
+$ignoreSpace = true;
 }
 }
-$output .= preg_replace(array('/\s+$/Sm','/\n+/S'),"\n", $rawChunk);
+}
+$output .= $rawChunk;
 return $output;
 }
 public function serialize()
@@ -2758,7 +2804,6 @@ return $this->path;
 }
 public function getParent()
 {
-return null;
 }
 final public function getName()
 {
@@ -2800,6 +2845,7 @@ $application->add($r->newInstance());
 namespace Symfony\Component\Config
 {
 use Symfony\Component\Config\Resource\ResourceInterface;
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 class ConfigCache
 {
@@ -2808,7 +2854,7 @@ private $file;
 public function __construct($file, $debug)
 {
 $this->file = $file;
-$this->debug = (Boolean) $debug;
+$this->debug = (bool) $debug;
 }
 public function __toString()
 {
@@ -2837,11 +2883,20 @@ return true;
 }
 public function write($content, array $metadata = null)
 {
-$mode = 0666 & ~umask();
+$mode = 0666;
+$umask = umask();
 $filesystem = new Filesystem();
-$filesystem->dumpFile($this->file, $content, $mode);
+$filesystem->dumpFile($this->file, $content, null);
+try {
+$filesystem->chmod($this->file, $mode, $umask);
+} catch (IOException $e) {
+}
 if (null !== $metadata && true === $this->debug) {
-$filesystem->dumpFile($this->getMetaFile(), serialize($metadata), $mode);
+$filesystem->dumpFile($this->getMetaFile(), serialize($metadata), null);
+try {
+$filesystem->chmod($this->getMetaFile(), $mode, $umask);
+} catch (IOException $e) {
+}
 }
 }
 private function getMetaFile()
@@ -2892,6 +2947,16 @@ return $this->handleException($e, $request, $type);
 public function terminate(Request $request, Response $response)
 {
 $this->dispatcher->dispatch(KernelEvents::TERMINATE, new PostResponseEvent($this, $request, $response));
+}
+public function terminateWithException(\Exception $exception)
+{
+if (!$request = $this->requestStack->getMasterRequest()) {
+throw new \LogicException('Request stack is empty', 0, $exception);
+}
+$response = $this->handleException($exception, $request, self::MASTER_REQUEST);
+$response->sendHeaders();
+$response->sendContent();
+$this->terminate($request, $response);
 }
 private function handleRaw(Request $request, $type = self::MASTER_REQUEST)
 {
