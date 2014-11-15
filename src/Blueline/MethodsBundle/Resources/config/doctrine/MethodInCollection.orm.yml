@@ -12,11 +12,11 @@ Blueline\MethodsBundle\Entity\MethodInCollection:
     manyToOne:
         collection:
             targetEntity: Collection
-            cascade: ["persist"]
+            cascade: ["merge","persist"]
             inversedBy: methods
         method:
             targetEntity: Method
-            cascade: ["persist"]
+            cascade: ["merge","persist"]
             inversedBy: collections
             joinColumn:
                 name: method_title

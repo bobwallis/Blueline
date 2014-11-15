@@ -83,7 +83,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
         // also keep the title.
         // Once we've updated/inserted everything, execute the 'sort' command on the title array, then
         // iterate through the database in title order and remove anything not present in the array.
-        $importedMethods = array();
+        $allImportedMethodTitles = array();
 
         // Iterate over all appropriate files
         $dataFiles = new \GlobIterator( __DIR__.'/../Resources/data/*.xml' );
@@ -110,7 +110,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
                     $output->writeln( "\r<error>".str_pad( " Invalid data for ".$xmlRow['title'].":\n".$errors, $targetConsoleWidth, ' ' ).'</error>' );
                     $progress->display();
                 } else {
-                    $importedMethods[] = $xmlRow['title'];
+                    $allImportedMethodTitles[] = $xmlRow['title'];
                     $method = $em->merge( $method );
                     $em->refresh( $method );
 
@@ -123,7 +123,6 @@ class ImportMethodsCommand extends ContainerAwareCommand
                                 $methodInCollection[$t]->setMethod( $method );
                                 $methodInCollection[$t]->setCollection( $methodCollections[$t] );
                                 $methodInCollection[$t]->setPosition( intval( $xmlRow[$t.'Ref'] ) );
-                                $methodCollections[$t]->addMethod( $methodInCollection[$t] );
                                 $methodInCollection[$t] = $em->merge( $methodInCollection[$t] );
                             }
                         }
@@ -140,12 +139,11 @@ class ImportMethodsCommand extends ContainerAwareCommand
                             }
                         }
                     }
-                    $em->merge( $method );
                 }
 
                 // Flush every so often so we don't run out of memory
                 ++$count;
-                if ($count % 10 == 0) {
+                if ($count % 1 == 0) { // Run into maanged+dirty errors if this is >1 and certain things happen, investigate later
                     $em->flush();
                     $em->clear();
                 }
@@ -176,7 +174,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
         $progress->setRedrawFrequency( max(1, $methodCount/100) );
         while ( $dbIterator->valid() ) {
             // If the entry found in the database wasn't just imported, remove it
-            if ( !in_array( $dbRow[0]->getTitle(), $importedMethods ) ) {
+            if ( !in_array( $dbRow[0]->getTitle(), $allImportedMethodTitles ) ) {
                 $output->writeln( "\r<comment>".str_pad( " Removed '".$dbRow[0]->getTitle()."'", $targetConsoleWidth, ' ' ).'</comment>' );
                 $em->remove( $dbRow[0] );
             }

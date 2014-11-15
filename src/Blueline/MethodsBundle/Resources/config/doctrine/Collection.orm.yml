@@ -15,4 +15,5 @@ Blueline\MethodsBundle\Entity\Collection:
     oneToMany:
         methods:
             targetEntity: MethodInCollection
+            cascade: ["all"]
             mappedBy: collection

@@ -72,9 +72,9 @@ Blueline\MethodsBundle\Entity\Method:
     oneToMany:
         performances:
             targetEntity: Performance
-            cascade: ["persist","remove"]
+            cascade: ["all"]
             mappedBy: method
         collections:
             targetEntity: MethodInCollection
-            cascade: ["persist","remove"]
+            cascade: ["all"]
             mappedBy: method
