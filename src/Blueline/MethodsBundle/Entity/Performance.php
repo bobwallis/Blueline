@@ -93,6 +93,10 @@ class Performance
         $this->setAll( $firstSet );
     }
 
+    public function __toString() {
+        return $this->getRungTitle().' '.$this->getType();
+    }
+
     /**
      * Sets multiple variables using an array of them
      *

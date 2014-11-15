@@ -37,6 +37,10 @@ class Collection
         $this->methods = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+    public function __toString() {
+        return $this->getName();
+    }
+
     /**
      * Set id
      *

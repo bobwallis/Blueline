@@ -121,6 +121,10 @@ class Method
         $this->setAll( $firstSet );
     }
 
+    public function __toString() {
+        return $this->getTitle();
+    }
+
     /**
      * Sets multiple variables using an array of them
      *

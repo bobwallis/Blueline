@@ -37,6 +37,10 @@ class MethodInCollection
         $this->setAll( $firstSet );
     }
 
+    public function __toString() {
+        return $this->getMethod().' in '.$this->getCollection();
+    }
+
     /**
      * Sets multiple variables using an array of them
      *
