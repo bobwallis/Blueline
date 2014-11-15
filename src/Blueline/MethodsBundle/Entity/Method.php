@@ -102,7 +102,7 @@ class Method
     private $rotational;
 
     /**
-     * @var text $calls
+     * @var array $calls
      */
     private $calls;
 
@@ -583,7 +583,7 @@ class Method
     /**
      * Set calls
      *
-     * @param  text   $calls
+     * @param  array   $calls
      * @return Method
      */
     public function setCalls($calls)
@@ -596,7 +596,7 @@ class Method
     /**
      * Get calls
      *
-     * @return string
+     * @return array
      */
     public function getCalls()
     {

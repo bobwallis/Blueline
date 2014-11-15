@@ -63,7 +63,7 @@ Blueline\MethodsBundle\Entity\Method:
             type: boolean
             nullable: true
         calls:
-            type: text
+            type: array
             nullable: true
         ruleOffs:
             type: string
