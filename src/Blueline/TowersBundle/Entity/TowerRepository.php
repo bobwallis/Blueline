@@ -60,7 +60,7 @@ class TowerRepository extends EntityRepository
 
     public function findNearbyTowers($latitude, $longitude, $count = 7)
     {
-        $distance = '( 6371 * acos( cos( radians(:near_lat) ) * cos( radians( t.latitude ) ) * cos( radians( t.longitude ) - radians(:near_long) ) + sin( radians(:near_lat) ) * sin( radians( t.latitude ) ) ) )';
+        $distance = '( 3956.5 * acos( cos( radians(:near_lat) ) * cos( radians( t.latitude ) ) * cos( radians( t.longitude ) - radians(:near_long) ) + sin( radians(:near_lat) ) * sin( radians( t.latitude ) ) ) )';
 
         return array_map( function ($t) { return array_merge( $t[0], array( 'distance' => $t['distance'] ) ); }, $this->createQueryBuilder( 't' )
             ->select( 'partial t.{id,place,dedication,latitude,longitude}, '.$distance.' as distance' )
