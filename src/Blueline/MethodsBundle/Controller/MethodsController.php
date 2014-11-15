@@ -74,11 +74,13 @@ class MethodsController extends Controller
             $u = urldecode( $u );
             // Replace S with Surprise, etc...
             $classificationsInitials = array_map( function( $c ) {
-                return  implode( '', array_map( function( $w ) { return $w[0]; }, explode( ' ', $c ) ) );
+                return implode( '', array_map( function( $w ) { return $w[0]; }, explode( ' ', $c ) ) );
             }, Classifications::toArray() );
             $matches = array();
             if( preg_match( '/('.implode( '|', $classificationsInitials ).')_('.implode( '|', Stages::toArray() ).')$/', $u, $matches ) ) {
-                $u = preg_replace( '/'.$matches[1].'_('.implode( '|', Stages::toArray() ).')$/', str_replace( $classificationsInitials, Classifications::toArray(), $matches[1] ).'_$1', $u );
+                $initial = $matches[1];
+                $classification = str_replace( ' ', '_', Classifications::toArray()[array_search( $initial, $classificationsInitials )] );
+                $u = preg_replace( '/'.$initial.'_('.implode( '|', Stages::toArray() ).')$/', $classification.'_$1', $u );
             }
             return $u;
         }, explode( '|', $title ) );
