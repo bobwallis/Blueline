@@ -7,4 +7,4 @@ Blueline_Pages_view:
     defaults: { _controller: BluelinePagesBundle:Pages:page, _format: 'html' }
     requirements:
         page:    about|copyright
-        _format: html
+        _format: html|txt
