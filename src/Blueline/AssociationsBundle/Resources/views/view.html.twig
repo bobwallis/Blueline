@@ -34,7 +34,7 @@
 			{% for tower in association.towers %}
 				<li><a href="{{ path( 'Blueline_Towers_view', { 'id': tower.id } ) }}">{{ tower.place }} <small> ({{ tower.dedication }})</small></a></li>
 			{% else %}
-				<li>None</li>
+				<li class="none">None</li>
 			{% endfor %}
 			</ol>
 		</div>

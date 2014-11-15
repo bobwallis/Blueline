@@ -5,11 +5,15 @@ ol, ul {
 	li {
 		padding: 0;
 		border-bottom: 1px solid lighten(@lightGrey,5%);
+		&.none {
+			padding: (@contentYPadding - 2) @contentXPadding;
+		}
 		&:first-child {
 			padding-top: 0;
 		}
 		&:last-child {
 			padding-bottom: 0;
+			border-bottom: 0;
 		}
 		a {
 			display: block;

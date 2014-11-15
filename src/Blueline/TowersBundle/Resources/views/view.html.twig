@@ -59,7 +59,7 @@
 				{% for tower2 in nearbyTowers2 %}
 					<li><a href="{{ path( 'Blueline_Towers_view', {'id':tower2.id} ) }}">{{ tower2.place}} <small>({{ tower2.dedication }})</small><small class="extra"> {{ round( tower2.distance, 1 ) }} miles</small></a></li>
 				{% else %}
-					<li>None</li>
+					<li class="none">None</li>
 				{% endfor %}
 			</ol>
 		</div>
@@ -69,7 +69,7 @@
 				{% for performance in tower.firstPealPerformances|default([]) %}
 					<li><a href="{{ path( 'Blueline_Methods_view', { 'title': performance.method.url } ) }}">{{ performance.method.title }}<small class="extra"> ({{ performance.date|date('Y-m-d') }})</small></a></li>
 				{% else %}
-					<li>None</li>
+					<li class="none">None</li>
 				{% endfor %}
 			</ol>
 		</div>
