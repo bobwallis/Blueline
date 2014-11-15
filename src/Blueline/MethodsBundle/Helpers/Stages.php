@@ -37,6 +37,14 @@ class Stages {
 	);
 
 	/**
+	 * Return array of all stages
+	 * @return array
+	 */
+	public static function toArray() {
+		return self::$_numberToStage;
+	}
+
+	/**
 	 * Converts an integer (or a valid string representation) into a string representation
 	 * @param integer|string $i
 	 * @return string|boolean

@@ -5,6 +5,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use Blueline\BluelineBundle\Helpers\Search;
 use Blueline\BluelineBundle\Helpers\Text;
+use Blueline\MethodsBundle\Helpers\Stages;
+use Blueline\MethodsBundle\Helpers\Classifications;
 
 class MethodsController extends Controller
 {
@@ -66,8 +68,24 @@ class MethodsController extends Controller
         $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
         if ( $response->isNotModified( $request ) ) { return $response; }
 
-        $urls = array_map( "urldecode", explode( '|', $title ) );
+        // Decode and canonicalise the requested URLs
+        $urls = array_map( function($u) {
+            // Decode
+            $u = urldecode( $u );
+            // Replace S with Surprise, etc...
+            $classificationsInitials = array_map( function( $c ) {
+                return  implode( '', array_map( function( $w ) { return $w[0]; }, explode( ' ', $c ) ) );
+            }, Classifications::toArray() );
+            $matches = array();
+            if( preg_match( '/('.implode( '|', $classificationsInitials ).')_('.implode( '|', Stages::toArray() ).')$/', $u, $matches ) ) {
+                $u = preg_replace( '/'.$matches[1].'_('.implode( '|', Stages::toArray() ).')$/', str_replace( $classificationsInitials, Classifications::toArray(), $matches[1] ).'_$1', $u );
+            }
+            return $u;
+        }, explode( '|', $title ) );
+        // Convert URLs into titles
         $titles = array_map( function ($m) { return str_replace( '_', ' ', $m ); }, $urls );
+
+        // Create lower case arrays for use in search
         $urlsLower = array_map( "strtolower", $urls );
         $titlesLower = array_map( "strtolower", $titles );
 

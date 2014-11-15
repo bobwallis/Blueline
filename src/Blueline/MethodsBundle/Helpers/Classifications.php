@@ -25,6 +25,14 @@ class Classifications {
 	);
 
 	/**
+	 * Return array of all classifications
+	 * @return array
+	 */
+	public static function toArray() {
+		return self::$_classifications;
+	}
+
+	/**
 	 * Test whether a string corresponds to a class
 	 * @param string $test
 	 * @return boolean
