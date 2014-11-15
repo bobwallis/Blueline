@@ -64,7 +64,7 @@ class TowerRepository extends EntityRepository
 
         return array_map( function ($t) { return array_merge( $t[0], array( 'distance' => $t['distance'] ) ); }, $this->createQueryBuilder( 't' )
             ->select( 'partial t.{id,place,dedication,latitude,longitude}, '.$distance.' as distance' )
-            ->where( 't.latitude IS NOT NULL AND (t.latitude <> :near_lat OR t.longitude <> :near_long)' )
+            ->where( 't.latitude IS NOT NULL' )
             ->having( $distance.' < 20' )
             ->groupBy( 't.id' )
             ->orderBy( 'distance', 'ASC' )
