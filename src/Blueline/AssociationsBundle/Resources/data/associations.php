@@ -1,349 +1,355 @@
 <?php
-// Associations data exported 2013/10/10, 23:25
+// Associations data exported 2014/11/15, 12:57
 $associations = array (
-  0 =>
+  0 => 
   array (
     'abbreviation' => 'ANZAB',
     'name' => 'Australian and New Zealand Association',
     'link' => 'http://www.anzab.org.au/',
   ),
-  1 =>
+  1 => 
   array (
     'abbreviation' => 'ASCY',
     'name' => 'Ancient Society of College Youths',
     'link' => 'http://www.ascy.org.uk/',
   ),
-  2 =>
+  2 => 
   array (
     'abbreviation' => 'Beds',
     'name' => 'Bedfordshire Association',
     'link' => 'http://www.bacr.co.uk/',
   ),
-  3 =>
+  3 => 
+  array (
+    'abbreviation' => 'Bev&D',
+    'name' => 'Beverley & District Society',
+    'link' => 'http://www.bnd.org.uk/',
+  ),
+  4 => 
   array (
     'abbreviation' => 'B&W',
     'name' => 'Bath and Wells Diocesan Association',
     'link' => 'http://bath-wells.org/',
   ),
-  4 =>
+  5 => 
   array (
     'abbreviation' => 'CarDG',
     'name' => 'Carlisle Diocesan Guild',
     'link' => 'http://www.carlisle-dgcbr.org.uk/',
   ),
-  5 =>
+  6 => 
   array (
     'abbreviation' => 'CheDG',
     'name' => 'Chester Diocesan Guild',
     'link' => 'http://www.chesterdg.org.uk/',
   ),
-  6 =>
+  7 => 
   array (
     'abbreviation' => 'CovDG',
     'name' => 'Coventry Diocesan Guild',
     'link' => 'http://www.coventrydg.co.uk/',
   ),
-  7 =>
+  8 => 
   array (
     'abbreviation' => 'DDA',
     'name' => 'Derby Diocesan Association',
     'link' => 'http://www.derbyda.org.uk/',
   ),
-  8 =>
+  9 => 
   array (
     'abbreviation' => 'DevAs',
     'name' => 'Devon Association',
     'link' => 'http://www.devonbells.co.uk/',
   ),
-  9 =>
+  10 => 
   array (
     'abbreviation' => 'D&N',
     'name' => 'Durham and Newcastle Diocesan Association',
     'link' => 'http://dandn.org/',
   ),
-  10 =>
+  11 => 
   array (
     'abbreviation' => 'EDWNA',
     'name' => 'East Derbyshire and West Nottinghamshire Association',
     'link' => '',
   ),
-  11 =>
+  12 => 
   array (
     'abbreviation' => 'EGDG',
     'name' => 'East Grinstead and District Guild',
     'link' => 'http://www.richard.gibson.dsl.pipex.com/egdg/home.htm',
   ),
-  12 =>
+  13 => 
   array (
     'abbreviation' => 'Ely',
     'name' => 'Ely Diocesan Association',
     'link' => 'https://sites.google.com/site/elydabells/',
   ),
-  13 =>
+  14 => 
   array (
     'abbreviation' => 'Essex',
     'name' => 'Essex Association',
     'link' => 'http://www.eacr.org.uk/',
   ),
-  14 =>
+  15 => 
   array (
     'abbreviation' => 'G&B',
     'name' => 'Gloucester and Bristol Diocesan Association',
     'link' => 'http://www.bellsgandb.org.uk/',
   ),
-  15 =>
+  16 => 
   array (
     'abbreviation' => 'GDG',
     'name' => 'Guildford Diocesan Guild',
     'link' => 'http://guildfordguild.org.uk/',
   ),
-  16 =>
+  17 => 
   array (
     'abbreviation' => 'GDR',
     'name' => 'Guild of Devonshire Ringers',
     'link' => 'http://devonringers.org.uk/',
   ),
-  17 =>
+  18 => 
   array (
     'abbreviation' => 'HCA',
     'name' => 'Hertford County Association',
     'link' => 'http://www.hcacr.org.uk/',
   ),
-  18 =>
+  19 => 
   array (
     'abbreviation' => 'HDG',
     'name' => 'Hereford Diocesan Guild',
     'link' => 'http://www.hdgb.org/',
   ),
-  19 =>
+  20 => 
   array (
     'abbreviation' => 'Irish',
     'name' => 'Irish Association',
     'link' => 'http://www.bellringingireland.org/',
   ),
-  20 =>
+  21 => 
   array (
     'abbreviation' => 'KCA',
     'name' => 'Kent County Association',
     'link' => 'http://www.kcacr.org.uk/',
   ),
-  21 =>
+  22 => 
   array (
     'abbreviation' => 'Lancs',
     'name' => 'Lancashire Association',
     'link' => 'http://www.lacr.org.uk/',
   ),
-  22 =>
+  23 => 
   array (
     'abbreviation' => 'LeiDG',
     'name' => 'Leicester Diocesan Guild',
     'link' => 'http://www.leicesterdg.org.uk/',
   ),
-  23 =>
+  24 => 
   array (
     'abbreviation' => 'LinDG',
     'name' => 'Lincoln Diocesan Guild',
     'link' => 'http://ldgcb.org.uk/',
   ),
-  24 =>
+  25 => 
   array (
     'abbreviation' => 'LivUS',
     'name' => 'Liverpool Universities Society',
     'link' => 'http://luscr.org.uk/',
   ),
-  25 =>
+  26 => 
   array (
     'abbreviation' => 'L&M',
     'name' => 'Llandaff and Monmouth Diocesan Association',
     'link' => 'http://www.llanmon.org.uk/',
   ),
-  26 =>
+  27 => 
   array (
     'abbreviation' => 'Lundy',
     'name' => 'Lundy Island Society',
     'link' => '',
   ),
-  27 =>
+  28 => 
   array (
     'abbreviation' => 'LWAS',
     'name' => 'Lichfield and Walsall Archdeaconries Society',
     'link' => 'http://www.lwascr.org.uk/',
   ),
-  28 =>
+  29 => 
   array (
     'abbreviation' => 'Middx',
     'name' => 'Middlesex County Association',
     'link' => 'http://www.mcaldg.org.uk/',
   ),
-  29 =>
+  30 => 
   array (
     'abbreviation' => 'MUG',
     'name' => 'Manchester University Guild',
     'link' => 'http://www.mugcr.org/',
   ),
-  30 =>
+  31 => 
   array (
     'abbreviation' => 'NAG',
     'name' => 'North American Guild',
     'link' => 'http://www.nagcr.org/',
   ),
-  31 =>
+  32 => 
   array (
     'abbreviation' => 'NDA',
     'name' => 'Norwich Diocesan Association',
     'link' => 'http://ndar.org.uk/',
   ),
-  32 =>
+  33 => 
   array (
     'abbreviation' => 'NSA',
     'name' => 'North Staffordshire Association',
     'link' => 'http://www.nsacr.org.uk/',
   ),
-  33 =>
+  34 => 
   array (
     'abbreviation' => 'NWA',
     'name' => 'North Wales Asssociation',
     'link' => 'http://www.northwalesbellringers.org/',
   ),
-  34 =>
+  35 => 
   array (
     'abbreviation' => 'ODG',
     'name' => 'Oxford Diocesan Guild',
     'link' => 'http://www.odg.org.uk/',
   ),
-  35 =>
+  36 => 
   array (
     'abbreviation' => 'OS',
     'name' => 'Oxford Society',
     'link' => 'http://www.oxfordsociety.org.uk/',
   ),
-  36 =>
+  37 => 
   array (
     'abbreviation' => 'OUS',
     'name' => 'Oxford University Society',
     'link' => 'http://www.ouscr.org.uk/',
   ),
-  37 =>
+  38 => 
   array (
     'abbreviation' => 'PDG',
     'name' => 'Peterborough Diocesan Guild',
     'link' => 'http://www.pdg.org.uk/',
   ),
-  38 =>
+  39 => 
   array (
     'abbreviation' => 'SAG',
     'name' => 'South African Guild',
     'link' => 'http://www.scifac.ru.ac.za/cathedral/bellguild.htm',
   ),
-  39 =>
+  40 => 
   array (
     'abbreviation' => 'Salis',
     'name' => 'Salisbury Diocesan Guild',
     'link' => 'http://sdgr.org.uk/',
   ),
-  40 =>
+  41 => 
   array (
     'abbreviation' => 'Salop',
     'name' => 'Shropshire Association',
     'link' => 'http://www.sacbr.org.uk/',
   ),
-  41 =>
+  42 => 
   array (
     'abbreviation' => 'S&B',
     'name' => 'Swansea and Brecon Diocesan Guild',
     'link' => 'http://myweb.tiscali.co.uk/pckmj/sbdg/',
   ),
-  42 =>
+  43 => 
   array (
     'abbreviation' => 'Scot',
     'name' => 'Scottish Association',
     'link' => 'http://www.sacr.org/',
   ),
-  43 =>
+  44 => 
   array (
     'abbreviation' => 'SDDG',
     'name' => 'St David\'s Diocesan Guild',
     'link' => 'https://sites.google.com/site/stdavidsguild/home',
   ),
-  44 =>
+  45 => 
   array (
     'abbreviation' => 'SMB',
     'name' => 'St Martin\'s Guild',
     'link' => 'http://www.smgcbr.heralded.co.uk/',
   ),
-  45 =>
+  46 => 
   array (
     'abbreviation' => 'SRCY',
     'name' => 'Society of Royal Cumberland Youths',
     'link' => 'http://www.srcy.org.uk/',
   ),
-  46 =>
+  47 => 
   array (
     'abbreviation' => 'Suff',
     'name' => 'Suffolk Guild',
     'link' => 'http://www.suffolkbells.org.uk/',
   ),
-  47 =>
+  48 => 
   array (
     'abbreviation' => 'Surr',
     'name' => 'Surrey Association',
     'link' => 'http://www.surreybellringers.org.uk/',
   ),
-  48 =>
+  49 => 
   array (
     'abbreviation' => 'SuxCA',
     'name' => 'Sussex County Association',
     'link' => 'http://www.scacr.org/',
   ),
-  49 =>
+  50 => 
   array (
     'abbreviation' => 'Swell',
     'name' => 'Southwell and Nottingham Diocesan Guild',
     'link' => 'http://www.southwelldg.org.uk/',
   ),
-  50 =>
+  51 => 
   array (
     'abbreviation' => 'Trans',
     'name' => 'Transvaal Society',
     'link' => '',
   ),
-  51 =>
+  52 => 
   array (
     'abbreviation' => 'TruDG',
     'name' => 'Truro Diocesan Guild',
     'link' => 'http://www.tdgr.org.uk/',
   ),
-  52 =>
+  53 => 
   array (
     'abbreviation' => 'UBSCR',
     'name' => 'University of Bristol Society',
     'link' => 'http://www.bris.ac.uk/Depts/Union/UBSCR/',
   ),
-  53 =>
+  54 => 
   array (
     'abbreviation' => 'UL',
     'name' => 'University of London Society',
     'link' => 'http://www.ulscr.org.uk/',
   ),
-  54 =>
+  55 => 
   array (
     'abbreviation' => 'WDA',
     'name' => 'Worcestershire & Districts Association',
     'link' => 'http://www.wdcra.org.uk/',
   ),
-  55 =>
+  56 => 
   array (
     'abbreviation' => 'W&P',
     'name' => 'Winchester and Portsmouth Diocesan Guild',
     'link' => 'http://www.wp-ringers.org.uk/',
   ),
-  56 =>
+  57 => 
   array (
     'abbreviation' => 'YACR',
     'name' => 'Yorkshire Association',
     'link' => 'http://www.yacr.org.uk/',
   ),
-  57 =>
+  58 => 
   array (
     'abbreviation' => 'Zimb',
     'name' => 'Zimbabwe Guild',
