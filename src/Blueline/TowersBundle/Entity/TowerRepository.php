@@ -8,11 +8,11 @@ class TowerRepository extends EntityRepository
 {
     private function createQueryForFindBySearchVariables($searchVariables, $initialQuery = null)
     {
-        $query = ($initialQuery === null)? $this->createQueryBuilder( 't' )->select( 'partial t.{id, place, dedication}' ) : $initialQuery;
+        $query = ($initialQuery === null)? $this->createQueryBuilder( 't' )->select( 'partial t.{id, place, dedication, county, country}' ) : $initialQuery;
 
         if ( isset( $searchVariables['q'] ) ) {
             if ( strpos( $searchVariables['q'], ' ' ) !== false ) {
-                $query->andWhere( "CONCAT_WS(' ', t.dedication, t.place ,t.dedication) LIKE :qLike" );
+                $query->andWhere( "CONCAT_WS(' ', LOWER(t.dedication), LOWER(t.place) ,LOWER(t.dedication)) LIKE :qLike" );
             } else {
                 $query->andWhere( 'LOWER(t.place) LIKE :qLike' );
             }

@@ -17,7 +17,7 @@
 		{% if towers is not empty %}
 		<ol>
 		{% for tower in towers %}
-			<li><a href="{{ path( 'Blueline_Towers_view', { 'id': tower.id } ) }}">{{ tower.place }} <small>({{ tower.dedication }})</small></a></li>
+			<li><a href="{{ path( 'Blueline_Towers_view', { 'id': tower.id } ) }}">{{ tower.place }} <small>({{ tower.dedication }}), {{ tower.county }}, {{ tower.country }}</small></a></li>
 		{% endfor %}
 		</ol>
 		{{ paging( 'Blueline_Towers_search', searchVariables, pageActive, pageCount, count ) }}
