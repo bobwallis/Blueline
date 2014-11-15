@@ -83,7 +83,11 @@ class ImportTowersCommand extends ContainerAwareCommand
                     // Add any new ones not in the old
                     foreach ($newAffiliations as $affiliation) {
                         if ( !in_array( $affiliation, $oldAffiliations ) ) {
-                            $tower->addAssociation( $em->getReference( 'BluelineAssociationsBundle:Association', $associations[$affiliation] ) );
+                            if ( isset( $associations[$affiliation] ) ) {
+                                $tower->addAssociation( $em->getReference( 'BluelineAssociationsBundle:Association', $associations[$affiliation] ) );
+                            } else {
+                                $notFoundAffiliations[] = $affiliation;
+                            }
                         }
                     }
                     // Remove any old ones not in the new
