@@ -3,6 +3,44 @@ namespace Blueline\TowersBundle\Entity;
 
 class Tower
 {
+    // Constructor
+    public function __construct($firstSet = array())
+    {
+        $this->oldpks       = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->associations = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->performances = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->setAll( $firstSet );
+    }
+
+    // Casting helpers
+    public function __toString() {
+        return $this->getPlace();
+    }
+
+    public function __toArray()
+    {
+        $objectVars = get_object_vars($this);
+        array_walk( $objectVars, function( &$v, $k ) {
+            // Filter oldpks for now.
+            if( $k == 'oldpks' || $k == 'associations' || $k == 'performances' ) {
+                $v = null;
+            }
+        } );
+        return array_filter( $objectVars );
+    }
+
+    // setAll helper
+    public function setAll($map)
+    {
+        foreach ($map as $key => $value) {
+            $method = 'set'.ucwords( $key );
+            if ( is_callable( array( $this, $method ) ) ) {
+                $this->$method( $value );
+            }
+        }
+    }
+
+    // Variables
     /**
      * @var string $id
      */
@@ -158,26 +196,17 @@ class Tower
      */
     private $oldpks;
 
-    public function __construct()
-    {
-        $this->oldpks = new \Doctrine\Common\Collections\ArrayCollection();
-    }
+    /**
+     * @var Doctrine\Common\Collections\Collection
+     */
+    private $associations;
 
     /**
-     * Sets multiple variables using an array of them
-     *
-     * @param array $map
+     * @var \Doctrine\Common\Collections\Collection
      */
-    public function setAll($map)
-    {
-        foreach ($map as $key => $value) {
-            $method = 'set'.ucwords( $key );
-            if ( is_callable( array( $this, $method ) ) ) {
-                $this->$method( $value );
-            }
-        }
-    }
+    private $performances;
 
+    // Getters and setters
     /**
      * Set id
      *
@@ -809,10 +838,6 @@ class Tower
         return 'http://dove.cccbr.org.uk/detail.php?DoveID='. str_replace( '_', '+', $this->getId() ) . '&showFrames=true';
     }
 
-    /**
-     * @var Blueline\AssociationsBundle\Entity\Association
-     */
-    private $associations;
 
     /**
      * Add associations
@@ -890,10 +915,6 @@ class Tower
     {
         $this->oldpks->removeElement($oldpks);
     }
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     */
-    private $performances;
 
     /**
      * Get oldpks

@@ -3,12 +3,50 @@
 namespace Blueline\MethodsBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use \Blueline\BluelineBundle\Helpers\Text;
 
 /**
  * Performance
  */
 class Performance
 {
+    // Constructor
+    public function __construct( $firstSet = array() )
+    {
+        $this->setAll( $firstSet );
+    }
+
+    // Casting helpers
+    public function __toString() {
+        return $this->getRungTitle().' '.$this->getType();
+    }
+
+    public function __toArray()
+    {
+        $objectVars = get_object_vars($this);
+        array_walk( $objectVars, function( &$v, $k ) {
+            // Filter out id because that's only really meaningful internally. Filter method and location_doveid for now.
+            if( $k == 'id' || $k == 'method' || $k == 'location_doveid' ) {
+                $v = null;
+            }
+        } );
+        return array_filter( $objectVars );
+    }
+
+    // setAll helper
+    public function setAll($map)
+    {
+        foreach ($map as $key => $value) {
+            $method = 'set'.str_replace( ' ', '', ucwords( str_replace( '_', ' ', $key ) ) );
+            if ( is_callable( array( $this, $method ) ) ) {
+                $this->$method( $value );
+            }
+        }
+
+        return $this;
+    }
+
+    // Variables
     /**
      * @var integer
      */
@@ -84,36 +122,7 @@ class Performance
      */
     private $method;
 
-
-    /**
-     * Constructor
-     */
-    public function __construct( $firstSet = array() )
-    {
-        $this->setAll( $firstSet );
-    }
-
-    public function __toString() {
-        return $this->getRungTitle().' '.$this->getType();
-    }
-
-    /**
-     * Sets multiple variables using an array of them
-     *
-     * @param array $map
-     */
-    public function setAll($map)
-    {
-        foreach ($map as $key => $value) {
-            $method = 'set'.str_replace( ' ', '', ucwords( str_replace( '_', ' ', $key ) ) );
-            if ( is_callable( array( $this, $method ) ) ) {
-                $this->$method( $value );
-            }
-        }
-
-        return $this;
-    }
-
+    // Getters and setters
     /**
      * Get id
      *
@@ -407,7 +416,7 @@ class Performance
      */
     public function getLocation()
     {
-        return implode( ', ', array_filter( array(
+        return Text::toList( array_filter( array(
             $this->getLocationRoom(),
             $this->getLocationBuilding(),
             $this->getLocationAddress(),
@@ -415,7 +424,7 @@ class Performance
             $this->getLocationCounty(),
             $this->getLocationRegion(),
             $this->getLocationCountry()
-        ) ) );
+        ) ), ', ', ', ' );
     }
 
     /**

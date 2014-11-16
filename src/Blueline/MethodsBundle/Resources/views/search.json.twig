@@ -1,0 +1,5 @@
+{{ {
+	'query': searchVariables,
+	'results': (methods|default([]))|toArray,
+	'count': count
+}|json_encode|raw }}

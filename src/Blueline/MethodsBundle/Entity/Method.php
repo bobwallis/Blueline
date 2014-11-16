@@ -11,6 +11,45 @@ use \Blueline\MethodsBundle\Helpers\Stages;
  */
 class Method
 {
+    // Constructor
+    public function __construct( $firstSet = array() )
+    {
+        $this->collections  = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->performances = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->setAll( $firstSet );
+    }
+
+    // Casting helpers
+    public function __toString() {
+        return $this->getTitle();
+    }
+
+    public function __toArray()
+    {
+        $objectVars = get_object_vars($this);
+        array_walk( $objectVars, function( &$v, $k ) {
+            // Filter collections and performances for now.
+            if( $k == 'collections' || $k == 'performances' ) {
+                $v = null;
+            }
+        } );
+        return array_filter( $objectVars );
+    }
+
+    // setAll helper
+    public function setAll($map)
+    {
+        foreach ($map as $key => $value) {
+            $method = 'set'.str_replace( ' ', '', ucwords( str_replace( '_', ' ', $key ) ) );
+            if ( is_callable( array( $this, $method ) ) ) {
+                $this->$method( $value );
+            }
+        }
+
+        return $this;
+    }
+
+    // Variables
     /**
      * @var string $title
      */
@@ -110,38 +149,18 @@ class Method
      * @var string $ruleOffs
      */
     private $ruleOffs;
+    
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     */
+    private $collections;
 
     /**
-     * Constructor
+     * @var \Doctrine\Common\Collections\Collection
      */
-    public function __construct( $firstSet = array() )
-    {
-        $this->collections  = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->performances = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->setAll( $firstSet );
-    }
+    private $performances;
 
-    public function __toString() {
-        return $this->getTitle();
-    }
-
-    /**
-     * Sets multiple variables using an array of them
-     *
-     * @param array $map
-     */
-    public function setAll($map)
-    {
-        foreach ($map as $key => $value) {
-            $method = 'set'.str_replace( ' ', '', ucwords( str_replace( '_', ' ', $key ) ) );
-            if ( is_callable( array( $this, $method ) ) ) {
-                $this->$method( $value );
-            }
-        }
-
-        return $this;
-    }
-
+    // Getters and setters
     /**
      * Get title
      *
@@ -698,78 +717,6 @@ class Method
         }
     }
 
-    // Non-database methods
-
-    private $callingPositions;
-    public function getCallingPositions()
-    {
-        if (!$this->callingPositions) {
-            $stage = $this->getStage();
-            $calls = $this->getCalls();
-            $lengthOfLead = $this->getLengthOfLead();
-            if ( $stage < 6 || empty( $calls ) || !isset( $calls['Bob'] ) ) {
-                $this->callingPositions = array();
-            } else {
-                // Calling positions for calls at lead ends (Home, Wrong and so forth)
-                $bobNotation = PlaceNotation::explodedToPermutations( $stage, PlaceNotation::explode( $calls['Bob']['notation'] ), $stage );
-                if ( $calls['Bob']['every'] == $lengthOfLead && $calls['Bob']['from'] == 0 && count( $bobNotation ) == 1 ) {
-                    $leadHeads = $this->getLeadHeads();
-                    // Work out what the lead end of a bobbed lead looks like
-                    $notation = PlaceNotation::explodedToPermutations( $this->getStage(), PlaceNotation::explode( $this->getNotationExpanded() ) );
-                    $notation[$lengthOfLead-1] = $bobNotation[0];
-                    $bobbedLead = PlaceNotation::apply( $notation, PlaceNotation::rounds( $stage ) );
-                    $bobbedLeadHeadPermutation = array_map( function ($b) { return PlaceNotation::bellToInt( $b ) - 1; }, array_pop( $bobbedLead ) );
-                    // Collect an array of what happens at each lead if a bob is called
-                    $bobbedLeadHeads = array( PlaceNotation::permute( PlaceNotation::rounds( $stage ), $bobbedLeadHeadPermutation ) );
-                    for ( $i = 1; $i < count( $leadHeads ); $i++ ) {
-                        array_push( $bobbedLeadHeads, PlaceNotation::permute( $leadHeads[$i-1], $bobbedLeadHeadPermutation ) );
-                    }
-                    // Convert the array of lead heads into calling position names
-                    $this->callingPositions = array( 'from' => 0, 'every' => $lengthOfLead, 'titles' => array_map( function ($leadEnd) use ($stage) {
-                        $position = array_search( PlaceNotation::intToBell( $stage ), $leadEnd );
-                        switch ($position+1) {
-                            case 2:
-                                return 'I';
-                            case 3:
-                                return 'B';
-                            case 4:
-                                return 'F';
-                            case $stage-2:
-                                return 'M';
-                            case $stage-1:
-                                return 'W';
-                            case $stage:
-                                return 'H';
-                            case 5:
-                                return 'V';
-                        }
-
-                        return null;
-                    }, $bobbedLeadHeads ) );
-                }
-            }
-        }
-
-        return $this->callingPositions? : array();
-    }
-
-    private $leadHeads;
-    public function getLeadHeads()
-    {
-        if (!$this->leadHeads) {
-            $rounds = PlaceNotation::rounds( $this->getStage() );
-            $tmp = str_split( $this->getLeadHead() );
-            $leadHeadPermutation = array_map( function ($b) { return PlaceNotation::bellToInt( $b ) - 1; }, $tmp );
-            $leadHeads = array( $tmp );
-            while ( !PlaceNotation::rowsEqual( $rounds, $tmp ) ) {
-                $tmp = PlaceNotation::permute( $tmp, $leadHeadPermutation );
-                array_push( $leadHeads, $tmp );
-            }
-            $this->leadHeads = $leadHeads;
-        }
-
-        return $this->leadHeads;
-    }
     /**
      * @var string
      */
@@ -797,10 +744,6 @@ class Method
     {
         return $this->url;
     }
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     */
-    private $collections;
 
     /**
      * Add collections
@@ -834,10 +777,6 @@ class Method
     {
         return $this->collections;
     }
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     */
-    private $performances;
 
     /**
      * Add performances
@@ -910,5 +849,77 @@ class Method
     public function getFirstHandbellPeal()
     {
         return $this->getPerformances()->filter( function($p) { return $p->getType() == 'firstHandbellPeal'; } )->get(0);
+    }
+
+    // Non-database methods
+    private $callingPositions;
+    public function getCallingPositions()
+    {
+        if (!$this->callingPositions) {
+            $stage = $this->getStage();
+            $calls = $this->getCalls();
+            $lengthOfLead = $this->getLengthOfLead();
+            if ( $stage < 6 || empty( $calls ) || !isset( $calls['Bob'] ) ) {
+                $this->callingPositions = array();
+            } else {
+                // Calling positions for calls at lead ends (Home, Wrong and so forth)
+                $bobNotation = PlaceNotation::explodedToPermutations( $stage, PlaceNotation::explode( $calls['Bob']['notation'] ), $stage );
+                if ( $calls['Bob']['every'] == $lengthOfLead && $calls['Bob']['from'] == 0 && count( $bobNotation ) == 1 ) {
+                    $leadHeads = $this->getLeadHeads();
+                    // Work out what the lead end of a bobbed lead looks like
+                    $notation = PlaceNotation::explodedToPermutations( $this->getStage(), PlaceNotation::explode( $this->getNotationExpanded() ) );
+                    $notation[$lengthOfLead-1] = $bobNotation[0];
+                    $bobbedLead = PlaceNotation::apply( $notation, PlaceNotation::rounds( $stage ) );
+                    $bobbedLeadHeadPermutation = array_map( function ($b) { return PlaceNotation::bellToInt( $b ) - 1; }, array_pop( $bobbedLead ) );
+                    // Collect an array of what happens at each lead if a bob is called
+                    $bobbedLeadHeads = array( PlaceNotation::permute( PlaceNotation::rounds( $stage ), $bobbedLeadHeadPermutation ) );
+                    for ( $i = 1; $i < count( $leadHeads ); $i++ ) {
+                        array_push( $bobbedLeadHeads, PlaceNotation::permute( $leadHeads[$i-1], $bobbedLeadHeadPermutation ) );
+                    }
+                    // Convert the array of lead heads into calling position names
+                    $this->callingPositions = array( 'from' => 0, 'every' => $lengthOfLead, 'titles' => array_map( function ($leadEnd) use ($stage) {
+                        $position = array_search( PlaceNotation::intToBell( $stage ), $leadEnd );
+                        switch ($position+1) {
+                            case 2:
+                                return 'I';
+                            case 3:
+                                return 'B';
+                            case 4:
+                                return 'F';
+                            case $stage-2:
+                                return 'M';
+                            case $stage-1:
+                                return 'W';
+                            case $stage:
+                                return 'H';
+                            case 5:
+                                return 'V';
+                        }
+
+                        return null;
+                    }, $bobbedLeadHeads ) );
+                }
+            }
+        }
+
+        return $this->callingPositions? : array();
+    }
+
+    private $leadHeads;
+    public function getLeadHeads()
+    {
+        if (!$this->leadHeads) {
+            $rounds = PlaceNotation::rounds( $this->getStage() );
+            $tmp = str_split( $this->getLeadHead() );
+            $leadHeadPermutation = array_map( function ($b) { return PlaceNotation::bellToInt( $b ) - 1; }, $tmp );
+            $leadHeads = array( $tmp );
+            while ( !PlaceNotation::rowsEqual( $rounds, $tmp ) ) {
+                $tmp = PlaceNotation::permute( $tmp, $leadHeadPermutation );
+                array_push( $leadHeads, $tmp );
+            }
+            $this->leadHeads = $leadHeads;
+        }
+
+        return $this->leadHeads;
     }
 }

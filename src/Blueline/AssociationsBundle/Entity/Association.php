@@ -3,16 +3,45 @@ namespace Blueline\AssociationsBundle\Entity;
 
 class Association
 {
-    public function __toString()
-    {
-        return $this->getId().': '.$this->getAbbreviation();
-    }
-
-    public function __construct()
+    // Constructor
+    public function __construct($firstSet = array())
     {
         $this->towers = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->setAll( $firstSet );
     }
 
+    // Casting helpers
+    public function __toString()
+    {
+        return $this->getName();
+    }
+    
+    public function __toArray()
+    {
+        $objectVars = get_object_vars($this);
+        array_walk( $objectVars, function( &$v, $k ) {
+            // Filter out id because that's only really meaningful internally. Filter towers for now.
+            if( $k == 'id' || $k == 'towers' ) {
+                $v = null;
+            }
+        } );
+        return array_filter( $objectVars );
+    }
+
+    // setAll helper
+    public function setAll($map)
+    {
+        foreach ($map as $key => $value) {
+            $method = 'set'.str_replace( ' ', '', ucwords( str_replace( '_', ' ', $key ) ) );
+            if ( is_callable( array( $this, $method ) ) ) {
+                $this->$method( $value );
+            }
+        }
+
+        return $this;
+    }
+
+    // Variables
     /**
      * @var integer $id
      */
@@ -38,6 +67,7 @@ class Association
      */
     private $towers;
 
+    // Getters and setters
     /**
      * Get id
      *

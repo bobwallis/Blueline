@@ -44,7 +44,8 @@ class BluelineExtension extends Twig_Extension
     {
         return array(
             'count'          => new \Twig_Filter_Function( 'count' ),
-            'addAccidentals' => new \Twig_Filter_Method( $this, 'addAccidentals' )
+            'addAccidentals' => new \Twig_Filter_Method( $this, 'addAccidentals' ),
+            'toArray'        => new \Twig_Filter_Method( $this, 'toArray' )
         );
     }
 
@@ -81,5 +82,17 @@ class BluelineExtension extends Twig_Extension
     public function dayToString($day)
     {
         return self::$days[intval( $day )];
+    }
+
+    public function toArray($obj) {
+        if ( is_callable( array( $obj, '__toArray' ) ) ) {
+            return $obj->__toArray();
+        }
+        elseif ( is_array( $obj ) ) {
+            return array_map( array( $this, 'toArray' ), $obj );
+        }
+        else {
+            throw \Twig_Error_Runtime( "toArray requested on object that doesn't implement it" );
+        }
     }
 }

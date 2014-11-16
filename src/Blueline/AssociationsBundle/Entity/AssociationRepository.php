@@ -8,7 +8,7 @@ class AssociationRepository extends EntityRepository
 {
     private function createQueryForFindBySearchVariables( $searchVariables, $initialQuery = null )
     {
-        $query = ($initialQuery === null)? $this->createQueryBuilder( 'a' )->select( 'partial a.{id, name, abbreviation}' ) : $initialQuery;
+        $query = ($initialQuery === null)? $this->createQueryBuilder( 'a' )->select( 'a' ) : $initialQuery;
 
         // Do a more general search if using 'q'
         if( isset(  $searchVariables['q'] ) ) {

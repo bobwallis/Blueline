@@ -45,7 +45,7 @@ class AssociationsController extends Controller
 
         $associations = $associationsRepository->findBySearchVariables( $searchVariables );
         $count = (count( $associations ) > 0)? $associationsRepository->findCountBySearchVariables( $searchVariables ) : 0;
-
+        
         $pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
         $pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
 
