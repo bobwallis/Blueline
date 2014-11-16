@@ -71,14 +71,14 @@ class MethodRepository extends EntityRepository
         }
 
         // String variables
-        foreach ( array( 'title', 'classification', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef' ) as $key ) {
+        foreach ( array( 'title', 'classification', 'leadHeadCode', 'leadHead', 'fchGroups' ) as $key ) {
             if ( isset(  $searchVariables[$key] ) ) {
                 if ( strpos( $searchVariables[$key], '/' ) === 0 && strlen( $searchVariables[$key] ) > 1 ) {
                     $query->andWhere( 'REGEXP(m.'.$key.', :'.$key.'Regexp) = 1' )
                         ->setParameter( $key.'Regexp', trim( $searchVariables[$key], '/' ) );
                 } else {
                     $query->andWhere( 'LOWER(m.'.$key.') LIKE :'.$key.'Like' )
-                        ->setParameter( $key.'Like', $this->prepareStringForLike( $searchVariables[$key] ) );
+                        ->setParameter( $key.'Like', Search::prepareStringForLike( $searchVariables[$key] ) );
                 }
             }
         }
