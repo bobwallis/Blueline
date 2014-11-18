@@ -161,12 +161,17 @@ class PlaceNotation
 
     /**
      * Expands a shortened place notation format into a fully expanded one
-     * @param  integer $stage
      * @param  string  $notation
+     * @param  integer $stage
      * @return string
      */
-    public static function expand( $stage, $notation )
+    public static function expand( $notation, $stage = null )
     {
+        // If stage isn't given, try to guess it
+        if( is_null( $stage ) ) {
+            $stage = max( array_map( function( $c ) { return PlaceNotation::bellToInt( $c ); }, array_filter( str_split( $notation ), function( $c ) { return preg_match( '/[0-9A-Z]/', $c ); } ) ) );
+        }
+
         // Tidy up letter cases
         $notationFull = strtoupper( $notation );
         $notationFull = str_replace( 'X', 'x', $notationFull );

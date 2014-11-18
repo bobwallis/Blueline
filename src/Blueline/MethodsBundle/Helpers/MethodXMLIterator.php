@@ -54,7 +54,7 @@ class MethodXMLIterator implements \Iterator, \Countable
 
             // Parse place notation
             if ( isset( $array['notation'] ) ) {
-                $array['notationExpanded'] = PlaceNotation::expand( $array['stage'], $array['notation'] );
+                $array['notationExpanded'] = PlaceNotation::expand( $array['notation'], $array['stage'] );
             }
 
             // If needed, work out the lead head/lead head code

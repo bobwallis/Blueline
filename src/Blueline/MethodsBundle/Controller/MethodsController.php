@@ -7,6 +7,7 @@ use Blueline\BluelineBundle\Helpers\Search;
 use Blueline\BluelineBundle\Helpers\Text;
 use Blueline\MethodsBundle\Helpers\Stages;
 use Blueline\MethodsBundle\Helpers\Classifications;
+use Blueline\MethodsBundle\Helpers\PlaceNotation;
 
 class MethodsController extends Controller
 {
@@ -95,6 +96,7 @@ class MethodsController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         // Check we are at the canonical URL for the content
+        // First check for titles
         $methodsCheck = $em->createQuery( '
             SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m
             WHERE LOWER(m.title) IN (:titles) OR LOWER(m.url) IN (:urls)' )
@@ -103,7 +105,18 @@ class MethodsController extends Controller
             ->setMaxResults( count( $titlesLower ) )
             ->getArrayResult();
         if ( empty( $methodsCheck ) || count( $methodsCheck ) < count( $methodsCheck ) ) {
-            throw $this->createNotFoundException( 'The method does not exist' );
+            // Then check if place notation has been given
+            $notationExpander = new PlaceNotation;
+            $notationTest = array_map( array( $notationExpander, 'expand' ), $urls );
+            $methodsCheck = $em->createQuery( '
+                SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m
+                WHERE LOWER(m.notationExpanded) IN (:notations)' )
+                ->setParameter( 'notations', $notationTest )
+                ->setMaxResults( count( $notationTest ) )
+                ->getArrayResult();
+            if ( empty( $methodsCheck ) || count( $methodsCheck ) < count( $methodsCheck ) ) {
+                throw $this->createNotFoundException( 'The method does not exist' );
+            }
         }
         $url = $this->generateUrl( 'Blueline_Methods_view', array( 'chromeless' => (($format == 'html')? intval( $request->query->get( 'chromeless' ) )?:null : null), 'title' => implode( '|', array_map( function ($m) { return $m['url']; }, $methodsCheck ) ), '_format' => $format ) );
         if ( $request->getRequestUri() !== urldecode( $url ) ) {
