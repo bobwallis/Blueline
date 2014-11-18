@@ -5,6 +5,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use Blueline\BluelineBundle\Helpers\Search;
 use Blueline\BluelineBundle\Helpers\Text;
+use Blueline\MethodsBundle\Entity\Method;
 use Blueline\MethodsBundle\Helpers\Stages;
 use Blueline\MethodsBundle\Helpers\Classifications;
 use Blueline\MethodsBundle\Helpers\PlaceNotation;
@@ -110,7 +111,7 @@ class MethodsController extends Controller
             $notationTest = array_map( array( $notationExpander, 'expand' ), $urls );
             $methodsCheck = $em->createQuery( '
                 SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m
-                WHERE LOWER(m.notationExpanded) IN (:notations)' )
+                WHERE m.notationExpanded IN (:notations)' )
                 ->setParameter( 'notations', $notationTest )
                 ->setMaxResults( count( $notationTest ) )
                 ->getArrayResult();
@@ -139,6 +140,52 @@ class MethodsController extends Controller
         }
 
         // Create response
+        return $this->render( 'BluelineMethodsBundle::view.'.$format.'.twig', compact( 'pageTitle', 'methods' ), $response );
+    }
+
+    public function viewCustomAction() {
+        $request = $this->getRequest();
+        $format = $request->getRequestFormat();
+
+        // Create basic response object
+        $response = new Response();
+        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
+            $response->setMaxAge( 129600 );
+            $response->setPublic();
+        }
+
+        // Collect passed in variables that are permissible
+        $vars = array();
+        foreach ( array( 'notation', 'title', 'stage', 'ruleOffs' ) as $key ) {
+            $value = trim( $request->query->get( $key ) );
+            if ( !empty( $value ) ) { $vars[$key] = $value; }
+        }
+
+        // Check we have the bare minimum of information required
+        if( !isset( $vars['notation'], $vars['stage'] ) ) {
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException( "Request requires at least 'notation' and 'stage' to be set" );
+        }
+
+        // Do some basic conversion
+        $vars['stage'] == intval( $vars['stage'] );
+        $vars['notationExpanded'] = PlaceNotation::expand( $vars['notation'], $vars['stage'] );
+        $vars['title'] = isset($vars['title'])? $vars['title'] : 'Unrung '.Stages::toString($vars['stage']).' Method';
+
+        // Check whether the method already exists and redirect to it if so
+        $methodsCheck = $this->getDoctrine()->getManager()->createQuery( '
+            SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m
+            WHERE m.notationExpanded = (:notation) AND m.stage = (:stage)' )
+            ->setParameter( 'notation', $vars['notationExpanded'] )
+            ->setParameter( 'stage', $vars['stage'] )
+            ->getArrayResult();
+        if ( !empty( $methodsCheck ) ) {
+            $url = $this->generateUrl( 'Blueline_Methods_view', array( 'chromeless' => (($format == 'html')? intval( $request->query->get( 'chromeless' ) )?:null : null), 'title' => implode( '|', array_map( function ($m) { return $m['url']; }, $methodsCheck ) ), '_format' => $format ) );
+            return $this->redirect( $url, 301 );
+        }
+
+        // Other wise create and display the custom method
+        $methods = array( new Method( $vars ) );
+        $pageTitle = $vars['title'];
         return $this->render( 'BluelineMethodsBundle::view.'.$format.'.twig', compact( 'pageTitle', 'methods' ), $response );
     }
 

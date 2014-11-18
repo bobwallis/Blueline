@@ -5,6 +5,7 @@ namespace Blueline\MethodsBundle\Entity;
 use \Blueline\BluelineBundle\Helpers\Text;
 use \Blueline\MethodsBundle\Helpers\PlaceNotation;
 use \Blueline\MethodsBundle\Helpers\Stages;
+use \Blueline\MethodsBundle\Helpers\LeadHeadCodes;
 
 /**
  * Blueline\MethodsBundle\Entity\Method
@@ -327,6 +328,12 @@ class Method
      */
     public function getLeadHeadCode()
     {
+        if( !$this->leadHeadCode ) {
+            $notationExploded = PlaceNotation::explode( $this->getNotationExpanded() );
+            $leadHeadNotation = end( $notationExploded );
+            $postLeadEndNotation = ($this->getNumberOfHunts() == 2)? $notationExploded[0] : '';
+            $this->leadHeadCode = LeadHeadCodes::toCode( $this->getLeadHead(), $this->getStage(), $this->getNumberOfHunts(), $leadHeadNotation, $postLeadEndNotation );
+        }
         return $this->leadHeadCode;
     }
 
@@ -350,6 +357,10 @@ class Method
      */
     public function getLeadHead()
     {
+        if( !$this->leadHead ) {
+            $lead = PlaceNotation::apply( PlaceNotation::explodedToPermutations( $this->getStage(), PlaceNotation::explode( $this->getNotationExpanded() ) ), PlaceNotation::rounds( $this->getStage() ) );
+            $this->leadHead = implode( '', end( $lead ) );
+        }
         return $this->leadHead;
     }
 
@@ -396,6 +407,9 @@ class Method
      */
     public function getLengthOfLead()
     {
+        if( !$this->lengthOfLead ) {
+            $this->lengthOfLead = count( PlaceNotation::explode( $this->getNotationExpanded() ) );
+        }
         return $this->lengthOfLead;
     }
 
@@ -419,6 +433,9 @@ class Method
      */
     public function getNumberOfHunts()
     {
+        if( !$this->numberOfHunts ) {
+            $this->numberOfHunts = count( $this->getHunts() );
+        }
         return $this->numberOfHunts;
     }
 
