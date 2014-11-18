@@ -91,6 +91,9 @@ class BluelineExtension extends Twig_Extension
         elseif ( is_array( $obj ) ) {
             return array_map( array( $this, 'toArray' ), $obj );
         }
+        elseif( is_callable( array( $obj, "toArray" ) ) ) {
+            return array_map( array( $this, 'toArray' ), $obj->toArray() );
+        }
         else {
             throw \Twig_Error_Runtime( "toArray requested on object that doesn't implement it" );
         }

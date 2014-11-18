@@ -21,16 +21,20 @@ class Method
 
     // Casting helpers
     public function __toString() {
-        return $this->getTitle();
+        return 'Method:'.$this->getTitle();
     }
 
-    public function __toArray()
+    public function __toArray($parent = '')
     {
+        $thisString = $this->__toString();
         $objectVars = get_object_vars($this);
-        array_walk( $objectVars, function( &$v, $k ) {
-            // Filter collections and performances for now.
-            if( $k == 'collections' || $k == 'performances' ) {
-                $v = null;
+        array_walk( $objectVars, function( &$v, $k ) use ($thisString, $parent) {
+            switch( $k ) {
+                // Don't try to drill down into sub-entities
+                case 'collections':
+                case 'performances':
+                    $v = null;
+                    break;
             }
         } );
         return array_filter( $objectVars );

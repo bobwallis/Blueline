@@ -13,16 +13,19 @@ class Association
     // Casting helpers
     public function __toString()
     {
-        return $this->getName();
+        return 'Association:'.$this->getAbbreviation();
     }
     
     public function __toArray()
     {
         $objectVars = get_object_vars($this);
         array_walk( $objectVars, function( &$v, $k ) {
-            // Filter out id because that's only really meaningful internally. Filter towers for now.
-            if( $k == 'id' || $k == 'towers' ) {
-                $v = null;
+            switch( $k ) {
+                // Filter out id because that's only really meaningful internally, and don't try to drill down into sub-entities
+                case 'id':
+                case 'towers':
+                    $v = null;
+                    break;
             }
         } );
         return array_filter( $objectVars );

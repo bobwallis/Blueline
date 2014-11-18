@@ -18,16 +18,24 @@ class Performance
 
     // Casting helpers
     public function __toString() {
-        return $this->getRungTitle().' '.$this->getType();
+        return 'Performance:'.$this->getId();
     }
 
     public function __toArray()
     {
         $objectVars = get_object_vars($this);
         array_walk( $objectVars, function( &$v, $k ) {
-            // Filter out id because that's only really meaningful internally. Filter method and location_doveid for now.
-            if( $k == 'id' || $k == 'method' || $k == 'location_doveid' ) {
-                $v = null;
+            switch( $k ) {
+                // Filter out id because that's only really meaningful internally, and don't try to drill down into sub-entities
+                case 'id':
+                case 'method':
+                case 'location_doveid':
+                    $v = null;
+                    break;
+                // Convert date object
+                case 'date':
+                    $v = $v->format( 'Y-m-d' );
+                    break;
             }
         } );
         return array_filter( $objectVars );

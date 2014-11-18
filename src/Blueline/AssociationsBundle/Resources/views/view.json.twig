@@ -1,0 +1,2 @@
+[{% for association in associations %}
+{{ association|toArray|merge({"towers":association.towers|toArray})|json_encode|raw }}{{ not loop.last ? "," }}{% endfor %}]

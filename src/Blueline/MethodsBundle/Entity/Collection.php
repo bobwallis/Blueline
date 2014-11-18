@@ -18,14 +18,14 @@ class Collection
 
     // Casting helpers
     public function __toString() {
-        return $this->getName();
+        return 'Collection:'.$this->getId();
     }
 
     public function __toArray()
     {
         $objectVars = get_object_vars($this);
         array_walk( $objectVars, function( &$v, $k ) {
-            // Filter out id because that's only really meaningful internally. Filter out methods for now.
+            // Filter out id because that's only really meaningful internally, and don't try to drill down into sub-entities
             if( $k == 'id' || $k == 'methods' ) {
                 $v = null;
             }

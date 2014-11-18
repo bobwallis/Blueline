@@ -14,16 +14,21 @@ class Tower
 
     // Casting helpers
     public function __toString() {
-        return $this->getPlace();
+        return 'Tower:'.$this->getId();
     }
 
     public function __toArray()
     {
         $objectVars = get_object_vars($this);
         array_walk( $objectVars, function( &$v, $k ) {
-            // Filter oldpks for now.
-            if( $k == 'oldpks' || $k == 'associations' || $k == 'performances' ) {
-                $v = null;
+            switch( $k ) {
+                // Ignore affiliations as it's replaced by associations, don't try to drill down into sub-entities
+                case 'affiliations':
+                case 'associations':
+                case 'oldpks':
+                case 'performances':
+                    $v = null;
+                    break;
             }
         } );
         return array_filter( $objectVars );
@@ -192,7 +197,7 @@ class Tower
     private $webPage;
 
     /**
-     * @var Blueline\TowersBundle\Entity\OldPK
+     * @var Doctrine\Common\Collections\Collection
      */
     private $oldpks;
 
