@@ -11,6 +11,7 @@ $method_towers = array(
     'Bristol Cathedral'         => 'BRISTOL_01',
     'Cadoxton'                  => 'CADOXTONJN',
     'Collingham'                => 'COLLINGHAM',
+    'Cubitt Town'               => 'POPLAR_IOD',
     'Farnworth with Kearsley'   => 'FARNWORTHK',
     'Great Berkhamsted'         => 'BERKHAMSTE',
     'Kingsbury (Warks)'         => 'KINGSBUR_W',
