@@ -666,7 +666,7 @@ class Method
                         if ($leadEndChange == '12') {
                             $this->calls = array( 'Bob' => '14::', 'Single' => '1234::' );
                         } elseif ($leadEndChange == '1'.$n) {
-                            if ( $this->getLeadHeadCode() == 'm' ) {
+                            if ( $this->getLeadHeadCode() == 'm' && $stage > 6 ) {
                                 $this->calls = array( 'Bob' => '14::', 'Single' => '1234::' );
                             } else {
                                 $this->calls = array( 'Bob' => '1'.$n_2.'::', 'Single' => '1'.$n_2.$n_1.$n.'::' );
