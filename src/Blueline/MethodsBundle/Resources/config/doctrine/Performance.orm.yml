@@ -55,7 +55,7 @@ Blueline\MethodsBundle\Entity\Performance:
             length: 255
             nullable: true
     manyToOne:
-        location_doveid:
+        location_tower:
             cascade: ["merge","persist"]
             targetEntity: Blueline\TowersBundle\Entity\Tower
             inversedBy: performances

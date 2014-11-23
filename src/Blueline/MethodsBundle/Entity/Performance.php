@@ -29,7 +29,7 @@ class Performance
                 // Filter out id because that's only really meaningful internally, and don't try to drill down into sub-entities
                 case 'id':
                 case 'method':
-                case 'location_doveid':
+                case 'location_tower':
                     $v = null;
                     break;
                 // Convert date object
@@ -123,7 +123,7 @@ class Performance
     /**
      * @var \Blueline\TowersBundle\Entity\Tower
      */
-    private $location_doveid;
+    private $location_tower;
 
     /**
      * @var \Blueline\MethodsBundle\Entity\Method
@@ -436,26 +436,26 @@ class Performance
     }
 
     /**
-     * Set location_doveid
+     * Set location_tower
      *
-     * @param \Blueline\TowersBundle\Entity\Tower $locationDoveid
+     * @param \Blueline\TowersBundle\Entity\Tower $locationTower
      * @return Performance
      */
-    public function setLocationDoveid(\Blueline\TowersBundle\Entity\Tower $locationDoveid = null)
+    public function setLocationTower(\Blueline\TowersBundle\Entity\Tower $locationTower = null)
     {
-        $this->location_doveid = $locationDoveid;
+        $this->location_tower = $locationTower;
 
         return $this;
     }
 
     /**
-     * Get location_doveid
+     * Get location_tower
      *
      * @return \Blueline\TowersBundle\Entity\Tower 
      */
-    public function getLocationDoveid()
+    public function getLocationTower()
     {
-        return $this->location_doveid;
+        return $this->location_tower;
     }
 
     /**

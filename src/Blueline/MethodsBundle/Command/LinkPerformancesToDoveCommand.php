@@ -77,7 +77,7 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
 
                 if ($doveid) {
                     $tower = $towerRepository->findOneById( $doveid );
-                    $performance->setLocationDoveid( $tower );
+                    $performance->setLocationTower( $tower );
                 }
 
                 $em->merge( $performance );

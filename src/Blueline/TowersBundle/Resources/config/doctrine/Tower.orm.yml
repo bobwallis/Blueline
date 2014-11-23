@@ -110,7 +110,7 @@ Blueline\TowersBundle\Entity\Tower:
             mappedBy: tower
         performances:
             targetEntity: Blueline\MethodsBundle\Entity\Performance
-            mappedBy: location_doveid
+            mappedBy: location_tower
     manyToMany:
         associations:
             targetEntity: Blueline\AssociationsBundle\Entity\Association

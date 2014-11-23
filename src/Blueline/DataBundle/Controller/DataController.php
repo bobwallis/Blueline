@@ -97,7 +97,7 @@ class DataController extends Controller
 	        						case 'method':
 	        							$v = $v['title'];
 	        							break;
-	        						case 'location_doveid':
+	        						case 'location_tower':
 	        							$v = $v['id'];
 	        							break;
 	        					}

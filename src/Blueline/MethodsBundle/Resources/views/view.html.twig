@@ -50,11 +50,11 @@
 {% endif %}
 {% if method.firstTowerbellPeal is not empty %}
 				<dt>First&nbsp;towerbell&nbsp;peal</dt>
-				<dd><time datetime="{{ method.firstTowerbellpeal.date|date('Y-m-d') }}">{{ method.firstTowerbellPeal.date|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time>{% if method.firstTowerbellPeal.location is not empty %} at {% if method.firstTowerbellPeal.locationDoveid is not empty %}<a href="{{ path( 'Blueline_Towers_view', { 'id': method.firstTowerbellPeal.locationDoveid.id } ) }}">{{ method.firstTowerbellPeal.location }}</a>{% else %}{{ method.firstTowerbellPeal.location }}{% endif %}{% endif %}</dd>
+				<dd><time datetime="{{ method.firstTowerbellpeal.date|date('Y-m-d') }}">{{ method.firstTowerbellPeal.date|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time>{% if method.firstTowerbellPeal.location is not empty %} at {% if method.firstTowerbellPeal.locationTower is not empty %}<a href="{{ path( 'Blueline_Towers_view', { 'id': method.firstTowerbellPeal.locationTower.id } ) }}">{{ method.firstTowerbellPeal.location }}</a>{% else %}{{ method.firstTowerbellPeal.location }}{% endif %}{% endif %}</dd>
 {% endif %}
 {% if method.firstHandbellPeal is not empty %}
 				<dt>First&nbsp;handbell&nbsp;peal</dt>
-				<dd><time datetime="{{ method.firstHandbellPeal.date|date('Y-m-d') }}">{{ method.firstHandbellPeal.date|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time>{% if method.firstHandbellPeal.location is not empty %} at {% if method.firstHandbellPeal.locationDoveid is not empty %}<a href="{{ path( 'Blueline_Towers_view', { 'id': method.firstHandbellPeal.locationDoveid.id } ) }}">{{ method.firstHandbellPeal.location }}</a>{% else %}{{ method.firstHandbellPeal.location }}{% endif %}{% endif %}</dd>
+				<dd><time datetime="{{ method.firstHandbellPeal.date|date('Y-m-d') }}">{{ method.firstHandbellPeal.date|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time>{% if method.firstHandbellPeal.location is not empty %} at {% if method.firstHandbellPeal.locationTower is not empty %}<a href="{{ path( 'Blueline_Towers_view', { 'id': method.firstHandbellPeal.locationTower.id } ) }}">{{ method.firstHandbellPeal.location }}</a>{% else %}{{ method.firstHandbellPeal.location }}{% endif %}{% endif %}</dd>
 {% endif %}
 {% if method.duplicates is not empty %}
 				<dt>Method also pealed as</dt>
