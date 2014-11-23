@@ -95,7 +95,7 @@ class TowersController extends Controller
         foreach ($ids  as $id) {
             // Get information about the tower, its affiliations, and first pealed methods
             $tower = $em->createQuery( '
-                SELECT t, partial a.{id,abbreviation,name}, partial p.{id,type,date}, partial m.{title,url} FROM BluelineTowersBundle:Tower t
+                SELECT t, partial a.{id,name}, partial p.{id,type,date}, partial m.{title,url} FROM BluelineTowersBundle:Tower t
                 LEFT JOIN t.associations a
                 LEFT JOIN t.performances p WITH p.type = :performanceType
                 LEFT JOIN p.method       m

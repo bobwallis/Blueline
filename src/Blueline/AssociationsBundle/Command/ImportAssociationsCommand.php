@@ -43,21 +43,20 @@ class ImportAssociationsCommand extends ContainerAwareCommand
         $progress->setRedrawFrequency( max(1,count($associations)/100) );
         while ( $txtIterator->valid() ) {
             $txtRow = $txtIterator->current();
-            $importedAssociations[] = $txtRow['abbreviation'];
-            $association = $associationRepository->findOneByAbbreviation( $txtRow['abbreviation'] );
+            $importedAssociations[] = $txtRow['id'];
+            $association = $associationRepository->findOneById( $txtRow['id'] );
             if( !$association ) {
-                $association = new Association();
+                $association = new Association( $txtRow );
+                $em->merge( $association );
             }
-            $association->setAbbreviation( $txtRow['abbreviation'] );
-            $association->setName( $txtRow['name'] );
-            $association->setLink( $txtRow['link'] );
+            else {
+                $association->setAll( $txtRow );
+            }
             $errors = $validator->validate( $association );
             if ( count( $errors ) > 0 ) {
                 $progress->clear();
                 $output->writeln( "\r<error> Invalid data for ".$txtRow['name'].":\n".$errors.'</error>' );
                 $progress->display();
-            } else {
-                $em->merge( $association );
             }
             $txtIterator->next();
             $progress->advance();
@@ -67,12 +66,12 @@ class ImportAssociationsCommand extends ContainerAwareCommand
         $em->clear();
 
         // Check for deletions
-        $abbreviationsInDatabase = $em->createQuery( 'SELECT a.abbreviation FROM Blueline\AssociationsBundle\Entity\Association a' )->getScalarResult();
-        foreach( $abbreviationsInDatabase as $a ) {
+        $idsInDatabase = $em->createQuery( 'SELECT a.id FROM Blueline\AssociationsBundle\Entity\Association a' )->getScalarResult();
+        foreach( $idsInDatabase as $a ) {
             $a = current( $a );
             if( !in_array( $a, $importedAssociations ) ) {
-                $em->createQuery('DELETE FROM Blueline\AssociationsBundle\Entity\Association a where a.abbreviation = :abbreviation')
-                    ->setParameter( 'abbreviation', $a )
+                $em->createQuery('DELETE FROM Blueline\AssociationsBundle\Entity\Association a where a.id = :id')
+                    ->setParameter( 'id', $a )
                     ->execute();
             }
         }

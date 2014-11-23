@@ -41,7 +41,7 @@ class AssociationsController extends Controller
         if ( $response->isNotModified( $request ) ) { return $response; }
 
         $associationsRepository = $this->getDoctrine()->getManager()->getRepository( 'BluelineAssociationsBundle:Association' );
-        $searchVariables = empty( $searchVariables )? Search::requestToSearchVariables( $request, array( 'abbreviation', 'name' ) ) : $searchVariables;
+        $searchVariables = empty( $searchVariables )? Search::requestToSearchVariables( $request, array( 'id', 'name' ) ) : $searchVariables;
 
         $associations = $associationsRepository->findBySearchVariables( $searchVariables );
         $count = (count( $associations ) > 0)? $associationsRepository->findCountBySearchVariables( $searchVariables ) : 0;
@@ -52,7 +52,7 @@ class AssociationsController extends Controller
         return $this->render( 'BluelineAssociationsBundle::search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'associations' ), $response );
     }
 
-    public function viewAction($abbreviation)
+    public function viewAction($id)
     {
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
@@ -66,21 +66,21 @@ class AssociationsController extends Controller
         $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
         if ( $response->isNotModified( $request ) ) { return $response; }
 
-        $abbreviations = explode( '|', $abbreviation );
+        $ids = explode( '|', $id );
 
         $em = $this->getDoctrine()->getManager();
 
         // Check we are at the canonical URL for the content
         $associations = $em->createQuery( '
-            SELECT partial a.{id,abbreviation,name} FROM BluelineAssociationsBundle:Association a
-            WHERE a.abbreviation IN (:abbreviations)' )
-            ->setParameter( 'abbreviations', $abbreviations )
-            ->setMaxResults( count( $abbreviations ) )
+            SELECT partial a.{id,id,name} FROM BluelineAssociationsBundle:Association a
+            WHERE a.id IN (:ids)' )
+            ->setParameter( 'ids', $ids )
+            ->setMaxResults( count( $ids ) )
             ->getArrayResult();
-        if ( empty( $associations ) || count( $associations ) < count( $abbreviations ) ) {
+        if ( empty( $associations ) || count( $associations ) < count( $ids ) ) {
             throw $this->createNotFoundException( 'The association does not exist' );
         }
-        $url = $this->generateUrl( 'Blueline_Associations_view', array( 'chromeless' => (($format == 'html')? intval( $request->query->get( 'chromeless' ) )?:null : null), 'abbreviation' => implode( '|', array_map( function ($a) { return $a['abbreviation']; }, $associations ) ), '_format' => $format ) );
+        $url = $this->generateUrl( 'Blueline_Associations_view', array( 'chromeless' => (($format == 'html')? intval( $request->query->get( 'chromeless' ) )?:null : null), 'id' => implode( '|', array_map( function ($a) { return $a['id']; }, $associations ) ), '_format' => $format ) );
 
         if ( $request->getRequestUri() !== $url && $request->getRequestUri() !== urldecode( $url ) ) {
             return $this->redirect( $url, 301 );
@@ -89,13 +89,13 @@ class AssociationsController extends Controller
         $pageTitle = Text::toList( array_map( function ($a) { return $a['name']; }, $associations ) );
         $associations = array();
 
-        foreach ($abbreviations as $abbreviation) {
+        foreach ($ids as $id) {
             // Get information about the association and its towers
             $associations[] = $em->createQuery( '
                 SELECT a, partial t.{id,place,dedication} FROM BluelineAssociationsBundle:Association a
                 LEFT JOIN a.towers t
-                WHERE a.abbreviation = :abbreviation' )
-            ->setParameter( 'abbreviation', $abbreviation )
+                WHERE a.id = :id' )
+            ->setParameter( 'id', $id )
             ->getSingleResult();
         }
 
@@ -105,8 +105,8 @@ class AssociationsController extends Controller
             $bbox = $em->createQuery( '
                 SELECT MAX(t.latitude) as lat_max, MIN(t.latitude) as lat_min, MAX(t.longitude) as long_max, MIN(t.longitude) as long_min FROM BluelineAssociationsBundle:Association a
                 JOIN a.towers t
-                WHERE a.abbreviation IN (:abbreviations)' )
-            ->setParameter( 'abbreviations', $abbreviations )
+                WHERE a.id IN (:ids)' )
+            ->setParameter( 'ids', $ids )
             ->getOneOrNullResult();
         }
 
@@ -128,7 +128,7 @@ class AssociationsController extends Controller
         $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
         if ( $response->isNotModified( $request ) ) { return $response; }
 
-        $associations = $this->getDoctrine()->getManager()->createQuery( 'SELECT partial a.{id,abbreviation} FROM BluelineAssociationsBundle:Association a' )->getArrayResult();
+        $associations = $this->getDoctrine()->getManager()->createQuery( 'SELECT a.id FROM BluelineAssociationsBundle:Association a' )->getArrayResult();
 
         return $this->render( 'BluelineAssociationsBundle::sitemap.'.$format.'.twig', compact( 'associations' ), $response );
     }

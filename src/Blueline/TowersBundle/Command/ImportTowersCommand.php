@@ -42,10 +42,10 @@ class ImportTowersCommand extends ContainerAwareCommand
         $validator  = $this->getContainer()->get( 'validator' );
         $progress   = $this->getHelperSet()->get('progress');
 
-        // Get an array mapping association abbreviations to their IDs
+        // Get an array of existing associations
         $associations = array();
-        foreach ( $em->createQuery( 'SELECT a.id, a.abbreviation FROM Blueline\AssociationsBundle\Entity\Association a' )->getArrayResult() as $association ) {
-            $associations[$association['abbreviation']] = $association['id'];
+        foreach ( $em->createQuery( 'SELECT a.id FROM Blueline\AssociationsBundle\Entity\Association a' )->getArrayResult() as $association ) {
+            $associations[] = $association['id'];
         }
 
         $output->writeln( "<info>Importing basic tower data...</info>" );
@@ -71,30 +71,26 @@ class ImportTowersCommand extends ContainerAwareCommand
             $importedTowers[] = $txtRow['id'];
             if ($tower) {
                 // If the tower exists, update it
-                // First, check if there are any changes to affiliations
-                $affiliationsChanged = ( $tower->getAffiliations() != $txtRow['affiliations'] );
                 // Copy in data from the text file
                 $tower->setAll( $txtRow );
                 // Make changes to affiliation data
-                if ($affiliationsChanged) {
-                    $newAffiliations = array_filter( explode( ',', $tower->getAffiliations() ) );
-                    $oldAffiliationsObjects = $tower->getAssociations();
-                    $oldAffiliations = $oldAffiliationsObjects->map( function ($a) { return $a->getAbbreviation(); } )->toArray();
-                    // Add any new ones not in the old
-                    foreach ($newAffiliations as $affiliation) {
-                        if ( !in_array( $affiliation, $oldAffiliations ) ) {
-                            if ( isset( $associations[$affiliation] ) ) {
-                                $tower->addAssociation( $em->getReference( 'BluelineAssociationsBundle:Association', $associations[$affiliation] ) );
-                            } else {
-                                $notFoundAffiliations[] = $affiliation;
-                            }
+                $newAffiliations = array_filter( explode( ',', $tower->getAffiliations() ) );
+                $oldAffiliationsObjects = $tower->getAssociations();
+                $oldAffiliations = $oldAffiliationsObjects->map( function ($a) { return $a->getId(); } )->toArray();
+                // Add any new ones not in the old
+                foreach ($newAffiliations as $affiliation) {
+                    if ( !in_array( $affiliation, $oldAffiliations ) ) {
+                        if ( in_array( $affiliation, $associations ) ) {
+                            $tower->addAssociation( $em->getReference( 'BluelineAssociationsBundle:Association', $affiliation ) );
+                        } else {
+                            $notFoundAffiliations[] = $affiliation;
                         }
                     }
-                    // Remove any old ones not in the new
-                    foreach ($oldAffiliations as $i => $affiliation) {
-                        if ( !in_array( $affiliation, $newAffiliations ) ) {
-                            $tower->removeAssociation( $oldAffiliationsObjects[$i] );
-                        }
+                }
+                // Remove any old ones not in the new
+                foreach ($oldAffiliations as $i => $affiliation) {
+                    if ( !in_array( $affiliation, $newAffiliations ) ) {
+                        $tower->removeAssociation( $oldAffiliationsObjects[$i] );
                     }
                 }
             } else {
@@ -102,9 +98,9 @@ class ImportTowersCommand extends ContainerAwareCommand
                 $tower = new Tower();
                 $tower->setAll( $txtRow );
                 // Also create references to the associations table
-                foreach ( array_filter( explode( ',', $tower->getAffiliations() ) ) as $affiliation ) {
-                    if ( isset( $associations[$affiliation] ) ) {
-                        $tower->addAssociation( $em->getReference( 'BluelineAssociationsBundle:Association', $associations[$affiliation] ) );
+                foreach ( array_filter( explode( ',', $txtRow['affiliations'] ) ) as $affiliation ) {
+                    if ( in_array( $affiliation, $associations) ) {
+                        $tower->addAssociation( $em->getReference( 'BluelineAssociationsBundle:Association', $affiliation ) );
                     } else {
                         $notFoundAffiliations[] = $affiliation;
                     }

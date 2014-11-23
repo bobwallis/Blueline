@@ -3,10 +3,10 @@ Blueline_Associations_welcome:
     defaults: { _controller: BluelineAssociationsBundle:Associations:welcome }
 
 Blueline_Associations_view:
-    pattern: /view/{abbreviation}.{_format}
+    pattern: /view/{id}.{_format}
     defaults: { _controller: BluelineAssociationsBundle:Associations:view, _format: html }
     requirements:
-        abbreviation: ^(?(?=.*\.(html|txt|json|xml)$).*(?=\.)|.*$)
+        id: ^(?(?=.*\.(html|txt|json|xml)$).*(?=\.)|.*$)
         _format: html|txt|json
 
 Blueline_Associations_search:

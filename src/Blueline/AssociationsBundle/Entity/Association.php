@@ -13,16 +13,15 @@ class Association
     // Casting helpers
     public function __toString()
     {
-        return 'Association:'.$this->getAbbreviation();
+        return 'Association:'.$this->getId();
     }
     
     public function __toArray()
     {
         $objectVars = get_object_vars($this);
-        array_walk( $objectVars, function( &$v, $k ) use ($showBlank) {
+        array_walk( $objectVars, function( &$v, $k ) {
             switch( $k ) {
                 // Don't try to drill down into sub-entities
-                case 'id';
                 case 'towers':
                     $v = null;
                     break;
@@ -46,14 +45,9 @@ class Association
 
     // Variables
     /**
-     * @var integer $id
+     * @var string $id
      */
     private $id;
-
-    /**
-     * @var string $abbreviation
-     */
-    private $abbreviation;
 
     /**
      * @var text $name
@@ -72,6 +66,16 @@ class Association
 
     // Getters and setters
     /**
+     * Set id
+     *
+     * @param string $id
+     */
+    public function setId( $id )
+    {
+        $this->id = $id;
+    }
+
+    /**
      * Get id
      *
      * @return integer
@@ -79,26 +83,6 @@ class Association
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * Set abbreviation
-     *
-     * @param string $abbreviation
-     */
-    public function setAbbreviation( $abbreviation )
-    {
-        $this->abbreviation = $abbreviation;
-    }
-
-    /**
-     * Get abbreviation
-     *
-     * @return string
-     */
-    public function getAbbreviation()
-    {
-        return $this->abbreviation;
     }
 
     /**

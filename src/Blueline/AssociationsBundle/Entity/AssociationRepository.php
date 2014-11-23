@@ -16,12 +16,12 @@ class AssociationRepository extends EntityRepository
                 $query->andWhere( 'REGEXP(a.name, :qRegexp) = TRUE' )
                     ->setParameter( 'qRegexp', trim( $searchVariables['q'], '/' ) );
             } else {
-                $query->andWhere( 'LOWER(a.name) LIKE :qLike OR LOWER(a.abbreviation) LIKE :qLike' )
+                $query->andWhere( 'LOWER(a.name) LIKE :qLike OR LOWER(a.id) LIKE :qLike' )
                     ->setParameter( 'qLike', Search::prepareStringForLike( $searchVariables['q'] ) );
             }
         }
 
-        foreach ( array( 'abbreviation', 'name' ) as $key ) {
+        foreach ( array( 'id', 'name' ) as $key ) {
             if ( isset(  $searchVariables[$key] ) ) {
                 if ( strpos( $searchVariables[$key], '/' ) === 0 && strlen( $searchVariables[$key] ) > 1 ) {
                     $query->andWhere( 'REGEXP(a.'.$field.', :'.$key.'Regexp) = TRUE' )

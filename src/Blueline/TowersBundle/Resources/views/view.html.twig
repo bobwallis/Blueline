@@ -34,7 +34,7 @@
 				</dd>
 				{% if tower.associations is not empty %}
 					<dt>Affiliations</dt>
-					<dd>{% for association in tower.associations %}{% if not loop.first %}{{ loop.last? ' and ' : ', ' }}{% endif %}<a href="{{ path( 'Blueline_Associations_view', { 'abbreviation': association.abbreviation } ) }}">{{ association.name }}</a>{% endfor %}</dd>
+					<dd>{% for association in tower.associations %}{% if not loop.first %}{{ loop.last? ' and ' : ', ' }}{% endif %}<a href="{{ path( 'Blueline_Associations_view', { 'id': association.id } ) }}">{{ association.name }}</a>{% endfor %}</dd>
 				{% endif %}
 				{% if tower.diocese is not empty or tower.postcode is not empty or tower.gridReference is not empty %}
 					<dt>Location</dt>

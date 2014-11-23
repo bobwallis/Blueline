@@ -40,6 +40,6 @@
 		</div>
 	</section>
 {% endfor %}
-{% autoescape false %}<script>require(['shared/ui/Map'],function(a){a.set({fitBounds:[{{ bbox.lat_min }},{{ bbox.long_min }},{{ bbox.lat_max }},{{ bbox.long_max }}],fusionTableQuery:"{% for association in associations %}affiliations contains '{{ association.abbreviation|e('js') }}'{{ (not loop.last)? ' or ':'' }}{% endfor %}"});});</script>
+{% autoescape false %}<script>require(['shared/ui/Map'],function(a){a.set({fitBounds:[{{ bbox.lat_min }},{{ bbox.long_min }},{{ bbox.lat_max }},{{ bbox.long_max }}],fusionTableQuery:"{% for association in associations %}affiliations contains '{{ association.id|e('js') }}'{{ (not loop.last)? ' or ':'' }}{% endfor %}"});});</script>
 {% endautoescape %}
 {% endblock %}

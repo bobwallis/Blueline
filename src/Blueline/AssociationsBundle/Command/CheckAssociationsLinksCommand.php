@@ -30,10 +30,10 @@ class CheckAssociationsLinksCommand extends ContainerAwareCommand
 
         // Get an array of association data
         $associations = $this->getContainer()->get( 'doctrine' )->getManager()
-                             ->createQuery( 'SELECT a.abbreviation, a.link FROM BluelineAssociationsBundle:Association a ORDER BY a.abbreviation' )
+                             ->createQuery( 'SELECT partial a.{id,link} FROM BluelineAssociationsBundle:Association a ORDER BY a.id' )
                              ->getArrayResult();
         foreach ($associations as $association) {
-            $output->write( ' '.$association['abbreviation'].str_repeat( ' ', 8-strlen($association['abbreviation']) ) );
+            $output->write( ' '.$association['id'].str_repeat( ' ', 8-strlen($association['id']) ) );
             $ch = curl_init( $association['link'] );
             curl_setopt( $ch, CURLOPT_NOBODY, true );
             curl_exec( $ch );

@@ -98,9 +98,6 @@ Blueline\TowersBundle\Entity\Tower:
         tunedYear:
             type: smallint
             nullable: true
-        affiliations:
-            type: text
-            nullable: true
         extraInfo:
             type: text
             nullable: true
@@ -123,10 +120,6 @@ Blueline\TowersBundle\Entity\Tower:
                 joinColumns:
                     tower_id:
                         referencedColumnName: id
-                        onDelete: CASCADE
-                        onUpdate: CASCADE
                 inverseJoinColumns:
                     association_id:
                         referencedColumnName: id
-                        onDelete: CASCADE
-                        onUpdate: CASCADE

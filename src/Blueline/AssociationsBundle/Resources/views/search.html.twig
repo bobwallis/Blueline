@@ -17,7 +17,7 @@
 		{% if associations is not empty %}
 		<ol>
 		{% for association in associations %}
-			<li><a href="{{ path( 'Blueline_Associations_view', { 'abbreviation': association.abbreviation } ) }}">{{ association.name }}</a></li>
+			<li><a href="{{ path( 'Blueline_Associations_view', { 'id': association.id } ) }}">{{ association.name }}</a></li>
 		{% endfor %}
 		</ol>
 		{{ paging( 'Blueline_Associations_search', searchVariables, pageActive, pageCount, count ) }}

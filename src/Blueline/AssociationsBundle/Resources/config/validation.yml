@@ -1,6 +1,6 @@
 Blueline\AssociationsBundle\Entity\Association:
     properties:
-        abbreviation:
+        id:
             - NotBlank: ~
         name:
             - NotBlank: ~

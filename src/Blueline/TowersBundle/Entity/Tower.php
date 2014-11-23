@@ -22,8 +22,7 @@ class Tower
         $objectVars = get_object_vars($this);
         array_walk( $objectVars, function( &$v, $k ) {
             switch( $k ) {
-                // Ignore affiliations as it's replaced by associations, don't try to drill down into sub-entities
-                case 'affiliations':
+                // Don't try to drill down into sub-entities
                 case 'associations':
                 case 'oldpks':
                 case 'performances':
@@ -872,30 +871,6 @@ class Tower
     public function getAssociations()
     {
         return $this->associations;
-    }
-    /**
-     * @var text $affiliations
-     */
-    private $affiliations;
-
-    /**
-     * Set affiliations
-     *
-     * @param text $affiliations
-     */
-    public function setAffiliations($affiliations)
-    {
-        $this->affiliations = $affiliations;
-    }
-
-    /**
-     * Get affiliations
-     *
-     * @return text
-     */
-    public function getAffiliations()
-    {
-        return $this->affiliations;
     }
 
     /**
