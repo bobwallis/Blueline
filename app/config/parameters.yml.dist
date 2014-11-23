@@ -26,3 +26,4 @@ parameters:
     admin_email:       blueline@example.com
     analytics_code:    false
     asset_update:      1392761954
+    database_update:   1392761954

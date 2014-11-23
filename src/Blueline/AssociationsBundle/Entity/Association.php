@@ -19,10 +19,10 @@ class Association
     public function __toArray()
     {
         $objectVars = get_object_vars($this);
-        array_walk( $objectVars, function( &$v, $k ) {
+        array_walk( $objectVars, function( &$v, $k ) use ($showBlank) {
             switch( $k ) {
-                // Filter out id because that's only really meaningful internally, and don't try to drill down into sub-entities
-                case 'id':
+                // Don't try to drill down into sub-entities
+                case 'id';
                 case 'towers':
                     $v = null;
                     break;

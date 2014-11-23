@@ -152,6 +152,7 @@ if [[ $CCCBRDATA = true ]]
 	php "$d/app/console" blueline:importMethods
 	echo ""
 	php "$d/app/console" blueline:linkPerformancesToDove
+	sed -i -e"s/database_update: .*/database_update: `date "+%s"`/" "$d/app/config/parameters.yml"
 fi
 
 

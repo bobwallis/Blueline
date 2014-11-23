@@ -25,11 +25,10 @@ class Method
         return 'Method:'.$this->getTitle();
     }
 
-    public function __toArray($parent = '')
+    public function __toArray()
     {
-        $thisString = $this->__toString();
         $objectVars = get_object_vars($this);
-        array_walk( $objectVars, function( &$v, $k ) use ($thisString, $parent) {
+        array_walk( $objectVars, function( &$v, $k ) {
             switch( $k ) {
                 // Don't try to drill down into sub-entities
                 case 'collections':

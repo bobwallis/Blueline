@@ -16,7 +16,7 @@ monolog:
         nested:
             type:  stream
             path:  %kernel.logs_dir%/%kernel.environment%.log
-            level: debug
+            level: error
 
 hearsay_require_js:
     optimizer:
