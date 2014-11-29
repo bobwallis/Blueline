@@ -39,7 +39,7 @@ class MethodXMLIterator implements \Iterator, \Countable
         $xmlToArray = function( \SimpleXMLElement $node, $array = array() ) {
             // Pull out the easy ones
             $array = array_merge( $array, array_filter( array(
-                'url'            => strval( $node->title )? str_replace( ['$','&','+',',','/',':',';','=','?','@',' ','"','<','>','#','%','{','}','|',"\\",'^','~','[',']','.'], ['_'], iconv( 'UTF-8', 'ASCII//TRANSLIT', strval( $node->title ) ) ):null,
+                'url'            => strval( $node->title )? str_replace( [' ','$','&','+',',','/',':',';','=','?','@','"','<','>','#','%','{','}','|',"\\",'^','~','[',']','.'], ['_'], iconv( 'UTF-8', 'ASCII//TRANSLIT', strval( $node->title ) ) ):null,
                 'title'          => strval( $node->title )?:null,
                 'nameMetaphone'  => metaphone( $node->name?:'' )?:null,
                 'notation'       => strval( $node->notation )?:null,
