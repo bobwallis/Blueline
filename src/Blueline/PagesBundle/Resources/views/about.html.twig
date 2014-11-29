@@ -10,11 +10,68 @@
 		<div class="wrap">
 			<p>This is a project begun over the summer of 2010 by <a href="https://rsw.me.uk" class="external">Robert Wallis</a>, and aims to be a fast, user-friendly interface to the data provided on <a href="http://www.methods.org.uk" class="external">www.methods.org.uk</a>, and <a href="http://dove.cccbr.org.uk" class="external">dove.cccbr.org.uk</a>.</p>
 			<h2>Apps</h2>
-			<p>There is a <a href="https://chrome.google.com/webstore/detail/ohgpoagcfmlbkdniokohgicofokpbpae?hl=en-GB" class="external">Chrome Web App</a><span id="cwai"></span><script>document.getElementById('cwai').innerHTML=(('chrome' in window)?((!chrome.app.isInstalled)?' available to <a href="javascript:chrome.webstore.install();">install</a>':' which you have installed'):' available to install');</script><noscript> available to install</noscript>.</p>
 			<p>iPhone/iPad users can install Blueline as a web app by navigating to the homepage in Mobile Safari, tapping the action button, then tapping 'Add to Home Screen'. There's no native iOS app, and no current plans to make one as I don't have an Apple computer to make it on.</p>
 			<p>Android users with Chrome >32 can also install Blueline as a web app by navigating to the homepage in Chrome, tapping the menu button, then tapping 'Add to Home Screen'.</p>
+			<p>There is a <a href="https://chrome.google.com/webstore/detail/ohgpoagcfmlbkdniokohgicofokpbpae?hl=en-GB" class="external">Chrome Web App</a><span id="cwai"></span><script>document.getElementById('cwai').innerHTML=(('chrome' in window)?((!chrome.app.isInstalled)?' available to <a href="javascript:chrome.webstore.install();">install</a>':' which you have installed'):' available to install');</script><noscript> available to install</noscript>.</p>
+			<h2>Data and Copyright</h2>
+			<p>The database tables can be downloaded below, and an explanation of where it's come from and how it works follows.</p>
+			<h3>Database</h3>
+			<p>Only the current version of the data for each entity is retained, and I keep no record of when data was created or modfied (that information may be available at source). The data is stored in 8 tables and (with the exception of those generated from Dove data) can be downloaded as ,-delimited and "-enclosed CSV files for your own use (bearing in mind the health warnings and copyright information above): {% for table in ['associations', 'collections', 'methods', 'methods_collections', 'performances'] %}<a href="{{ path( 'Blueline_Data_table', { 'table': table, '_format': 'csv' }) }}" rel="nofollow" data-forcerefresh="true">{{ table }}</a>{{ not loop.last ? ', ' }}{% endfor %}.</p>
+			<p>The towers, towers_associations and towers_oldpks tables aren't provided as the maintainers of Dove have <a href="http://dove.cccbr.org.uk/news.php?article=165" class="external">decided to authorise and log downloads of the Dove data</a>, and I don't want to ruin that. A download code <a href="http://dove.cccbr.org.uk/downloads.php" class="external">can be requested from them here</a>. I expand some abbreviations and create a link-table to associations, but make no significant changes to the data before using it on this site.</p>
+			<h3>Methods</h3>
+			<p>Method details are derived from the Central Council of Church Bellringers data maintained by Tony Smith on <a href="http://www.methods.org.uk" class="external">www.methods.org.uk</a>. The following copyright statement applies to their use:<p>
+			<blockquote>These method collections are the copyright of the Central Council of Church Bell Ringers. You are welcome to make copies of the material for your own use. You may distribute copies to others <strong>provided that you do not do so for profit and provided that you include this copyright statement</strong>. If you modify the material before distributing it, you must include a <strong>clear</strong> notice that the material has been modified.</blockquote>
+			<p>The <a href="http://www.methods.org.uk/method-collections/xml-zip-files/method%20xml%201.0.pdf" class="external">XML schema (part 6)</a> has been mapped into the database table in an obvious way.</p>
+			<p>Data has not been modified, but the following additional fields have been added:</p>
+			<table>
+			<tr><th>Table Field</th><th>Value</th></tr>
+			<tr><td>methods.notationExpanded</td><td>Contains the place notation of the method converted to a normalised format using 0-9 and uppercase letters for places, 'x' for changes with no places made, '.' to seperate consecutive changes with places made, and expanding any abbreviations made due to palindromic symmetry. The code carrying out this expansion is <a href="https://github.com/bobwallis/Blueline/blob/master/src/Blueline/MethodsBundle/Helpers/PlaceNotation.php#L168" class="external">here</a>.</td></tr>
+			<tr><td>methods.url</td><td>Contains the method's name with URL-unsafe/reserved characters removed, and converted to the ASCII character set.</td></tr>
+			<tr><td>methods.nameMetaphone</td><td>Contains the <a href="http://en.wikipedia.org/wiki/Metaphone" class="external">metaphone key</a> of the method's name. This is used for implementing spell-check in search. <a href="{{ path( 'Blueline_Methods_search', { 'q': 'beverly 6' } ) }}">Example</a>.</td></tr>
+			<tr><td>methods.calls</td><td>Contains the details of common calls (Bobs and Singles) for the method. These are automatically generated unless overidden by me based on common practice (e.g. <a href="{{ path( 'Blueline_Methods_view', { 'title': 'Stedman Triples' } ) }}">Stedman Triples</a> has Bobs of '5:6:-3' and Singles, '567:6:-3').</td></tr>
+			<tr><td>methods.ruleOffs</td><td>Details where lines should be drawn to divide the method into sections when displaying, in the format '[divisionLength]:[start]' with both divisionLength and start integers.<br />This is assumed to be '[leadLength]:0' unless overidden by me based on common practice (e.g. <a href="{{ path( 'Blueline_Methods_view', { 'title': 'Stedman_Triples' } ) }}">Stedman divided into sixes by '6:-3'</a>).</td></tr>
+			</table>
+			<p>The manual overrides mentioned above are best viewed <a href="https://github.com/bobwallis/Blueline/blob/master/src/Blueline/MethodsBundle/Resources/data/method_extras.php" class="external">on GitHub</a>, and I would welcome any comments on other methods where tweaks are required.</p>
+			<h3>Collections</h3>
+			<p>The method data discussed above also contains the numeric indices of methods in the "Treble Dodging Minor Methods" and "Plain Minor Methods" collections as 'tdmmRef' and 'pmmRef'. These are added (unmodified) to my database to create the 'tdmm' and 'pmm' collections.</p>
+			<p>Any further collection data have been added by me and are based on my knowledge of common practice.</p>
+			<h3>Performances</h3>
+			<p>The www.methods.org.uk data discussed above contains the date and location of the first towerbell and handbell peals of methods if they are known. The <a href="http://www.methods.org.uk/method-collections/xml-zip-files/method%20xml%201.0.pdf" class="external">XML schema (part 7)</a> has been mapped into the database table in an obvious way.</p>
+			<p>A relation back to the method is added and then I also attempt to add a relation to the tower where the performance took place. This is done by searching the towers table for a matching location, or using a <a href="https://github.com/bobwallis/Blueline/blob/master/src/Blueline/MethodsBundle/Resources/data/method_towers.php" class="external">manual list</a> where there are known differences in spelling or similar between the Dove data file and the naming used in the methods data. If multiple (or no) matches are found then no relation is added, so these relations are certainly incomplete. They may also be incorrect if a previously ambiguous location in the method data no longer results in multiple matches due to towers being removed from the current version of Dove.</p>
+			<h3>Towers</h3>
+			<p>Tower information is taken from the the current version of the <a href="http://dove.cccbr.org.uk/downloads.php" class="external">Dove data file</a>, maintained by the Central Council of Church Bellringers. The fields in the data file are mapped as follows:</p>
+			<table>
+				<tr><th>CSV Field</th><th>Table Field</th></tr>
+				<tr><td>DoveID</td><td>towers.id</td></tr>
+				<tr><td>NG</td><td>towers.gridreference</td></tr>
+				<tr><td>Lat</td><td>towers.latitude</td></tr>
+				<tr><td>Long</td><td>towers.longitude</td></tr>
+				<tr><td>SNLat</td><td>towers.latitudesatnav</td></tr>
+				<tr><td>SNLong</td><td>towers.longitudesatnav</td></tr>
+				<tr><td>Postcode</td><td>towers.postcode</td></tr>
+				<tr><td>Bells</td><td>towers.bells</td></tr>
+				<tr><td>Wt</td><td>towers.weight</td></tr>
+				<tr><td>App</td><td>towers.weightapprox</td></tr>
+				<tr><td>Note</td><td>towers.note</td></tr>
+				<tr><td>Hz</td><td>towers.hz</td></tr>
+				<tr><td>PDNo</td><td>towers.practicenight</td></tr>
+				<tr><td>PSt</td><td>towers.practicestart</td></tr>
+				<tr><td>PrXF</td><td>towers.practicenotes</td></tr>
+				<tr><td>GF</td><td>towers.groundfloor</td></tr>
+				<tr><td>Toilet</td><td>towers.toilet</td></tr>
+				<tr><td>UR</td><td>towers.unringable</td></tr>
+				<tr><td>Simulator</td><td>towers.simulator</td></tr>
+				<tr><td>OvhaulYr</td><td>towers.overhaulyear</td></tr>
+				<tr><td>TuneYr</td><td>towers.tunedyear</td></tr>
+				<tr><td>ExtraInfo</td><td>towers.extrainfo</td></tr>
+			</table>
+			<p>Data is modified as follows: Spaces in Dove IDs are replaced with underscores (_) to improve readability in URLs. Various abbreviations are expanded.</p>
+			<h3>Associations</h3>
+			<p>The Dove data file noted above contains an affiliations field with a list of abbreviations of associations to which the tower is affiliated. I used Google to find the full name and websites of them. A more complete list is avaliable on <a href="http://www.ringing.info/associations.html" class="external">ringing.info</a>.</p>
+			<p>Fields and relationships are as in the below diagram:</p>
+			<p class="center"><img src="{{ path( 'Blueline_image', { 'image': 'database', '_format': 'svg' } ) }}" /></p>
 			<h2>Source code</h2>
-			<p>The source code is <a href="https://github.com/bobwallis/Blueline" class="external">made available</a> for interested people. Feedback, bug reports and advice are encouraged.</p>
+			<p>The source code for this website is <a href="https://github.com/bobwallis/Blueline" class="external">made available</a> for interested people.</p>
 		</div>
 	</section>
 {% endblock %}

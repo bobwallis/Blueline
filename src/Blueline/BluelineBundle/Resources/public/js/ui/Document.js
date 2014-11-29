@@ -22,7 +22,7 @@ define( ['jquery', 'eve', '../lib/fastclick', '../helpers/URL', '../data/Page', 
 				// Get the href of the link
 				var href = $target.attr( 'href' );
 				// If the URL is internal, push it (which will trigger a statechange)
-				if( href && URL.isInternal( href ) ) {
+				if( href && URL.isInternal( href ) && !($target.data( 'forcerefresh' ) === true) ) {
 					e.preventDefault();
 					Page.request( href, 'click' );
 				}

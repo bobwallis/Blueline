@@ -100,7 +100,6 @@
 				<h2 id="breadcrumb_sep">&raquo;</h2>
 				<h2 id="breadcrumb"><a href="{{ breadcrumb.href }}">{{ breadcrumb.title}}</a></h2>
 			{% endif %}
-			<div id="menuButton"></div>
 		</header>
 		<form id="search" role="search" action="{{ search_action|default('/') }}"{{ search|default(false) ? '' : ' style="display:none"' }}>
 			<div>
@@ -111,10 +110,6 @@
 		<div id="content" role="main"{{ search|default(false) ? ' class="searchable"' : '' }}>
 			{% block body %}{% endblock %}
 		</div>
-		<ul id="menu">
-			<li class="first"><a href="{{ path( 'Blueline_Pages_view', { 'page': 'about' } ) }}">About</a></li>
-			<li><a href="{{ path( 'Blueline_Pages_view', { 'page': 'copyright' } ) }}">Copyright</a></li>
-		</ul>
 	</body>
 </html>
 {% endspaceless %}

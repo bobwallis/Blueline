@@ -22,6 +22,11 @@ class DataController extends Controller
         	return $response;
         }
 
+        // Block Dove data
+        if( $table == 'towers' || $table == 'towers_associations' || $table == 'towers_oldpks' ) {
+        	throw $this->createAccessDeniedException('Data tables generated from the Dove data file cannot be exported.');
+        }
+
         // Set content
         $response->headers->set('Content-Type', 'text/csv');
         $response->setCallback(function() use($table, $container) {
@@ -40,7 +45,7 @@ class DataController extends Controller
         			$query  = $em->createQuery( 'SELECT partial m.{title}, mc, partial c.{id} FROM Blueline\MethodsBundle\Entity\Method m JOIN m.collections mc JOIN mc.collection c ORDER BY c.id, mc.position ASC' );
         			break;
             	case 'performances':
-        			$query  = $em->createQuery( 'SELECT p, partial m.{title}, partial t.{id} FROM Blueline\MethodsBundle\Entity\Performance p JOIN p.method m JOIN p.location_doveid t ORDER BY p.id ASC' );
+        			$query  = $em->createQuery( 'SELECT p, partial m.{title}, partial t.{id} FROM Blueline\MethodsBundle\Entity\Performance p JOIN p.method m JOIN p.location_tower t ORDER BY p.id ASC' );
         			break;
         		case 'towers':
         			$query  = $em->createQuery( 'SELECT t FROM Blueline\TowersBundle\Entity\Tower t ORDER BY t.id ASC' );

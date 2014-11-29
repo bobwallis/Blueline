@@ -151,6 +151,7 @@ class AssetController extends Controller
         $file    = false;
 
         switch ($image) {
+            case 'database':
             case 'external':
             case 'search':
             case 'select':

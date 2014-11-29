@@ -1,1 +1,1 @@
-define( ['./Header/Breadcrumb', './Header/Menu', './Header/Search'], {} );
+define( ['./Header/Breadcrumb', './Header/Search'], {} );
