@@ -79,7 +79,7 @@ class MethodsController extends Controller
                 return implode( '', array_map( function( $w ) { return $w[0]; }, explode( ' ', $c ) ) );
             }, Classifications::toArray() );
             $matches = array();
-            if( preg_match( '/('.implode( '|', $classificationsInitials ).')_('.implode( '|', Stages::toArray() ).')$/', $u, $matches ) ) {
+            if( preg_match( '/_('.implode( '|', $classificationsInitials ).')_('.implode( '|', Stages::toArray() ).')$/', $u, $matches ) ) {
                 $initial = $matches[1];
                 $classification = str_replace( ' ', '_', Classifications::toArray()[array_search( $initial, $classificationsInitials )] );
                 $u = preg_replace( '/'.$initial.'_('.implode( '|', Stages::toArray() ).')$/', $classification.'_$1', $u );
