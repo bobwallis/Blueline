@@ -9,7 +9,8 @@ define( ['jquery', './Null'], function( $, Null ) {
 	unsetup();
 
 	if( !Modernizr.indexeddb && Modernizr.websqldatabase ) {
-		db = openDatabase( 'Blueline', '1.1', '', 5242880 );
+		try { db = openDatabase( 'Blueline', '1.1', '', 5242880 ); }
+		catch(e) { db = null; }
 		if( db ) {
 			db.transaction(
 				function( tx ) {

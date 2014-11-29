@@ -3,6 +3,7 @@ namespace Blueline\MethodsBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Process\Process;
 use Blueline\BluelineBundle\Helpers\Search;
 use Blueline\BluelineBundle\Helpers\Text;
 use Blueline\MethodsBundle\Entity\Method;
@@ -119,7 +120,11 @@ class MethodsController extends Controller
                 throw $this->createNotFoundException( 'The method does not exist' );
             }
         }
-        $url = $this->generateUrl( 'Blueline_Methods_view', array( 'chromeless' => (($format == 'html')? intval( $request->query->get( 'chromeless' ) )?:null : null), 'title' => implode( '|', array_map( function ($m) { return $m['url']; }, $methodsCheck ) ), '_format' => $format ) );
+        $url = $this->generateUrl( 'Blueline_Methods_view', array(
+            'chromeless' => (($format == 'html')? intval( $request->query->get( 'chromeless' ) )?:null : null),
+            'scale'      => intval( $request->query->get( 'scale' ) )?:null,
+            'title'      => implode( '|', array_map( function ($m) { return $m['url']; }, $methodsCheck ) ), '_format' => $format )
+        );
         if ( $request->getRequestUri() !== urldecode( $url ) ) {
             return $this->redirect( $url, 301 );
         }
@@ -140,7 +145,18 @@ class MethodsController extends Controller
         }
 
         // Create response
-        return $this->render( 'BluelineMethodsBundle::view.'.$format.'.twig', compact( 'pageTitle', 'methods' ), $response );
+        switch( $format ) {
+            case 'png':
+                if( (intval( $request->query->get( 'scale' ) )?:1) > 4 && $this->container->getParameter( 'kernel.environment') == 'prod' ) {
+                    throw $this->createAccessDeniedException('Maximum scale is 4 unless in developer mode.');
+                }
+                $process = new Process( 'phantomjs --disk-cache=true --load-images=false "'.__DIR__.'/../Resources/phantomjs/render_line.js" "'.$this->generateUrl( 'Blueline_Methods_view', array( 'title' => implode( '|', array_map( function ($m) { return $m['url']; }, $methodsCheck ) ) ), true ).'" '.(intval( $request->query->get( 'scale' ) )?:1).' 2>&1' );
+                $process->mustRun();
+                $response->setContent( $process->getOutput() );
+                return $response;
+            default:
+                return $this->render( 'BluelineMethodsBundle::view.'.$format.'.twig', compact( 'pageTitle', 'methods' ), $response );
+        }
     }
 
     public function viewCustomAction() {

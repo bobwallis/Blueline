@@ -5,8 +5,11 @@ define( function() {
 	if( Modernizr.canvas ) {
 		var Canvas = function( options ) {
 			// Create canvas element
-			var pixelRatio = (typeof options.scale === 'number')? options.scale : ( (typeof window.devicePixelRatio === 'number')? window.devicePixelRatio : 1),
-				canvas = document.createElement( 'canvas' );
+			var queryString = location.href.replace( /^.*?(\?|$)/, '' ),
+				pixelRatio  = (typeof options.scale === 'number')? options.scale : (
+				               (queryString.indexOf( 'scale=' ) !== -1)? parseInt( queryString.replace( /^.*scale=(.*?)(&.*$|$)/, '$1' ) ) :
+				               ( (typeof window.devicePixelRatio === 'number')? window.devicePixelRatio : 1) ),
+				canvas      = document.createElement( 'canvas' );
 			canvas.setAttribute( 'id', options.id );
 			canvas.setAttribute( 'width', options.width * pixelRatio );
 			canvas.setAttribute( 'height', options.height * pixelRatio );

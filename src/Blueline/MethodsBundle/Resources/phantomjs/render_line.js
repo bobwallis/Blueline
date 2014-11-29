@@ -19,7 +19,7 @@ page.viewportSize = {
 page.open( url, function() {
 	page.evaluate( function() {
 		// Remove elements not needed
-		var elements = document.querySelectorAll( '#top, #search, #loading, #menu, #towerMap, .method header, .method .details, .method .grid, .method .line canvas:nth-child(2), .method .line canvas:nth-child(3)' );
+		var elements = document.querySelectorAll( '#top, #search, #loading, #menu, #towerMap, .method header, .method .details, .method .grid, .method .line canvas:nth-child(2), .method .line canvas:nth-child(3), .sf-toolbar' );
 		Array.prototype.forEach.call( elements, function( node ) {
 			node.parentNode.removeChild( node );
 		} );

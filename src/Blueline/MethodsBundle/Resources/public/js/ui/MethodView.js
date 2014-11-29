@@ -12,8 +12,8 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers
 	// Display messages if canvas is not supported
 	if( !Modernizr.canvas ) {
 		return function( options ) {
-			var message = '<p class="nothing">Your browser doesn\'t support canvas elements, and so can\'t draw methods. Consider upgrading to a more modern browser.</p>';
-			$( options.numbersContainer ).html( message );
+			var message = '<div class="wrap"><p class="nothing">Your browser doesn\'t support canvas elements, and so can\'t draw methods. Consider upgrading to a more modern browser.</p></div>';
+			$( options.numbersContainer ).html( $( 'noscript', $( options.numbersContainer ) ).text() );
 			$( options.gridContainer ).html( message );
 		};
 	}
@@ -28,8 +28,8 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers
 
 		// Containers
 		this.container = {
-			numbers: $( options.numbersContainer ),
-			grid: $( options.gridContainer )
+			numbers: $( options.numbersContainer ).empty(),
+			grid: $( options.gridContainer ).empty()
 		};
 
 		// Method details

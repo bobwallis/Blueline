@@ -6,8 +6,8 @@ Blueline_Methods_view:
     pattern: /view/{title}.{_format}
     defaults: { _controller: BluelineMethodsBundle:Methods:view, _format: html }
     requirements:
-        title: ^(?(?=.*\.(html|txt|json|xml)$).*(?=\.)|.*$)
-        _format: html|json
+        title: ^(?(?=.*\.(html|json|png)$).*(?=\.)|.*$)
+        _format: html|json|png
 
 Blueline_Methods_custom_view:
     pattern: /view
