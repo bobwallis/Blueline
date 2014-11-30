@@ -56,6 +56,7 @@ class AssociationsController extends Controller
     {
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
+        $associationsRepository = $this->getDoctrine()->getManager()->getRepository( 'BluelineAssociationsBundle:Association' );
 
         // Create basic response object
         $response = new Response();
@@ -88,6 +89,7 @@ class AssociationsController extends Controller
 
         $pageTitle = Text::toList( array_map( function ($a) { return $a['name']; }, $associations ) );
         $associations = array();
+        $associationsContains = array();
 
         foreach ($ids as $id) {
             // Get information about the association and its towers
@@ -97,9 +99,10 @@ class AssociationsController extends Controller
                 WHERE a.id = :id' )
             ->setParameter( 'id', $id )
             ->getSingleResult();
+            $associationsContains[] = $associationsRepository->findContainedAssociations( $id );
         }
 
-        // Get the bounding box for the tower map if needed
+        // Get the bounding box for the tower map
         $bbox = array();
         if ($format == 'html') {
             $bbox = $em->createQuery( '
@@ -111,7 +114,7 @@ class AssociationsController extends Controller
         }
 
         // Create response
-        return $this->render( 'BluelineAssociationsBundle::view.'.$format.'.twig', compact( 'pageTitle', 'associations', 'bbox' ), $response );
+        return $this->render( 'BluelineAssociationsBundle::view.'.$format.'.twig', compact( 'pageTitle', 'associations', 'associationsContains','bbox' ), $response );
     }
 
     public function sitemapAction()

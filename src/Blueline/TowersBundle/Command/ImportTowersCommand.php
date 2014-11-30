@@ -74,7 +74,7 @@ class ImportTowersCommand extends ContainerAwareCommand
                 // Copy in data from the text file
                 $tower->setAll( $txtRow );
                 // Make changes to affiliation data
-                $newAffiliations = array_filter( explode( ',', $tower->getAffiliations() ) );
+                $newAffiliations = array_filter( explode( ',', $txtRow['affiliations'] ) );
                 $oldAffiliationsObjects = $tower->getAssociations();
                 $oldAffiliations = $oldAffiliationsObjects->map( function ($a) { return $a->getId(); } )->toArray();
                 // Add any new ones not in the old

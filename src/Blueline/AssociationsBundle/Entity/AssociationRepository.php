@@ -58,4 +58,30 @@ class AssociationRepository extends EntityRepository
 
         return intval( $result[0]['num'] );
     }
+
+    public function findContainedAssociations($id)
+    {
+        $bbox = $this->createQueryBuilder( 'a' )
+            ->select( 'MAX(t.longitude) as max_lon, MAX(t.latitude) as max_lat, MIN(t.longitude) as min_lon, MIN(t.latitude) as min_lat' )
+            ->leftJoin('a.towers', 't')
+            ->where( 'a.id = (:id)' )
+            ->groupBy('a.id')
+            ->setParameter( 'id', $id )
+            ->getQuery()
+            ->getSingleResult();
+        return $this->createQueryBuilder( 'a' )
+            ->select( 'a' )
+            ->leftJoin('a.towers', 't')
+            ->where('a.id != (:id)' )
+            ->having('MAX(t.longitude) < (:max_lon) AND MAX(t.latitude) < (:max_lat) AND MIN(t.longitude) > (:min_lon) AND MIN(t.latitude) > (:min_lat)' )
+            ->groupBy('a.id')
+            ->orderBy('a.name')
+            ->setParameter( 'id', $id )
+            ->setParameter( 'max_lon', $bbox['max_lon'] )
+            ->setParameter( 'max_lat', $bbox['max_lat'] )
+            ->setParameter( 'min_lon', $bbox['min_lon'] )
+            ->setParameter( 'min_lat', $bbox['min_lat'] )
+            ->getQuery()
+            ->getArrayResult();
+    }
 }
