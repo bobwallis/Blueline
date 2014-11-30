@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Get script directory, and cd to it
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
+d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+cd "$d"
+
+echo -e "\n\033[1mRunning tests\033[0m"
+phpunit -c "$d/app/"

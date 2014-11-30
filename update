@@ -155,6 +155,8 @@ if [[ $CCCBRDATA = true ]]
 	sed -i -e"s/database_update: .*/database_update: `date "+%s"`/" "$d/app/config/parameters.yml"
 fi
 
-
 # Update source timestamp to refresh caching headers etc
 sed -i -e"s/asset_update: .*/asset_update: `date "+%s"`/" "$d/app/config/parameters.yml"
+
+# Run tests
+"$d/test"
