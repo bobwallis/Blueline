@@ -10,11 +10,10 @@
 
 define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers/PlaceNotation'], function( $, webFontLoaded, MethodGrid, PlaceNotation ) {
 	// Display messages if canvas is not supported
-	if( !Modernizr.canvas ) {
+	if( true||!Modernizr.canvas ) {
 		return function( options ) {
-			var message = '<div class="wrap"><p class="nothing">Your browser doesn\'t support canvas elements, and so can\'t draw methods. Consider upgrading to a more modern browser.</p></div>';
-			$( options.numbersContainer ).html( $( 'noscript', $( options.numbersContainer ) ).text() );
-			$( options.gridContainer ).html( message );
+			$( options.numbersContainer ).html( '<div class="wrap"><img src="'+location.href+'.png" /></div>' );
+			$( options.gridContainer ).html( '<div class="wrap"><p class="nothing">Your browser doesn\'t support canvas elements, and so can\'t draw methods. Consider upgrading to a more modern browser.</p></div>' );
 		};
 	}
 
