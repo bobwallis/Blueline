@@ -70,7 +70,7 @@
 		{% endstylesheets %}
 
 		{# HTML5 Shiv #}
-		{% javascripts '@html5shiv' output="js/html5shiv.js" filter="?closure" %}
+		{% javascripts '@html5shiv' '@BluelineBundle/Resources/public/js/helpers/Array.js' output="js/old_ie.js" filter="?closure" %}
 			<!--[if lt IE 9]><script src="{{ asset_url }}"></script><![endif]-->
 		{% endjavascripts %}
 
