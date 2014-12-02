@@ -321,7 +321,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas'], func
 
 			// Draw place starts
 			if( show.placeStarts ) {
-				placeStarts.sort();
+				placeStarts.sort( function(a,b) { return a - b; } );
 				context.lineWidth = 1;
 				placeStarts.forEach( function( i, pos ) {
 					var j = (typeof startRow === 'object')? startRow[i] : i,
