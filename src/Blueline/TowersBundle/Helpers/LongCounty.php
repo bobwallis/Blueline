@@ -21,7 +21,7 @@ class LongCounty
         'Australia',
         'New Zealand',
         'South Africa',
-        'Netherlands'
+        'Netherlands',
     );
 
     private static $counties = array(
@@ -86,7 +86,7 @@ class LongCounty
         'W Yks'     => 'West Yorkshire',
         'S Yks'     => 'South Yorkshire',
         'S Yorks'   => 'South Yorkshire',
-        'Scilly'    => 'Isles of Scilly'
+        'Scilly'    => 'Isles of Scilly',
     );
 
     private static $scottishAreas = array(
@@ -104,7 +104,7 @@ class LongCounty
         'PthKross'   => 'Perth and Kinross',
         'PerthKross' => 'Perth and Kinross',
         'Renfrews'   => 'Renfrewshire',
-        'Stirling'   => 'Stirling'
+        'Stirling'   => 'Stirling',
     );
 
     private static $welshAreas = array(
@@ -133,7 +133,7 @@ class LongCounty
         'Swansea'    => 'Swansea',
         'Torfaen'    => 'Torfaen',
         'ValeGlam'   => 'The Vale of Glamorgan',
-        'Wrexham'    => 'Wrexham'
+        'Wrexham'    => 'Wrexham',
     );
 
     private static $irishAreas = array(
@@ -150,7 +150,7 @@ class LongCounty
         'Armagh'  => 'Armagh',
         'Tip'     => 'Tipperary',
         'Waterfd' => 'Waterford',
-        'Wexford' => 'Wexford'
+        'Wexford' => 'Wexford',
     );
 
     private static $states = array(
@@ -204,7 +204,7 @@ class LongCounty
         'WA' => "Washington",
         'WV' => "West Virginia",
         'WI' => "Wisconsin",
-        'WY' => "Wyoming"
+        'WY' => "Wyoming",
     );
 
     private static $canadianStates = array(
@@ -217,7 +217,7 @@ class LongCounty
         'PE' => 'Prince Edward Island',
         'SK' => 'Saskatchewan',
         'AB' => 'Alberta',
-        'NL' => 'Newfoundland and Labrador'
+        'NL' => 'Newfoundland and Labrador',
     );
 
     private static $australianAreas = array(
@@ -229,12 +229,12 @@ class LongCounty
         'QLD'  => 'Queensland',
         'ACT'  => 'Australian Capital Territory',
         'Tas'  => 'Tasmania',
-        'WA'   => 'Western Australia'
+        'WA'   => 'Western Australia',
     );
 
     private static $newZealandAreas = array(
         'NI' => 'North Island',
-        'SI' => 'South Island'
+        'SI' => 'South Island',
     );
 
     private static $southAfricanAreas = array(
@@ -242,38 +242,38 @@ class LongCounty
         'KZN'        => 'KwaZulu-Natal',
         'EC'         => 'Eastern Cape',
         'Gaut'       => 'Gauteng',
-        'North West' => 'North West'
+        'North West' => 'North West',
     );
 
     private static $netherlandsAreas = array(
-        'S Holland' => 'South Holland'
+        'S Holland' => 'South Holland',
     );
 
-    public static function get( $short, $country )
+    public static function get($short, $country)
     {
         // Look up in a different county array depending on the country
-        switch ( strtoupper( $country ) ) {
+        switch (strtoupper($country)) {
             case 'ENGLAND':
-                return isset( self::$counties[$short] )? self::$counties[$short] : $short;
-            case 'SCOTLAND':
-                return isset( self::$scottishAreas[$short] )? self::$scottishAreas[$short] : $short;
-            case 'WALES':
-                return isset( self::$welshAreas[$short] )? self::$welshAreas[$short] : $short;
-            case 'IRELAND':
-                return isset( self::$irishAreas[$short] )? self::$irishAreas[$short] : $short;
-            case 'USA':
-                return isset( self::$states[$short] )? self::$states[$short] : $short;
-            case 'CANADA':
-                return isset( self::$canadianStates[$short] )? self::$canadianStates[$short] : $short;
-            case 'AUSTRALIA':
-                return isset( self::$australianAreas[$short] )? self::$australianAreas[$short] : $short;
-            case 'NEW ZEALAND':
-                return isset( self::$newZealandAreas[$short] )? self::$newZealandAreas[$short] : $short;
-            case 'SOUTH AFRICA':
-                return isset( self::$southAfricanAreas[$short] )? self::$southAfricanAreas[$short] : $short;
-            case 'NETHERLANDS':
-                return isset( self::$netherlandsAreas[$short] )? self::$netherlandsAreas[$short] : $short;
-            default:
+                return isset(self::$counties[$short]) ? self::$counties[$short] : $short;
+            case 'SCOTLAND' :
+                return isset(self::$scottishAreas[$short]) ? self::$scottishAreas[$short] : $short;
+            case 'WALES' :
+                return isset(self::$welshAreas[$short]) ? self::$welshAreas[$short] : $short;
+            case 'IRELAND' :
+                return isset(self::$irishAreas[$short]) ? self::$irishAreas[$short] : $short;
+            case 'USA' :
+                return isset(self::$states[$short]) ? self::$states[$short] : $short;
+            case 'CANADA' :
+                return isset(self::$canadianStates[$short]) ? self::$canadianStates[$short] : $short;
+            case 'AUSTRALIA' :
+                return isset(self::$australianAreas[$short]) ? self::$australianAreas[$short] : $short;
+            case 'NEW ZEALAND' :
+                return isset(self::$newZealandAreas[$short]) ? self::$newZealandAreas[$short] : $short;
+            case 'SOUTH AFRICA' :
+                return isset(self::$southAfricanAreas[$short]) ? self::$southAfricanAreas[$short] : $short;
+            case 'NETHERLANDS' :
+                return isset(self::$netherlandsAreas[$short]) ? self::$netherlandsAreas[$short] : $short;
+            default :
                 return $short;
         }
     }

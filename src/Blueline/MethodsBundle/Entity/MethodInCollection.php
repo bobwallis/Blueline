@@ -2,7 +2,6 @@
 
 namespace Blueline\MethodsBundle\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 
 /**
  * MethodInCollection
@@ -32,12 +31,13 @@ class MethodInCollection
     /**
      * Constructor
      */
-    public function __construct( $firstSet = array() )
+    public function __construct($firstSet = array())
     {
-        $this->setAll( $firstSet );
+        $this->setAll($firstSet);
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         return $this->getMethod().' in '.$this->getCollection();
     }
 
@@ -49,9 +49,9 @@ class MethodInCollection
     public function setAll($map)
     {
         foreach ($map as $key => $value) {
-            $method = 'set'.str_replace( ' ', '', ucwords( str_replace( '_', ' ', $key ) ) );
-            if ( is_callable( array( $this, $method ) ) ) {
-                $this->$method( $value );
+            $method = 'set'.str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
+            if (is_callable(array( $this, $method ))) {
+                $this->$method($value);
             }
         }
 
@@ -61,7 +61,7 @@ class MethodInCollection
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -71,7 +71,7 @@ class MethodInCollection
     /**
      * Set position
      *
-     * @param integer $position
+     * @param  integer            $position
      * @return MethodInCollection
      */
     public function setPosition($position)
@@ -84,7 +84,7 @@ class MethodInCollection
     /**
      * Get position
      *
-     * @return integer 
+     * @return integer
      */
     public function getPosition()
     {
@@ -94,7 +94,7 @@ class MethodInCollection
     /**
      * Set method
      *
-     * @param \Blueline\MethodsBundle\Entity\Method $method
+     * @param  \Blueline\MethodsBundle\Entity\Method $method
      * @return MethodInCollection
      */
     public function setMethod(\Blueline\MethodsBundle\Entity\Method $method = null)
@@ -107,7 +107,7 @@ class MethodInCollection
     /**
      * Get method
      *
-     * @return \Blueline\MethodsBundle\Entity\Methods 
+     * @return \Blueline\MethodsBundle\Entity\Methods
      */
     public function getMethod()
     {
@@ -117,7 +117,7 @@ class MethodInCollection
     /**
      * Set collection
      *
-     * @param \Blueline\MethodsBundle\Entity\Collection $collection
+     * @param  \Blueline\MethodsBundle\Entity\Collection $collection
      * @return MethodInCollection
      */
     public function setCollection(\Blueline\MethodsBundle\Entity\Collection $collection = null)
@@ -130,7 +130,7 @@ class MethodInCollection
     /**
      * Get collection
      *
-     * @return \Blueline\MethodsBundle\Entity\Collection 
+     * @return \Blueline\MethodsBundle\Entity\Collection
      */
     public function getCollection()
     {

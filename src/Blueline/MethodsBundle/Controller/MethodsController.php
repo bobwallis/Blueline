@@ -13,7 +13,6 @@ use Blueline\MethodsBundle\Helpers\PlaceNotation;
 
 class MethodsController extends Controller
 {
-
     public function welcomeAction()
     {
         $request = $this->getRequest();
@@ -21,40 +20,44 @@ class MethodsController extends Controller
 
         // Create basic response object
         $response = new Response();
-        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
-            $response->setMaxAge( 129600 );
+        if ($this->container->getParameter('kernel.environment') == 'prod') {
+            $response->setMaxAge(129600);
             $response->setPublic();
         }
-        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
-        if ( $response->isNotModified( $request ) ) { return $response; }
+        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
+        if ($response->isNotModified($request)) {
+            return $response;
+        }
 
-        return $this->render( 'BluelineMethodsBundle::welcome.'.$format.'.twig', array(), $response );
+        return $this->render('BluelineMethodsBundle::welcome.'.$format.'.twig', array(), $response);
     }
 
-    public function searchAction( $searchVariables = array() )
+    public function searchAction($searchVariables = array())
     {
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
         // Create basic response object
         $response = new Response();
-        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
-            $response->setMaxAge( 129600 );
+        if ($this->container->getParameter('kernel.environment') == 'prod') {
+            $response->setMaxAge(129600);
             $response->setPublic();
         }
-        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
-        if ( $response->isNotModified( $request ) ) { return $response; }
+        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
+        if ($response->isNotModified($request)) {
+            return $response;
+        }
 
-        $methodRepository = $this->getDoctrine()->getManager()->getRepository( 'BluelineMethodsBundle:Method' );
-        $searchVariables = empty( $searchVariables )? Search::requestToSearchVariables( $request, array( 'title', 'stage', 'classification', 'notation', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef', 'tdmmRef', 'pmmRef', 'lengthOfLead', 'numberOfHunts', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational' ) ) : $searchVariables;
+        $methodRepository = $this->getDoctrine()->getManager()->getRepository('BluelineMethodsBundle:Method');
+        $searchVariables = empty($searchVariables) ? Search::requestToSearchVariables($request, array( 'title', 'stage', 'classification', 'notation', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef', 'tdmmRef', 'pmmRef', 'lengthOfLead', 'numberOfHunts', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational' )) : $searchVariables;
 
-        $methods = $methodRepository->findBySearchVariables( $searchVariables );
-        $count = (count( $methods ) > 0)? $methodRepository->findCountBySearchVariables( $searchVariables ) : 0;
+        $methods = $methodRepository->findBySearchVariables($searchVariables);
+        $count = (count($methods) > 0) ? $methodRepository->findCountBySearchVariables($searchVariables) : 0;
 
-        $pageActive = max( 1, ceil( ($searchVariables['offset']+1)/$searchVariables['count'] ) );
-        $pageCount =  max( 1, ceil( $count / $searchVariables['count'] ) );
-        
-        return $this->render( 'BluelineMethodsBundle::search.'.$format.'.twig', compact( 'searchVariables', 'count', 'pageActive', 'pageCount', 'methods' ), $response );
+        $pageActive = max(1, ceil(($searchVariables['offset']+1)/$searchVariables['count']));
+        $pageCount =  max(1, ceil($count / $searchVariables['count']));
+
+        return $this->render('BluelineMethodsBundle::search.'.$format.'.twig', compact('searchVariables', 'count', 'pageActive', 'pageCount', 'methods'), $response);
     }
 
     public function viewAction($title)
@@ -64,145 +67,154 @@ class MethodsController extends Controller
 
         // Create basic response object
         $response = new Response();
-        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
-            $response->setMaxAge( 129600 );
+        if ($this->container->getParameter('kernel.environment') == 'prod') {
+            $response->setMaxAge(129600);
             $response->setPublic();
         }
-        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
-        if ( $response->isNotModified( $request ) ) { return $response; }
+        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
+        if ($response->isNotModified($request)) {
+            return $response;
+        }
 
         // Decode and canonicalise the requested URLs
-        $urls = array_map( function($u) {
+        $urls = array_map(function ($u) {
             // Decode
-            $u = urldecode( $u );
+            $u = urldecode($u);
             // Replace S with Surprise, etc...
-            $classificationsInitials = array_map( function( $c ) {
-                return implode( '', array_map( function( $w ) { return $w[0]; }, explode( ' ', $c ) ) );
-            }, Classifications::toArray() );
+            $classificationsInitials = array_map(function ($c) {
+                return implode('', array_map(function ($w) { return $w[0]; }, explode(' ', $c)));
+            }, Classifications::toArray());
             $matches = array();
-            if( preg_match( '/_('.implode( '|', $classificationsInitials ).')_('.implode( '|', Stages::toArray() ).')$/', $u, $matches ) ) {
+            if (preg_match('/_('.implode('|', $classificationsInitials).')_('.implode('|', Stages::toArray()).')$/', $u, $matches)) {
                 $initial = $matches[1];
-                $classification = str_replace( ' ', '_', Classifications::toArray()[array_search( $initial, $classificationsInitials )] );
-                $u = preg_replace( '/'.$initial.'_('.implode( '|', Stages::toArray() ).')$/', $classification.'_$1', $u );
+                $classification = str_replace(' ', '_', Classifications::toArray()[array_search($initial, $classificationsInitials)]);
+                $u = preg_replace('/'.$initial.'_('.implode('|', Stages::toArray()).')$/', $classification.'_$1', $u);
             }
+
             return $u;
-        }, explode( '|', $title ) );
+        }, explode('|', $title));
         // Convert URLs into titles
-        $titles = array_map( function ($m) { return str_replace( '_', ' ', $m ); }, $urls );
+        $titles = array_map(function ($m) { return str_replace('_', ' ', $m); }, $urls);
 
         // Create lower case arrays for use in search
-        $urlsLower = array_map( "strtolower", $urls );
-        $titlesLower = array_map( "strtolower", $titles );
+        $urlsLower = array_map("strtolower", $urls);
+        $titlesLower = array_map("strtolower", $titles);
 
-        $methodRepository = $this->getDoctrine()->getManager()->getRepository( 'BluelineMethodsBundle:Method' );
+        $methodRepository = $this->getDoctrine()->getManager()->getRepository('BluelineMethodsBundle:Method');
         $em = $this->getDoctrine()->getManager();
 
         // Check we are at the canonical URL for the content
         // First check for titles
-        $methodsCheck = $em->createQuery( '
+        $methodsCheck = $em->createQuery('
             SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m
-            WHERE LOWER(m.title) IN (:titles) OR LOWER(m.url) IN (:urls)' )
-            ->setParameter( 'urls', $urlsLower )
-            ->setParameter( 'titles', $titlesLower )
-            ->setMaxResults( count( $titlesLower ) )
+            WHERE LOWER(m.title) IN (:titles) OR LOWER(m.url) IN (:urls)')
+            ->setParameter('urls', $urlsLower)
+            ->setParameter('titles', $titlesLower)
+            ->setMaxResults(count($titlesLower))
             ->getArrayResult();
-        if ( empty( $methodsCheck ) || count( $methodsCheck ) < count( $methodsCheck ) ) {
+        if (empty($methodsCheck) || count($methodsCheck) < count($methodsCheck)) {
             // Then check if place notation has been given
-            $notationExpander = new PlaceNotation;
-            $notationTest = array_map( array( $notationExpander, 'expand' ), $urls );
-            $methodsCheck = $em->createQuery( '
+            $notationExpander = new PlaceNotation();
+            $notationTest = array_map(array( $notationExpander, 'expand' ), $urls);
+            $methodsCheck = $em->createQuery('
                 SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m
-                WHERE m.notationExpanded IN (:notations)' )
-                ->setParameter( 'notations', $notationTest )
-                ->setMaxResults( count( $notationTest ) )
+                WHERE m.notationExpanded IN (:notations)')
+                ->setParameter('notations', $notationTest)
+                ->setMaxResults(count($notationTest))
                 ->getArrayResult();
-            if ( empty( $methodsCheck ) || count( $methodsCheck ) < count( $methodsCheck ) ) {
-                throw $this->createNotFoundException( 'The method does not exist' );
+            if (empty($methodsCheck) || count($methodsCheck) < count($methodsCheck)) {
+                throw $this->createNotFoundException('The method does not exist');
             }
         }
-        $url = $this->generateUrl( 'Blueline_Methods_view', array(
-            'chromeless' => (($format == 'html')? intval( $request->query->get( 'chromeless' ) )?:null : null),
-            'scale'      => intval( $request->query->get( 'scale' ) )?:null,
-            'title'      => implode( '|', array_map( function ($m) { return $m['url']; }, $methodsCheck ) ), '_format' => $format )
+        $url = $this->generateUrl('Blueline_Methods_view', array(
+            'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null),
+            'scale'      => intval($request->query->get('scale')) ?: null,
+            'title'      => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)), '_format' => $format, )
         );
-        if ( $request->getRequestUri() !== urldecode( $url ) ) {
-            return $this->redirect( $url, 301 );
+        if ($request->getRequestUri() !== urldecode($url)) {
+            return $this->redirect($url, 301);
         }
 
-        $pageTitle = Text::toList( array_map( function ($m) { return $m['title']; }, $methodsCheck ) );
+        $pageTitle = Text::toList(array_map(function ($m) { return $m['title']; }, $methodsCheck));
         $methods = array();
 
         foreach ($methodsCheck  as $methodTitle) {
             // Get information about the method
-            $method = $em->createQuery( '
+            $method = $em->createQuery('
                 SELECT m FROM BluelineMethodsBundle:Method m
                 LEFT JOIN m.performances p
                 LEFT JOIN m.collections c
-                WHERE m.title = :title' )
-            ->setParameter( 'title', $methodTitle['title'] )
+                WHERE m.title = :title')
+            ->setParameter('title', $methodTitle['title'])
             ->getSingleResult();
             $methods[] = $method;
         }
 
         // Create response
-        switch( $format ) {
-            case 'png':
-                if( (intval( $request->query->get( 'scale' ) )?:1) > 4 && $this->container->getParameter( 'kernel.environment') == 'prod' ) {
+        switch ($format) {
+            case 'png' :
+                if ((intval($request->query->get('scale')) ?: 1) > 4 && $this->container->getParameter('kernel.environment') == 'prod') {
                     throw $this->createAccessDeniedException('Maximum scale is 4 unless in developer mode.');
                 }
-                $process = new Process( 'phantomjs --disk-cache=true --load-images=false "'.__DIR__.'/../Resources/phantomjs/render_line.js" "'.$this->generateUrl( 'Blueline_Methods_view', array( 'title' => implode( '|', array_map( function ($m) { return $m['url']; }, $methodsCheck ) ) ), true ).'" '.(intval( $request->query->get( 'scale' ) )?:1).' 2>&1' );
+                $process = new Process('phantomjs --disk-cache=true --load-images=false "'.__DIR__.'/../Resources/phantomjs/render_line.js" "'.$this->generateUrl('Blueline_Methods_view', array( 'title' => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)) ), true).'" '.(intval($request->query->get('scale')) ?: 1).' 2>&1');
                 $process->mustRun();
-                $response->setContent( $process->getOutput() );
+                $response->setContent($process->getOutput());
+
                 return $response;
-            default:
-                return $this->render( 'BluelineMethodsBundle::view.'.$format.'.twig', compact( 'pageTitle', 'methods' ), $response );
+            default :
+                return $this->render('BluelineMethodsBundle::view.'.$format.'.twig', compact('pageTitle', 'methods'), $response);
         }
     }
 
-    public function viewCustomAction() {
+    public function viewCustomAction()
+    {
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
         // Create basic response object
         $response = new Response();
-        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
-            $response->setMaxAge( 129600 );
+        if ($this->container->getParameter('kernel.environment') == 'prod') {
+            $response->setMaxAge(129600);
             $response->setPublic();
         }
 
         // Collect passed in variables that are permissible
         $vars = array();
-        foreach ( array( 'notation', 'title', 'stage', 'ruleOffs' ) as $key ) {
-            $value = trim( $request->query->get( $key ) );
-            if ( !empty( $value ) ) { $vars[$key] = $value; }
+        foreach (array( 'notation', 'title', 'stage', 'ruleOffs' ) as $key) {
+            $value = trim($request->query->get($key));
+            if (!empty($value)) {
+                $vars[$key] = $value;
+            }
         }
 
         // Check we have the bare minimum of information required
-        if( !isset( $vars['notation'], $vars['stage'] ) ) {
-            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException( "Request requires at least 'notation' and 'stage' to be set" );
+        if (!isset($vars['notation'], $vars['stage'])) {
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException("Request requires at least 'notation' and 'stage' to be set");
         }
 
         // Do some basic conversion
-        $vars['stage'] == intval( $vars['stage'] );
-        $vars['notationExpanded'] = PlaceNotation::expand( $vars['notation'], $vars['stage'] );
-        $vars['title'] = isset($vars['title'])? $vars['title'] : 'Unrung '.Stages::toString($vars['stage']).' Method';
+        $vars['stage'] == intval($vars['stage']);
+        $vars['notationExpanded'] = PlaceNotation::expand($vars['notation'], $vars['stage']);
+        $vars['title'] = isset($vars['title']) ? $vars['title'] : 'Unrung '.Stages::toString($vars['stage']).' Method';
 
         // Check whether the method already exists and redirect to it if so
-        $methodsCheck = $this->getDoctrine()->getManager()->createQuery( '
+        $methodsCheck = $this->getDoctrine()->getManager()->createQuery('
             SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m
-            WHERE m.notationExpanded = (:notation) AND m.stage = (:stage)' )
-            ->setParameter( 'notation', $vars['notationExpanded'] )
-            ->setParameter( 'stage', $vars['stage'] )
+            WHERE m.notationExpanded = (:notation) AND m.stage = (:stage)')
+            ->setParameter('notation', $vars['notationExpanded'])
+            ->setParameter('stage', $vars['stage'])
             ->getArrayResult();
-        if ( !empty( $methodsCheck ) ) {
-            $url = $this->generateUrl( 'Blueline_Methods_view', array( 'chromeless' => (($format == 'html')? intval( $request->query->get( 'chromeless' ) )?:null : null), 'title' => implode( '|', array_map( function ($m) { return $m['url']; }, $methodsCheck ) ), '_format' => $format ) );
-            return $this->redirect( $url, 301 );
+        if (!empty($methodsCheck)) {
+            $url = $this->generateUrl('Blueline_Methods_view', array( 'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null), 'title' => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)), '_format' => $format ));
+
+            return $this->redirect($url, 301);
         }
 
         // Other wise create and display the custom method
-        $methods = array( new Method( $vars ) );
+        $methods = array( new Method($vars) );
         $pageTitle = $vars['title'];
-        return $this->render( 'BluelineMethodsBundle::view.'.$format.'.twig', compact( 'pageTitle', 'methods' ), $response );
+
+        return $this->render('BluelineMethodsBundle::view.'.$format.'.twig', compact('pageTitle', 'methods'), $response);
     }
 
     public function sitemapAction()
@@ -212,15 +224,17 @@ class MethodsController extends Controller
 
         // Create basic response object
         $response = new Response();
-        if ( $this->container->getParameter( 'kernel.environment') == 'prod' ) {
-            $response->setMaxAge( 129600 );
+        if ($this->container->getParameter('kernel.environment') == 'prod') {
+            $response->setMaxAge(129600);
             $response->setPublic();
         }
-        $response->setLastModified( new \DateTime( '@'.$this->container->getParameter('asset_update') ) );
-        if ( $response->isNotModified( $request ) ) { return $response; }
+        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
+        if ($response->isNotModified($request)) {
+            return $response;
+        }
 
-        $methods = $this->getDoctrine()->getManager()->createQuery( 'SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m' )->getArrayResult();
+        $methods = $this->getDoctrine()->getManager()->createQuery('SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m')->getArrayResult();
 
-        return $this->render( 'BluelineMethodsBundle::sitemap.'.$format.'.twig', compact( 'methods' ), $response );
+        return $this->render('BluelineMethodsBundle::sitemap.'.$format.'.twig', compact('methods'), $response);
     }
 }

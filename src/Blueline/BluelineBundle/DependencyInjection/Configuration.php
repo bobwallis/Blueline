@@ -9,13 +9,13 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root( 'blueline' );
+        $rootNode = $treeBuilder->root('blueline');
         $rootNode
                 ->children()
-                ->scalarNode( 'admin_email')->defaultValue( 'blueline@example.com' )->end()
-                ->scalarNode( 'cache_manifest')->defaultFalse()->end()
-                ->scalarNode( 'analytics_code')->defaultNull()->end()
-                ->scalarNode( 'asset_update')->defaultValue( '0' )->end()
+                ->scalarNode('admin_email')->defaultValue('blueline@example.com')->end()
+                ->scalarNode('cache_manifest')->defaultFalse()->end()
+                ->scalarNode('analytics_code')->defaultNull()->end()
+                ->scalarNode('asset_update')->defaultValue('0')->end()
                 ->end();
 
         return $treeBuilder;

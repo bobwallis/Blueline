@@ -7,7 +7,7 @@ class PagesControllerTest extends WebTestCase
 {
     public function testPages()
     {
-        foreach( array('/','/about') as $page ) {
+        foreach (array('/', '/about') as $page) {
             $client = static::createClient();
             $crawler = $client->request('GET', $page);
             $this->assertTrue($client->getResponse()->isSuccessful(), $page.' request unsuccessful');

@@ -14,8 +14,8 @@
 
 namespace Blueline\BluelineBundle\Doctrine\Extension;
 
-use Doctrine\ORM\Query\AST\Functions\FunctionNode,
-    Doctrine\ORM\Query\Lexer;
+use Doctrine\ORM\Query\AST\Functions\FunctionNode;
+use Doctrine\ORM\Query\Lexer;
 
 /**
  * Usage: CONCAT_WS(SEPARATOR, STR1, STR2, ... [ NOTEMPTY ])
@@ -52,8 +52,7 @@ class ConcatWs extends FunctionNode
         $lexer = $parser->getLexer();
 
         while (count($this->values) < 3
-                || $lexer->lookahead['type'] == Lexer::T_COMMA)
-        {
+                || $lexer->lookahead['type'] == Lexer::T_COMMA) {
             $parser->match(Lexer::T_COMMA);
             $peek = $lexer->glimpse();
 

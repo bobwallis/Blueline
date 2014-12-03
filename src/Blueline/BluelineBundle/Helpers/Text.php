@@ -17,16 +17,16 @@ class Text
      * @param  string $last Optional, defaults to ' and '
      * @return string
      */
-    public static function toList( array $list, $glue = ', ', $last = ' and ' )
+    public static function toList(array $list, $glue = ', ', $last = ' and ')
     {
-        $list = array_filter( $list );
-        if ( empty( $list ) ) {
+        $list = array_filter($list);
+        if (empty($list)) {
             return '';
         }
-        if ( count( $list ) > 1 ) {
-            return implode( $glue, array_slice( $list, null, -1 ) ) . $last . array_pop( $list );
+        if (count($list) > 1) {
+            return implode($glue, array_slice($list, null, -1)).$last.array_pop($list);
         } else {
-            return array_pop( $list );
+            return array_pop($list);
         }
     }
 
@@ -37,8 +37,8 @@ class Text
      * @param  string  $plural   The pluralised form of the word. Optional, defaults to $singular.'s'
      * @return string
      */
-    public static function pluralise( $count, $singular, $plural = false )
+    public static function pluralise($count, $singular, $plural = false)
     {
-        return $count.' '.( ( $count == 1 )? $singular : ( $plural?:$singular.'s' ) );
+        return $count.' '.(($count == 1) ? $singular : ($plural ?: $singular.'s'));
     }
 };

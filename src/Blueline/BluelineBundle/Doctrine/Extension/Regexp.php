@@ -1,8 +1,8 @@
 <?php
 namespace Blueline\BluelineBundle\Doctrine\Extension;
 
-use Doctrine\ORM\Query\AST\Functions\FunctionNode,
-    Doctrine\ORM\Query\Lexer;
+use Doctrine\ORM\Query\AST\Functions\FunctionNode;
+use Doctrine\ORM\Query\Lexer;
 
 /**
  * Usage: REGEXP(STR, REG)
@@ -18,31 +18,31 @@ class Regexp extends FunctionNode
     private $string = null;
     private $regexp = null;
 
-    public function parse( \Doctrine\ORM\Query\Parser $parser )
+    public function parse(\Doctrine\ORM\Query\Parser $parser)
     {
-        $parser->match( Lexer::T_IDENTIFIER );
-        $parser->match( Lexer::T_OPEN_PARENTHESIS );
+        $parser->match(Lexer::T_IDENTIFIER);
+        $parser->match(Lexer::T_OPEN_PARENTHESIS);
         $this->string = $parser->ArithmeticPrimary();
-        $parser->match( Lexer::T_COMMA );
+        $parser->match(Lexer::T_COMMA);
         $this->regexp = $parser->ArithmeticPrimary();
-        $parser->match( Lexer::T_CLOSE_PARENTHESIS );
+        $parser->match(Lexer::T_CLOSE_PARENTHESIS);
     }
 
-    public function getSql( \Doctrine\ORM\Query\SqlWalker $sqlWalker )
+    public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
     {
-        switch ( $sqlWalker->getConnection()->getDatabasePlatform()->getName() ) {
+        switch ($sqlWalker->getConnection()->getDatabasePlatform()->getName()) {
             // TODO: Implement for more platforms
             case 'postgresql':
-                return '(' .
-                    $this->string->dispatch( $sqlWalker ) .
-                    ' ~* ' .
-                    $this->regexp->dispatch( $sqlWalker ) .
+                return '('.
+                    $this->string->dispatch($sqlWalker).
+                    ' ~* '.
+                    $this->regexp->dispatch($sqlWalker).
                 ')';
             case 'mysql':
-                return '(' .
-                    $this->string->dispatch( $sqlWalker ) .
-                    ' REGEXP ' .
-                    $this->regexp->dispatch( $sqlWalker ) .
+                return '('.
+                    $this->string->dispatch($sqlWalker).
+                    ' REGEXP '.
+                    $this->regexp->dispatch($sqlWalker).
                 ')';
         }
     }

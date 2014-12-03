@@ -14,19 +14,18 @@
 
 namespace Blueline\BluelineBundle\Doctrine\Extension;
 
-use Doctrine\ORM\Query\AST\Functions\FunctionNode,
-    Doctrine\ORM\Query\Lexer;
+use Doctrine\ORM\Query\AST\Functions\FunctionNode;
+use Doctrine\ORM\Query\Lexer;
 
 class Cos extends FunctionNode
 {
-
     public $arithmeticExpression;
 
     public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
     {
-        return 'COS(' . $sqlWalker->walkSimpleArithmeticExpression(
+        return 'COS('.$sqlWalker->walkSimpleArithmeticExpression(
                 $this->arithmeticExpression
-        ) . ')';
+        ).')';
     }
 
     public function parse(\Doctrine\ORM\Query\Parser $parser)
@@ -38,5 +37,4 @@ class Cos extends FunctionNode
 
         $parser->match(Lexer::T_CLOSE_PARENTHESIS);
     }
-
 }

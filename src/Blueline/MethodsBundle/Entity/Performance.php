@@ -2,8 +2,7 @@
 
 namespace Blueline\MethodsBundle\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-use \Blueline\BluelineBundle\Helpers\Text;
+use Blueline\BluelineBundle\Helpers\Text;
 
 /**
  * Performance
@@ -11,21 +10,22 @@ use \Blueline\BluelineBundle\Helpers\Text;
 class Performance
 {
     // Constructor
-    public function __construct( $firstSet = array() )
+    public function __construct($firstSet = array())
     {
-        $this->setAll( $firstSet );
+        $this->setAll($firstSet);
     }
 
     // Casting helpers
-    public function __toString() {
+    public function __toString()
+    {
         return 'Performance:'.$this->getId();
     }
 
     public function __toArray()
     {
         $objectVars = get_object_vars($this);
-        array_walk( $objectVars, function( &$v, $k ) {
-            switch( $k ) {
+        array_walk($objectVars, function (&$v, $k) {
+            switch ($k) {
                 // Filter out id because that's only really meaningful internally, and don't try to drill down into sub-entities
                 case 'id':
                 case 'method':
@@ -34,20 +34,21 @@ class Performance
                     break;
                 // Convert date object
                 case 'date':
-                    $v = $v->format( 'Y-m-d' );
+                    $v = $v->format('Y-m-d');
                     break;
             }
-        } );
-        return array_filter( $objectVars );
+        });
+
+        return array_filter($objectVars);
     }
 
     // setAll helper
     public function setAll($map)
     {
         foreach ($map as $key => $value) {
-            $method = 'set'.str_replace( ' ', '', ucwords( str_replace( '_', ' ', $key ) ) );
-            if ( is_callable( array( $this, $method ) ) ) {
-                $this->$method( $value );
+            $method = 'set'.str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
+            if (is_callable(array( $this, $method ))) {
+                $this->$method($value);
             }
         }
 
@@ -134,7 +135,7 @@ class Performance
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -144,7 +145,7 @@ class Performance
     /**
      * Set type
      *
-     * @param string $type
+     * @param  string      $type
      * @return Performance
      */
     public function setType($type)
@@ -157,7 +158,7 @@ class Performance
     /**
      * Get type
      *
-     * @return string 
+     * @return string
      */
     public function getType()
     {
@@ -167,7 +168,7 @@ class Performance
     /**
      * Set date
      *
-     * @param \DateTime $date
+     * @param  \DateTime   $date
      * @return Performance
      */
     public function setDate($date)
@@ -180,7 +181,7 @@ class Performance
     /**
      * Get date
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getDate()
     {
@@ -190,7 +191,7 @@ class Performance
     /**
      * Set society
      *
-     * @param string $society
+     * @param  string      $society
      * @return Performance
      */
     public function setSociety($society)
@@ -203,7 +204,7 @@ class Performance
     /**
      * Get society
      *
-     * @return string 
+     * @return string
      */
     public function getSociety()
     {
@@ -213,7 +214,7 @@ class Performance
     /**
      * Set rung_title
      *
-     * @param string $rungTitle
+     * @param  string      $rungTitle
      * @return Performance
      */
     public function setRungTitle($rungTitle)
@@ -226,7 +227,7 @@ class Performance
     /**
      * Get rung_title
      *
-     * @return string 
+     * @return string
      */
     public function getRungTitle()
     {
@@ -236,7 +237,7 @@ class Performance
     /**
      * Set reference
      *
-     * @param string $reference
+     * @param  string      $reference
      * @return Performance
      */
     public function setReference($reference)
@@ -249,7 +250,7 @@ class Performance
     /**
      * Get reference
      *
-     * @return string 
+     * @return string
      */
     public function getReference()
     {
@@ -259,7 +260,7 @@ class Performance
     /**
      * Set location_room
      *
-     * @param string $locationRoom
+     * @param  string      $locationRoom
      * @return Performance
      */
     public function setLocationRoom($locationRoom)
@@ -272,7 +273,7 @@ class Performance
     /**
      * Get location_room
      *
-     * @return string 
+     * @return string
      */
     public function getLocationRoom()
     {
@@ -282,7 +283,7 @@ class Performance
     /**
      * Set location_building
      *
-     * @param string $locationBuilding
+     * @param  string      $locationBuilding
      * @return Performance
      */
     public function setLocationBuilding($locationBuilding)
@@ -295,7 +296,7 @@ class Performance
     /**
      * Get location_building
      *
-     * @return string 
+     * @return string
      */
     public function getLocationBuilding()
     {
@@ -305,7 +306,7 @@ class Performance
     /**
      * Set location_address
      *
-     * @param string $locationAddress
+     * @param  string      $locationAddress
      * @return Performance
      */
     public function setLocationAddress($locationAddress)
@@ -318,7 +319,7 @@ class Performance
     /**
      * Get location_address
      *
-     * @return string 
+     * @return string
      */
     public function getLocationAddress()
     {
@@ -328,7 +329,7 @@ class Performance
     /**
      * Set location_town
      *
-     * @param string $locationTown
+     * @param  string      $locationTown
      * @return Performance
      */
     public function setLocationTown($locationTown)
@@ -341,7 +342,7 @@ class Performance
     /**
      * Get location_town
      *
-     * @return string 
+     * @return string
      */
     public function getLocationTown()
     {
@@ -351,7 +352,7 @@ class Performance
     /**
      * Set location_county
      *
-     * @param string $locationCounty
+     * @param  string      $locationCounty
      * @return Performance
      */
     public function setLocationCounty($locationCounty)
@@ -364,7 +365,7 @@ class Performance
     /**
      * Get location_county
      *
-     * @return string 
+     * @return string
      */
     public function getLocationCounty()
     {
@@ -374,7 +375,7 @@ class Performance
     /**
      * Set location_region
      *
-     * @param string $locationRegion
+     * @param  string      $locationRegion
      * @return Performance
      */
     public function setLocationRegion($locationRegion)
@@ -387,7 +388,7 @@ class Performance
     /**
      * Get location_region
      *
-     * @return string 
+     * @return string
      */
     public function getLocationRegion()
     {
@@ -397,7 +398,7 @@ class Performance
     /**
      * Set location_country
      *
-     * @param string $locationCountry
+     * @param  string      $locationCountry
      * @return Performance
      */
     public function setLocationCountry($locationCountry)
@@ -410,7 +411,7 @@ class Performance
     /**
      * Get location_country
      *
-     * @return string 
+     * @return string
      */
     public function getLocationCountry()
     {
@@ -420,25 +421,25 @@ class Performance
     /**
      * Get location
      *
-     * @return string 
+     * @return string
      */
     public function getLocation()
     {
-        return Text::toList( array_filter( array(
+        return Text::toList(array_filter(array(
             $this->getLocationRoom(),
             $this->getLocationBuilding(),
             $this->getLocationAddress(),
             $this->getLocationTown(),
             $this->getLocationCounty(),
             $this->getLocationRegion(),
-            $this->getLocationCountry()
-        ) ), ', ', ', ' );
+            $this->getLocationCountry(),
+        )), ', ', ', ');
     }
 
     /**
      * Set location_tower
      *
-     * @param \Blueline\TowersBundle\Entity\Tower $locationTower
+     * @param  \Blueline\TowersBundle\Entity\Tower $locationTower
      * @return Performance
      */
     public function setLocationTower(\Blueline\TowersBundle\Entity\Tower $locationTower = null)
@@ -451,7 +452,7 @@ class Performance
     /**
      * Get location_tower
      *
-     * @return \Blueline\TowersBundle\Entity\Tower 
+     * @return \Blueline\TowersBundle\Entity\Tower
      */
     public function getLocationTower()
     {
@@ -461,7 +462,7 @@ class Performance
     /**
      * Set method
      *
-     * @param \Blueline\MethodsBundle\Entity\Method $method
+     * @param  \Blueline\MethodsBundle\Entity\Method $method
      * @return Performance
      */
     public function setMethod(\Blueline\MethodsBundle\Entity\Method $method = null)
@@ -474,7 +475,7 @@ class Performance
     /**
      * Get method
      *
-     * @return \Blueline\MethodsBundle\Entity\Method 
+     * @return \Blueline\MethodsBundle\Entity\Method
      */
     public function getMethod()
     {

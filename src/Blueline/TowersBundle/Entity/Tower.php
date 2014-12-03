@@ -9,19 +9,20 @@ class Tower
         $this->oldpks       = new \Doctrine\Common\Collections\ArrayCollection();
         $this->associations = new \Doctrine\Common\Collections\ArrayCollection();
         $this->performances = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->setAll( $firstSet );
+        $this->setAll($firstSet);
     }
 
     // Casting helpers
-    public function __toString() {
+    public function __toString()
+    {
         return 'Tower:'.$this->getId();
     }
 
     public function __toArray()
     {
         $objectVars = get_object_vars($this);
-        array_walk( $objectVars, function( &$v, $k ) {
-            switch( $k ) {
+        array_walk($objectVars, function (&$v, $k) {
+            switch ($k) {
                 // Don't try to drill down into sub-entities
                 case 'associations':
                 case 'oldpks':
@@ -29,17 +30,18 @@ class Tower
                     $v = null;
                     break;
             }
-        } );
-        return array_filter( $objectVars );
+        });
+
+        return array_filter($objectVars);
     }
 
     // setAll helper
     public function setAll($map)
     {
         foreach ($map as $key => $value) {
-            $method = 'set'.ucwords( $key );
-            if ( is_callable( array( $this, $method ) ) ) {
-                $this->$method( $value );
+            $method = 'set'.ucwords($key);
+            if (is_callable(array( $this, $method ))) {
+                $this->$method($value);
             }
         }
     }
@@ -839,9 +841,8 @@ class Tower
      */
     public function getDoveLink()
     {
-        return 'http://dove.cccbr.org.uk/detail.php?DoveID='. str_replace( '_', '+', $this->getId() ) . '&showFrames=true';
+        return 'http://dove.cccbr.org.uk/detail.php?DoveID='.str_replace('_', '+', $this->getId()).'&showFrames=true';
     }
-
 
     /**
      * Add associations
@@ -860,7 +861,7 @@ class Tower
      */
     public function removeAssociation(\Blueline\AssociationsBundle\Entity\Association $associations)
     {
-        return $this->associations->removeElement( $associations );
+        return $this->associations->removeElement($associations);
     }
 
     /**
@@ -946,6 +947,6 @@ class Tower
      */
     public function getFirstPealPerformances()
     {
-        return $this->getPerformances()->filter( function($p) { return $p->getType() == 'firstTowerbellPeal'; } );
+        return $this->getPerformances()->filter(function ($p) { return $p->getType() == 'firstTowerbellPeal'; });
     }
 }

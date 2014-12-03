@@ -7,7 +7,7 @@ class Association
     public function __construct($firstSet = array())
     {
         $this->towers = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->setAll( $firstSet );
+        $this->setAll($firstSet);
     }
 
     // Casting helpers
@@ -15,28 +15,29 @@ class Association
     {
         return 'Association:'.$this->getId();
     }
-    
+
     public function __toArray()
     {
         $objectVars = get_object_vars($this);
-        array_walk( $objectVars, function( &$v, $k ) {
-            switch( $k ) {
+        array_walk($objectVars, function (&$v, $k) {
+            switch ($k) {
                 // Don't try to drill down into sub-entities
                 case 'towers':
                     $v = null;
                     break;
             }
-        } );
-        return array_filter( $objectVars );
+        });
+
+        return array_filter($objectVars);
     }
 
     // setAll helper
     public function setAll($map)
     {
         foreach ($map as $key => $value) {
-            $method = 'set'.str_replace( ' ', '', ucwords( str_replace( '_', ' ', $key ) ) );
-            if ( is_callable( array( $this, $method ) ) ) {
-                $this->$method( $value );
+            $method = 'set'.str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
+            if (is_callable(array( $this, $method ))) {
+                $this->$method($value);
             }
         }
 
@@ -70,7 +71,7 @@ class Association
      *
      * @param string $id
      */
-    public function setId( $id )
+    public function setId($id)
     {
         $this->id = $id;
     }
@@ -90,7 +91,7 @@ class Association
      *
      * @param text $name
      */
-    public function setName( $name )
+    public function setName($name)
     {
         $this->name = $name;
     }
@@ -110,7 +111,7 @@ class Association
      *
      * @param text $link
      */
-    public function setLink( $link )
+    public function setLink($link)
     {
         $this->link = $link;
     }
@@ -130,7 +131,7 @@ class Association
      *
      * @param Blueline\TowersBundle\Entity\Tower $towers
      */
-    public function addTower( \Blueline\TowersBundle\Entity\Tower $towers )
+    public function addTower(\Blueline\TowersBundle\Entity\Tower $towers)
     {
         $this->towers[] = $towers;
     }

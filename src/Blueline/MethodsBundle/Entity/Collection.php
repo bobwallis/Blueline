@@ -2,7 +2,6 @@
 
 namespace Blueline\MethodsBundle\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Collection
@@ -10,36 +9,38 @@ use Doctrine\ORM\Mapping as ORM;
 class Collection
 {
     // Constructor
-    public function __construct( $firstSet = array() )
+    public function __construct($firstSet = array())
     {
         $this->methods = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->setAll( $firstSet );
+        $this->setAll($firstSet);
     }
 
     // Casting helpers
-    public function __toString() {
+    public function __toString()
+    {
         return 'Collection:'.$this->getId();
     }
 
     public function __toArray()
     {
         $objectVars = get_object_vars($this);
-        array_walk( $objectVars, function( &$v, $k ) {
+        array_walk($objectVars, function (&$v, $k) {
             // Filter out id because that's only really meaningful internally, and don't try to drill down into sub-entities
-            if( $k == 'id' || $k == 'methods' ) {
+            if ($k == 'id' || $k == 'methods') {
                 $v = null;
             }
-        } );
-        return array_filter( $objectVars );
+        });
+
+        return array_filter($objectVars);
     }
 
     // setAll helper
     public function setAll($map)
     {
         foreach ($map as $key => $value) {
-            $method = 'set'.str_replace( ' ', '', ucwords( str_replace( '_', ' ', $key ) ) );
-            if ( is_callable( array( $this, $method ) ) ) {
-                $this->$method( $value );
+            $method = 'set'.str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
+            if (is_callable(array( $this, $method ))) {
+                $this->$method($value);
             }
         }
 
@@ -71,7 +72,7 @@ class Collection
     /**
      * Set id
      *
-     * @param string $id
+     * @param  string     $id
      * @return Collection
      */
     public function setId($id)
@@ -84,7 +85,7 @@ class Collection
     /**
      * Get id
      *
-     * @return string 
+     * @return string
      */
     public function getId()
     {
@@ -94,7 +95,7 @@ class Collection
     /**
      * Set name
      *
-     * @param string $name
+     * @param  string     $name
      * @return Collection
      */
     public function setName($name)
@@ -107,7 +108,7 @@ class Collection
     /**
      * Get name
      *
-     * @return string 
+     * @return string
      */
     public function getName()
     {
@@ -117,7 +118,7 @@ class Collection
     /**
      * Set description
      *
-     * @param string $description
+     * @param  string     $description
      * @return Collection
      */
     public function setDescription($description)
@@ -130,7 +131,7 @@ class Collection
     /**
      * Get description
      *
-     * @return string 
+     * @return string
      */
     public function getDescription()
     {
@@ -140,7 +141,7 @@ class Collection
     /**
      * Add methods
      *
-     * @param \Blueline\MethodsBundle\Entity\MethodInCollection $methods
+     * @param  \Blueline\MethodsBundle\Entity\MethodInCollection $methods
      * @return Collection
      */
     public function addMethod(\Blueline\MethodsBundle\Entity\MethodInCollection $method)
@@ -163,7 +164,7 @@ class Collection
     /**
      * Get methods
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getMethods()
     {
