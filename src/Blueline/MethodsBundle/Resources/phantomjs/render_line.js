@@ -19,19 +19,25 @@ page.viewportSize = {
 page.open( url, function() {
 	page.evaluate( function() {
 		// Remove elements not needed
-		var elements = document.querySelectorAll( '#top, #search, #loading, #menu, #towerMap, .method header, .method .details, .method .grid, .method .line canvas:nth-child(2), .method .line canvas:nth-child(3), .sf-toolbar' );
+		var elements = document.querySelectorAll( '#top, #search, #loading, #menu, #towerMap, .method header, .method .details, .method .grid, .sf-toolbar' );
 		Array.prototype.forEach.call( elements, function( node ) {
 			node.parentNode.removeChild( node );
 		} );
 		// Remove all margins and padding
 		var sheet = window.document.styleSheets[0];
 		sheet.insertRule( '* { margin: 0 !important; padding: 0 !important; }', sheet.cssRules.length);
-		sheet.insertRule( '.method .line canvas { margin: 5px 0 0 5px !important; padding: 0 0 5px 0 !important; }', sheet.cssRules.length);
+		sheet.insertRule( '.method .line canvas { margin: 5px 20px 0 5px !important; padding: 0 0 5px 0 !important; }', sheet.cssRules.length);
+		sheet.insertRule( '.method .line canvas:first-child { margin-right: 10px !important; }', sheet.cssRules.length);
+		sheet.insertRule( '.method .line canvas:last-child { margin-right: 0 !important; padding-right: 5px !important; }', sheet.cssRules.length);
 	} );
-	// Drop down viewport size (doesn't trigger reload event) to ensure render only include the content
-	page.viewportSize = {
-		width: 10,
-		height: 10
+	// Clip the page to ensure we render only the content
+	page.clipRect = {
+		top: 0,
+		left: 0,
+		width: scale*page.evaluate( function() {
+			return $('.method .line canvas').map( function(i,e) { return $(e).outerWidth(true); } ).toArray().reduce( function( prev, cur ) { return prev + cur; }, 0 );
+		} ),
+		height: scale*page.evaluate( function() { return $('#numbers1_plain').outerHeight( true ); } )
 	};
 	page.render( '/dev/stdout' );
 	phantom.exit();
