@@ -2291,11 +2291,11 @@ protected $booted = false;
 protected $name;
 protected $startTime;
 protected $loadClassCache;
-const VERSION ='2.6.0';
-const VERSION_ID ='20600';
+const VERSION ='2.6.1';
+const VERSION_ID ='20601';
 const MAJOR_VERSION ='2';
 const MINOR_VERSION ='6';
-const RELEASE_VERSION ='0';
+const RELEASE_VERSION ='1';
 const EXTRA_VERSION ='';
 public function __construct($environment, $debug)
 {
@@ -2633,7 +2633,7 @@ $dumper = new PhpDumper($container);
 if (class_exists('ProxyManager\Configuration')) {
 $dumper->setProxyDumper(new ProxyDumper());
 }
-$content = $dumper->dump(array('class'=> $class,'base_class'=> $baseClass));
+$content = $dumper->dump(array('class'=> $class,'base_class'=> $baseClass,'file'=> (string) $cache));
 if (!$this->debug) {
 $content = static::stripComments($content);
 }
