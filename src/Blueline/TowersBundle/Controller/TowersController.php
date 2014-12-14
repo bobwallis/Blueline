@@ -110,7 +110,9 @@ class TowersController extends Controller
             ->setParameter('performanceType', 'firstTowerbellPeal')
             ->getSingleResult();
 
-            $nearbyTowers[] = array_slice($towersRepository->findNearbyTowers($tower->getLatitude(), $tower->getLongitude(), 7), 1);
+            $nearbyTowers[] = array_filter($towersRepository->findNearbyTowers($tower->getLatitude(), $tower->getLongitude(), 7), function($e) use ($id) {
+                return strcmp($id,$e['id']) != 0;
+            });
             $towers[] = $tower;
         }
 
