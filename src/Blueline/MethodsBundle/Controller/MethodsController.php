@@ -99,7 +99,7 @@ class MethodsController extends Controller
         // Create lower case arrays for use in search
         $urlsLower = array_map("strtolower", $urls);
         $titlesLower = array_map("strtolower", $titles);
-
+        
         $methodRepository = $this->getDoctrine()->getManager()->getRepository('BluelineMethodsBundle:Method');
         $em = $this->getDoctrine()->getManager();
 
@@ -107,9 +107,10 @@ class MethodsController extends Controller
         // First check for titles
         $methodsCheck = $em->createQuery('
             SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m
-            WHERE LOWER(m.title) IN (:titles) OR LOWER(m.url) IN (:urls)')
+            WHERE LOWER(m.title) IN (:titles) OR LOWER(m.url) IN (:urls) OR LOWER(m.title) IN (:titlesNoSpacesCockUpFix)')
             ->setParameter('urls', $urlsLower)
             ->setParameter('titles', $titlesLower)
+            ->setParameter('titlesNoSpacesCockUpFix', array_map(function ($m) { return preg_replace( '/^ /', '', strtolower(preg_replace('/(?<!\ )[A-Z]/', ' $0', $m))); }, $titles))
             ->setMaxResults(count($titlesLower))
             ->getArrayResult();
         if (empty($methodsCheck) || count($methodsCheck) < count($methodsCheck)) {
