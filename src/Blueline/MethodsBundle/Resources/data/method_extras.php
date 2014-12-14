@@ -1,5 +1,5 @@
 <?php
-// Extra method data exported 2014/11/15, 23:24
+// Extra method data exported 2014/12/14, 14:51
 $method_extras = array (
   0 => 
   array (
@@ -178,5 +178,31 @@ $method_extras = array (
       'Single' => '567:6:-3',
     ),
     'ruleOffs' => '6:-3',
+  ),
+  18 => 
+  array (
+    'title' => 'Titanic Cinques',
+    'calls' => 
+    array (
+      'Bob' => '9:6:-1',
+      'Single' => '90E:2:-1',
+    ),
+    'ruleOffs' => '2:-1',
+  ),
+  19 => 
+  array (
+    'title' => 'Titanic Doubles',
+    'calls' => NULL,
+    'ruleOffs' => '2:-1',
+  ),
+  20 => 
+  array (
+    'title' => 'Titanic Triples',
+    'calls' => 
+    array (
+      'Bob' => '5:6:-1',
+      'Single' => '567:2:-1',
+    ),
+    'ruleOffs' => '2:-1',
   ),
 );

@@ -82,7 +82,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
         // Once we've updated/inserted everything, execute the 'sort' command on the title array, then
         // iterate through the database in title order and remove anything not present in the array.
         $allImportedMethodTitles = array();
-
+        
         // Iterate over all appropriate files
         $dataFiles = new \GlobIterator(__DIR__.'/../Resources/data/*.xml');
         foreach ($dataFiles as $file) {
@@ -191,7 +191,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
         $progress->finish();
         $em->flush();
         $em->clear();
-
+        
         // Add in any 'extra' method data that is recorded
         if (file_exists(__DIR__.'/../Resources/data/method_extras.php')) {
             $output->writeln('<info>Adding extra method data...</info>');
@@ -203,8 +203,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
                 $method = $methodRepository->findOneByTitle($txtRow['title']);
 
                 if ($method) {
-                    $method->setCalls($txtRow['calls']);
-                    $method->setRuleOffs($txtRow['ruleOffs']);
+                    $method->setAll($txtRow);
                 } else {
                     $output->writeln('<warning> Extra data provided for '.$xmlRow['title'].', which isn\'t in the database</warning>');
                 }
