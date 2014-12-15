@@ -8,3 +8,9 @@ Blueline_Pages_view:
     requirements:
         page:    about
         _format: html
+Blueline_Pages_copyright:
+    path: /copyright
+    defaults:
+        _controller: FrameworkBundle:Redirect:urlRedirect
+        path: /about
+        permanent: true
