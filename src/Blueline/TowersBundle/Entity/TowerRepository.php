@@ -62,20 +62,29 @@ class TowerRepository extends EntityRepository
     {
         $distance = '( 3959 * acos( cos( radians(:near_lat) ) * cos( radians( t.latitude ) ) * cos( radians( t.longitude ) - radians(:near_long) ) + sin( radians(:near_lat) ) * sin( radians( t.latitude ) ) ) )';
 
-        return array_map(function ($t) { return array_merge($t[0], array( 'distance' => $t['distance'] )); }, $this->createQueryBuilder('t')
-            ->select('partial t.{id,place,dedication,latitude,longitude}, '.$distance.' as distance')
-              // If the tower is dead on the location then floating point arithmetic
-              // sometimes means that the haversine formula returns >1, so exclude the edge case
-            ->where('t.latitude IS NOT NULL AND t.latitude <> (:near_lat)')
-              // and then add it back in
-            ->orWhere('t.latitude = (:near_lat) AND t.longitude = (:near_long)')
-            ->having($distance.' < 20')
-            ->groupBy('t.id')
-            ->orderBy('distance', 'ASC')
-            ->setMaxResults($count)
-            ->setParameter('near_lat', $latitude)
-            ->setParameter('near_long', $longitude)
-            ->getQuery()
-            ->getArrayResult());
+        return array_map(function ($t) { return array_merge($t[0], array( 'distance' => $t['distance'] )); }, array_slice( array_merge(
+            $this->createQueryBuilder('t')
+                ->select('partial t.{id,place,dedication,latitude,longitude}, 0 as distance')
+                  // If the tower is dead on the location then floating point arithmetic
+                  // sometimes means that the haversine formula returns >1, so exclude the 
+                  // edge case and fetch seperately
+                ->orWhere('t.latitude = (:near_lat) AND t.longitude = (:near_long)')
+                ->groupBy('t.id')
+                ->setParameter('near_lat', $latitude)
+                ->setParameter('near_long', $longitude)
+                ->getQuery()
+                ->getArrayResult(),
+            $this->createQueryBuilder('t')
+                ->select('partial t.{id,place,dedication,latitude,longitude}, '.$distance.' as distance')
+                ->where('t.latitude IS NOT NULL AND t.latitude <> (:near_lat)')
+                ->having($distance.' < 20')
+                ->groupBy('t.id')
+                ->orderBy('distance', 'ASC')
+                ->setMaxResults($count)
+                ->setParameter('near_lat', $latitude)
+                ->setParameter('near_long', $longitude)
+                ->getQuery()
+                ->getArrayResult()
+        ), 0, $count ) );
     }
 }
