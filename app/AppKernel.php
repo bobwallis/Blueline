@@ -23,6 +23,7 @@ class AppKernel extends Kernel
             new Blueline\MethodsBundle\BluelineMethodsBundle(),
             new Blueline\TowersBundle\BluelineTowersBundle(),
             new Blueline\DataBundle\BluelineDataBundle(),
+            new Blueline\ServicesBundle\BluelineServicesBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {

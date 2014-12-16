@@ -18,6 +18,10 @@ BluelineDataBundle:
     resource: "@BluelineDataBundle/Resources/config/routing_data.yml"
     prefix:   /data/
 
+BluelineServicesBundle:
+    resource: "@BluelineServicesBundle/Resources/config/routing_services.yml"
+    prefix:   /services/
+
 Blueline_resource:
     pattern:  /{page}.{_format}
     defaults: { _controller: BluelineBundle:Default:resource }

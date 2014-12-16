@@ -4,6 +4,9 @@
 
 {% block og_title %}{{ pageTitle }}{% endblock %}
 {% block og_description %}Method information for bellringers{% endblock %}
+{% if methods is not empty %}
+	{% block oembed %}<link rel="alternate" type="application/json+oembed" href="{{ url('Blueline_Services_oembed', {'_format': 'json', 'url': url('Blueline_Methods_view', {'title': methods[0].url})}) }}" title="{{ pageTitle }}" />{% endblock %}
+{% endif %}
 
 {% set breadcrumb = { 'title': 'Methods', 'href': path('Blueline_Methods_welcome') } %}
 

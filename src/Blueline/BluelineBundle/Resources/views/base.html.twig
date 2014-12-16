@@ -58,6 +58,9 @@
 		<meta property="og:type" content="{% block og_type %}website{% endblock %}" />
 		<meta property="og:site_name" content="Blueline" />
 
+		{# oEmbed tags #}
+		{% block oembed %}{% endblock %}
+
 		{# Stylesheets #}
 		{% stylesheets '@BluelineBundle/Resources/public/css/lib/normalize.css' '@BluelineBundle/Resources/public/css/all.less' output='css/all.css' filter='less, ?yui_css' %}
 			<link rel="stylesheet" media="all" href="{{ asset_url }}" />
