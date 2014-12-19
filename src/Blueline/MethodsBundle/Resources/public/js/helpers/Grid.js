@@ -1,105 +1,4 @@
-define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas'], function( require, $, PlaceNotation, Canvas ) {
-
-	// Vertical positioning of text within its bounding box is inconsistent across
-	// browsers. This is a problem when trying to get pixel perfect alignments of
-	// text and lines. This function, given a font and size, will return the offset
-	// needed to be applied to x and y to centre text of size n in an nxn box when
-	// drawing with textAlign=center and baseLine=alphabetic
-	var measureXAndYTextPadding = function( size, font ) {
-		var padding = { x: null, y: null },
-			age = $( 'html' ).data( 'age' );
-
-		if( age != 'dev' && Modernizr.localstorage ) {
-			var metricAge = localStorage.getItem( 'Metrics.age.'+size+'.'+font );
-			if( metricAge !== null && parseInt( metricAge, 10) == age ) {
-				padding.x = localStorage.getItem( 'Metrics.x.'+size+'.'+font );
-				padding.y = localStorage.getItem( 'Metrics.y.'+size+'.'+font );
-			}
-		}
-		if( padding.x === null || padding.y === null ) {
-			var canvas = new Canvas( {
-				id: 'metric',
-				width: size*3,
-				height: size*3,
-				scale: (typeof window.devicePixelRatio === 'number')? Math.round(window.devicePixelRatio*8) : 8
-			} );
-			if( canvas !== false ) {
-				try {
-					var context = canvas.context;
-					context.font = size+'px '+font;
-					context.textAlign = 'center';
-					context.baseLine = 'alphabetic';
-					context.fillStyle = '#F00';
-					context.fillText( '0', size*1.5, size*2 );
-
-					var dim = size*3*canvas.scale,
-						imageData = context.getImageData( 0, 0, dim, dim ),
-						bottomOfText = false,
-						topOfText = false,
-						leftOfText = false,
-						rightOfText = false,
-						row, column;
-
-					// Find top
-					for( row = 0; topOfText === false && row < dim; ++row ) {
-						for( column = 0; column < dim ; ++column ) {
-							if(imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
-								topOfText = row;
-								break;
-							}
-						}
-					}
-					// Find bottom
-					for( row = dim; bottomOfText === false && row > 0; --row ) {
-						for( column = 0; column < dim ; ++column ) {
-							if( imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
-								bottomOfText = row + 1;
-								break;
-							}
-						}
-					}
-					// Find left
-					for( column = 0; leftOfText === false && column < dim; ++column ) {
-						for( row = 0; row < dim ; ++row ) {
-							if( imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
-								leftOfText = column;
-								break;
-							}
-						}
-					}
-					// Find right
-					for( column = dim; rightOfText === false && column > 0; --column ) {
-						for( row = 0; row < dim ; ++row ) {
-							if( imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
-								rightOfText = column + 1;
-								break;
-							}
-						}
-					}
-
-					padding.x = ((dim - rightOfText) - leftOfText) / (canvas.scale*2);
-					padding.y = ((dim - bottomOfText) - topOfText) / (canvas.scale*2);
-
-					if( Modernizr.localstorage ) {
-						localStorage.setItem( 'Metrics.x.'+size+'.'+font, padding.x );
-						localStorage.setItem( 'Metrics.y.'+size+'.'+font, padding.y );
-						localStorage.setItem( 'Metrics.age.'+size+'.'+font, age );
-					}
-				}
-				catch( e ) {
-					console.log(e);
-					padding.x = padding.y = 0;
-				}
-			}
-			canvas = null;
-		}
-		else {
-			padding.x = parseFloat( padding.x );
-			padding.y = parseFloat( padding.y );
-		}
-		return padding;
-	};
-
+define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../../shared/helpers/MeasureCanvasTextOffset'], function( require, $, PlaceNotation, Canvas, MeasureCanvasTextOffset ) {
 	var MethodGrid = function( options ) {
 		// Prevent errors being thrown when accessing empty options objects
 		['layout', 'dimensions', 'display'].forEach( function( e ) {
@@ -245,7 +144,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas'], func
 
 			// Draw notation down side
 			if( show.notation ) {
-				textMetrics = measureXAndYTextPadding( 10, font.text );
+				textMetrics = MeasureCanvasTextOffset( 10, font.text );
 				context.fillStyle = '#000';
 				context.font = '10px '+font.text;
 				context.textAlign = 'right';
@@ -353,7 +252,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas'], func
 							context.font = placeStartFontSize+'px '+font.numbers;
 							context.textAlign = 'center';
 							context.textBaseline = 'alphabetic';
-							textMetrics = measureXAndYTextPadding( placeStartFontSize, font.numbers );
+							textMetrics = MeasureCanvasTextOffset( placeStartFontSize, font.numbers );
 							context.fillText( (positionInLeadHead+1).toString(), x + textMetrics.x, y + 6 + textMetrics.y - ((12-placeStartFontSize)/2) );
 						}
 					}
@@ -380,7 +279,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas'], func
 			// Draw numbers
 			if( show.numbers && typeof context.fillText === 'function' ) {
 				// Measure the actual text position (for pixel perfect positioning)
-				var textMetrics = measureXAndYTextPadding( font.numbersSize, font.numbers ),
+				var textMetrics = MeasureCanvasTextOffset( font.numbersSize, font.numbers ),
 					topPadding = canvasTopPadding + rowHeight + textMetrics.y - ((rowHeight-font.numbersSize)/2),
 					sidePadding = canvasLeftPadding + (bellWidth/2) + textMetrics.x,
 					columnSidePadding = interColumnPadding + columnRightPadding;
