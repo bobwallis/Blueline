@@ -126,194 +126,189 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 			height: canvasHeight
 		} );
 
-		if( canvas === false ) {
-			// TO IMPLEMENT: png fallback
+		var context = canvas.context,
+			textMetrics;
+
+		// Draw title
+		if( show.title ) {
+			context.fillStyle = '#000';
+			context.font = '11.5px '+font.text;
+			context.textAlign = 'left';
+			context.textBaseline = 'top';
+			context.fillText( title, 0, 0 );
 		}
-		else {
-			var context = canvas.context,
-				textMetrics;
 
-			// Draw title
-			if( show.title ) {
-				context.fillStyle = '#000';
-				context.font = '11.5px '+font.text;
-				context.textAlign = 'left';
-				context.textBaseline = 'top';
-				context.fillText( title, 0, 0 );
+		// Draw notation down side
+		if( show.notation ) {
+			textMetrics = MeasureCanvasTextOffset( 10, font.text );
+			context.fillStyle = '#000';
+			context.font = '10px '+font.text;
+			context.textAlign = 'right';
+			context.textBaseline = 'alphabetic';
+			y = canvasTopPadding + (rowHeight*1.5) + textMetrics.y - ((rowHeight - 10)/2);
+			for( i = 0; i < notation.exploded.length; ++i ) {
+				context.fillText( notation.exploded[i], canvasLeftPadding - 4, (i*rowHeight)+y );
 			}
+		}
 
-			// Draw notation down side
-			if( show.notation ) {
-				textMetrics = MeasureCanvasTextOffset( 10, font.text );
-				context.fillStyle = '#000';
-				context.font = '10px '+font.text;
-				context.textAlign = 'right';
-				context.textBaseline = 'alphabetic';
-				y = canvasTopPadding + (rowHeight*1.5) + textMetrics.y - ((rowHeight - 10)/2);
-				for( i = 0; i < notation.exploded.length; ++i ) {
-					context.fillText( notation.exploded[i], canvasLeftPadding - 4, (i*rowHeight)+y );
-				}
-			}
-
-			// Draw rule offs
-			if( show.ruleOffs ) {
-				context.lineWidth = 1;
-				context.lineCap = 'round';
-				context.strokeStyle = '#999';
-				context.beginPath();
-				for( i = 0; i < numberOfColumns; ++i ) {
-					for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
-						for( k = ruleOffs.from; k <= leadLength; k += ruleOffs.every ) {
-							if( k > 0 ) {
-								x = canvasLeftPadding + (i*rowWidthWithPadding);
-								y = canvasTopPadding + (((j*leadLength)+k)*rowHeight);
-								context.moveTo( x, y );
-								context.lineTo( x + rowWidth, y );
-							}
-						}
-					}
-				}
-				context.stroke();
-			}
-
-			// Draw lines
-			if( show.lines ) {
-				context.lineCap = 'round';
-				context.lineJoin = 'round';
-				i = stage;
-				while( i-- ) {
-					j = startRow[i];
-					if( typeof lines[j] === 'object' && lines[j].stroke !== 'transparent' ) {
-						context.beginPath();
-						for( k = 0; k < numberOfColumns; ++k ) {
-							var columnNotation = notation.parsed;
-							for( l = 1; l < leadsPerColumn && (k*leadsPerColumn)+l < numberOfLeads; ++l ) {
-								columnNotation = columnNotation.concat( notation.parsed );
-							}
-
-							var bell = leadHeads[k*leadsPerColumn].indexOf( j ),
-								position = bell, newPosition;
-
-							x = canvasLeftPadding + (k*rowWidthWithPadding) + (bell*bellWidth) + (bellWidth/2);
-							y = canvasTopPadding + (rowHeight/2);
-
+		// Draw rule offs
+		if( show.ruleOffs ) {
+			context.lineWidth = 1;
+			context.lineCap = 'round';
+			context.strokeStyle = '#999';
+			context.beginPath();
+			for( i = 0; i < numberOfColumns; ++i ) {
+				for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
+					for( k = ruleOffs.from; k <= leadLength; k += ruleOffs.every ) {
+						if( k > 0 ) {
+							x = canvasLeftPadding + (i*rowWidthWithPadding);
+							y = canvasTopPadding + (((j*leadLength)+k)*rowHeight);
 							context.moveTo( x, y );
-							for( m = 0; m < columnNotation.length; ++m ) {
-								newPosition = columnNotation[m].indexOf( position );
-								x += (newPosition-position)*bellWidth;
-								y += rowHeight;
-								context.lineTo( x, y );
-								position = newPosition;
-							}
-
-							if( (k*leadsPerColumn)+l < numberOfLeads ) {
-								newPosition = columnNotation[0].indexOf( position );
-								context.lineTo( x + (((newPosition-position)*bellWidth)/4), y + (rowHeight/4) );
-							}
+							context.lineTo( x + rowWidth, y );
 						}
-						context.strokeStyle = lines[j].stroke;
-						context.lineWidth = lines[j].lineWidth;
-						context.stroke();
 					}
 				}
 			}
-
-			// Draw place starts
-			if( show.placeStarts ) {
-				placeStarts.sort( function(a,b) { return a - b; } );
-				context.lineWidth = 1;
-				placeStarts.forEach( function( i, pos ) {
-					var j = (typeof startRow === 'object')? startRow[i] : i,
-						k, l;
-					for( k = 0; k < numberOfColumns; ++k ) {
-						for( l = 0; l < leadsPerColumn && (k*leadsPerColumn)+l < numberOfLeads; ++l ) {
-							var positionInLeadHead = leadHeads[(k*leadsPerColumn)+l].indexOf( j );
-
-							// The little circle
-							var x = canvasLeftPadding + (k*rowWidthWithPadding) + ((positionInLeadHead+0.5)*bellWidth),
-								y = canvasTopPadding + (l*rowHeight*leadLength) + (rowHeight/2);
-							context.fillStyle = lines[j].stroke;
-							context.beginPath();
-							context.arc( x, y, 2, 0, twoPi, true);
-							context.closePath();
-							context.fill();
-
-							// The big circle
-							x = canvasLeftPadding + (k*rowWidthWithPadding) + rowWidth + 11*pos + 10;
-							context.strokeStyle = lines[j].stroke;
-							context.beginPath();
-							context.arc( x, y, 6, 0, twoPi, true );
-							context.closePath();
-							context.stroke();
-
-							// The text inside the big circle
-							var placeStartFontSize = ((positionInLeadHead<9)?10:8);
-							context.fillStyle = '#000';
-							context.font = placeStartFontSize+'px '+font.numbers;
-							context.textAlign = 'center';
-							context.textBaseline = 'alphabetic';
-							textMetrics = MeasureCanvasTextOffset( placeStartFontSize, font.numbers );
-							context.fillText( (positionInLeadHead+1).toString(), x + textMetrics.x, y + 6 + textMetrics.y - ((12-placeStartFontSize)/2) );
-						}
-					}
-				}, this );
-			}
-
-			// Draw calling positions
-			if( show.callingPositions && typeof context.fillText === 'function' ) {
-				context.fillStyle = '#000';
-				context.font = (font.numbersSize-2)+'px '+font.text;
-				context.textAlign = 'left';
-				context.textBaseline = 'bottom';
-
-				for( i = 0; i < callingPositions.titles.length; ++i ) {
-					if( callingPositions.titles[i] !== null ) {
-						var rowInMethod = callingPositions.from + ( callingPositions.every * (i+1) ) - 2;
-						x = canvasLeftPadding + (Math.floor( rowInMethod/rowsPerColumn )*rowWidthWithPadding) + rowWidth + 4;
-						y = canvasTopPadding + ((rowInMethod % rowsPerColumn) + 1)*rowHeight;
-						context.fillText( '-'+callingPositions.titles[i], x, y );
-					}
-				}
-			}
-
-			// Draw numbers
-			if( show.numbers && typeof context.fillText === 'function' ) {
-				// Measure the actual text position (for pixel perfect positioning)
-				var textMetrics = MeasureCanvasTextOffset( font.numbersSize, font.numbers ),
-					topPadding = canvasTopPadding + rowHeight + textMetrics.y - ((rowHeight-font.numbersSize)/2),
-					sidePadding = canvasLeftPadding + (bellWidth/2) + textMetrics.x,
-					columnSidePadding = interColumnPadding + columnRightPadding;
-
-				// Set up the context
-				context.textAlign = 'center';
-				context.textBaseline = 'alphabetic';
-				context.font = font.numbersSize+'px '+font.numbers;
-
-				numbers.forEach( function( color, bell ) { // For each number
-					if( color !== 'transparent' ) { // Only bother drawing at all if not transparent
-						context.fillStyle = '#000';
-
-						var char = PlaceNotation.bellToChar( bell ),
-							row = startRow;
-
-						for( i = 0; i < numberOfColumns; ++i ) {
-							for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
-								if( j === 0 ) {
-									context.fillText( char, sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding), topPadding );
-								}
-								for( k = 0; k < leadLength; ) {
-									row = PlaceNotation.apply( notation.parsed[k], row );
-									context.fillText( char, sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding), topPadding+(j*leadLength*rowHeight)+(++k*rowHeight) );
-								}
-							}
-						}
-					}
-				} );
-			}
-
-			// Return the image
-			return canvas.element;
+			context.stroke();
 		}
+
+		// Draw lines
+		if( show.lines ) {
+			context.lineCap = 'round';
+			context.lineJoin = 'round';
+			i = stage;
+			while( i-- ) {
+				j = startRow[i];
+				if( typeof lines[j] === 'object' && lines[j].stroke !== 'transparent' ) {
+					context.beginPath();
+					for( k = 0; k < numberOfColumns; ++k ) {
+						var columnNotation = notation.parsed;
+						for( l = 1; l < leadsPerColumn && (k*leadsPerColumn)+l < numberOfLeads; ++l ) {
+							columnNotation = columnNotation.concat( notation.parsed );
+						}
+
+						var bell = leadHeads[k*leadsPerColumn].indexOf( j ),
+							position = bell, newPosition;
+
+						x = canvasLeftPadding + (k*rowWidthWithPadding) + (bell*bellWidth) + (bellWidth/2);
+						y = canvasTopPadding + (rowHeight/2);
+
+						context.moveTo( x, y );
+						for( m = 0; m < columnNotation.length; ++m ) {
+							newPosition = columnNotation[m].indexOf( position );
+							x += (newPosition-position)*bellWidth;
+							y += rowHeight;
+							context.lineTo( x, y );
+							position = newPosition;
+						}
+
+						if( (k*leadsPerColumn)+l < numberOfLeads ) {
+							newPosition = columnNotation[0].indexOf( position );
+							context.lineTo( x + (((newPosition-position)*bellWidth)/4), y + (rowHeight/4) );
+						}
+					}
+					context.strokeStyle = lines[j].stroke;
+					context.lineWidth = lines[j].lineWidth;
+					context.stroke();
+				}
+			}
+		}
+
+		// Draw place starts
+		if( show.placeStarts ) {
+			placeStarts.sort( function(a,b) { return a - b; } );
+			context.lineWidth = 1;
+			placeStarts.forEach( function( i, pos ) {
+				var j = (typeof startRow === 'object')? startRow[i] : i,
+					k, l;
+				for( k = 0; k < numberOfColumns; ++k ) {
+					for( l = 0; l < leadsPerColumn && (k*leadsPerColumn)+l < numberOfLeads; ++l ) {
+						var positionInLeadHead = leadHeads[(k*leadsPerColumn)+l].indexOf( j );
+
+						// The little circle
+						var x = canvasLeftPadding + (k*rowWidthWithPadding) + ((positionInLeadHead+0.5)*bellWidth),
+							y = canvasTopPadding + (l*rowHeight*leadLength) + (rowHeight/2);
+						context.fillStyle = lines[j].stroke;
+						context.beginPath();
+						context.arc( x, y, 2, 0, twoPi, true);
+						context.closePath();
+						context.fill();
+
+						// The big circle
+						x = canvasLeftPadding + (k*rowWidthWithPadding) + rowWidth + 11*pos + 10;
+						context.strokeStyle = lines[j].stroke;
+						context.beginPath();
+						context.arc( x, y, 6, 0, twoPi, true );
+						context.closePath();
+						context.stroke();
+
+						// The text inside the big circle
+						var placeStartFontSize = ((positionInLeadHead<9)?10:8);
+						context.fillStyle = '#000';
+						context.font = placeStartFontSize+'px '+font.numbers;
+						context.textAlign = 'center';
+						context.textBaseline = 'alphabetic';
+						textMetrics = MeasureCanvasTextOffset( placeStartFontSize, font.numbers );
+						context.fillText( (positionInLeadHead+1).toString(), x + textMetrics.x, y + 6 + textMetrics.y - ((12-placeStartFontSize)/2) );
+					}
+				}
+			}, this );
+		}
+
+		// Draw calling positions
+		if( show.callingPositions && typeof context.fillText === 'function' ) {
+			context.fillStyle = '#000';
+			context.font = (font.numbersSize-2)+'px '+font.text;
+			context.textAlign = 'left';
+			context.textBaseline = 'bottom';
+
+			for( i = 0; i < callingPositions.titles.length; ++i ) {
+				if( callingPositions.titles[i] !== null ) {
+					var rowInMethod = callingPositions.from + ( callingPositions.every * (i+1) ) - 2;
+					x = canvasLeftPadding + (Math.floor( rowInMethod/rowsPerColumn )*rowWidthWithPadding) + rowWidth + 4;
+					y = canvasTopPadding + ((rowInMethod % rowsPerColumn) + 1)*rowHeight;
+					context.fillText( '-'+callingPositions.titles[i], x, y );
+				}
+			}
+		}
+
+		// Draw numbers
+		if( show.numbers && typeof context.fillText === 'function' ) {
+			// Measure the actual text position (for pixel perfect positioning)
+			var textMetrics = MeasureCanvasTextOffset( font.numbersSize, font.numbers ),
+				topPadding = canvasTopPadding + rowHeight + textMetrics.y - ((rowHeight-font.numbersSize)/2),
+				sidePadding = canvasLeftPadding + (bellWidth/2) + textMetrics.x,
+				columnSidePadding = interColumnPadding + columnRightPadding;
+
+			// Set up the context
+			context.textAlign = 'center';
+			context.textBaseline = 'alphabetic';
+			context.font = font.numbersSize+'px '+font.numbers;
+
+			numbers.forEach( function( color, bell ) { // For each number
+				if( color !== 'transparent' ) { // Only bother drawing at all if not transparent
+					context.fillStyle = '#000';
+
+					var char = PlaceNotation.bellToChar( bell ),
+						row = startRow;
+
+					for( i = 0; i < numberOfColumns; ++i ) {
+						for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
+							if( j === 0 ) {
+								context.fillText( char, sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding), topPadding );
+							}
+							for( k = 0; k < leadLength; ) {
+								row = PlaceNotation.apply( notation.parsed[k], row );
+								context.fillText( char, sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding), topPadding+(j*leadLength*rowHeight)+(++k*rowHeight) );
+							}
+						}
+					}
+				}
+			} );
+		}
+
+		// Return the image
+		return canvas.element;
 	};
 
 	return MethodGrid;
