@@ -34,7 +34,7 @@ class RenamedHTMLIterator implements \Iterator
         // Parse the line
         preg_match('/^<p><b><i>(.*?)<\/i><\/b> .*?(on|at|as) (.*?) on (.*?) (was|(\(.*\)?) renamed) <b><i>(.*?)<\/i>/', $this->line, $matches);
         if ($matches == null) {
-            throw new Exception("Failed to match on: {$line}");
+            throw new Exception("Failed to match on: {$this->line}");
         }
 
         // Get the data out of the match array
