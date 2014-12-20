@@ -17,7 +17,6 @@ This script updates Blueline.
 Options:
  --nopull  Prevents the pulling of new application code.
  --nodata  Prevents the update of association/method/tower data
- --force   Prevents the confirmation message
  --dev     Updates a development version
  --help    Shows this message
 EOF
@@ -26,19 +25,16 @@ source "$d/resources/scripts/getopts_long.sh"
 CCCBRDATA=true
 GITPULL=true
 DEV=false
-CONFIRM=true
 OPTLIND=1
 while getopts_long :dpfeh opt \
 	nodata no_argument \
 	nopull no_argument \
-	force no_argument \
 	dev no_argument \
 	help 0 "" "$@"
 	do
 		case "$opt" in
 			d|nodata) CCCBRDATA=false;;
 			p|nopull) GITPULL=false;;
-			f|force) CONFIRM=false;;
 			e|dev) DEV=true;;
 			h|help) usage; exit 0;;
 			:) printf >&2 '%s: %s\n' "${0##*/}" "$OPTLERR"
@@ -47,17 +43,6 @@ while getopts_long :dpfeh opt \
 		esac
 	done
 shift "$(($OPTLIND - 1))"
-
-if [[ $CONFIRM = true ]]
-	then
-	echo -e "\033[1mUse of this script in a production environment is discouraged\033[0m"
-	echo -e "\033[1mIf a step fails, later steps will have undefined consequences\033[0m"
-	read -p "Press 'Y' to contiue running the script. Any other key will exit: " -n 1 -r
-	if [[ ! $REPLY =~ ^[Yy]$ ]]
-	then
-	    exit
-	fi
-fi
 
 
 # Update composer.phar
@@ -78,9 +63,9 @@ if [[ $GITPULL = true && $DEV = false ]]
 	# Restart update script (to allow it to update itself)
 	if [[ $CCCBRDATA = true ]]
 	then
-		"$d/update" --nopull --force
+		"$d/update" --nopull
 	else
-		"$d/update" --nopull --nodata --force
+		"$d/update" --nopull --nodata
 	fi
 	exit
 fi
