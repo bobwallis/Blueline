@@ -70,7 +70,7 @@
 {% endif %}
 			</dl>
 		</div>
-		<div id="method_line_{{ loop.index }}" class="line"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png' } ) }}" /></div></noscript></div>
+		<div id="method_line_{{ loop.index }}" class="line"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
 		<div id="method_grid_{{ loop.index }}" class="grid"></div>
 		{% autoescape false %}
 		<script>require(['methods/ui/MethodView'],function(a){
