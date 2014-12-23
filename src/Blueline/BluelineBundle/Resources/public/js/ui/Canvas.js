@@ -26,9 +26,10 @@ define( function() {
 				this.context.scale( pixelRatio, pixelRatio );
 			}
 
-			// Set some default options
-			this.context.lineCap = 'round';
-			this.context.lineJoin = 'round';
+			// Add placeholder functions for browsers that lack support
+			if (!this.context.setLineDash) {
+				this.context.setLineDash = function () {};
+			}
 
 			return this;
 		};
