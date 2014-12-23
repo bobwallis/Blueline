@@ -21,7 +21,8 @@
         "incenteev/composer-parameter-handler": "~2.0",
         "hearsay/require-js-bundle": "2.0.*@dev",
         "components/jquery": "1.11.*",
-        "afarkas/html5shiv": "3.7.*"
+        "afarkas/html5shiv": "3.7.*",
+        "symfony/var-dumper": "~2.6"
     },
     "scripts": {
         "post-install-cmd": [
