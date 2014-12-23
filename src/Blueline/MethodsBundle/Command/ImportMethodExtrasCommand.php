@@ -75,7 +75,12 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
         // Import data about renamed methods
         $output->writeln("<info>Importing renamed method data...</info>");
         $renamedIterator = new RenamedHTMLIterator(__DIR__.'/../Resources/data/renamed.htm');
-        foreach ($renamedIterator as $renamedRow) {
+        $renamedIterator->rewind();
+        while ($renamedIterator->valid()) {
+            try { $renamedRow = $renamedIterator->current(); }
+            catch(\Exception $e){
+                $output->writeln("\r<error>".str_pad(' '.$e->getMessage(), $targetConsoleWidth, ' ').'</error>');
+            }
             $method  = $methodRepository->findOneByTitle($renamedRow['title']);
             if (! $method) {
                 $output->writeln('<comment> "'.$renamedRow['title'].'" not found in methods table</comment>');
@@ -85,6 +90,7 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
                 $renamed->setMethod($method);
                 $em->merge($renamed);
             }
+            $renamedIterator->next();
         }
         $em->flush();
         $em->clear();
@@ -93,7 +99,12 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
         // Import data about duplicate methods
         $output->writeln("<info>Importing duplicate method data...</info>");
         $duplicateIterator = new DuplicateHTMLIterator(__DIR__.'/../Resources/data/duplicate.htm');
-        foreach ($duplicateIterator as $duplicateRow) {
+        $duplicateIterator->rewind();
+        while ($duplicateIterator->valid() ) {
+            try { $duplicateRow = $duplicateIterator->current(); }
+            catch(\Exception $e){
+                $output->writeln("\r<error>".str_pad(' '.$e->getMessage(), $targetConsoleWidth, ' ').'</error>');
+            }
             $method  = $methodRepository->findOneByTitle($duplicateRow['title']);
             if (! $method) {
                 $output->writeln('<comment> "'.$duplicateRow['title'].'" not found in methods table</comment>');
@@ -103,6 +114,7 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
                 $duplicate->setMethod($method);
                 $em->merge($duplicate);
             }
+            $duplicateIterator->next();
         }
         $em->flush();
         $em->clear();
