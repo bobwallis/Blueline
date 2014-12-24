@@ -4,19 +4,21 @@ define( ['jquery', '../ui/Canvas'], function( $, Canvas ) {
 	 * This is a problem when trying to get pixel perfect alignments of text and lines.
 	 *
 	 * This function, given a font and size, will return the offset needed to be applied
-	 * to x and y to centre text of size n in an nxn box when drawing with
-	 * textAlign=center and baseLine=alphabetic
+	 * to x and y to centre a single character of the font in a sizexsize box when drawing 
+	 * with textAlign=center and baseLine=middle
 	 * It caches the result when used in production.
 	*/
-	var measureXAndYTextPadding = function( size, font ) {
+	var measureXAndYTextPadding = function( size, font, text ) {
+		if( typeof text == 'undefined' ) { text = '0'; }
+
 		var padding = { x: null, y: null },
 			age = $( 'html' ).data( 'age' );
 
 		if( age != 'dev' && Modernizr.localstorage ) {
-			var metricAge = localStorage.getItem( 'Metrics.age.'+size+'.'+font );
+			var metricAge = localStorage.getItem( 'Metrics.age.'+font+text );
 			if( metricAge !== null && parseInt( metricAge, 10) == age ) {
-				padding.x = localStorage.getItem( 'Metrics.x.'+size+'.'+font );
-				padding.y = localStorage.getItem( 'Metrics.y.'+size+'.'+font );
+				padding.x = localStorage.getItem( 'Metrics.x.'+font+text );
+				padding.y = localStorage.getItem( 'Metrics.y.'+font+text );
 			}
 		}
 		if( padding.x === null || padding.y === null ) {
@@ -29,11 +31,11 @@ define( ['jquery', '../ui/Canvas'], function( $, Canvas ) {
 			if( canvas !== false ) {
 				try {
 					var context = canvas.context;
-					context.font = size+'px '+font;
+					context.font = font;
 					context.textAlign = 'center';
-					context.baseLine = 'alphabetic';
+					context.textBaseline = 'middle';
 					context.fillStyle = '#F00';
-					context.fillText( '0', size*1.5, size*2 );
+					context.fillText( text, size*1.5, size*1.5 );
 
 					var dim = size*3*canvas.scale,
 						imageData = context.getImageData( 0, 0, dim, dim ),
@@ -84,13 +86,12 @@ define( ['jquery', '../ui/Canvas'], function( $, Canvas ) {
 					padding.y = ((dim - bottomOfText) - topOfText) / (canvas.scale*2);
 
 					if( Modernizr.localstorage ) {
-						localStorage.setItem( 'Metrics.x.'+size+'.'+font, padding.x );
-						localStorage.setItem( 'Metrics.y.'+size+'.'+font, padding.y );
-						localStorage.setItem( 'Metrics.age.'+size+'.'+font, age );
+						localStorage.setItem( 'Metrics.x.'+font+text, padding.x );
+						localStorage.setItem( 'Metrics.y.'+font+text, padding.y );
+						localStorage.setItem( 'Metrics.age.'+font+text, age );
 					}
 				}
 				catch( e ) {
-					console.log(e);
 					padding.x = padding.y = 0;
 				}
 			}

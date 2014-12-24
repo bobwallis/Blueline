@@ -1,62 +1,135 @@
-define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../../shared/helpers/MeasureCanvasTextOffset'], function( require, $, PlaceNotation, Canvas, MeasureCanvasTextOffset ) {
-	var MethodGrid = function( options ) {
-		// Prevent errors being thrown when accessing empty options objects
-		['layout', 'dimensions', 'display'].forEach( function( e ) {
-			if( typeof options[e] !== 'object' ) {
-				options[e] = {};
+define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../../shared/helpers/MeasureCanvasTextOffset', '../../shared/helpers/MeasureCanvasText'], function( require, $, PlaceNotation, Canvas, MeasureCanvasTextOffset, MeasureCanvasText ) {
+	// Default options (note runtime defaults are set later)
+	var defaultOptions = {
+		background: {
+			color: '#FFF' // CSS color
+		},
+		layout: {
+
+		},
+		dimensions: {
+
+		},
+		title: {
+			show: false,         // Can just set the whole attribute to false instead
+			text: null,
+			font: '12px "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif',
+			color: '#000'        // CSS color
+		},
+		sideNotation: {
+			show: false, 
+			font: '10px "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif',
+			color: '#000'        // CSS color
+		},
+		verticalGuides: {
+			shading: false, // or a CSS color
+			lines: {
+				show: false,    // Can just set the whole attribute to false instead
+				stroke: '#999', // for passing to ctx.strokeStyle - CSS color
+				dash:   [2,1],  // for passing to ctx.setLineDash
+				width:  1,      // for passing to ctx.lineWidth
+				cap:    'round' // for passing to ctx.lineCap: butt, round or square
+			}
+		},
+		placeStarts: {
+			show: false,
+			font: '"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif',
+			color: '#000'
+		},
+		callingPositions: {
+			show: false,
+			font: '10px sans-serif',
+			color: '#000'
+		},
+		ruleOffs: {
+			show: true,
+			stroke: '#999',  // for passing to ctx.strokeStyle - CSS color
+			dash:   [3,1],   // for passing to ctx.setLineDash
+			width:  1,       // for passing to ctx.lineWidth
+			cap:    'butt' // for passing to ctx.lineCap: butt, round or square
+		},
+		numbers: {
+			show: true,
+			font: '12px '+((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : 'Blueline, "Andale Mono", Consolas, ')+'monospace'
+		},
+		lines: {
+			show: true
+		}
+	};
+	
+	var counter = 1;
+
+	var MethodGrid = function( passedOptions ) {
+		// Do some basic error checking, but don't go mad - if someone passes in junk it shouldn't be a surprise when it doesn't work
+		if( typeof passedOptions.stage !== 'number' ) { throw 'options.stage should be a number.' }
+		if( typeof passedOptions.notation !== 'object' ) { throw 'options.notation should be a notation object.' }
+
+		// Make runtime adjustments to the default options object
+		var defaultRuntimeOptions = {
+			id: 'grid_'+(++counter),
+			sideNotation: {
+				text: passedOptions.notation.exploded
+			},
+			startRow: PlaceNotation.rounds( passedOptions.stage ),
+			lines: {
+				bells: ( function( stage ) {
+					var bells = [], i = 0;
+					for(; i < stage; ++i ) {
+						bells.push( {
+							lineWidth: 1,
+							stroke: 'transparent',
+							cap: 'round',
+							join: 'round',
+							dash: []
+						} );
+					}
+					return bells;
+				} )( passedOptions.stage )
+			},
+			numbers: {
+				bells: ( function( stage ) {
+					var bells = [], i = 0;
+					for(; i < stage; ++i ) {
+						bells.push( {
+							color: '#000'
+						} );
+					}
+					return bells;
+				} )( passedOptions.stage )
+			}
+		};
+
+		// Merge options object with the defaults
+		var options = $.extend( true, {}, defaultOptions, defaultRuntimeOptions, passedOptions );
+
+		// Allow entire attributes to be set to false
+		Object.keys( defaultOptions ).forEach( function( e ) {
+			if( typeof options[e] === false ) {
+				options[e] = { show: false };
 			}
 		} );
-		if( typeof options.display.fonts !== 'object' ) { options.display.fonts = {}; }
+		// Allow title to be shown by just setting title.text
+		if( options.title.text !== null ) { options.title.show = true; }
 
 		var i, j, k, l, m, x, y,
-			twoPi = Math.PI*2,
 
-			id = options.id,
-			notation = options.notation,
-			stage = options.stage,
-
-			startRow = (typeof options.startRow === 'object')? options.startRow : PlaceNotation.rounds( stage ),
-			leadHeads = [startRow],
-
-			leadLength = notation.parsed.length,
+			leadLength = options.notation.parsed.length,
 			numberOfLeads = (typeof options.layout.numberOfLeads === 'number')? options.layout.numberOfLeads : 1,
 			numberOfColumns = (typeof options.layout.numberOfColumns === 'number')? options.layout.numberOfColumns : ((typeof options.layout.leadsPerColumn === 'number')? Math.ceil( numberOfLeads / options.layout.leadsPerColumn ): 1),
 			leadsPerColumn = (typeof options.layout.leadsPerColumn === 'number')? options.layout.leadsPerColumn : Math.ceil( numberOfLeads / numberOfColumns ),
-			rowsPerColumn = leadsPerColumn * leadLength,
-			title = (typeof options.display.title === 'string')? options.display.title : '',
-
-			callingPositions = (typeof options.display.callingPositions === 'object')? options.display.callingPositions : {},
-			lines = (typeof options.display.lines === 'object')? options.display.lines : {},
-			numbers = (typeof options.display.numbers === 'object')? options.display.numbers : {},
-			placeStarts = (typeof options.display.placeStarts === 'object')? options.display.placeStarts : {},
-			ruleOffs = (typeof options.display.ruleOffs === 'object')? options.display.ruleOffs : {},
-
-			show = {
-				callingPositions: (typeof callingPositions.every === 'number' && typeof callingPositions.from === 'number' && typeof callingPositions.titles.length === 'number')? true : false,
-				lines: (typeof options.display.lines === 'object')? true : false,
-				notation: (typeof options.display.notation === 'boolean')? options.display.notation : false,
-				numbers: (typeof options.display.numbers === 'object')? true : false,
-				placeStarts: (typeof options.display.placeStarts === 'object')? true : false,
-				ruleOffs: (typeof ruleOffs.every === 'number' && typeof ruleOffs.from === 'number')? true : false,
-				title: (title === '')? false : true
-			},
-
-			font = {
-				numbers: (typeof options.display.fonts.numbers === 'string')? options.display.fonts.numbers : 'monospace',
-				numbersSize: (typeof options.display.fonts.numbers === 'number')? options.display.fonts.numbersSize : 12,
-				text: (typeof options.display.fonts.text === 'string')? options.display.fonts.text : 'sans-serif'
-			};
+			rowsPerColumn = leadsPerColumn * leadLength;
 
 		// If we're displaying multiple leads, pre-calculate the lead heads for later use
+		var leadHeads = [options.startRow];
 		if( numberOfLeads > 1 ) {
 			for( i = 1; i < numberOfLeads; ++i ) {
-				leadHeads.push( PlaceNotation.apply( notation.parsed, leadHeads[i-1] ) );
+				leadHeads.push( PlaceNotation.apply( options.notation.parsed, leadHeads[i-1] ) );
 			}
 		}
 
 		// Dimensions
 		var canvasWidth, canvasHeight,
-			rowWidth = 10*stage,
+			rowWidth = 10*options.stage,
 			rowHeight = 14,
 			bellWidth = 10,
 			interColumnPadding = 0,
@@ -68,10 +141,10 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 		// Bell/row dimensions
 		if( typeof options.dimensions.rowWidth === 'number' ) {
 			rowWidth = options.dimensions.rowWidth;
-			bellWidth = options.dimensions.rowWidth / stage;
+			bellWidth = options.dimensions.rowWidth / options.stage;
 		}
 		else if( typeof options.dimensions.bellWidth === 'number' ) {
-			rowWidth = options.dimensions.bellWidth * stage;
+			rowWidth = options.dimensions.bellWidth * options.stage;
 			bellWidth = options.dimensions.bellWidth;
 		}
 		if( typeof options.dimensions.rowHeight === 'number' ) {
@@ -85,43 +158,41 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 		if( typeof options.dimensions.columnPadding === 'number' ) {
 			interColumnPadding = options.dimensions.columnPadding;
 		}
-		if( show.placeStarts ) {
-			columnRightPadding = Math.max( columnRightPadding, 10 + ( placeStarts.length * 12 ) );
+		if( options.placeStarts.show ) {
+			columnRightPadding = Math.max( columnRightPadding, 10 + ( options.placeStarts.bells.length * 12 ) );
 		}
-		if( show.callingPositions ) {
+		if( options.callingPositions.show ) {
 			columnRightPadding = Math.max( columnRightPadding, 15 );
 		}
 		var rowWidthWithPadding = interColumnPadding + columnLeftPadding + columnRightPadding + rowWidth;
 
 		// Canvas padding
-		if( show.title ) {
-			canvasTopPadding += show.numbers? 18 : 12;
+		if( options.title.show ) {
+			canvasTopPadding += parseInt(options.title.font)*1.2;
 		}
-		if( show.notation ) {
+		if( options.sideNotation.show ) {
 			canvasLeftPadding += (function() {
 				var longest = 0, text = '', i, width;
-				for( i = 0; i < notation.exploded.length; ++i ) {
-					if( notation.exploded[i].length > longest ) {
-						longest = notation.exploded[i].length;
-						text = notation.exploded[i];
+				for( i = 0; i < options.sideNotation.text.length; ++i ) {
+					if( options.sideNotation.text[i].length > longest ) {
+						longest = options.sideNotation.text[i].length;
+						text = options.sideNotation.text[i];
 					}
 				}
-				var testCanvas = document.createElement( 'canvas' ),
-					ctx = testCanvas.getContext( '2d' );
-				ctx.font = '10px '+font.text;
-				width = ctx.measureText( text ).width + 4;
-				testCanvas = ctx = null;
-				return width;
+				return MeasureCanvasText( text, options.sideNotation.font ).width + 4;
 			})();
 		}
 
 		// Canvas dimensions
-		canvasWidth = canvasLeftPadding + ((rowWidth + columnLeftPadding + columnRightPadding)*numberOfColumns) + (interColumnPadding*(numberOfColumns-1));
+		canvasWidth = Math.max( 
+			canvasLeftPadding + ((rowWidth + columnLeftPadding + columnRightPadding)*numberOfColumns) + (interColumnPadding*(numberOfColumns-1)),
+			options.title.show? MeasureCanvasText( options.title.text, options.title.font ).width : 0
+		);
 		canvasHeight = canvasTopPadding + (rowHeight * ((leadsPerColumn * leadLength)+1));
 
 		// Set up canvas
 		var canvas =  new Canvas( {
-			id: id,
+			id: options.id,
 			width: canvasWidth,
 			height: canvasHeight
 		} );
@@ -129,37 +200,43 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 		var context = canvas.context,
 			textMetrics;
 
+		// Set the background color
+		context.fillStyle = options.background.color;
+		context.fillRect(0, 0, canvasWidth, canvasHeight);
+
 		// Draw title
-		if( show.title ) {
-			context.fillStyle = '#000';
-			context.font = '11.5px '+font.text;
+		if( options.title.show ) {
+			context.fillStyle = options.title.color;
+			context.font = options.title.font;
 			context.textAlign = 'left';
 			context.textBaseline = 'top';
-			context.fillText( title, 0, 0 );
+			context.fillText( options.title.text, 0, 0 );
 		}
 
 		// Draw notation down side
-		if( show.notation ) {
-			textMetrics = MeasureCanvasTextOffset( 10, font.text );
-			context.fillStyle = '#000';
-			context.font = '10px '+font.text;
+		if( options.sideNotation.show ) {
+			textMetrics = MeasureCanvasTextOffset( parseInt( options.sideNotation.font ), options.sideNotation.font, '0' );
+			context.fillStyle = options.sideNotation.color;
+			context.font = options.sideNotation.font;
 			context.textAlign = 'right';
-			context.textBaseline = 'alphabetic';
-			y = canvasTopPadding + (rowHeight*1.5) + textMetrics.y - ((rowHeight - 10)/2);
-			for( i = 0; i < notation.exploded.length; ++i ) {
-				context.fillText( notation.exploded[i], canvasLeftPadding - 4, (i*rowHeight)+y );
+			context.textBaseline = 'middle';
+			y = canvasTopPadding + rowHeight + textMetrics.y;
+			for( i = 0; i < options.sideNotation.text.length; ++i ) {
+				context.fillText( options.sideNotation.text[i], canvasLeftPadding - 4, (i*rowHeight)+y );
 			}
 		}
 
 		// Draw rule offs
-		if( show.ruleOffs ) {
-			context.lineWidth = 1;
-			context.lineCap = 'round';
-			context.strokeStyle = '#999';
+		if( options.ruleOffs.show ) {
+			context.lineWidth = options.ruleOffs.width;
+			context.lineJoin = 'bevel';
+			context.lineCap = options.ruleOffs.cap;
+			context.strokeStyle = options.ruleOffs.stroke;
+			context.setLineDash( options.ruleOffs.dash );
 			context.beginPath();
 			for( i = 0; i < numberOfColumns; ++i ) {
 				for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
-					for( k = ruleOffs.from; k <= leadLength; k += ruleOffs.every ) {
+					for( k = options.ruleOffs.from; k <= leadLength; k += options.ruleOffs.every ) {
 						if( k > 0 ) {
 							x = canvasLeftPadding + (i*rowWidthWithPadding);
 							y = canvasTopPadding + (((j*leadLength)+k)*rowHeight);
@@ -173,18 +250,16 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 		}
 
 		// Draw lines
-		if( show.lines ) {
-			context.lineCap = 'round';
-			context.lineJoin = 'round';
-			i = stage;
+		if( options.lines.show ) {
+			i = options.stage;
 			while( i-- ) {
-				j = startRow[i];
-				if( typeof lines[j] === 'object' && lines[j].stroke !== 'transparent' ) {
+				j = options.startRow[i];
+				if( typeof options.lines.bells[j] === 'object' && options.lines.bells[j].stroke !== 'transparent' ) {
 					context.beginPath();
 					for( k = 0; k < numberOfColumns; ++k ) {
-						var columnNotation = notation.parsed;
+						var columnNotation = options.notation.parsed;
 						for( l = 1; l < leadsPerColumn && (k*leadsPerColumn)+l < numberOfLeads; ++l ) {
-							columnNotation = columnNotation.concat( notation.parsed );
+							columnNotation = columnNotation.concat( options.notation.parsed );
 						}
 
 						var bell = leadHeads[k*leadsPerColumn].indexOf( j ),
@@ -207,19 +282,23 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 							context.lineTo( x + (((newPosition-position)*bellWidth)/4), y + (rowHeight/4) );
 						}
 					}
-					context.strokeStyle = lines[j].stroke;
-					context.lineWidth = lines[j].lineWidth;
+					context.strokeStyle = options.lines.bells[j].stroke;
+					context.lineWidth = options.lines.bells[j].width;
+					context.lineCap = options.lines.bells[j].cap;
+					context.lineJoin = options.lines.bells[j].join
+					context.setLineDash( options.lines.bells[j].dash );
 					context.stroke();
 				}
 			}
 		}
 
 		// Draw place starts
-		if( show.placeStarts ) {
-			placeStarts.sort( function(a,b) { return a - b; } );
+		if( options.placeStarts.show ) {
+			options.placeStarts.bells.sort( function(a,b) { return a - b; } );
 			context.lineWidth = 1;
-			placeStarts.forEach( function( i, pos ) {
-				var j = (typeof startRow === 'object')? startRow[i] : i,
+			context.setLineDash( [] );
+			options.placeStarts.bells.forEach( function( i, pos ) {
+				var j = (typeof options.startRow === 'object')? options.startRow[i] : i,
 					k, l;
 				for( k = 0; k < numberOfColumns; ++k ) {
 					for( l = 0; l < leadsPerColumn && (k*leadsPerColumn)+l < numberOfLeads; ++l ) {
@@ -227,70 +306,73 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 
 						// The little circle
 						var x = canvasLeftPadding + (k*rowWidthWithPadding) + ((positionInLeadHead+0.5)*bellWidth),
-							y = canvasTopPadding + (l*rowHeight*leadLength) + (rowHeight/2);
-						context.fillStyle = lines[j].stroke;
+							y = canvasTopPadding + (l*rowHeight*leadLength) + Math.max(3.25*2, rowHeight/2);
+						
+						context.fillStyle = options.lines.bells[j].stroke;
 						context.beginPath();
-						context.arc( x, y, 2, 0, twoPi, true);
+						context.arc( x, y, 2, 0, Math.PI*2, true);
 						context.closePath();
 						context.fill();
 
 						// The big circle
-						x = canvasLeftPadding + (k*rowWidthWithPadding) + rowWidth + 11*pos + 10;
-						context.strokeStyle = lines[j].stroke;
+						x = canvasLeftPadding + (k*rowWidthWithPadding) + rowWidth + 12*pos + 10;
+						context.strokeStyle = options.lines.bells[j].stroke;
 						context.beginPath();
-						context.arc( x, y, 6, 0, twoPi, true );
+						context.arc( x, y, 6.5, 0, Math.PI*2, true );
 						context.closePath();
 						context.stroke();
 
 						// The text inside the big circle
-						var placeStartFontSize = ((positionInLeadHead<9)?10:8);
-						context.fillStyle = '#000';
-						context.font = placeStartFontSize+'px '+font.numbers;
+						var placeStartFontSize = ((positionInLeadHead<9)?10:8),
+							textMetrics = MeasureCanvasTextOffset( 13, placeStartFontSize+'px '+options.placeStarts.font, (positionInLeadHead+1).toString() );
+						console.log( 13, placeStartFontSize+'px '+options.placeStarts.font, (positionInLeadHead+1).toString() );
+						console.log(textMetrics);
+						context.fillStyle = options.placeStarts.color;
+						context.font = placeStartFontSize+'px '+options.placeStarts.font;
 						context.textAlign = 'center';
-						context.textBaseline = 'alphabetic';
-						textMetrics = MeasureCanvasTextOffset( placeStartFontSize, font.numbers );
-						context.fillText( (positionInLeadHead+1).toString(), x + textMetrics.x, y + 6 + textMetrics.y - ((12-placeStartFontSize)/2) );
+						context.textBaseline = 'middle';
+						context.fillText( (positionInLeadHead+1).toString(), x + textMetrics.x, y + textMetrics.y );
 					}
 				}
 			}, this );
 		}
 
 		// Draw calling positions
-		if( show.callingPositions && typeof context.fillText === 'function' ) {
-			context.fillStyle = '#000';
-			context.font = (font.numbersSize-2)+'px '+font.text;
+		if( options.callingPositions.show ) {
+			context.fillStyle = options.callingPositions.color;
+			context.font = options.callingPositions.font;
 			context.textAlign = 'left';
 			context.textBaseline = 'bottom';
 
-			for( i = 0; i < callingPositions.titles.length; ++i ) {
-				if( callingPositions.titles[i] !== null ) {
-					var rowInMethod = callingPositions.from + ( callingPositions.every * (i+1) ) - 2;
+			for( i = 0; i < options.callingPositions.titles.length; ++i ) {
+				if( options.callingPositions.titles[i] !== null ) {
+					var rowInMethod = options.callingPositions.from + ( options.callingPositions.every * (i+1) ) - 2;
 					x = canvasLeftPadding + (Math.floor( rowInMethod/rowsPerColumn )*rowWidthWithPadding) + rowWidth + 4;
 					y = canvasTopPadding + ((rowInMethod % rowsPerColumn) + 1)*rowHeight;
-					context.fillText( '-'+callingPositions.titles[i], x, y );
+					context.fillText( '-'+options.callingPositions.titles[i], x, y );
 				}
 			}
 		}
 
 		// Draw numbers
-		if( show.numbers && typeof context.fillText === 'function' ) {
-			// Measure the actual text position (for pixel perfect positioning)
-			var textMetrics = MeasureCanvasTextOffset( font.numbersSize, font.numbers ),
-				topPadding = canvasTopPadding + rowHeight + textMetrics.y - ((rowHeight-font.numbersSize)/2),
+		if( options.numbers.show ) {
+			// Calculate reused offsets
+			var textMetrics = MeasureCanvasTextOffset( Math.max(bellWidth, rowHeight ), options.numbers.font, '0' ),
+				columnSidePadding = interColumnPadding + columnRightPadding,
 				sidePadding = canvasLeftPadding + (bellWidth/2) + textMetrics.x,
-				columnSidePadding = interColumnPadding + columnRightPadding;
+				topPadding = canvasTopPadding + (rowHeight/2) + textMetrics.y;
 
 			// Set up the context
+			context.font = options.numbers.font;
 			context.textAlign = 'center';
-			context.textBaseline = 'alphabetic';
-			context.font = font.numbersSize+'px '+font.numbers;
+			context.textBaseline = 'middle';
 
-			numbers.forEach( function( color, bell ) { // For each number
-				if( color !== 'transparent' ) { // Only bother drawing at all if not transparent
-					context.fillStyle = '#000';
+			options.numbers.bells.forEach( function( bellOptions, bell ) { // For each number
+				if( bellOptions.color !== 'transparent' ) { // Only bother drawing at all if not transparent
+					context.fillStyle = bellOptions.color;
 
 					var char = PlaceNotation.bellToChar( bell ),
-						row = startRow;
+						row = options.startRow;
 
 					for( i = 0; i < numberOfColumns; ++i ) {
 						for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
@@ -298,7 +380,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 								context.fillText( char, sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding), topPadding );
 							}
 							for( k = 0; k < leadLength; ) {
-								row = PlaceNotation.apply( notation.parsed[k], row );
+								row = PlaceNotation.apply( options.notation.parsed[k], row );
 								context.fillText( char, sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding), topPadding+(j*leadLength*rowHeight)+(++k*rowHeight) );
 							}
 						}

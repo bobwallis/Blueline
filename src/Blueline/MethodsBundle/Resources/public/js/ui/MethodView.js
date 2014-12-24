@@ -8,7 +8,7 @@
 // more obvious what on earth is going on.
 // ../helpers/PlaceNotation is fine, some documentation would be useful though
 
-define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers/PlaceNotation'], function( $, webFontLoaded, MethodGrid, PlaceNotation ) {
+define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../helpers/Grid', '../helpers/PlaceNotation'], function( $, webFontLoaded, Method, MethodGrid, PlaceNotation ) {
 	// Display messages if canvas is not supported
 	if( !Modernizr.canvas ) {
 		return function( options ) {
@@ -67,7 +67,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers
 			this.method.callingPositions = options.callingPositions;
 		}
 		else {
-			this.method.callingPositions = { from: 0, every: 0, titles: [] };
+			this.method.callingPositions = false;
 		}
 
 		// Set up reusable options objects
@@ -77,7 +77,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers
 		this.options.plainCourse = {
 			notation: $.extend( true, {}, this.method.notation ),
 			stage: this.method.stage,
-			display: {ruleOffs: $.extend( {}, this.method.ruleOffs )}
+			ruleOffs: $.extend( {}, this.method.ruleOffs )
 		};
 
 		// Calls
@@ -133,10 +133,10 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers
 						notation: call.notation,
 						stage: this.method.stage,
 						startRow: call.startRow,
-						display: {
-							ruleOffs: call.ruleOffs,
-							title: callTitle+':'
+						title: {
+							text: callTitle+':'
 						},
+						ruleOffs: call.ruleOffs,
 						affected: affectedBells
 					} );
 				}
@@ -152,10 +152,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers
 	MethodView.prototype = {
 		drawNumbers: function() {
 			// Get settings
-			var numbersFont = ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : 'Blueline, "Andale Mono", Consolas, ')+'monospace',
-				textFont = '"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif',
-				numbersFontSize = 12,
-				workingBellColor = ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'],
+			var workingBellColor = ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'],
 				huntBellColor = '#D11',
 				workingBellWidth = 2,
 				huntBellWidth = 1.2,
@@ -165,7 +162,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers
 					// Measure the text
 					var testCanvas = $( '<canvas></canvas>' ).get( 0 ),
 						ctx = testCanvas.getContext( '2d' );
-					ctx.font = numbersFontSize+'px '+numbersFont;
+					ctx.font = '12px '+((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : 'Blueline, "Andale Mono", Consolas, ')+'monospace';
 					return ctx.measureText( Array( stage + 1 ).join( '0' ) ).width + stage;
 				} )( this.method.stage ),
 				leadsPerColumn,
@@ -174,13 +171,6 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers
 					dimensions: {
 						rowHeight: rowHeight,
 						rowWidth: rowWidth,
-					},
-					display: {
-						fonts: {
-							numbers: numbersFont,
-							numbersSize: numbersFontSize,
-							text: textFont
-						}
 					}
 				};
 
@@ -189,7 +179,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers
 				plainLines = [];
 			for( var i = 0, j = 0; i < this.method.stage; ++i ) {
 				plainLines.push( {
-					lineWidth: (this.method.huntBells.indexOf( i ) !== -1)? huntBellWidth : workingBellWidth,
+					width: (this.method.huntBells.indexOf( i ) !== -1)? huntBellWidth : workingBellWidth,
 					stroke: (this.method.huntBells.indexOf( i ) !== -1)? huntBellColor : ((toFollow.indexOf( i ) !== -1)? workingBellColor[j++] || workingBellColor[j = 0, j++] : 'transparent')
 				} );
 			}
@@ -203,7 +193,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers
 				callLines[k] = [];
 				for( var i = 0, j = 0; i < this.method.stage; ++i ) {
 					callLines[k].push( {
-						lineWidth: (this.method.huntBells.indexOf( i ) !== -1)? huntBellWidth : workingBellWidth,
+						width: (this.method.huntBells.indexOf( i ) !== -1)? huntBellWidth : workingBellWidth,
 						stroke: (this.method.huntBells.indexOf( i ) !== -1)? huntBellColor : ((call.affected.indexOf( i ) !== -1)? workingBellColor[j++] || workingBellColor[j = 0, j++] : 'transparent')
 					} );
 				}
@@ -235,6 +225,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers
 			// Options object for the plain course
 			var plainCourseOptions = $.extend( true, {}, this.options.plainCourse, sharedOptions, {
 				id: 'numbers'+this.id+'_plain',
+				callingPositions: (this.method.callingPositions == false)? false: $.extend( { show: true }, this.method.callingPositions ),
 				dimensions: {
 					columnPadding: columnPadding
 				},
@@ -242,12 +233,12 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers
 					numberOfLeads: this.method.numberOfLeads,
 					leadsPerColumn: leadsPerColumn
 				},
-				display: {
-					callingPositions: this.method.callingPositions,
-					lines: plainLines,
-					numbers: plainLines.map( function( l ) { return (l.stroke !== 'transparent')? 'transparent' : false; } ),
-					placeStarts: plainPlaceStarts
-				}
+				placeStarts: {
+					show:true,
+					bells: plainPlaceStarts
+				},
+				lines: {show: true, bells: plainLines },
+				numbers: {show: true, bells: plainLines.map( function( l, i ) { return { color: (l.stroke !== 'transparent')? 'transparent' : '#000' }; } ) }
 			} );
 
 			// Create the plain course image
@@ -276,10 +267,8 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers
 				this.container.numbers.append( new MethodGrid( $.extend( true, {}, call, sharedOptions, {
 					id: 'numbers'+this.id+'_'+call.id,
 					numberOfLeads: 1,
-					display: {
-						lines: callLines[i],
-						numbers: callLines[i].map( function( l ) { return (l.stroke !== 'transparent')? 'transparent' : false; } )
-					}
+					lines: { show: true, bells: callLines[i] },
+					numbers: { show: true, bells: callLines[i].map( function( l ) { return { color: (l.stroke !== 'transparent')? 'transparent' : '#000' }; } ) }
 				} ) ) );
 			}, this );
 		},
@@ -294,30 +283,26 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Grid', '../helpers
 
 				sharedOptions = {
 					dimensions: ($window.width() > 600)? { rowHeight: 14, bellWidth: 12 } : { rowHeight: 11, bellWidth: 9 },
-					display: {
-						fonts: {
-							text: '"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif'
-						},
-						lines: ( function( iLim, huntBells ) {
-							var lines = [], i = 0, j = 0;
-							for(; i < iLim; ++i ) {
-								var isHuntBell = (huntBells.indexOf( i ) !== -1);
-								lines.push( {
-									lineWidth: isHuntBell? huntBellWidth : workingBellWidth,
-									stroke: isHuntBell? huntBellColor : workingBellColor[j++] || workingBellColor[j = 0, j++]
-								} );
-							}
-							return lines;
-						} )( this.method.stage, this.method.huntBells ),
-						notation: true
-					}
+					sideNotation: { show: true },
+					numbers: false,
+					lines: {show: true, bells: ( function( iLim, huntBells ) {
+						var lines = [], i = 0, j = 0;
+						for(; i < iLim; ++i ) {
+							var isHuntBell = (huntBells.indexOf( i ) !== -1);
+							lines.push( {
+								width: isHuntBell? huntBellWidth : workingBellWidth,
+								stroke: isHuntBell? huntBellColor : workingBellColor[j++] || workingBellColor[j = 0, j++]
+							} );
+						}
+						return lines;
+					} )( this.method.stage, this.method.huntBells ) }
 				};
 
 			// Plain lead
 			this.container.grid.append( new MethodGrid( $.extend( true, {}, this.options.plainCourse, sharedOptions, {
 				id: 'grid'+this.id+'_plain',
-				display: {
-					title: 'Plain Lead:'
+				title: {
+					text: 'Plain Lead:'
 				}
 			} ) ) );
 			// Calls

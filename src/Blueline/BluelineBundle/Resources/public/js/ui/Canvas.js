@@ -30,6 +30,9 @@ define( function() {
 			if (!this.context.setLineDash) {
 				this.context.setLineDash = function () {};
 			}
+			if (!this.context.fillText) {
+				this.context.fillText = function () {};
+			}
 
 			return this;
 		};
