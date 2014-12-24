@@ -139,7 +139,7 @@ class MethodsController extends Controller
         $pageTitle = Text::toList(array_map(function ($m) { return $m['title']; }, $methodsCheck));
         $methods = array();
 
-        foreach ($methodsCheck  as $methodTitle) {
+        foreach ($methodsCheck as $methodTitle) {
             // Get information about the method
             $method = $em->createQuery('
                 SELECT m FROM BluelineMethodsBundle:Method m
@@ -153,7 +153,7 @@ class MethodsController extends Controller
 
         // Create response
         switch ($format) {
-            case 'png' :
+            case 'png':
                 if ((intval($request->query->get('scale')) ?: 1) > 4 && $this->container->getParameter('kernel.environment') == 'prod') {
                     throw $this->createAccessDeniedException('Maximum scale is 4 unless in developer mode.');
                 }
@@ -162,7 +162,7 @@ class MethodsController extends Controller
                 $response->setContent($process->getOutput());
 
                 return $response;
-            default :
+            default:
                 return $this->render('BluelineMethodsBundle::view.'.$format.'.twig', compact('pageTitle', 'methods'), $response);
         }
     }

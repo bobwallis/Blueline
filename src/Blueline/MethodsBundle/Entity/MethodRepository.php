@@ -39,7 +39,7 @@ class MethodRepository extends EntityRepository
                     }
                     while (1) {
                         switch (strtolower($last)) {
-                            case 'little' :
+                            case 'little':
                                 $query->andWhere('m.little = :littleFromQ')
                                     ->setParameter('littleFromQ', true);
                                 $last = array_pop($qExplode);

@@ -2,7 +2,6 @@
 
 namespace Blueline\MethodsBundle\Entity;
 
-
 /**
  * Collection
  */

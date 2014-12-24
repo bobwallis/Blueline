@@ -141,7 +141,8 @@ class ImportMethodsCommand extends ContainerAwareCommand
 
                 // Flush every so often so we don't run out of memory
                 ++$count;
-                if ($count % 1 == 0) { // Run into maanged+dirty errors if this is >1 and certain things happen, investigate later
+                if ($count % 1 == 0) {
+                // Run into managed+dirty errors if this is >1 and certain things happen, investigate later
                     $em->flush();
                     $em->clear();
                 }

@@ -54,7 +54,7 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
                     $doveid = $method_towers[$location];
                 } else {
                     // Place
-                    if (strpos($location, ',') === FALSE) {
+                    if (strpos($location, ',') === false) {
                         $try = $em->createQuery('SELECT partial t.{id} from Blueline\TowersBundle\Entity\Tower t WHERE ((LOWER(t.place) LIKE :place OR LOWER(t.altName) LIKE :place OR LOWER(t.id) LIKE :place) AND t.bells >= :bells)')
                             ->setParameter('place', strtolower($location))
                             ->setParameter('bells', $performance->getMethod()->getStage())

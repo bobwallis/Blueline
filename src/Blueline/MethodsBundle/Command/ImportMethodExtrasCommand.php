@@ -77,8 +77,9 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
         $renamedIterator = new RenamedHTMLIterator(__DIR__.'/../Resources/data/renamed.htm');
         $renamedIterator->rewind();
         while ($renamedIterator->valid()) {
-            try { $renamedRow = $renamedIterator->current(); }
-            catch(\Exception $e){
+            try {
+                $renamedRow = $renamedIterator->current();
+            } catch (\Exception $e) {
                 $output->writeln("\r<error>".str_pad(' '.$e->getMessage(), $targetConsoleWidth, ' ').'</error>');
             }
             $method  = $methodRepository->findOneByTitle($renamedRow['title']);
@@ -100,9 +101,10 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
         $output->writeln("<info>Importing duplicate method data...</info>");
         $duplicateIterator = new DuplicateHTMLIterator(__DIR__.'/../Resources/data/duplicate.htm');
         $duplicateIterator->rewind();
-        while ($duplicateIterator->valid() ) {
-            try { $duplicateRow = $duplicateIterator->current(); }
-            catch(\Exception $e){
+        while ($duplicateIterator->valid()) {
+            try {
+                $duplicateRow = $duplicateIterator->current();
+            } catch (\Exception $e) {
                 $output->writeln("\r<error>".str_pad(' '.$e->getMessage(), $targetConsoleWidth, ' ').'</error>');
             }
             $method  = $methodRepository->findOneByTitle($duplicateRow['title']);
