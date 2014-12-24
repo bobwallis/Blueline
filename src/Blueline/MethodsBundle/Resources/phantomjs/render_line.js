@@ -6,7 +6,7 @@ if( args.length < 3 || args.length > 3 ) {
 	phantom.exit();
 }
 var scale = Math.round( parseFloat( args[2] ) * 100 ) / 100,
-	url = args[1]+'?scale='+scale;
+	url = args[1]+'?scale='+(scale*2);
 
 // Open page
 var page = require('webpage').create();
