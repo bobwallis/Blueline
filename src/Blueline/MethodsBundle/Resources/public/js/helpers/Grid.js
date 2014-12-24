@@ -325,8 +325,6 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 						// The text inside the big circle
 						var placeStartFontSize = ((positionInLeadHead<9)?10:8),
 							textMetrics = MeasureCanvasTextOffset( 13, placeStartFontSize+'px '+options.placeStarts.font, (positionInLeadHead+1).toString() );
-						console.log( 13, placeStartFontSize+'px '+options.placeStarts.font, (positionInLeadHead+1).toString() );
-						console.log(textMetrics);
 						context.fillStyle = options.placeStarts.color;
 						context.font = placeStartFontSize+'px '+options.placeStarts.font;
 						context.textAlign = 'center';
