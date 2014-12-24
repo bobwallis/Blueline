@@ -4,7 +4,7 @@ define( ['jquery', '../ui/Canvas'], function( $, Canvas ) {
 	 * This is a problem when trying to get pixel perfect alignments of text and lines.
 	 *
 	 * This function, given a font and size, will return the offset needed to be applied
-	 * to x and y to centre a single character of the font in a sizexsize box when drawing 
+	 * to x and y to centre a single character of the font in a sizexsize box when drawing
 	 * with textAlign=center and baseLine=middle
 	 * It caches the result when used in production.
 	*/

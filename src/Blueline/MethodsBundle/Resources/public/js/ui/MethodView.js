@@ -225,7 +225,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 			// Options object for the plain course
 			var plainCourseOptions = $.extend( true, {}, this.options.plainCourse, sharedOptions, {
 				id: 'numbers'+this.id+'_plain',
-				callingPositions: (this.method.callingPositions == false)? false: $.extend( { show: true }, this.method.callingPositions ),
+				callingPositions: (this.method.callingPositions === false)? false: $.extend( { show: true }, this.method.callingPositions ),
 				dimensions: {
 					columnPadding: columnPadding
 				},

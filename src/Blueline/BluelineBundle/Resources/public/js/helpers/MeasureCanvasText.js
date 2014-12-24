@@ -6,6 +6,6 @@ define( ['jquery', '../ui/Canvas'], function( $, Canvas ) {
 		ctx.font = font;
 		return ctx.measureText( text );
 	};
-	
+
 	return measureText;
 } );

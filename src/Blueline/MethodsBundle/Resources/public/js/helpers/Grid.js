@@ -17,7 +17,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 			color: '#000'        // CSS color
 		},
 		sideNotation: {
-			show: false, 
+			show: false,
 			font: '10px "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif',
 			color: '#000'        // CSS color
 		},
@@ -61,8 +61,8 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 
 	var MethodGrid = function( passedOptions ) {
 		// Do some basic error checking, but don't go mad - if someone passes in junk it shouldn't be a surprise when it doesn't work
-		if( typeof passedOptions.stage !== 'number' ) { throw 'options.stage should be a number.' }
-		if( typeof passedOptions.notation !== 'object' ) { throw 'options.notation should be a notation object.' }
+		if( typeof passedOptions.stage !== 'number' ) { throw 'options.stage should be a number.'; }
+		if( typeof passedOptions.notation !== 'object' ) { throw 'options.notation should be a notation object.'; }
 
 		// Make runtime adjustments to the default options object
 		var defaultRuntimeOptions = {
@@ -184,7 +184,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 		}
 
 		// Canvas dimensions
-		canvasWidth = Math.max( 
+		canvasWidth = Math.max(
 			canvasLeftPadding + ((rowWidth + columnLeftPadding + columnRightPadding)*numberOfColumns) + (interColumnPadding*(numberOfColumns-1)),
 			options.title.show? MeasureCanvasText( options.title.text, options.title.font ).width : 0
 		);
@@ -285,7 +285,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 					context.strokeStyle = options.lines.bells[j].stroke;
 					context.lineWidth = options.lines.bells[j].width;
 					context.lineCap = options.lines.bells[j].cap;
-					context.lineJoin = options.lines.bells[j].join
+					context.lineJoin = options.lines.bells[j].join;
 					context.setLineDash( options.lines.bells[j].dash );
 					context.stroke();
 				}
