@@ -169,8 +169,10 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 
 				sharedOptions = {
 					dimensions: {
-						rowHeight: rowHeight,
-						rowWidth: rowWidth,
+						row: {
+							height: rowHeight,
+							width: rowWidth
+						}
 					}
 				};
 
@@ -243,7 +245,8 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 
 			// Create the plain course image
 			var plainCourseContainer = this.container.numbers;
-			plainCourseContainer.append( new MethodGrid( plainCourseOptions ) );
+			var plainCourseGrid = new MethodGrid( plainCourseOptions );
+			plainCourseContainer.append( plainCourseGrid.draw() );
 
 			// Redistribute the plain course's leads across the required number of columns to fit the page when resizing
 			var plainCourseResizedLastFired = 0;
@@ -264,12 +267,13 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 			
 			// Create images for the calls. These will not be redrawn when resizing the window, so don't store the options for later use
 			this.options.calls.forEach( function( call, i ) {
-				this.container.numbers.append( new MethodGrid( $.extend( true, {}, call, sharedOptions, {
+				var callGrid = new MethodGrid( $.extend( true, {}, call, sharedOptions, {
 					id: 'numbers'+this.id+'_'+call.id,
 					numberOfLeads: 1,
 					lines: { show: true, bells: callLines[i] },
 					numbers: { show: true, bells: callLines[i].map( function( l ) { return { color: (l.stroke !== 'transparent')? 'transparent' : '#000' }; } ) }
-				} ) ) );
+				} ) );
+				this.container.numbers.append( callGrid.draw() );
 			}, this );
 		},
 
@@ -282,7 +286,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 				huntBellWidth = 1.8,
 
 				sharedOptions = {
-					dimensions: ($window.width() > 600)? { rowHeight: 14, bellWidth: 12 } : { rowHeight: 11, bellWidth: 9 },
+					dimensions: ($window.width() > 600)? { row: {height: 14}, bell: {width: 12} } : { row: {height: 11}, bell: {width: 9} },
 					sideNotation: { show: true },
 					numbers: false,
 					lines: {show: true, bells: ( function( iLim, huntBells ) {
@@ -299,17 +303,19 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 				};
 
 			// Plain lead
-			this.container.grid.append( new MethodGrid( $.extend( true, {}, this.options.plainCourse, sharedOptions, {
+			var plainCourseGrid = new MethodGrid( $.extend( true, {}, this.options.plainCourse, sharedOptions, {
 				id: 'grid'+this.id+'_plain',
 				title: {
 					text: 'Plain Lead:'
 				}
-			} ) ) );
+			} ) );
+			this.container.grid.append( plainCourseGrid.draw() );
 			// Calls
 			for( i = 0; i < this.options.calls.length; i++ ) {
-				this.container.grid.append( new MethodGrid( $.extend( true, {}, this.options.calls[i], sharedOptions, {
+				var callGrid = new MethodGrid( $.extend( true, {}, this.options.calls[i], sharedOptions, {
 					id: 'grid'+this.id+'_'+this.options.calls[i].id
-				} ) ) );
+				} ) );
+				this.container.grid.append( callGrid.draw() );
 			}
 
 			// Give all the grids the same width
