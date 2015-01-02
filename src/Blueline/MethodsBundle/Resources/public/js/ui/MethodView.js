@@ -233,7 +233,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 				},
 				layout: {
 					numberOfLeads: this.method.numberOfLeads,
-					leadsPerColumn: leadsPerColumn
+					numberOfColumns: Math.ceil( this.method.numberOfLeads / leadsPerColumn )
 				},
 				placeStarts: {
 					show:true,
@@ -289,6 +289,12 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 					dimensions: ($window.width() > 600)? { row: {height: 14}, bell: {width: 12} } : { row: {height: 11}, bell: {width: 9} },
 					sideNotation: { show: true },
 					numbers: false,
+					verticalGuides: {
+						lines: {
+							show: true,
+							stroke: '#BBB'
+						}
+					},
 					lines: {show: true, bells: ( function( iLim, huntBells ) {
 						var lines = [], i = 0, j = 0;
 						for(; i < iLim; ++i ) {

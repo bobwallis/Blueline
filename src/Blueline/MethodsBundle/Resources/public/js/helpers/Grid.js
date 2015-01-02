@@ -15,13 +15,13 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 			canvas: { padding: {} }
 		},
 		background: {
-			color: '#FFF' // CSS color
+			color: '#FFF'
 		},
 		title: {
-			show: false,         // Can just set the whole attribute to false instead
+			show: false,
 			text: null,
 			font: '12px "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif',
-			color: '#000'        // CSS color
+			color: '#000'
 		},
 		sideNotation: {
 			show: false,
@@ -29,13 +29,18 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 			color: '#000'        // CSS color
 		},
 		verticalGuides: {
-			shading: false, // or a CSS color
+			shading: {
+				show: false,
+				fullHeight: false,
+				color: '#EEE'
+			},
 			lines: {
-				show: false,    // Can just set the whole attribute to false instead
-				stroke: '#999', // for passing to ctx.strokeStyle - CSS color
-				dash:   [2,1],  // for passing to ctx.setLineDash
-				width:  1,      // for passing to ctx.lineWidth
-				cap:    'round' // for passing to ctx.lineCap: butt, round or square
+				show: false,
+				fullHeight: false,
+				stroke: '#999',
+				dash:   [2,1],
+				width:  1,
+				cap:    'butt'
 			}
 		},
 		placeStarts: {
@@ -50,10 +55,10 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 		},
 		ruleOffs: {
 			show: true,
-			stroke: '#999',  // for passing to ctx.strokeStyle - CSS color
-			dash:   [3,1],   // for passing to ctx.setLineDash
-			width:  1,       // for passing to ctx.lineWidth
-			cap:    'butt' // for passing to ctx.lineCap: butt, round or square
+			stroke: '#999',
+			dash:   [3,1],
+			width:  1,
+			cap:    'butt'
 		},
 		numbers: {
 			show: true,
@@ -125,11 +130,11 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 			if( options.title.text !== null ) { options.title.show = true; }
 
 			// Calculate what the 'layout' option object should look like using the passed options to guide
-			if( options.layout.numberOfLeads > options.layout.numberOfColumns ) {
+			if( options.layout.numberOfColumns > options.layout.numberOfLeads ) {
 				options.layout.numberOfColumns = options.layout.numberOfLeads;
 			}
 			options.layout.leadsPerColumn = Math.ceil( options.layout.numberOfLeads / options.layout.numberOfColumns );
-			options.layout.rowsPerColumn = options.layout.leadsPerColumn * options.layout.leadLength;
+			options.layout.changesPerColumn = (options.layout.leadsPerColumn * options.layout.leadLength);
 
 			// Calculation what the 'dimensions' object should look like
 			// Bell width and row width come from each other
@@ -199,12 +204,13 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 			} );
 
 			// Create some shortcut variables for later use
-			var context = canvas.context,
+			var i, j, k, h, w, x, y
+				context = canvas.context,
 
 				numberOfLeads = options.layout.numberOfLeads,
 				numberOfColumns = options.layout.numberOfColumns,
 				leadsPerColumn = options.layout.leadsPerColumn,
-				rowsPerColumn = options.layout.rowsPerColumn,
+				changesPerColumn = options.layout.changesPerColumn,
 				leadLength = options.layout.leadLength,
 
 				rowHeight = options.dimensions.row.height,
@@ -254,10 +260,52 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 				}
 			}
 
+			// Draw vertical guides - shading
+			if( options.verticalGuides.shading.show ) {
+				context.fillStyle = options.verticalGuides.shading.color;
+				for( i = 0; i < numberOfColumns; ++i ) {
+					if( options.verticalGuides.shading.fullHeight ) {
+						h = rowHeight*(1+(leadLength*((i+1 == numberOfColumns)? Math.max(1,(numberOfLeads%leadsPerColumn)): leadsPerColumn)));
+						y = canvasTopPadding;
+					}
+					else {
+						h = rowHeight*leadLength*((i+1 == numberOfColumns)? Math.max(1,(numberOfLeads%leadsPerColumn)): leadsPerColumn);
+						y = canvasTopPadding + (bellHeight/2);
+					}
+					for( k = 0; k < options.stage; k+=2 ) {
+						context.fillRect( canvasLeftPadding + (i*rowWidthWithPadding) + ((0.5+k)*bellWidth), y, bellWidth, h );
+					}
+				}
+			}
+
+			// Draw vertical guides - lines
+			if( options.verticalGuides.lines.show ) {
+				context.lineWidth = options.verticalGuides.lines.width;
+				context.lineCap = options.verticalGuides.lines.cap;
+				context.strokeStyle = options.verticalGuides.lines.stroke;
+				context.setLineDash( options.verticalGuides.lines.dash );
+				context.beginPath();
+				for( i = 0; i < numberOfColumns; ++i ) {
+					if( options.verticalGuides.shading.fullHeight ) {
+						h = rowHeight*(1+(leadLength*((i+1 == numberOfColumns)? Math.max(1,(numberOfLeads%leadsPerColumn)): leadsPerColumn)));
+						y = canvasTopPadding;
+					}
+					else {
+						h = rowHeight*leadLength*((i+1 == numberOfColumns)? Math.max(1,(numberOfLeads%leadsPerColumn)): leadsPerColumn);
+						y = canvasTopPadding + (bellHeight/2);
+					}
+					for( k = 0; k < options.stage; ++k ) {
+						x = canvasLeftPadding + (i*rowWidthWithPadding) + ((0.5+k)*bellWidth);
+						context.moveTo( x, y );
+						context.lineTo( x, y + h );
+					}
+				}
+				context.stroke();
+			}
+
 			// Draw rule offs
 			if( options.ruleOffs.show ) {
 				context.lineWidth = options.ruleOffs.width;
-				context.lineJoin = 'bevel';
 				context.lineCap = options.ruleOffs.cap;
 				context.strokeStyle = options.ruleOffs.stroke;
 				context.setLineDash( options.ruleOffs.dash );
@@ -373,8 +421,8 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 				for( i = 0; i < options.callingPositions.titles.length; ++i ) {
 					if( options.callingPositions.titles[i] !== null ) {
 						var rowInMethod = options.callingPositions.from + ( options.callingPositions.every * (i+1) ) - 2;
-						x = canvasLeftPadding + (Math.floor( rowInMethod/rowsPerColumn )*rowWidthWithPadding) + rowWidth + 4;
-						y = canvasTopPadding + ((rowInMethod % rowsPerColumn) + 1)*rowHeight;
+						x = canvasLeftPadding + (Math.floor( rowInMethod/changesPerColumn )*rowWidthWithPadding) + rowWidth + 4;
+						y = canvasTopPadding + ((rowInMethod % changesPerColumn) + 1)*rowHeight;
 						context.fillText( '-'+options.callingPositions.titles[i], x, y );
 					}
 				}
