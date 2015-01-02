@@ -32,7 +32,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 			shading: {
 				show: false,
 				fullHeight: false,
-				color: '#EEE'
+				color: '#999'
 			},
 			lines: {
 				show: false,
