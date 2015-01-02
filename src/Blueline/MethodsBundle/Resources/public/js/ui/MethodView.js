@@ -245,8 +245,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 
 			// Create the plain course image
 			var plainCourseContainer = this.container.numbers;
-			var plainCourseGrid = new MethodGrid( plainCourseOptions );
-			plainCourseContainer.append( plainCourseGrid.draw() );
+			plainCourseContainer.append( (new MethodGrid( plainCourseOptions )).draw() );
 
 			// Redistribute the plain course's leads across the required number of columns to fit the page when resizing
 			var plainCourseResizedLastFired = 0;
@@ -259,8 +258,8 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 					newLeadsPerColumn = determineLeadsPerColumn();
 				if( currentLeadsPerColumn !== newLeadsPerColumn ) {
 					$( '#'+plainCourseOptions.id ).remove();
-					plainCourseOptions.layout.leadsPerColumn = newLeadsPerColumn;
-					plainCourseContainer.prepend( new MethodGrid( plainCourseOptions ) );
+					plainCourseOptions.layout.numberOfColumns = Math.ceil( plainCourseOptions.layout.numberOfLeads / newLeadsPerColumn );
+					plainCourseContainer.prepend( (new MethodGrid( plainCourseOptions )).draw() );
 					leadsPerColumn = newLeadsPerColumn;
 				}
 			} );
