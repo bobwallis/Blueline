@@ -38,7 +38,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 				show: false,
 				fullHeight: false,
 				stroke: '#999',
-				dash:   [2,1],
+				dash:   [3,1],
 				width:  1,
 				cap:    'butt'
 			}

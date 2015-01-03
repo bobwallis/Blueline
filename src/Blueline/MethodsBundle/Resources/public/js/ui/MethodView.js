@@ -291,7 +291,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 					verticalGuides: {
 						lines: {
 							show: true,
-							stroke: '#BBB'
+							stroke: '#DDD'
 						}
 					},
 					lines: {show: true, bells: ( function( iLim, huntBells ) {
