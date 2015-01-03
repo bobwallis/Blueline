@@ -65,6 +65,13 @@ class MethodsController extends Controller
         $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
+        // If the title is empty redirect to version without slash
+        if( empty($title) ) {
+            return $this->redirect( $this->generateUrl('Blueline_Methods_custom_view', array(
+                'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null)
+            ), 301) );
+        }
+
         // Create basic response object
         $response = new Response();
         if ($this->container->getParameter('kernel.environment') == 'prod') {
