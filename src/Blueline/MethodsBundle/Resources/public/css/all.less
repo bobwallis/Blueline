@@ -1,18 +1,25 @@
 section.method {
-	// Nearby towers stuff
 	h3 {
-		margin: 0 @contentXPadding 2px;
-		// Adjust top margins, and padding for nearby towers ol
+		margin: 0;
+		padding: (@contentYPadding - 2) @contentXPadding 2px @contentXPadding;
+		border-top: 1px solid @lightGrey;
 		&+ol {
 			margin-top: 0;
-			margin-left: @contentXPadding*2;
+			margin-left: 0;
 			li {
 				padding: 2px 0;
+				border-color: lighten(@lightGrey, 6%) !important;
+				&.none {
+					padding: 4px @contentXPadding 4px (@contentXPadding*2);
+				}
+				a {
+					padding: 4px @contentXPadding 4px (@contentXPadding*2);
+				}
 				&:first-child {
 					padding-top: 0;
 				}
 				&:last-child {
-					padding-bottom: 0;
+					padding-bottom: (@contentYPadding - 4);
 				}
 			}
 		}
@@ -26,31 +33,98 @@ section.method {
 	}
 
 	// Default tab shows/hides
-	.details, .grid {
+	.details, .line, .grid {
 		display: none;
 	}
-	.line {
+	.numbers {
 		display: block;
 	}
 }
 
-@media screen and (max-width: 500px) {
-	// Borders and padding for nearby towers ol
-	section.method h3 {
-		margin: 0;
-		padding: (@contentYPadding - 2) @contentXPadding 2px @contentXPadding;
-		border-top: 1px solid @lightGrey;
-		&+ol {
-			margin-left: 0;
-			li {
-				border-color: lighten(@lightGrey, 6%) !important;
-				a {
-					padding: 4px @contentXPadding 4px (@contentXPadding*2);
-				}
-				&:last-child {
-					padding-bottom: (@contentYPadding - 4);
-				}
+#export {
+	fieldset {
+		border: 1px solid @lightGrey;
+	}
+	.form-section {
+
+	}
+	legend {
+		padding: 0.2em 0.5em;
+		font-size: 16px;
+	}
+	label.large {
+		display: block;
+		margin: @contentYPadding 0 5px 0;
+		font-size: 12px;
+		font-weight: bold;
+		&:first-child {
+			margin: 0;
+		}
+	}
+	.form-group {
+		padding: 0 0 @contentYPadding @contentXPadding;
+		label {
+			display: inline-block;
+			width: 95px;
+			line-height: 23px;
+			&.internal {
+				width: auto !important;
 			}
 		}
+		.form-group label {
+			width: 95 - @contentXPadding;
+		}
+	}
+	input.text {
+		font-size: 12px;
+		height: 15px;
+		line-height: 15px;
+		border: 2px solid #DDD;
+		.border-radius(3px);
+		margin: 0 2px;
+		padding: 2px 5px;
+		&:required:invalid {
+			border-color: #F00;
+		}
+		&.tiny {
+			width: 38px;
+		}
+		&.small {
+			width: 70px;
+		}
+		&.medium {
+			width: 120px;
+		}
+		&.large {
+			width: 250px;
+		}
+	}
+	input.check {
+		margin: 0 5px;
+	}
+	select {
+		margin: 0 2px;
+	}
+	.colorPreview {
+		display: inline-block;
+		.transition-property(background-color;);
+		.transition-duration(.15s);
+		width: 19px;
+		height: 19px;
+		margin: 0 0 0 4px;
+		line-height: 19px;
+		border: 2px solid #DDD;
+		.border-radius(3px);
+	}
+	.capPreview, .dashPreview, .widthPreview, .facePreview {
+		display: inline-block;
+		vertical-align: top;
+		margin: 0 0 0 4px;
+	}
+	.facePreview {
+		width: 125px;
+		height: 19px;
+		border: 2px solid #DDD;
+		.border-radius(3px);
 	}
 }

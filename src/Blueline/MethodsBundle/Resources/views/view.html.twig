@@ -19,6 +19,7 @@
 	<section class="method">
 		{{ header( { 'title': method.title }, null, { 'id': 'method_'~loop.index~'_tabBar', 'active': 1, 'tabs': [
 			{ 'title': 'Details', 'content': 'method_details_'~loop.index },
+			{ 'title': 'Numbers', 'content': 'method_numbers_'~loop.index },
 			{ 'title': 'Line', 'content': 'method_line_'~loop.index },
 			{ 'title': 'Grid', 'content': 'method_grid_'~loop.index }
 		] } ) }}
@@ -70,12 +71,14 @@
 {% endif %}
 			</dl>
 		</div>
-		<div id="method_line_{{ loop.index }}" class="line"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
+		<div id="method_numbers_{{ loop.index }}" class="numbers"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
+		<div id="method_line_{{ loop.index }}" class="line"></div>
 		<div id="method_grid_{{ loop.index }}" class="grid"></div>
 		{% autoescape false %}
 		<script>require(['methods/ui/MethodView'],function(a){new a({{ {
 			id: loop.index,
-			numbersContainer: '#method_line_'~loop.index,
+			numbersContainer: '#method_numbers_'~loop.index,
+			lineContainer: '#method_line_'~loop.index,
 			gridContainer: '#method_grid_'~loop.index,
 			stage: method.stage,
 			notation: method.notationExpanded,

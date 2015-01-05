@@ -47,14 +47,12 @@ define( ['jquery'], function( $ ) {
 		}
 	};
 
-	// Initialise a couple of things relying on the DOM after it's ready
-	$( function() {
-		URL.baseURL = location.protocol+'//'+location.host + $( '#top a:first' ).attr( 'href' );
-		if ( URL.baseURL.substr(-1) != '/' ) {
-			URL.baseURL += '/';
-		}
-		regExp_isInternalLink = new RegExp( '^'+URL.baseURL.replace( '/', '\\/' ) );
-	} );
+	// Initialise
+	URL.baseURL = location.protocol+'//'+location.host + $( '#top a:first' ).attr( 'href' );
+	if ( URL.baseURL.substr(-1) != '/' ) {
+		URL.baseURL += '/';
+	}
+	regExp_isInternalLink = new RegExp( '^'+URL.baseURL.replace( '/', '\\/' ) );
 
 	return URL;
 } );

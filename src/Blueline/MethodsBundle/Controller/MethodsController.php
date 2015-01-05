@@ -67,7 +67,7 @@ class MethodsController extends Controller
 
         // If the title is empty redirect to version without slash
         if( empty($title) ) {
-            return $this->redirect( $this->generateUrl('Blueline_Methods_custom_view', array(
+            return $this->redirect( $this->generateUrl('Blueline_Methods_welcome', array(
                 'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null)
             ), 301) );
         }
@@ -137,8 +137,10 @@ class MethodsController extends Controller
         $url = $this->generateUrl('Blueline_Methods_view', array(
             'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null),
             'scale'      => intval($request->query->get('scale')) ?: null,
-            'title'      => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)), '_format' => $format, )
-        );
+            'style'      => strtolower($request->query->get('style')) ?: null,
+            'title'      => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)),
+            '_format'    => $format
+        ) );
         if ($request->getRequestUri() !== urldecode($url)) {
             return $this->redirect($url, 301);
         }
@@ -164,7 +166,21 @@ class MethodsController extends Controller
                 if ((intval($request->query->get('scale')) ?: 1) > 4 && $this->container->getParameter('kernel.environment') == 'prod') {
                     throw $this->createAccessDeniedException('Maximum scale is 4 unless in developer mode.');
                 }
-                $process = new Process('phantomjs --disk-cache=true --load-images=false "'.__DIR__.'/../Resources/phantomjs/render_line.js" "'.$this->generateUrl('Blueline_Methods_view', array( 'title' => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)) ), true).'" '.(intval($request->query->get('scale')) ?: 1).' 2>&1');
+                $section = $request->query->get('style');
+                if ($section == 'numbers') {
+                    $url = $this->generateUrl('Blueline_Methods_view', array(
+                        'scale'   => intval($request->query->get('scale')) ?: null,
+                        'title'   => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)),
+                        '_format' => 'png'
+                    ) );
+                    return $this->redirect($url, 301);
+                } elseif (!$section) {
+                    $section = 'numbers';
+                }
+                if (!in_array($section, ['numbers', 'line', 'grid'])) {
+                    throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'line' or 'grid'.");
+                }
+                $process = new Process('phantomjs --disk-cache=true --load-images=false "'.__DIR__.'/../Resources/phantomjs/render.js" "'.$this->generateUrl('Blueline_Methods_view', array( 'title' => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)) ), true).'" "'.$section.'" '.(intval($request->query->get('scale')) ?: 1).' 2>&1');
                 $process->mustRun();
                 $response->setContent($process->getOutput());
 
@@ -223,6 +239,21 @@ class MethodsController extends Controller
         $pageTitle = $vars['title'];
 
         return $this->render('BluelineMethodsBundle::view.'.$format.'.twig', compact('pageTitle', 'methods'), $response);
+    }
+
+    public function exportAction()
+    {
+        $request = $this->getRequest();
+        $format = $request->getRequestFormat();
+
+        // Create basic response object
+        $response = new Response();
+        if ($this->container->getParameter('kernel.environment') == 'prod') {
+            $response->setMaxAge(129600);
+            $response->setPublic();
+        }
+
+        return $this->render('BluelineMethodsBundle::export.html.twig', array(), $response);
     }
 
     public function sitemapAction()

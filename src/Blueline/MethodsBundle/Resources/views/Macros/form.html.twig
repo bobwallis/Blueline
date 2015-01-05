@@ -1,0 +1,78 @@
+{% macro text( id, label, default, size ) %}
+<div class="form-group">
+	<label for="{{ id }}">{{ label|default('Text') }}</label>
+	<input id="{{ id }}" class="text{{ size in ['large', 'medium', 'small', 'tiny'] ? ' '~size }}" type="text" value="{{ default|default('') }}" />
+</div>
+{% endmacro %}
+
+{% macro checkbox( id, label, default ) %}
+<div class="form-group">
+	<label for="{{ id }}">{{ label|default('Checkbox') }}</label>
+	<input id="{{ id }}" class="check" type="checkbox" value="true" />
+</div>
+{% endmacro %}
+
+{% macro color( id, label, default ) %}
+<div class="form-group">
+	<label for="{{ id }}">{{ label|default('Colour') }}</label>
+	<input id="{{ id }}" class="color text medium" type="text" value="{{ default|default('#000') }}" />
+	<div id="{{ id }}_preview" class="colorPreview" style="background-color:{{ default|default('#000') }}">&nbsp;</div>
+</div>
+{% endmacro %}
+
+{% macro every( id, label ) %}
+<div class="form-group">
+	<label>Frequency</label>
+	<label for="{{ id }}_every" class="internal">Every</label>
+	<input id="{{ id }}_every" class="text tiny" type="number" min="0" step="1" value="1" />&nbsp;rows
+	<label for="{{ id }}_from" class="internal">starting at row</label>
+	<input id="{{ id }}_from" class="text tiny" type="number" step="1" value="0" />
+
+</div>
+{% endmacro %}
+
+{% macro line( id, defaults ) %}
+{% import _self as form %}
+{{ form.color(id~'_color', 'Colour', defaults.color|default('#000')) }}
+<div class="form-group">
+	<label for="{{ id }}">Dash</label>
+	<input id="{{ id }}_dash" class="dash text tiny" type="text" pattern="[0-9.,]*" value="{{ defaults.dash|default(0) }}" />
+</div>
+<div class="form-group">
+	<label for="{{ id }}">Width</label>
+	<input id="{{ id }}_width" class="width text tiny" type="number" min="0.5" step="0.5" value="{{ defaults.width|default(1) }}" />
+</div>
+<div class="form-group">
+	<label for="{{ id }}_cap">Cap</label>
+	<select id="{{ id }}_cap" class="cap">
+		<option value="butt"{{ defaults.cap == 'butt' ? ' selected="selected"' }}>Butt</option>
+		<option value="round"{{ defaults.cap == 'round' ? ' selected="selected"' }}>Round</option>
+		<option value="square" {{ defaults.cap == 'square' ? ' selected="selected"' }}>Square</option>
+	</select>
+</div>
+{% endmacro %}
+
+{% macro font( id, label, defaults, previewText ) %}
+<div class="form-group">
+	<label for="{{ id }}">{{ label|default('Font') }}</label>
+	<input id="{{ id }}_size" class="text tiny" type="number" min="1" step="0.5" value="{{ defaults.size|default(12) }}" />px&nbsp;&nbsp;
+	<select id="{{ id }}_face" class="face" data-previewtext="{{ previewText|default('Test Text') }}">
+		<optgroup label="Serif">
+			{% for font in ['Liberation Serif', 'Linux Libertine', 'Roboto Slab'] %}
+			<option value="{{ font }}"{{ defaults.face == font ? ' selected="selected"' }}>{{ font }}</option>
+			{% endfor %}
+		</optgroup>
+		<optgroup label="Sans-Serif">
+			{% for font in ['Liberation Sans', 'Linux Biolinum', 'Roboto', 'Ubuntu'] %}
+			<option value="{{ font }}"{{ defaults.face == font ? ' selected="selected"' }}>{{ font }}</option>
+			{% endfor %}
+		</optgroup>
+		<optgroup label="Monospace">
+			{% for font in ['Inconsolata', 'Droid Sans Mono', 'Liberation Mono', 'Ubuntu Mono'] %}
+			<option value="{{ font }}"{{ defaults.face == font ? ' selected="selected"' }}>{{ font }}</option>
+			{% endfor %}
+		</optgroup>
+	</select>
+	<div id="{{ id }}_preview" class="fontPreview"></div>
+</div>
+{% endmacro %}

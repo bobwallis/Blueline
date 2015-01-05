@@ -3,3 +3,9 @@ Blueline_Services_oembed:
     defaults: { _controller: BluelineServicesBundle:Oembed:index }
     requirements:
         _format: json|xml
+
+Blueline_FontPreview:
+    path:     /previewFont.{_format}
+    defaults: { _controller: BluelineServicesBundle:FontPreview:preview }
+    requirements:
+        _format: png

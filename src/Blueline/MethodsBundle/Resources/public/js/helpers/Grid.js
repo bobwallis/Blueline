@@ -117,15 +117,16 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 				}
 			};
 
+			// Allow entire attributes to be set to true or false
+			Object.keys( defaultOptions ).forEach( function( e ) {
+				if( typeof passedOptions[e] === 'boolean' ) {
+					passedOptions[e] = { show: passedOptions[e] };
+				}
+			} );
+
 			// Merge options object with the defaults
 			options = $.extend( true, {}, defaultOptions, defaultRuntimeOptions, passedOptions );
 
-			// Allow entire attributes to be set to false
-			Object.keys( defaultOptions ).forEach( function( e ) {
-				if( typeof options[e] === false ) {
-					options[e] = { show: false };
-				}
-			} );
 			// Allow title to be shown by just setting title.text
 			if( options.title.text !== null ) { options.title.show = true; }
 
@@ -188,7 +189,6 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 				height: options.dimensions.canvas.padding.top + (options.dimensions.row.height * ((options.layout.leadsPerColumn * options.layout.leadLength)+1)),
 				padding: options.dimensions.canvas.padding
 			};
-			console.log(options);
 		};
 
 		this.measure = function() {
@@ -269,7 +269,11 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 						y = canvasTopPadding;
 					}
 					else {
-						h = rowHeight*leadLength*((i+1 == numberOfColumns)? Math.max(1,(numberOfLeads%leadsPerColumn)): leadsPerColumn);
+						if(i+1 == numberOfColumns) {
+							h = rowHeight*leadLength*Math.max(1,(numberOfLeads%leadsPerColumn));
+						} else {
+							h = rowHeight*(0.25+(leadLength*leadsPerColumn));
+						}
 						y = canvasTopPadding + (bellHeight/2);
 					}
 					for( k = 0; k < options.stage; k+=2 ) {
@@ -291,7 +295,11 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 						y = canvasTopPadding;
 					}
 					else {
-						h = rowHeight*leadLength*((i+1 == numberOfColumns)? Math.max(1,(numberOfLeads%leadsPerColumn)): leadsPerColumn);
+						if(i+1 == numberOfColumns) {
+							h = rowHeight*leadLength*Math.max(1,(numberOfLeads%leadsPerColumn));
+						} else {
+							h = rowHeight*(0.25+(leadLength*leadsPerColumn));
+						}
 						y = canvasTopPadding + (bellHeight/2);
 					}
 					for( k = 0; k < options.stage; ++k ) {
@@ -303,26 +311,39 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 				context.stroke();
 			}
 
-			// Draw rule offs
-			if( options.ruleOffs.show ) {
-				context.lineWidth = options.ruleOffs.width;
-				context.lineCap = options.ruleOffs.cap;
-				context.strokeStyle = options.ruleOffs.stroke;
-				context.setLineDash( options.ruleOffs.dash );
-				context.beginPath();
-				for( i = 0; i < numberOfColumns; ++i ) {
-					for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
-						for( k = options.ruleOffs.from; k <= leadLength; k += options.ruleOffs.every ) {
-							if( k > 0 ) {
-								x = canvasLeftPadding + (i*rowWidthWithPadding);
-								y = canvasTopPadding + (((j*leadLength)+k)*rowHeight);
-								context.moveTo( x, y );
-								context.lineTo( x + rowWidth, y );
+			// Draw numbers
+			if( options.numbers.show ) {
+				// Calculate reused offsets
+				var textMetrics = MeasureCanvasTextOffset( Math.max(bellWidth, rowHeight ), options.numbers.font, '0' ),
+					columnSidePadding = interColumnPadding + columnRightPadding,
+					sidePadding = canvasLeftPadding + (bellWidth/2) + textMetrics.x,
+					topPadding = canvasTopPadding + (rowHeight/2) + textMetrics.y;
+
+				// Set up the context
+				context.font = options.numbers.font;
+				context.textAlign = 'center';
+				context.textBaseline = 'middle';
+
+				options.numbers.bells.forEach( function( bellOptions, bell ) { // For each number
+					if( bellOptions.color !== 'transparent' ) { // Only bother drawing at all if not transparent
+						context.fillStyle = bellOptions.color;
+
+						var char = PlaceNotation.bellToChar( bell ),
+							row = options.startRow;
+
+						for( i = 0; i < numberOfColumns; ++i ) {
+							for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
+								if( j === 0 ) {
+									context.fillText( char, sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding), topPadding );
+								}
+								for( k = 0; k < leadLength; ) {
+									row = PlaceNotation.apply( options.notation.parsed[k], row );
+									context.fillText( char, sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding), topPadding+(j*leadLength*rowHeight)+(++k*rowHeight) );
+								}
 							}
 						}
 					}
-				}
-				context.stroke();
+				} );
 			}
 
 			// Draw lines
@@ -366,6 +387,28 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 						context.stroke();
 					}
 				}
+			}
+
+			// Draw rule offs
+			if( options.ruleOffs.show ) {
+				context.lineWidth = options.ruleOffs.width;
+				context.lineCap = options.ruleOffs.cap;
+				context.strokeStyle = options.ruleOffs.stroke;
+				context.setLineDash( options.ruleOffs.dash );
+				context.beginPath();
+				for( i = 0; i < numberOfColumns; ++i ) {
+					for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
+						for( k = options.ruleOffs.from; k <= leadLength; k += options.ruleOffs.every ) {
+							if( k > 0 ) {
+								x = canvasLeftPadding + (i*rowWidthWithPadding);
+								y = canvasTopPadding + (((j*leadLength)+k)*rowHeight);
+								context.moveTo( x, y );
+								context.lineTo( x + rowWidth, y );
+							}
+						}
+					}
+				}
+				context.stroke();
 			}
 
 			// Draw place starts
@@ -426,41 +469,6 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 						context.fillText( '-'+options.callingPositions.titles[i], x, y );
 					}
 				}
-			}
-
-			// Draw numbers
-			if( options.numbers.show ) {
-				// Calculate reused offsets
-				var textMetrics = MeasureCanvasTextOffset( Math.max(bellWidth, rowHeight ), options.numbers.font, '0' ),
-					columnSidePadding = interColumnPadding + columnRightPadding,
-					sidePadding = canvasLeftPadding + (bellWidth/2) + textMetrics.x,
-					topPadding = canvasTopPadding + (rowHeight/2) + textMetrics.y;
-
-				// Set up the context
-				context.font = options.numbers.font;
-				context.textAlign = 'center';
-				context.textBaseline = 'middle';
-
-				options.numbers.bells.forEach( function( bellOptions, bell ) { // For each number
-					if( bellOptions.color !== 'transparent' ) { // Only bother drawing at all if not transparent
-						context.fillStyle = bellOptions.color;
-
-						var char = PlaceNotation.bellToChar( bell ),
-							row = options.startRow;
-
-						for( i = 0; i < numberOfColumns; ++i ) {
-							for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
-								if( j === 0 ) {
-									context.fillText( char, sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding), topPadding );
-								}
-								for( k = 0; k < leadLength; ) {
-									row = PlaceNotation.apply( options.notation.parsed[k], row );
-									context.fillText( char, sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding), topPadding+(j*leadLength*rowHeight)+(++k*rowHeight) );
-								}
-							}
-						}
-					}
-				} );
 			}
 
 			// Return the image

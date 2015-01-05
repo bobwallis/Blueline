@@ -3,16 +3,12 @@
 // Create ../helpers/Method for calculating useful information about a method (rather than doing it below)
 // Split this into MethodView/Numbers and MethodView/Grid
 
-// Maybe split the measureTextXAndYPadding function out of ../helpers/Grid
-// ../helpers/Grid is just a massive function. At least split things out so it's
-// more obvious what on earth is going on.
-// ../helpers/PlaceNotation is fine, some documentation would be useful though
-
 define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../helpers/Grid', '../helpers/PlaceNotation'], function( $, webFontLoaded, Method, MethodGrid, PlaceNotation ) {
 	// Display messages if canvas is not supported
 	if( !Modernizr.canvas ) {
 		return function( options ) {
 			$( options.numbersContainer ).html( '<div class="wrap"><img src="'+location.href+'.png" /></div>' );
+			$( options.lineContainer ).html( '<div class="wrap"><p class="nothing">Your browser doesn\'t support canvas elements, and so can\'t draw methods. Consider upgrading to a more modern browser.</p></div>' );
 			$( options.gridContainer ).html( '<div class="wrap"><p class="nothing">Your browser doesn\'t support canvas elements, and so can\'t draw methods. Consider upgrading to a more modern browser.</p></div>' );
 		};
 	}
@@ -28,6 +24,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 		// Containers
 		this.container = {
 			numbers: $( options.numbersContainer ).empty(),
+			lines: $( options.lineContainer ).empty(),
 			grid: $( options.gridContainer ).empty()
 		};
 
@@ -144,6 +141,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 		}
 
 		this.drawNumbers();
+		this.drawLines();
 		this.drawGrids();
 
 		return this;
@@ -240,7 +238,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 					bells: plainPlaceStarts
 				},
 				lines: {show: true, bells: plainLines },
-				numbers: {show: true, bells: plainLines.map( function( l, i ) { return { color: (l.stroke !== 'transparent')? 'transparent' : '#000' }; } ) }
+				numbers: {show: true, bells: plainLines.map( function( l, i ) { return { color: (l.stroke !== 'transparent')? '#DDD' : '#000' }; } ) }
 			} );
 
 			// Create the plain course image
@@ -270,9 +268,139 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 					id: 'numbers'+this.id+'_'+call.id,
 					numberOfLeads: 1,
 					lines: { show: true, bells: callLines[i] },
-					numbers: { show: true, bells: callLines[i].map( function( l ) { return { color: (l.stroke !== 'transparent')? 'transparent' : '#000' }; } ) }
+					numbers: { show: true, bells: callLines[i].map( function( l ) { return { color: (l.stroke !== 'transparent')? '#DDD' : '#000' }; } ) }
 				} ) );
 				this.container.numbers.append( callGrid.draw() );
+			}, this );
+		},
+		drawLines: function() {
+			// Get settings
+			var workingBellColor = ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'],
+				huntBellColor = '#D11',
+				workingBellWidth = 2,
+				huntBellWidth = 1.2,
+				columnPadding = 15,
+				rowHeight = 14,
+				rowWidth = ( function( stage ) {
+					// Measure the text
+					var testCanvas = $( '<canvas></canvas>' ).get( 0 ),
+						ctx = testCanvas.getContext( '2d' );
+					ctx.font = '12px '+((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : 'Blueline, "Andale Mono", Consolas, ')+'monospace';
+					return ctx.measureText( Array( stage + 1 ).join( '0' ) ).width + stage;
+				} )( this.method.stage ),
+				leadsPerColumn,
+
+				sharedOptions = {
+					numbers: false,
+					dimensions: {
+						row: {
+							height: rowHeight,
+							width: rowWidth
+						}
+					},
+					verticalGuides: {
+						shading: {
+							show: true,
+							color: '#F3F3F3'
+						}
+					}
+				};
+
+			// For the plain course image, draw a line through the heaviest working bell of each type, and the hunt bells
+			var toFollow = this.method.workGroups.map( function( g ) { return Math.max.apply( Math, g ); } ),
+				plainLines = [];
+			for( var i = 0, j = 0; i < this.method.stage; ++i ) {
+				plainLines.push( {
+					width: (this.method.huntBells.indexOf( i ) !== -1 || toFollow.indexOf( i ) === -1)? huntBellWidth : workingBellWidth,
+					stroke: (this.method.huntBells.indexOf( i ) !== -1)? huntBellColor : ((toFollow.indexOf( i ) !== -1)? workingBellColor[j++] || workingBellColor[j = 0, j++] : 'rgba(0,0,0,0.1)')
+				} );
+			}
+
+			// Decide which bells get place starts drawn on the plain course image (hint: the ones that have lines being drawn that aren't hunt bells)
+			var plainPlaceStarts = plainLines.map( function( l, i ) { return (l.stroke !== 'rgba(0,0,0,0.1)' && this.method.huntBells.indexOf( i ) === -1)? i : -1; }, this ).filter( function( l ) { return l !== -1; } );
+
+			// For calls, draw lines through affected bells, and hunt bells
+			var callLines = [];
+			this.options.calls.forEach( function( call, k ) {
+				callLines[k] = [];
+				for( var i = 0, j = 0; i < this.method.stage; ++i ) {
+					callLines[k].push( {
+						width: (this.method.huntBells.indexOf( i ) !== -1 || toFollow.indexOf( i ) === -1)? huntBellWidth : workingBellWidth,
+						stroke: (this.method.huntBells.indexOf( i ) !== -1)? huntBellColor : ((call.affected.indexOf( i ) !== -1)? workingBellColor[j++] || workingBellColor[j = 0, j++] : 'rgba(0,0,0,0.1)')
+					} );
+				}
+			}, this );
+
+			// Determine the appropriate lead distribution for the plain course to ensure it fits on the page
+			var determineLeadsPerColumn = (function( view ) {
+				var numberOfLeads = view.method.numberOfLeads,
+					numberOfCalls = view.options.calls.length,
+					maxWidth = view.container.numbers.width(),
+					callWidth = 15 + rowWidth,
+					placeStartWidth = (10 + plainPlaceStarts.length*12);
+				return function() {
+					var leadsPerColumn = 1;
+					maxWidth = $('#content').width() - 30;
+					// Check that the window isn't plenty big enough before bothering to look at adjusting
+					if( maxWidth <= 2*callWidth + 5 + (rowWidth + placeStartWidth + columnPadding)*numberOfLeads ) {
+						for( leadsPerColumn = 1; leadsPerColumn < numberOfLeads; ++leadsPerColumn ) {
+							if( maxWidth > ((leadsPerColumn>1)?callWidth:numberOfCalls*callWidth) + Math.ceil( numberOfLeads/leadsPerColumn )*(columnPadding + rowWidth + placeStartWidth ) ) {
+								break;
+							}
+						}
+					}
+					return leadsPerColumn;
+				};
+			})( this );
+			leadsPerColumn = determineLeadsPerColumn();
+
+			// Options object for the plain course
+			var plainCourseOptions = $.extend( true, {}, this.options.plainCourse, sharedOptions, {
+				id: 'lines'+this.id+'_plain',
+				callingPositions: (this.method.callingPositions === false)? false: $.extend( { show: true }, this.method.callingPositions ),
+				dimensions: {
+					columnPadding: columnPadding
+				},
+				layout: {
+					numberOfLeads: this.method.numberOfLeads,
+					numberOfColumns: Math.ceil( this.method.numberOfLeads / leadsPerColumn )
+				},
+				placeStarts: {
+					show:true,
+					bells: plainPlaceStarts
+				},
+				lines: {show: true, bells: plainLines }
+			} );
+
+			// Create the plain course image
+			var plainCourseContainer = this.container.lines;
+			plainCourseContainer.append( (new MethodGrid( plainCourseOptions )).draw() );
+
+			// Redistribute the plain course's leads across the required number of columns to fit the page when resizing
+			var plainCourseResizedLastFired = 0;
+			$window.resize( function() {
+				// Fire at most once every 200ms
+				var nowTime = (new Date()).getTime();
+				if( nowTime - plainCourseResizedLastFired < 200 ) { return; }
+				else { plainCourseResizedLastFired = nowTime; }
+				var currentLeadsPerColumn = leadsPerColumn,
+					newLeadsPerColumn = determineLeadsPerColumn();
+				if( currentLeadsPerColumn !== newLeadsPerColumn ) {
+					$( '#'+plainCourseOptions.id ).remove();
+					plainCourseOptions.layout.numberOfColumns = Math.ceil( plainCourseOptions.layout.numberOfLeads / newLeadsPerColumn );
+					plainCourseContainer.prepend( (new MethodGrid( plainCourseOptions )).draw() );
+					leadsPerColumn = newLeadsPerColumn;
+				}
+			} );
+			
+			// Create images for the calls. These will not be redrawn when resizing the window, so don't store the options for later use
+			this.options.calls.forEach( function( call, i ) {
+				var callGrid = new MethodGrid( $.extend( true, {}, call, sharedOptions, {
+					id: 'lines'+this.id+'_'+call.id,
+					numberOfLeads: 1,
+					lines: { show: true, bells: callLines[i] }
+				} ) );
+				this.container.lines.append( callGrid.draw() );
 			}, this );
 		},
 
