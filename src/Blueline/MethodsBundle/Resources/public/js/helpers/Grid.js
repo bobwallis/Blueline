@@ -276,8 +276,8 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 						}
 						y = canvasTopPadding + (bellHeight/2);
 					}
-					for( k = 0; k < options.stage; k+=2 ) {
-						context.fillRect( canvasLeftPadding + (i*rowWidthWithPadding) + ((0.5+k)*bellWidth), y, bellWidth, h );
+					for( k = 1; k < options.stage; k+=2 ) {
+						context.fillRect( canvasLeftPadding + (i*rowWidthWithPadding) + ((k-0.5)*bellWidth), y, bellWidth, h );
 					}
 				}
 			}
