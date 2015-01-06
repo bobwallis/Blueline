@@ -96,7 +96,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 					for( var i = 0; i < callNotationExploded.length; ++i ) { notationExploded[(i + call.from + call.every) - 1] = callNotationExploded[i]; }
 
 					// Calculte a good amount of padding to display on either side of the call's notation
-					var padding = Math.max( 1, Math.floor(this.method.notation.exploded.length/4) ),
+					var padding = Math.max( 1, Math.floor((this.method.notation.exploded.length-7)/4) ),
 						start = Math.max( 0, (call.from+call.every-1)-padding ), end = Math.min( notationExploded.length, (call.from+call.every+callNotationExploded.length-1)+padding );
 
 					// Parse notation
@@ -154,7 +154,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 				huntBellColor = '#D11',
 				workingBellWidth = 2,
 				huntBellWidth = 1.2,
-				columnPadding = 15,
+				columnPadding = 10,
 				rowHeight = 14,
 				rowWidth = ( function( stage ) {
 					// Measure the text
@@ -205,14 +205,14 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 					numberOfCalls = view.options.calls.length,
 					maxWidth = view.container.numbers.width(),
 					callWidth = 15 + rowWidth,
-					placeStartWidth = (10 + plainPlaceStarts.length*12);
+					placeStartWidth = (10 + plainPlaceStarts.length*13);
 				return function() {
 					var leadsPerColumn = 1;
-					maxWidth = $('#content').width() - 30;
+					maxWidth = $('#content').width() - 24;
 					// Check that the window isn't plenty big enough before bothering to look at adjusting
 					if( maxWidth <= 2*callWidth + 5 + (rowWidth + placeStartWidth + columnPadding)*numberOfLeads ) {
 						for( leadsPerColumn = 1; leadsPerColumn < numberOfLeads; ++leadsPerColumn ) {
-							if( maxWidth > ((leadsPerColumn>1)?callWidth:numberOfCalls*callWidth) + Math.ceil( numberOfLeads/leadsPerColumn )*(columnPadding + rowWidth + placeStartWidth ) ) {
+							if( maxWidth > callWidth + Math.ceil( numberOfLeads/leadsPerColumn )*(columnPadding + rowWidth + placeStartWidth ) ) {
 								break;
 							}
 						}
@@ -279,7 +279,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 				huntBellColor = '#D11',
 				workingBellWidth = 2,
 				huntBellWidth = 1.2,
-				columnPadding = 15,
+				columnPadding = 10,
 				rowHeight = 14,
 				rowWidth = ( function( stage ) {
 					// Measure the text
@@ -337,14 +337,14 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 					numberOfCalls = view.options.calls.length,
 					maxWidth = view.container.numbers.width(),
 					callWidth = 15 + rowWidth,
-					placeStartWidth = (10 + plainPlaceStarts.length*12);
+					placeStartWidth = (10 + plainPlaceStarts.length*13);
 				return function() {
 					var leadsPerColumn = 1;
-					maxWidth = $('#content').width() - 30;
+					maxWidth = $('#content').width() - 24;
 					// Check that the window isn't plenty big enough before bothering to look at adjusting
 					if( maxWidth <= 2*callWidth + 5 + (rowWidth + placeStartWidth + columnPadding)*numberOfLeads ) {
 						for( leadsPerColumn = 1; leadsPerColumn < numberOfLeads; ++leadsPerColumn ) {
-							if( maxWidth > ((leadsPerColumn>1)?callWidth:numberOfCalls*callWidth) + Math.ceil( numberOfLeads/leadsPerColumn )*(columnPadding + rowWidth + placeStartWidth ) ) {
+							if( maxWidth > callWidth + Math.ceil( numberOfLeads/leadsPerColumn )*(columnPadding + rowWidth + placeStartWidth ) ) {
 								break;
 							}
 						}
