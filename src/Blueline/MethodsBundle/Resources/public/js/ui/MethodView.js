@@ -8,8 +8,8 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 	if( !Modernizr.canvas ) {
 		return function( options ) {
 			$( options.numbersContainer ).html( '<div class="wrap"><img src="'+location.href+'.png" /></div>' );
-			$( options.lineContainer ).html( '<div class="wrap"><p class="nothing">Your browser doesn\'t support canvas elements, and so can\'t draw methods. Consider upgrading to a more modern browser.</p></div>' );
-			$( options.gridContainer ).html( '<div class="wrap"><p class="nothing">Your browser doesn\'t support canvas elements, and so can\'t draw methods. Consider upgrading to a more modern browser.</p></div>' );
+			$( options.lineContainer ).html( '<div class="wrap"><img src="'+location.href+'.png?style=line" /></div>' );
+			$( options.gridContainer ).html( '<div class="wrap"><img src="'+location.href+'.png?style=grid" /></div>' );
 		};
 	}
 
