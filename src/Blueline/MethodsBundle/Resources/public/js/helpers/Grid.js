@@ -204,7 +204,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 			} );
 
 			// Create some shortcut variables for later use
-			var i, j, k, h, w, x, y
+			var i, j, k, h, w, x, y,
 				context = canvas.context,
 
 				numberOfLeads = options.layout.numberOfLeads,
@@ -270,7 +270,7 @@ define( ['require', 'jquery', './PlaceNotation', '../../shared/ui/Canvas', '../.
 					}
 					else {
 						if(i+1 == numberOfColumns) {
-							h = rowHeight*leadLength*Math.max(1,(numberOfLeads%leadsPerColumn));
+							h = rowHeight*leadLength*((numberOfLeads%leadsPerColumn === 0)? leadsPerColumn : numberOfLeads%leadsPerColumn);
 						} else {
 							h = rowHeight*(0.25+(leadLength*leadsPerColumn));
 						}
