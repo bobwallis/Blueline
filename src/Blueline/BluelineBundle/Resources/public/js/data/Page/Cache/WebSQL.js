@@ -1,4 +1,4 @@
-define( ['jquery', './Null'], function( $, Null ) {
+define( ['jquery', './Null', '../../../helpers/LocalStorage'], function( $, Null, LocalStorage ) {
 	var WebSQL, emptyFunction = $.noop, db;
 
 	// Function to revert the cache back to the null version (use if setup fails)
@@ -59,11 +59,10 @@ define( ['jquery', './Null'], function( $, Null ) {
 					};
 
 					// Do an initial clear of the cache if needed
-					var age = $( 'html' ).data( 'age' ),
-						cacheAge = localStorage.getItem( 'cacheAge' );
-					if( age === 'dev' || cacheAge === 'dev' || cacheAge === null || parseInt( cacheAge, 10 ) < parseInt( age, 10 ) ) {
+					var dbAge = LocalStorage.getItem( 'websqlAge' );
+					if( dbAge === null ) {
 						WebSQL.clear();
-						localStorage.setItem( 'cacheAge', age );
+						LocalStorage.setItem( 'websqlAge', LocalStorage.age );
 					}
 				}
 			);

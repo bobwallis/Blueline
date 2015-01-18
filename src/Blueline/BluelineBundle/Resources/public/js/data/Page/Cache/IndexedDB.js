@@ -1,4 +1,4 @@
-define( ['jquery', '../../../lib/db', './Null'], function( $, db, Null ) {
+define( ['jquery', '../../../lib/db', './Null', '../../../helpers/LocalStorage'], function( $, db, Null, LocalStorage ) {
 	var IndexedDB;
 	if( Modernizr.indexeddb ) {
 		// The IndexedDB API is a bit of a moving target. Once it stablises it would be sensible to trim
@@ -70,11 +70,10 @@ define( ['jquery', '../../../lib/db', './Null'], function( $, db, Null ) {
 			};
 
 			// Do an initial clear of the cache if needed
-			var age = $( 'html' ).data( 'age' ),
-				cacheAge = localStorage.getItem( 'cacheAge' );
-			if( age === 'dev' || cacheAge === 'dev' || cacheAge === null || parseInt( cacheAge, 10 ) < parseInt( age, 10 ) ) {
+			var dbAge = LocalStorage.getItem( 'dbAge' );
+			if( dbAge === null ) {
 				IndexedDB.clear();
-				localStorage.setItem( 'cacheAge', age );
+				LocalStorage.setItem( 'dbAge', LocalStorage.age );
 			}
 		} );
 	}

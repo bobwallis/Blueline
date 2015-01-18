@@ -1,4 +1,4 @@
-define( ['jquery', '../ui/Canvas'], function( $, Canvas ) {
+define( ['jquery', '../ui/Canvas', './LocalStorage'], function( $, Canvas, LocalStorage ) {
 	/*
 	 * Text positioning on a <canvas> is inconsistent across browsers and platforms.
 	 * This is a problem when trying to get pixel perfect alignments of text and lines.
@@ -11,17 +11,9 @@ define( ['jquery', '../ui/Canvas'], function( $, Canvas ) {
 	var measureXAndYTextPadding = function( size, font, text ) {
 		if( typeof text == 'undefined' ) { text = '0'; }
 
-		var padding = { x: null, y: null },
-			age = $( 'html' ).data( 'age' );
+		var padding = LocalStorage.getItem( 'Metrics.'+font+text );
 
-		if( age != 'dev' && Modernizr.localstorage ) {
-			var metricAge = localStorage.getItem( 'Metrics.age.'+font+text );
-			if( metricAge !== null && parseInt( metricAge, 10) == age ) {
-				padding.x = localStorage.getItem( 'Metrics.x.'+font+text );
-				padding.y = localStorage.getItem( 'Metrics.y.'+font+text );
-			}
-		}
-		if( padding.x === null || padding.y === null ) {
+		if( padding === null ) {
 			var canvas = new Canvas( {
 				id: 'metric',
 				width: size*3,
@@ -82,24 +74,18 @@ define( ['jquery', '../ui/Canvas'], function( $, Canvas ) {
 						}
 					}
 
-					padding.x = ((dim - rightOfText) - leftOfText) / (canvas.scale*2);
-					padding.y = ((dim - bottomOfText) - topOfText) / (canvas.scale*2);
+					padding = {
+						x: ((dim - rightOfText) - leftOfText) / (canvas.scale*2),
+						y: ((dim - bottomOfText) - topOfText) / (canvas.scale*2)
+					};
 
-					if( Modernizr.localstorage ) {
-						localStorage.setItem( 'Metrics.x.'+font+text, padding.x );
-						localStorage.setItem( 'Metrics.y.'+font+text, padding.y );
-						localStorage.setItem( 'Metrics.age.'+font+text, age );
-					}
+					LocalStorage.setItem( 'Metrics.'+font+text, padding );
 				}
 				catch( e ) {
 					padding.x = padding.y = 0;
 				}
 			}
 			canvas = null;
-		}
-		else {
-			padding.x = parseFloat( padding.x );
-			padding.y = parseFloat( padding.y );
 		}
 		return padding;
 	};
