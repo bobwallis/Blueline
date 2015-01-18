@@ -4,7 +4,7 @@
 {% if pageCount > 1 %}
 	<div class="pagingLinks">
 		{% if pageActive > 1 %}
-			<a href="{{ path( searchPath, searchVariables|merge( { 'offset': (searchVariables['offset']-searchVariables['count']) } ) ) }}">&laquo;</a>
+			<a rel="prev" href="{{ path( searchPath, searchVariables|merge( { 'offset': (searchVariables['offset']-searchVariables['count']) } ) ) }}">&laquo;</a>
 		{% else %}
 			<span>&laquo</span>
 		{% endif %}
@@ -46,7 +46,7 @@
 			{% endfor %}
 		{% endif %}
 		{% if pageActive < pageCount %}
-			<a href="{{ path( searchPath, searchVariables|merge( { 'offset': (searchVariables['offset']+searchVariables['count']) } ) ) }}">&raquo;</a>
+			<a rel="next" href="{{ path( searchPath, searchVariables|merge( { 'offset': (searchVariables['offset']+searchVariables['count']) } ) ) }}">&raquo;</a>
 		{% else %}
 			<span>&raquo</span>
 		{% endif %}
