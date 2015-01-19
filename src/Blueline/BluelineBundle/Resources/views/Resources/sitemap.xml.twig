@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
  <sitemap>
-  <loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_resource', {'page':'sitemap_root', '_format':'xml'}) }}</loc>
+  <loc>{{ url('Blueline_resource', {'page':'sitemap_root', '_format':'xml'}) }}</loc>
  </sitemap>
  <sitemap>
-  <loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_Associations_sitemap',{'_format':'xml'}) }}</loc>
+  <loc>{{ url('Blueline_Associations_sitemap',{'_format':'xml'}) }}</loc>
  </sitemap>
  <sitemap>
-  <loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_Methods_sitemap',{'_format':'xml'}) }}</loc>
+  <loc>{{ url('Blueline_Methods_sitemap',{'_format':'xml', 'page': 1}) }}</loc>
  </sitemap>
  <sitemap>
-  <loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_Towers_sitemap',{'_format':'xml'}) }}</loc>
+  <loc>{{ url('Blueline_Methods_sitemap',{'_format':'xml', 'page': 2}) }}</loc>
+ </sitemap>
+ <sitemap>
+  <loc>{{ url('Blueline_Towers_sitemap',{'_format':'xml'}) }}</loc>
  </sitemap>
 </sitemapindex>

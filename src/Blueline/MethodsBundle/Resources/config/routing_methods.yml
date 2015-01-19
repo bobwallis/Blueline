@@ -15,11 +15,11 @@ Blueline_Methods_custom_view:
     requirements:
         _format: html
 
-#Blueline_Methods_export:
-#    pattern: /export
-#    defaults: { _controller: BluelineMethodsBundle:Methods:export, _format: html }
-#    requirements:
-#        _format: html
+Blueline_Methods_export:
+    pattern: /export
+    defaults: { _controller: BluelineMethodsBundle:Methods:export, _format: html }
+    requirements:
+        _format: html
 
 Blueline_Methods_search:
     pattern:  /search.{_format}
@@ -28,7 +28,8 @@ Blueline_Methods_search:
         _format: html|json
 
 Blueline_Methods_sitemap:
-    pattern:  /sitemap.{_format}
+    pattern:  /sitemap_{page}.{_format}
     defaults: { _controller: BluelineMethodsBundle:Methods:sitemap }
     requirements:
+        page: \d+
         _format: xml

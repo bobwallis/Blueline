@@ -265,10 +265,10 @@ class MethodsController extends Controller
         return $this->render('BluelineMethodsBundle::export.html.twig', array(), $response);
     }
 
-    public function sitemapAction()
+    public function sitemapAction($page)
     {
         $request = $this->getRequest();
-        $format = $request->getRequestFormat();
+        $format  = $request->getRequestFormat();
 
         // Create basic response object
         $response = new Response();
@@ -281,7 +281,11 @@ class MethodsController extends Controller
             return $response;
         }
 
-        $methods = $this->getDoctrine()->getManager()->createQuery('SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m')->getArrayResult();
+        $methods = $this->getDoctrine()->getManager()
+                    ->createQuery('SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m ORDER BY m.url')
+                    ->setMaxResults( 12500 )
+                    ->setFirstResult(($page-1)*12500)
+                    ->getArrayResult();
 
         return $this->render('BluelineMethodsBundle::sitemap.'.$format.'.twig', compact('methods'), $response);
     }
