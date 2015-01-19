@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 {% for method in methods|default([]) %}
- <url><loc>{{ url( 'Blueline_Methods_view', { 'title': method.url } ) }}</loc></url>
- <url><loc>{{ url( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2 } ) }}</loc></url>
- <url><loc>{{ url( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2, 'style': 'line' } ) }}</loc></url>
- <url><loc>{{ url( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2, 'style': 'grid' } ) }}</loc></url>
+ <url>
+  <loc>{{ url( 'Blueline_Methods_view', { 'title': method.url } ) }}</loc>
+  <image:image>
+   <image:loc>{{ url( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2 } ) }}</image:loc>
+  </image:image>
+  <image:image>
+   <image:loc>{{ url( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2, 'style': 'line' } ) }}</image:loc>
+  </image:image>
+  <image:image>
+   <image:loc>{{ url( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2, 'style': 'grid' } ) }}</image:loc>
+  </image:image>
+</url>
 {% endfor %}
 </urlset>
