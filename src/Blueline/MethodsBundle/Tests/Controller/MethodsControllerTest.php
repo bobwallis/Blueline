@@ -20,7 +20,7 @@ class MethodsControllerTest extends WebTestCase
             $this->assertTrue($client->getResponse()->isSuccessful(), $page.' request unsuccessful');
             $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'application/json'), $page.' Content-Type header wrong');
         }
-        foreach (array('/methods/view/Cambridge_Surprise_Minor.png?scale=2', '/methods/view/Cambridge_Surprise_Minor.png?style=line', '/methods/view/Cambridge_Surprise_Minor.png?scale=2&style=grid') as $page) {
+        foreach (array('/methods/view/Cambridge_Surprise_Minor.png?scale=2', '/methods/view/Cambridge_Surprise_Minor.png?scale=1&style=line', '/methods/view/Cambridge_Surprise_Minor.png?scale=2&style=grid') as $page) {
             $client = static::createClient();
             $crawler = $client->request('GET', $page);
             $this->assertTrue($client->getResponse()->isSuccessful(), $page.' request unsuccessful');
@@ -54,7 +54,7 @@ class MethodsControllerTest extends WebTestCase
     }
     public function testMethodsSitemap()
     {
-        foreach (array('/methods/sitemap') as $xml) {
+        foreach (array('/methods/sitemap_1', '/methods/sitemap_2') as $xml) {
             $client = static::createClient();
             $crawler = $client->request('GET', '/'.$xml.'.xml');
             $this->assertTrue($client->getResponse()->isSuccessful(), $xml.'.xml request unsuccessful');

@@ -11,7 +11,7 @@ class FontPreviewController extends Controller
 {
     public function previewAction(Request $request)
     {
-        $face = escapeshellarg('normal 14px '.$request->get('typeface'));
+        $face = escapeshellarg('normal 16px '.$request->get('typeface'));
         $text = escapeshellarg($request->get('text'));
 
         $response = new Response();
