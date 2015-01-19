@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 {% for method in methods|default([]) %}
- <url><loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path( 'Blueline_Methods_view', { 'title': method.url } ) }}</loc></url>
+ <url><loc>{{ url( 'Blueline_Methods_view', { 'title': method.url } ) }}</loc></url>
+ <url><loc>{{ url( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2 } ) }}</loc></url>
+ <url><loc>{{ url( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2, 'style': 'line' } ) }}</loc></url>
+ <url><loc>{{ url( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2, 'style': 'grid' } ) }}</loc></url>
 {% endfor %}
 </urlset>
