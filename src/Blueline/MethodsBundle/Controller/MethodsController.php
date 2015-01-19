@@ -169,13 +169,22 @@ class MethodsController extends Controller
                 $section = $request->query->get('style');
                 if ($section == 'numbers') {
                     $url = $this->generateUrl('Blueline_Methods_view', array(
-                        'scale'   => intval($request->query->get('scale')) ?: null,
+                        'scale'   => intval($request->query->get('scale')) ?: 1,
                         'title'   => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)),
                         '_format' => 'png'
                     ) );
                     return $this->redirect($url, 301);
                 } elseif (!$section) {
                     $section = 'numbers';
+                }
+                if( intval($request->query->get('scale')) === 0 ) {
+                    $url = $this->generateUrl('Blueline_Methods_view', array(
+                        'scale'   => 1,
+                        'style'   => $section,
+                        'title'   => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)),
+                        '_format' => 'png'
+                    ) );
+                    return $this->redirect($url, 301);
                 }
                 if (!in_array($section, ['numbers', 'line', 'grid'])) {
                     throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'line' or 'grid'.");

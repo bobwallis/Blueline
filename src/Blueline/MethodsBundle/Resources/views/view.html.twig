@@ -73,9 +73,9 @@
 				<dd>Details on the <a href="{{ path( 'Blueline_Pages_view', { 'page': 'about' } ) }}">about page</a>.</dd>
 			</dl>
 		</div>
-		<div id="method_numbers_{{ loop.index }}" class="numbers"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
-		<div id="method_line_{{ loop.index }}" class="line"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'style': 'line' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
-		<div id="method_grid_{{ loop.index }}" class="grid"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'style': 'grid' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
+		<div id="method_numbers_{{ loop.index }}" class="numbers"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 1 } ) }}" alt="{{ method.title }}" /></div></noscript></div>
+		<div id="method_line_{{ loop.index }}" class="line"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 1 , 'style': 'line' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
+		<div id="method_grid_{{ loop.index }}" class="grid"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 1 , 'style': 'grid' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
 		{% autoescape false %}
 		<script>require(['methods/ui/MethodView'],function(a){new a({{ {
 			id: loop.index,
