@@ -49,7 +49,7 @@ class OembedController extends Controller
 	            'title' => $method[0]->title,
 	            'provider_name' => 'Blueline',
 	            'provider_url' => $this->generateUrl('Blueline_welcome', array(), true),
-	            'url' => $url.'.png?scale=1',
+	            'url' => $url.'.png?scale=1&style=numbers',
 	            'width' => $imageSize[0],
 	            'height' => $imageSize[1]
 	        ));

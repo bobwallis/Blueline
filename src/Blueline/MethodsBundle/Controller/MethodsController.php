@@ -167,14 +167,7 @@ class MethodsController extends Controller
                     throw $this->createAccessDeniedException('Maximum scale is 4 unless in developer mode.');
                 }
                 $section = $request->query->get('style');
-                if ($section == 'numbers') {
-                    $url = $this->generateUrl('Blueline_Methods_view', array(
-                        'scale'   => intval($request->query->get('scale')) ?: 1,
-                        'title'   => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)),
-                        '_format' => 'png'
-                    ) );
-                    return $this->redirect($url, 301);
-                } elseif (!$section) {
+                if (!$section) {
                     $section = 'numbers';
                 }
                 if( intval($request->query->get('scale')) === 0 ) {
