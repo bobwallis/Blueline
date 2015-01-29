@@ -5,8 +5,8 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use Blueline\MethodsBundle\Entity\Performance;
-use Blueline\TowersBundle\Entity\Tower;
+use Blueline\MethodsBundle\Helpers\PgResultIterator;
+use Blueline\BluelineBundle\Helpers\Text;
 
 class LinkPerformancesToDoveCommand extends ContainerAwareCommand
 {
@@ -27,25 +27,37 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
         $output->writeln('<title>Linking performances to towers</title>');
 
         // Get access to the entity manager,validator and a progress bar indicator
-        $em                    = $this->getContainer()->get('doctrine')->getManager();
-        $performanceRepository = $em->getRepository('BluelineMethodsBundle:Performance');
-        $towerRepository       = $em->getRepository('BluelineTowersBundle:Tower');
-        $validator             = $this->getContainer()->get('validator');
-        $progress              = $this->getHelperSet()->get('progress');
+        $db = pg_connect('host='.$this->getContainer()->getParameter('database_host').' port='.$this->getContainer()->getParameter('database_port').' dbname='.$this->getContainer()->getParameter('database_name').' user='.$this->getContainer()->getParameter('database_user').' password='.$this->getContainer()->getParameter('database_password').'');
+        if( $db === false ) {
+            $output->writeln('<error>Failed to connect to database</error>');
+            return;
+        }
+        $progress = $this->getHelperSet()->get('progress');
         require __DIR__.'/../Resources/data/method_towers.php';
-        require __DIR__.'/../../TowersBundle/Resources/data/abbreviations.php';
 
-        $dbIterator  = $em->createQuery('SELECT p FROM Blueline\MethodsBundle\Entity\Performance p')->iterate();
-        $dbRow       = $dbIterator->next(); // For some reason the Doctrine iterators don't initialise at 0
-        $count       = 0;
-        $performanceCount = $em->createQuery('SELECT count(p) FROM Blueline\MethodsBundle\Entity\Performance p')->getSingleScalarResult();
+        // Get an iterator over the performances table
+        $result = pg_query('SELECT id, method_title, stage, location_room, location_building, location_town, location_county, location_region, location_country FROM performances LEFT JOIN methods ON method_title = title');
+        if( $result === false ) {
+            $output->writeln('<error>Failed to query performances table: '.pg_last_error($db).'</error>');
+            return;
+        }
+        $dbIterator = new PgResultIterator( $result );
+        $performanceCount = $dbIterator->count();
+
+        // Prepare a query for searching for towers
+        if(pg_prepare($db, 'tryLocation', 'SELECT id from towers WHERE (place ILIKE $1 OR altname ILIKE $1 OR id ILIKE $1) AND bells >= $2') === false) {
+            $output->writeln('<error>Failed to create prepared query: '.pg_last_error($db).'</error>');
+            return;
+        }
+
+        // Set-up the progress bar
         $progress->start($output, $performanceCount);
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) $performanceCount)*2) - 10);
         $progress->setRedrawFrequency(max(1, $performanceCount/100));
-        while ($dbIterator->valid()) {
-            $performance = $dbRow[0];
 
-            $location = trim(str_replace('-', ' ', $performance->getLocation()));
+        foreach ($dbIterator as $performance) {
+            $location = trim(str_replace('-', ' ', Text::toList(array_intersect_key($performance, array_flip(array('location_room', 'location_building', 'location_town', 'location_county', 'location_region', 'location_country'))), ', ', ', ')));
+
             if ($location != '' && $location != 'handbells') {
                 $doveid = false;
 
@@ -55,45 +67,36 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
                 } else {
                     // Place
                     if (strpos($location, ',') === false) {
-                        $try = $em->createQuery('SELECT partial t.{id} from Blueline\TowersBundle\Entity\Tower t WHERE ((LOWER(t.place) LIKE :place OR LOWER(t.altName) LIKE :place OR LOWER(t.id) LIKE :place) AND t.bells >= :bells)')
-                            ->setParameter('place', strtolower($location))
-                            ->setParameter('bells', $performance->getMethod()->getStage())
-                            ->getArrayResult();
-                        $try = array_map('current', $try);
-                        if (count($try) == 1) {
-                            $doveid = $try[0];
+                        $try = pg_execute($db, 'tryLocation', array(strtolower($location), intval($performance['stage'])));
+                        if($try === false) {
+                            $output->writeln('<error>Failed to query for location \''.$location.'\': '.pg_last_error($db).'</error>');
+                            continue;
+                        }
+                        $try = pg_fetch_all($try);
+
+                        if($try === false)
+                        {
+                            $progress->clear();
+                            $output->writeln("\r<comment> ".$performance['method_title'].": No tower found for '".$location."'</comment>");
+                            $progress->display();
+                        } elseif (count($try) == 1) {
+                            $doveid = $try[0]['id'];
                         } elseif (count($try) > 1) {
                             $progress->clear();
-                            $output->writeln("\r<comment> ".$performance->getMethod()->getTitle().": Multiple towers found for '".$location."' => ".join($try, ', ')."</comment>");
-                            $progress->display();
-                        } else {
-                            $progress->clear();
-                            $output->writeln("\r<comment> ".$performance->getMethod()->getTitle().": No tower found for '".$location."'</comment>");
+                            $output->writeln("\r<comment> ".$performance['method_title'].": Multiple towers found for '".$location."' => ".join(array_map('current', $try), ', ')."</comment>");
                             $progress->display();
                         }
                     }
                 }
 
                 if ($doveid) {
-                    $tower = $towerRepository->findOneById($doveid);
-                    $performance->setLocationTower($tower);
+                    pg_update($db, 'performances', array('location_tower_id' => $doveid), array('id' => $performance['id']));
                 }
 
-                $em->merge($performance);
-                // Flush every now and again
-                ++$count;
-                if ($count % 20 == 0) {
-                    $em->flush();
-                    $em->clear();
-                }
             }
-            // Advance through the database iterator
-            $dbRow = $dbIterator->next();
             $progress->advance();
         }
         $progress->finish();
-        $em->flush();
-        $em->clear();
 
         $output->writeln("\n<info>Finished updating performance data. Peak memory usage: ".number_format(memory_get_peak_usage()).' bytes.</info>');
     }
