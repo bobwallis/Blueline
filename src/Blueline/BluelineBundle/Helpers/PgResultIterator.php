@@ -1,5 +1,5 @@
 <?php
-namespace Blueline\MethodsBundle\Helpers;
+namespace Blueline\BluelineBundle\Helpers;
 
 use Exception;
 

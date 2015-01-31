@@ -74,7 +74,7 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
             } catch (\Exception $e) {
                 $output->writeln("\r<error>".$e->getMessage().'</error>');
             }
-            if( pg_insert($db, 'performances', $renamedRow) === false ) {
+            if( @pg_insert($db, 'performances', $renamedRow) === false ) {
                 $output->writeln('<comment> Failed to import renamed method information for "'.$renamedRow['rung_title'].'"</comment>');
                 $output->writeln('<comment> '.pg_last_error($db).'</comment>');
             }
@@ -92,7 +92,7 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
             } catch (\Exception $e) {
                 $output->writeln("\r<error>".$e->getMessage().'</error>');
             }
-            if( pg_insert($db, 'performances', $duplicateRow) === false ) {
+            if( @pg_insert($db, 'performances', $duplicateRow) === false ) {
                 $output->writeln('<comment> Failed to import duplicate method information for "'.$duplicateRow['rung_title'].'"</comment>');
                 $output->writeln('<comment> '.pg_last_error($db).'</comment>');
             }

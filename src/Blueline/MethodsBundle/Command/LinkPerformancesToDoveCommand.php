@@ -5,7 +5,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use Blueline\MethodsBundle\Helpers\PgResultIterator;
+use Blueline\BluelineBundle\Helpers\PgResultIterator;
 use Blueline\BluelineBundle\Helpers\Text;
 
 class LinkPerformancesToDoveCommand extends ContainerAwareCommand
