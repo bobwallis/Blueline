@@ -69,5 +69,6 @@ class ImportAssociationsCommand extends ContainerAwareCommand
                 $progress->display();
             }
         }
+        $progress->finish();
     }
 }
