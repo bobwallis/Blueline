@@ -6,7 +6,7 @@ Blueline\MethodsBundle\Entity\Performance:
         id:
             type: integer
             generator:
-                strategy: AUTO
+                strategy: IDENTITY
     fields:
         type:
             type: string

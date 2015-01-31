@@ -65,7 +65,7 @@ class RenamedHTMLIterator implements \Iterator
         if ($last === 'Differential') {
             $differential = true;
         }
-        $data['title'] = str_replace('’', "'", html_entity_decode($matches[7])).($differential ? ' Differential' : '').($little ? ' Little' : '').' '.$classification.' '.$stage;
+        $data['method_title'] = str_replace('’', "'", html_entity_decode($matches[7])).($differential ? ' Differential' : '').($little ? ' Little' : '').' '.$classification.' '.$stage;
 
         return $data;
     }

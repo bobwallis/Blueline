@@ -26,50 +26,41 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
         // Set up styles
         $output->getFormatter()
                ->setStyle('title', new OutputFormatterStyle('white', null, array( 'bold' )));
-        $targetConsoleWidth = 75;
 
         // Print title
         $output->writeln('<title>Updating extra method data</title>');
 
-        // Get access to the entity manager,validator and a progress bar indicator
-        $em                    = $this->getContainer()->get('doctrine')->getManager();
-        $methodRepository      = $em->getRepository('BluelineMethodsBundle:Method');
-        $collectionRepository  = $em->getRepository('BluelineMethodsBundle:Collection');
-        $methodInCollectionRepository = $em->getRepository('BluelineMethodsBundle:MethodInCollection');
-        $performanceRepository = $em->getRepository('BluelineMethodsBundle:Performance');
-        $validator             = $this->getContainer()->get('validator');
-        $progress              = $this->getHelperSet()->get('progress');
+        // Get access to the database and other services
+        $db = pg_connect('host='.$this->getContainer()->getParameter('database_host').' port='.$this->getContainer()->getParameter('database_port').' dbname='.$this->getContainer()->getParameter('database_name').' user='.$this->getContainer()->getParameter('database_user').' password='.$this->getContainer()->getParameter('database_password').'');
+        if( $db === false ) {
+            $output->writeln('<error>Failed to connect to database</error>');
+            return;
+        }
+
+        $output->writeln('<info>Clear existing extra method data...</info>');
+        if( pg_query($db, 'UPDATE methods SET calls = NULL, ruleoffs = NULL') === false || pg_query($db, "DELETE FROM performances WHERE type = 'duplicateMethod' OR type = 'renamedMethod'") === false ) {
+            $output->writeln('<error>Failed to clear existing data: '.pg_last_error($db).'</error>');
+            return;
+        }
 
         if (file_exists(__DIR__.'/../Resources/data/method_extras.php')) {
             $output->writeln('<info>Adding extra method data...</info>');
             require __DIR__.'/../Resources/data/method_extras.php';
             $method_extras = new \ArrayObject($method_extras);
             $extrasIterator   = $method_extras->getIterator();
+
             while ($extrasIterator->valid()) {
+                // Import the row
                 $txtRow = $extrasIterator->current();
-                $method = $methodRepository->findOneByTitle($txtRow['title']);
-
-                if ($method) {
-                    $method->setAll($txtRow);
-                } else {
-                    $output->writeln('<warning> Extra data provided for '.$xmlRow['title'].', which isn\'t in the database</warning>');
-                }
-
-                // Validate the new data, and detach the invalid object if needed to prevent the bad data
-                // reaching the database
-                $errors = $validator->validate($method);
-                if (count($errors) > 0) {
-                    $output->writeln('<error> Invalid extra data for '.$txtRow['title'].":\n".$errors.'</error>');
-                    $em->detach($method);
-                } else {
-                    $em->persist($method);
+                $txtRow['calls'] = serialize($txtRow['calls']);
+                if( pg_update( $db, 'methods', array_change_key_case($txtRow), array('title' => $txtRow['title']) ) === false ) {
+                    $output->writeln('<comment> Failed to import method extras for "'.$txtRow['title'].'"</comment>');
+                    $output->writeln('<comment> '.pg_last_error($db).'</comment>');
                 }
 
                 // Get the next row
                 $txtRow = $extrasIterator->next();
             }
-            $em->flush();
-            $em->clear();
         }
 
         // Import data about renamed methods
@@ -79,23 +70,16 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
         while ($renamedIterator->valid()) {
             try {
                 $renamedRow = $renamedIterator->current();
+                $renamedRow['date'] = $renamedRow['date']->format('Y-m-d');
             } catch (\Exception $e) {
-                $output->writeln("\r<error>".str_pad(' '.$e->getMessage(), $targetConsoleWidth, ' ').'</error>');
+                $output->writeln("\r<error>".$e->getMessage().'</error>');
             }
-            $method  = $methodRepository->findOneByTitle($renamedRow['title']);
-            if (! $method) {
-                $output->writeln('<comment> "'.$renamedRow['title'].'" not found in methods table</comment>');
-            } else {
-                $renamed = $performanceRepository->findOneBy(array( 'type' => $renamedRow['type'], 'rung_title' => $renamedRow['rung_title'] )) ?: new Performance();
-                $renamed->setAll($renamedRow);
-                $renamed->setMethod($method);
-                $em->merge($renamed);
+            if( pg_insert($db, 'performances', $renamedRow) === false ) {
+                $output->writeln('<comment> Failed to import renamed method information for "'.$renamedRow['rung_title'].'"</comment>');
+                $output->writeln('<comment> '.pg_last_error($db).'</comment>');
             }
             $renamedIterator->next();
         }
-        $em->flush();
-        $em->clear();
-        unset($renamedIterator, $renamedRow, $renamed, $method);
 
         // Import data about duplicate methods
         $output->writeln("<info>Importing duplicate method data...</info>");
@@ -104,23 +88,16 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
         while ($duplicateIterator->valid()) {
             try {
                 $duplicateRow = $duplicateIterator->current();
+                $duplicateRow['date'] = $duplicateRow['date']->format('Y-m-d');
             } catch (\Exception $e) {
-                $output->writeln("\r<error>".str_pad(' '.$e->getMessage(), $targetConsoleWidth, ' ').'</error>');
+                $output->writeln("\r<error>".$e->getMessage().'</error>');
             }
-            $method  = $methodRepository->findOneByTitle($duplicateRow['title']);
-            if (! $method) {
-                $output->writeln('<comment> "'.$duplicateRow['title'].'" not found in methods table</comment>');
-            } else {
-                $duplicate = $performanceRepository->findOneBy(array( 'type' => $duplicateRow['type'], 'rung_title' => $duplicateRow['rung_title'] )) ?: new Performance();
-                $duplicate->setAll($duplicateRow);
-                $duplicate->setMethod($method);
-                $em->merge($duplicate);
+            if( pg_insert($db, 'performances', $duplicateRow) === false ) {
+                $output->writeln('<comment> Failed to import duplicate method information for "'.$duplicateRow['rung_title'].'"</comment>');
+                $output->writeln('<comment> '.pg_last_error($db).'</comment>');
             }
             $duplicateIterator->next();
         }
-        $em->flush();
-        $em->clear();
-        unset($duplicateIterator, $duplicateRow, $duplicate, $method);
 
         $output->writeln("\n<info>Finished updating extra method data. Peak memory usage: ".number_format(memory_get_peak_usage()).' bytes.</info>');
     }
