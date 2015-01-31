@@ -5,7 +5,8 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use Blueline\AssociationsBundle\Entity\Association;
+use Blueline\BluelineBundle\Helpers\PgResultIterator;
+require(__DIR__.'/../../BluelineBundle/Helpers/pg_upsert.php'); // Can use 'use function' when PHP 5.6 is more common
 
 class ImportAssociationsCommand extends ContainerAwareCommand
 {
@@ -29,13 +30,16 @@ class ImportAssociationsCommand extends ContainerAwareCommand
         require __DIR__.'/../Resources/data/associations.php';
         $associations = new \ArrayObject($associations);
 
-        // Get access to the entity manager and validator service
-        $em                    = $this->getContainer()->get('doctrine')->getManager();
-        $associationRepository = $em->getRepository('BluelineAssociationsBundle:Association');
-        $validator             = $this->getContainer()->get('validator');
-        $progress              = $this->getHelperSet()->get('progress');
+        // Get access to the database and other services
+        $db = pg_connect('host='.$this->getContainer()->getParameter('database_host').' port='.$this->getContainer()->getParameter('database_port').' dbname='.$this->getContainer()->getParameter('database_name').' user='.$this->getContainer()->getParameter('database_user').' password='.$this->getContainer()->getParameter('database_password').'');
+        if ($db === false) {
+            $output->writeln('<error>Failed to connect to database</error>');
+            return;
+        }
+        $progress = $this->getHelperSet()->get('progress');
 
         // Iterate over the data and import/update
+        $output->writeln('<info>Importing new data...</info>');
         $txtIterator = $associations->getIterator();
         $importedAssociations = array();
         $progress->start($output, count($associations));
@@ -44,34 +48,25 @@ class ImportAssociationsCommand extends ContainerAwareCommand
         while ($txtIterator->valid()) {
             $txtRow = $txtIterator->current();
             $importedAssociations[] = $txtRow['id'];
-            $association = $associationRepository->findOneById($txtRow['id']);
-            if (!$association) {
-                $association = new Association($txtRow);
-                $em->merge($association);
-            } else {
-                $association->setAll($txtRow);
-            }
-            $errors = $validator->validate($association);
-            if (count($errors) > 0) {
-                $progress->clear();
-                $output->writeln("\r<error> Invalid data for ".$txtRow['name'].":\n".$errors.'</error>');
-                $progress->display();
-            }
+            \Blueline\BluelineBundle\Helpers\pg_upsert($db, 'associations', $txtRow, array('id' => $txtRow['id']));
             $txtIterator->next();
             $progress->advance();
         }
         $progress->finish();
-        $em->flush();
-        $em->clear();
 
         // Check for deletions
-        $idsInDatabase = $em->createQuery('SELECT a.id FROM Blueline\AssociationsBundle\Entity\Association a')->getScalarResult();
+        $output->writeln('<info>Checking for deletion of old data...</info>');
+        $idsInDatabase = new PgResultIterator( pg_query('SELECT id FROM associations') );
+        $progress->start($output, count($idsInDatabase));
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($idsInDatabase))*2) - 10);
+        $progress->setRedrawFrequency(max(1, count($idsInDatabase)/100));
         foreach ($idsInDatabase as $a) {
             $a = current($a);
             if (!in_array($a, $importedAssociations)) {
-                $em->createQuery('DELETE FROM Blueline\AssociationsBundle\Entity\Association a where a.id = :id')
-                    ->setParameter('id', $a)
-                    ->execute();
+                pg_delete($db, 'associations', array('id' => $a));
+                $progress->clear();
+                $output->writeln("\r<comment>".str_pad(" Association '".$a."' deleted", $targetConsoleWidth, ' ')."</comment>");
+                $progress->display();
             }
         }
     }

@@ -14,8 +14,21 @@ function pg_upsert($connection, $table_name, $data, $condition) {
         return pg_escape_literal($connection, $e);
     }, array_values($dataAndCondition)));
 
-    $insert = 'INSERT INTO '.$table_name.' ('.$insertKeys.') SELECT '.$insertValues;
-    $upsert = 'UPDATE '.$table_name.' SET tally=tally+1 WHERE date='today' AND spider='Googlebot'";
 
-    return pg_query_($connection, 'WITH upsert AS ('.$upsert.' RETURNING *) '.$insert.' WHERE NOT EXISTS (SELECT * FROM upsert)' );
+    $updateSet = array();
+    foreach ($data as $key=>$val) {
+        $updateSet[] = pg_escape_identifier($connection, $key).'='.pg_escape_literal($connection, $val);
+    }
+    $updateSet = implode(', ', $updateSet);
+
+    $updateConditions = array();
+    foreach ($condition as $key=>$val) {
+        $updateConditions[] = pg_escape_identifier($connection, $key).'='.pg_escape_literal($connection, $val);
+    }
+    $updateConditions = implode(' AND ', $updateConditions);
+
+    $insert = 'INSERT INTO '.$table_name.' ('.$insertKeys.') SELECT '.$insertValues;
+    $upsert = 'UPDATE '.$table_name.' SET '.$updateSet.' WHERE '.$updateConditions;
+
+    return pg_query($connection, 'WITH upsert AS ('.$upsert.' RETURNING *) '.$insert.' WHERE NOT EXISTS (SELECT * FROM upsert)');
 }
