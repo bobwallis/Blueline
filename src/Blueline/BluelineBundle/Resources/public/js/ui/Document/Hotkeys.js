@@ -35,7 +35,7 @@ define( ['jquery'], function( $ ) {
 					$($( 'section.welcome a' )[1]).click();
 					break;
 				case t:
-					$( 'section.welcome a:last' ).click();
+					$($( 'section.welcome a' )[2]).click();
 					break;
 
 				// Click paging links
