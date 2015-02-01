@@ -14,9 +14,11 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use Symfony\Component\Console\Helper\ProgressBar;
+use Blueline\BluelineBundle\Helpers\PgResultIterator;
 use Blueline\TowersBundle\Helpers\DoveTxtIterator;
-use Blueline\AssociationsBundle\Entity\Association;
-use Blueline\TowersBundle\Entity\Tower;
+
+require_once(__DIR__.'/../../BluelineBundle/Helpers/pg_upsert.php'); // Can use 'use function' when PHP 5.6 is more common
 
 class ImportTowersCommand extends ContainerAwareCommand
 {
@@ -36,16 +38,24 @@ class ImportTowersCommand extends ContainerAwareCommand
         // Print title
         $output->writeln('<title>Updating tower data</title>');
 
-        // Get access to the entity manager, repository, validator and a progress bar
-        $em         = $this->getContainer()->get('doctrine')->getManager();
-        $repository = $em->getRepository('BluelineTowersBundle:Tower');
-        $validator  = $this->getContainer()->get('validator');
-        $progress   = $this->getHelperSet()->get('progress');
+        // Get access to the database and other services
+        $db = pg_connect('host='.$this->getContainer()->getParameter('database_host').' port='.$this->getContainer()->getParameter('database_port').' dbname='.$this->getContainer()->getParameter('database_name').' user='.$this->getContainer()->getParameter('database_user').' password='.$this->getContainer()->getParameter('database_password').'');
+        if ($db === false) {
+            $output->writeln('<error>Failed to connect to database</error>');
+            return;
+        }
 
         // Get an array of existing associations
         $associations = array();
-        foreach ($em->createQuery('SELECT a.id FROM Blueline\AssociationsBundle\Entity\Association a')->getArrayResult() as $association) {
+        foreach (new PgResultIterator(pg_query($db, 'SELECT id from associations')) as $association) {
             $associations[] = $association['id'];
+        }
+
+        // Clear existing affiliation data
+        $output->writeln('<info>Clear existing tower/association links...</info>');
+        if (pg_query($db, 'DELETE FROM towers_associations') === false) {
+            $output->writeln('<error>Failed to clear existing data: '.pg_last_error($db).'</error>');
+            return;
         }
 
         $output->writeln("<info>Importing basic tower data...</info>");
@@ -58,116 +68,55 @@ class ImportTowersCommand extends ContainerAwareCommand
         $txtIterator = new DoveTxtIterator(__DIR__.'/../Resources/data/dove.txt');
         $notFoundAffiliations = array();
         $importedTowers = array();
-        $count  = 0;
         $towerCount = count($txtIterator);
-        $progress->start($output, $towerCount);
+        $progress = new ProgressBar($output, $towerCount);
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) $towerCount)*2) - 10);
         $progress->setRedrawFrequency($towerCount/100);
-        while ($txtIterator->valid()) {
-            $txtRow = $txtIterator->current();
-
-            // Lookup the DoveId, and store it in the list of imported towers
-            $tower = $repository->findOneById($txtRow['id']);
+        foreach ($txtIterator as $txtRow) {
+            $affiliations = $txtRow['affiliations'];
+            unset($txtRow['affiliations']);
+            // Upsert tower record
+            \Blueline\BluelineBundle\Helpers\pg_upsert($db, 'towers', $txtRow, array('id' => $txtRow['id']));
+            // Create references to the associations table
+            foreach (array_filter(explode(',', $affiliations)) as $affiliation) {
+                if (in_array($affiliation, $associations)) {
+                    pg_insert($db, 'towers_associations', array('tower_id' => $txtRow['id'], 'association_id' => $affiliation));
+                } else {
+                    $notFoundAffiliations[] = $affiliation;
+                }
+            }
+            // Advance
             $importedTowers[] = $txtRow['id'];
-            if ($tower) {
-                // If the tower exists, update it
-                // Copy in data from the text file
-                $tower->setAll($txtRow);
-                // Make changes to affiliation data
-                $newAffiliations = array_filter(explode(',', $txtRow['affiliations']));
-                $oldAffiliationsObjects = $tower->getAssociations();
-                $oldAffiliations = $oldAffiliationsObjects->map(function ($a) { return $a->getId(); })->toArray();
-                // Add any new ones not in the old
-                foreach ($newAffiliations as $affiliation) {
-                    if (!in_array($affiliation, $oldAffiliations)) {
-                        if (in_array($affiliation, $associations)) {
-                            $tower->addAssociation($em->getReference('BluelineAssociationsBundle:Association', $affiliation));
-                        } else {
-                            $notFoundAffiliations[] = $affiliation;
-                        }
-                    }
-                }
-                // Remove any old ones not in the new
-                foreach ($oldAffiliations as $i => $affiliation) {
-                    if (!in_array($affiliation, $newAffiliations)) {
-                        $tower->removeAssociation($oldAffiliationsObjects[$i]);
-                    }
-                }
-            } else {
-                // Otherwise, insert a new entry
-                $tower = new Tower();
-                $tower->setAll($txtRow);
-                // Also create references to the associations table
-                foreach (array_filter(explode(',', $txtRow['affiliations'])) as $affiliation) {
-                    if (in_array($affiliation, $associations)) {
-                        $tower->addAssociation($em->getReference('BluelineAssociationsBundle:Association', $affiliation));
-                    } else {
-                        $notFoundAffiliations[] = $affiliation;
-                    }
-                }
-            }
-
-            // Validate the tower object, and persist if it passes
-            $errors = $validator->validate($tower);
-            if (count($errors) > 0) {
-                $progress->clear();
-                $output->writeln("\r<error>".str_pad(" Invalid data for ".$txtRow['id'].":\n".$errors, $targetConsoleWidth, ' ').'</error>');
-                $progress->display();
-            } else {
-                $em->persist($tower);
-            }
-            // Move on to the next row in the text file
-            $txtIterator->next();
             $progress->advance();
-
-            // Flush every so often so we don't run out of memory
-            ++$count;
-            if ($count % 50 == 0) {
-                $em->flush();
-                $em->clear();
-            }
         }
         $progress->finish();
-        $em->flush();
-        $em->clear();
+        $output->writeln('');
 
         // Print a warning for any affiliations that couldn't be found
         if (count($notFoundAffiliations) > 0) {
             $notFoundAffiliations = array_unique($notFoundAffiliations);
             sort($notFoundAffiliations);
-            $output->writeln("\r<comment>".str_pad(' Association with abbreviation(s) '.implode(', ', $notFoundAffiliations).' not found.', $targetConsoleWidth, ' ').'</comment>');
+            $output->writeln("<comment>".str_pad(' Association with abbreviation(s) '.implode(', ', $notFoundAffiliations).' not found.', $targetConsoleWidth, ' ').'</comment>');
         }
 
         // Now begin the removal process
         $output->writeln('<info>Checking for deletion of old data...</info>');
-        $dbIterator = $em->createQuery('SELECT t FROM Blueline\TowersBundle\Entity\Tower t ORDER BY t.id')->iterate();
-        $dbRow      = $dbIterator->next(); // For some reason the Doctrine iterators don't initialise at 0
-        $count = 0;
-        $progress->start($output, $towerCount);
-        $progress->setRedrawFrequency($towerCount/100);
-        while ($dbIterator->valid()) {
+        $dbIterator = new PgResultIterator(pg_query($db, 'SELECT id FROM towers'));
+        $dbCount = count($dbIterator);
+        $progress = new ProgressBar($output, $dbCount);
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) $dbCount)*2) - 10);
+        $progress->setRedrawFrequency($dbCount/100);
+        foreach ($dbIterator as $dbRow) {
             // If the entry found in the database wasn't just imported, remove it
-            if (!in_array($dbRow[0]->getId(), $importedTowers)) {
+            if (!in_array($dbRow['id'], $importedTowers)) {
+                pg_delete($db, 'towers', array('id' => $dbRow['id']));
                 $progress->clear();
                 $output->writeln("\r<comment>".str_pad(" Removed ".$dbRow[0]->getId(), $targetConsoleWidth, ' ').'</comment>');
                 $progress->display();
-                $em->remove($dbRow[0]);
             }
-
-            // Advance through the database iterator
-            $dbRow = $dbIterator->next();
             $progress->advance();
-
-            // Flush every now and again
-            ++$count;
-            if ($count % 20 == 0) {
-                $em->flush();
-                $em->clear();
-            }
         }
         $progress->finish();
-        $em->flush();
-        $em->clear();
 
         // Finish
         $output->writeln("\n<info>Finished updating tower data.. Peak memory usage: ".number_format(memory_get_peak_usage()).' bytes.</info>');

@@ -70,28 +70,28 @@ class DoveTxtIterator implements \Iterator, \Countable
         // Initialise $this->currentTower, and set the easy fields
         $this->currentTower = array(
             'id'              => str_replace(' ', '_', $towerData['DoveID']) ?: null,
-            'gridReference'   => $towerData['NG'] ?: null,
+            'gridreference'   => $towerData['NG'] ?: null,
             'latitude'        => floatval($towerData['Lat']) ?: null,
             'longitude'       => floatval($towerData['Long']) ?: null,
-            'latitudeSatNav'  => floatval($towerData['SNLat']) ?: null,
-            'longitudeSatNav' => floatval($towerData['SNLong']) ?: null,
+            'latitudesatnav'  => floatval($towerData['SNLat']) ?: null,
+            'longitudesatnav' => floatval($towerData['SNLong']) ?: null,
             'postcode'        => $towerData['Postcode'] ?: null,
             'bells'           => intval($towerData['Bells']),
             'weight'          => intval($towerData['Wt']),
-            'weightApprox'    => empty($towerData['App']) ? false : true,
+            'weightapprox'    => empty($towerData['App']) ? false : true,
             'note'            => $towerData['Note'] ?: null,
             'hz'              => floatval($towerData['Hz']) ?: null,
-            'practiceNight'   => intval($towerData['PDNo']) ?: null,
-            'practiceStart'   => $towerData['PSt'] ?: null,
-            'practiceNotes'   => $towerData['PrXF'] ?: null,
-            'groundFloor'     => empty($towerData['GF']) ? false : true,
+            'practicenight'   => intval($towerData['PDNo']) ?: null,
+            'practicestart'   => $towerData['PSt'] ?: null,
+            'practicenotes'   => $towerData['PrXF'] ?: null,
+            'groundfloor'     => empty($towerData['GF']) ? false : true,
             'toilet'          => empty($towerData['Toilet']) ? false : true,
             'unringable'      => empty($towerData['UR']) ? false : true,
             'simulator'       => empty($towerData['Simulator']) ? false : true,
-            'overhaulYear'    => intval($towerData['OvhaulYr']) ?: null,
-            'tunedYear'       => intval($towerData['TuneYr']) ?: null,
+            'overhaulyear'    => intval($towerData['OvhaulYr']) ?: null,
+            'tunedyear'       => intval($towerData['TuneYr']) ?: null,
             'affiliations'    => $towerData['Affiliations'] ?: null,
-            'extraInfo'       => $towerData['ExtraInfo'] ?: null,
+            'extrainfo'       => $towerData['ExtraInfo'] ?: null,
         );
 
         // We have to do some work to tidy up the other Dove data
@@ -206,9 +206,9 @@ class DoveTxtIterator implements \Iterator, \Countable
 
         // Only include altName if necessary
         if (empty($towerData['AltName']) || $towerData['Place'] == $towerData['AltName']) {
-            $this->currentTower['altName'] = null;
+            $this->currentTower['altname'] = null;
         } else {
-            $this->currentTower['altName'] = $towerData['AltName'];
+            $this->currentTower['altname'] = $towerData['AltName'];
         }
 
         // Concat 'place2' and 'place'
@@ -218,7 +218,7 @@ class DoveTxtIterator implements \Iterator, \Countable
         $towerData['WebPage'] = $towerData['WebPage'] ? (preg_match('/^[a-z]+:\/\//', $towerData['WebPage']) ? $towerData['WebPage'] : 'http://'.$towerData['WebPage']) : null;
         // Encode spaces to %20. This isn't an ideal technique.
         $towerData['WebPage'] = str_replace(' ', '%20', $towerData['WebPage']);
-        $this->currentTower['webPage'] = $towerData['WebPage'];
+        $this->currentTower['webpage'] = $towerData['WebPage'];
 
         return $this->currentTower;
     }
