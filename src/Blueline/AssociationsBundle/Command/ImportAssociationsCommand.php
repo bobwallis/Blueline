@@ -70,5 +70,7 @@ class ImportAssociationsCommand extends ContainerAwareCommand
             }
         }
         $progress->finish();
+        // Finish
+        $output->writeln("\n<info>Finished updating association data.. Peak memory usage: ".number_format(memory_get_peak_usage()).' bytes.</info>');
     }
 }

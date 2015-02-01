@@ -57,6 +57,7 @@ class ImportOldPKsCommand extends ContainerAwareCommand
         $progress->start();
 
         // Iterate over newpks.txt, importing data
+        $output->writeln('<info>Importing oldpk data...</info>');
         while ($txtIterator->valid()) {
             $txtRow = $txtIterator->current();
 
