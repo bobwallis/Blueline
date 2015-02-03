@@ -17,7 +17,7 @@ $associations = array (
   array (
     'id' => 'Beds',
     'name' => 'Bedfordshire Association',
-    'link' => 'http://www.bacr.co.uk/',
+    'link' => 'http://www.bedsbellringers.co.uk/',
   ),
   3 =>
   array (
@@ -245,7 +245,7 @@ $associations = array (
   array (
     'id' => 'SAG',
     'name' => 'South African Guild',
-    'link' => 'http://www.scifac.ru.ac.za/cathedral/bellguild.htm',
+    'link' => 'https://sites.google.com/site/bellringingsouthafrica/home',
   ),
   41 =>
   array (
