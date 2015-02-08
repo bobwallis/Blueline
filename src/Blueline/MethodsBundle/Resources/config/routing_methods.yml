@@ -2,6 +2,13 @@ Blueline_Methods_welcome:
     pattern:  /
     defaults: { _controller: BluelineMethodsBundle:Methods:welcome }
 
+Blueline_Methods_view_redirect:
+    path: /view/
+    defaults:
+        _controller: FrameworkBundle:Redirect:redirect
+        route: Blueline_Methods_welcome
+        permanent: true
+
 Blueline_Methods_view:
     pattern: /view/{title}.{_format}
     defaults: { _controller: BluelineMethodsBundle:Methods:view, _format: html }

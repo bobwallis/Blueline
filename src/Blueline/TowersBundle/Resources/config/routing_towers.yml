@@ -2,6 +2,20 @@ Blueline_Towers_welcome:
     pattern:  /
     defaults: { _controller: BluelineTowersBundle:Towers:welcome }
 
+
+Blueline_Towers_view_redirect:
+    path: /view
+    defaults:
+        _controller: FrameworkBundle:Redirect:redirect
+        route: Blueline_Towers_welcome
+        permanent: true
+Blueline_Towers_view_redirect2:
+    path: /view/
+    defaults:
+        _controller: FrameworkBundle:Redirect:redirect
+        route: Blueline_Towers_welcome
+        permanent: true
+
 Blueline_Towers_view:
     pattern: /view/{id}.{_format}
     defaults: { _controller: BluelineTowersBundle:Towers:view, _format: html }

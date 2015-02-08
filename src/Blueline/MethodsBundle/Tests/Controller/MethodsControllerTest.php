@@ -46,10 +46,10 @@ class MethodsControllerTest extends WebTestCase
     public function testMethodsRedirects()
     {
         // Test redirects to top page
-        foreach (array('/methods', '/methods/view', '/methods/view/') as $page) {
+        foreach (array('/methods', '/methods/view/') as $page) {
             $client = static::createClient();
             $crawler = $client->request('GET', $page);
-            $this->assertTrue($client->getResponse()->isRedirect('/methods/'), $page.' doesn\'t redirect to /methods/');
+            $this->assertTrue($client->getResponse()->isRedirect(), $page.' isn\'t a redirect');
         }
     }
     public function testMethodsSitemap()

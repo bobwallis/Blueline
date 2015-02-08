@@ -43,7 +43,7 @@ class AssociationsControllerTest extends WebTestCase
         foreach (array('/associations', '/associations/view', '/associations/view/') as $page) {
             $client = static::createClient();
             $crawler = $client->request('GET', $page);
-            $this->assertTrue($client->getResponse()->isRedirect('/associations/'), $page.' doesn\'t redirect to /associations/');
+            $this->assertTrue($client->getResponse()->isRedirect(), $page.' isn\'t a redirect');
         }
     }
     public function testAssociationsSitemap()

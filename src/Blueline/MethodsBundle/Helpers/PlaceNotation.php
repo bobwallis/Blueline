@@ -172,7 +172,7 @@ class PlaceNotation
     public static function expand($notation, $stage = null)
     {
         // If stage isn't given, try to guess it
-        if (is_null($stage)) {
+        if (is_null($stage) || $stage < 3 ) {
             $stage = max(array_map(function ($c) { return PlaceNotation::bellToInt($c); }, array_filter(str_split($notation), function ($c) { return preg_match('/[0-9A-Z]/', $c); })));
         }
 
@@ -187,7 +187,7 @@ class PlaceNotation
         // Remove anything inside brackets, or appended fch details (arise when people copy notation from somewhere with extra information at the start or end)
         $notationFull = preg_replace(array( '/[\(\[{\<].*[\)\]}\>]/', '/ FCH.*$/' ), '', $notationFull);
 
-        // Deal with notation like 'x1x1x1-2' (After checking for this form we can assume - means x from thereafter)
+        // Deal with notation like 'x1x1x1-2' (After checking for this form we can assume - means x)
         if (preg_match('/^([^-]+)-([^-\.,x]+)$/', $notationFull, $match) == 1) {
             // if there's only one -, and it's got one change after it...
             $notationFull = self::expandHalf($match[1]).'.'.$match[2];
@@ -199,8 +199,8 @@ class PlaceNotation
             $notationFull = str_replace(' HL ', '.', $notationFull);
         }
 
-        // Deal with notation like '-1-1-1LH2', or '-1-1-1 le2'
-        if (preg_match('/^(.*)(LH|LE)/', $notationFull, $match) == 1) {
+        // Deal with notation like '-1-1-1LH2', or '-1-1-1 le2'. Allow a preceding ampersand
+        if (preg_match('/^&?(.*)(LH|LE)/', $notationFull, $match) == 1) {
             $notationFull = str_replace($match[0], self::expandHalf($match[1]), $notationFull);
         }
 

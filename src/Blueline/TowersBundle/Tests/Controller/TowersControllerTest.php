@@ -43,7 +43,7 @@ class TowersControllerTest extends WebTestCase
         foreach (array('/towers', '/towers/view', '/towers/view/') as $page) {
             $client = static::createClient();
             $crawler = $client->request('GET', $page);
-            $this->assertTrue($client->getResponse()->isRedirect('/towers/'), $page.' doesn\'t redirect to /towers/');
+            $this->assertTrue($client->getResponse()->isRedirect(), $page.' isn\'t a redirect');
         }
     }
     public function testTowersSitemap()

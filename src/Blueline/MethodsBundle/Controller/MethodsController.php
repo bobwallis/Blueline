@@ -216,7 +216,7 @@ class MethodsController extends Controller
         }
 
         // Do some basic conversion
-        $vars['stage'] == intval($vars['stage']);
+        $vars['stage'] = intval($vars['stage']);
         $vars['notationExpanded'] = PlaceNotation::expand($vars['notation'], $vars['stage']);
         $vars['title'] = isset($vars['title']) ? $vars['title'] : 'Unrung '.Stages::toString($vars['stage']).' Method';
 
