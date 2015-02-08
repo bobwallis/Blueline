@@ -9,3 +9,9 @@ Blueline_FontPreview:
     defaults: { _controller: BluelineServicesBundle:FontPreview:preview }
     requirements:
         _format: png
+
+Blueline_Notation_expand:
+    path:     /expandNotation.{_format}
+    defaults: { _controller: BluelineServicesBundle:Notation:expand }
+    requirements:
+        _format: txt|json

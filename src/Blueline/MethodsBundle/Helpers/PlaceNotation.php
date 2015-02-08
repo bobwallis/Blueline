@@ -210,7 +210,7 @@ class PlaceNotation
             $notationFull = str_replace(array( '.x.', 'x.', '.x'), 'x', $notationFull);
         }
 
-        // + seems a little pointless, but some notation uses it to seperate lead heads from the rest of the notation (&x1x1x1+1), so replace it with a space just in case
+        // + seems a little pointless, but some notation uses it to seperate lead heads from the rest of the notation (&x1x1x1+2), so replace it with a space just in case
         $notationFull = str_replace('+', ' ', $notationFull);
 
         // Convert 'a &-1-1-1' type notation into '&x1x1x1 2' type
