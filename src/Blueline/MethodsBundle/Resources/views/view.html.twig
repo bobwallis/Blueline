@@ -70,7 +70,7 @@
 				</dd>
 {% endif %}
 				<dt>Download as image</dt>
-				<dd><a href="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2, 'style': 'line' } ) }}" class="external">Line</a><br/><a href="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2, 'style': 'numbers' } ) }}" class="external">Numbers</a><br/><a href="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2, 'style': 'grid' } ) }}" class="external">Grid</a></dd>
+				<dd><a href="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2, 'style': 'line' } ) }}" class="external" data-forcerefresh="true">Line</a><br/><a href="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2, 'style': 'numbers' } ) }}" class="external" data-forcerefresh="true">Numbers</a><br/><a href="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2, 'style': 'grid' } ) }}" class="external" data-forcerefresh="true">Grid</a></dd>
 				<dt>Data Source and Copyright</dt>
 				<dd>Details on the <a href="{{ path( 'Blueline_Pages_view', { 'page': 'about' } ) }}">about page</a>.</dd>
 			</dl>
