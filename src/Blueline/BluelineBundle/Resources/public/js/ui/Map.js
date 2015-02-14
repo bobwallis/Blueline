@@ -16,13 +16,13 @@ define( ['require', 'eve', 'jquery', '../lib/gmaps'], function( require, eve, $ 
 		fusionTableLayer: null,
 		fusionTableInfoWindow: null,
 		show: function() {
-			$towerMap.fadeIn( 125 );
 			$( '#loading' ).css( 'width', '40%' );
 			$content.css( 'width', '40%' );
+			$towerMap.show();
 			towerMapAdjust();
 		},
 		hide: function() {
-			$towerMap.fadeOut( 125 );
+			$towerMap.hide();
 			$( '#loading' ).css( 'width', '100%' );
 			$content.css( 'width', '100%' );
 		},

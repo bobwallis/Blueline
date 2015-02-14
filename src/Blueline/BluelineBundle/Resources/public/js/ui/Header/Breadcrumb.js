@@ -7,13 +7,13 @@ define( ['eve', 'jquery', '../../helpers/URL'], function( eve, $, URL ) {
 		section: null,
 		set: function( section ) {
 			if( typeof section === 'string' ) {
-				$breadcrumb_sep.stop().fadeIn( 125 );
-				$breadcrumb.stop().html( '<a href="'+URL.baseURL+section+'/">'+section.charAt(0).toUpperCase()+section.slice(1)+'</a>' ).fadeIn( 150 );
+				$breadcrumb_sep.show();
+				$breadcrumb.html( '<a href="'+URL.baseURL+section+'/">'+section.charAt(0).toUpperCase()+section.slice(1)+'</a>' ).show();
 				Breadcrumb.section = section;
 			}
 			else {
-				$breadcrumb_sep.stop().fadeOut( 150 );
-				$breadcrumb.stop().fadeOut( 125, function() { $breadcrumb.empty(); } );
+				$breadcrumb_sep.hide();
+				$breadcrumb.hide();
 				Breadcrumb.section = null;
 			}
 		}

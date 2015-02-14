@@ -1,5 +1,5 @@
 // This module manages the search box UI, updating it on page changes.
-// It also receives user input into the search box, and issues appropriate 
+// It also receives user input into the search box, and issues appropriate
 // data requests
 
 define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve, $, URL, Page ) {
@@ -10,7 +10,7 @@ define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve
 		hide: function() {
 			if( Search.visible === true ) {
 				$q.blur();
-				$search.stop( true ).fadeOut( 100 );
+				$search.hide();
 				Search.visible = false;
 				$content.removeClass( 'searchable' );
 			}
@@ -33,7 +33,7 @@ define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve
 			}
 
 			if( Search.visible === false ) {
-				$search.stop( true ).fadeIn( 150 );
+				$search.show();
 				Search.visible = true;
 				$content.addClass( 'searchable' );
 			}
