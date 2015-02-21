@@ -157,6 +157,11 @@ class Method
     private $ruleOffs;
 
     /**
+     * @var integer $sort
+     */
+    private $sort;
+
+    /**
      * @var \Doctrine\Common\Collections\Collection
      */
     private $collections;
@@ -742,6 +747,29 @@ class Method
         } else {
             return $this->ruleOffs ?: array( 'from' => 0, 'every' => $this->getLengthOfLead() );
         }
+    }
+
+    /**
+     * Set sort
+     *
+     * @param  integer $sort
+     * @return Method
+     */
+    public function setSort($sort)
+    {
+        $this->sort = $sort;
+
+        return $this;
+    }
+
+    /**
+     * Get sort
+     *
+     * @return integer
+     */
+    public function getSort()
+    {
+        return $this->sort;
     }
 
     /**
