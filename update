@@ -136,6 +136,7 @@ if [[ $CCCBRDATA = true ]]
 	# Import updated method data
 	php "$d/app/console" blueline:importMethods
 	php "$d/app/console" blueline:importMethodExtras
+	php "$d/app/console" blueline:importCollections
 	echo ""
 	php "$d/app/console" blueline:linkPerformancesToDove
 	sed -i -e"s/database_update: .*/database_update: `date "+%s"`/" "$d/app/config/parameters.yml"
