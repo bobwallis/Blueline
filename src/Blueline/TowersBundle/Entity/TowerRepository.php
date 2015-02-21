@@ -39,10 +39,15 @@ class TowerRepository extends EntityRepository
     {
         $query = $this->createQueryForFindBySearchVariables($searchVariables);
 
-        // Offset and count
+        // Sort/Order
+        $query->orderBy('t.'.(isset($searchVariables['sort'])?$searchVariables['sort']:'id'), isset($searchVariables['order'])?$searchVariables['order']:'ASC');
+
+        // Offset
         if (isset($searchVariables['offset'])) {
             $query->setFirstResult($searchVariables['offset']);
         }
+
+        // Count
         if (isset($searchVariables['count'])) {
             $query->setMaxResults($searchVariables['count']);
         }
@@ -66,8 +71,8 @@ class TowerRepository extends EntityRepository
             $this->createQueryBuilder('t')
                 ->select('partial t.{id,place,dedication,latitude,longitude}, 0 as distance')
                   // If the tower is dead on the location then floating point arithmetic
-                  // sometimes means that the haversine formula returns >1, so exclude the 
-                  // edge case and fetch seperately
+                  // sometimes means that cos( radians(:near_lat) returns >1 and errors,
+                  // so exclude the edge case and fetch seperately
                 ->orWhere('t.latitude = (:near_lat) AND t.longitude = (:near_long)')
                 ->groupBy('t.id')
                 ->setParameter('near_lat', $latitude)

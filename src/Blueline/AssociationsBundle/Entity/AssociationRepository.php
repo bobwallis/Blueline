@@ -40,10 +40,15 @@ class AssociationRepository extends EntityRepository
     {
         $query = $this->createQueryForFindBySearchVariables($searchVariables);
 
-        // Offset and count
+        // Sort/Order
+        $query->orderBy('a.'.(isset($searchVariables['sort'])?$searchVariables['sort']:'id'), isset($searchVariables['order'])?$searchVariables['order']:'ASC');
+
+        // Offset
         if (isset($searchVariables['offset'])) {
             $query->setFirstResult($searchVariables['offset']);
         }
+
+        // Count
         if (isset($searchVariables['count'])) {
             $query->setMaxResults($searchVariables['count']);
         }
