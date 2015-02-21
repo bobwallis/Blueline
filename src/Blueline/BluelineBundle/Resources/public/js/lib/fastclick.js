@@ -1,10 +1,9 @@
-(function () {
+;(function () {
 	'use strict';
 
 	/**
 	 * @preserve FastClick: polyfill to remove click delays on browsers with touch UIs.
 	 *
-	 * @version 1.0.3
 	 * @codingstandard ftlabs-jsv2
 	 * @copyright The Financial Times Limited [All Rights Reserved]
 	 * @license MIT License (see LICENSE.txt)
@@ -19,7 +18,7 @@
 	 *
 	 * @constructor
 	 * @param {Element} layer The layer to listen on
-	 * @param {Object} options The options to override the defaults
+	 * @param {Object} [options={}] The options to override the defaults
 	 */
 	function FastClick(layer, options) {
 		var oldOnClick;
@@ -96,6 +95,13 @@
 		 */
 		this.tapDelay = options.tapDelay || 200;
 
+		/**
+		 * The maximum time for a tap
+		 *
+		 * @type number
+		 */
+		this.tapTimeout = options.tapTimeout || 700;
+
 		if (FastClick.notNeeded(layer)) {
 			return;
 		}
@@ -167,13 +173,19 @@
 		}
 	}
 
+	/**
+	* Windows Phone 8.1 fakes user agent string to look like Android and iPhone.
+	*
+	* @type boolean
+	*/
+	var deviceIsWindowsPhone = navigator.userAgent.indexOf("Windows Phone") >= 0;
 
 	/**
 	 * Android requires exceptions.
 	 *
 	 * @type boolean
 	 */
-	var deviceIsAndroid = navigator.userAgent.indexOf('Android') > 0;
+	var deviceIsAndroid = navigator.userAgent.indexOf('Android') > 0 && !deviceIsWindowsPhone;
 
 
 	/**
@@ -181,7 +193,7 @@
 	 *
 	 * @type boolean
 	 */
-	var deviceIsIOS = /iP(ad|hone|od)/.test(navigator.userAgent);
+	var deviceIsIOS = /iP(ad|hone|od)/.test(navigator.userAgent) && !deviceIsWindowsPhone;
 
 
 	/**
@@ -193,11 +205,11 @@
 
 
 	/**
-	 * iOS 6.0(+?) requires the target element to be manually derived
+	 * iOS 6.0-7.* requires the target element to be manually derived
 	 *
 	 * @type boolean
 	 */
-	var deviceIsIOSWithBadTarget = deviceIsIOS && (/OS ([6-9]|\d{2})_\d/).test(navigator.userAgent);
+	var deviceIsIOSWithBadTarget = deviceIsIOS && (/OS [6-7]_\d/).test(navigator.userAgent);
 
 	/**
 	 * BlackBerry requires exceptions.
@@ -519,6 +531,10 @@
 			return true;
 		}
 
+		if ((event.timeStamp - this.trackingClickStart) > this.tapTimeout) {
+			return true;
+		}
+
 		// Reset to prevent wrong click cancel on input (issue #156).
 		this.cancelNextClick = false;
 
@@ -719,6 +735,7 @@
 		var metaViewport;
 		var chromeVersion;
 		var blackberryVersion;
+		var firefoxVersion;
 
 		// Devices that don't support touch don't need FastClick
 		if (typeof window.ontouchstart === 'undefined') {
@@ -771,8 +788,26 @@
 			}
 		}
 
-		// IE10 with -ms-touch-action: none, which disables double-tap-to-zoom (issue #97)
-		if (layer.style.msTouchAction === 'none') {
+		// IE10 with -ms-touch-action: none or manipulation, which disables double-tap-to-zoom (issue #97)
+		if (layer.style.msTouchAction === 'none' || layer.style.touchAction === 'manipulation') {
+			return true;
+		}
+
+		// Firefox version - zero for other browsers
+		firefoxVersion = +(/Firefox\/([0-9]+)/.exec(navigator.userAgent) || [,0])[1];
+
+		if (firefoxVersion >= 27) {
+			// Firefox 27+ does not have tap delay if the content is not zoomable - https://bugzilla.mozilla.org/show_bug.cgi?id=922896
+
+			metaViewport = document.querySelector('meta[name=viewport]');
+			if (metaViewport && (metaViewport.content.indexOf('user-scalable=no') !== -1 || document.documentElement.scrollWidth <= window.outerWidth)) {
+				return true;
+			}
+		}
+
+		// IE11: prefixed -ms-touch-action is no longer supported and it's recomended to use non-prefixed version
+		// http://msdn.microsoft.com/en-us/library/windows/apps/Hh767313.aspx
+		if (layer.style.touchAction === 'none' || layer.style.touchAction === 'manipulation') {
 			return true;
 		}
 
@@ -784,14 +819,14 @@
 	 * Factory method for creating a FastClick object
 	 *
 	 * @param {Element} layer The layer to listen on
-	 * @param {Object} options The options to override the defaults
+	 * @param {Object} [options={}] The options to override the defaults
 	 */
 	FastClick.attach = function(layer, options) {
 		return new FastClick(layer, options);
 	};
 
 
-	if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+	if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
 
 		// AMD. Register as an anonymous module.
 		define(function() {
