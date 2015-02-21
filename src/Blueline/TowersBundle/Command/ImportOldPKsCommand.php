@@ -46,6 +46,7 @@ class ImportOldPKsCommand extends ContainerAwareCommand
             return;
         }
 
+        $output->writeln('<info>Importing oldpk data...</info>');
         // Create the iterator
         $txtIterator = new OldPKTxtIterator(__DIR__.'/../Resources/data/newpks.txt');
         $oldPKCount = count($txtIterator);
@@ -57,7 +58,6 @@ class ImportOldPKsCommand extends ContainerAwareCommand
         $progress->start();
 
         // Iterate over newpks.txt, importing data
-        $output->writeln('<info>Importing oldpk data...</info>');
         while ($txtIterator->valid()) {
             $txtRow = $txtIterator->current();
 
