@@ -1,9 +1,44 @@
 <?php
-// Collections data exported 2015/02/22, 15:27
+// Collections data exported 2015/02/22, 16:18
 $collections = array (
   0 =>
   array (
-    'id' => 'diagrams',
+    'id' => 'CroslandsAlphabet',
+    'name' => 'Crosland Alphabet Series',
+    'description' => 'Richard Crosland\'s alphabet series of Surprise Major methods.',
+    'methods' =>
+    array (
+      0 => 'Adelaide Surprise Major',
+      1 => 'Bordesley Surprise Major',
+      2 => 'Chesterfield Surprise Major',
+      3 => 'Datchet Surprise Major',
+      4 => 'Eccleston Surprise Major',
+      5 => 'Frankley Surprise Major',
+      6 => 'Greenford Surprise Major',
+      7 => 'Hertfordshire Surprise Major',
+      8 => 'Irthlingborough Surprise Major',
+      9 => 'Jesmond Surprise Major',
+      10 => 'Kirklington Surprise Major',
+      11 => 'Lennoxville Surprise Major',
+      12 => 'Midhurst Surprise Major',
+      13 => 'Norton Surprise Major',
+      14 => 'Overton Surprise Major',
+      15 => 'Penzance Surprise Major',
+      16 => 'Quarrington Surprise Major',
+      17 => 'Ripplesmere Surprise Major',
+      18 => 'Springvale Surprise Major',
+      19 => 'Taunton Surprise Major',
+      20 => 'Urchfont Surprise Major',
+      21 => 'Valbourne Surprise Major',
+      22 => 'Warnham Surprise Major',
+      23 => 'Xenia Surprise Major',
+      24 => 'Yeading Surprise Major',
+      25 => 'Zaporozhye Surprise Major',
+    ),
+  ),
+  1 =>
+  array (
+    'id' => 'Diagrams',
     'name' => 'Diagrams',
     'description' => 'Methods in the 1991 reprint of Jasper Snowden\'s Diagrams.',
     'methods' =>
@@ -126,9 +161,9 @@ $collections = array (
       115 => 'Londinium Surprise Maximus',
     ),
   ),
-  1 =>
+  2 =>
   array (
-    'id' => 'lbfg8',
+    'id' => 'LBFG8',
     'name' => '"LBFG" Surprise Major',
     'description' => 'London, Bristol, Belfast and Glasow Surprise Major.',
     'methods' =>
@@ -139,7 +174,7 @@ $collections = array (
       3 => 'Glasgow Surprise Major',
     ),
   ),
-  2 =>
+  3 =>
   array (
     'id' => 'mostViewed200',
     'name' => '200 Most Viewed Methods',
@@ -348,9 +383,9 @@ $collections = array (
       199 => 'Xanthus Delight Royal',
     ),
   ),
-  3 =>
+  4 =>
   array (
-    'id' => 'nottingham8',
+    'id' => 'Nottingham8',
     'name' => '"Nottingham 8" Surprise Major',
     'description' => 'An alternative to the "Standard 8".',
     'methods' =>
@@ -365,9 +400,59 @@ $collections = array (
       7 => 'Superlative Surprise Major',
     ),
   ),
-  4 =>
+  5 =>
   array (
-    'id' => 'standard8',
+    'id' => 'Pitmans9',
+    'name' => 'Pitman Series',
+    'description' => 'The Pitman series of Surprise Major methods.',
+    'methods' =>
+    array (
+      0 => 'Bristol Surprise Major',
+      1 => 'Cambridge Surprise Major',
+      2 => 'Cassiobury Surprise Major',
+      3 => 'Dorchester Surprise Major',
+      4 => 'Lincoln Surprise Major',
+      5 => 'London Surprise Major',
+      6 => 'Pudsey Surprise Major',
+      7 => 'Superlative Surprise Major',
+      8 => 'Watford Surprise Major',
+    ),
+  ),
+  6 =>
+  array (
+    'id' => 'Smiths23',
+    'name' => 'Norman Smith\'s 23 Spliced Surprise Major',
+    'description' => 'The 23 Surprise Major methods making up Norman Smith\'s famous peal composition.',
+    'methods' =>
+    array (
+      0 => 'Ashtead Surprise Major',
+      1 => 'Bristol Surprise Major',
+      2 => 'Cambridge Surprise Major',
+      3 => 'Cassiobury Surprise Major',
+      4 => 'Cornwall Surprise Major',
+      5 => 'Cray Surprise Major',
+      6 => 'Double Dublin Surprise Major',
+      7 => 'Glasgow Surprise Major',
+      8 => 'Ipswich Surprise Major',
+      9 => 'Jersey Surprise Major',
+      10 => 'Lincolnshire Surprise Major',
+      11 => 'Lindum Surprise Major',
+      12 => 'London Surprise Major',
+      13 => 'Preston Surprise Major',
+      14 => 'Pudsey Surprise Major',
+      15 => 'Rutland Surprise Major',
+      16 => 'Superlative Surprise Major',
+      17 => 'Tavistock Surprise Major',
+      18 => 'Uxbridge Surprise Major',
+      19 => 'Watford Surprise Major',
+      20 => 'Wembley Surprise Major',
+      21 => 'Whalley Surprise Major',
+      22 => 'Yorkshire Surprise Major',
+    ),
+  ),
+  7 =>
+  array (
+    'id' => 'Standard8',
     'name' => '"Standard 8" Surprise Major',
     'description' => '',
     'methods' =>
