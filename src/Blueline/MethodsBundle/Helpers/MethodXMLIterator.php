@@ -99,6 +99,7 @@ class MethodXMLIterator implements \Iterator, \Countable
                 $array['performances'] = array();
                 if (isset($node->performances->firstTowerbellPeal)) {
                     $array['performances'][] = array_filter(array(
+                        'method_title' => $array['title'],
                         'type' => 'firstTowerbellPeal',
                         'date' => (new \DateTime($node->performances->firstTowerbellPeal->date))->format('Y-m-d'),
                         'location_room' => strval($node->performances->firstTowerbellPeal->location->room) ?: null,
@@ -112,6 +113,7 @@ class MethodXMLIterator implements \Iterator, \Countable
                 }
                 if (isset($node->performances->firstHandbellPeal)) {
                     $array['performances'][] = array_filter(array(
+                        'method_title' => $array['title'],
                         'type' => 'firstHandbellPeal',
                         'date' => (new \DateTime($node->performances->firstHandbellPeal->date))->format('Y-m-d'),
                         'location_room' => strval($node->performances->firstHandbellPeal->location->room) ?: null,
