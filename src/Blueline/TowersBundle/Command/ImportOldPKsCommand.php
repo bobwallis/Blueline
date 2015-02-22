@@ -71,6 +71,7 @@ class ImportOldPKsCommand extends ContainerAwareCommand
             $progress->advance();
         }
         $progress->finish();
+        $output->writeln('');
 
         // Finish
         $output->writeln("\n<info>Finished updating old primary key data.. Peak memory usage: ".number_format(memory_get_peak_usage()).' bytes.</info>');

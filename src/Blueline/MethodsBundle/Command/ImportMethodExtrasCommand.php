@@ -5,13 +5,10 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Blueline\MethodsBundle\Helpers\MethodXMLIterator;
 use Blueline\MethodsBundle\Helpers\RenamedHTMLIterator;
 use Blueline\MethodsBundle\Helpers\DuplicateHTMLIterator;
-use Blueline\MethodsBundle\Entity\Method;
-use Blueline\MethodsBundle\Entity\Collection;
-use Blueline\MethodsBundle\Entity\MethodInCollection;
-use Blueline\MethodsBundle\Entity\Performance;
 
 class ImportMethodExtrasCommand extends ContainerAwareCommand
 {
@@ -48,18 +45,13 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
             require __DIR__.'/../Resources/data/method_extras.php';
             $method_extras = new \ArrayObject($method_extras);
             $extrasIterator   = $method_extras->getIterator();
-
-            while ($extrasIterator->valid()) {
+            foreach ($extrasIterator as $txtRow) {
                 // Import the row
-                $txtRow = $extrasIterator->current();
                 $txtRow['calls'] = serialize($txtRow['calls']);
                 if( pg_update( $db, 'methods', array_change_key_case($txtRow), array('title' => $txtRow['title']) ) === false ) {
                     $output->writeln('<comment> Failed to import method extras for "'.$txtRow['title'].'"</comment>');
                     $output->writeln('<comment> '.pg_last_error($db).'</comment>');
                 }
-
-                // Get the next row
-                $txtRow = $extrasIterator->next();
             }
         }
 

@@ -102,6 +102,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
                 $progress->advance();
             }
             $progress->finish();
+            $output->writeln(' ');
         }
 
         // Check for deletions
@@ -121,6 +122,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
             $progress->advance();
         }
         $progress->finish();
+        $output->writeln(' ');
 
         // Finish
         $output->writeln("\n<info>Finished updating method data. Peak memory usage: ".number_format(memory_get_peak_usage()).' bytes.</info>');

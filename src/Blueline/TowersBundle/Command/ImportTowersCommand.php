@@ -117,6 +117,7 @@ class ImportTowersCommand extends ContainerAwareCommand
             $progress->advance();
         }
         $progress->finish();
+        $output->writeln('');
 
         // Finish
         $output->writeln("\n<info>Finished updating tower data.. Peak memory usage: ".number_format(memory_get_peak_usage()).' bytes.</info>');

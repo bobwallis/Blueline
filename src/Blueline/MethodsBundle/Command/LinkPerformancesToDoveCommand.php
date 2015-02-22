@@ -5,6 +5,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Blueline\BluelineBundle\Helpers\PgResultIterator;
 use Blueline\BluelineBundle\Helpers\Text;
 
@@ -32,7 +33,6 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
             $output->writeln('<error>Failed to connect to database</error>');
             return;
         }
-        $progress = $this->getHelperSet()->get('progress');
         require __DIR__.'/../Resources/data/method_towers.php';
 
         // Get an iterator over the performances table
@@ -51,7 +51,7 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
         }
 
         // Set-up the progress bar
-        $progress->start($output, $performanceCount);
+        $progress = new ProgressBar($output, $performanceCount);
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) $performanceCount)*2) - 10);
         $progress->setRedrawFrequency(max(1, $performanceCount/100));
 
@@ -97,6 +97,7 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
             $progress->advance();
         }
         $progress->finish();
+        $output->writeln('');
 
         $output->writeln("\n<info>Finished updating performance data. Peak memory usage: ".number_format(memory_get_peak_usage()).' bytes.</info>');
     }
