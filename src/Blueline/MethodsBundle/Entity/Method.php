@@ -157,9 +157,9 @@ class Method
     private $ruleOffs;
 
     /**
-     * @var integer $sort
+     * @var integer $magic
      */
-    private $sort;
+    private $magic;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -750,26 +750,26 @@ class Method
     }
 
     /**
-     * Set sort
+     * Set magic
      *
-     * @param  integer $sort
+     * @param  integer $magic
      * @return Method
      */
-    public function setSort($sort)
+    public function setMagic($magic)
     {
-        $this->sort = $sort;
+        $this->magic = $magic;
 
         return $this;
     }
 
     /**
-     * Get sort
+     * Get magic
      *
      * @return integer
      */
-    public function getSort()
+    public function getMagic()
     {
-        return $this->sort;
+        return $this->magic;
     }
 
     /**

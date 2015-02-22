@@ -14,13 +14,13 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Blueline\MethodsBundle\Helpers\MethodXMLIterator;
 use Blueline\MethodsBundle\Helpers\RenamedHTMLIterator;
 use Blueline\MethodsBundle\Helpers\DuplicateHTMLIterator;
-use Blueline\MethodsBundle\Entity\Method;
-use Blueline\MethodsBundle\Entity\Collection;
-use Blueline\MethodsBundle\Entity\MethodInCollection;
-use Blueline\MethodsBundle\Entity\Performance;
+use Blueline\BluelineBundle\Helpers\PgResultIterator;
+
+require_once(__DIR__.'/../../BluelineBundle/Helpers/pg_upsert.php'); // Can use 'use function' when PHP 5.6 is more common
 
 class ImportMethodsCommand extends ContainerAwareCommand
 {
@@ -40,48 +40,36 @@ class ImportMethodsCommand extends ContainerAwareCommand
         // Print title
         $output->writeln('<title>Updating method data</title>');
 
-        // Get access to the entity manager,validator and a progress bar indicator
-        $em                    = $this->getContainer()->get('doctrine')->getManager();
-        $methodRepository      = $em->getRepository('BluelineMethodsBundle:Method');
-        $collectionRepository  = $em->getRepository('BluelineMethodsBundle:Collection');
-        $methodInCollectionRepository = $em->getRepository('BluelineMethodsBundle:MethodInCollection');
-        $performanceRepository = $em->getRepository('BluelineMethodsBundle:Performance');
-        $validator             = $this->getContainer()->get('validator');
-        $progress              = $this->getHelperSet()->get('progress');
+        // Get access to the database and other services
+        $db = pg_connect('host='.$this->getContainer()->getParameter('database_host').' port='.$this->getContainer()->getParameter('database_port').' dbname='.$this->getContainer()->getParameter('database_name').' user='.$this->getContainer()->getParameter('database_user').' password='.$this->getContainer()->getParameter('database_password').'');
+        if ($db === false) {
+            $output->writeln('<error>Failed to connect to database</error>');
+            return;
+        }
 
         // There are two 'standard' method collections in the methods.org.uk data that we will add methods to as we go along
         // The 'Plain Minor Method' collection
-        $methodCollections = array();
-        $methodCollections['pmm'] = $collectionRepository->findOneById('pmm');
-        if (!$methodCollections['pmm']) {
-            $methodCollections['pmm'] = new Collection();
-            $methodCollections['pmm']->setId('pmm');
-            $methodCollections['pmm']->setName('Plain Minor Methods');
-            $methodCollections['pmm']->setDescription('All the possible symmetric Bob and Place Minor methods with five leads in the plain course.');
-            $em->persist($methodCollections['pmm']);
-        }
+        \Blueline\BluelineBundle\Helpers\pg_upsert($db, 'collections', array('name' => 'Plain Minor Methods', 'description' => 'All the possible symmetric Bob and Place Minor methods with five leads in the plain course.'), array('id' => 'pmm'));
         // and the 'Treble Dodging Minor Method' collection
-        $methodCollections['tdmm'] = $collectionRepository->findOneById('tdmm');
-        if (!$methodCollections['tdmm']) {
-            $methodCollections['tdmm'] = new Collection();
-            $methodCollections['tdmm']->setId('tdmm');
-            $methodCollections['tdmm']->setName('Treble Dodging Minor Methods');
-            $methodCollections['tdmm']->setDescription('All the possible symmetric Treble Bob, Delight and Surprise Minor methods with five leads in the plain course and with no bell making more than two consecutive blows in the same position.');
-            $em->persist($methodCollections['tdmm']);
+        \Blueline\BluelineBundle\Helpers\pg_upsert($db, 'collections', array('name' => 'Treble Dodging Minor Methods', 'description' => 'All the possible symmetric Treble Bob, Delight and Surprise Minor methods with five leads in the plain course and with no bell making more than two consecutive blows in the same position.'), array('id' => 'tdmm'));
+        // Clear existing data before we start
+        $output->writeln('<info>Clear existing PMM and TDMM collection data...</info>');
+        if (pg_query($db, "DELETE FROM methods_collections WHERE collection_id = 'pmm' OR collection_id = 'tdmm'") === false) {
+            $output->writeln('<error>Failed to clear existing data: '.pg_last_error($db).'</error>');
+            return;
         }
 
-        // Utility arrays to store entities in as we make them
-        $methodInCollection = array();
-        $methodInPerformance = array();
+        // Clear existing first peal data
+        $output->writeln('<info>Clear existing first peal data...</info>');
+        if (pg_query($db, "DELETE FROM performances WHERE type = 'firstTowerbellPeal' OR type = 'firstHandbellPeal'") === false) {
+            $output->writeln('<error>Failed to clear existing data: '.pg_last_error($db).'</error>');
+            return;
+        }
 
-        $output->writeln("<info>Importing basic method data...</info>");
-        // The method data isn't presented in a sensible order in the XML files, so detecting
-        // deletion will require an extra step (not that there should ever really be any).
-        // We'll read data from the XML file line by line, update/insert each method we get to, and
-        // also keep the title.
-        // Once we've updated/inserted everything, execute the 'sort' command on the title array, then
-        // iterate through the database in title order and remove anything not present in the array.
-        $allImportedMethodTitles = array();
+        // Import data
+        $output->writeln("<info>Importing method data...</info>");
+        $validFields = array_flip(array('title', 'url', 'stage', 'classification', 'namemetaphone','notation', 'notationexpanded', 'leadheadcode', 'leadhead', 'fchgroups', 'lengthoflead', 'numberofhunts', 'little', 'differential', 'plain', 'trebledodging', 'palindromic', 'doublesym', 'rotational', 'calls', 'ruleOffs', 'magic'));
+        $importedMethods = array();
         
         // Iterate over all appropriate files
         $dataFiles = new \GlobIterator(__DIR__.'/../Resources/data/*.xml');
@@ -91,108 +79,50 @@ class ImportMethodsCommand extends ContainerAwareCommand
 
             // Create the iterator, and begin
             $xmlIterator = new MethodXMLIterator(__DIR__.'/../Resources/data/'.$file->getFilename());
-            $xmlRow      = $xmlIterator->current();
-            $count = 0;
             $methodCount = count($xmlIterator);
-            $progress->start($output, $methodCount);
+            $progress = new ProgressBar($output, $methodCount);
             $progress->setBarWidth($targetConsoleWidth - (strlen((string) $methodCount)*2) - 10);
             $progress->setRedrawFrequency(max(1, $methodCount/100));
-            while ($xmlIterator->valid()) {
-                $method = new Method();
-                $method->setAll($xmlRow);
-
-                // Validate the new data, and merge if it validates
-                $errors = $validator->validate($method);
-                if (count($errors) > 0) {
-                    $progress->clear();
-                    $output->writeln("\r<error>".str_pad(" Invalid data for ".$xmlRow['title'].":\n".$errors, $targetConsoleWidth, ' ').'</error>');
-                    $progress->display();
-                } else {
-                    $allImportedMethodTitles[] = $xmlRow['title'];
-                    $method = $em->merge($method);
-                    $em->refresh($method);
-
-                    // 'Treble Dodging Minor Method Collection' and 'Plain Minor Method' collections
-                    foreach (array( 'tdmm', 'pmm' ) as $t) {
-                        if (isset($xmlRow[$t.'Ref'])) {
-                            $methodInCollection[$t] = $methodInCollectionRepository->findOneBy(array( 'collection' => $t, 'method' => $method->getTitle() ));
-                            if (! $methodInCollection[$t]) {
-                                $methodInCollection[$t] = new MethodInCollection();
-                                $methodInCollection[$t]->setMethod($method);
-                                $methodInCollection[$t]->setCollection($methodCollections[$t]);
-                                $methodInCollection[$t]->setPosition(intval($xmlRow[$t.'Ref']));
-                                $methodInCollection[$t] = $em->merge($methodInCollection[$t]);
-                            }
-                        }
-                    }
-                    // Performances
-                    if (isset($xmlRow['performances'])) {
-                        foreach ($xmlRow['performances'] as $performanceRow) {
-                            $t = $performanceRow['type'];
-                            $methodInPerformance[$t] = $performanceRepository->findOneBy(array( 'type' => $t, 'method' => $method->getTitle() ));
-                            if (! $methodInPerformance[$t]) {
-                                $methodInPerformance[$t] = new Performance($performanceRow);
-                                $methodInPerformance[$t]->setMethod($method);
-                                $methodInPerformance[$t] = $em->merge($methodInPerformance[$t]);
-                            }
-                        }
+            foreach ($xmlIterator as $xmlRow) {
+                // Upsert the method data
+                \Blueline\BluelineBundle\Helpers\pg_upsert($db, 'methods', array_intersect_key($xmlRow, $validFields), array('title' => $xmlRow['title']));
+                // 'Treble Dodging Minor Method' and 'Plain Minor Method' collections
+                foreach (array( 'tdmm', 'pmm' ) as $t) {
+                    if (isset($xmlRow[$t.'ref'])) {
+                        pg_insert($db, 'methods_collections', array('collection_id' => $t, 'method_title' => $xmlRow['title'], 'position' => intval($xmlRow[$t.'ref'])));
                     }
                 }
-
-                // Flush every so often so we don't run out of memory
-                ++$count;
-                if ($count % 1 == 0) {
-                // Run into managed+dirty errors if this is >1 and certain things happen, investigate later
-                    $em->flush();
-                    $em->clear();
+                // Performances
+                if (isset($xmlRow['performances'])) {
+                    foreach ($xmlRow['performances'] as $performanceRow) {
+                        pg_insert($db, 'performances', $performanceRow);
+                    }
                 }
-
-                // Get the next row
-                $xmlRow = $xmlIterator->next();
+                $importedMethods[] = $xmlRow['title'];
                 $progress->advance();
             }
             $progress->finish();
-            $em->flush();
-            $em->clear();
         }
 
-        // Now begin the removal process
-        $output->writeln('<info>Deleting old method data...</info>');
-        // Ideally we'd do this by sorting the two lists (the method titles we just imported, and the
-        // method titles in the database) by the same algorithm, and advance through the lists
-        // concurrently. This is non-trivial it seems, since MySQL, Postgres and PHP disagree on how to order
-        // strings containing non-alphanumeric and accented characters.
-        // Get around the issue by looking up each title in the array of imported methods.
-        // This will obviously be slower than is ideal.
-        $dbIterator  = $em->createQuery('SELECT m FROM Blueline\MethodsBundle\Entity\Method m ORDER BY m.title')->iterate();
-        $dbRow       = $dbIterator->next(); // For some reason the Doctrine iterators don't initialise at 0
-        $count       = 0;
-        $methodCount = $em->createQuery('SELECT count(m) FROM Blueline\MethodsBundle\Entity\Method m')->getSingleScalarResult();
-        $progress->start($output, $methodCount);
-        $progress->setBarWidth($targetConsoleWidth - (strlen((string) $methodCount)*2) - 10);
-        $progress->setRedrawFrequency(max(1, $methodCount/100));
-        while ($dbIterator->valid()) {
-            // If the entry found in the database wasn't just imported, remove it
-            if (!in_array($dbRow[0]->getTitle(), $allImportedMethodTitles)) {
-                $output->writeln("\r<comment>".str_pad(" Removed '".$dbRow[0]->getTitle()."'", $targetConsoleWidth, ' ').'</comment>');
-                $em->remove($dbRow[0]);
+        // Check for deletions
+        $output->writeln('<info>Checking for deletion of old data...</info>');
+        $idsInDatabase = new PgResultIterator(pg_query('SELECT title FROM methods'));
+        $progress = new ProgressBar($output, count($idsInDatabase));
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($idsInDatabase))*2) - 10);
+        $progress->setRedrawFrequency(max(1, count($idsInDatabase)/100));
+        foreach ($idsInDatabase as $m) {
+            $m = current($m);
+            if (!in_array($m, $importedMethods)) {
+                pg_delete($db, 'methods', array('title' => $m));
+                $progress->clear();
+                $output->writeln("\r<comment>".str_pad(" Method '".$m."' deleted", $targetConsoleWidth, ' ')."</comment>");
+                $progress->display();
             }
-
-            // Flush every now and again
-            ++$count;
-            if ($count % 20 == 0) {
-                $em->flush();
-                $em->clear();
-            }
-
-            // Advance through the database iterator
-            $dbRow = $dbIterator->next();
             $progress->advance();
         }
         $progress->finish();
-        $em->flush();
-        $em->clear();
-        
+
+        // Finish
         $output->writeln("\n<info>Finished updating method data. Peak memory usage: ".number_format(memory_get_peak_usage()).' bytes.</info>');
     }
 }

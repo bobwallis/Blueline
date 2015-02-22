@@ -69,8 +69,10 @@ class ImportAssociationsCommand extends ContainerAwareCommand
                 $output->writeln("\r<comment>".str_pad(" Association '".$a."' deleted", $targetConsoleWidth, ' ')."</comment>");
                 $progress->display();
             }
+            $progress->advance();
         }
         $progress->finish();
+        
         // Finish
         $output->writeln("\n<info>Finished updating association data.. Peak memory usage: ".number_format(memory_get_peak_usage()).' bytes.</info>');
     }

@@ -10,13 +10,19 @@
 
 namespace Blueline\MethodsBundle\Helpers;
 
-
 class MethodXMLIterator implements \Iterator, \Countable
 {
     private $data;
 
     public function __construct($file)
     {
+        // Prepare methodCollections data for easier methos sorting
+        require __DIR__.'/../Resources/data/collections.php';
+        $methodCollections = array();
+        foreach ($collections as $collection) {
+            $methodCollections[$collection['id']] = $collection['methods'];
+        }
+
         // Parse the XML data
         // TODO: Investigate a switch to XMLReader <http://www.php.net/manual/en/book.xmlreader.php> over SimpleXML.
         libxml_use_internal_errors(true);
@@ -34,34 +40,35 @@ class MethodXMLIterator implements \Iterator, \Countable
         }
 
         // Function to parse the SimpleXMLElements we'll encounter into an array of data
-        $xmlToArray = function (\SimpleXMLElement $node, $array = array()) {
+        $xmlToArray = function (\SimpleXMLElement $node, $array = array()) use ($methodCollections) {
             // Pull out the easy ones
-            $array = array_merge($array, array_filter(array(
+            $array = array_merge($array, array(
                 'url'            => strval($node->title) ? str_replace([' ', '$', '&', '+', ',', '/', ':', ';', '=', '?', '@', '"', "'", '<', '>', '#', '%', '{', '}', '|', "\\", '^', '~', '[', ']', '.'], ['_'], iconv('UTF-8', 'ASCII//TRANSLIT', strval($node->title))) : null,
                 'title'          => strval($node->title) ?: null,
-                'nameMetaphone'  => metaphone($node->name ?: '') ?: null,
+                'namemetaphone'  => metaphone($node->name ?: '') ?: null,
                 'notation'       => strval($node->notation) ?: null,
+                ), array_filter(array(
                 'stage'          => intval($node->stage) ?: null,
                 'classification' => strval($node->classification) ?: null,
-                'numberOfHunts'  => $node->numberOfHunts ? intval($node->numberOfHunts) : null,
-                'lengthOfLead'   => intval($node->lengthOfLead) ?: null,
-                'leadHead'       => strval($node->leadHead) ?: null,
-                'leadHeadCode'   => strval($node->leadHeadCode) ?: null,
-                'fchGroups'      => strval($node->falseness->fchGroups) ?: null,
+                'numberofhunts'  => $node->numberOfHunts ? intval($node->numberOfHunts) : null,
+                'lengthoflead'   => intval($node->lengthOfLead) ?: null,
+                'leadhead'       => strval($node->leadHead) ?: null,
+                'leadheadcode'   => strval($node->leadHeadCode) ?: null,
+                'fchgroups'      => strval($node->falseness->fchGroups) ?: null,
             ), function ($e) { return !is_null($e); }));
 
             // Parse place notation
             if (isset($array['notation'])) {
-                $array['notationExpanded'] = PlaceNotation::expand($array['notation'], $array['stage']);
+                $array['notationexpanded'] = PlaceNotation::expand($array['notation'], $array['stage']);
             }
 
             // If needed, work out the lead head/lead head code
-            if (!isset($array['leadHead']) && isset($array['stage'], $array['leadHeadCode'])) {
-                $array['leadHead'] = LeadHeadCodes::fromCode($array['leadHeadCode'], $array['stage']);
+            if (!isset($array['leadhead']) && isset($array['stage'], $array['leadheadcode'])) {
+                $array['leadhead'] = LeadHeadCodes::fromCode($array['leadheadcode'], $array['stage']);
             }
-            if (isset($array['leadHead'], $array['stage'], $array['numberOfHunts'], $array['notation']) && !isset($array['leadHeadCode'])) {
-                $explodedNotation = PlaceNotation::explode($array['notationExpanded']);
-                $array['leadHeadCode'] = LeadHeadCodes::toCode($array['leadHead'], $array['stage'], $array['numberOfHunts'], array_pop($explodedNotation), array_shift($explodedNotation));
+            if (isset($array['leadhead'], $array['stage'], $array['numberofhunts'], $array['notation']) && !isset($array['leadheadcode'])) {
+                $explodedNotation = PlaceNotation::explode($array['notationexpanded']);
+                $array['leadheadcode'] = LeadHeadCodes::toCode($array['leadhead'], $array['stage'], $array['numberofhunts'], array_pop($explodedNotation), array_shift($explodedNotation));
             }
 
             // Get additional classification attributes
@@ -69,22 +76,22 @@ class MethodXMLIterator implements \Iterator, \Countable
                 $array['little']        = ($node->classification->attributes()->little) ? true : null;
                 $array['differential']  = ($node->classification->attributes()->differential) ? true : null;
                 $array['plain']         = ($node->classification->attributes()->plain) ? true : null;
-                $array['trebleDodging'] = ($node->classification->attributes()->trebleDodging) ? true : null;
+                $array['trebledodging'] = ($node->classification->attributes()->trebleDodging) ? true : null;
             }
 
             // Get symmetry
             if (isset($node->symmetry)) {
                 $array['palindromic'] = (strpos(strval($node->symmetry), 'palindromic') !== false) ? true : null;
-                $array['doubleSym']   = (strpos(strval($node->symmetry), 'double') !== false) ? true : null;
+                $array['doublesym']   = (strpos(strval($node->symmetry), 'double') !== false) ? true : null;
                 $array['rotational']  = (strpos(strval($node->symmetry), 'rotational') !== false) ? true : null;
             }
 
             // Get references
             if (isset($node->references)) {
-                $array['rwRef']   = strval($node->references->rwRef) ?: null;
-                $array['bnRef']   = strval($node->references->bnRef) ?: null;
-                $array['tdmmRef'] = strval($node->references->tdmmRef) ?: null;
-                $array['pmmRef']  = strval($node->references->pmmRef) ?: null;
+                $array['rwref']   = strval($node->references->rwRef) ?: null;
+                $array['bnref']   = strval($node->references->bnRef) ?: null;
+                $array['tdmmref'] = strval($node->references->tdmmRef) ?: null;
+                $array['pmmref']  = strval($node->references->pmmRef) ?: null;
             }
 
             // Get performance information
@@ -93,7 +100,7 @@ class MethodXMLIterator implements \Iterator, \Countable
                 if (isset($node->performances->firstTowerbellPeal)) {
                     $array['performances'][] = array_filter(array(
                         'type' => 'firstTowerbellPeal',
-                        'date' => new \DateTime($node->performances->firstTowerbellPeal->date),
+                        'date' => (new \DateTime($node->performances->firstTowerbellPeal->date))->format('Y-m-d'),
                         'location_room' => strval($node->performances->firstTowerbellPeal->location->room) ?: null,
                         'location_building' => strval($node->performances->firstTowerbellPeal->location->building) ?: null,
                         'location_address' => strval($node->performances->firstTowerbellPeal->location->address) ?: null,
@@ -106,7 +113,7 @@ class MethodXMLIterator implements \Iterator, \Countable
                 if (isset($node->performances->firstHandbellPeal)) {
                     $array['performances'][] = array_filter(array(
                         'type' => 'firstHandbellPeal',
-                        'date' => new \DateTime($node->performances->firstHandbellPeal->date),
+                        'date' => (new \DateTime($node->performances->firstHandbellPeal->date))->format('Y-m-d'),
                         'location_room' => strval($node->performances->firstHandbellPeal->location->room) ?: null,
                         'location_building' => strval($node->performances->firstHandbellPeal->location->building) ?: null,
                         'location_address' => strval($node->performances->firstHandbellPeal->location->address) ?: null,
@@ -129,13 +136,13 @@ class MethodXMLIterator implements \Iterator, \Countable
                     $regionSearchArray = array();
                     if (isset($p['location_region'], $p['location_country'])) {
                         switch ($p['location_country']) {
-                            case 'Australia' :
+                            case 'Australia':
                                 $regionSearchArray = $australianAreas;
                                 break;
-                            case 'Canada' :
+                            case 'Canada':
                                 $regionSearchArray = $canadianStates;
                                 break;
-                            case 'USA' :
+                            case 'USA':
                                 $regionSearchArray = $states;
                                 break;
                         }
@@ -154,8 +161,65 @@ class MethodXMLIterator implements \Iterator, \Countable
                 }
             }
 
-            // Filter out null items, and return
-            return array_filter($array, function ($e) { return !is_null($e); });
+            // Work out what the sort code should be if we're looking at a method
+            if (isset($array['title'])) {
+                $sort = 32000;
+                // Favour certain classifications
+                if (isset($array['classification'])) {
+                    switch($array['classification']) {
+                        case "Surprise":
+                            $sort *= 0.91;
+                            break;
+                        case "Bob":
+                            $sort *= 0.92;
+                            break;
+                        case "Delight":
+                            $sort *= 0.93;
+                            break;
+                        case "Treble Bob":
+                        case "Alliance":
+                            $sort *= 0.95;
+                            break;
+                        case "Treble Place":
+                        case "Place":
+                        case "Slow Course":
+                            $sort *= 0.97;
+                            break;
+                        case "Hybrid":
+                            $sort *= 0.99;
+                    }
+                }
+                // Favour certain stages
+                if ($array['stage'] <= 4) {
+                    $sort *= 0.96;
+                } else if ($array['stage'] <= 6) {
+                    $sort *= 0.92;
+                } else if ($array['stage'] <= 8) {
+                    $sort *= 0.90;
+                } else if ($array['stage'] <= 10) {
+                    $sort *= 0.92;
+                } else if ($array['stage'] <= 12) {
+                    $sort *= 0.94;
+                } else if ($array['stage'] <= 16) {
+                    $sort *= 0.96;
+                }
+                // Push methods in certain collections up the list
+                if (in_array($array['title'], $methodCollections['Standard8']) || in_array($array['title'], $methodCollections['Nottingham8']) || in_array($array['title'], $methodCollections['LBFG8'])) {
+                    $sort *= 0.5;
+                }
+                if (in_array($array['title'], $methodCollections['Smiths23']) || in_array($array['title'], $methodCollections['Pitmans9']) || in_array($array['title'], $methodCollections['CroslandsAlphabet'])) {
+                    $sort *= 0.8;
+                }
+                if (in_array($array['title'], $methodCollections['Diagrams'])) {
+                    $sort *= 0.8;
+                }
+                if (in_array($array['title'], $methodCollections['mostViewed200'])) {
+                    $sort *= 0.95;
+                }
+                $array['magic'] = intval($sort);
+            }
+
+            return $array;
         };
 
         // Iterate over <methodSet>s

@@ -69,7 +69,7 @@ Blueline\MethodsBundle\Entity\Method:
             type: string
             length: 255
             nullable: true
-        sort:
+        magic:
             type: smallint
             nullable: true
     oneToMany:

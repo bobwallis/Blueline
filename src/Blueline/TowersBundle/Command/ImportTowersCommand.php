@@ -105,7 +105,7 @@ class ImportTowersCommand extends ContainerAwareCommand
         $dbCount = count($dbIterator);
         $progress = new ProgressBar($output, $dbCount);
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) $dbCount)*2) - 10);
-        $progress->setRedrawFrequency($dbCount/100);
+        $progress->setRedrawFrequency(max(1, $dbCount/100));
         foreach ($dbIterator as $dbRow) {
             // If the entry found in the database wasn't just imported, remove it
             if (!in_array($dbRow['id'], $importedTowers)) {

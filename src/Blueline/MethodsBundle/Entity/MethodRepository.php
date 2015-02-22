@@ -91,7 +91,7 @@ class MethodRepository extends EntityRepository
         $query = $this->createQueryForFindBySearchVariables($searchVariables);
         
         // Sort/Order
-        $query->orderBy('m.'.(isset($searchVariables['sort'])?$searchVariables['sort']:'title'), isset($searchVariables['order'])?$searchVariables['order']:'ASC');
+        $query->orderBy('m.'.(isset($searchVariables['sort'])?$searchVariables['sort']:'magic'), isset($searchVariables['order'])?$searchVariables['order']:'ASC');
 
         // Offset
         if (isset($searchVariables['offset'])) {
