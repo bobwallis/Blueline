@@ -71,7 +71,7 @@ class ImportTowersCommand extends ContainerAwareCommand
         $towerCount = count($txtIterator);
         $progress = new ProgressBar($output, $towerCount);
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) $towerCount)*2) - 10);
-        $progress->setRedrawFrequency($towerCount/100);
+        $progress->setRedrawFrequency(max(1, $towerCount/100));
         foreach ($txtIterator as $txtRow) {
             $affiliations = $txtRow['affiliations'];
             unset($txtRow['affiliations']);
