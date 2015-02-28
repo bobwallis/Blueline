@@ -39,11 +39,6 @@ module.exports = function (grunt) {
 		},
 
 		imagemin: {
-			all: {
-				files: [
-					{ expand: true, src: ['web/images/*'] }
-				]
-			},
 			gif: {
 				files: [
 					{ expand: true, src: ['web/images/*.gif'] }
@@ -62,16 +57,6 @@ module.exports = function (grunt) {
 		},
 
 		compress: {
-			all: {
-				options: {
-					mode: 'gzip',
-					pretty: true,
-					level: 6
-				},
-				files: [
-					{ expand: true, rename: function(d,s) { return s+'.gz'; },  src: ['web/**/*.{css,js,svg}'] }
-				]
-			},
 			css: {
 				options: {
 					mode: 'gzip',
@@ -111,5 +96,5 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-compress');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
-	grunt.registerTask('default', 'Build all assets.', ['copy', 'svg2png', 'imagemin:all', 'compress:all']);
+	grunt.registerTask('default', 'Build all assets.', ['copy', 'svg2png', 'imagemin', 'compress']);
 };
