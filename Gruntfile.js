@@ -110,6 +110,6 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-imagemin');
 	grunt.loadNpmTasks('grunt-contrib-compress');
 	grunt.loadNpmTasks('grunt-contrib-watch');
-	
-	grunt.registerTask('default', 'Build all assets.', ['copy:all', 'svg2png', 'imagemin:all', 'compress:all']);
+
+	grunt.registerTask('default', 'Build all assets.', ['copy', 'svg2png', 'imagemin:all', 'compress:all']);
 };
