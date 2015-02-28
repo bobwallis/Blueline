@@ -1,0 +1,15 @@
+{
+  "name": "Blueline",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bobwallis/Blueline.git"
+  },
+  "dependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-copy": "^0.8.0",
+    "grunt-contrib-uglify": "^0.8.0",
+    "grunt-modernizr": "^0.6.0"
+  }
+}

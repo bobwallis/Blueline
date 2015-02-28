@@ -44,17 +44,6 @@ while getopts_long :dpfeh opt \
 	done
 shift "$(($OPTLIND - 1))"
 
-
-# Update composer.phar
-if [[ ! ( -e "$d/composer.phar" ) ]]
-	then
-	echo -e "\n\033[1mInstalling Composer\033[0m"
-	curl -sS https://getcomposer.org/installer | php
-fi
-echo -e "\n\033[1mUpdating Composer\033[0m"
-php "$d/composer.phar" self-update
-
-
 # Pull latest version
 if [[ $GITPULL = true && $DEV = false ]]
 	then
@@ -70,8 +59,17 @@ if [[ $GITPULL = true && $DEV = false ]]
 	exit
 fi
 
+# Update composer.phar
+if [[ ! ( -e "$d/composer.phar" ) ]]; then
+	echo -e "\n\033[1mInstalling Composer\033[0m"
+	curl -sS https://getcomposer.org/installer | php
+else
+	echo -e "\n\033[1mUpdating Composer\033[0m"
+	php "$d/composer.phar" self-update
+fi
+
 # Update vendors
-echo -e "\n\033[1mUpdating vendors for Blueline\033[0m"
+echo -e "\n\033[1mUpdating /vendors\033[0m"
 if [[ $DEV = true ]]; then
 	php "$d/composer.phar" update
 else
@@ -79,20 +77,21 @@ else
 	php "$d/composer.phar" dump-autoload --optimize
 fi
 
-
-# Update Javascript libraries
+# Update node_modules
+echo -e "\n\033[1mUpdating /bo\033[0m"
 if [[ $DEV = true ]]; then
-	# Get latest eve
-	echo -e "\n\033[1mUpdating eve\033[0m..."
-	#curl -s -o "$d/app/Resources/public/js/eve.js" "https://raw.github.com/adobe-webplatform/eve/master/eve.js"
-	echo "Done"
-
-	# Get latest FastClick
-	echo -e "\n\033[1mUpdating FastClick\033[0m..."
-	curl -s -o "$d/src/Blueline/BluelineBundle/Resources/public/js/lib/fastclick.js" "https://raw.github.com/ftlabs/fastclick/master/lib/fastclick.js"
-	echo "Done"
+	npm update
+else
+	npm install
 fi
 
+# Update node_modules
+echo -e "\n\033[1mUpdating /bower_components\033[0m"
+if [[ $DEV = true ]]; then
+	bower update
+else
+	bower install
+fi
 
 # Clear cache
 echo -e "\n\033[1mClearing Symfony cache\033[0m"
@@ -113,6 +112,11 @@ php "$d/app/console" doctrine:schema:validate
 echo -e "\n\033[1mRebuilding CSS and JS assets\033[0m"
 rm -rf "$d/web/css"
 rm -rf "$d/web/js"
+rm -rf "$d/web/fonts"
+rm -rf "$d/web/components"
+rm -rf "$d/web/bundles"
+rm -rf "$d/web/assetic"
+grunt
 php "$d/app/console" assetic:dump --env=prod --no-debug
 
 

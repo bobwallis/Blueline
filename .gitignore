@@ -12,5 +12,9 @@ web/bundles
 web/components
 web/css
 web/js
+web/fonts
+web/images
 
 vendor/*
+bower_components/
+node_modules/
