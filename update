@@ -78,7 +78,7 @@ else
 fi
 
 # Update node_modules
-echo -e "\n\033[1mUpdating /bo\033[0m"
+echo -e "\n\033[1mUpdating /node_modules\033[0m"
 if [[ $DEV = true ]]; then
 	npm update
 else
