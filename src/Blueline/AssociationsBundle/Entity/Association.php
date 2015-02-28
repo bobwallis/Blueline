@@ -61,6 +61,11 @@ class Association
     private $link;
 
     /**
+     * @var array $outline
+     */
+    private $outline;
+
+    /**
      * @var Blueline\TowersBundle\Entity\Tower
      */
     private $towers;
@@ -74,6 +79,8 @@ class Association
     public function setId($id)
     {
         $this->id = $id;
+
+        return $this;
     }
 
     /**
@@ -94,6 +101,8 @@ class Association
     public function setName($name)
     {
         $this->name = $name;
+
+        return $this;
     }
 
     /**
@@ -114,6 +123,8 @@ class Association
     public function setLink($link)
     {
         $this->link = $link;
+
+        return $this;
     }
 
     /**
@@ -127,6 +138,28 @@ class Association
     }
 
     /**
+     * Set outline
+     *
+     * @param array $outline
+     */
+    public function setOutline($outline)
+    {
+        $this->outline = $outline;
+
+        return $this;
+    }
+
+    /**
+     * Get outline
+     *
+     * @return array
+     */
+    public function getOutline()
+    {
+        return $this->outline;
+    }
+
+    /**
      * Add towers
      *
      * @param Blueline\TowersBundle\Entity\Tower $towers
@@ -134,6 +167,8 @@ class Association
     public function addTower(\Blueline\TowersBundle\Entity\Tower $towers)
     {
         $this->towers[] = $towers;
+
+        return $this;
     }
 
     /**

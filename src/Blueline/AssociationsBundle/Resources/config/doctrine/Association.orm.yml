@@ -13,6 +13,9 @@ Blueline\AssociationsBundle\Entity\Association:
             unique: true
         link:
             type: text
+        outline:
+            type: json_array
+            nullable: true
     manyToMany:
         towers:
             targetEntity: Blueline\TowersBundle\Entity\Tower
