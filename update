@@ -116,8 +116,8 @@ rm -rf "$d/web/fonts"
 rm -rf "$d/web/components"
 rm -rf "$d/web/bundles"
 rm -rf "$d/web/assetic"
-grunt
 php "$d/app/console" assetic:dump --env=prod --no-debug
+grunt
 
 
 if [[ $CCCBRDATA = true ]]
