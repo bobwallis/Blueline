@@ -21,7 +21,19 @@ module.exports = function (grunt) {
 		imagemin: {
 			all: {
 				files: [
-					{ expand: true, flatten: true, dest: 'web/images/', src: ['web/images/*'] }
+					{ expand: true, src: ['web/images/*'] }
+				]
+			}
+		},
+		compress: {
+			all: {
+				options: {
+					mode: 'gzip',
+					pretty: true,
+					level: 6
+				},
+				files: [
+					{ expand: true, rename: function(d,s) { return s+'.gz'; },  src: ['web/**/*.{css,js,svg}'] }
 				]
 			}
 		}
@@ -30,5 +42,6 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-copy');
 	grunt.loadNpmTasks('grunt-svg2png');
 	grunt.loadNpmTasks('grunt-contrib-imagemin');
-	grunt.registerTask('default', 'Build all assets.', ['copy', 'svg2png', 'imagemin']);
+	grunt.loadNpmTasks('grunt-contrib-compress');
+	grunt.registerTask('default', 'Build all assets.', ['copy', 'svg2png', 'imagemin', 'compress']);
 };
