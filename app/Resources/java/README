@@ -1,6 +1,5 @@
 In here put:
 closure.jar:       Google's Closure Compiler
-yuicompressor.jar: Yahoo's CSS Minifier
 
 These can be symbolic links if you want to install them using the system's
 package manager instead of putting the actual .jar files here.

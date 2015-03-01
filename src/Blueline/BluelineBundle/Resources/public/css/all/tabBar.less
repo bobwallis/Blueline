@@ -6,7 +6,7 @@
 	height: 21px;
 	font-size: 11px;
 	list-style: none;
-	.user-select(none);
+	user-select: none;
 	li {
 		float: left;
 		border-top-right-radius: 3px;
@@ -18,8 +18,8 @@
 		margin-right: 8px;
 		line-height: 20px;
 		padding: 0 10px;
-		.transition-property(background-color);
-		.transition-duration(.4s);
+		transition-property: background-color;
+		transition-duration: .4s;
 		&:hover { background: @background; }
 		&.active {
 			background-color: @background;

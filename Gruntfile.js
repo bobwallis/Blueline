@@ -7,6 +7,11 @@ module.exports = function (grunt) {
 				tasks: ['copy:gif', 'imagemin:gif'],
 				options: { spawn: false }
 			},
+			less: {
+				files: ['src/Blueline/**/*.{less,css}'],
+				tasks: ['less', 'compress:css'],
+				options: { spawn: false }
+			},
 			svg: {
 				files: ['src/Blueline/**/*.svg'],
 				tasks: ['copy:svg', 'imagemin:svg', 'compress:svg', 'svg2png', 'imagemin:png'],
@@ -35,6 +40,22 @@ module.exports = function (grunt) {
 		svg2png: {
 			all: {
 				src: ['web/images/*.svg']
+			}
+		},
+
+		less: {
+			all: {
+				options: {
+					plugins: [
+						new (require('less-plugin-autoprefix'))({browsers: ["last 2 versions"]}),
+						new (require('less-plugin-clean-css'))()
+					]
+				},
+				files: [
+					{ dest: 'web/css/all.css', src: ['src/Blueline/BluelineBundle/Resources/public/css/all.less'] },
+					{ dest: 'web/css/print.css', src: 'src/Blueline/BluelineBundle/Resources/public/css/print.less' },
+					{ dest: 'web/css/old_ie.css', src: 'src/Blueline/BluelineBundle/Resources/public/css/old_ie.less' }
+				]
 			}
 		},
 
@@ -93,8 +114,9 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-copy');
 	grunt.loadNpmTasks('grunt-svg2png');
 	grunt.loadNpmTasks('grunt-contrib-imagemin');
+	grunt.loadNpmTasks('grunt-contrib-less');
 	grunt.loadNpmTasks('grunt-contrib-compress');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
-	grunt.registerTask('default', 'Build all assets.', ['copy', 'svg2png', 'imagemin', 'compress']);
+	grunt.registerTask('default', 'Build all assets.', ['copy', 'svg2png', 'imagemin', 'less', 'compress']);
 };

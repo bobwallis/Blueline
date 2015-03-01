@@ -66,15 +66,9 @@
 		{% block oembed %}{% endblock %}
 
 		{# Stylesheets #}
-		{% stylesheets '@BluelineBundle/Resources/public/css/lib/normalize.css' '@BluelineBundle/Resources/public/css/all.less' output='css/all.css' filter='less, ?yui_css' %}
-			<link rel="stylesheet" media="all" href="{{ asset_url }}" />
-		{% endstylesheets %}
-		{% stylesheets '@BluelineBundle/Resources/public/css/lib/normalize.css' '@BluelineBundle/Resources/public/css/print.less' output='css/print.css' filter='less, ?yui_css' %}
-			<link rel="stylesheet" media="print" href="{{ asset_url }}" />
-		{% endstylesheets %}
-		{% stylesheets '@BluelineBundle/Resources/public/css/old_ie.less' output='css/old_ie.css' filter='less, ?yui_css' %}
-			<!--[if lt IE 9]><link rel="stylesheet" href="{{ asset_url }}" /><![endif]-->
-		{% endstylesheets %}
+		<link rel="stylesheet" media="all" href="{{ app.request.basepath }}/css/all.css" />
+		<link rel="stylesheet" media="print" href="{{ app.request.basepath }}/css/print.css" />
+		<!--[if lt IE 9]><link rel="stylesheet" href="{{ app.request.basepath }}/css/old_ie.css" /><![endif]-->
 
 		{# HTML5 Shiv #}
 		{% javascripts '@html5shiv' '@BluelineBundle/Resources/public/js/helpers/Array.js' output="js/old_ie.js" filter="?closure" %}
