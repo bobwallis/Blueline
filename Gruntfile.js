@@ -52,7 +52,7 @@ module.exports = function (grunt) {
 					]
 				},
 				files: [
-					{ dest: 'web/css/all.css', src: ['src/Blueline/BluelineBundle/Resources/public/css/all.less'] },
+					{ dest: 'web/css/all.css', src: ['bower_components/normalize.css/normalize.css', 'src/Blueline/BluelineBundle/Resources/public/css/all.less'] },
 					{ dest: 'web/css/print.css', src: 'src/Blueline/BluelineBundle/Resources/public/css/print.less' },
 					{ dest: 'web/css/old_ie.css', src: 'src/Blueline/BluelineBundle/Resources/public/css/old_ie.less' }
 				]
