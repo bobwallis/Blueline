@@ -62,4 +62,4 @@ Blueline_font:
     defaults: { _controller: BluelineBundle:Asset:font }
     requirements:
         font: Blueline
-        _format: woff
+        _format: woff|woff2

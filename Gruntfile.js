@@ -22,7 +22,7 @@ module.exports = function (grunt) {
 		copy: {
 			fonts: {
 				files: [
-					{ expand: true, flatten: true, dest: 'web/fonts/', src: 'src/Blueline/**/fonts/*.{woff,ttf}' }
+					{ expand: true, flatten: true, dest: 'web/fonts/', src: 'src/Blueline/**/fonts/*.{woff,woff2,ttf}' }
 				]
 			},
 			gif: {

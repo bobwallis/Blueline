@@ -18,5 +18,6 @@ class RequestListener
         $event->getRequest()->setFormat('bmp', 'image/bmp');
         $event->getRequest()->setFormat('svg', 'image/svg+xml');
         $event->getRequest()->setFormat('woff', 'application/font-woff');
+        $event->getRequest()->setFormat('woff2', 'application/font-woff2');
     }
 }
