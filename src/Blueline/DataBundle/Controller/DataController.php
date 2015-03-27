@@ -78,7 +78,7 @@ class DataController extends Controller
                             array_walk($result[$i], function (&$v, $k) use ($table) {
                                 switch ($k) {
                                     case 'calls':
-                                        $v = serialize($v);
+                                        $v = json_encode($v);
                                         break;
                                 }
                             });
