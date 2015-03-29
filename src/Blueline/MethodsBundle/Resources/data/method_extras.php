@@ -1,208 +1,167 @@
 <?php
-// Extra method data exported 2014/12/14, 14:51
+
 $method_extras = array (
-  0 => 
   array (
     'title' => 'Double Norwich Court Bob Caters',
-    'calls' => 
-    array (
-      'Bob' => '3::4',
-      'Single' => '123::4',
+    'calls' => array (
+      'Bob' => array('notation' => '3', 'every' => 18, 'from' => 4),
+      'Single' => array('notation' => '123', 'every' => 18, 'from' => 4),
     ),
-    'ruleOffs' => '',
+    'ruleoffs' => array('every' => 18, 'from' => 0),
   ),
-  1 => 
   array (
     'title' => 'Erin Caters',
-    'calls' => 
-    array (
-      'Bob' => '7:6:-5',
-      'Single' => '789:6:-5',
+    'calls' => array (
+      'Bob' => array('notation' => '7', 'every' => 6, 'from' => -5),
+      'Single' => array('notation' => '789', 'every' => 6, 'from' => -5),
     ),
-    'ruleOffs' => '6:-5',
+    'ruleoffs' => array('every' => 6, 'from' => -5),
   ),
-  2 => 
   array (
     'title' => 'Erin Cinques',
-    'calls' => 
-    array (
-      'Bob' => '9:6:-5',
-      'Single' => '90E:6:-5',
+    'calls' => array (
+      'Bob' => array('notation' => '9', 'every' => 6, 'from' => -5),
+      'Single' => array('notation' => '90E', 'every' => 6, 'from' => -5),
     ),
-    'ruleOffs' => '6:-5',
+    'ruleoffs' => array('every' => 6, 'from' => -5),
   ),
-  3 => 
   array (
     'title' => 'Erin Doubles',
-    'calls' => 
-    array (
-      'Single' => '345:6:-2',
+    'calls' => array (
+      'Single' => array('notation' => '345', 'every' => 6, 'from' => -2),
     ),
-    'ruleOffs' => '6:-5',
+    'ruleoffs' => array('every' => 6, 'from' => -5),
   ),
-  4 => 
   array (
     'title' => 'Erin Octuples',
-    'calls' => 
-    array (
-      'Bob' => 'C:6:-5',
-      'Single' => 'CDF:6:-5',
+    'calls' => array (
+      'Bob' => array('notation' => 'C', 'every' => 6, 'from' => -5),
+      'Single' => array('notation' => 'CDF', 'every' => 6, 'from' => -5),
     ),
-    'ruleOffs' => '6:-5',
+    'ruleoffs' => array('every' => 6, 'from' => -5),
   ),
-  5 => 
   array (
     'title' => 'Erin Septuples',
-    'calls' => 
-    array (
-      'Bob' => 'A:6:-5',
-      'Single' => 'ABC:6:-5',
+    'calls' => array (
+      'Bob' => array('notation' => 'A', 'every' => 6, 'from' => -5),
+      'Single' => array('notation' => 'ABC', 'every' => 6, 'from' => -5),
     ),
-    'ruleOffs' => '6:-5',
+    'ruleoffs' => array('every' => 6, 'from' => -5),
   ),
-  6 => 
   array (
     'title' => 'Erin Sextuples',
-    'calls' => 
-    array (
-      'Bob' => 'E:6:-5',
-      'Single' => 'ETA:6:-5',
+    'calls' => array (
+      'Bob' => array('notation' => 'E', 'every' => 6, 'from' => -5),
+      'Single' => array('notation' => 'ETA', 'every' => 6, 'from' => -5),
     ),
-    'ruleOffs' => '6:-5',
+    'ruleoffs' => array('every' => 6, 'from' => -5),
   ),
-  7 => 
   array (
     'title' => 'Erin Triples',
-    'calls' => 
-    array (
-      'Bob' => '5:6:-5',
-      'Single' => '567:6:-5',
+    'calls' => array (
+      'Bob' => array('notation' => '5', 'every' => 6, 'from' => -5),
+      'Single' => array('notation' => '567', 'every' => 6, 'from' => -5),
     ),
-    'ruleOffs' => '6:-5',
+    'ruleoffs' => array('every' => 6, 'from' => -5),
   ),
-  8 => 
   array (
     'title' => 'Original Caters',
-    'calls' => 
-    array (
-      'Bob' => '7::-1',
-      'Single' => '789::-1',
+    'calls' => array (
+      'Bob' => array('notation' => '7', 'every' => 2, 'from' => -1),
+      'Single' => array('notation' => '789', 'every' => 2, 'from' => -1),
     ),
-    'ruleOffs' => '',
+    'ruleoffs' => array('every' => 2, 'from' => 0),
   ),
-  9 => 
   array (
     'title' => 'Original Cinques',
-    'calls' => 
-    array (
-      'Bob' => '9::-1',
-      'Single' => '90E::-1',
+    'calls' => array (
+      'Bob' => array('notation' => '9', 'every' => 2, 'from' => -1),
+      'Single' => array('notation' => '90E', 'every' => 2, 'from' => -1),
     ),
-    'ruleOffs' => '',
+    'ruleoffs' => array('every' => 2, 'from' => 0),
   ),
-  10 => 
   array (
     'title' => 'Original Doubles',
-    'calls' => 
-    array (
-      'Bob' => '3::-1',
-      'Single' => '345::-1',
+    'calls' => array (
+      'Bob' => array('notation' => '3', 'every' => 2, 'from' => -1),
+      'Single' => array('notation' => '345', 'every' => 2, 'from' => -1),
     ),
-    'ruleOffs' => '',
+    'ruleoffs' => array('every' => 2, 'from' => 0),
   ),
-  11 => 
   array (
     'title' => 'Original Triples',
-    'calls' => 
-    array (
-      'Bob' => '5::-1',
-      'Single' => '567::-1',
+    'calls' => array (
+      'Bob' => array('notation' => '5', 'every' => 2, 'from' => -1),
+      'Single' => array('notation' => '567', 'every' => 2, 'from' => -1),
     ),
-    'ruleOffs' => '',
+    'ruleoffs' => array('every' => 2, 'from' => 0),
   ),
-  12 => 
   array (
     'title' => 'Stedman Caters',
-    'calls' => 
-    array (
-      'Bob' => '7:6:-3',
-      'Single' => '789:6:-3',
+    'calls' => array (
+      'Bob' => array('notation' => '7', 'every' => 6, 'from' => -3),
+      'Single' => array('notation' => '789', 'every' => 6, 'from' => -3),
     ),
-    'ruleOffs' => '6:-3',
+    'ruleoffs' => array('every' => 6, 'from' => -3),
   ),
-  13 => 
   array (
     'title' => 'Stedman Cinques',
-    'calls' => 
-    array (
-      'Bob' => '9:6:-3',
-      'Single' => '90E:6:-3',
+    'calls' => array (
+      'Bob' => array('notation' => '9', 'every' => 6, 'from' => -3),
+      'Single' => array('notation' => '90E', 'every' => 6, 'from' => -3),
     ),
-    'ruleOffs' => '6:-3',
+    'ruleoffs' => array('every' => 6, 'from' => -3),
   ),
-  14 => 
   array (
     'title' => 'Stedman Doubles',
-    'calls' => 
-    array (
-      'Single' => '45:6:0',
+    'calls' => array (
+      'Single' => array('notation' => '45', 'every' => 6, 'from' => 0),
     ),
-    'ruleOffs' => '6:-3',
+    'ruleoffs' => array('every' => 6, 'from' => -3),
   ),
-  15 => 
   array (
     'title' => 'Stedman Septuples',
-    'calls' => 
-    array (
-      'Bob' => 'A:6:-3',
-      'Single' => 'ABC:6:-3',
+    'calls' => array (
+      'Bob' => array('notation' => 'A', 'every' => 6, 'from' => -3),
+      'Single' => array('notation' => 'ABC', 'every' => 6, 'from' => -3),
     ),
-    'ruleOffs' => '6:-3',
+    'ruleoffs' => array('every' => 6, 'from' => -3),
   ),
-  16 => 
   array (
     'title' => 'Stedman Sextuples',
-    'calls' => 
-    array (
-      'Bob' => 'E:6:-3',
-      'Single' => 'ETA:6:-3',
+    'calls' => array (
+      'Bob' => array('notation' => 'E', 'every' => 6, 'from' => -3),
+      'Single' => array('notation' => 'ETA', 'every' => 6, 'from' => -3),
     ),
-    'ruleOffs' => '6:-3',
+    'ruleoffs' => array('every' => 6, 'from' => -3),
   ),
-  17 => 
   array (
     'title' => 'Stedman Triples',
-    'calls' => 
-    array (
-      'Bob' => '5:6:-3',
-      'Single' => '567:6:-3',
+    'calls' => array (
+      'Bob' => array('notation' => '5', 'every' => 6, 'from' => -3),
+      'Single' => array('notation' => '567', 'every' => 6, 'from' => -3),
     ),
-    'ruleOffs' => '6:-3',
+    'ruleoffs' => array('every' => 6, 'from' => -3),
   ),
-  18 => 
   array (
     'title' => 'Titanic Cinques',
-    'calls' => 
-    array (
-      'Bob' => '9:6:-1',
-      'Single' => '90E:2:-1',
+    'calls' => array (
+      'Bob' => array('notation' => '9', 'every' => 2, 'from' => -1),
+      'Single' => array('notation' => '90E', 'every' => 2, 'from' => -1),
     ),
-    'ruleOffs' => '2:-1',
+    'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
-  19 => 
   array (
     'title' => 'Titanic Doubles',
-    'calls' => NULL,
-    'ruleOffs' => '2:-1',
+    'calls' => array(),
+    'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
-  20 => 
   array (
     'title' => 'Titanic Triples',
-    'calls' => 
-    array (
-      'Bob' => '5:6:-1',
-      'Single' => '567:2:-1',
+    'calls' => array (
+      'Bob' => array('notation' => '5', 'every' => 2, 'from' => -1),
+      'Single' => array('notation' => '567', 'every' => 2, 'from' => -1),
     ),
-    'ruleOffs' => '2:-1',
+    'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
 );
