@@ -1,8 +1,9 @@
-define( ['jquery'], function( $ ) {
+define( function() {
 	var prefix = 'blueline_',
-	LocalStorage = {
-		age: $( 'html' ).data( 'age' )
-	};
+		dataAge = document.getElementsByTagName('html')[0].getAttribute( 'data-age' ),
+		LocalStorage = {
+			age: (dataAge == 'dev')? 'dev' : parseInt(dataAge)
+		};
 	if( Modernizr.localstorage ) {
 		LocalStorage.getItem = function( key ) {
 			return JSON.parse( localStorage.getItem( prefix+key ) );
@@ -26,7 +27,7 @@ define( ['jquery'], function( $ ) {
 		LocalStorage.setItem( 'cacheAge', LocalStorage.age );
 	}
 	else {
-		LocalStorage.setItem = LocalStorage.removeItem = LocalStorage.clear = $.noop;
+		LocalStorage.setItem = LocalStorage.removeItem = LocalStorage.clear = function() {};
 		LocalStorage.getItem = function() { return null; };
 	}
 	return LocalStorage;

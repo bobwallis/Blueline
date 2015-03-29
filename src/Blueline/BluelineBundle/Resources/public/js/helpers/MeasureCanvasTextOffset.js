@@ -1,4 +1,4 @@
-define( ['jquery', '../ui/Canvas', './LocalStorage'], function( $, Canvas, LocalStorage ) {
+define( ['../ui/Canvas', './LocalStorage'], function( Canvas, LocalStorage ) {
 	/*
 	 * Text positioning on a <canvas> is inconsistent across browsers and platforms.
 	 * This is a problem when trying to get pixel perfect alignments of text and lines.
