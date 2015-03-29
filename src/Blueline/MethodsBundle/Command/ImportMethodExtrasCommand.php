@@ -34,12 +34,6 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
             return;
         }
 
-        $output->writeln('<info>Clear existing extra method data...</info>');
-        if( pg_query($db, 'UPDATE methods SET calls = NULL, ruleoffs = NULL') === false || pg_query($db, "DELETE FROM performances WHERE type = 'duplicateMethod' OR type = 'renamedMethod'") === false ) {
-            $output->writeln('<error>Failed to clear existing data: '.pg_last_error($db).'</error>');
-            return;
-        }
-
         if (file_exists(__DIR__.'/../Resources/data/method_extras.php')) {
             $output->writeln('<info>Adding extra method data...</info>');
             require __DIR__.'/../Resources/data/method_extras.php';
