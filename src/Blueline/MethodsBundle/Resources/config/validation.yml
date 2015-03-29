@@ -9,5 +9,3 @@ Blueline\MethodsBundle\Entity\Method:
         numberOfHunts:
             - GreaterThanOrEqual:
                 value: 0
-        ruleOffs:
-            - Regex: "/^-?\d+:-?\d+$/"

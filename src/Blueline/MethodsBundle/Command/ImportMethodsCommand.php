@@ -19,6 +19,7 @@ use Blueline\MethodsBundle\Helpers\MethodXMLIterator;
 use Blueline\MethodsBundle\Helpers\RenamedHTMLIterator;
 use Blueline\MethodsBundle\Helpers\DuplicateHTMLIterator;
 use Blueline\BluelineBundle\Helpers\PgResultIterator;
+use Blueline\MethodsBundle\Entity\Method;
 
 require_once(__DIR__.'/../../BluelineBundle/Helpers/pg_upsert.php'); // Can use 'use function' when PHP 5.6 is more common
 
@@ -68,7 +69,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
 
         // Import data
         $output->writeln("<info>Importing method data...</info>");
-        $validFields = array_flip(array('title', 'url', 'stage', 'classification', 'namemetaphone','notation', 'notationexpanded', 'leadheadcode', 'leadhead', 'fchgroups', 'lengthoflead', 'numberofhunts', 'little', 'differential', 'plain', 'trebledodging', 'palindromic', 'doublesym', 'rotational', 'calls', 'ruleOffs', 'magic'));
+        $validFields = array_flip(array('title', 'url', 'stage', 'classification', 'namemetaphone','notation', 'notationexpanded', 'leadheadcode', 'leadhead', 'fchgroups', 'lengthoflead', 'numberofhunts', 'little', 'differential', 'plain', 'trebledodging', 'palindromic', 'doublesym', 'rotational', 'calls', 'ruleoffs', 'callingpositions', 'magic'));
         $importedMethods = array();
         
         // Iterate over all appropriate files
@@ -84,6 +85,11 @@ class ImportMethodsCommand extends ContainerAwareCommand
             $progress->setBarWidth($targetConsoleWidth - (strlen((string) $methodCount)*2) - 10);
             $progress->setRedrawFrequency(max(1, $methodCount/100));
             foreach ($xmlIterator as $xmlRow) {
+                // Generate details not in the XML
+                $method = new Method($xmlRow);
+                $xmlRow['calls'] = serialize($method->getCalls());
+                $xmlRow['callingpositions'] = serialize($method->getCallingPositions());
+                $xmlRow['ruleoffs'] = serialize($method->getRuleOffs());
                 // Upsert the method data
                 \Blueline\BluelineBundle\Helpers\pg_upsert($db, 'methods', array_intersect_key($xmlRow, $validFields), array('title' => $xmlRow['title']));
                 // 'Treble Dodging Minor Method' and 'Plain Minor Method' collections

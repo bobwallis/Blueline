@@ -78,6 +78,8 @@ class DataController extends Controller
                             array_walk($result[$i], function (&$v, $k) use ($table) {
                                 switch ($k) {
                                     case 'calls':
+                                    case 'ruleOffs':
+                                    case 'callingPositions':
                                         $v = json_encode($v);
                                         break;
                                 }

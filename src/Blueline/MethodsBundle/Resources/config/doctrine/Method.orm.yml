@@ -66,8 +66,10 @@ Blueline\MethodsBundle\Entity\Method:
             type: array
             nullable: true
         ruleOffs:
-            type: string
-            length: 255
+            type: array
+            nullable: true
+        callingPositions:
+            type: array
             nullable: true
         magic:
             type: smallint
