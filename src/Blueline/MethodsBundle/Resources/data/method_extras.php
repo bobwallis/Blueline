@@ -2,6 +2,14 @@
 
 $method_extras = array (
   array (
+    'title' => 'Banana Doubles',
+    'calls' => array (
+      'Lead-End Bob' => array('notation' => '125', 'every' => 8, 'from' => 0),
+      'Half-Lead Bob' => array('notation' => '145', 'every' => 8, 'from' => -4),
+    ),
+    'ruleoffs' => array('every' => 8, 'from' => 0),
+  ),
+  array (
     'title' => 'Double Norwich Court Bob Caters',
     'calls' => array (
       'Bob' => array('notation' => '3', 'every' => 18, 'from' => 4),
