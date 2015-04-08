@@ -18,7 +18,6 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 		$body = $( document.body );
 
 	var MethodView = function( options ) {
-	// Required options
 		this.id = options.id.toString();
 
 		// Containers
@@ -29,116 +28,9 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 		};
 
 		// Method details
-		this.method = {
-			stage: parseInt( options.stage, 10 ),
-			notation: {
-				text: options.notation,
-				exploded: PlaceNotation.explode( options.notation )
-			}
-		};
-		var rounds = PlaceNotation.rounds( this.method.stage );
-		this.method.notation.parsed = PlaceNotation.parse( options.notation, this.method.stage );
-		this.method.huntBells = PlaceNotation.huntBells( this.method.notation.parsed, this.method.stage );
-		this.method.leadHead = PlaceNotation.apply( this.method.notation.parsed, rounds );
-		this.method.leadHeads = [rounds, this.method.leadHead];
-		for( var i = 1; !PlaceNotation.rowsEqual( this.method.leadHeads[i], rounds ); ++i ) {
-			this.method.leadHeads.push( PlaceNotation.apply( this.method.leadHead, this.method.leadHeads[i] ) );
-		}
-		this.method.leadHeads.pop();
-		this.method.numberOfLeads = this.method.leadHeads.length;
-		this.method.workGroups = PlaceNotation.cycles( this.method.leadHead );
+		this.method = new Method( $.extend( {}, options, {
 
-		// Rule offs
-		if( typeof options.ruleOffs === 'undefined' ) {
-			this.method.ruleOffs = { from: 0, every: this.method.notation.exploded.length };
-		}
-		else if( typeof options.ruleOffs === 'object' ) {
-			this.method.ruleOffs = options.ruleOffs;
-		}
-		else {
-			this.method.ruleOffs = { from: 0, every: 0 };
-		}
-
-		// Calling positions
-		if( typeof options.callingPositions === 'object' ) {
-			this.method.callingPositions = options.callingPositions;
-		}
-		else {
-			this.method.callingPositions = false;
-		}
-
-		// Set up reusable options objects
-		this.options = {};
-
-		// Plain course
-		this.options.plainCourse = {
-			notation: $.extend( true, {}, this.method.notation ),
-			stage: this.method.stage,
-			ruleOffs: $.extend( {}, this.method.ruleOffs )
-		};
-
-		// Calls
-		this.options.calls = [];
-		if( typeof options.calls === 'object' ) {
-			for( var callTitle in options.calls ) {
-				if( Object.prototype.hasOwnProperty.call( options.calls, callTitle ) ) {
-					var call = options.calls[callTitle];
-
-					// If call.from is negative, add to it so we use the second calling position (this stops us from having to mess around with adding notation to the start (Erin))
-					if( call.from < 0 ) { call.from += call.every; }
-
-					// Create a block of notation big enough to play with
-					var notationExploded = this.method.notation.exploded,
-						callNotationExploded = PlaceNotation.explode( call.notation );
-					while( notationExploded.length < (2*call.every)+call.from ) { notationExploded = notationExploded.concat( notationExploded ); }
-
-					// Insert the call's notation
-					for( var i = 0; i < callNotationExploded.length; ++i ) { notationExploded[(i + call.from + call.every) - 1] = callNotationExploded[i]; }
-
-					// Calculte a good amount of padding to display on either side of the call's notation
-					var padding = Math.max( 1, Math.floor((this.method.notation.exploded.length-7)/4) ),
-						start = Math.max( 0, (call.from+call.every-1)-padding ), end = Math.min( notationExploded.length, (call.from+call.every+callNotationExploded.length-1)+padding );
-
-					// Parse notation
-					var notationParsed = PlaceNotation.parse( PlaceNotation.implode( notationExploded ), this.method.stage );
-
-					// Slice out the notation we want
-					call.notation = {
-						text: PlaceNotation.implode( notationExploded.slice( start, end ) ),
-						exploded: notationExploded.slice( start, end ),
-						parsed: notationParsed.slice( start, end )
-					};
-
-					// Calculate what the start row of the part we chopped out is (used to match up colours with the plain lead, and to display meaningful numbers relative to the plain course)
-					call.startRow = (start === 0)? PlaceNotation.rounds( this.method.stage ) : PlaceNotation.apply( notationParsed.slice( 0, start ), PlaceNotation.rounds( this.method.stage ) );
-
-					// Adjust rule offs to compensate for the fact we just sliced off some of the start of the method
-					call.ruleOffs = $.extend( {}, this.method.ruleOffs );
-					call.ruleOffs.from -= start;
-
-					// Calculate which bells are affected by the call
-					var plainLeadNotation = this.method.notation.parsed;
-					for( var i = 1; i*this.method.notation.parsed.length < end; ++i ) { plainLeadNotation = plainLeadNotation.concat( this.method.notation.parsed ); }
-					var plainLeadRow = PlaceNotation.apply( plainLeadNotation.slice( 0, end ), PlaceNotation.rounds( this.method.stage ) ),
-						callLeadRow = PlaceNotation.apply( notationParsed.slice( 0, end ), PlaceNotation.rounds( this.method.stage ) ),
-						affectedBells = [];
-					plainLeadRow.forEach( function( b, i ) { if( b !== callLeadRow[i] ) { affectedBells.push( b ); } } );
-
-					// Create an options object for the call
-					this.options.calls.push( {
-						id: callTitle.replace( ' ', '_' ).replace( /[^A-Za-z0-9_]/, '' ).toLowerCase(),
-						notation: call.notation,
-						stage: this.method.stage,
-						startRow: call.startRow,
-						title: {
-							text: callTitle+':'
-						},
-						ruleOffs: call.ruleOffs,
-						affected: affectedBells
-					} );
-				}
-			}
-		}
+		} ) );
 
 		this.drawNumbers();
 		this.drawLines();
@@ -155,7 +47,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 				workingBellWidth = 2,
 				huntBellWidth = 1.2,
 				columnPadding = 10,
-				rowHeight = 14,
+				rowHeight = 13,
 				rowWidth = ( function( stage ) {
 					// Measure the text
 					var testCanvas = $( '<canvas></canvas>' ).get( 0 ),
@@ -189,7 +81,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 
 			// For calls, draw lines through affected bells, and hunt bells
 			var callLines = [];
-			this.options.calls.forEach( function( call, k ) {
+			this.method.gridOptions.calls.forEach( function( call, k ) {
 				callLines[k] = [];
 				for( var i = 0, j = 0; i < this.method.stage; ++i ) {
 					callLines[k].push( {
@@ -202,7 +94,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 			// Determine the appropriate lead distribution for the plain course to ensure it fits on the page
 			var determineLeadsPerColumn = (function( view ) {
 				var numberOfLeads = view.method.numberOfLeads,
-					numberOfCalls = view.options.calls.length,
+					numberOfCalls = view.method.gridOptions.calls.length,
 					maxWidth = view.container.numbers.width(),
 					callWidth = 15 + rowWidth,
 					placeStartWidth = (10 + plainPlaceStarts.length*13);
@@ -223,7 +115,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 			leadsPerColumn = determineLeadsPerColumn();
 
 			// Options object for the plain course
-			var plainCourseOptions = $.extend( true, {}, this.options.plainCourse, sharedOptions, {
+			var plainCourseOptions = $.extend( true, {}, this.method.gridOptions.plainCourse, sharedOptions, {
 				id: 'numbers'+this.id+'_plain',
 				callingPositions: (this.method.callingPositions === false)? false: $.extend( { show: true }, this.method.callingPositions ),
 				dimensions: {
@@ -238,7 +130,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 					bells: plainPlaceStarts
 				},
 				lines: {show: true, bells: plainLines },
-				numbers: {show: true, bells: plainLines.map( function( l, i ) { return { color: (l.stroke !== 'transparent')? '#DDD' : '#000' }; } ) }
+				numbers: {show: true, bells: plainLines.map( function( l, i ) { return { color: (l.stroke !== 'transparent')? 'transparent' : '#000' }; } ) }
 			} );
 
 			// Create the plain course image
@@ -263,12 +155,12 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 			} );
 			
 			// Create images for the calls. These will not be redrawn when resizing the window, so don't store the options for later use
-			this.options.calls.forEach( function( call, i ) {
+			this.method.gridOptions.calls.forEach( function( call, i ) {
 				var callGrid = new MethodGrid( $.extend( true, {}, call, sharedOptions, {
 					id: 'numbers'+this.id+'_'+call.id,
 					numberOfLeads: 1,
 					lines: { show: true, bells: callLines[i] },
-					numbers: { show: true, bells: callLines[i].map( function( l ) { return { color: (l.stroke !== 'transparent')? '#DDD' : '#000' }; } ) }
+					numbers: { show: true, bells: callLines[i].map( function( l ) { return { color: (l.stroke !== 'transparent')? 'transparent' : '#000' }; } ) }
 				} ) );
 				this.container.numbers.append( callGrid.draw() );
 			}, this );
@@ -280,7 +172,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 				workingBellWidth = 2,
 				huntBellWidth = 1.2,
 				columnPadding = 10,
-				rowHeight = 14,
+				rowHeight = 13,
 				rowWidth = ( function( stage ) {
 					// Measure the text
 					var testCanvas = $( '<canvas></canvas>' ).get( 0 ),
@@ -300,8 +192,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 					},
 					verticalGuides: {
 						shading: {
-							show: true,
-							color: '#F3F3F3'
+							show: true
 						}
 					}
 				};
@@ -321,7 +212,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 
 			// For calls, draw lines through affected bells, and hunt bells
 			var callLines = [];
-			this.options.calls.forEach( function( call, k ) {
+			this.method.gridOptions.calls.forEach( function( call, k ) {
 				callLines[k] = [];
 				for( var i = 0, j = 0; i < this.method.stage; ++i ) {
 					callLines[k].push( {
@@ -334,7 +225,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 			// Determine the appropriate lead distribution for the plain course to ensure it fits on the page
 			var determineLeadsPerColumn = (function( view ) {
 				var numberOfLeads = view.method.numberOfLeads,
-					numberOfCalls = view.options.calls.length,
+					numberOfCalls = view.method.gridOptions.calls.length,
 					maxWidth = view.container.numbers.width(),
 					callWidth = 15 + rowWidth,
 					placeStartWidth = (10 + plainPlaceStarts.length*13);
@@ -355,7 +246,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 			leadsPerColumn = determineLeadsPerColumn();
 
 			// Options object for the plain course
-			var plainCourseOptions = $.extend( true, {}, this.options.plainCourse, sharedOptions, {
+			var plainCourseOptions = $.extend( true, {}, this.method.gridOptions.plainCourse, sharedOptions, {
 				id: 'lines'+this.id+'_plain',
 				callingPositions: (this.method.callingPositions === false)? false: $.extend( { show: true }, this.method.callingPositions ),
 				dimensions: {
@@ -394,7 +285,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 			} );
 			
 			// Create images for the calls. These will not be redrawn when resizing the window, so don't store the options for later use
-			this.options.calls.forEach( function( call, i ) {
+			this.method.gridOptions.calls.forEach( function( call, i ) {
 				var callGrid = new MethodGrid( $.extend( true, {}, call, sharedOptions, {
 					id: 'lines'+this.id+'_'+call.id,
 					numberOfLeads: 1,
@@ -436,7 +327,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 				};
 
 			// Plain lead
-			var plainCourseGrid = new MethodGrid( $.extend( true, {}, this.options.plainCourse, sharedOptions, {
+			var plainCourseGrid = new MethodGrid( $.extend( true, {}, this.method.gridOptions.plainCourse, sharedOptions, {
 				id: 'grid'+this.id+'_plain',
 				title: {
 					text: 'Plain Lead:'
@@ -444,9 +335,9 @@ define( ['jquery', 'shared/lib/webfont!Blueline', '../helpers/Method',  '../help
 			} ) );
 			this.container.grid.append( plainCourseGrid.draw() );
 			// Calls
-			for( i = 0; i < this.options.calls.length; i++ ) {
-				var callGrid = new MethodGrid( $.extend( true, {}, this.options.calls[i], sharedOptions, {
-					id: 'grid'+this.id+'_'+this.options.calls[i].id
+			for( i = 0; i < this.method.gridOptions.calls.length; i++ ) {
+				var callGrid = new MethodGrid( $.extend( true, {}, this.method.gridOptions.calls[i], sharedOptions, {
+					id: 'grid'+this.id+'_'+this.method.gridOptions.calls[i].id
 				} ) );
 				this.container.grid.append( callGrid.draw() );
 			}
