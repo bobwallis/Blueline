@@ -4,7 +4,7 @@ define( ['../ui/Canvas', './LocalStorage'], function( Canvas, LocalStorage ) {
 		if( width === null ) {
 			var canvas = new Canvas( { id: 'metric', width: 50, height: 200, scale: 1 } );
 			canvas.context.font = font;
-			width = canvas.context.measureText( text );
+			width = canvas.context.measureText( text ).width;
 			LocalStorage.setItem( 'Width.'+font+text, width );
 		}
 		return width;

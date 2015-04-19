@@ -1,10 +1,10 @@
-define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared/ui/Canvas', '../../shared/helpers/MeasureCanvasTextOffset', '../../shared/helpers/MeasureCanvasText'], function( require, $, GridOptions, PlaceNotation, Canvas, MeasureCanvasTextOffset, MeasureCanvasText ) {
+define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared/ui/Canvas', '../../shared/helpers/MeasureCanvasTextOffset'], function( require, $, GridOptions, PlaceNotation, Canvas, MeasureCanvasTextOffset ) {
 
 	var MethodGrid = function( passedOptions ) {
 		var options = {};
 
 		this.setOptions = function( passedOptions ) {
-			options = GridOptions( passedOptions );
+			options = GridOptions( $.extend( true, {}, options, passedOptions ) );
 		};
 
 		this.measure = function() {
@@ -295,7 +295,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 		if( passedOptions ) {
 			this.setOptions( passedOptions );
 		}
-
+		
 		return this;
 	};
 

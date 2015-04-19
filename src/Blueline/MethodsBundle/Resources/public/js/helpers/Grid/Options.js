@@ -134,7 +134,7 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 		options.layout.changesPerColumn = (options.layout.leadsPerColumn * options.layout.leadLength);
 
 		// Calculation what the 'dimensions' object should look like
-		// Bell width and row width come from each other
+		// Bell width and row width come from each other, rowWidth overrides bellWidth
 		if( typeof options.dimensions.row.width === 'number' ) {
 			options.dimensions.bell.width = options.dimensions.row.width / options.stage;
 		}
@@ -166,22 +166,22 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 					text = options.sideNotation.text[i];
 				}
 			}
-			return MeasureCanvasText( new Array(text.length + 1).join( '0' ), options.sideNotation.font ).width + 4;
+			return MeasureCanvasText( new Array(text.length + 1).join( '0' ), options.sideNotation.font ) + 4;
 		})() : 0;
 
 		if( options.placeStarts.show ) {
 			options.dimensions.column.padding.right = Math.max( options.dimensions.column.padding.right, 10 + ( options.placeStarts.bells.length * 12 ) );
+			options.dimensions.canvas.padding.top = Math.max( options.dimensions.canvas.padding.top, 15 - options.dimensions.row.height);
 		}
 		if( options.callingPositions.show ) {
 			options.dimensions.column.padding.right = Math.max( options.dimensions.column.padding.right, 15 );
-			options.dimensions.canvas.padding.top = Math.max( options.dimensions.canvas.padding.top, 14 - options.dimensions.row.height)
 		}
 
 		// Canvas dimensions
 		options.dimensions.canvas = {
 			width: Math.max(
 				options.dimensions.canvas.padding.left + ((options.dimensions.row.width + options.dimensions.column.padding.left + options.dimensions.column.padding.right)*options.layout.numberOfColumns) + (options.dimensions.column.padding.between*(options.layout.numberOfColumns-1)),
-				options.title.show? MeasureCanvasText( options.title.text, options.title.font ).width : 0
+				options.title.show? MeasureCanvasText( options.title.text, options.title.font ) : 0
 			),
 			height: options.dimensions.canvas.padding.top + (options.dimensions.row.height * ((options.layout.leadsPerColumn * options.layout.leadLength)+1)),
 			padding: options.dimensions.canvas.padding
