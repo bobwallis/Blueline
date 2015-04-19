@@ -1,12 +1,12 @@
 <?php
-// Collections data exported 2015/02/22, 16:18
+// Collections data exported 2015/04/19, 19:00
 $collections = array (
-  0 =>
+  0 => 
   array (
     'id' => 'CroslandsAlphabet',
     'name' => 'Crosland Alphabet Series',
     'description' => 'Richard Crosland\'s alphabet series of Surprise Major methods.',
-    'methods' =>
+    'methods' => 
     array (
       0 => 'Adelaide Surprise Major',
       1 => 'Bordesley Surprise Major',
@@ -36,12 +36,12 @@ $collections = array (
       25 => 'Zaporozhye Surprise Major',
     ),
   ),
-  1 =>
+  1 => 
   array (
     'id' => 'Diagrams',
     'name' => 'Diagrams',
     'description' => 'Methods in the 1991 reprint of Jasper Snowden\'s Diagrams.',
-    'methods' =>
+    'methods' => 
     array (
       0 => 'Plain Bob Minimus',
       1 => 'Reverse Bob Minimus',
@@ -161,12 +161,12 @@ $collections = array (
       115 => 'Londinium Surprise Maximus',
     ),
   ),
-  2 =>
+  2 => 
   array (
     'id' => 'LBFG8',
     'name' => '"LBFG" Surprise Major',
     'description' => 'London, Bristol, Belfast and Glasow Surprise Major.',
-    'methods' =>
+    'methods' => 
     array (
       0 => 'London Surprise Major',
       1 => 'Bristol Surprise Major',
@@ -174,12 +174,12 @@ $collections = array (
       3 => 'Glasgow Surprise Major',
     ),
   ),
-  3 =>
+  3 => 
   array (
     'id' => 'mostViewed200',
     'name' => '200 Most Viewed Methods',
     'description' => 'The 200 most viewed methods on https://rsw.me.uk/blueline/ in Feb 2014.',
-    'methods' =>
+    'methods' => 
     array (
       0 => 'Superlative Surprise Major',
       1 => 'London Surprise Minor',
@@ -383,12 +383,12 @@ $collections = array (
       199 => 'Xanthus Delight Royal',
     ),
   ),
-  4 =>
+  4 => 
   array (
     'id' => 'Nottingham8',
     'name' => '"Nottingham 8" Surprise Major',
     'description' => 'An alternative to the "Standard 8".',
-    'methods' =>
+    'methods' => 
     array (
       0 => 'Bristol Surprise Major',
       1 => 'Cambridge Surprise Major',
@@ -400,12 +400,12 @@ $collections = array (
       7 => 'Superlative Surprise Major',
     ),
   ),
-  5 =>
+  5 => 
   array (
     'id' => 'Pitmans9',
     'name' => 'Pitman Series',
     'description' => 'The Pitman series of Surprise Major methods.',
-    'methods' =>
+    'methods' => 
     array (
       0 => 'Bristol Surprise Major',
       1 => 'Cambridge Surprise Major',
@@ -418,12 +418,12 @@ $collections = array (
       8 => 'Watford Surprise Major',
     ),
   ),
-  6 =>
+  6 => 
   array (
     'id' => 'Smiths23',
     'name' => 'Norman Smith\'s 23 Spliced Surprise Major',
     'description' => 'The 23 Surprise Major methods making up Norman Smith\'s famous peal composition.',
-    'methods' =>
+    'methods' => 
     array (
       0 => 'Ashtead Surprise Major',
       1 => 'Bristol Surprise Major',
@@ -450,12 +450,62 @@ $collections = array (
       22 => 'Yorkshire Surprise Major',
     ),
   ),
-  7 =>
+  7 => 
+  array (
+    'id' => 'Standard41',
+    'name' => 'The "Standard 41" Surprise Minor',
+    'description' => '',
+    'methods' => 
+    array (
+      0 => 'York Surprise Minor',
+      1 => 'Durham Surprise Minor',
+      2 => 'Beverley Surprise Minor',
+      3 => 'Surfleet Surprise Minor',
+      4 => 'Cambridge Surprise Minor',
+      5 => 'Bourne Surprise Minor',
+      6 => 'Ipswich Surprise Minor',
+      7 => 'Berwick Surprise Minor',
+      8 => 'Hexham Surprise Minor',
+      9 => 'Primrose Surprise Minor',
+      10 => 'Hull Surprise Minor',
+      11 => 'Norfolk Surprise Minor',
+      12 => 'Allendale Surprise Minor',
+      13 => 'Westminster Surprise Minor',
+      14 => 'Lightfoot Surprise Minor',
+      15 => 'Wearmouth Surprise Minor',
+      16 => 'Netherseale Surprise Minor',
+      17 => 'Bamborough Surprise Minor',
+      18 => 'Rossendale Surprise Minor',
+      19 => 'Stamford Surprise Minor',
+      20 => 'Annable\'s London Surprise Minor',
+      21 => 'Bacup Surprise Minor',
+      22 => 'Warkworth Surprise Minor',
+      23 => 'Norwich Surprise Minor',
+      24 => 'Alnwick Surprise Minor',
+      25 => 'Newcastle Surprise Minor',
+      26 => 'Chester Surprise Minor',
+      27 => 'Munden Surprise Minor',
+      28 => 'Carlisle Surprise Minor',
+      29 => 'Sandiacre Surprise Minor',
+      30 => 'Northumberland Surprise Minor',
+      31 => 'Canterbury Surprise Minor',
+      32 => 'Morpeth Surprise Minor',
+      33 => 'Wooler Surprise Minor',
+      34 => 'Whitley Surprise Minor',
+      35 => 'Coldstream Surprise Minor',
+      36 => 'Lincoln Surprise Minor',
+      37 => 'London Surprise Minor',
+      38 => 'Wells Surprise Minor',
+      39 => 'Cunecastre Surprise Minor',
+      40 => 'Kelso Surprise Minor',
+    ),
+  ),
+  8 => 
   array (
     'id' => 'Standard8',
-    'name' => '"Standard 8" Surprise Major',
+    'name' => 'The "Standard 8" Surprise Major',
     'description' => '',
-    'methods' =>
+    'methods' => 
     array (
       0 => 'Cambridge Surprise Major',
       1 => 'Yorkshire Surprise Major',

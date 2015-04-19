@@ -206,11 +206,11 @@ class MethodXMLIterator implements \Iterator, \Countable
                     $sort *= 0.96;
                 }
                 // Push methods in certain collections up the list
-                if (in_array($array['title'], $methodCollections['Standard8']) || in_array($array['title'], $methodCollections['Nottingham8']) || in_array($array['title'], $methodCollections['LBFG8'])) {
+                if (in_array($array['title'], $methodCollections['Standard8']) || in_array($array['title'], $methodCollections['Standard41']) || in_array($array['title'], $methodCollections['Nottingham8']) || in_array($array['title'], $methodCollections['LBFG8'])) {
                     $sort *= 0.5;
                 }
                 if (in_array($array['title'], $methodCollections['Smiths23']) || in_array($array['title'], $methodCollections['Pitmans9']) || in_array($array['title'], $methodCollections['CroslandsAlphabet'])) {
-                    $sort *= 0.8;
+                    $sort *= 0.9;
                 }
                 if (in_array($array['title'], $methodCollections['Diagrams'])) {
                     $sort *= 0.8;
