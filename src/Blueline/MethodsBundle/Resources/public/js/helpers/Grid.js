@@ -11,7 +11,8 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 			return options.dimensions;
 		};
 
-		this.draw = function() {
+		this.draw = function(returnImage) {
+			returnImage = (typeof returnImage !== 'boolean')? false : returnImage;
 			// Set up canvas
 			var canvas =  new Canvas( {
 				id: options.id,
@@ -271,7 +272,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 			}
 
 			// Draw calling positions
-			if( options.callingPositions.show ) {
+			if( options.callingPositions.show && typeof options.callingPositions.title == 'object' ) {
 				context.fillStyle = options.callingPositions.color;
 				context.font = options.callingPositions.font;
 				context.textAlign = 'left';
@@ -288,7 +289,16 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 			}
 
 			// Return the image
-			return canvas.element;
+			if( returnImage ) {
+				var i = new Image();
+				i.width = options.dimensions.canvas.width;
+				i.height = options.dimensions.canvas.height;
+				i.src = canvas.element.toDataURL();
+				return i;
+			}
+			else {
+				return canvas.element;
+			}
 		};
 
 		// Do an initial set up and return
