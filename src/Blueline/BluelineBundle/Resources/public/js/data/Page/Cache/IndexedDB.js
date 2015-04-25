@@ -1,15 +1,15 @@
-define( ['jquery', '../../../lib/db', './Null', '../../../helpers/LocalStorage'], function( $, db, Null, LocalStorage ) {
+define( ['../../../lib/db', './Null', '../../../helpers/LocalStorage'], function( db, Null, LocalStorage ) {
 	var IndexedDB;
 	if( Modernizr.indexeddb ) {
 		// The IndexedDB API is a bit of a moving target. Once it stablises it would be sensible to trim
 		// this down a bit by using the actual API, but for now we'll just throw a wrapper over the top
 		// of it.
 		var indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.oIndexedDB || window.msIndexedDB,
-			emptyFunction = $.noop;
+			emptyFunction = function(){};
 
 		// Function to revert the cache back to the null version (use if setup fails)
 		var unsetup = function() {
-			IndexedDB = $.extend( {}, Null );
+			IndexedDB = Null;
 		};
 		unsetup();
 
@@ -63,7 +63,7 @@ define( ['jquery', '../../../lib/db', './Null', '../../../helpers/LocalStorage']
 				success = (typeof success === 'undefined') ? emptyFunction : success;
 				failure = (typeof failure === 'undefined') ? emptyFunction : failure;
 				server.query( 'pages' ).execute().done( function( results ) {
-					$.each( results, function( i, e ) {
+					results.forEach( function( e, i ) {
 						server.remove( 'pages', e.url );
 					} );
 				} );

@@ -1,10 +1,10 @@
-define( ['jquery', './Null', '../../../helpers/LocalStorage'], function( $, Null, LocalStorage ) {
-	var WebSQL, emptyFunction = $.noop, db;
+define( ['./Null', '../../../helpers/LocalStorage'], function( Null, LocalStorage ) {
+	var WebSQL, emptyFunction = function(){}, db;
 
 	// Function to revert the cache back to the null version (use if setup fails)
 	var unsetup = function() {
 		db = null;
-		WebSQL = $.extend( {}, Null );
+		WebSQL = Null;
 	};
 	unsetup();
 

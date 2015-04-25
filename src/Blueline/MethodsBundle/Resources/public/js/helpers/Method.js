@@ -50,9 +50,9 @@ define( ['jquery', 'shared/lib/webfont!Blueline', './PlaceNotation', '../../shar
 		// Plain course
 		var sharedPlainCourseGridOptions = {
 			id: 'plainCourse_'+options.id,
-			notation: $.extend( true, {}, this.notation ),
+			notation: this.notation,
 			stage: this.stage,
-			ruleOffs: $.extend( {}, this.ruleOffs ),
+			ruleOffs: { every: this.ruleOffs.every, from: this.ruleOffs.from },
 			callingPositions: (this.callingPositions === false)? false: $.extend( { show: true }, this.callingPositions ),
 			dimensions: {
 				row: {
@@ -113,7 +113,7 @@ define( ['jquery', 'shared/lib/webfont!Blueline', './PlaceNotation', '../../shar
 					call.startRow = (start === 0)? PlaceNotation.rounds( this.stage ) : PlaceNotation.apply( notationParsed.slice( 0, start ), PlaceNotation.rounds( this.stage ) );
 
 					// Adjust rule offs to compensate for the fact we just sliced off some of the start of the method
-					call.ruleOffs = $.extend( {}, this.ruleOffs );
+					call.ruleOffs = { every: this.ruleOffs.every, from: this.ruleOffs.from };
 					call.ruleOffs.from -= start;
 
 					// Calculate which bells are affected by the call

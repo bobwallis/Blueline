@@ -4,7 +4,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 		var options = {};
 
 		this.setOptions = function( passedOptions ) {
-			options = GridOptions( $.extend( true, {}, options, passedOptions ) );
+			options = GridOptions( $.extend( true, options, passedOptions ) );
 		};
 
 		this.measure = function() {
