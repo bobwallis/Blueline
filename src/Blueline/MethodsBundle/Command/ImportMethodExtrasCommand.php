@@ -50,6 +50,13 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
             }
         }
 
+        // Clear existing renamed/duplicate method performance data before we start
+        $output->writeln('<info>Clear existing renamed/duplicate method performance data...</info>');
+        if (pg_query($db, "DELETE FROM performances WHERE type = 'renamedMethod' OR type = 'duplicateMethod'") === false) {
+            $output->writeln('<error>Failed to clear existing data: '.pg_last_error($db).'</error>');
+            return;
+        }
+
         // Import data about renamed methods
         $output->writeln("<info>Importing renamed method data...</info>");
         $renamedIterator = new RenamedHTMLIterator(__DIR__.'/../Resources/data/renamed.htm');
