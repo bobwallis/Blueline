@@ -72,6 +72,9 @@ define( ['jquery', 'shared/lib/webfont!Blueline', './PlaceNotation', '../../shar
 			placeStarts: {
 				show: true,
 				bells: placeStarts
+			},
+			sideNotation: {
+				show: true
 			}
 		};
 
@@ -150,6 +153,9 @@ define( ['jquery', 'shared/lib/webfont!Blueline', './PlaceNotation', '../../shar
 						lines: {
 							show: true,
 							bells: []
+						},
+						sideNotation: {
+							show: true
 						}
 					} );
 				}
@@ -177,14 +183,11 @@ define( ['jquery', 'shared/lib/webfont!Blueline', './PlaceNotation', '../../shar
 
 		this.gridOptions.plainCourse.grid = $.extend( true, {}, sharedPlainCourseGridOptions, {
 			id: sharedPlainCourseGridOptions.id+'_grid',
-			title: {
-				text: 'Plain Lead:'
-			},
+			title: false,
 			numberOfLeadsmbers: false,
 			numbers: false,
 			placeStarts: false,
 			callingPositions: false,
-			sideNotation: { show: true },
 			layout: {
 				numberOfLeads: 1,
 				numberOfColumns: 1

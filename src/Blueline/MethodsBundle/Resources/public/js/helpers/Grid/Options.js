@@ -27,7 +27,7 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 		sideNotation: {
 			show: false,
 			font: '10px "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif',
-			color: '#000'
+			color: '#999'
 		},
 		verticalGuides: {
 			shading: {
@@ -155,7 +155,7 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 			right: 0,
 			bottom: 0,
 			left: 0,
-			between: (typeof options.dimensions.column.padding.between === 'number' )? options.dimensions.column.padding.between : 10
+			between: (typeof options.dimensions.column.padding.between === 'number' )? options.dimensions.column.padding.between : ((options.layout.numberOfColumns > 1)? 10 : 0)
 		};
 		options.dimensions.canvas.padding.top += options.title.show? parseInt(options.title.font)*1.2 : 0;
 		options.dimensions.canvas.padding.left += options.sideNotation.show? (function() {
