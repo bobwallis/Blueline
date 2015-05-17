@@ -103,35 +103,12 @@ define( ['require', 'eve', 'jquery', '../lib/gmaps'], function( require, eve, $ 
 							fusionTableQuery: (typeof options.fusionTableQuery !== 'undefined')? options.fusionTableQuery : ''
 						} );
 
-						// Re-label 'Map' as 'Google'
-						if( typeof document.querySelector !== 'undefined' ) {
-							var googleTitle = function() { try { document.querySelector( 'div.map div[title="Show street map"]' ).innerHTML = 'Google'; } catch(e){} };
-							window.setTimeout( googleTitle, 500 ); window.setTimeout( googleTitle, 1000 ); window.setTimeout( googleTitle, 1500 );
-						}
-
 						// Add OSM and OS maps
 						TowerMap.map.mapTypes.set( 'openStreetMap', new google.maps.ImageMapType( {
 							name: 'OSM',
 							alt: 'MapQuest\'s Mapnik-rendered map',
 							getTileUrl: function( coord, zoom ) { return 'http://otile'+[1,2,3,4][Math.floor(Math.random()*4)]+'.mqcdn.com/tiles/1.0.0/map/'+zoom+'/'+coord.x+'/'+coord.y+'.png'; },
 							maxZoom: 18,
-							tileSize: new google.maps.Size( 256, 256 ),
-							isPng: true
-						} ) );
-						TowerMap.map.mapTypes.set( 'osMap', new google.maps.ImageMapType( {
-							name: 'OS',
-							alt: 'Ordanance Survey map',
-							getTileUrl: function( coord, zoom ) {
-								var quadkey = '';
-								while( zoom-- ) {
-									var digit = 0, mask = 1 << zoom;
-									if( ( coord.x & mask ) !== 0 ) { digit++; }
-									if( ( coord.y & mask ) !== 0 ) { digit += 2; }
-									quadkey += digit.toString();
-								}
-								return 'http://ecn.t'+[0,1,2,3,4][Math.floor(Math.random()*5)]+'.tiles.virtualearth.net/tiles/r'+quadkey+'.png?g=604&productSet=mmOS';
-							},
-							minZoom: 1, maxZoom: 15,
 							tileSize: new google.maps.Size( 256, 256 ),
 							isPng: true
 						} ) );
