@@ -4,7 +4,7 @@ define( function() {
 		LocalStorage = {
 			age: (dataAge == 'dev')? 'dev' : parseInt(dataAge)
 		};
-	if( Modernizr.localstorage ) {
+	if( Modernizr.localstorage && typeof window.JSON === 'object' ) {
 		LocalStorage.getItem = function( key ) {
 			return JSON.parse( localStorage.getItem( prefix+key ) );
 		};
