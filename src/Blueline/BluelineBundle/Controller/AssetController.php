@@ -91,7 +91,7 @@ class AssetController extends Controller
         return $response;
     }
 
-    public function iOSiconAction($size)
+    public function iOSiconAction($size, Request $request)
     {
         $size = intval($size);
         $image = new \Imagick();
@@ -108,7 +108,7 @@ class AssetController extends Controller
             $response->setPublic();
         }
         $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($this->getRequest())) {
+        if ($response->isNotModified($request)) {
             return $response;
         }
 
@@ -118,7 +118,7 @@ class AssetController extends Controller
         return $response;
     }
 
-    public function iOSstartupAction($size, $ratio)
+    public function iOSstartupAction($size, $ratio, Request $request)
     {
         $sizes = array_map(function ($s) { return intval($s); }, explode('x', $size));
         $image = new \Imagick();
@@ -140,7 +140,7 @@ class AssetController extends Controller
             $response->setPublic();
         }
         $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($this->getRequest())) {
+        if ($response->isNotModified($request)) {
             return $response;
         }
 
