@@ -54,5 +54,8 @@
         "branch-alias": {
             "dev-master": "2.3-dev"
         }
+    },
+    "require-dev": {
+        "symfony/phpunit-bridge": "^2.7"
     }
 }
