@@ -6,9 +6,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DefaultController extends Controller
 {
-    public function resourceAction($page)
+    public function resourceAction($page, Request $request)
     {
-        $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
         // Create basic response object

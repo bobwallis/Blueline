@@ -8,9 +8,8 @@ use Blueline\BluelineBundle\Helpers\Text;
 
 class TowersController extends Controller
 {
-    public function welcomeAction()
+    public function welcomeAction(Request $request)
     {
-        $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
         // Create basic response object
@@ -27,9 +26,8 @@ class TowersController extends Controller
         return $response = $this->render('BluelineTowersBundle::welcome.'.$format.'.twig', array(), $response);
     }
 
-    public function searchAction($searchVariables = array())
+    public function searchAction($searchVariables = array(), Request $request)
     {
-        $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
         // Create basic response object
@@ -55,9 +53,8 @@ class TowersController extends Controller
         return $this->render('BluelineTowersBundle::search.'.$format.'.twig', compact('searchVariables', 'count', 'pageActive', 'pageCount', 'towers'), $response);
     }
 
-    public function viewAction($id)
+    public function viewAction($id, Request $request)
     {
-        $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
         // Create basic response object
@@ -128,9 +125,8 @@ class TowersController extends Controller
         return $this->render('BluelineTowersBundle::view.'.$format.'.twig', compact('pageTitle', 'towers', 'nearbyTowers', 'bbox'), $response);
     }
 
-    public function sitemapAction()
+    public function sitemapAction(Request $request)
     {
-        $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
         // Create basic response object

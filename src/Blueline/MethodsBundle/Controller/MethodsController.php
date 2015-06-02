@@ -13,9 +13,8 @@ use Blueline\MethodsBundle\Helpers\PlaceNotation;
 
 class MethodsController extends Controller
 {
-    public function welcomeAction()
+    public function welcomeAction(Request $request)
     {
-        $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
         // Create basic response object
@@ -32,9 +31,8 @@ class MethodsController extends Controller
         return $this->render('BluelineMethodsBundle::welcome.'.$format.'.twig', array(), $response);
     }
 
-    public function searchAction($searchVariables = array())
+    public function searchAction($searchVariables = array(), Request $request)
     {
-        $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
         // Create basic response object
@@ -60,9 +58,8 @@ class MethodsController extends Controller
         return $this->render('BluelineMethodsBundle::search.'.$format.'.twig', compact('searchVariables', 'count', 'pageActive', 'pageCount', 'methods'), $response);
     }
 
-    public function viewAction($title)
+    public function viewAction($title, Request $request)
     {
-        $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
         // If the title is empty redirect to version without slash
@@ -189,9 +186,8 @@ class MethodsController extends Controller
         }
     }
 
-    public function viewCustomAction()
+    public function viewCustomAction(Request $request)
     {
-        $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
         // Create basic response object
@@ -240,9 +236,8 @@ class MethodsController extends Controller
         return $this->render('BluelineMethodsBundle::view.'.$format.'.twig', compact('pageTitle', 'methods'), $response);
     }
 
-    public function exportAction()
+    public function exportAction(Request $request)
     {
-        $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
         // Create basic response object
@@ -255,9 +250,8 @@ class MethodsController extends Controller
         return $this->render('BluelineMethodsBundle::export.html.twig', array(), $response);
     }
 
-    public function sitemapAction($page)
+    public function sitemapAction($page, Request $request)
     {
-        $request = $this->getRequest();
         $format  = $request->getRequestFormat();
 
         // Create basic response object

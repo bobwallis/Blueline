@@ -8,9 +8,8 @@ class AssetController extends Controller
 {
     private $cacheTime = 604800;
 
-    public function fontAction($font)
+    public function fontAction($font, Request $request)
     {
-        $request = $this->getRequest();
         $format = $request->getRequestFormat();
         $fontPath = __DIR__.'/../Resources/public/fonts/'.$font.'.'.$format;
         if (!file_exists($fontPath)) {
@@ -33,9 +32,8 @@ class AssetController extends Controller
         return $response;
     }
 
-    public function faviconAction()
+    public function faviconAction(Request $request)
     {
-        $request = $this->getRequest();
         $format  = $request->getRequestFormat();
         $size =    intval($request->get('size') ?: 32);
 
@@ -152,9 +150,8 @@ class AssetController extends Controller
         return $response;
     }
 
-    public function imageAction($image)
+    public function imageAction($image, Request $request)
     {
-        $request = $this->getRequest();
         $format  = $request->getRequestFormat();
         $file    = false;
 

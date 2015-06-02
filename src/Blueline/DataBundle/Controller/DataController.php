@@ -6,10 +6,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DataController extends Controller
 {
-    public function tableAction($table)
+    public function tableAction($table, Request $request)
     {
         $container = $this->container;
-        $request = $this->getRequest();
         $response = new StreamedResponse();
 
         // Set headers

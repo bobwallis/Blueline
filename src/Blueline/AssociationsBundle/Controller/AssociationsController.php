@@ -8,9 +8,8 @@ use Blueline\BluelineBundle\Helpers\Text;
 
 class AssociationsController extends Controller
 {
-    public function welcomeAction()
+    public function welcomeAction(Request $request)
     {
-        $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
         // Create basic response object
@@ -27,9 +26,8 @@ class AssociationsController extends Controller
         return $this->render('BluelineAssociationsBundle::welcome.'.$format.'.twig', array(), $response);
     }
 
-    public function searchAction($searchVariables = array())
+    public function searchAction($searchVariables = array(), Request $request)
     {
-        $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
         // Create basic response object
@@ -55,9 +53,8 @@ class AssociationsController extends Controller
         return $this->render('BluelineAssociationsBundle::search.'.$format.'.twig', compact('searchVariables', 'count', 'pageActive', 'pageCount', 'associations'), $response);
     }
 
-    public function viewAction($id)
+    public function viewAction($id, Request $request)
     {
-        $request = $this->getRequest();
         $format = $request->getRequestFormat();
         $associationsRepository = $this->getDoctrine()->getManager()->getRepository('BluelineAssociationsBundle:Association');
 
@@ -122,9 +119,8 @@ class AssociationsController extends Controller
         return $this->render('BluelineAssociationsBundle::view.'.$format.'.twig', compact('pageTitle', 'associations', 'associationsContains', 'bbox'), $response);
     }
 
-    public function sitemapAction()
+    public function sitemapAction(Request $request)
     {
-        $request = $this->getRequest();
         $format = $request->getRequestFormat();
 
         // Create basic response object
