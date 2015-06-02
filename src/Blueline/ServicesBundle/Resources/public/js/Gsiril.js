@@ -10,7 +10,7 @@ define( ['jquery', '../shared/helpers/URL', '../shared/lib/expanding'], function
 			$gsiril_input.expanding();
 
 			// Create the web worker
-			gsirilWorker = new Worker( '/js/gsiril.worker.js' );
+			gsirilWorker = new Worker( URL.baseURL+'js/gsiril.worker.js' );
 			gsirilWorker.onmessage = function( e ) {
 				if(typeof e.data.output == 'string' ) {
 					$gsiril_output.append(e.data.output+"\n");
