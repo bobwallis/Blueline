@@ -23,27 +23,27 @@ BluelineServicesBundle:
     prefix:   /services/
 
 Blueline_resource:
-    pattern:  /{page}.{_format}
+    path: /{page}.{_format}
     defaults: { _controller: BluelineBundle:Default:resource }
     requirements:
         page: robots|humans|site|sitemap|sitemap_root|browserconfig|manifest
         _format: json|manifest|txt|xml
 
 Blueline_favicon:
-    pattern:  /favicon.{_format}
+    path: /favicon.{_format}
     defaults: { _controller: BluelineBundle:Asset:favicon }
     requirements:
         _format: ico|png|bmp|svg
 
 Blueline_iOSicon:
-    pattern:  /apple-touch-icon-{size}.{_format}
+    path: /apple-touch-icon-{size}.{_format}
     defaults: { _controller: BluelineBundle:Asset:iOSicon }
     requirements:
         size: 57x57|72x72|76x76|96x96|114x114|120x120|144x144|152x152|192x192|196x196|768x768
         _format: png
 
 Blueline_iOSstartup:
-    pattern:  /apple-startup-image-{ratio}-{size}.{_format}
+    path: /apple-startup-image-{ratio}-{size}.{_format}
     defaults: { _controller: BluelineBundle:Asset:iOSstartup }
     requirements:
         size: 640x1096|640x920|320x460|1536x2008|1496x2048|768x1004|748x1024
@@ -51,14 +51,14 @@ Blueline_iOSstartup:
         _format: png
 
 Blueline_image:
-    pattern:  /images/{image}.{_format}
+    path: /images/{image}.{_format}
     defaults: { _controller: BluelineBundle:Asset:image }
     requirements:
         image: database|external|search|select|loading|more|welcome_associations|welcome_methods|welcome_towers
         _format: png|jpg|bmp|gif|svg
 
 Blueline_font:
-    pattern:  /fonts/{font}.{_format}
+    path: /fonts/{font}.{_format}
     defaults: { _controller: BluelineBundle:Asset:font }
     requirements:
         font: Blueline

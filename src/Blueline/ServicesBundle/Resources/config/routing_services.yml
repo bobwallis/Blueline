@@ -1,25 +1,25 @@
 Blueline_Services_oembed:
-    path:     /oembed.{_format}
+    path: /oembed.{_format}
     defaults: { _controller: BluelineServicesBundle:Oembed:index }
     requirements:
         _format: json|xml
 
 Blueline_FontPreview:
-    path:     /previewFont.{_format}
+    path: /previewFont.{_format}
     defaults: { _controller: BluelineServicesBundle:FontPreview:preview }
     requirements:
         _format: png
 
 Blueline_Notation_expand:
-    path:     /expandNotation.{_format}
+    path: /expandNotation.{_format}
     defaults: { _controller: BluelineServicesBundle:Notation:expand }
     requirements:
         _format: txt|json
 
 Blueline_Services_siril:
-    path:     /siril
+    path: /siril
     defaults: { _controller: BluelineServicesBundle:Siril:index }
 
 Blueline_Services_siril_why:
-    path:     /siril/about
+    path: /siril/about
     defaults: { _controller: BluelinePagesBundle:Pages:page, page: 'siril_about' }

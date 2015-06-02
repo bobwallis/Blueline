@@ -1,5 +1,5 @@
 Blueline_Associations_welcome:
-    pattern:  /
+    path: /
     defaults: { _controller: BluelineAssociationsBundle:Associations:welcome }
 
 Blueline_Associations_view_redirect:
@@ -16,20 +16,20 @@ Blueline_Associations_view_redirect2:
         permanent: true
 
 Blueline_Associations_view:
-    pattern: /view/{id}.{_format}
+    path: /view/{id}.{_format}
     defaults: { _controller: BluelineAssociationsBundle:Associations:view, _format: html }
     requirements:
         id: ^(?(?=.*\.(html|txt|json|xml)$).*(?=\.)|.*$)
         _format: html|txt|json
 
 Blueline_Associations_search:
-    pattern:  /search.{_format}
+    path: /search.{_format}
     defaults: { _controller: BluelineAssociationsBundle:Associations:search, _format: html }
     requirements:
         _format: html|txt|json|atom
 
 Blueline_Associations_sitemap:
-    pattern:  /sitemap.{_format}
+    path: /sitemap.{_format}
     defaults: { _controller: BluelineAssociationsBundle:Associations:sitemap }
     requirements:
         _format: xml

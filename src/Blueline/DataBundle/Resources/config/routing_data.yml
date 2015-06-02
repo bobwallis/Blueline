@@ -1,5 +1,5 @@
 Blueline_Data_table:
-    pattern:  /{table}.{_format}
+    path: /{table}.{_format}
     defaults: { _controller: BluelineDataBundle:Data:table }
     requirements:
         table: associations|collections|methods|methods_collections|performances|towers|towers_associations|towers_oldpks

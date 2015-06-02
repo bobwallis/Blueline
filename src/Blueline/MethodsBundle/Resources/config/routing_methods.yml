@@ -1,34 +1,34 @@
 Blueline_Methods_welcome:
-    pattern:  /
+    path: /
     defaults: { _controller: BluelineMethodsBundle:Methods:welcome }
 
 Blueline_Methods_view:
-    pattern: /view/{title}.{_format}
+    path: /view/{title}.{_format}
     defaults: { _controller: BluelineMethodsBundle:Methods:view, _format: html }
     requirements:
         title: ^(?(?=.*\.(html|json|png)$).*(?=\.)|.*$)
         _format: html|json|png
 
 Blueline_Methods_custom_view:
-    pattern: /view
+    path: /view
     defaults: { _controller: BluelineMethodsBundle:Methods:viewCustom, _format: html }
     requirements:
         _format: html
 
 Blueline_Methods_export:
-    pattern: /export
+    path: /export
     defaults: { _controller: BluelineMethodsBundle:Methods:export, _format: html }
     requirements:
         _format: html
 
 Blueline_Methods_search:
-    pattern:  /search.{_format}
+    path: /search.{_format}
     defaults: { _controller: BluelineMethodsBundle:Methods:search, _format: html }
     requirements:
         _format: html|json
 
 Blueline_Methods_sitemap:
-    pattern:  /sitemap_{page}.{_format}
+    path: /sitemap_{page}.{_format}
     defaults: { _controller: BluelineMethodsBundle:Methods:sitemap }
     requirements:
         page: \d+

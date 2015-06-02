@@ -1,9 +1,9 @@
 Blueline_welcome:
-    pattern:  /
+    path: /
     defaults: { _controller: BluelinePagesBundle:Pages:page, page: 'welcome' }
 
 Blueline_Pages_view:
-    pattern:  /{page}.{_format}
+    path: /{page}.{_format}
     defaults: { _controller: BluelinePagesBundle:Pages:page, _format: 'html' }
     requirements:
         page:    about
