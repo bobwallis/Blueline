@@ -1,0 +1,29 @@
+{% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
+
+{% block title %}Composition Prover | {{ parent() }}{% endblock %}
+{% set search = false %}
+
+{% block body %}
+	{% from 'BluelineBundle:Macros:header.html.twig' import header %}
+	<section class="text">
+		{{ header('Composition Prover') }}
+		<div class="wrap">
+			<h2>About</h2>
+			<p><a href="http://www.ex-parrot.com/~richard/gsiril/" class="external">GSiril</a> is a program for proving touches written by Richard Smith. It uses a syntax that is backwards compatible with that of MicroSiril.</p>
+			<p>Using the program requires use of the command line and installation is a little complex. I read about <a href="http://emscripten.org" class="external">Emscripten</a>, which is an LLVM-based project that compiles C and C++ to JavaScript for running in a web browser, and thought it would be fun to try and get GSiril working in that way.</p>
+			<p>Having a JavaScript version of the program allows for it to be easily distributed to, and run on, any system that can operate a web browser. All calculations are done on the user's machine rather than requiring a request to a server.</p>
+			<p>Note that GSiril is distributed under the terms of the <a href="http://www.gnu.org/copyleft/gpl.html">GPL</a>. The 3 minor modifications made to the source code noted below are too.</p>
+			<h2>Building</h2>
+			<p>Compilation requires very little modification to the original GSiril source code, but is a bit fiddly to actually do.</p>
+			<p>Download a copy of the <a href="http://ringing-lib.sourceforge.net/" class="external">Ringing Class Library</a>, which includes the source of GSiril. Apply <a href="https://github.com/bobwallis/Blueline/tree/master/src/Blueline/ServicesBundle/Resources/gsiril/ringing-lib.diff" class="external">this diff</a>, which does three things to ensure compilation works properly:</p>
+			<blockquote>
+				<p>Renames system_error to system_error2 in ringing-lib/apps/utils/exec.cpp to prevent conflict with the standard library class.</p>
+				<p>Removes methodset.cpp from the libringing library. The file is included in libringingcore as well, and GSiril uses both libraries, so this change prevents complaints about duplicate symbols.</p>
+				<p>Add some extra includes to ringing-lib/ringing/dom_stub.cpp which appear to be needed for compilation to succeed.</p>
+			</blockquote>
+			<p>Create the configure scripts and Makefiles then <a href="http://kripken.github.io/emscripten-site/docs/compiling/Building-Projects.html#building-projects" class="external">compile the project using Emscripten</a>. There will be some warnings.</p>
+			<p>Perform the final linking by running: '<span class="code">emcc -O2 main.o execution_context.o expr_base.o proof_context.o symbol_table.o expression.o statement.o parser.o prog_args.o import.o ../../apps/utils/libstuff.a ../../ringing/.libs/libringing.so ../../ringing/.libs/libringingcore.so -o gsiril.js --memory-init-file 0 -s DISABLE_EXCEPTION_CATCHING=0</span>'. This will output gsiril.js, which in theory can be run using Node.js (try node gsiril.js --help) like the native executable, but in reality it doesn't seem to handle reading from stdin very well and can't read from the system's filesystem.</p>
+			<p>The version used on this site takes the gsiril.js output and wraps it in Javascript code that implements a virtual filesystem using <a href-"https://kripken.github.io/emscripten-site/docs/api_reference/Filesystem-API.html" class="external">Emscripten's API</a>, and runs the proving function within a <a href="http://en.wikipedia.org/wiki/Web_worker" class="external">Web Worker</a> in a browser. This is acheived using the '<span class="code">--pre-js</span>' and '<span class="code">--post-js</span>' options for emcc and the files found <a href="https://github.com/bobwallis/Blueline/tree/master/src/Blueline/ServicesBundle/Resources/gsiril" class="external">here</a>. A minimal example of an implementation of a web page using the worker is in the same location.</p>
+		</div>
+	</section>
+{% endblock %}

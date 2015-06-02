@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Minimal GSiril Example</title>
+	</head>
+	<body>
+		<p>This file contains a minimal example of how to use the gsiril.worker.js file in a webpage. Most browsers prevent Web Workers running if they are loaded from the file:// protocol, so you will need to start a webserver to test.</p>
+		<hr />
+		<textarea id="input" placeholder="Paste MicroSiril code here. Click the button." rows="15" cols="80"></textarea>
+		<hr />
+		<button id="go">Prove</button>
+		<hr />
+		<div id="output" style="font-family: monospace; white-space: pre;"></div>
+		<script>
+			var gsirilWorker = new Worker( '../public/js/gsiril.worker.js' );
+			gsirilWorker.onmessage = function( e ) {
+				if(typeof e.data.output == 'string' ) {
+					document.getElementById('output').innerHTML += e.data.output + "\n";
+				}
+				else if(typeof e.data.error === 'string') {
+					document.getElementById('output').innerHTML += '<span style="color:red">' + e.data.error + "</span>\n"
+				}
+				else {
+					console.log(e.data);
+				}
+			};
+
+			document.getElementById( 'go' ).addEventListener( 'click', function() {
+				gsirilWorker.postMessage(	{
+					input: document.getElementById( 'input' ).value,
+					args: ['--msiril']
+				} );
+				document.getElementById('output').innerHTML = '';
+			} );
+		</script>
+	</body>
+</html>

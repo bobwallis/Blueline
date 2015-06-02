@@ -30,6 +30,11 @@ module.exports = function (grunt) {
 					{ expand: true, flatten: true, dest: 'web/images/', src: ['src/Blueline/**/images/*.gif'] }
 				]
 			},
+			js: {
+				files: [
+					{ dest: 'web/js/gsiril.worker.js', src: ['src/Blueline/ServicesBundle/Resources/public/js/gsiril.worker.js'] }
+				]
+			},
 			svg: {
 				files: [
 					{ expand: true, flatten: true, dest: 'web/images/', src: ['src/Blueline/**/images/*.svg', '!**/{favicon,iosicon}.svg'] }

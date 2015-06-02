@@ -15,3 +15,11 @@ Blueline_Notation_expand:
     defaults: { _controller: BluelineServicesBundle:Notation:expand }
     requirements:
         _format: txt|json
+
+Blueline_Services_siril:
+    path:     /siril
+    defaults: { _controller: BluelineServicesBundle:Siril:index }
+
+Blueline_Services_siril_why:
+    path:     /siril/about
+    defaults: { _controller: BluelinePagesBundle:Pages:page, page: 'siril_about' }
