@@ -26,8 +26,8 @@ Blueline_resource:
     pattern:  /{page}.{_format}
     defaults: { _controller: BluelineBundle:Default:resource }
     requirements:
-        page: robots|humans|site|sitemap|sitemap_root|browserconfig
-        _format: txt|xml|manifest
+        page: robots|humans|site|sitemap|sitemap_root|browserconfig|manifest
+        _format: json|manifest|txt|xml
 
 Blueline_favicon:
     pattern:  /favicon.{_format}
@@ -39,7 +39,7 @@ Blueline_iOSicon:
     pattern:  /apple-touch-icon-{size}.{_format}
     defaults: { _controller: BluelineBundle:Asset:iOSicon }
     requirements:
-        size: 57x57|72x72|76x76|114x114|120x120|144x144|152x152|196x196|768x768
+        size: 57x57|72x72|76x76|96x96|114x114|120x120|144x144|152x152|192x192|196x196|768x768
         _format: png
 
 Blueline_iOSstartup:

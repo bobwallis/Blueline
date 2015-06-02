@@ -10,12 +10,15 @@
 		<link rel="icon" type="image/svg+xml" sizes="any" href="{{ path( 'Blueline_favicon', { _format: 'svg' } ) }}" />
 		<link rel="alternate icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="{{ path( 'Blueline_favicon', { _format: 'ico' } ) }}" />
 
+		{# Web app manifest #}
+		<link rel="manifest" href="{{ path( 'Blueline_resource', { page: 'manifest', _format: 'json' } ) }}" />
+
 		{# Chrome web app link #}
 		<link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/blueline/ohgpoagcfmlbkdniokohgicofokpbpae" />
 
 		{# Chrome web app tags #}
 		<meta name="mobile-web-app-capable" content="yes" />
-		<link rel="shortcut icon" sizes="196x196" href="{{ path( 'Blueline_iOSicon', { 'size': '196x196', '_format': 'png' } ) }}" />
+		<link rel="icon" sizes="192x192" href="{{ path( 'Blueline_iOSicon', { 'size': '192x192', '_format': 'png' } ) }}" />
 
 		{# iOS meta tags #}
 		<meta name="apple-mobile-web-app-capable" content="yes" />
