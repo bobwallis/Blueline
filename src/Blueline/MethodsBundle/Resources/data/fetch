@@ -17,6 +17,7 @@ urls=( "http://www.methods.org.uk/method-collections/xml-zip-files/plain-xml.zip
        "http://www.methods.org.uk/method-collections/xml-zip-files/principl-xml.zip"
        "http://www.methods.org.uk/method-collections/xml-zip-files/diferntl-xml.zip"
        "http://www.methods.org.uk/method-collections/xml-zip-files/difhuntr-xml.zip"
+       "http://www.methods.org.uk/supplement/provisionally-named/provisional-xml.zip"
        "http://methods.org.uk/other/renamed.htm"
        "http://methods.org.uk/other/duplicate.htm"
      )
