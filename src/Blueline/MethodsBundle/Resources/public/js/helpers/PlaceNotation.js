@@ -1,5 +1,4 @@
 define( function() {
-
 	var PlaceNotation = {
 		bellToCharMap: ['1','2','3','4','5','6','7','8','9','0','E','T','A','B','C','D','F','G','H','J','K','L'],
 		bellToChar: function( bell ) {
@@ -28,8 +27,9 @@ define( function() {
 			return --bell;
 		},
 		expand: function( notation, stage ) {
-			var fullNotation, matches, stageText;
 			// Tries to normalise place notation given in abbreviated form into full notation
+			var fullNotation, matches, stageText;
+
 			// If stage isn't given try to guess
 			if( typeof stage === 'undefined' ) {
 				stage = Math.max.apply( Math, notation.split( '' ).map( PlaceNotation.charToBell ) ) + 1;
@@ -49,7 +49,7 @@ define( function() {
 			}
 			fullNotation = fullNotation.replace( /-/g, 'x' );
 
-			// Turn notation like ...x34 hl 16 le 12 into ...x34.16 le 12
+			// Turn notation like "...x34 hl 16 le 12" into "...x34.16 le 12"
 			if( fullNotation.indexOf( ' HL ' ) !== -1 ) {
 				fullNotation = fullNotation.replace( ' HL ', '.' );
 			}

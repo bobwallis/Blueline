@@ -204,13 +204,26 @@ class PlaceNotation
             $notationFull = str_replace($match[0], self::expandHalf($match[1]), $notationFull);
         }
 
+        // Parse microSiril format notation
+        if (strpos($notationFull, ',') !== false) {
+            $splitOnComma = array_map('trim', explode(',', $notationFull));
+            if (array_reduce($splitOnComma, function ($carry, $item) {
+                return ($carry && ($item{0} == '+' || $item{0} == '&'));
+            }, true)) {
+                $notationFull = array_reduce($splitOnComma, function ($carry, $item) {
+                    return $carry . ($item{0} == '&'? self::expandHalf($item) : trim($item, '+'));
+                }, '');
+            }
+        }
+
+        // Now we've checked for proper microSiril format we'll make some assumptions about what people might actually mean.
         // Deal with notation like '-1-1-1,2' or '3,1.5.1.5.1'
         if (preg_match('/^\s*&?\s*(.*),(.*)/', $notationFull, $match) == 1) {
             $notationFull = self::expandHalf($match[1]).'.'.self::expandHalf($match[2]);
             $notationFull = str_replace(array( '.x.', 'x.', '.x'), 'x', $notationFull);
         }
 
-        // + seems a little pointless, but some notation uses it to seperate lead heads from the rest of the notation (&x1x1x1+2), so replace it with a space just in case
+        // Get rid of +
         $notationFull = str_replace('+', ' ', $notationFull);
 
         // Convert 'a &-1-1-1' type notation into '&x1x1x1 2' type
@@ -234,13 +247,15 @@ class PlaceNotation
                     }
                 }
                 // r, s is n post lead head (similar to above)
-                elseif (preg_match('/^([R-S]{1}[1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
-                    if (strpos($match[2], self::$_notationOrder[$stage-1]) === 0) {
-                        $notationFull = $match[2];
-                    } else {
-                        $notationFull = self::$_notationOrder[$stage-1].' '.$match[2];
-                    }
-                }
+                // I don't know why I think this... but it doesn't seem to be true looking at actual methods in the current collections.
+                // Let me know if you know!
+                //elseif (preg_match('/^([R-S]{1}[1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
+                //    if (strpos($match[2], self::$_notationOrder[$stage-1]) === 0) {
+                //        $notationFull = $match[2];
+                //    } else {
+                //        $notationFull = self::$_notationOrder[$stage-1].' '.$match[2];
+                //    }
+                //}
             }
             // For odd bell methods
             else {
@@ -418,6 +433,7 @@ class PlaceNotation
      */
     private static function expandHalf($notation)
     {
+        $notation = trim($notation, '&');
         $notationReversed = strrev($notation);
 
         $firstDot = (strpos($notationReversed, '.') !== FALSE) ? strpos($notationReversed, '.') : 99999;
