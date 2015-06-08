@@ -200,7 +200,7 @@ define( function() {
 				trim = (firstX === 0) ? 1 : firstX;
 			}
 			else {
-				trim = firstDot + 1;
+				trim = firstDot;
 			}
 			return (notation + notationReversed.substring( trim )).replace( /\.?(x|-)\.?/g, 'x' ).trim();
 		},
