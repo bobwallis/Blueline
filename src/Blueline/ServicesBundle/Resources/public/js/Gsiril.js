@@ -25,7 +25,7 @@ define( ['jquery', '../shared/helpers/URL', '../shared/lib/expanding'], function
 
 			// Listen for clicks to the prove button and pass input to the worker as required
 			$('#gsiril_go').click( function() {
-				gsirilWorker.postMessage(	{
+				gsirilWorker.postMessage( {
 					input: $gsiril_input.val(),
 					args: ($gsiril_format.val() == 'MicroSiril')? ['--msiril'] : []
 				} );
