@@ -4,7 +4,8 @@ define( ['jquery', '../shared/helpers/URL', '../shared/lib/expanding'], function
 			var gsirilWorker,
 				$gsiril_output = $('#gsiril_output'),
 				$gsiril_format = $('#gsiril_format'),
-				$gsiril_input = $('#gsiril_input');
+				$gsiril_input = $('#gsiril_input'),
+				targetScrollTop = $gsiril_output.prev().position().top;
 
 			// Make the textarea expand as input is entered
 			$gsiril_input.expanding();
@@ -14,9 +15,11 @@ define( ['jquery', '../shared/helpers/URL', '../shared/lib/expanding'], function
 			gsirilWorker.onmessage = function( e ) {
 				if(typeof e.data.output == 'string' ) {
 					$gsiril_output.append(e.data.output+"\n");
+					$(window).scrollTop( targetScrollTop );
 				}
 				else if(typeof e.data.error === 'string') {
 					$gsiril_output.append('<span style="color:red">'+e.data.error+"</span>\n");
+					$(window).scrollTop( targetScrollTop );
 				}
 				else {
 					console.log(e.data);
