@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
- <url><loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_welcome') }}</loc></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+ <url>
+  <loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_welcome') }}</loc>
+  <xhtml:link rel="alternate" href="android-app://uk.me.rsw.bl/blueline/methods" />
+</url>
  <url><loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_Pages_view', {'page':'about'}) }}</loc></url>
  <url><loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_Associations_welcome') }}</loc></url>
- <url><loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_Methods_welcome') }}</loc></url>
+ <url>
+  <loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_Methods_welcome') }}</loc>
+  <xhtml:link rel="alternate" href="android-app://uk.me.rsw.bl/blueline/methods" />
+ </url>
  <url><loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_Towers_welcome') }}</loc></url>
  <url><loc>{{ app.request.scheme ~  '://' ~ app.request.host ~ path('Blueline_Services_siril') }}</loc></url>
 </urlset>
