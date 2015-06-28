@@ -272,7 +272,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 			}
 
 			// Draw calling positions
-			if( options.callingPositions.show && typeof options.callingPositions.title == 'object' ) {
+			if( options.callingPositions.show && typeof options.callingPositions.titles == 'object' ) {
 				context.fillStyle = options.callingPositions.color;
 				context.font = options.callingPositions.font;
 				context.textAlign = 'left';
