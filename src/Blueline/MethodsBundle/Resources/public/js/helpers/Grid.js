@@ -21,7 +21,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 			} );
 
 			// Create some shortcut variables for later use
-			var i, j, k, h, w, x, y,
+			var i, j, k, l, m, h, w, x, y,
 				context = canvas.context,
 
 				numberOfLeads = options.layout.numberOfLeads,
@@ -231,11 +231,11 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 			// Draw place starts
 			if( options.placeStarts.show ) {
 				options.placeStarts.bells.sort( function(a,b) { return a - b; } );
-				context.lineWidth = 1;
+				context.lineWidth = options.placeStarts.size*0.1;
 				context.setLineDash( [] );
 				options.placeStarts.bells.forEach( function( i, pos ) {
 					var j = (typeof options.startRow === 'object')? options.startRow[i] : i,
-						k, l;
+						k, l, m;
 					for( k = 0; k < numberOfColumns; ++k ) {
 						for( l = 0; l < leadsPerColumn && (k*leadsPerColumn)+l < numberOfLeads; ++l ) {
 							var positionInLeadHead = leadHeads[(k*leadsPerColumn)+l].indexOf( j );
@@ -243,7 +243,6 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 							// The little circle
 							var x = canvasLeftPadding + (k*rowWidthWithPadding) + ((positionInLeadHead+0.5)*bellWidth),
 								y = canvasTopPadding + (l*rowHeight*leadLength) + Math.max(3.25*2, rowHeight/2);
-							
 							context.fillStyle = options.lines.bells[j].stroke;
 							context.beginPath();
 							context.arc( x, y, 2, 0, Math.PI*2, true);
@@ -251,16 +250,16 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 							context.fill();
 
 							// The big circle
-							x = canvasLeftPadding + (k*rowWidthWithPadding) + rowWidth + 12*pos + 10;
+							x = canvasLeftPadding + (k*rowWidthWithPadding) + rowWidth + options.placeStarts.size*(pos+0.75);
 							context.strokeStyle = options.lines.bells[j].stroke;
 							context.beginPath();
-							context.arc( x, y, 6.5, 0, Math.PI*2, true );
+							context.arc( x, y, options.placeStarts.size/2, 0, Math.PI*2, true );
 							context.closePath();
 							context.stroke();
 
 							// The text inside the big circle
-							var placeStartFontSize = ((positionInLeadHead<9)?10:8),
-								textMetrics = MeasureCanvasTextOffset( 13, placeStartFontSize+'px '+options.placeStarts.font, (positionInLeadHead+1).toString() );
+							var placeStartFontSize = Math.round(10*(((positionInLeadHead<9)?0.7:0.55)*options.placeStarts.size))/10,
+								textMetrics = MeasureCanvasTextOffset( options.placeStarts.size, placeStartFontSize+'px '+options.placeStarts.font, (positionInLeadHead+1).toString() );
 							context.fillStyle = options.placeStarts.color;
 							context.font = placeStartFontSize+'px '+options.placeStarts.font;
 							context.textAlign = 'center';

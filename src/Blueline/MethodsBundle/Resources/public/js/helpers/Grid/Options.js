@@ -47,7 +47,9 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 		placeStarts: {
 			show: false,
 			font: '"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif',
-			color: '#000'
+			color: '#000',
+			size: 13,
+			from: 0
 		},
 		callingPositions: {
 			show: false,
@@ -110,6 +112,9 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 					}
 					return bells;
 				} )( passedOptions.stage )
+			},
+			placeStarts: {
+				every: passedOptions.notation.exploded.length
 			}
 		};
 
@@ -170,8 +175,8 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 		})() : 0;
 
 		if( options.placeStarts.show ) {
-			options.dimensions.column.padding.right = Math.max( options.dimensions.column.padding.right, 10 + ( options.placeStarts.bells.length * 12 ) );
-			options.dimensions.canvas.padding.top = Math.max( options.dimensions.canvas.padding.top, 15 - options.dimensions.row.height);
+			options.dimensions.column.padding.right = Math.max( options.dimensions.column.padding.right, 10 + ( options.placeStarts.bells.length * options.placeStarts.size ) );
+			options.dimensions.canvas.padding.top = Math.max( options.dimensions.canvas.padding.top, 1 + options.placeStarts.size - options.dimensions.row.height);
 		}
 		if( options.callingPositions.show ) {
 			options.dimensions.column.padding.right = Math.max( options.dimensions.column.padding.right, 15 );
