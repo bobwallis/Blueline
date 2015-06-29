@@ -17,6 +17,8 @@ define( function() {
 			canvas.style.height = options.height+'px';
 
 			// Move variables onto object
+			this.width = options.width;
+			this.height = options.height;
 			this.element = canvas;
 			this.context = canvas.getContext( '2d' );
 			this.scale = pixelRatio;

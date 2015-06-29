@@ -242,7 +242,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 
 							// The little circle
 							var x = canvasLeftPadding + (k*rowWidthWithPadding) + ((positionInLeadHead+0.5)*bellWidth),
-								y = canvasTopPadding + (l*rowHeight*leadLength) + Math.max(3.25*2, rowHeight/2);
+								y = canvasTopPadding + (l*rowHeight*leadLength) + Math.max(options.placeStarts.size/2, rowHeight/2);
 							context.fillStyle = options.lines.bells[j].stroke;
 							context.beginPath();
 							context.arc( x, y, 2, 0, Math.PI*2, true);
@@ -259,7 +259,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 
 							// The text inside the big circle
 							var placeStartFontSize = Math.round(10*(((positionInLeadHead<9)?0.7:0.55)*options.placeStarts.size))/10,
-								textMetrics = MeasureCanvasTextOffset( options.placeStarts.size, placeStartFontSize+'px '+options.placeStarts.font, (positionInLeadHead+1).toString() );
+								textMetrics = MeasureCanvasTextOffset( Math.ceil(options.placeStarts.size), placeStartFontSize+'px '+options.placeStarts.font, (positionInLeadHead+1).toString() );
 							context.fillStyle = options.placeStarts.color;
 							context.font = placeStartFontSize+'px '+options.placeStarts.font;
 							context.textAlign = 'center';
