@@ -38,7 +38,7 @@ class AssetControllerTest extends WebTestCase
     public function testImages()
     {
         foreach (array('png', 'svg') as $format) {
-            foreach (array('database', 'external', 'search', 'select', 'more', 'welcome_associations', 'welcome_methods', 'welcome_towers') as $image) {
+            foreach (array('database', 'external', 'search', 'select', 'welcome_associations', 'welcome_methods', 'welcome_towers') as $image) {
                 $client = static::createClient();
                 $crawler = $client->request('GET', '/images/'.$image.'.'.$format);
                 $this->assertTrue($client->getResponse()->isSuccessful(), $image.'.'.$format.' request unsuccessful');
