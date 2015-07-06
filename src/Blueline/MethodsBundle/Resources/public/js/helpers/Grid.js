@@ -258,7 +258,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 							context.stroke();
 
 							// The text inside the big circle
-							var placeStartFontSize = Math.round(10*(((positionInLeadHead<9)?0.7:0.55)*options.placeStarts.size))/10,
+							var placeStartFontSize = Math.round( 10*Math.min( options.placeStarts.size-((positionInLeadHead<9)?2:4), (((positionInLeadHead<9)?0.75:0.6)*options.placeStarts.size) )/10 ),
 								textMetrics = MeasureCanvasTextOffset( Math.ceil(options.placeStarts.size), placeStartFontSize+'px '+options.placeStarts.font, (positionInLeadHead+1).toString() );
 							context.fillStyle = options.placeStarts.color;
 							context.font = placeStartFontSize+'px '+options.placeStarts.font;
