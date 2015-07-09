@@ -1,0 +1,14 @@
+{% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
+
+{% block title %}{{ status_text }} | {{ parent() }}{% endblock %}
+{% set search = false %}
+
+{% block body %}
+	{% from 'BluelineBundle:Macros:header.html.twig' import header %}
+	<section class="text">
+		{{ header(status_text) }}
+		<div class="wrap">
+			<p>An error has ocurred. The server returned a "{{ status_code }} {{ status_text }}" status code.</p>
+		</div>
+	</section>
+{% endblock %}

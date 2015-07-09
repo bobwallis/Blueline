@@ -60,7 +60,7 @@
 		{# Opengraph tags #}
 		<meta property="og:title" content="{% block og_title %}Blueline{% endblock %}" />
 		<meta property="og:description" content="{% block og_description %}Information for bellringers{% endblock %}" />
-		<meta property="og:url" content="{{ url( app.request.attributes.get( '_route' ), app.request.attributes.get( '_route_params' ) ) }}" />
+		{% if status_code is not defined %}<meta property="og:url" content="{{ url( app.request.attributes.get( '_route' ), app.request.attributes.get( '_route_params' ) ) }}" />{% endif %}
 		<meta property="og:type" content="{% block og_type %}website{% endblock %}" />
 		<meta property="og:image" content="{% block og_image %}{{ url( 'Blueline_iOSicon', { 'size': '144x144', '_format': 'png' } ) }}{% endblock %}" />
 		<meta property="og:site_name" content="Blueline" />
