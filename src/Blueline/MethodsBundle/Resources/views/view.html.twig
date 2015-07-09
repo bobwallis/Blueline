@@ -25,6 +25,9 @@
 		] } ) }}
 		<div id="method_details_{{ loop.index }}" class="details">
 			<dl>
+{% if method.provisional %}
+				<dt class="alone">This method is provisionally named</dt>
+{% endif %}
 {% if method.renamed is not empty %}
 				<dt>Originally named</dt>
 				<dd>

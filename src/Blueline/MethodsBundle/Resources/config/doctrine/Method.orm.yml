@@ -7,6 +7,9 @@ Blueline\MethodsBundle\Entity\Method:
             type: string
             length: 255
     fields:
+        provisional:
+            type: boolean
+            nullable: true
         url:
             type: string
             length: 255

@@ -61,6 +61,12 @@ class Method
      */
     private $title;
 
+
+    /**
+     * @var boolean $provisional
+     */
+    private $provisional;
+
     /**
      * @var integer $stage
      */
@@ -198,6 +204,29 @@ class Method
         $this->title = $title;
 
         return $this;
+    }
+
+    /**
+     * Set provisional
+     *
+     * @param  boolean $provisional
+     * @return Method
+     */
+    public function setProvisional($provisional)
+    {
+        $this->provisional = $provisional;
+
+        return $this;
+    }
+
+    /**
+     * Get provisional
+     *
+     * @return boolean
+     */
+    public function getProvisional()
+    {
+        return $this->provisional;
     }
 
     /**

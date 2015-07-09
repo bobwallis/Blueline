@@ -23,6 +23,9 @@ class MethodXMLIterator implements \Iterator, \Countable
             $methodCollections[$collection['id']] = $collection['methods'];
         }
 
+        // Flag for if we're iterating over the "provisionally named" methods collection
+        $provisional = (preg_match('/provisional\.xml$/', $file) === 1);
+
         // Parse the XML data
         // TODO: Investigate a switch to XMLReader <http://www.php.net/manual/en/book.xmlreader.php> over SimpleXML.
         libxml_use_internal_errors(true);
@@ -40,9 +43,10 @@ class MethodXMLIterator implements \Iterator, \Countable
         }
 
         // Function to parse the SimpleXMLElements we'll encounter into an array of data
-        $xmlToArray = function (\SimpleXMLElement $node, $array = array()) use ($methodCollections) {
+        $xmlToArray = function (\SimpleXMLElement $node, $array = array()) use ($methodCollections, $provisional) {
             // Pull out the easy ones
             $array = array_merge($array, array(
+                'provisional'    => $provisional,
                 'url'            => strval($node->title) ? str_replace([' ', '$', '&', '+', ',', '/', ':', ';', '=', '?', '@', '"', "'", '<', '>', '#', '%', '{', '}', '|', "\\", '^', '~', '[', ']', '.'], ['_'], iconv('UTF-8', 'ASCII//TRANSLIT', strval($node->title))) : null,
                 'title'          => strval($node->title) ?: null,
                 'namemetaphone'  => metaphone($node->name ?: '') ?: null,
