@@ -23,6 +23,9 @@ class TowerRepository extends EntityRepository
         foreach (array( 'id', 'gridReference', 'postcode', 'country', 'county', 'diocese', 'place', 'dedication', 'note', 'contractor' ) as $key) {
             if (isset($searchVariables[$key])) {
                 if (strpos($searchVariables[$key], '/') === 0 && strlen($searchVariables[$key]) > 1) {
+                    if (@preg_match($searchVariables['q'].'/', ' ') === false) {
+                        throw new BadRequestHttpException('Invalid regular expression');
+                    }
                     $query->andWhere('REGEXP(t.'.$key.',:'.$key.'Regexp) = TRUE')
                         ->setParameter($key.'Regexp', trim($searchVariables[$key], '/'));
                 } else {

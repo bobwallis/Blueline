@@ -13,6 +13,9 @@ class AssociationRepository extends EntityRepository
         // Do a more general search if using 'q'
         if (isset($searchVariables['q'])) {
             if (strpos($searchVariables['q'], '/') === 0 && strlen($searchVariables['q']) > 1) {
+                if (@preg_match($searchVariables['q'].'/', ' ') === false) {
+                    throw new BadRequestHttpException('Invalid regular expression');
+                }
                 $query->andWhere('REGEXP(a.name, :qRegexp) = TRUE')
                     ->setParameter('qRegexp', trim($searchVariables['q'], '/'));
             } else {

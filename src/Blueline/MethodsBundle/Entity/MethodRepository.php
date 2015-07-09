@@ -2,6 +2,7 @@
 namespace Blueline\MethodsBundle\Entity;
 
 use Doctrine\ORM\EntityRepository;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Blueline\BluelineBundle\Helpers\Search;
 use Blueline\MethodsBundle\Helpers\Stages;
 use Blueline\MethodsBundle\Helpers\Classifications;
@@ -14,6 +15,9 @@ class MethodRepository extends EntityRepository
 
         if (isset($searchVariables['q'])) {
             if (strpos($searchVariables['q'], '/') === 0 && strlen($searchVariables['q']) > 1) {
+                if (@preg_match($searchVariables['q'].'/', ' ') === false) {
+                    throw new BadRequestHttpException('Invalid regular expression');
+                }
                 $query->andWhere('REGEXP(m.title, :qRegexp) = TRUE')
                     ->setParameter('qRegexp', trim($searchVariables['q'], '/'));
             } else {
