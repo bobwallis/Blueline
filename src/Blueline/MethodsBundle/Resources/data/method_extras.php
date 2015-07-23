@@ -105,6 +105,15 @@ $method_extras = array (
     'ruleoffs' => array('every' => 2, 'from' => 0),
   ),
   array (
+    'title' => 'Scientific Triples',
+    'calls' => array (
+      'Red' => array('notation' => '3.7.3', 'every' => 30, 'from' => 6),
+      'Blue' => array('notation' => '3.7.3', 'every' => 30, 'from' => 15),
+      'Green' => array('notation' => '3.7.3', 'every' => 30, 'from' => 23),
+    ),
+    'ruleoffs' => array('every' => 30, 'from' => 0),
+  ),
+  array (
     'title' => 'Stedman Caters',
     'calls' => array (
       'Bob' => array('notation' => '7', 'every' => 6, 'from' => -3),
