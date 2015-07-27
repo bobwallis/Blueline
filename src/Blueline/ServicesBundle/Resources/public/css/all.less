@@ -1,4 +1,6 @@
 .gsiril {
+	margin: @contentYPadding @contentXPadding;
+	max-width: 1000px;
 	input, button {
 		margin: 10px 0;
 	}
@@ -10,9 +12,16 @@
 #gsiril_input {
 	display: block;
 	border: 1px solid @lightGrey;
-	font-family: monospace;
+	padding: @contentYPadding/2 @contentXPadding/2;
+	font: 12px monospace;
 	width: 100%;
 	height: 100px;
+	transition-property: border-color;
+	transition-duration: .4s;
+	&:focus {
+		border-color: darken(@lightGrey,20%);
+		outline: none;
+	}
 }
 
 #gsiril_output {

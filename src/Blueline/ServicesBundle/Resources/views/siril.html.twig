@@ -7,9 +7,11 @@
 	{% from 'BluelineBundle:Macros:header.html.twig' import header %}
 	<section class="text">
 		{{ header('Composition Prover') }}
-		<div class="wrap gsiril">
+		<div class="wrap">
 			<p>This page contains a simple web interface for Richard Smith's <a href="http://www.ex-parrot.com/~richard/gsiril/" class="external">GSiril</a> touch proving program. <a href="{{ path( 'Blueline_Services_siril_why' ) }}">Here</a> are some notes on why and how this has been achieved.</p>
 			<p>Enter the composition in the box below in the MicroSiril or GSiril language and click "Prove".</p>
+		</div>
+		<div class="gsiril">
 			<h2>Input</h2>
 			<p><label>Syntax&nbsp;&nbsp;</label><select id="gsiril_format"><option>MicroSiril</option><option>GSiril</option></select></p>
 			<p><textarea id="gsiril_input" spellcheck="false" class="expanding" placeholder="Enter composition in GSiril/MicroSiril syntax"></textarea></p>
