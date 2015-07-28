@@ -2,9 +2,9 @@ define( ['jquery', '../shared/helpers/URL', '../shared/lib/expanding'], function
 	var GSiril = {
 		init: function() {
 			var gsirilWorker,
-				$gsiril_output = $('#gsiril_output'),
-				$gsiril_format = $('#gsiril_format'),
-				$gsiril_input = $('#gsiril_input'),
+				$gsiril_output = $( '#gsiril_output' ),
+				$gsiril_format = $( '#gsiril_format' ),
+				$gsiril_input = $( '#gsiril_input' ),
 				targetScrollTop = $gsiril_output.prev().position().top;
 
 			// Make the textarea expand as input is entered
@@ -18,21 +18,26 @@ define( ['jquery', '../shared/helpers/URL', '../shared/lib/expanding'], function
 					$(window).scrollTop( targetScrollTop );
 				}
 				else if(typeof e.data.error === 'string') {
-					$gsiril_output.append('<span style="color:red">'+e.data.error+"</span>\n");
+					$gsiril_output.append( '<span style="color:red">'+e.data.error+"</span>\n" );
 					$(window).scrollTop( targetScrollTop );
 				}
 				else {
-					console.log(e.data);
+					console.log( e.data );
 				}
 			};
 
 			// Listen for clicks to the prove button and pass input to the worker as required
-			$('#gsiril_go').click( function() {
+			$( '#gsiril_form' ).submit( function( e ) {
+				e.preventDefault();
 				gsirilWorker.postMessage( {
 					input: $gsiril_input.val(),
-					args: ($gsiril_format.val() == 'MicroSiril')? ['--msiril'] : []
+					args: ($gsiril_format.val() == 'MicroSiril syntax')? ['--msiril'] : []
 				} );
 				$gsiril_output.empty();
+			} )
+			.on( 'reset', function( e ) {
+				e.preventDefault();
+				$gsiril_input.val( '' ).change();
 			} );
 		}
 	};

@@ -102,7 +102,7 @@ define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve
 		} );
 
 		// Submit. Triggered when a form is submitted
-		$( document.body ).on( 'submit', 'form', function( e ) {
+		$( document.body ).on( 'submit', 'form#search', function( e ) {
 			var $form = $( e.target ),
 				href = $form.attr( 'action' ) + '?' + $form.serialize();
 			e.preventDefault();
