@@ -1,3 +1,4 @@
+// Based on:
 // Expanding Textareas v0.2.0
 // MIT License
 // https://github.com/bgrins/ExpandingTextareas
@@ -16,7 +17,6 @@
     Expanding._registry.push(this);
 
     this.$textarea = $textarea;
-    this.$textCopy = $("<span />");
     this.$clone = $("<pre class='expanding-clone'><br /></pre>").prepend(this.$textCopy);
 
     $textarea
@@ -63,6 +63,22 @@
   // and so is avoided altogether.
   var inputSupported = "oninput" in document.createElement("input") && ieVersion !== 9;
 
+  var regexp_bellsextents = /^(\d+) (bells|extents)/gm,
+    regexp_importproverounds = /(import|prove|rounds) ([^;]*?)($|;|[^,]{1}\n)/g,
+    regexp_definition = /(^|\s|\()([a-zA-Z]{1}[a-zA-Z0-9_]*)(\s*=)/gm,
+    regexp_comment = /(\/(?!span).*)/g,
+    regexp_string = /(class=|^|\s|\(|,)("[^"\n]*")/gm,
+    regexp_seq = /(@|\$|#|\\'|\\\\|\\n|\\t|\\@|\\\$|\\#)/g,
+    regexp_bracket = /(\(|\))/g,
+    regexp_brace = /(\{|\})/g,
+    regexp_regexp = /\/(?!span)(.*?)\//g,
+    regexp_semicolon = /;/g,
+    regexp_semicolonendingline = /;($|\s*<span class="comment">)/gm,
+
+    regexp_alternativeblock1 = /\{([^\{\}]*?)\}/g,
+    regexp_alternativeblock2 = /\{(.*)<span class="comment">(.*)<\/span>/g,
+    regexp_span = /<span class="[a-z]+">(.*?)<\/span>/g;
+
   Expanding.prototype = {
 
     // Attaches input events
@@ -76,7 +92,37 @@
 
     // Updates the clone with the textarea value
     update: function() {
-      this.$textCopy.text(this.$textarea.val().replace(/\r\n/g, "\n"));
+      this.$clone.html( this.$textarea.val().replace(/\r\n/g, "\n")
+        // MicroSiril formatting
+        .replace( regexp_definition, '$1<span class="name">$2</span><span class="equals">$3</span>' )
+        .replace( regexp_string, function( match, p1, p2 ) {
+          if( p1 == 'class=' ) {
+            return p1+p2;
+          }
+          else {
+            return p1+'<span class="string">'+p2.replace( regexp_seq, '<span class="seq">$1</span>' )+'</span>';
+          }
+        } )
+        .replace( regexp_comment, '<span class="comment">$1</span>' )
+        .replace( regexp_bellsextents, '<span class="statement">$1 $2</span>' )
+        .replace( regexp_importproverounds, function( match, p1, p2, p3 ) {
+          return '<span class="statement">'+p1+' '+p2+(p3===';'?p3+'</span>':'</span>'+p3);
+        } )
+        .replace( regexp_bracket, '<span class="bracket">$1</span>' )
+        // Wipe out any formatting contained within {...} (GSiril's 'alternatives blocks')
+        .replace( regexp_alternativeblock1, function( match, p1 ) {
+          return '{'+p1.replace( regexp_span, '$1' )+'}';
+        } )
+        .replace( regexp_alternativeblock2, '{$1$2' )
+        // Then redo said formatting
+        .replace( regexp_brace, '<span class="brace">$1</span>' )
+        .replace( regexp_alternativeblock1, function( match, p1 ) {
+          return '{'+p1.replace( regexp_semicolon, '<span class="brace">;</span>' )
+            .replace( regexp_regexp, '<span class="comment">/</span>$1<span class="comment">/</span>' )+'}';
+        } )
+        // Do semicolons at the end
+        .replace( regexp_semicolonendingline, '<span class="semicolon">;</span>$1' )
+      +' ');
 
       // Use `triggerHandler` to prevent conflicts with `update` in Prototype.js
       this.$textarea.triggerHandler("update.expanding");
@@ -121,8 +167,6 @@
     _setCloneStyles: function() {
       var css = {
         display: 'block',
-        border: '0 solid',
-        visibility: 'hidden',
         minHeight: this.$textarea.outerHeight()
       };
 
@@ -171,15 +215,13 @@
     }
   };
 
-  $.expanding = $.extend({
-    autoInitialize: true,
-    initialSelector: "textarea.expanding",
+  $.gsirilTextarea = $.extend({
     opts: {
       update: function() { }
     }
-  }, $.expanding || {});
+  }, $.gsirilTextarea || {});
 
-  $.fn.expanding = function(o) {
+  $.fn.gsirilTextarea = function(o) {
 
     if (o === "destroy") {
       this.each(function() {
@@ -206,7 +248,7 @@
       return this;
     }
 
-    var opts = $.extend({ }, $.expanding.opts, o);
+    var opts = $.extend({ }, $.gsirilTextarea.opts, o);
 
     this.filter("textarea").each(function() {
       var visible = this.offsetWidth > 0 || this.offsetHeight > 0,
@@ -224,11 +266,5 @@
   function _warn(text) {
     if(window.console && console.warn) console.warn(text);
   }
-
-  $(function () {
-    if ($.expanding.autoInitialize) {
-      $($.expanding.initialSelector).expanding();
-    }
-  });
 
 }));

@@ -1,4 +1,4 @@
-define( ['jquery', '../shared/helpers/URL', '../shared/lib/expanding'], function( $, URL ) {
+define( ['jquery', '../shared/helpers/URL', './GsirilTextarea'], function( $, URL ) {
 	var GSiril = {
 		init: function() {
 			var gsirilWorker,
@@ -8,7 +8,17 @@ define( ['jquery', '../shared/helpers/URL', '../shared/lib/expanding'], function
 				targetScrollTop = $gsiril_output.prev().position().top;
 
 			// Make the textarea expand as input is entered
-			$gsiril_input.expanding();
+			$gsiril_input.gsirilTextarea();
+
+			// Hide the syntax highlighting if the browser doesn't support pointer-events on HTML
+			var browserSupportsPointerEvents = (function() {
+				var style = document.createElement('a').style;
+				style.cssText = 'pointer-events:auto';
+				return style.pointerEvents === 'auto';
+			})();
+			if( !browserSupportsPointerEvents ) {
+				$( 'pre.expanding-clone' ).css( 'visibility', 'hidden' );
+			}
 
 			// Create the web worker
 			gsirilWorker = new Worker( URL.baseURL+'js/gsiril.worker.js' );
