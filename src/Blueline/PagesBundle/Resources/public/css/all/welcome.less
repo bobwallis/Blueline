@@ -1,18 +1,26 @@
-section.welcome h2 {
-	position: relative;
-	margin: 0 30px;
-	font-size: 26px;
-	line-height: 26px;
-	background-position: left center;
-	background-repeat: no-repeat;
-	background-size: auto 30px;
-	a {
-		display: inline-block;
-		padding: 20px 0 20px 40px;
-		border-bottom: 0;
-		color: @headerBackground;
-		&:visited {
+section.welcome  {
+	ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	li {
+		position: relative;
+		margin: 0 @contentXPadding;
+		font: bold 24px @serif-stack;
+		text-rendering: optimizeLegibility;
+		border: 0;
+		background-position: left center;
+		background-repeat: no-repeat;
+		background-size: auto 26px;
+		a {
+			display: inline-block;
+			padding: 10px 0 10px 45px;
+			border-bottom: 0;
 			color: @headerBackground;
+			&:visited {
+				color: @headerBackground;
+			}
 		}
 	}
 }
@@ -27,4 +35,8 @@ section.welcome h2 {
 
 #welcome_methods {
 	background-image: url(../images/welcome_methods.svg);
+}
+
+#welcome_prover {
+	background-image: url(../images/welcome_prover.svg);
 }

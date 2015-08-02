@@ -12,7 +12,9 @@
 @titleBackground: #F3F3F3;
 @lightGrey: #E0DED9;
 
-// Font
+// Fonts
+@sans-stack: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+@serif-stack: Palatino, "Palatino Linotype", "Palatino LT STD", "URW Palladio L", "Book Antiqua", Constantia, serif;
 @font-face {
 	font-family: 'Blueline';
 	font-style: normal;
@@ -39,10 +41,10 @@ html, body {
 	-webkit-font-smoothing: antialiased;
 	-webkit-overflow-scrolling: touch;
 	min-width: 320px;
-	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+	font-family: @sans-stack;
 }
 h1, h2, fieldset legend {
-	font-family: Palatino, "Palatino Linotype", "Palatino LT STD", "URW Palladio L", "Book Antiqua", Constantia, serif;
+	font-family: @serif-stack;
 	text-rendering: optimizeLegibility;
 }
 
