@@ -7,8 +7,8 @@ define( ['jquery', '../shared/helpers/URL', './GsirilTextarea'], function( $, UR
 				$gsiril_input = $( '#gsiril_input' ),
 				targetScrollTop = $gsiril_output.prev().position().top;
 
-			// Make the textarea expand as input is entered
-			$gsiril_input.gsirilTextarea();
+			// Make the textarea expand as input is entered (after a tick of the event loop so it has a chance to init)
+			window.setTimeout( function() { $gsiril_input.gsirilTextarea(); }, 10 );
 
 			// Hide the syntax highlighting if the browser doesn't support pointer-events on HTML
 			var browserSupportsPointerEvents = (function() {
