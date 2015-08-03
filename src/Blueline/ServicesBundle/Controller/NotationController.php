@@ -10,7 +10,7 @@ use Blueline\MethodsBundle\Helpers\PlaceNotation;
 
 class NotationController extends Controller
 {
-    public function expandAction(Request $request)
+    public function parseAction(Request $request)
     {
         // Creat response
         $response = new Response();
@@ -34,15 +34,16 @@ class NotationController extends Controller
         }
 
         // Convert
-        $vars['stage'] = isset($vars['stage'])? intval($vars['stage']) : null;
-        $vars['notationExpanded'] = PlaceNotation::expand($vars['notation'], $vars['stage']);
+        $vars['stage'] = isset($vars['stage'])? intval($vars['stage']) : max(array_map(function ($c) { return PlaceNotation::bellToInt($c); }, array_filter(str_split($notation), function ($c) { return preg_match('/[0-9A-Z]/', $c); })));
+        $vars['expanded'] = PlaceNotation::expand($vars['notation'], $vars['stage']);
+        $vars['siril'] = PlaceNotation::siril($vars['notation'], $vars['stage']);
         
         switch($request->getRequestFormat()) {
             case 'txt':
-                $response->setContent($vars['notationExpanded']);
+                $response->setContent($vars['expanded']."\n".$vars['siril']);
                 break;
             case 'json':
-                $response->setContent(json_encode($vars['notationExpanded']));
+                $response->setContent(json_encode(array( 'stage' => $vars['stage'], 'expanded' => $vars['expanded'], 'siril' => $vars['siril'])));
                 break;
 
         }

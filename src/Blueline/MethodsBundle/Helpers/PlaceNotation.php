@@ -211,7 +211,7 @@ class PlaceNotation
                 return ($carry && ($item{0} == '+' || $item{0} == '&'));
             }, true)) {
                 $notationFull = array_reduce($splitOnComma, function ($carry, $item) {
-                    return $carry . ($item{0} == '&'? self::expandHalf($item) : trim($item, '+'));
+                    return $carry . '.' . ($item{0} == '&'? self::expandHalf($item) : trim($item, '+'));
                 }, '');
             }
         }
@@ -332,6 +332,67 @@ class PlaceNotation
 
         // Implode the exploded notation, with added external places, back into string form
         return self::implode($notationExploded);
+    }
+
+    /**
+     * Converts notation into microSiril format
+     * @param  string  $notation
+     * @param  integer $stage
+     * @return string
+     */
+    public static function siril($notation, $stage = null)
+    {
+        // If stage isn't given, try to guess it
+        if (is_null($stage) || $stage < 3) {
+            $stage = max(array_map(function ($c) { return PlaceNotation::bellToInt($c); }, array_filter(str_split($notation), function ($c) { return preg_match('/[0-9A-Z]/', $c); })));
+        }
+
+        // Expand place notation, explode, then remove external places
+        $expandedAndExploded = array_map(function($pn) use ($stage) {
+            if ($pn != 'x') {
+                if (strlen($pn) > 1 &&
+                    $pn{0} == '1' && PlaceNotation::bellToInt($pn{1})%2 ==0
+                   ) {
+                    $pn = substr($pn, 1);
+                }
+                if (strlen($pn) > 1 &&
+                    $pn{strlen($pn)-1} == PlaceNotation::intToBell($stage) &&
+                    PlaceNotation::bellToInt($pn{strlen($pn)-2})%2 != $stage%2
+                   ) {
+                    $pn = substr($pn, 0, strlen($pn)-1);
+                }
+
+            }
+            return $pn;
+        }, self::explode(self::expand($notation, $stage)));
+
+        // Then find and reduce any palindromes
+        $sirilise = function($notation) use (&$sirilise) {
+            // If at the end
+            if (count($notation) < 3) {
+                return '+'.PlaceNotation::implode($notation);
+            }
+            // Otherwise hunt for palindrom
+            for ($palindromeLength = (count($notation)%2 == 0)? count($notation)-1 : count($notation); $palindromeLength >= 3; $palindromeLength -= 2) {
+                for ($palindromeOffset = 0; $palindromeLength+$palindromeOffset <= count($notation); ++$palindromeOffset) {
+                    $word = array_slice($notation, $palindromeOffset, $palindromeLength);
+                    $reversedWord = array_reverse($word);
+                    if ($word == $reversedWord) {
+                        $result = '';
+                        if ($palindromeOffset > 0) {
+                            $result .= $sirilise(array_slice($notation, 0, $palindromeOffset)).', ';
+                        }
+                        $result .= '&'.PlaceNotation::implode(array_slice($word, 0, (count($word)+1)/2));
+                        if ($palindromeOffset + $palindromeLength < count($notation)) {
+                            $result .= ', '.$sirilise(array_slice($notation, $palindromeOffset+$palindromeLength));
+                        }
+                        return $result;
+                    }
+                }
+            }
+            return '+'.PlaceNotation::implode($notation);
+        };
+        return str_replace('x', '-', $sirilise( $expandedAndExploded ));
     }
 
     /**
