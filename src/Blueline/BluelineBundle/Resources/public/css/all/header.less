@@ -35,7 +35,7 @@
 
 
 /* Search */
-@searchWidth: 350px;
+@searchWidth: 440px;
 @searchWidth_smallScreen: 304px;
 #search {
 	display: block;
@@ -49,15 +49,18 @@
 	background-color: @titleBackground;
 	background-color: rgba(red(@titleBackground),green(@titleBackground),blue(@titleBackground),0.95);
 	box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+#search, #search_dummy {
 	div {
 		width: @searchWidth;
-		margin: 8px;
+		margin: @contentYPadding @contentXPadding;
 		overflow: hidden;
-		border-radius: 3px;
-		border: 2px solid #DDD;
+		border-radius: 2px;
+		border: 1px solid @lightGrey;
 		height: 25px;
 		background: #FFF url(../images/search.svg) no-repeat right center;
 		background-size: contain;
+		box-shadow: 0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.24);
 	}
 	input {
 		display: block;
@@ -82,10 +85,15 @@
 		background-color: transparent;
 	}
 }
+#search_dummy div {
+	background-color: #F3F3F3;
+}
+
 @media screen and (max-width: 480px) {
-	#search {
+	#search, #search_dummy {
 		div {
-			width: @searchWidth_smallScreen;
+			width: 100%*(@searchWidth/480);
+			min-width: @searchWidth_smallScreen;
 		}
 		input {
 			width: @searchWidth_smallScreen - 40;

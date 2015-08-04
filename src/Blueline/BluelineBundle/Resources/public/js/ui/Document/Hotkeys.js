@@ -39,7 +39,9 @@ define( ['jquery'], function( $ ) {
 
 				// Click paging links
 				case HOME:
-					$( "div.pagingLinks:first a:contains('1'):first" ).click();
+					if( $searchBox.is( ':not(:focus)' ) ) {
+						$( "div.pagingLinks:first a:contains('1'):first" ).click();
+					}
 					break;
 				case PGUP:
 					$( "div.pagingLinks:first a:contains('«'):first" ).click();
@@ -48,7 +50,9 @@ define( ['jquery'], function( $ ) {
 					$( "div.pagingLinks:first a:contains('»'):first" ).click();
 					break;
 				case END:
-					$( "div.pagingLinks:first :not(:contains('»')):last" ).click();
+					if( $searchBox.is( ':not(:focus)' ) ) {
+						$( "div.pagingLinks:first :not(:contains('»')):last" ).click();
+					}
 					break;
 
 				// Focus search boxes on '/'
@@ -58,6 +62,11 @@ define( ['jquery'], function( $ ) {
 						e.preventDefault();
 						$searchBox.focus();
 						$searchBox.select();
+					}
+					else if( $('#q2').is( ':visible:not(:focus)' ) ) {
+						e.preventDefault();
+						$('#q2').focus();
+						$('#q2').select();
 					}
 					break;
 

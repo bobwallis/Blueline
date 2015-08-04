@@ -1,7 +1,7 @@
 // Utility functions for dealing with URLs
 
 define( ['jquery'], function( $ ) {
-	var regExp_showSearchBar = /(\/methods\/$|\/towers\/$|\/associations\/$|\/search)/,
+	var regExp_showSearchBar = /\/search/,
 		regExp_showTowerMap = /(\/towers\/view\/|\/associations\/view\/)/,
 		regExp_section = /^(.*)\/(associations|methods|towers)\//,
 		regExp_isInternalLink;

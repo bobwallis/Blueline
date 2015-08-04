@@ -208,12 +208,12 @@ class MethodsController extends Controller
         }
 
         // Check we have the bare minimum of information required
-        if (!isset($vars['notation'], $vars['stage'])) {
-            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException("Request requires at least 'notation' and 'stage' to be set");
+        if (!isset($vars['notation'])) {
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException("Request requires at least 'notation' to be set");
         }
 
         // Do some basic conversion
-        $vars['stage'] = intval($vars['stage']);
+        $vars['stage'] = isset($vars['stage'])? intval($vars['stage']) : max(array_map(function ($c) { return PlaceNotation::bellToInt($c); }, array_filter(str_split($vars['notation']), function ($c) { return preg_match('/[0-9A-Z]/', $c); })));
         $vars['notationExpanded'] = PlaceNotation::expand($vars['notation'], $vars['stage']);
         $vars['title'] = isset($vars['title']) ? $vars['title'] : 'Unrung '.Stages::toString($vars['stage']).' Method';
 

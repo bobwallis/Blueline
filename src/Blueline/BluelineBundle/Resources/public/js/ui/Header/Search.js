@@ -75,7 +75,7 @@ define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve
 	} );
 
 	if( Modernizr.history ) {
-		$( '#search' ).on( 'keyup cut paste', 'input', function( e ) {
+		$(document).on( 'keyup cut paste', '#q, #q2', function( e ) {
 			var $input = $( e.target ),
 				$form = $input.closest( 'form' ),
 				href;
@@ -86,14 +86,22 @@ define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve
 				return true;
 			}
 
-			// Check if the input is the main search box, and if it has been emptied
-			// If this is the case then hop back up to the main section page
+			// Check if the search box, has been emptied. If this is the case then
+			// hop back up to the main section page
 			if( $input.val() === '' ) {
 				href = $form.attr( 'action' ).replace( /search$/, '' );
+				eve.once( 'page.loaded', function() {
+					$( '#q2' ).focus();
+				} );
 			}
 			// Otherwise, submit the form
 			else if( $form.length > 0 ) {
 				href = $form.attr( 'action' ) + '?' + $form.serialize();
+			}
+			// If starting a search from the dummy search box on welcome pages the hop into the main search box
+			if( $input.is('#q2') ) {
+				$search.show();
+				$q.focus().val( $input.val() );
 			}
 
 			// Defer the eve event handlers until the next time the event loop comes around, to
@@ -102,7 +110,7 @@ define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve
 		} );
 
 		// Submit. Triggered when a form is submitted
-		$( document.body ).on( 'submit', 'form#search', function( e ) {
+		$( document.body ).on( 'submit', '#search, #custom_method', function( e ) {
 			var $form = $( e.target ),
 				href = $form.attr( 'action' ) + '?' + $form.serialize();
 			e.preventDefault();

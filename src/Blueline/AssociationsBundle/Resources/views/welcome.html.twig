@@ -7,10 +7,25 @@
 
 {% set breadcrumb = { 'title': 'Associations', 'href': path('Blueline_Associations_welcome') } %}
 
-{% set search = true %}
+{% set search = false %}
 {% set search_action = path( 'Blueline_Associations_search' ) %}
 {% set search_placeholder = 'Search associations' %}
 
 {% block body %}
-	<section class="blank"></section>
+	{% from 'BluelineBundle:Macros:header.html.twig' import header %}
+	<section class="text">
+		{{ header('Associations') }}
+		<div class="wrap">
+			<p>The <a href="http://dove.cccbr.org.uk/" class="external">Dove data file</a> notes the associations to which a tower is affiliated. This area of the site presents that information as a map and provides a link to the association's web page if known. <a href="http://ringing.info/associations.html" class="external">ringing.info</a> also maintains a list of links to association web pages.</p>
+			<p>I'm not sure there's much more of particular interest to do with this data, but the maps are quite pretty.</p>
+			<h2>Search</h2>
+			<p>Search for associations by name using the box:</p>
+			<form id="search_dummy" role="search" action="{{ search_action }}">
+				<div>
+					<input type="text" name="q" id="q2" spellcheck="false" autocomplete="off" placeholder="{{ search_placeholder }}" value="" />
+					<button type="submit" title="Search"><span class="hide">Search</span></button>
+				</div>
+			</form>
+		</div>
+	</section>
 {% endblock %}

@@ -13,7 +13,7 @@ define( ['jquery', 'eve'], function( $, eve ) {
 
 	eve.on( 'page.request', function() {
 		// Only clear the current content if the history event isn't a 'keyup' one
-		if( window.history.state === null || ( typeof window.history.state.type !== 'string' || window.history.state.type !== 'keyup' ) ) {
+		if( window.history.state === null || typeof window.history.state.type !== 'string' || window.history.state.type !== 'keyup' || $('#q2').length ) {
 			$content.queue( function( next ) {
 				$content.empty().hide();
 				next();

@@ -7,10 +7,25 @@
 
 {% set breadcrumb = { 'title': 'Towers', 'href': path('Blueline_Towers_welcome') } %}
 
-{% set search = true %}
+{% set search = false %}
 {% set search_action = path( 'Blueline_Towers_search' ) %}
 {% set search_placeholder = 'Search towers' %}
 
 {% block body %}
-	<section class="blank"></section>
+	{% from 'BluelineBundle:Macros:header.html.twig' import header %}
+	<section class="text">
+		{{ header('Towers') }}
+		<div class="wrap">
+			<p>The maintainers of the <a href="http://dove.cccbr.org.uk/" class="external">Dove</a> database make a data file available containing some of their data, and this area of the site presents that data. Interesting things in this area are the clickable Google map of towers, and attempts to tie the first peal locations in the Central Council's method library to tower's Dove records. The pages for many towers contains a list of the methods first pealed there, which some people may find interesting.</p>
+			<p>I had a few other ideas for useful tools that could be built using this data, like an outing organiser, but haven't got around to building them.</p>
+			<h2>Search</h2>
+			<p>Search for towers by name/location using the box:</p>
+			<form id="search_dummy" role="search" action="{{ search_action }}">
+				<div>
+					<input type="text" name="q" id="q2" spellcheck="false" autocomplete="off" placeholder="{{ search_placeholder }}" value="" />
+					<button type="submit" title="Search"><span class="hide">Search</span></button>
+				</div>
+			</form>
+		</div>
+	</section>
 {% endblock %}
