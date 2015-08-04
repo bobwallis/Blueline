@@ -5,7 +5,7 @@ define( ['jquery', '../shared/helpers/URL', './GsirilTextarea'], function( $, UR
 				$gsiril_output = $( '#gsiril_output' ),
 				$gsiril_format = $( '#gsiril_format' ),
 				$gsiril_input = $( '#gsiril_input' ),
-				targetScrollTop = $gsiril_output.prev().position().top;
+				targetScrollTop;
 
 			// Make the textarea expand as input is entered (after a tick of the event loop so it has a chance to init)
 			window.setTimeout( function() { $gsiril_input.gsirilTextarea(); }, 10 );
@@ -39,6 +39,8 @@ define( ['jquery', '../shared/helpers/URL', './GsirilTextarea'], function( $, UR
 			// Listen for clicks to the prove button and pass input to the worker as required
 			$( '#gsiril_form' ).submit( function( e ) {
 				e.preventDefault();
+				targetScrollTop = $gsiril_output.prev().position().top;
+				$(window).scrollTop( targetScrollTop );
 				gsirilWorker.postMessage( {
 					input: $gsiril_input.val(),
 					args: ($gsiril_format.val() == 'MicroSiril syntax')? ['--msiril'] : []
