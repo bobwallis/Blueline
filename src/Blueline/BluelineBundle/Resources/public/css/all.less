@@ -51,16 +51,22 @@ h1, h2, fieldset legend {
 // Links
 a {
 	text-decoration: none;
-	border-bottom: 1px solid #A1C4D0;
-	transition-property: border-bottom-color, color;
+	text-shadow: .03em 0 #FFF, -.03em 0 #FFF, 0 .03em #FFF, 0 -.03em #FFF, .06em 0 #FFF, -.06em 0 #FFF, .09em 0 #FFF, -.09em 0 #FFF, .12em 0 #FFF, -.12em 0 #FFF, .15em 0 #FFF, -.15em 0 #FFF;
+	background-image: linear-gradient(#FFF, #FFF), linear-gradient(#FFF, #FFF), linear-gradient(#A1C4D0, #A1C4D0);
+	background-size: .05em 1px, .05em 1px, 1px 1px;
+	background-repeat: no-repeat, no-repeat, repeat-x;
+	background-position: 0% 99%, 100% 99%, 0% 99%;
+	transition-property: color;
 	transition-duration: .4s;
 	&:link { color: #29404C; }
 	&:visited { color: #4C2940; }
-	&:hover { border-bottom-color: #29404C; }
 	&:active { color: #404C29; }
 	&.external {
 		padding-right: 13px;
-		background: transparent url(../images/external.svg) no-repeat center right;
+		background-image: url(../images/external.svg), linear-gradient(#FFF, #FFF), linear-gradient(#FFF, #FFF), linear-gradient(#A1C4D0, #A1C4D0);
+		background-size: auto, .05em 1px, .05em 1px, 1px 1px;
+		background-repeat: no-repeat, no-repeat, no-repeat, repeat-x;
+		background-position: center right, 0% 99%, 100% 99%, 0% 99%;
 	}
 }
 
