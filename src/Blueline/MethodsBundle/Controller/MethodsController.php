@@ -167,7 +167,7 @@ class MethodsController extends Controller
                 $section = $request->query->get('style');
                 if( !$section || intval($request->query->get('scale')) === 0 ) {
                     $url = $this->generateUrl('Blueline_Methods_view', array(
-                        'scale'   => 1,
+                        'scale'   => (intval($request->query->get('scale')) ?: 1),
                         'style'   => (!$section)? 'numbers' : $section,
                         'title'   => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)),
                         '_format' => 'png'
@@ -200,7 +200,7 @@ class MethodsController extends Controller
 
         // Collect passed in variables that are permissible
         $vars = array();
-        foreach (array( 'notation', 'title', 'stage', 'ruleOffs' ) as $key) {
+        foreach (array('notation', 'title', 'stage') as $key) {
             $value = trim($request->query->get($key));
             if (!empty($value)) {
                 $vars[$key] = $value;
@@ -226,15 +226,46 @@ class MethodsController extends Controller
             ->getArrayResult();
         if (!empty($methodsCheck)) {
             $url = $this->generateUrl('Blueline_Methods_view', array( 'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null), 'title' => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)), '_format' => $format ));
-
             return $this->redirect($url, 301);
         }
 
-        // Other wise create and display the custom method
+        // Otherwise create and display the custom method
         $methods = array( new Method($vars) );
         $pageTitle = $vars['title'];
+        $custom = true;
 
-        return $this->render('BluelineMethodsBundle::view.'.$format.'.twig', compact('pageTitle', 'methods'), $response);
+        // Create response
+        switch ($format) {
+            case 'png':
+                if ((intval($request->query->get('scale')) ?: 1) > 4 && $this->container->getParameter('kernel.environment') == 'prod') {
+                    throw $this->createAccessDeniedException('Maximum scale is 4 unless in developer mode.');
+                }
+                $section = $request->query->get('style');
+                if (!$section || intval($request->query->get('scale')) === 0) {
+                    $url = $this->generateUrl('Blueline_Methods_custom_view', array(
+                        'stage'    => $vars['stage'],
+                        'notation' => $vars['notation'],
+                        'scale'    => (intval($request->query->get('scale')) ?: 1),
+                        'style'    => (!$section)? 'numbers' : $section,
+                        '_format'  => 'png'
+                    ));
+                    return $this->redirect($url, 301);
+                }
+                if (!in_array($section, ['numbers', 'line', 'grid'])) {
+                    throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'line' or 'grid'.");
+                }
+                $processUrl = $this->generateUrl('Blueline_Methods_custom_view', array(
+                    'stage'    => $vars['stage'],
+                    'notation' => $vars['notation']
+                ), true);
+                $process = new Process('phantomjs --disk-cache=true --load-images=false "'.__DIR__.'/../Resources/phantomjs/render.js" "'.$processUrl.'" "'.$section.'" '.(intval($request->query->get('scale')) ?: 1).' 2>&1');
+                $process->mustRun();
+                $response->setContent($process->getOutput());
+
+                return $response;
+            default:
+                return $this->render('BluelineMethodsBundle::view.'.$format.'.twig', compact('pageTitle', 'methods', 'custom'), $response);
+        }
     }
 
     public function exportAction(Request $request)
@@ -268,7 +299,7 @@ class MethodsController extends Controller
 
         $methods = $this->getDoctrine()->getManager()
                     ->createQuery('SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m ORDER BY m.url')
-                    ->setMaxResults( 12500 )
+                    ->setMaxResults(12500)
                     ->setFirstResult(($page-1)*12500)
                     ->getArrayResult();
 

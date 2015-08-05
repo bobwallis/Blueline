@@ -10,10 +10,10 @@ Blueline_Methods_view:
         _format: html|json|png
 
 Blueline_Methods_custom_view:
-    path: /view
+    path: /view.{_format}
     defaults: { _controller: BluelineMethodsBundle:Methods:viewCustom, _format: html }
     requirements:
-        _format: html
+        _format: html|json|png
 
 Blueline_Methods_export:
     path: /export

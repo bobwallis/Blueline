@@ -7,7 +7,7 @@ if( args.length < 4 || args.length > 4 ) {
 }
 var scale = Math.round( parseFloat( args[3] ) * 100 ) / 100,
 	section = args[2];
-	url = args[1]+'?scale='+(scale*2);
+	url = args[1]+(/\?/.test(args[1])?'&':'?')+'scale='+(scale*2);
 
 // Open page
 var page = require('webpage').create();
