@@ -35,7 +35,7 @@ class DataController extends Controller
             $em = $container->get('doctrine')->getManager();
             switch ($table) {
                 case 'associations':
-                    $query  = $em->createQuery('SELECT a FROM Blueline\AssociationsBundle\Entity\Association a ORDER BY a.id ASC');
+                    $query  = $em->createQuery('SELECT partial a.{id,name,link} FROM Blueline\AssociationsBundle\Entity\Association a ORDER BY a.id ASC');
                     break;
                 case 'collections':
                     $query  = $em->createQuery('SELECT c FROM Blueline\MethodsBundle\Entity\Collection c ORDER BY c.id ASC');
