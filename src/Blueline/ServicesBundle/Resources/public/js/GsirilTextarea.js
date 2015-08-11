@@ -63,17 +63,18 @@
   // and so is avoided altogether.
   var inputSupported = "oninput" in document.createElement("input") && ieVersion !== 9;
 
-  var regexp_bellsextents = /^(\d+) (bells|extents)/gm,
+  var regexp_bellsextents = /^(\d+) (BELLS|bells|EXTENTS|extents)/gm,
     regexp_importproverounds = /(import|prove|rounds) ([^;]*?)($|;|[^,]{1}\n)/g,
     regexp_definition = /(^|\s|\()([a-zA-Z]{1}[a-zA-Z0-9_]*)(\s*=)/gm,
     regexp_comment = /(\/(?!span).*)/g,
-    regexp_string = /(class=|^|\s|\(|,)("[^"\n]*")/gm,
+    regexp_string = /(class=|^|\s|\(|,|>)("[^"\n]*")/gm,
     regexp_seq = /(@|\$|#|\\'|\\\\|\\n|\\t|\\@|\\\$|\\#)/g,
     regexp_bracket = /(\(|\))/g,
     regexp_brace = /(\{|\})/g,
     regexp_regexp = /\/(?!span)(.*?)\//g,
     regexp_semicolon = /;/g,
-    regexp_semicolonendingline = /;($|\s*<span class="comment">)/gm,
+    regexp_punctuation = /(\*|,)/g;
+    regexp_semicolonatendofline = /;($|\s*<span class="comment">)/gm,
 
     regexp_alternativeblock1 = /\{([^\{\}]*?)\}/g,
     regexp_alternativeblock2 = /\{(.*)<span class="comment">(.*)<\/span>/g,
@@ -94,21 +95,29 @@
     update: function() {
       this.$clone.html( this.$textarea.val().replace(/\r\n/g, "\n")
         // MicroSiril formatting
-        .replace( regexp_definition, '$1<span class="name">$2</span><span class="equals">$3</span>' )
+        .replace( regexp_definition, '$1<span class="name">$2</span><span class="punctuation">$3</span>' )
+        .replace( regexp_bellsextents, '<span class="statement">$1 $2</span>' )
+        .replace( regexp_importproverounds, function( match, p1, p2, p3 ) {
+          return '<span class="statement">'+p1+' '+p2+(p3===';'?p3+'</span>':'</span>'+p3);
+        } )
+        // Strings
         .replace( regexp_string, function( match, p1, p2 ) {
           if( p1 == 'class=' ) {
             return p1+p2;
           }
           else {
-            return p1+'<span class="string">'+p2.replace( regexp_seq, '<span class="seq">$1</span>' )+'</span>';
+            return p1+'<span class="string">'+p2.replace( regexp_span, '$1' ).replace( regexp_seq, '<span class="seq">$1</span>' )+'</span>';
           }
         } )
-        .replace( regexp_comment, '<span class="comment">$1</span>' )
-        .replace( regexp_bellsextents, '<span class="statement">$1 $2</span>' )
-        .replace( regexp_importproverounds, function( match, p1, p2, p3 ) {
-          return '<span class="statement">'+p1+' '+p2+(p3===';'?p3+'</span>':'</span>'+p3);
-        } )
+        // Brackets
         .replace( regexp_bracket, '<span class="bracket">$1</span>' )
+        // Punctuation
+        .replace( regexp_punctuation, '<span class="punctuation">$1</span>' )
+        .replace( regexp_semicolonatendofline, '<span class="punctuation">;</span>$1' )
+        // Comments
+        .replace( regexp_comment, function( match, p1 ) {
+          return '<span class="comment">'+p1.replace( regexp_span, '$1' )+'</span>';
+        } )
         // Wipe out any formatting contained within {...} (GSiril's 'alternatives blocks')
         .replace( regexp_alternativeblock1, function( match, p1 ) {
           return '{'+p1.replace( regexp_span, '$1' )+'}';
@@ -120,8 +129,6 @@
           return '{'+p1.replace( regexp_semicolon, '<span class="brace">;</span>' )
             .replace( regexp_regexp, '<span class="comment">/</span>$1<span class="comment">/</span>' )+'}';
         } )
-        // Do semicolons at the end
-        .replace( regexp_semicolonendingline, '<span class="semicolon">;</span>$1' )
       +' ');
 
       // Use `triggerHandler` to prevent conflicts with `update` in Prototype.js

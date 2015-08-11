@@ -39,7 +39,7 @@ define( ['jquery', '../shared/helpers/URL', './GsirilTextarea'], function( $, UR
 			// Listen for clicks to the prove button and pass input to the worker as required
 			$( '#gsiril_form' ).submit( function( e ) {
 				e.preventDefault();
-				targetScrollTop = $gsiril_output.prev().position().top;
+				targetScrollTop = $gsiril_output.prev().position().top - $( '#top' ).height() - 10;
 				$(window).scrollTop( targetScrollTop );
 				gsirilWorker.postMessage( {
 					input: $gsiril_input.val(),
