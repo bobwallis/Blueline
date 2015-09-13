@@ -61,7 +61,8 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 			stroke: '#999',
 			dash:   [3,1],
 			width:  1,
-			cap:    'butt'
+			cap:    'butt',
+			from:   0
 		},
 		numbers: {
 			show: true,
@@ -92,7 +93,7 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 					var bells = [], i = 0;
 					for(; i < stage; ++i ) {
 						bells.push( {
-							lineWidth: 1,
+							width: 1,
 							stroke: 'transparent',
 							cap: 'round',
 							join: 'round',
