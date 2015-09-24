@@ -54,7 +54,7 @@ Blueline_image:
     path: /images/{image}.{_format}
     defaults: { _controller: BluelineBundle:Asset:image }
     requirements:
-        image: database|external|search|select|loading|more|welcome_associations|welcome_methods|welcome_towers|welcome_prover
+        image: database|external|search|select|loading|more|welcome_associations|welcome_methods|welcome_tutorials|welcome_towers|welcome_prover
         _format: png|jpg|bmp|gif|svg
 
 Blueline_font:
