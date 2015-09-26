@@ -34,7 +34,7 @@ class NotationController extends Controller
         }
 
         // Convert
-        $vars['stage'] = isset($vars['stage'])? intval($vars['stage']) : max(array_map(function ($c) { return PlaceNotation::bellToInt($c); }, array_filter(str_split($notation), function ($c) { return preg_match('/[0-9A-Z]/', $c); })));
+        $vars['stage'] = isset($vars['stage'])? intval($vars['stage']) : max(array_map(function ($c) { return PlaceNotation::bellToInt($c); }, array_filter(str_split($vars['notation']), function ($c) { return preg_match('/[0-9A-Z]/', $c); })));
         $vars['expanded'] = PlaceNotation::expand($vars['notation'], $vars['stage']);
         $vars['siril'] = PlaceNotation::siril($vars['notation'], $vars['stage']);
         

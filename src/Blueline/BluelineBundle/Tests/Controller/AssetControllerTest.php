@@ -21,7 +21,7 @@ class AssetControllerTest extends WebTestCase
         // Icons
         foreach (array('57x57', '72x72', '76x76', '114x114', '120x120', '144x144', '152x152', '196x196', '768x768') as $size) {
             $client = static::createClient();
-            $crawler = $client->request('GET', '/apple-touch-icon-'.$size.'.png');
+            $crawler = $client->request('GET', '/appicon-'.$size.'.png');
             $this->assertTrue($client->getResponse()->isSuccessful(), 'apple-touch-icon-'.$size.'.png request unsuccessful');
         }
         // Startup images
