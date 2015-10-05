@@ -8,7 +8,12 @@ define( ['require', 'eve', 'jquery', '../lib/gmaps'], function( require, eve, $ 
 
 	// Create the tower map container, and define variables for other jQuery objects
 	var $towerMap = $( '<div id="towerMap" style="display:none"><div class="map"></div></div>' ),
-		$content, $window, $top;
+		$content = $( '#content' ),
+		$window = $( window ),
+		$top = $( '#top' );
+
+	// Append the tower map container
+	$( document.body ).append( $towerMap );
 
 	// Create the TowerMap object
 	var TowerMap = {
@@ -243,29 +248,16 @@ define( ['require', 'eve', 'jquery', '../lib/gmaps'], function( require, eve, $ 
 		$towerMap.finish();
 	} );
 
-	// Attach to the page in various ways on load
-	$( function() {
-		var $body = $( document.body );
-
-		// Get DOM elements
-		$window = $( window );
-		$top = $( '#top' );
-		$content = $( '#content' );
-
-		// Append the tower map container
-		$body.append( $towerMap );
-
-		// Redo the map if we switch between online and offline
-		$body.on( 'online offline', function() {
-			if( $( '.tower, .association' ).length > 0 ) {
-				TowerMap.set( TowerMap.lastSetOptions );
-			}
-		} );
-
-		// Attach resize event
-		$window.resize( towerMapAdjust );
-		towerMapAdjust();
+	// Redo the map if we switch between online and offline
+	$( document.body ).on( 'online offline', function() {
+		if( $( '.tower, .association' ).length > 0 ) {
+			TowerMap.set( TowerMap.lastSetOptions );
+		}
 	} );
+
+	// Attach resize event
+	$window.resize( towerMapAdjust );
+	towerMapAdjust();
 
 	return TowerMap;
 } );

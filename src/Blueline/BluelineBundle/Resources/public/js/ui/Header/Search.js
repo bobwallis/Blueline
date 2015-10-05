@@ -3,7 +3,10 @@
 // data requests
 
 define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve, $, URL, Page ) {
-	var $top, $content, $search, $q;
+	var $top = $( '#top' ),
+		$content = $( '#content' ),
+		$search = $( '#search' ),
+		$q = $( '#q' );
 
 	var Search = {
 		visible: false,
@@ -40,24 +43,15 @@ define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve
 		}
 	};
 
-	// On DOM ready
-	$( function() {
-		// Initialise jQuery objects
-		$top = $( '#top' );
-		$content = $( '#content' );
-		$search = $( '#search' );
-		$q = $( '#q' );
-
-		// On pages where the search box is hidden to start with, change the CSS so that the box is
-		// sat in the hidden position instead.
-		// Update Search.visible with an initial value
-		if( !$search.is( ':visible' ) ) {
-			Search.visible = false;
-		}
-		else {
-			Search.visible = true;
-		}
-	} );
+	// On pages where the search box is hidden to start with, change the CSS so that the box is
+	// sat in the hidden position instead.
+	// Update Search.visible with an initial value
+	if( !$search.is( ':visible' ) ) {
+		Search.visible = false;
+	}
+	else {
+		Search.visible = true;
+	}
 
 	// Update the visibility of the search bar when a new page is requested
 	eve.on( 'page.request', function( request ) {

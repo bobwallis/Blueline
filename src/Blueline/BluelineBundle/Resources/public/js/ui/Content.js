@@ -1,15 +1,9 @@
 define( ['jquery', 'eve'], function( $, eve ) {
-	var $content,
+	var $content = $( '#content' ),
 		$loading = $( '<div id="loading"/>' ),
 		showLoadingTimeout;
 
-	$( function() {
-		// Get jQuery objects
-		$content = $( '#content' );
-
-		// Append the loading overlay
-		$( document.body ).append( $loading );
-	} );
+	$( document.body ).append( $loading );
 
 	eve.on( 'page.request', function() {
 		// Only clear the current content if the history event isn't a 'keyup' one

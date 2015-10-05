@@ -14,7 +14,7 @@ define( {
 			else if( !!window.FontFace ) {
 				// Use the CSS Font Loading Module if it's defined
 				document.fonts.forEach( function(e) {
-					if( e.family == 'Blueline' ) {
+					if( e.family == 'Blueline' || e.family == '"Blueline"' ) {
 						e.load().then( function() { load( true ); }, function() { load( false ); } );
 					}
 				} );
