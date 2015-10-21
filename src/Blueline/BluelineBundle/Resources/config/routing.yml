@@ -39,7 +39,7 @@ Blueline_iOSicon:
     path: /appicon-{size}.{_format}
     defaults: { _controller: BluelineBundle:Asset:iOSicon }
     requirements:
-        size: 57x57|72x72|76x76|96x96|114x114|120x120|144x144|152x152|180x180|192x192|196x196|768x768
+        size: 57x57|72x72|76x76|96x96|114x114|120x120|144x144|152x152|180x180|192x192|196x196|256x256|384x384|512x512|768x768
         _format: png
 
 Blueline_iOSstartup:
