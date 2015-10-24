@@ -114,6 +114,27 @@ $method_extras = array (
     'ruleoffs' => array('every' => 30, 'from' => 0),
   ),
   array (
+    'title' => 'Shipway Minor',
+    'calls' => array (
+      'Bob' => array('notation' => '34', 'every' => 8, 'from' => 2),
+      'Single' => array('notation' => '3456', 'every' => 8, 'from' => 2),
+    ),
+    'ruleoffs' => array('every' => 8, 'from' => 2),
+  ),
+  array (
+    'title' => 'Shipway Major',
+    'calls' => array (
+      'Bob' => array('notation' => '36', 'every' => 8, 'from' => 2),
+      'Single' => array('notation' => '3678', 'every' => 8, 'from' => 2),
+    ),
+    'ruleoffs' => array('every' => 8, 'from' => 2),
+  ),
+  array (
+    'title' => 'Shipway Royal',
+    'calls' => array (),
+    'ruleoffs' => array('every' => 8, 'from' => 2),
+  ),
+  array (
     'title' => 'Stedman Caters',
     'calls' => array (
       'Bob' => array('notation' => '7', 'every' => 6, 'from' => -3),
