@@ -693,7 +693,7 @@ class Method
             if (!$this->getDifferential() && $stage > 4) {
                 $leadEndChange = array_pop($notationExploded);
                 $postLeadEndChange = array_shift($notationExploded);
-                unset($notationExploded); // Prevent naive reuse
+                unset($notationExploded);
                 $n = PlaceNotation::intToBell($stage);
                 $n_1 = PlaceNotation::intToBell($stage - 1);
                 $n_2 = PlaceNotation::intToBell($stage - 2);
@@ -727,8 +727,14 @@ class Method
                         break;
                     case 2:
                         // Bobs and singles for Grandsire and Single Court like lead ends
-                        if ($leadEndChange == '1' && ($postLeadEndChange == '3' || $postLeadEndChange == $n)) {
-                            $this->calls = array( 'Bob' => '3.1::-1', 'Single' => '3.23::-1' );
+                        if ($stage % 2 == 0) {
+                            if ($leadEndChange == '1'.$n && $postLeadEndChange == '3'.$n) {
+                                $this->calls = array( 'Bob' => '3'.$n.'.1'.$n.'::-1', 'Single' => '3'.$n.'.23'.$n.'::-1' );
+                            }
+                        } else {
+                            if ($leadEndChange == '1' && ($postLeadEndChange == '3' || $postLeadEndChange == $n)) {
+                                $this->calls = array( 'Bob' => '3.1'.$n.'::-1', 'Single' => '3.23::-1' );
+                            }
                         }
                         break;
                     default:
