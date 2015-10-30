@@ -729,11 +729,11 @@ class Method
                         // Bobs and singles for Grandsire and Single Court like lead ends
                         if ($stage % 2 == 0) {
                             if ($leadEndChange == '1'.$n && $postLeadEndChange == '3'.$n) {
-                                $this->calls = array( 'Bob' => '3'.$n.'.1'.$n.'::-1', 'Single' => '3'.$n.'.23'.$n.'::-1' );
+                                $this->calls = array( 'Bob' => '3'.$n.'.1'.$n.'::-1', 'Single' => '3'.$n.'.123'.$n.'::-1' );
                             }
                         } else {
                             if ($leadEndChange == '1' && ($postLeadEndChange == '3' || $postLeadEndChange == $n)) {
-                                $this->calls = array( 'Bob' => '3.1'.$n.'::-1', 'Single' => '3.23::-1' );
+                                $this->calls = array( 'Bob' => '3.1::-1', 'Single' => '3.123::-1' );
                             }
                         }
                         break;
