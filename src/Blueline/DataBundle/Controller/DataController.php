@@ -14,7 +14,7 @@ class DataController extends Controller
 
         // Set headers
         if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge(129600);
+            $response->setMaxAge(604800);
             $response->setPublic();
         }
         $response->setLastModified(new \DateTime('@'.$this->container->getParameter('database_update')));
@@ -80,7 +80,7 @@ class DataController extends Controller
                                     case 'calls':
                                     case 'ruleOffs':
                                     case 'callingPositions':
-                                        $v = json_encode($v);
+                                        $v = json_encode($v)?: '';
                                         break;
                                 }
                             });
