@@ -148,6 +148,3 @@ fi
 
 # Update source timestamp to refresh caching headers etc
 sed -i -e"s/asset_update: .*/asset_update: `date "+%s"`/" "$d/app/config/parameters.yml"
-
-# Run tests
-"$d/test"
