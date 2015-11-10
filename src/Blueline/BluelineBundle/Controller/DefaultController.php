@@ -24,7 +24,7 @@ class DefaultController extends Controller
     /**
     * @Cache(maxage="21600", public=true, lastModified="asset_update")
     */
-    public function manifestAction()
+    public function manifestAction(Request $request)
     {
         return $this->render('BluelineBundle:Resources:site.manifest.twig');
     }

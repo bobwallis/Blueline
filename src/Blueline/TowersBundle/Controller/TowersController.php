@@ -1,6 +1,7 @@
 <?php
 namespace Blueline\TowersBundle\Controller;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -9,39 +10,19 @@ use Blueline\BluelineBundle\Helpers\Text;
 
 class TowersController extends Controller
 {
+    /**
+    * @Cache(maxage="129600", public=true, lastModified="asset_update")
+    */
     public function welcomeAction(Request $request)
     {
-        $format = $request->getRequestFormat();
-
-        // Create basic response object
-        $response = new Response();
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge(129600);
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($request)) {
-            return $response;
-        }
-
-        return $response = $this->render('BluelineTowersBundle::welcome.'.$format.'.twig', array(), $response);
+        return $response = $this->render('BluelineTowersBundle::welcome.'.$request->getRequestFormat().'.twig');
     }
 
+    /**
+    * @Cache(maxage="129600", public=true, lastModified="database_update")
+    */
     public function searchAction($searchVariables = array(), Request $request)
     {
-        $format = $request->getRequestFormat();
-
-        // Create basic response object
-        $response = new Response();
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge(129600);
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($request)) {
-            return $response;
-        }
-
         $towerRepository = $this->getDoctrine()->getManager()->getRepository('BluelineTowersBundle:Tower');
         $searchVariables = empty($searchVariables) ? Search::requestToSearchVariables($request, array( 'id', 'gridReference', 'postcode', 'country', 'county', 'diocese', 'place', 'dedication', 'note', 'contractor' )) : $searchVariables;
 
@@ -51,23 +32,15 @@ class TowersController extends Controller
         $pageActive = max(1, ceil(($searchVariables['offset']+1)/$searchVariables['count']));
         $pageCount =  max(1, ceil($count / $searchVariables['count']));
 
-        return $this->render('BluelineTowersBundle::search.'.$format.'.twig', compact('searchVariables', 'count', 'pageActive', 'pageCount', 'towers'), $response);
+        return $this->render('BluelineTowersBundle::search.'.$request->getRequestFormat().'.twig', compact('searchVariables', 'count', 'pageActive', 'pageCount', 'towers'));
     }
 
+    /**
+    * @Cache(maxage="129600", public=true, lastModified="database_update")
+    */
     public function viewAction($id, Request $request)
     {
         $format = $request->getRequestFormat();
-
-        // Create basic response object
-        $response = new Response();
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge(129600);
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($request)) {
-            return $response;
-        }
 
         $ids = array_map('strtoupper', explode('|', $id));
 
@@ -123,26 +96,15 @@ class TowersController extends Controller
         }
 
         // Create response
-        return $this->render('BluelineTowersBundle::view.'.$format.'.twig', compact('pageTitle', 'towers', 'nearbyTowers', 'bbox'), $response);
+        return $this->render('BluelineTowersBundle::view.'.$format.'.twig', compact('pageTitle', 'towers', 'nearbyTowers', 'bbox'));
     }
 
-    public function sitemapAction(Request $request)
+    /**
+    * @Cache(maxage="604800", public=true, lastModified="database_update")
+    */
+    public function sitemapAction()
     {
-        $format = $request->getRequestFormat();
-
-        // Create basic response object
-        $response = new Response();
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge(129600);
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($request)) {
-            return $response;
-        }
-
         $towers = $this->getDoctrine()->getManager()->createQuery('SELECT partial t.{id} FROM BluelineTowersBundle:Tower t')->getArrayResult();
-
-        return $this->render('BluelineTowersBundle::sitemap.'.$format.'.twig', compact('towers'), $response);
+        return $this->render('BluelineTowersBundle::sitemap.xml.twig', compact('towers'));
     }
 }

@@ -1,28 +1,20 @@
 <?php
 namespace Blueline\BluelineBundle\Controller;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+* @Cache(maxage="604800", public=true, lastModified="database_update")
+*/
 class DataController extends Controller
 {
     public function tableAction($table, Request $request)
     {
         $container = $this->container;
         $response = new StreamedResponse();
-
-        // Set headers
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge(604800);
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('database_update')));
-        if ($response->isNotModified($request)) {
-            $response->setCallback(function () { echo ''; });
-
-            return $response;
-        }
 
         // Block Dove data
         if ($table == 'towers' || $table == 'towers_associations' || $table == 'towers_oldpks') {

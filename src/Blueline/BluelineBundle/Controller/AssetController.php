@@ -1,36 +1,23 @@
 <?php
 namespace Blueline\BluelineBundle\Controller;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+* @Cache(maxage="604800", public=true, lastModified="asset_update")
+*/
 class AssetController extends Controller
 {
-    private $cacheTime = 604800;
-
     public function fontAction($font, Request $request)
     {
-        $format = $request->getRequestFormat();
-        $fontPath = __DIR__.'/../Resources/public/fonts/'.$font.'.'.$format;
+        $fontPath = __DIR__.'/../Resources/public/fonts/'.$font.'.'.$request->getRequestFormat();
         if (!file_exists($fontPath)) {
             throw $this->createNotFoundException('The font does not exist');
         }
-
-        // Create basic response object
-        $response = new Response();
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge($this->cacheTime);
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($request)) {
-            return $response;
-        }
-
-        $response->setContent(file_get_contents($fontPath));
-
-        return $response;
+        return new Response(file_get_contents($fontPath));
     }
 
     public function faviconAction(Request $request)
@@ -40,18 +27,10 @@ class AssetController extends Controller
 
         // Create basic response object
         $response = new Response();
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge($this->cacheTime);
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($request)) {
-            return $response;
-        }
 
         // Create the image
         switch ($format) {
-            case 'svg' :
+            case 'svg':
                 $response->setContent(file_get_contents(__DIR__.'/../Resources/public/images/favicon.svg'));
                 break;
             case 'png':
@@ -64,7 +43,7 @@ class AssetController extends Controller
                 $image->readImage(__DIR__.'/../Resources/public/images/favicon.svg');
                 $image->scaleImage($size, $size);
                 switch ($format) {
-                    case 'png' :
+                    case 'png':
                         $image->setImageFormat('png32');
                         break;
                     case 'gif':
@@ -102,21 +81,7 @@ class AssetController extends Controller
         $image->setImageFormat('png32');
         $image->stripImage();
 
-        // Create basic response object
-        $response = new Response();
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge($this->cacheTime);
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($request)) {
-            return $response;
-        }
-
-        $response->setContent($image);
-        $image->destroy();
-
-        return $response;
+        return new Response($image);
     }
 
     public function iOSstartupAction($size, $ratio, Request $request)
@@ -134,21 +99,7 @@ class AssetController extends Controller
         $image->setImageFormat('png32');
         $image->stripImage();
 
-        // Create basic response object
-        $response = new Response();
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge($this->cacheTime);
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($request)) {
-            return $response;
-        }
-
-        $response->setContent($image);
-        $image->destroy();
-
-        return $response;
+        return new Response($image);
     }
 
     public function imageAction($image, Request $request)
@@ -181,23 +132,10 @@ class AssetController extends Controller
 
     private function createImageResponse($request, $imagePath, $format, $width = null, $height = null)
     {
-        // Create basic response object
-        $response = new Response();
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge($this->cacheTime);
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($request)) {
-            return $response;
-        }
-
         // Check we actually need to convert
         $pathInfo = pathinfo($imagePath);
         if ($pathInfo['extension'] == $format) {
-            $response->setContent(file_get_contents($imagePath));
-
-            return $response;
+            return new Response(file_get_contents($imagePath));
         }
 
         // Output the image
@@ -212,32 +150,26 @@ class AssetController extends Controller
         }
         $image->stripImage();
         switch ($format) {
-            case 'svg' :
+            case 'svg':
                 $image->setImageFormat('svg');
-                $response->setContent($image);
                 break;
             case 'png':
                 $image->setImageFormat('png32');
-                $response->setContent($image);
                 break;
             case 'gif':
                 $image->setImageFormat('gif');
-                $response->setContent($image);
                 break;
             case 'jpg':
                 $image->setImageFormat('jpeg');
                 $image->setCompression(\Imagick::COMPRESSION_JPEG);
                 $image->setImageCompressionQuality(90);
                 $image->setImageFormat('jpeg');
-                $response->setContent($image);
                 break;
             case 'bmp':
                 $image->setImageFormat('bmp');
-                $response->setContent($image);
                 break;
         }
-        $image->destroy();
 
-        return $response;
+        return new Response($image);
     }
 }

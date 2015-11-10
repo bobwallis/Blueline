@@ -1,6 +1,7 @@
 <?php
 namespace Blueline\AssociationsBundle\Controller;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -9,39 +10,19 @@ use Blueline\BluelineBundle\Helpers\Text;
 
 class AssociationsController extends Controller
 {
+    /**
+    * @Cache(maxage="129600", public=true, lastModified="asset_update")
+    */
     public function welcomeAction(Request $request)
     {
-        $format = $request->getRequestFormat();
-
-        // Create basic response object
-        $response = new Response();
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge(129600);
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($request)) {
-            return $response;
-        }
-
-        return $this->render('BluelineAssociationsBundle::welcome.'.$format.'.twig', array(), $response);
+        return $this->render('BluelineAssociationsBundle::welcome.'.$request->getRequestFormat().'.twig');
     }
 
+    /**
+    * @Cache(maxage="129600", public=true, lastModified="database_update")
+    */
     public function searchAction($searchVariables = array(), Request $request)
     {
-        $format = $request->getRequestFormat();
-
-        // Create basic response object
-        $response = new Response();
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge(129600);
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($request)) {
-            return $response;
-        }
-
         $associationsRepository = $this->getDoctrine()->getManager()->getRepository('BluelineAssociationsBundle:Association');
         $searchVariables = empty($searchVariables) ? Search::requestToSearchVariables($request, array( 'id', 'name' )) : $searchVariables;
 
@@ -51,27 +32,19 @@ class AssociationsController extends Controller
         $pageActive = max(1, ceil(($searchVariables['offset']+1)/$searchVariables['count']));
         $pageCount =  max(1, ceil($count / $searchVariables['count']));
 
-        return $this->render('BluelineAssociationsBundle::search.'.$format.'.twig', compact('searchVariables', 'count', 'pageActive', 'pageCount', 'associations'), $response);
+        return $this->render('BluelineAssociationsBundle::search.'.$request->getRequestFormat().'.twig', compact('searchVariables', 'count', 'pageActive', 'pageCount', 'associations'));
     }
 
+    /**
+    * @Cache(maxage="129600", public=true, lastModified="database_update")
+    */
     public function viewAction($id, Request $request)
     {
         $format = $request->getRequestFormat();
-        $associationsRepository = $this->getDoctrine()->getManager()->getRepository('BluelineAssociationsBundle:Association');
-
-        // Create basic response object
-        $response = new Response();
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge(129600);
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($request)) {
-            return $response;
-        }
 
         $ids = explode('|', $id);
 
+        $associationsRepository = $this->getDoctrine()->getManager()->getRepository('BluelineAssociationsBundle:Association');
         $em = $this->getDoctrine()->getManager();
 
         // Check we are at the canonical URL for the content
@@ -117,26 +90,15 @@ class AssociationsController extends Controller
         }
 
         // Create response
-        return $this->render('BluelineAssociationsBundle::view.'.$format.'.twig', compact('pageTitle', 'associations', 'associationsContains', 'bbox'), $response);
+        return $this->render('BluelineAssociationsBundle::view.'.$format.'.twig', compact('pageTitle', 'associations', 'associationsContains', 'bbox'));
     }
 
-    public function sitemapAction(Request $request)
+    /**
+    * @Cache(maxage="604800", public=true, lastModified="database_update")
+    */
+    public function sitemapAction()
     {
-        $format = $request->getRequestFormat();
-
-        // Create basic response object
-        $response = new Response();
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge(129600);
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($request)) {
-            return $response;
-        }
-
         $associations = $this->getDoctrine()->getManager()->createQuery('SELECT a.id FROM BluelineAssociationsBundle:Association a')->getArrayResult();
-
-        return $this->render('BluelineAssociationsBundle::sitemap.'.$format.'.twig', compact('associations'), $response);
+        return $this->render('BluelineAssociationsBundle::sitemap.xml.twig', compact('associations'));
     }
 }

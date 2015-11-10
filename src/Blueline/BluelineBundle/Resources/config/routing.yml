@@ -35,8 +35,10 @@ Blueline_resource:
         _format: json|txt|xml
 
 Blueline_manifest:
-    path: /site.manifest
+    path: /site.{_format}
     defaults: { _controller: BluelineBundle:Default:manifest }
+    requirements:
+        _format: manifest
 
 Blueline_Pages_copyright:
     path: /copyright
