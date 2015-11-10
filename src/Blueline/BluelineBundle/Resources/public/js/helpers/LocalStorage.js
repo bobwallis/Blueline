@@ -20,7 +20,7 @@ define( function() {
 
 		// Clear out the cache if the app's age has changed
 		var cacheAge = LocalStorage.getItem( 'cacheAge' );
-		if( cacheAge == null ) { cacheAge = 0; }
+		if( cacheAge === null ) { cacheAge = 0; }
 		if( LocalStorage.age === 'dev' || cacheAge < LocalStorage.age ) {
 			LocalStorage.clear();
 		}

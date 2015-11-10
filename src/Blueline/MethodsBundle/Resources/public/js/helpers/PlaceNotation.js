@@ -98,10 +98,10 @@ define( function() {
 					// p, q is 3n post lead head (if 3n isn't the start of $match[2] then add it to the start)
 					else if( /^[P-Q]{1}/.test( matches[1] ) ) {
 						if( matches[2].indexOf( '3' ) === 0 ) {
-							notationFull = matches[2];
+							fullNotation = matches[2];
 						}
 						else {
-							notationFull = '3' + stageText + ' ' + matches[2];
+							fullNotation = '3' + stageText + ' ' + matches[2];
 						}
 					}
 					// r, s is n post lead head
@@ -109,10 +109,10 @@ define( function() {
 					// Let me know if you know!
 					//else {
 					//	if( matches[2].indexOf( 'x' ) === 0 ) {
-					//		notationFull = matches[2];
+					//		fullNotation = matches[2];
 					//	}
 					//	else {
-					//		notationFull = 'x' + matches[2];
+					//		fullNotation = 'x' + matches[2];
 					//	}
 					//}
 				}
@@ -120,19 +120,19 @@ define( function() {
 					// a to f is 3 post lead head (if 3 isn't the start of $match[2] then add it to the start)
 					if( /^[A-F]{1}/.test( matches[1] ) ) {
 						if( matches[2].indexOf( '3' ) === 0 ) {
-							notationFull = matches[2];
+							fullNotation = matches[2];
 						}
 						else {
-							notationFull = '3 ' + matches[2];
+							fullNotation = '3 ' + matches[2];
 						}
 					}
 					// g to m is n post lead head
 					else if( /^[G-M]{1}/.test( matches[1] ) ) {
 						if( matches[2].indexOf( stageText ) === 0 ) {
-							notationFull = matches[2];
+							fullNotation = matches[2];
 						}
 						else {
-							notationFull = stageText + ' ' + matches[2];
+							fullNotation = stageText + ' ' + matches[2];
 						}
 					}
 					// p, q is 12n

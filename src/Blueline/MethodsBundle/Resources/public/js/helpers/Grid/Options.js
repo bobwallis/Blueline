@@ -165,7 +165,7 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 		};
 		options.dimensions.canvas.padding.top += options.title.show? parseInt(options.title.font)*1.2 : 0;
 		options.dimensions.canvas.padding.left += options.sideNotation.show? (function() {
-			var longest = 0, text = '', i, width;
+			var longest = 0, text = '', i;
 			for( i = 0; i < options.sideNotation.text.length; ++i ) {
 				if( options.sideNotation.text[i].length > longest ) {
 					longest = options.sideNotation.text[i].length;
