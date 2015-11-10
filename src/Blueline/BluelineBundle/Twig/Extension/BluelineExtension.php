@@ -1,10 +1,9 @@
 <?php
 namespace Blueline\BluelineBundle\Twig\Extension;
 
-use Twig_Extension;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class BluelineExtension extends Twig_Extension
+class BluelineExtension extends \Twig_Extension
 {
     protected $path;
     protected $chromeless;
@@ -33,19 +32,19 @@ class BluelineExtension extends Twig_Extension
     public function getFunctions()
     {
         return array(
-            'count'       => new \Twig_Function_Function('count'),
-            'round'       => new \Twig_Function_Function('round'),
-            'list'        => new \Twig_Function_Method($this, 'toList'),
-            'dayToString' => new \Twig_Function_Method($this, 'dayToString'),
+            new \Twig_SimpleFunction('count', 'count'),
+            new \Twig_SimpleFunction('round', 'round'),
+            new \Twig_SimpleFunction('list', array($this, 'toList')),
+            new \Twig_SimpleFunction('dayToString', 'dayToString'),
         );
     }
 
     public function getFilters()
     {
         return array(
-            'count'          => new \Twig_Filter_Function('count'),
-            'addAccidentals' => new \Twig_Filter_Method($this, 'addAccidentals'),
-            'toArray'        => new \Twig_Filter_Method($this, 'toArray'),
+            new \Twig_SimpleFilter('count', 'count'),
+            new \Twig_SimpleFilter('addAccidentals', array($this, 'addAccidentals')),
+            new \Twig_SimpleFilter('toArray', array($this, 'toArray')),
         );
     }
 
