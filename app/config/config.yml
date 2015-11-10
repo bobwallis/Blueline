@@ -103,3 +103,4 @@ blueline:
 
     # The below parameters will automatically update themselves
     asset_update: %asset_update%
+    database_update: %database_update%

@@ -16,6 +16,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('cache_manifest')->defaultFalse()->end()
                 ->scalarNode('analytics_code')->defaultNull()->end()
                 ->scalarNode('asset_update')->defaultValue('0')->end()
+                ->scalarNode('database_update')->defaultValue('0')->end()
                 ->end();
 
         return $treeBuilder;

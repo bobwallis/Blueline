@@ -1,31 +1,31 @@
 <?php
 namespace Blueline\BluelineBundle\Controller;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+* @Cache(maxage="129600", public=true, lastModified="asset_update")
+*/
 class DefaultController extends Controller
 {
     public function resourceAction($page, Request $request)
     {
-        $format = $request->getRequestFormat();
+        return $this->render('BluelineBundle:Resources:'.$page.'.'.$request->getRequestFormat().'.twig');
+    }
 
-        // Create basic response object
-        $response = new Response();
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            if ($format == 'manifest') {
-                $response->setMaxAge(21600);
-            } else {
-                $response->setMaxAge(129600);
-            }
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($request)) {
-            return $response;
-        }
+    public function pageAction($page, Request $request)
+    {
+        return $this->render('BluelineBundle:Pages:'.$page.'.'.$request->getRequestFormat().'.twig');
+    }
 
-        return $this->render('BluelineBundle:Resources:'.$page.'.'.$format.'.twig', array(), $response);
+    /**
+    * @Cache(maxage="21600", public=true, lastModified="asset_update")
+    */
+    public function manifestAction()
+    {
+        return $this->render('BluelineBundle:Resources:site.manifest.twig');
     }
 }

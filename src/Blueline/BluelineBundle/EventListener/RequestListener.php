@@ -1,10 +1,19 @@
 <?php
-namespace Blueline\BluelineBundle;
+namespace Blueline\BluelineBundle\EventListener;
 
+use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 
 class RequestListener
 {
+
+    private $container;
+
+    public function __construct(Container $container)
+    {
+        $this->container = $container;
+    }
+
     public function onKernelRequest(GetResponseEvent $event)
     {
         // Add some missing mime-types
@@ -19,5 +28,15 @@ class RequestListener
         $event->getRequest()->setFormat('svg', 'image/svg+xml');
         $event->getRequest()->setFormat('woff', 'application/font-woff');
         $event->getRequest()->setFormat('woff2', 'application/font-woff2');
+
+        // Set global parameters that can be used in @Cache annotations
+        if ($this->container->getParameter('kernel.environment') == 'prod') {
+            $event->getRequest()->attributes->set('asset_update', new \DateTime('@'.$this->container->getParameter('asset_update')));
+            $event->getRequest()->attributes->set('database_update', new \DateTime('@'.$this->container->getParameter('database_update')));
+        }
+        else {
+            $event->getRequest()->attributes->set('asset_update', new \DateTime());
+            $event->getRequest()->attributes->set('database_update', new \DateTime());
+        }
     }
 }

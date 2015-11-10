@@ -1,7 +1,3 @@
-BluelinePagesBundle:
-    resource: "@BluelinePagesBundle/Resources/config/routing_pages.yml"
-    prefix:   /
-
 BluelineAssociationsBundle:
     resource: "@BluelineAssociationsBundle/Resources/config/routing_associations.yml"
     prefix:   /associations/
@@ -18,12 +14,36 @@ BluelineServicesBundle:
     resource: "@BluelineServicesBundle/Resources/config/routing_services.yml"
     prefix:   /services/
 
+
+# Static pages
+Blueline_welcome:
+    path: /
+    defaults: { _controller: BluelineBundle:Default:page, page: 'welcome' }
+
+Blueline_Pages_view:
+    path: /{page}.{_format}
+    defaults: { _controller: BluelineBundle:Default:page, _format: 'html' }
+    requirements:
+        page:    about
+        _format: html
+
 Blueline_resource:
     path: /{page}.{_format}
     defaults: { _controller: BluelineBundle:Default:resource }
     requirements:
-        page: robots|humans|site|sitemap|sitemap_root|browserconfig|manifest
-        _format: json|manifest|txt|xml
+        page: robots|humans|sitemap|sitemap_root|browserconfig|manifest
+        _format: json|txt|xml
+
+Blueline_manifest:
+    path: /site.manifest
+    defaults: { _controller: BluelineBundle:Default:manifest }
+
+Blueline_Pages_copyright:
+    path: /copyright
+    defaults:
+        _controller: FrameworkBundle:Redirect:urlRedirect
+        path: /about
+        permanent: true
 
 
 ## Table exports

@@ -18,7 +18,6 @@ class AppKernel extends Kernel
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
             new Hearsay\RequireJSBundle\HearsayRequireJSBundle(),
             new Blueline\BluelineBundle\BluelineBundle(),
-            new Blueline\PagesBundle\BluelinePagesBundle(),
             new Blueline\AssociationsBundle\BluelineAssociationsBundle(),
             new Blueline\MethodsBundle\BluelineMethodsBundle(),
             new Blueline\TowersBundle\BluelineTowersBundle(),
