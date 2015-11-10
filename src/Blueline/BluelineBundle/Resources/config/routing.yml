@@ -14,10 +14,6 @@ BluelineTowersBundle:
     resource: "@BluelineTowersBundle/Resources/config/routing_towers.yml"
     prefix:   /towers/
 
-BluelineDataBundle:
-    resource: "@BluelineDataBundle/Resources/config/routing_data.yml"
-    prefix:   /data/
-
 BluelineServicesBundle:
     resource: "@BluelineServicesBundle/Resources/config/routing_services.yml"
     prefix:   /services/
@@ -29,6 +25,17 @@ Blueline_resource:
         page: robots|humans|site|sitemap|sitemap_root|browserconfig|manifest
         _format: json|manifest|txt|xml
 
+
+## Table exports
+Blueline_Data_table:
+    path: /data/{table}.{_format}
+    defaults: { _controller: BluelineBundle:Data:table }
+    requirements:
+        table: associations|collections|methods|methods_collections|performances|towers|towers_associations|towers_oldpks
+        _format: csv
+
+
+## Image and other resources
 Blueline_favicon:
     path: /favicon.{_format}
     defaults: { _controller: BluelineBundle:Asset:favicon }

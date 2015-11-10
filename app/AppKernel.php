@@ -22,7 +22,6 @@ class AppKernel extends Kernel
             new Blueline\AssociationsBundle\BluelineAssociationsBundle(),
             new Blueline\MethodsBundle\BluelineMethodsBundle(),
             new Blueline\TowersBundle\BluelineTowersBundle(),
-            new Blueline\DataBundle\BluelineDataBundle(),
             new Blueline\ServicesBundle\BluelineServicesBundle(),
         );
 

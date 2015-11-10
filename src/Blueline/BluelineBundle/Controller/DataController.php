@@ -1,5 +1,5 @@
 <?php
-namespace Blueline\DataBundle\Controller;
+namespace Blueline\BluelineBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
