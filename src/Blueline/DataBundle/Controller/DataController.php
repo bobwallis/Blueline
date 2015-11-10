@@ -70,6 +70,7 @@ class DataController extends Controller
                         fputcsv($handle, array_keys($result[0]));
                         do {
                             fputcsv($handle, $result[$i]);
+                            if( $i % 50 == 0 ) { flush(); }
                         } while (isset($result[++$i]));
                         break;
                     case 'methods':
@@ -84,6 +85,7 @@ class DataController extends Controller
                                         break;
                                 }
                             });
+                            if( $i % 50 == 0 ) { flush(); }
                             fputcsv($handle, $result[$i]);
                         } while (isset($result[++$i]));
                         break;
@@ -112,6 +114,7 @@ class DataController extends Controller
                                 }
                             });
                             fputcsv($handle, $result[$i]);
+                            if( $i % 50 == 0 ) { flush(); }
                         } while (isset($result[++$i]));
                         break;
                     case 'towers_associations':
@@ -120,6 +123,7 @@ class DataController extends Controller
                             foreach ($result[$i]['associations'] as $association) {
                                 fputcsv($handle, array($result[$i]['id'], $association['id']));
                             }
+                            if( $i % 50 == 0 ) { flush(); }
                         } while (isset($result[++$i]));
                         break;
                     case 'towers_oldpks':
@@ -128,6 +132,7 @@ class DataController extends Controller
                             foreach ($result[$i]['oldpks'] as $oldpk) {
                                 fputcsv($handle, array($result[$i]['id'], $oldpk['oldpk']));
                             }
+                            if( $i % 50 == 0 ) { flush(); }
                         } while (isset($result[++$i]));
                         break;
                 }
