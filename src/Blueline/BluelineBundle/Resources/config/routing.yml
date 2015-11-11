@@ -24,7 +24,7 @@ Blueline_Pages_view:
     path: /{page}.{_format}
     defaults: { _controller: BluelineBundle:Default:page, _format: 'html' }
     requirements:
-        page:    about
+        page:    about|tutorials
         _format: html
 
 Blueline_resource:
