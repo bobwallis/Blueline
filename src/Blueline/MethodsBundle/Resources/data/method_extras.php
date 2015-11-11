@@ -2,6 +2,14 @@
 
 $method_extras = array (
   array (
+    'title' => 'Antelope Place Doubles',
+    'calls' => array (
+      'Bob' => array('notation' => '145.3.1', 'every' => 10, 'from' => -2),
+      'Single' => array('notation' => '145.3.123', 'every' => 10, 'from' => -2),
+    ),
+    'ruleoffs' => array('every' => 10, 'from' => 1),
+  ),
+  array (
     'title' => 'Banana Doubles',
     'calls' => array (
       'Lead-End Bob' => array('notation' => '125', 'every' => 8, 'from' => 0),
