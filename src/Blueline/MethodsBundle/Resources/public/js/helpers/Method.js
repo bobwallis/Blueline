@@ -99,8 +99,9 @@ define( ['jquery', 'shared/lib/webfont!Blueline', './PlaceNotation', '../../shar
 					}
 
 					// Calculte a good amount of padding to display on either side of the call's notation
-					var padding = Math.max( 1, Math.floor((this.notation.exploded.length-7)/4) ),
-						start = Math.max( 0, (call.from+call.every-1)-padding ), end = Math.min( notationExploded.length, (call.from+call.every+callNotationExploded.length-1)+padding );
+					var padding = Math.max( 2, Math.floor((this.notation.exploded.length-7)/4) ),
+						start = Math.max( 0, (call.from+call.every-1)-padding ),
+						end = Math.min( notationExploded.length, (call.from+call.every+callNotationExploded.length-1)+padding );
 
 					// Parse notation
 					var notationParsed = PlaceNotation.parse( PlaceNotation.implode( notationExploded ), this.stage );
