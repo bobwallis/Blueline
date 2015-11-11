@@ -781,12 +781,27 @@ class Method
      */
     public function getRuleOffs()
     {
-        // Generate rule off from the string if it's there
         if (is_string($this->ruleOffs) && preg_match('/^([^:]*):([^:]*)$/', $this->ruleOffs, $matches) && isset($matches[1], $matches[2])) {
+        // Generate rule off from the string if it's there
             return array( 'every' => intval($matches[1]), 'from' => intval($matches[2]) );
+        } else if ($this->ruleOffs) {
+        // Use the preset value if it's there
+            return $this->ruleOffs;
         } else {
-            return $this->ruleOffs ?: array( 'every' => $this->getLengthOfLead(), 'from' => 0 );
+        // Check for methods similar to Grandsire and offset the rule off by one. TODO: Check that the hunt bells are actually hunting as well as leading one after the other near the lead end. (Hereford D G Bob Doubles is an example false positive)
+            if ($this->getNumberOfHunts() == 2) {
+                $hunts = $this->getHunts();
+                $notationExploded = PlaceNotation::explode($this->getNotationExpanded());
+                $leadEndChange = array_pop($notationExploded);
+                array_shift($notationExploded);
+                $postLeadEndChange2 = array_shift($notationExploded);
+                if ($hunts[0] == 1 && $hunts[1] == 2 && $leadEndChange{0} == '1' && (strlen($leadEndChange) == 1 || $leadEndChange{1} != '2') && $postLeadEndChange2{0} == '1') {
+                    return array( 'every' => $this->getLengthOfLead(), 'from' => 1 );
+                }
+            }
         }
+        // Otherwise assume this...
+        return array( 'every' => $this->getLengthOfLead(), 'from' => 0 );
     }
 
     /**
