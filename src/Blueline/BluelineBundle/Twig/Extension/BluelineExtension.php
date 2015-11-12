@@ -35,7 +35,7 @@ class BluelineExtension extends \Twig_Extension
             new \Twig_SimpleFunction('count', 'count'),
             new \Twig_SimpleFunction('round', 'round'),
             new \Twig_SimpleFunction('list', array($this, 'toList')),
-            new \Twig_SimpleFunction('dayToString', 'dayToString'),
+            new \Twig_SimpleFunction('dayToString', array($this, 'dayToString')),
         );
     }
 
