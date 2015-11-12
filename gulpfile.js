@@ -19,7 +19,7 @@ var amdclean     = require( 'gulp-amdclean' );
 var uglify       = require( 'gulp-uglify' );
 var sourcemaps   = require( 'gulp-sourcemaps' );
 
-gulp.task( 'default', ['appicon', 'favicon', 'maskicon', 'images', 'fonts', 'css', 'js'], function() {} );
+gulp.task( 'default', ['appicon', 'favicon', 'maskicon', 'androidicon', 'images', 'fonts', 'css', 'js'], function() {} );
 
 // App Icon
 gulp.task( 'appicon', ['appicon-png', 'appicon-svg'], function() {} );
@@ -87,6 +87,35 @@ gulp.task( 'maskicon-svg', function() {
 		.pipe( gulp.dest( DEST+'images/' ) );
 } );
 
+
+// Android Icon
+gulp.task( 'androidicon', ['androidicon-png', 'androidicon-svg'], function() {} );
+var androidicon_sizes = [48, 96, 128, 144, 192, 256, 384, 512];
+gulp.task( 'androidicon-png', function() {
+	var fp1 = gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/androidicon.svg' )
+		.pipe( svg2png( 64/192 ) )
+		.pipe( imagemin() )
+		.pipe( gulp.dest( DEST+'images/' ) );
+	var fp2 = es.merge.apply( null, androidicon_sizes.map( function( size ) {
+		return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/androidicon.svg' )
+			.pipe( svg2png( size/192 ) )
+			.pipe( imagemin() )
+			.pipe( rename( function( path ) {
+				path.basename += '-'+size+'x'+size;
+			} ) )
+			.pipe( gulp.dest( DEST+'images/' ) );
+	} ) );
+	return merge( fp1, fp2 );
+} );
+gulp.task( 'androidicon-svg', function() {
+	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/androidicon.svg' )
+		.pipe( imagemin() )
+		.pipe( gulp.dest( DEST+'images/' ) )
+		.pipe( gzip() )
+		.pipe( gulp.dest( DEST+'images/' ) );
+} );
+
+
 // Splash
 gulp.task( 'splash', ['splash-png'], function() {} );
 var splash_sizes = [ [1536,2008], [1496,2048], [768,1004], [748,1024],[1242,2148], [1182,2208], [750,1294],[640,1096], [640,920], [320,460] ];
@@ -108,14 +137,14 @@ gulp.task( 'splash-png', function() {
 // Other images
 gulp.task( 'images', ['images-svg', 'images-png', 'images-gif'], function() {} );
 gulp.task( 'images-svg', function() {
-	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/!(favicon|appicon|splash|maskicon).svg' )
+	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/!(favicon|appicon|splash|maskicon|androidicon).svg' )
 		.pipe( imagemin() )
 		.pipe( gulp.dest( DEST+'images/' ) )
 		.pipe( gzip() )
 		.pipe( gulp.dest( DEST+'images/' ) );
 } );
 gulp.task( 'images-png', function() {
-	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/!(favicon|appicon|splash|maskicon).svg' )
+	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/!(favicon|appicon|splash|maskicon|androidicon).svg' )
 		.pipe( svg2png() )
 		.pipe( imagemin() )
 		.pipe( gulp.dest( DEST+'images/' ) );
@@ -202,7 +231,8 @@ gulp.task( 'watch', function() {
 	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/splash.svg'], ['splash'] );
 	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/appicon.svg'], ['appicon'] );
 	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/favicon.svg'], ['favicon'] );
-	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/!(favicon|appicon|splash|maskicon).svg'], ['images'] );
+	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/androidicon.svg'], ['androidicon'] );
+	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/!(favicon|appicon|splash|maskicon|androidicon).svg'], ['images'] );
 	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/fonts/*'], ['fonts'] );
 	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/css/**/*', 'src/Blueline/AssociationsBundle/Resources/public/css/**/*', 'src/Blueline/MethodsBundle/Resources/public/css/**/*', 'src/Blueline/ServicesBundle/Resources/public/css/**/*', 'src/Blueline/TowersBundle/Resources/public/css/**/*'], ['css'] );
 	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/js/**/*', 'src/Blueline/AssociationsBundle/Resources/public/js/**/*', 'src/Blueline/MethodsBundle/Resources/public/js/**/*', 'src/Blueline/ServicesBundle/Resources/public/js/**/*', 'src/Blueline/TowersBundle/Resources/public/js/**/*'], ['js-main'] );
