@@ -19,7 +19,7 @@ var amdclean     = require( 'gulp-amdclean' );
 var uglify       = require( 'gulp-uglify' );
 var sourcemaps   = require( 'gulp-sourcemaps' );
 
-gulp.task( 'default', ['appicon', 'favicon', 'maskicon', 'androidicon', 'images', 'fonts', 'css', 'js'], function() {} );
+gulp.task( 'default', ['appicon', 'favicon', 'maskicon', 'androidicon', 'splash', 'images', 'fonts', 'css', 'js'], function() {} );
 
 // App Icon
 gulp.task( 'appicon', ['appicon-png', 'appicon-svg'], function() {} );
