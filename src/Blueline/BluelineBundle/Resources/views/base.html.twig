@@ -7,8 +7,9 @@
 		<title>{% block title %}Blueline{% endblock %}</title>
 
 		{# Icons #}
-		<link rel="icon" type="image/svg+xml" sizes="any" href="{{ path( 'Blueline_favicon', { _format: 'svg' } ) }}" />
-		<link rel="alternate icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="{{ path( 'Blueline_favicon', { _format: 'ico' } ) }}" />
+		<link rel="icon" type="image/svg+xml" sizes="any" href="{{ app.request.basepath }}/favicon.svg" />
+		<link rel="alternate icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="{{ app.request.basepath }}/favicon.ico" />
+		<link rel="mask-icon" href="{{ app.request.basepath }}/images/maskicon.svg" color="#002856" />
 
 		{# Web app manifest #}
 		<link rel="manifest" href="{{ path( 'Blueline_resource', { page: 'manifest', _format: 'json' } ) }}" />
@@ -18,7 +19,7 @@
 
 		{# Chrome web app tags #}
 		<meta name="mobile-web-app-capable" content="yes" />
-		<link rel="icon" sizes="192x192" href="{{ path( 'Blueline_iOSicon', { 'size': '192x192', '_format': 'png' } ) }}" />
+		<link rel="icon" sizes="192x192" href="{{ app.request.basepath }}/images/appicon-192x192.png" />
 
 		{# iOS meta tags #}
 		<meta name="apple-mobile-web-app-capable" content="yes" />
@@ -27,30 +28,26 @@
 		<meta name="format-detection" content="telephone=no" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 		{# The number of tags for this is just absurd... #}
-		{% for size in [57, 72, 76, 114, 120, 144, 152, 180] %}
-			<link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="{{ path( 'Blueline_iOSicon', { 'size': size~'x'~size, '_format': 'png' } ) }}" />
+		{% for size in [57, 72, 76, 114, 144, 152, 180] %}
+			<link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="{{ app.request.basepath }}/images/appicon-{{ size }}x{{ size }}.png" />
 		{% endfor %}
-		{# iOS 6 & 7 iPhone 5 #}
-		<link href="{{ path( 'Blueline_iOSstartup', { 'size': '640x1096', ratio: 2, '_format': 'png' } ) }}" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)" rel="apple-touch-startup-image" />
-		{# iOS 6 & 7 iPhone (retina) #}
-		<link href="{{ path( 'Blueline_iOSstartup', { 'size': '640x920', ratio: 2, '_format': 'png' } ) }}" media="(device-width:320px) and (device-height:480px) and (-webkit-device-pixel-ratio:2)" rel="apple-touch-startup-image" />
-		{# iOS 6 iPhone #}
-		<link href="{{ path( 'Blueline_iOSstartup', { 'size': '320x460', ratio: 1, '_format': 'png' } ) }}" media="(device-width:320px) and (device-height:480px) and (-webkit-device-pixel-ratio:1)" rel="apple-touch-startup-image" />
-		{# iOS 6 & 7 iPad (retina, portrait) #}
-		<link href="{{ path( 'Blueline_iOSstartup', { 'size': '1536x2008', ratio: 2, '_format': 'png' } ) }}" media="(device-width:768px) and (device-height:1024px) and (orientation:portrait) and (-webkit-device-pixel-ratio:2)" rel="apple-touch-startup-image" />
-		{# iOS 6 & 7 iPad (retina, landscape) #}
-		<link href="{{ path( 'Blueline_iOSstartup', { 'size': '1496x2048', ratio: 2, '_format': 'png' } ) }}" media="(device-width:768px) and (device-height:1024px) and (orientation:landscape) and (-webkit-device-pixel-ratio:2)" rel="apple-touch-startup-image" />
-		{# iOS 6 iPad (portrait) #}
-		<link href="{{ path( 'Blueline_iOSstartup', { 'size': '768x1004', ratio: 1, '_format': 'png' } ) }}" media="(device-width:768px) and (device-height:1024px) and (orientation:portrait) and (-webkit-device-pixel-ratio:1)" rel="apple-touch-startup-image" />
-		{# iOS 6 iPad (landscape) #}
-		<link href="{{ path( 'Blueline_iOSstartup', { 'size': '748x1024', ratio: 1, '_format': 'png' } ) }}" media="(device-width:768px) and (device-height:1024px) and (orientation:landscape) and (-webkit-device-pixel-ratio:1)" rel="apple-touch-startup-image" />
+		<link href="{{ app.request.basepath }}/images/splash-1536x2008.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" rel="apple-touch-startup-image" />
+		<link href="{{ app.request.basepath }}/images/splash-1496x2048.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" rel="apple-touch-startup-image" />
+		<link href="{{ app.request.basepath }}/images/splash-768x1004.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 1) and (orientation: portrait)" rel="apple-touch-startup-image" />
+		<link href="{{ app.request.basepath }}/images/splash-748x1024.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 1) and (orientation: landscape)" rel="apple-touch-startup-image" />
+		<link href="{{ app.request.basepath }}/images/splash-1242x2148.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" rel="apple-touch-startup-image" />
+		<link href="{{ app.request.basepath }}/images/splash-1182x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)" rel="apple-touch-startup-image" />
+		<link href="{{ app.request.basepath }}/images/splash-750x1294.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+		<link href="{{ app.request.basepath }}/images/splash-640x1096.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+		<link href="{{ app.request.basepath }}/images/splash-640x920.png" media="(device-width: 320px) and (device-height: 480px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+		<link href="{{ app.request.basepath }}/images/splash-320x460.png" media="(device-width: 320px) and (device-height: 480px) and (-webkit-device-pixel-ratio: 1)" rel="apple-touch-startup-image" />
 
 		{# IE Pinned Sites tags #}
 		<meta name="application-name" content="Blueline" />
 		<meta name="msapplication-navbutton-color" content="#002856" />
 		<meta name="msapplication-starturl" content="{{ app.request.scheme ~  '://' ~ app.request.host ~ path( 'Blueline_welcome' ) }}" />
 		<meta name="msapplication-TileColor" content="#EFE5BD">
-		<meta name="msapplication-TileImage" content="{{ path( 'Blueline_favicon', { size: 144, _format: 'png' } ) }}">
+		<meta name="msapplication-TileImage" content="{{ app.request.basepath }}/images/appicon-144x144.png">
 		<meta name="msapplication-tooltip" content="Blueline - Information for bellringers" />
 		<meta name="msapplication-config" content="{{ path( 'Blueline_resource', { page: 'browserconfig', _format: 'xml' } ) }}" />
 
@@ -62,7 +59,7 @@
 		<meta property="og:description" content="{% block og_description %}Information for bellringers{% endblock %}" />
 		{% if status_code is not defined %}<meta property="og:url" content="{{ url( app.request.attributes.get( '_route' ), app.request.attributes.get( '_route_params' ) ) }}" />{% endif %}
 		<meta property="og:type" content="{% block og_type %}website{% endblock %}" />
-		<meta property="og:image" content="{% block og_image %}{{ url( 'Blueline_iOSicon', { 'size': '144x144', '_format': 'png' } ) }}{% endblock %}" />
+		<meta property="og:image" content="{% block og_image %}{{ app.request.basepath }}/images/appicon-144x144.png{% endblock %}" />
 		<meta property="og:site_name" content="Blueline" />
 
 		{# oEmbed tags #}
@@ -73,21 +70,9 @@
 		<link rel="stylesheet" media="print" href="{{ app.request.basepath }}/css/print.css" />
 		<!--[if lt IE 9]><link rel="stylesheet" href="{{ app.request.basepath }}/css/old_ie.css" /><![endif]-->
 
-		{# HTML5 Shiv #}
-		{% javascripts '@html5shiv' '@BluelineBundle/Resources/public/js/helpers/Array.js' output="js/old_ie.js" filter="?closure" %}
-			<!--[if lt IE 9]><script src="{{ asset_url }}"></script><![endif]-->
-		{% endjavascripts %}
-
-		{#  Load RequireJS/Modernizr and start.js (this is a little bit fiddly because you don't seem to be able to optmize both the RequireJS modules and RequireJS itself at the same time using the usual method) #}
-		{% set mainModuleURL = '' %}
-		{% javascripts '@BluelineBundle/Resources/public/js/main.js' output="js/main.js" filter='?requirejs' %}
-			{% set mainModuleURL = asset_url %}
-		{% endjavascripts %}
-
-		{% javascripts '@BluelineBundle/Resources/public/js/lib/modernizr.js' '%kernel.root_dir%/Resources/public/js/require.js' output="js/modreq.js" filter="?closure" %}
-			<script>var require={{ require_js.config|json_encode|raw }};</script>
-			<script data-main="{{ mainModuleURL }}" src="{{ asset_url }}"></script>
-		{% endjavascripts %}
+		{# JavaScript #}
+		<!--[if lt IE 9]><script src="{{ app.request.basepath }}/js/old_ie.js"></script><![endif]-->
+		<script src="{{ app.request.basepath }}/js/main.js" async></script>
 
 		{# Analytics code #}
 		{% if analytics_code is not empty %}

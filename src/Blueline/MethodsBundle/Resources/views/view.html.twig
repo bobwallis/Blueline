@@ -85,8 +85,7 @@
 		<div id="method_numbers_{{ loop.index }}" class="numbers"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 1, 'style': 'numbers' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
 		<div id="method_line_{{ loop.index }}" class="line"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 1, 'style': 'line' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
 		<div id="method_grid_{{ loop.index }}" class="grid"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 1, 'style': 'grid' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
-		{% autoescape false %}
-		<script>require(['methods/ui/MethodView'],function(a){new a({{ {
+		<div class="MethodView" data-set="{{ {
 			id: loop.index,
 			numbersContainer: '#method_numbers_'~loop.index,
 			lineContainer: '#method_line_'~loop.index,
@@ -96,8 +95,7 @@
 			calls: method.calls|default(false),
 			callingPositions: method.callingPositions|default(false),
 			ruleOffs: method.ruleOffs
-		}|json_encode|raw }});});</script>
-		{% endautoescape %}
+		}|json_encode() }}"></div>
 	</section>
 {% endfor %}
 {% endblock %}

@@ -1,4 +1,4 @@
-define( ['jquery', '../helpers/Method',  '../helpers/Grid', '../helpers/PlaceNotation'], function( $, Method, MethodGrid, PlaceNotation ) {
+define( ['jquery', 'eve', 'Modernizr', 'shared/lib/webfont', '../helpers/Method',  '../helpers/Grid', '../helpers/PlaceNotation'], function( $, eve, Modernizr, webfont, Method, MethodGrid, PlaceNotation ) {
 	// Display messages if canvas is not supported
 	if( !Modernizr.canvas ) {
 		return function( options ) {
@@ -85,6 +85,17 @@ define( ['jquery', '../helpers/Method',  '../helpers/Grid', '../helpers/PlaceNot
 
 		return this;
 	};
+
+	// Check and listen for new MethodView requests
+	var checkForNewSettings = function() {
+		webfont( function() {
+			$( '.MethodView' ).each( function( i, e ) {
+				new MethodView( $(e).data('set') );
+			} );
+		} );
+	};
+	eve.on( 'page.loaded', checkForNewSettings );
+	$(checkForNewSettings);
 
 	return MethodView;
 } );

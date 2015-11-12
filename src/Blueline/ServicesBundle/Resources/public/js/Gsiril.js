@@ -1,4 +1,4 @@
-define( ['jquery', '../shared/helpers/URL', './GsirilTextarea'], function( $, URL ) {
+define( ['jquery', 'eve', 'Modernizr', '../shared/helpers/URL', './GsirilTextarea'], function( $, eve, Modernizr, URL ) {
 	var GSiril = {
 		init: function() {
 			var gsirilWorker,
@@ -11,17 +11,12 @@ define( ['jquery', '../shared/helpers/URL', './GsirilTextarea'], function( $, UR
 			window.setTimeout( function() { $gsiril_input.gsirilTextarea(); }, 10 );
 
 			// Hide the syntax highlighting if the browser doesn't support pointer-events on HTML
-			var browserSupportsPointerEvents = (function() {
-				var style = document.createElement('a').style;
-				style.cssText = 'pointer-events:auto';
-				return style.pointerEvents === 'auto';
-			})();
-			if( !browserSupportsPointerEvents ) {
+			if( !Modernizr.csspointerevents ) {
 				$( 'pre.expanding-clone' ).css( 'visibility', 'hidden' );
 			}
 
 			// Create the web worker
-			gsirilWorker = new Worker( URL.baseURL+'js/gsiril.worker.js' );
+			gsirilWorker = new Worker( URL.baseResourceURL+'js/gsiril.worker.js' );
 			gsirilWorker.onmessage = function( e ) {
 				if(typeof e.data.output == 'string' ) {
 					$gsiril_output.append(e.data.output+"\n");
@@ -53,6 +48,15 @@ define( ['jquery', '../shared/helpers/URL', './GsirilTextarea'], function( $, UR
 			} );
 		}
 	};
+
+	// Initialise when required
+	var checkForInitRequired = function() {
+		if( $( '.gsiril' ).length > 0 ) {
+			GSiril.init();
+		}
+	};
+	eve.on( 'page.loaded', checkForInitRequired );
+	$( checkForInitRequired );
 
 	return GSiril;
 } );

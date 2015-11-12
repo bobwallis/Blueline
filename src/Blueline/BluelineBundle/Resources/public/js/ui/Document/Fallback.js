@@ -1,7 +1,7 @@
 // In general, we rely on the browser's own fallback mechanisms, and use progressive enhancement.
 // In some cases though, a modern browser feature is so important to the UI that having it missing
 // is a problem. This file will fix such problems.
-define( ['jquery', '../../helpers/URL'], function( $, URL ) {
+define( ['jquery', 'Modernizr', '../../helpers/URL'], function( $, Modernizr, URL ) {
 	$( function() {
 		// PNG background images instead of SVG where the browser doesn't support SVG
 		if( !Modernizr.svg ) {

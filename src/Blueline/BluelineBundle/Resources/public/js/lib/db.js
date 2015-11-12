@@ -1,7 +1,7 @@
 (function ( window ) {
     'use strict';
     var db;
-    if( Modernizr.indexeddb ) {
+    if( window['Modernizr'].indexeddb ) {
         var indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.oIndexedDB || window.msIndexedDB,
             IDBDatabase = window.IDBDatabase || window.webkitIDBDatabase,
             IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange,

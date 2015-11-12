@@ -1,6 +1,6 @@
 // This module manages the retrieval and caching of page content and emits the page.* global events
 
-define( ['eve', 'jquery', './Page/Cache', '../helpers/URL'], function ( eve, $, Cache, URL ) {
+define( ['eve', 'jquery', 'Modernizr', './Page/Cache', '../helpers/URL'], function ( eve, $, Modernizr, Cache, URL ) {
 	var mostRecentRequest = URL.currentURL;
 
 	// Exposed API

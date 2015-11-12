@@ -1,3 +1,7 @@
+// Normalize
+@import 'lib/normalize.css';
+@import 'lib/normalize-opentype.css';
+
 // Layout
 @standaloneStatusBarHeight: 18px;
 @headerHeight: 35px;
@@ -71,6 +75,9 @@ a {
 	&::selection {
 		text-shadow: none;
 	}
+}
+.sf-toolbar a {
+	text-shadow: none !important;
 }
 
 // Selection styles

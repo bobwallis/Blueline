@@ -1,7 +1,7 @@
 /**
  * Manages creation of canvas elements to cope with different pixel ratios
  */
-define( function() {
+define( ['Modernizr'], function(Modernizr) {
 	if( Modernizr.canvas ) {
 		var Canvas = function( options ) {
 			// Create canvas element

@@ -16,9 +16,6 @@ monolog:
             path:  %kernel.logs_dir%/%kernel.environment%.log
             level: warning
 
-assetic:
-    use_controller: true
-
 blueline:
     cache_manifest: false
     analytics_code: false

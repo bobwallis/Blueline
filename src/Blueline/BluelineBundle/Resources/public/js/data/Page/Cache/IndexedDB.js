@@ -1,4 +1,4 @@
-define( ['../../../lib/db', './Null', '../../../helpers/LocalStorage'], function( db, Null, LocalStorage ) {
+define( ['Modernizr', '../../../lib/db', './Null', '../../../helpers/LocalStorage'], function( Modernizr, db, Null, LocalStorage ) {
 	var IndexedDB;
 	if( Modernizr.indexeddb ) {
 		// The IndexedDB API is a bit of a moving target. Once it stablises it would be sensible to trim

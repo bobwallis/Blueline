@@ -17,7 +17,3 @@ monolog:
             type:  stream
             path:  %kernel.logs_dir%/%kernel.environment%.log
             level: error
-
-hearsay_require_js:
-    optimizer:
-        hide_unoptimized_assets: true

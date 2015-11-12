@@ -1,7 +1,7 @@
 /*
  * Manages the tower map
  */
-define( ['require', 'eve', 'jquery', '../lib/gmaps'], function( require, eve, $ ) {
+define( ['eve', 'jquery', '../lib/gmaps'], function( eve, $, GMaps ) {
 	// Constants
 	/** @const */ var FUSION_TABLE_ID = '1pw4eqhq_7JBmxhup5Z7KrPKFZBs5P70y7K3Azg';
 	/** @const */ var SMALL_MAP_LIMIT = 700;
@@ -80,8 +80,8 @@ define( ['require', 'eve', 'jquery', '../lib/gmaps'], function( require, eve, $ 
 					return;
 				}
 
-				// Otherwise display the normal map
-				require( ['../../shared/lib/gmaps!'], function() {
+				// Otherwise display the normal map (after lazy loadin the Google Maps API)
+				GMaps( function() {
 					// Create Google options from passed numbers
 					if( typeof options.center === 'object' && typeof options.center.length === 'number' ) {
 						options.center = new google.maps.LatLng( options.center[0], options.center[1] );
@@ -236,6 +236,12 @@ define( ['require', 'eve', 'jquery', '../lib/gmaps'], function( require, eve, $ 
 			}
 		}
 	};
+	var checkForNewSettings = function() {
+		var $Map = $( '.Map:last' );
+		if( $Map.length > 0 ) {
+			TowerMap.set( $Map.data( 'set' ) );
+		}
+	};
 
 	// Hide the tower map if a page is requested that it isn't needed for
 	eve.on( 'page.request', function( request ) {
@@ -243,9 +249,10 @@ define( ['require', 'eve', 'jquery', '../lib/gmaps'], function( require, eve, $ 
 			TowerMap.hide();
 		}
 	} );
-	// Accelerate animations when loaded
+	// Accelerate animations and check for new settings when loaded
 	eve.on( 'page.loaded', function() {
 		$towerMap.finish();
+		checkForNewSettings();
 	} );
 
 	// Redo the map if we switch between online and offline
@@ -257,7 +264,10 @@ define( ['require', 'eve', 'jquery', '../lib/gmaps'], function( require, eve, $ 
 
 	// Attach resize event
 	$window.resize( towerMapAdjust );
+
+	// Initial run
 	towerMapAdjust();
+	checkForNewSettings();
 
 	return TowerMap;
 } );

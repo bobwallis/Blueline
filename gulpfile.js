@@ -1,0 +1,210 @@
+var DEST = './web/';
+
+var gulp         = require( 'gulp' );
+var plumber      = require( 'gulp-plumber' );
+var rename       = require( 'gulp-rename' );
+var concat       = require( 'gulp-concat');
+var flatten      = require( 'gulp-flatten' );
+var gzip         = require( 'gulp-gzip' );
+var es           = require( 'event-stream' );
+var merge        = require( 'merge-stream' );
+var svg2png      = require( 'gulp-svg2png' );
+var less         = require( 'gulp-less' );
+var autoprefixer = require( 'gulp-autoprefixer' );
+var minifyCss    = require( 'gulp-minify-css' );
+var imagemin     = require( 'gulp-imagemin' );
+var imageresize  = require( 'gulp-image-resize' );
+var requirejs    = require( 'gulp-requirejs' );
+var amdclean     = require( 'gulp-amdclean' );
+var uglify       = require( 'gulp-uglify' );
+var sourcemaps   = require( 'gulp-sourcemaps' );
+
+gulp.task( 'default', ['appicon', 'favicon', 'maskicon', 'images', 'fonts', 'css', 'js'], function() {} );
+
+// App Icon
+gulp.task( 'appicon', ['appicon-png', 'appicon-svg'], function() {} );
+var appicon_sizes = [57, 72, 76, 96, 114, 120, 144, 152, 180, 192, 196, 256, 384, 512, 768];
+gulp.task( 'appicon-png', function() {
+	var tasks = appicon_sizes.map( function( size ) {
+		return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/appicon.svg' )
+			.pipe( svg2png( size/63 ) )
+			.pipe( imagemin() )
+			.pipe( rename( function( path ) {
+				path.basename += '-'+size+'x'+size;
+			} ) )
+			.pipe( gulp.dest( DEST+'images/' ) );
+	} );
+	return es.merge.apply( null, tasks );
+} );
+gulp.task( 'appicon-svg', function() {
+	return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/appicon.svg' )
+		.pipe( imagemin() )
+		.pipe( gulp.dest( DEST+'images/' ) )
+		.pipe( gzip() )
+		.pipe( gulp.dest( DEST+'images/' ) );
+} );
+
+
+// Favicon
+gulp.task( 'favicon', ['favicon-png', 'favicon-ico', 'favicon-svg'], function() {} );
+var favicon_sizes = [70, 144, 150, 310];
+gulp.task( 'favicon-ico', function() {
+	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/favicon.ico' )
+		.pipe( gulp.dest( DEST ) );
+} );
+gulp.task( 'favicon-png', function() {
+	var fp1 = gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/favicon.svg' )
+		.pipe( svg2png( 64/63 ) )
+		.pipe( imagemin() )
+		.pipe( gulp.dest( DEST+'images/' ) );
+	var fp2 = es.merge.apply( null, favicon_sizes.map( function( size ) {
+		return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/favicon.svg' )
+			.pipe( svg2png( size/63 ) )
+			.pipe( imagemin() )
+			.pipe( rename( function( path ) {
+				path.basename += '-'+size+'x'+size;
+			} ) )
+			.pipe( gulp.dest( DEST+'images/' ) );
+	} ) );
+	return merge( fp1, fp2 );
+} );
+gulp.task( 'favicon-svg', function() {
+	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/favicon.svg' )
+		.pipe( imagemin() )
+		.pipe( gulp.dest( DEST ) )
+		.pipe( gzip() )
+		.pipe( gulp.dest( DEST ) );
+} );
+
+
+// Mask icon
+gulp.task( 'maskicon', ['maskicon-svg'], function() {} );
+gulp.task( 'maskicon-svg', function() {
+	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/maskicon.svg' )
+		.pipe( imagemin() )
+		.pipe( gulp.dest( DEST+'images/' ) )
+		.pipe( gzip() )
+		.pipe( gulp.dest( DEST+'images/' ) );
+} );
+
+// Splash
+gulp.task( 'splash', ['splash-png'], function() {} );
+var splash_sizes = [ [1536,2008], [1496,2048], [768,1004], [748,1024],[1242,2148], [1182,2208], [750,1294],[640,1096], [640,920], [320,460] ];
+gulp.task( 'splash-png', function() {
+	var tasks = splash_sizes.map( function( size ) {
+		return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/splash.svg' )
+			.pipe( svg2png() )
+			.pipe( imageresize( { width: size[0], height: size[1], upscale: true, crop: true } ) )
+			.pipe( imagemin() )
+			.pipe( rename( function( path ) {
+				path.basename += '-'+size[0]+'x'+size[1];
+			} ) )
+			.pipe( gulp.dest( DEST+'images/' ) );
+	} );
+	return es.merge.apply( null, tasks );
+} );
+
+
+// Other images
+gulp.task( 'images', ['images-svg', 'images-png', 'images-gif'], function() {} );
+gulp.task( 'images-svg', function() {
+	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/!(favicon|appicon|splash|maskicon).svg' )
+		.pipe( imagemin() )
+		.pipe( gulp.dest( DEST+'images/' ) )
+		.pipe( gzip() )
+		.pipe( gulp.dest( DEST+'images/' ) );
+} );
+gulp.task( 'images-png', function() {
+	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/!(favicon|appicon|splash|maskicon).svg' )
+		.pipe( svg2png() )
+		.pipe( imagemin() )
+		.pipe( gulp.dest( DEST+'images/' ) );
+} );
+gulp.task( 'images-gif', function() {
+	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/*.gif' )
+		.pipe( imagemin() )
+		.pipe( gulp.dest( DEST+'images/' ) );
+} );
+
+
+// Fonts
+gulp.task( 'fonts', function() {
+	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/fonts/*' )
+		.pipe( gulp.dest( DEST+'fonts/' ) );
+} );
+
+
+// Javascripts
+gulp.task( 'js', ['js-old_ie', 'js-main', 'js-workers'], function() {} );
+var old_ie_js_sources = ['src/Blueline/BluelineBundle/Resources/public/js/helpers/Array.js', 'src/Blueline/BluelineBundle/Resources/public/js/lib/html5shiv.js'];
+gulp.task( 'js-old_ie', function() {
+	gulp.src( old_ie_js_sources )
+		.pipe( concat( 'old_ie.js' ) )
+		.pipe( uglify() )
+		.pipe( gulp.dest( DEST+'js/' ) )
+		.pipe( gzip() )
+		.pipe( gulp.dest( DEST+'js/' ) );
+
+} );
+gulp.task( 'js-main', function() {
+	requirejs( {
+		baseUrl: './',
+		include: 'shared/main',
+		paths: {
+			shared: 'src/Blueline/BluelineBundle/Resources/public/js/',
+			methods: 'src/Blueline/MethodsBundle/Resources/public/js/',
+			towers: 'src/Blueline/TowersBundle/Resources/public/js/',
+			services: 'src/Blueline/ServicesBundle/Resources/public/js/',
+			jquery: 'src/Blueline/BluelineBundle/Resources/public/js/lib/jquery',
+			eve: 'src/Blueline/BluelineBundle/Resources/public/js/lib/eve',
+			Modernizr: 'src/Blueline/BluelineBundle/Resources/public/js/lib/modernizr'
+		},
+		shim: {
+			Modernizr: {
+				exports: 'Modernizr'
+			}
+		},
+		optimize: 'none',
+		out: 'main.js'
+    } )
+		.pipe( amdclean.gulp() )
+		.pipe( sourcemaps.init() )
+		.pipe( uglify() )
+		.pipe( sourcemaps.write( '.' ) )
+		.pipe( gulp.dest( DEST+'js/' ) )
+		.pipe( gzip() )
+		.pipe( gulp.dest( DEST+'js/' ) );
+} );
+gulp.task( 'js-workers', function() {
+	gulp.src( ['src/Blueline/ServicesBundle/Resources/public/js/gsiril.worker.js'] )
+		.pipe( gulp.dest( DEST+'js/' ) )
+		.pipe( gzip() )
+		.pipe( gulp.dest( DEST+'js/' ) );
+} );
+
+
+// CSS
+gulp.task( 'css', function() {
+	var all = gulp.src( ['src/Blueline/BluelineBundle/Resources/public/css/all.less', 'src/Blueline/BluelineBundle/Resources/public/css/print.less', 'src/Blueline/BluelineBundle/Resources/public/css/old_ie.less'] )
+		.pipe( less() )
+		.pipe( autoprefixer( { browsers: ['> 5%'] } ) )
+		.pipe( sourcemaps.init() )
+		.pipe( minifyCss( { keepSpecialComments: 0 } ) )
+		.pipe( sourcemaps.write( '.' ) )
+		.pipe( gulp.dest( DEST+'css/' ) )
+		.pipe( gzip() )
+		.pipe( gulp.dest( DEST+'css/' ) );
+} );
+
+
+// Watch task
+gulp.task( 'watch', function() {
+	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/splash.svg'], ['splash'] );
+	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/appicon.svg'], ['appicon'] );
+	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/favicon.svg'], ['favicon'] );
+	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/!(favicon|appicon|splash|maskicon).svg'], ['images'] );
+	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/fonts/*'], ['fonts'] );
+	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/css/**/*', 'src/Blueline/AssociationsBundle/Resources/public/css/**/*', 'src/Blueline/MethodsBundle/Resources/public/css/**/*', 'src/Blueline/ServicesBundle/Resources/public/css/**/*', 'src/Blueline/TowersBundle/Resources/public/css/**/*'], ['css'] );
+	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/js/**/*', 'src/Blueline/AssociationsBundle/Resources/public/js/**/*', 'src/Blueline/MethodsBundle/Resources/public/js/**/*', 'src/Blueline/ServicesBundle/Resources/public/js/**/*', 'src/Blueline/TowersBundle/Resources/public/js/**/*'], ['js-main'] );
+	gulp.watch( old_ie_js_sources, ['js-old_ie'] );
+} );

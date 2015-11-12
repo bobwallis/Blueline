@@ -9,6 +9,7 @@ define( ['jquery'], function( $ ) {
 	var URL = {
 		// Store the base URL of the app (useful when generating links)
 		baseURL: '',
+		baseResourceURL: '',
 		currentURL: location.href,
 		// Function to absolutise a link
 		absolutise: function( href ) {
@@ -49,6 +50,10 @@ define( ['jquery'], function( $ ) {
 
 	// Initialise
 	URL.baseURL = location.protocol+'//'+location.host + $( '#top a:first' ).attr( 'href' );
+	if ( URL.baseURL.substr(-1) != '/' ) {
+		URL.baseURL += '/';
+	}
+	URL.baseResourceURL = location.protocol+'//'+location.host + $( '#top a:first' ).attr( 'href' ).replace( 'app_dev.php/', '' );
 	if ( URL.baseURL.substr(-1) != '/' ) {
 		URL.baseURL += '/';
 	}

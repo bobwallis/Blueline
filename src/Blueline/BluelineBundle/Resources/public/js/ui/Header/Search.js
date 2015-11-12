@@ -2,7 +2,7 @@
 // It also receives user input into the search box, and issues appropriate
 // data requests
 
-define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve, $, URL, Page ) {
+define( ['eve', 'jquery', 'Modernizr', '../../helpers/URL', '../../data/Page'], function( eve, $, Moernizr, URL, Page ) {
 	var $top = $( '#top' ),
 		$content = $( '#content' ),
 		$search = $( '#search' ),
@@ -69,6 +69,7 @@ define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve
 	} );
 
 	if( Modernizr.history ) {
+		// Capture keypresses and load in the page without a refresh if the browser supports it
 		$(document).on( 'keyup cut paste', '#q, #q2', function( e ) {
 			var $input = $( e.target ),
 				$form = $input.closest( 'form' ),

@@ -85,14 +85,6 @@ else
 	npm install
 fi
 
-# Update node_modules
-echo -e "\n\033[1mUpdating /bower_components\033[0m"
-if [[ $DEV = true ]]; then
-	bower update
-else
-	bower install
-fi
-
 # Clear cache
 echo -e "\n\033[1mClearing Symfony cache\033[0m"
 php "$d/app/console" cache:clear --env=prod
@@ -109,15 +101,15 @@ php "$d/app/console" doctrine:schema:validate
 
 
 # Rebuild web assets
-echo -e "\n\033[1mRebuilding CSS and JS assets\033[0m"
+echo -e "\n\033[1mRebuilding image, CSS and JS assets\033[0m"
 rm -rf "$d/web/css"
+rm -rf "$d/web/images"
 rm -rf "$d/web/js"
 rm -rf "$d/web/fonts"
 rm -rf "$d/web/components"
 rm -rf "$d/web/bundles"
 rm -rf "$d/web/assetic"
-php "$d/app/console" assetic:dump --env=prod --no-debug
-grunt
+gulp
 
 
 if [[ $CCCBRDATA = true ]]

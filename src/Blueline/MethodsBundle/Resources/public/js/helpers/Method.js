@@ -1,4 +1,4 @@
-define( ['jquery', 'shared/lib/webfont!Blueline', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'], function( $, webFontLoaded, PlaceNotation, MeasureCanvasText ) {
+define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'], function( $, PlaceNotation, MeasureCanvasText ) {
 
 	// Helps generate options for Grid.js to display full plain courses and calls for a particular method
 
@@ -247,5 +247,6 @@ define( ['jquery', 'shared/lib/webfont!Blueline', './PlaceNotation', '../../shar
 
 		return this;
 	};
+
 	return Method;
 } );

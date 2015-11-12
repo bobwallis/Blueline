@@ -1,4 +1,4 @@
-define( ['./Null', '../../../helpers/LocalStorage'], function( Null, LocalStorage ) {
+define( ['Modernizr', './Null', '../../../helpers/LocalStorage'], function( Modernizr, Null, LocalStorage ) {
 	var WebSQL, emptyFunction = function(){}, db;
 
 	// Function to revert the cache back to the null version (use if setup fails)

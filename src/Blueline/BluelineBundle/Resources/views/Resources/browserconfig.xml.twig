@@ -2,10 +2,10 @@
 <browserconfig>
  <msapplication>
   <tile>
-   <square70x70logo src="{{ path( 'Blueline_favicon', { size: 70, _format: 'png' } ) }}"/>
-   <square150x150logo src="{{ path( 'Blueline_favicon', { size: 150, _format: 'png' } ) }}"/>
-   <square310x310logo src="{{ path( 'Blueline_favicon', { size: 310, _format: 'png' } ) }}"/>
-   <TileImage src="{{ path( 'Blueline_favicon', { size: 150, _format: 'png' } ) }}"/>
+   <square70x70logo src="{{ app.request.basepath }}/images/favicon-70x70.png"/>
+   <square150x150logo src="{{ app.request.basepath }}/images/favicon-150x150.png"/>
+   <square310x310logo src="{{ app.request.basepath }}/images/favicon-310x310.png"/>
+   <TileImage src="{{ app.request.basepath }}/images/favicon-150x150.png"/>
    <TileColor>#EFE5BD</TileColor>
   </tile>
  </msapplication>
