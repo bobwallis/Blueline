@@ -43,17 +43,26 @@ page.open( url, function() {
 		sheet.insertRule( '.method .numbers canvas:first-child, .method .line canvas:first-child, .method .grid canvas:first-child { margin-right: 10px !important; }', sheet.cssRules.length);
 		sheet.insertRule( '.method .numbers canvas:last-child, .method .line canvas:last-child, .method .grid canvas:last-child { margin-right: 0 !important; padding-right: 5px !important; }', sheet.cssRules.length);
 	}, section );
-	// Clip the page to ensure we render only the content
-	page.clipRect = {
-		top: 0,
-		left: 0,
-		width: scale*page.evaluate( function( section ) {
-			return $('.method .'+section+' canvas').map( function(i,e) { return $(e).outerWidth(true); } ).toArray().reduce( function( prev, cur ) { return prev + cur; }, 0 );
-		}, section ),
-		height: scale*page.evaluate( function( section ) {
-			return $('.method .'+section+' canvas:first-child').outerHeight( true );
-		}, section )
+	// Check / wait for page load
+	var check = function() {
+		if( page.evaluate( function( section ) { return $('.method .'+section+' canvas').length > 0; }, section ) ) {
+			// Clip the page to ensure we render only the content
+			page.clipRect = {
+				top: 0,
+				left: 0,
+				width: scale*page.evaluate( function( section ) {
+					return $('.method .'+section+' canvas').map( function(i,e) { return $(e).outerWidth(true); } ).toArray().reduce( function( prev, cur ) { return prev + cur; }, 0 );
+				}, section ),
+				height: scale*page.evaluate( function( section ) {
+					return $('.method .'+section+' canvas:first-child').outerHeight( true );
+				}, section )
+			};
+			page.render( '/dev/stdout' );
+			phantom.exit();
+		}
+		else {
+			window.setTimeout( check, 200 );
+		}
 	};
-	page.render( '/dev/stdout' );
-	phantom.exit();
+	check();
 });
