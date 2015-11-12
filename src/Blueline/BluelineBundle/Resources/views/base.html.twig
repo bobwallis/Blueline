@@ -66,13 +66,13 @@
 		{% block oembed %}{% endblock %}
 
 		{# Stylesheets #}
-		<link rel="stylesheet" media="all" href="{{ app.request.basepath }}/css/all.css" />
-		<link rel="stylesheet" media="print" href="{{ app.request.basepath }}/css/print.css" />
-		<!--[if lt IE 9]><link rel="stylesheet" href="{{ app.request.basepath }}/css/old_ie.css" /><![endif]-->
+		<link rel="stylesheet" media="all" href="{{ app.request.basepath }}/css/all.css?v={{ html_age }}" />
+		<link rel="stylesheet" media="print" href="{{ app.request.basepath }}/css/print.css?v={{ html_age }}" />
+		<!--[if lt IE 9]><link rel="stylesheet" href="{{ app.request.basepath }}/css/old_ie.css?v={{ html_age }}" /><![endif]-->
 
 		{# JavaScript #}
-		<!--[if lt IE 9]><script src="{{ app.request.basepath }}/js/old_ie.js"></script><![endif]-->
-		<script src="{{ app.request.basepath }}/js/main.js" async></script>
+		<!--[if lt IE 9]><script src="{{ app.request.basepath }}/js/old_ie.js?v={{ html_age }}"></script><![endif]-->
+		<script src="{{ app.request.basepath }}/js/main.js?v={{ html_age }}" async></script>
 
 		{# Analytics code #}
 		{% if analytics_code is not empty %}

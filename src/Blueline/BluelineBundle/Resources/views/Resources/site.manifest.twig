@@ -1,9 +1,9 @@
 CACHE MANIFEST
 # {{ html_age }}
 CACHE:
-{{ app.request.basepath }}/css/all.css
-{{ app.request.basepath }}/css/print.css
-{{ app.request.basepath }}/js/main.js
+{{ app.request.basepath }}/css/all.css?v={{ html_age }}
+{{ app.request.basepath }}/css/print.css?v={{ html_age }}
+{{ app.request.basepath }}/js/main.js?v={{ html_age }}
 {{ app.request.basepath }}/favicon.ico
 {{ app.request.basepath }}/favicon.svg
 {{ app.request.basepath }}/images/database.svg
