@@ -12,7 +12,10 @@ define( ['jquery', 'eve', 'Modernizr', '../shared/helpers/URL', './GsirilTextare
 
 			// Hide the syntax highlighting if the browser doesn't support pointer-events on HTML
 			if( !Modernizr.csspointerevents ) {
-				$( 'pre.expanding-clone' ).css( 'visibility', 'hidden' );
+				$( 'pre.expanding-clone' ).css( 'visibility', 'hidden' ).hide();
+			}
+			else {
+				$gsiril_input.css( 'color', $gsiril_input.css( 'background-color' ) );
 			}
 
 			// Create the web worker
