@@ -56,16 +56,26 @@ define( ['jquery', 'eve', 'Modernizr', 'shared/lib/webfont', '../helpers/Method'
 			lastDrawnNumberOfColumns = 0;
 		var reDraw = function() {
 			var newNumberOfColumns = setNumberOfColumns(),
-				newScale = (typeof window.devicePixelRatio === 'number')? window.devicePixelRatio : 1;
+				newScale = (typeof window.devicePixelRatio === 'number')? window.devicePixelRatio : 1,
+				widthds, maxWidth;
 			// If the scale has changed redraw everything
 			if( lastDrawnScale !== newScale ) {
 				that.container.numbers.empty().append( numbers_plainCourse.draw(), numbers_calls.map( function(e) { return e.draw(); } ) );
 				that.container.lines.empty().append( lines_plainCourse.draw(), lines_calls.map( function(e) { return e.draw(); } ) );
 				that.container.grid.empty().append( grid_plainCourse.draw(), grid_calls.map( function(e) { return e.draw(); } ) );
 				// Give all the grids the same width
-				var widths = $( 'canvas', that.container.grid ).map( function( i, e ) { return $(e).width(); } ).toArray(),
-					maxWidth = Math.max.apply( Math, widths );
+				widths = $( 'canvas', that.container.grid ).map( function( i, e ) { return $(e).width(); } ).toArray();
+				maxWidth = Math.max.apply( Math, widths );
 				$( 'canvas', that.container.grid ).map( function( i, e ) {
+					$(e).css( 'margin-left', (12 + maxWidth - widths[i])+'px' );
+				} );
+				// Give all the calls the same with on the numbers and line bits
+				widths = $( 'canvas:not(:first)', that.container.numbers ).map( function( i, e ) { return $(e).width(); } ).toArray();
+				maxWidth = Math.max.apply( Math, widths );
+				$( 'canvas:not(:first)', that.container.numbers ).map( function( i, e ) {
+					$(e).css( 'margin-left', (12 + maxWidth - widths[i])+'px' );
+				} );
+				$( 'canvas:not(:first)', that.container.lines ).map( function( i, e ) {
 					$(e).css( 'margin-left', (12 + maxWidth - widths[i])+'px' );
 				} );
 			}
