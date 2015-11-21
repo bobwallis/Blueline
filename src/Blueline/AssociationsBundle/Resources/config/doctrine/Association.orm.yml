@@ -10,7 +10,6 @@ Blueline\AssociationsBundle\Entity\Association:
         name:
             type: string
             length: 255
-            unique: true
         link:
             type: text
         outline:
