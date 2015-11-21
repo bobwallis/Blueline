@@ -381,7 +381,7 @@ $associations = array (
   ),
   54 =>
   array (
-    'id' => 'UL',
+    'id' => 'ULSCR',
     'name' => 'University of London Society',
     'link' => 'http://www.ulscr.org.uk/',
     'outline' => NULL,
