@@ -109,9 +109,10 @@ class ImportTowersCommand extends ContainerAwareCommand
         foreach ($dbIterator as $dbRow) {
             // If the entry found in the database wasn't just imported, remove it
             if (!in_array($dbRow['id'], $importedTowers)) {
+                pg_delete($db, 'performances', array('location_tower_id' => $dbRow['id']));
                 pg_delete($db, 'towers', array('id' => $dbRow['id']));
                 $progress->clear();
-                $output->writeln("\r<comment>".str_pad(" Removed ".$dbRow[0]->getId(), $targetConsoleWidth, ' ').'</comment>');
+                $output->writeln("\r<comment>".str_pad(" Removed ".$dbRow['id'], $targetConsoleWidth, ' ').'</comment>');
                 $progress->display();
             }
             $progress->advance();
