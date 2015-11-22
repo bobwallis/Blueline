@@ -16,8 +16,8 @@
 	<section class="text">
 		{{ header('Methods') }}
 		<div class="wrap">
-			<p>This site contains details of all methods in the <a href="http://www.methods.org.uk/" class="external">Central Council method collections</a> maintained by Tony Smith, and draws blue lines of them.</p>
-			<h2>Search</h2>
+			<h2>Method Library</h2>
+			<p>All methods in the <a href="http://www.methods.org.uk/" class="external">Central Council method collections</a> maintained by Tony Smith are included in the database, and this site will draw blue lines of them for your reference.</p>
 			<p>Search for methods by name/stage using the box. Queries beginning with '/' will be interpreted as a <a href="https://en.wikipedia.org/wiki/Regular_expression" class="external">regular expression</a>.</p>
 			<form id="search_dummy" role="search" action="{{ search_action }}">
 				<div>
@@ -25,6 +25,8 @@
 					<button type="submit" title="Search"><span class="hide">Search</span></button>
 				</div>
 			</form>
+			<h2>Tutorials</h2>
+			<p>I've written some <a href="{{ path( 'Blueline_Pages_view', {page: 'methods/tutorials'} ) }}">interactive method tutorials</a> which you may find useful.</p>
 			<h2>Custom Method</h2>
 			<p>To view a method not in the collections enter the stage and place notation below. Various abbreviated place notation formats are supported.</p>
 			<form id="custom_method" action="{{ path( 'Blueline_Methods_custom_view' ) }}">

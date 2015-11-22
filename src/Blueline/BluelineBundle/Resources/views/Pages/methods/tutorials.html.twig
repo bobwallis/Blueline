@@ -1,7 +1,9 @@
 {% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
 
-{% block title %}Tutorials | {{ parent() }}{% endblock %}
+{% block title %}Tutorials | Methods | {{ parent() }}{% endblock %}
 {% set search = false %}
+
+{% set breadcrumb = { 'title': 'Methods', 'href': path('Blueline_Methods_welcome') } %}
 
 {% block body %}
 	{% from 'BluelineBundle:Macros:header.html.twig' import header %}
