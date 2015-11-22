@@ -15,7 +15,7 @@ define( ['jquery', 'eve', 'Modernizr', '../shared/helpers/URL', './GsirilTextare
 				$( 'pre.expanding-clone' ).css( 'visibility', 'hidden' ).hide();
 			}
 			else {
-				$gsiril_input.css( 'color', $gsiril_input.css( 'background-color' ) );
+				$gsiril_input.addClass( 'highlighted' );
 			}
 
 			// Create the web worker
