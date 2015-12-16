@@ -9,11 +9,11 @@ services:
         tags:
             - { name: twig.extension }
         arguments:
-            - @service_container
+            - "@service_container"
             - %blueline%
     blueline.listener.requuest:
         class: Blueline\BluelineBundle\EventListener\RequestListener
         arguments:
-            - @service_container
+            - "@service_container"
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }

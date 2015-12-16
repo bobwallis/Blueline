@@ -3,7 +3,7 @@ namespace Blueline\BluelineBundle\Twig\Extension;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class BluelineExtension extends \Twig_Extension
+class BluelineExtension extends \Twig_Extension implements \Twig_Extension_GlobalsInterface
 {
     protected $path;
     protected $chromeless;

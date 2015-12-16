@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Blueline\BluelineBundle\Helpers\Search;
 use Blueline\BluelineBundle\Helpers\Text;
 use Blueline\MethodsBundle\Entity\Method;
@@ -150,7 +151,7 @@ class MethodsController extends Controller
                 if (!in_array($section, ['numbers', 'line', 'grid'])) {
                     throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'line' or 'grid'.");
                 }
-                $process = new Process('phantomjs --disk-cache=true --load-images=false "'.__DIR__.'/../Resources/phantomjs/render.js" "'.$this->generateUrl('Blueline_Methods_view', array( 'title' => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)) ), true).'" "'.$section.'" '.(intval($request->query->get('scale')) ?: 1).' 2>&1');
+                $process = new Process('phantomjs --disk-cache=true --load-images=false "'.__DIR__.'/../Resources/phantomjs/render.js" "'.$this->generateUrl('Blueline_Methods_view', array( 'title' => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)) ), UrlGeneratorInterface::ABSOLUTE_URL).'" "'.$section.'" '.(intval($request->query->get('scale')) ?: 1).' 2>&1');
                 $process->mustRun();
                 return new Response($process->getOutput());
             default:
