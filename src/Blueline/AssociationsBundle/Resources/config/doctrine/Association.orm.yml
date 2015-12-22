@@ -12,9 +12,6 @@ Blueline\AssociationsBundle\Entity\Association:
             length: 255
         link:
             type: text
-        outline:
-            type: json_array
-            nullable: true
     manyToMany:
         towers:
             targetEntity: Blueline\TowersBundle\Entity\Tower

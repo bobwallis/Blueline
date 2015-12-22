@@ -1,9 +1,9 @@
 {% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
 
-{% block title %}{{ pageTitle }} | Associations | {{ parent() }}{% endblock %}
+{% block title %}{{ association.name }} | Associations | {{ parent() }}{% endblock %}
 
-{% block og_title %}{{ pageTitle }}{% endblock %}
-{% block og_description %}Association information for bellringers{% endblock %}
+{% block og_title %}{{ association.name }}{% endblock %}
+{% block og_description %}Information about {{ association.name }}, a bellringing association.{% endblock %}
 
 {% set breadcrumb = { 'title': 'Associations', 'href': path('Blueline_Associations_welcome') } %}
 
@@ -11,13 +11,12 @@
 
 {% block body %}
 {% from 'BluelineBundle:Macros:header.html.twig' import header %}
-{% for association in associations %}
 	<section class="association">
-		{{ header( association.name, null, { 'id': 'association_'~loop.index~'_tabBar', 'tabs': [
-			{ 'title': 'Details', 'content': 'association_details_'~loop.index },
-			{ 'title': 'Towers', 'content': 'association_towers_'~loop.index }
+		{{ header( association.name, null, { 'id': 'association_tabBar', 'tabs': [
+			{ 'title': 'Details', 'content': 'association_details' },
+			{ 'title': 'Towers', 'content': 'association_towers' }
 		], 'active': 0 } ) }}
-		<div id="association_details_{{ loop.index }}" class="details">
+		<div id="association_details" class="details">
 			<noscript><h2>Details</h2></noscript>
 			<dl>
 			{% if association.link is not empty %}
@@ -27,7 +26,6 @@
 				<dt>Towers</dt>
 				<dd>{{ count( association.towers ) }}</dd>
 			</dl>
-			{% set enclaved = associationsContains[loop.index0]|default([]) %}
 			{% if enclaved is not empty %}
 			<h3>Enclaved Associations</h3>
 			<ol>
@@ -37,11 +35,11 @@
 					<li class="none">None</li>
 				{% endfor %}
 			</ol>
+			{% endif %}
 			<h3>Data Source and Copyright</h3>
 			<dl><dd>Details on the <a href="{{ path( 'Blueline_Pages_view', { 'page': 'about' } ) }}">about page</a>.<dd></dl>
-			{% endif %}
 		</div>
-		<div id="association_towers_{{ loop.index }}" class="affiliations">
+		<div id="association_towers" class="affiliations">
 			<noscript><h2>Affiliated Towers</h2></noscript>
 			<ol>
 			{% for tower in association.towers %}
@@ -52,9 +50,8 @@
 			</ol>
 		</div>
 	</section>
-{% endfor %}
 	<div class="Map" data-set="{{ {
-		fitBounds: [bbox.lat_min,bbox.long_min,bbox.lat_max,bbox.long_max],
-		fusionTableQuery: "{% for association in associations %}affiliations contains '{{ association.id|e('js') }}'{{ (not loop.last)? ' or ':'' }}{% endfor %}"
+		fitBounds: [bbox.min_lat,bbox.min_lon,bbox.max_lat,bbox.max_lon],
+		fusionTableQuery: "affiliations contains '"~association.id|e('js')~"'"
 	}|json_encode() }}"></div>
 {% endblock %}

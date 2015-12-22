@@ -40,57 +40,19 @@ class AssociationsController extends Controller
     */
     public function viewAction($id, Request $request)
     {
-        $format = $request->getRequestFormat();
-
-        $ids = explode('|', $id);
-
         $associationsRepository = $this->getDoctrine()->getManager()->getRepository('BluelineAssociationsBundle:Association');
-        $em = $this->getDoctrine()->getManager();
 
-        // Check we are at the canonical URL for the content
-        $associations = $em->createQuery('
-            SELECT partial a.{id,id,name} FROM BluelineAssociationsBundle:Association a
-            WHERE a.id IN (:ids)')
-            ->setParameter('ids', $ids)
-            ->setMaxResults(count($ids))
-            ->getArrayResult();
-        if (empty($associations) || count($associations) < count($ids)) {
+        // Get association information
+        $association = $associationsRepository->findOneByIdJoiningBasicTowerInformation($id);
+        if (!$association) {
             throw $this->createNotFoundException('The association does not exist');
         }
-        $url = $this->generateUrl('Blueline_Associations_view', array( 'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null), 'id' => implode('|', array_map(function ($a) { return $a['id']; }, $associations)), '_format' => $format ));
-
-        if ($request->getRequestUri() !== $url && $request->getRequestUri() !== urldecode($url)) {
-            return $this->redirect($url, 301);
-        }
-
-        $pageTitle = Text::toList(array_map(function ($a) { return $a['name']; }, $associations));
-        $associations = array();
-        $associationsContains = array();
-
-        foreach ($ids as $id) {
-            // Get information about the association and its towers
-            $associations[] = $em->createQuery('
-                SELECT a, partial t.{id,place,dedication} FROM BluelineAssociationsBundle:Association a
-                LEFT JOIN a.towers t
-                WHERE a.id = :id')
-            ->setParameter('id', $id)
-            ->getSingleResult();
-            $associationsContains[] = $associationsRepository->findContainedAssociations($id);
-        }
-
-        // Get the bounding box for the tower map
-        $bbox = array();
-        if ($format == 'html') {
-            $bbox = $em->createQuery('
-                SELECT MAX(t.latitude) as lat_max, MIN(t.latitude) as lat_min, MAX(t.longitude) as long_max, MIN(t.longitude) as long_min FROM BluelineAssociationsBundle:Association a
-                JOIN a.towers t
-                WHERE a.id IN (:ids)')
-            ->setParameter('ids', $ids)
-            ->getOneOrNullResult();
-        }
+        // Get the bounding box for the tower map, and details of any enclaved associations
+        $enclaved = $associationsRepository->findContainedAssociations($id);
+        $bbox = $associationsRepository->findBoundingBox($id);
 
         // Create response
-        return $this->render('BluelineAssociationsBundle::view.'.$format.'.twig', compact('pageTitle', 'associations', 'associationsContains', 'bbox'));
+        return $this->render('BluelineAssociationsBundle::view.'.$request->getRequestFormat().'.twig', compact('association', 'enclaved', 'bbox'));
     }
 
     /**
