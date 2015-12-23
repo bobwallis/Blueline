@@ -1,8 +1,0 @@
-{{ association.name }}
-{% if association.link is not empty %}
-Link:	{{ association.link }}
-{% endif %}
-Towers:	{{ count( association.towers ) }}
-{% if enclaved is not empty %}
-Enclaved Associations: {% for association2 in enclaved %}{{ association2.name }}{{ (not loop.last)? ', ':'' }}{% endfor %}
-{% endif %}

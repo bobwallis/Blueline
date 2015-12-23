@@ -19,13 +19,13 @@ Blueline_Associations_view:
     path: /view/{id}.{_format}
     defaults: { _controller: BluelineAssociationsBundle:Associations:view, _format: html }
     requirements:
-        _format: html|txt|json
+        _format: html|json
 
 Blueline_Associations_search:
     path: /search.{_format}
     defaults: { _controller: BluelineAssociationsBundle:Associations:search, _format: html }
     requirements:
-        _format: html|txt|json
+        _format: html|json
 
 Blueline_Associations_sitemap:
     path: /sitemap.{_format}
