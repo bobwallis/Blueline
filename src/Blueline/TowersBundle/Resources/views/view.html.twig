@@ -1,9 +1,9 @@
 {% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
 
-{% block title %}{{ pageTitle }} | Towers | {{ parent() }}{% endblock %}
+{% block title %}{{ tower.place }} {{ tower.dedication != 'Unknown'? '('~tower.dedication~')' : '' }} | Towers | {{ parent() }}{% endblock %}
 
-{% block og_title %}{{ pageTitle }}{% endblock %}
-{% block og_description %}Tower information for bellringers{% endblock %}
+{% block og_title %}{{ tower.place }} {{ tower.dedication != 'Unknown'? '('~tower.dedication~')' : '' }}{% endblock %}
+{% block og_description %}Information about the peal of bells found in {{ tower.place }} {{ tower.dedication != 'Unknown'? '('~tower.dedication~')' : '' }}, {{ list( [tower.place, tower.county, tower.country],', ',', ' ) }}{% endblock %}
 
 {% set breadcrumb = { 'title': 'Towers', 'href': path('Blueline_Towers_welcome') } %}
 
@@ -11,20 +11,20 @@
 
 {% block body %}
 {% from 'BluelineBundle:Macros:header.html.twig' import header %}
-{% for tower in towers %}
+
 	<section class="tower">
-		{{ header( { 'title': tower.place, 'title2': (tower.dedication != 'Unknown')? tower.dedication : null }, list( [tower.county, tower.country],', ',', ' ), { 'id': 'tower_'~tower.id~'_tabBar', 'tabs': [
-			{ 'title': 'Details', 'content': 'tower_details_'~tower.id },
+		{{ header( { 'title': tower.place, 'title2': (tower.dedication != 'Unknown')? tower.dedication : null }, list( [tower.county, tower.country],', ',', ' ), { 'id': 'tower_tabBar', 'tabs': [
+			{ 'title': 'Details', 'content': 'tower_details' },
 			{ 'title': 'Map', 'content': 'tower_map_'~tower.id, 'className': 'l700' },
-			(tower.firstPealPerformances|default([]) is not empty)? { 'title': 'Methods First Pealed', 'content': 'tower_peals_'~tower.id } : {}
+			(tower.firstPealPerformances|default([]) is not empty)? { 'title': 'Methods First Pealed', 'content': 'tower_peals' } : {}
 		] } ) }}
-		<div id="tower_map_{{ tower.id }}" class="staticMap" data-ll="{{ tower.latitude }},{{ tower.longitude }}" data-image="//maps.google.com/maps/api/staticmap?format=png&amp;scale=2&amp;size=310x380&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center={{ tower.latitude }},{{ tower.longitude }}&amp;markers=size:small|color:red|{{ tower.latitude }},{{ tower.longitude }}">
+		<div id="tower_map" class="staticMap" data-ll="{{ tower.latitude }},{{ tower.longitude }}" data-image="//maps.google.com/maps/api/staticmap?format=png&amp;scale=2&amp;size=310x380&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center={{ tower.latitude }},{{ tower.longitude }}&amp;markers=size:small|color:red|{{ tower.latitude }},{{ tower.longitude }}">
 			<noscript>
 				<h2>Map</h2>
 				<img width="310" height="380" alt="Map of tower location" src="//maps.google.com/maps/api/staticmap?format=png&amp;scale=2&amp;size=310x380&amp;maptype=roadmap&amp;sensor=false&amp;zoom=14&amp;center={{ tower.latitude }},{{ tower.longitude }}&amp;markers=size:small|color:red|{{ tower.latitude }},{{ tower.longitude }}" />
 			</noscript>
 		</div>
-		<div id="tower_details_{{ tower.id }}" class="details">
+		<div id="tower_details" class="details">
 			<noscript><h2>Details</h2></noscript>
 			<dl>
 				<dt>Bells</dt>
@@ -55,8 +55,7 @@
 			</dl>
 			<h3>Nearby Towers</h3>
 			<ol>
-				{% set nearbyTowers2 = nearbyTowers[loop.index0]|default([]) %}
-				{% for tower2 in nearbyTowers2 %}
+				{% for tower2 in nearbyTowers|default([]) %}
 					<li><a href="{{ path( 'Blueline_Towers_view', {'id':tower2.id} ) }}">{{ tower2.place}} <small>({{ tower2.dedication }})</small><small class="extra"> {{ round( tower2.distance, 1 ) }} miles</small></a></li>
 				{% else %}
 					<li class="none">None</li>
@@ -65,7 +64,7 @@
 			<h3>Data Source and Copyright</h3>
 			<dl><dd>Details on the <a href="{{ path( 'Blueline_Pages_view', { 'page': 'about' } ) }}">about page</a>.<dd></dl>
 		</div>
-		<div id="tower_peals_{{ tower.id }}" class="firstPeals">
+		<div id="tower_peals" class="firstPeals">
 			<noscript><h2>First Peals</h2></noscript>
 			<ol>
 				{% for performance in tower.firstPealPerformances|default([]) %}
@@ -76,6 +75,5 @@
 			</ol>
 		</div>
 	</section>
-{% endfor %}
-	<div class="Map" data-set="{% if count(towers) > 1 %} {{ {fitBounds: [bbox.lat_min,bbox.long_min,bbox.lat_max,bbox.long_max]}|json_encode() }}{% else %}{{ {zoom:15,center:[towers[0].latitude,towers[0].longitude]}|json_encode() }}{% endif %}"></div>
+	<div class="Map" data-set="{{ {zoom:15,center:[tower.latitude,tower.longitude]}|json_encode() }}"></div>
 {% endblock %}

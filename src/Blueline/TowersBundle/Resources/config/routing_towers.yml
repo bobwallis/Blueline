@@ -20,14 +20,13 @@ Blueline_Towers_view:
     path: /view/{id}.{_format}
     defaults: { _controller: BluelineTowersBundle:Towers:view, _format: html }
     requirements:
-        id: ^(?(?=.*\.(html|txt|json|xml)$).*(?=\.)|.*$)
         _format: html|txt|json
 
 Blueline_Towers_search:
     path: /search.{_format}
     defaults: { _controller: BluelineTowersBundle:Towers:search, _format: html }
     requirements:
-        _format: html|txt|json|atom
+        _format: html|txt|json
 
 Blueline_Towers_sitemap:
     path: /sitemap.{_format}

@@ -95,4 +95,23 @@ class TowerRepository extends EntityRepository
                 ->getArrayResult()
         ), 0, $count ) );
     }
+
+    public function findOneByIdJoiningBasicAssociationAndPerformanceInformation($id)
+    {
+        $query = $this->getEntityManager()->createQuery('
+            SELECT t, partial a.{id,name}, partial p.{id,type,date}, partial m.{title,url} FROM BluelineTowersBundle:Tower t
+            LEFT JOIN t.associations a
+            LEFT JOIN t.performances p WITH p.type = :performanceType
+            LEFT JOIN p.method m
+            WHERE t.id = :id
+            ORDER BY p.date DESC')
+        ->setParameter('id', $id)
+        ->setParameter('performanceType', 'firstTowerbellPeal');
+
+        try {
+            return $query->getSingleResult();
+        } catch (\Doctrine\ORM\NoResultException $e) {
+            return null;
+        }
+    }
 }
