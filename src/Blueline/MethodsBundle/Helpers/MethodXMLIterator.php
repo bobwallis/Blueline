@@ -61,6 +61,11 @@ class MethodXMLIterator implements \Iterator, \Countable
                 'fchgroups'      => strval($node->falseness->fchGroups) ?: null,
             ), function ($e) { return !is_null($e); }));
 
+            // Manually fix non-unique URLs caused by odd naming choices
+            if ($array['title'] == '"Northumberland" Surprise Major') {
+                $array['url'] = '_Northumberland_ Surprise Major';
+            }
+
             // Parse place notation
             if (isset($array['notation'])) {
                 $array['notationexpanded'] = PlaceNotation::expand($array['notation'], $array['stage']);
