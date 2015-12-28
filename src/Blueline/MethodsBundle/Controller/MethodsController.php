@@ -105,6 +105,10 @@ class MethodsController extends Controller
 
         $method = $methodRepository->findByURLJoiningPerformancesAndCollections($url);
 
+        if (!$method) {
+            throw $this->createNotFoundException('The method does not exist');
+        }
+
         // Create response
         switch ($format) {
             case 'png':
