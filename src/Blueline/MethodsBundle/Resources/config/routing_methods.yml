@@ -3,10 +3,10 @@ Blueline_Methods_welcome:
     defaults: { _controller: BluelineMethodsBundle:Methods:welcome }
 
 Blueline_Methods_view:
-    path: /view/{title}.{_format}
+    path: /view/{url}.{_format}
     defaults: { _controller: BluelineMethodsBundle:Methods:view, _format: html }
     requirements:
-        title: ^(?(?=.*\.(html|json|png)$).*(?=\.)|.*$)
+        url: ^(?(?=.*\.(html|json|png)$).*(?=\.)|.*$)
         _format: html|json|png
 
 Blueline_Methods_custom_view:

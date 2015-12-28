@@ -1,13 +1,11 @@
 {% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
 
-{% block title %}{{ pageTitle }} | Methods | {{ parent() }}{% endblock %}
+{% block title %}{{ method.title }} | Methods | {{ parent() }}{% endblock %}
 
-{% block og_title %}{{ pageTitle }}{% endblock %}
-{% block og_description %}Method information for bellringers{% endblock %}
-{% if methods is not empty %}
-	{% block og_image %}{{ url( 'Blueline_Methods_view', { 'title': methods[0].url, '_format': 'png' } ) }}{% endblock %}
-	{% block oembed %}<link rel="alternate" type="application/json+oembed" href="{{ url('Blueline_Services_oembed', {'_format': 'json', 'url': url('Blueline_Methods_view', {'title': methods[0].url})}) }}" title="{{ pageTitle }}" />{% endblock %}
-{% endif %}
+{% block og_title %}{{ method.title }}{% endblock %}
+{% block og_description %}Method diagram and other details for {{ method.title }}{% endblock %}
+{% block og_image %}{{ url( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png' } ) }}{% endblock %}
+{% block oembed %}<link rel="alternate" type="application/json+oembed" href="{{ url('Blueline_Services_oembed', {'_format': 'json', 'url': url('Blueline_Methods_view', {'url': method.url})}) }}" title="{{ method.title }}" />{% endblock %}
 
 {% set breadcrumb = { 'title': 'Methods', 'href': path('Blueline_Methods_welcome') } %}
 
@@ -15,15 +13,14 @@
 
 {% block body %}
 {% from 'BluelineBundle:Macros:header.html.twig' import header %}
-{% for method in methods %}
 	<section class="method">
-		{{ header( { 'title': method.title }, null, { 'id': 'method_'~loop.index~'_tabBar', 'active': 1, 'tabs': [
-			{ 'title': 'Details', 'content': 'method_details_'~loop.index },
-			{ 'title': 'Numbers', 'content': 'method_numbers_'~loop.index },
-			{ 'title': 'Line', 'content': 'method_line_'~loop.index },
-			{ 'title': 'Grid', 'content': 'method_grid_'~loop.index }
+		{{ header( { 'title': method.title }, null, { 'id': 'method_tabBar', 'active': 1, 'tabs': [
+			{ 'title': 'Details', 'content': 'method_details' },
+			{ 'title': 'Numbers', 'content': 'method_numbers' },
+			{ 'title': 'Line', 'content': 'method_line' },
+			{ 'title': 'Grid', 'content': 'method_grid' }
 		] } ) }}
-		<div id="method_details_{{ loop.index }}" class="details">
+		<div id="method_details" class="details">
 			<dl>
 {% if method.provisional %}
 				<dt class="alone">This method is provisionally named</dt>
@@ -74,7 +71,7 @@
 {% endif %}
 				<dt>Download as image</dt>
 				{% if custom is not defined or not custom %}
-				<dd><a href="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2, 'style': 'line' } ) }}" class="external" data-forcerefresh="true">Line</a><br/><a href="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2, 'style': 'numbers' } ) }}" class="external" data-forcerefresh="true">Numbers</a><br/><a href="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 2, 'style': 'grid' } ) }}" class="external" data-forcerefresh="true">Grid</a></dd>
+				<dd><a href="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 2, 'style': 'line' } ) }}" class="external" data-forcerefresh="true">Line</a><br/><a href="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 2, 'style': 'numbers' } ) }}" class="external" data-forcerefresh="true">Numbers</a><br/><a href="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 2, 'style': 'grid' } ) }}" class="external" data-forcerefresh="true">Grid</a></dd>
 				{% else %}
 				<dd><a href="{{ path( 'Blueline_Methods_custom_view', { 'stage': method.stage, 'notation': method.notation, '_format': 'png', 'scale': 2, 'style': 'line' } ) }}" class="external" data-forcerefresh="true">Line</a><br/><a href="{{ path( 'Blueline_Methods_custom_view', { 'stage': method.stage, 'notation': method.notation, '_format': 'png', 'scale': 2, 'style': 'numbers' } ) }}" class="external" data-forcerefresh="true">Numbers</a><br/><a href="{{ path( 'Blueline_Methods_custom_view', { 'stage': method.stage, 'notation': method.notation, '_format': 'png', 'scale': 2, 'style': 'grid' } ) }}" class="external" data-forcerefresh="true">Grid</a></dd>
 				{% endif %}
@@ -82,14 +79,14 @@
 				<dd>Details on the <a href="{{ path( 'Blueline_Pages_view', { 'page': 'about' } ) }}">about page</a>.</dd>
 			</dl>
 		</div>
-		<div id="method_numbers_{{ loop.index }}" class="numbers"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 1, 'style': 'numbers' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
-		<div id="method_line_{{ loop.index }}" class="line"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 1, 'style': 'line' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
-		<div id="method_grid_{{ loop.index }}" class="grid"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'title': method.url, '_format': 'png', 'scale': 1, 'style': 'grid' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
+		<div id="method_numbers" class="numbers"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 1, 'style': 'numbers' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
+		<div id="method_line" class="line"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 1, 'style': 'line' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
+		<div id="method_grid" class="grid"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 1, 'style': 'grid' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
 		<div class="MethodView" data-set="{{ {
-			id: loop.index,
-			numbersContainer: '#method_numbers_'~loop.index,
-			lineContainer: '#method_line_'~loop.index,
-			gridContainer: '#method_grid_'~loop.index,
+			id: 0,
+			numbersContainer: '#method_numbers',
+			lineContainer: '#method_line',
+			gridContainer: '#method_grid',
 			stage: method.stage,
 			notation: method.notationExpanded,
 			calls: method.calls|default(false),
@@ -97,5 +94,4 @@
 			ruleOffs: method.ruleOffs
 		}|json_encode() }}"></div>
 	</section>
-{% endfor %}
 {% endblock %}

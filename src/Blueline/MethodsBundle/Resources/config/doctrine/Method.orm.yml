@@ -13,6 +13,7 @@ Blueline\MethodsBundle\Entity\Method:
         url:
             type: string
             length: 255
+            unique: true
         stage:
             type: smallint
         classification:

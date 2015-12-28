@@ -44,118 +44,75 @@ class MethodsController extends Controller
     /**
     * @Cache(maxage="129600", public=true, lastModified="database_update")
     */
-    public function viewAction($title, Request $request)
+    public function viewAction($url, Request $request)
     {
         $format = $request->getRequestFormat();
-
-        // If the title is empty redirect to version without slash
-        if( empty($title) ) {
-            return $this->redirect( $this->generateUrl('Blueline_Methods_welcome', array(
-                'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null)
-            ), 301) );
-        }
-
-        // Decode and canonicalise the requested URLs
-        $urls = array_map(function ($u) {
-            // Decode
-            $u = urldecode($u);
-            // Replace S with Surprise, etc...
-            $classificationsInitials = array_map(function ($c) {
-                return implode('', array_map(function ($w) { return $w[0]; }, explode(' ', $c)));
-            }, Classifications::toArray());
-            $matches = array();
-            if (preg_match('/_('.implode('|', $classificationsInitials).')_('.implode('|', Stages::toArray()).')$/', $u, $matches)) {
-                $initial = $matches[1];
-                $classification = str_replace(' ', '_', Classifications::toArray()[array_search($initial, $classificationsInitials)]);
-                $u = preg_replace('/'.$initial.'_('.implode('|', Stages::toArray()).')$/', $classification.'_$1', $u);
-            }
-
-            return $u;
-        }, explode('|', $title));
-        // Convert URLs into titles
-        $titles = array_map(function ($m) { return str_replace('_', ' ', $m); }, $urls);
-
-        // Create lower case arrays for use in search
-        $urlsLower = array_map("strtolower", $urls);
-        $titlesLower = array_map("strtolower", $titles);
-        
         $methodRepository = $this->getDoctrine()->getManager()->getRepository('BluelineMethodsBundle:Method');
         $em = $this->getDoctrine()->getManager();
 
-        // Check we are at the canonical URL for the content
-        // First check for titles
-        $methodsCheck = $em->createQuery('
-            SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m
-            WHERE LOWER(m.title) IN (:titles) OR LOWER(m.url) IN (:urls) OR LOWER(m.title) IN (:titlesNoSpacesCockUpFix)')
-            ->setParameter('urls', $urlsLower)
-            ->setParameter('titles', $titlesLower)
-            ->setParameter('titlesNoSpacesCockUpFix', array_map(function ($m) { return preg_replace( '/^ /', '', strtolower(preg_replace('/(?<!\ )[A-Z]/', ' $0', $m))); }, $titles))
-            ->setMaxResults(count($titlesLower))
-            ->getArrayResult();
-        if (empty($methodsCheck) || count($methodsCheck) < count($methodsCheck)) {
-            // Then check if place notation has been given
-            $notationExpander = new PlaceNotation();
-            $notationTest = array_map(array( $notationExpander, 'expand' ), $urls);
-            $methodsCheck = $em->createQuery('
-                SELECT partial m.{title,url} FROM BluelineMethodsBundle:Method m
-                WHERE m.notationExpanded IN (:notations)')
-                ->setParameter('notations', $notationTest)
-                ->setMaxResults(count($notationTest))
-                ->getArrayResult();
-            if (empty($methodsCheck) || count($methodsCheck) < count($methodsCheck)) {
-                throw $this->createNotFoundException('The method does not exist');
+        // If the title is empty redirect to version without slash
+        if (empty($url)) {
+            return $this->redirect($this->generateUrl('Blueline_Methods_welcome', array(
+                'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null)
+            ), 301));
+        }
+
+        // Decode and canonicalise the requested URLs
+        $url = urldecode($url);
+        // Replace S with Surprise, etc...
+        $classificationsInitials = array_map(function ($c) {
+            return implode('', array_map(function ($w) { return $w[0]; }, explode(' ', $c)));
+        }, Classifications::toArray());
+        $matches = array();
+        if (preg_match('/_('.implode('|', $classificationsInitials).')_('.implode('|', Stages::toArray()).')$/', $url, $matches)) {
+            $initial = $matches[1];
+            $classification = str_replace(' ', '_', Classifications::toArray()[array_search($initial, $classificationsInitials)]);
+            $url = preg_replace('/'.$initial.'_('.implode('|', Stages::toArray()).')$/', $classification.'_$1', $url);
+        }
+        // Redirect to the right URL if we're at a wrong one
+        if ($request->get('url') !== $url) {
+            $redirect = $this->generateUrl('Blueline_Methods_view', array(
+                'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null),
+                'scale'      => intval($request->query->get('scale')) ?: null,
+                'style'      => strtolower($request->query->get('style')) ?: null,
+                'url'      => $url,
+                '_format'    => $format
+            ));
+            return $this->redirect($redirect, 301);
+        }
+        // Perform extra checks for PNG format requests
+        if ($format == 'png') {
+            // Validate scale parameter
+            if ((intval($request->query->get('scale')) ?: 1) > 4 && $this->container->getParameter('kernel.environment') == 'prod') {
+                throw $this->createAccessDeniedException('Maximum scale is 4 unless in developer mode.');
+            }
+            // Validate section parameter
+            $section = $request->query->get('style');
+            if (!in_array($section, ['numbers', 'line', 'grid'])) {
+                throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'line' or 'grid'.");
+            }
+            // Normalise
+            if (!$section || intval($request->query->get('scale')) === 0) {
+                $url = $this->generateUrl('Blueline_Methods_view', array(
+                    'scale'   => (intval($request->query->get('scale')) ?: 1),
+                    'style'   => (!$section)? 'numbers' : $section,
+                    'url'     => $url,
+                    '_format' => 'png'
+                ));
+                return $this->redirect($url, 301);
             }
         }
-        $url = $this->generateUrl('Blueline_Methods_view', array(
-            'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null),
-            'scale'      => intval($request->query->get('scale')) ?: null,
-            'style'      => strtolower($request->query->get('style')) ?: null,
-            'title'      => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)),
-            '_format'    => $format
-        ) );
-        if ($request->getRequestUri() !== urldecode($url)) {
-            return $this->redirect($url, 301);
-        }
 
-        $pageTitle = Text::toList(array_map(function ($m) { return $m['title']; }, $methodsCheck));
-        $methods = array();
-
-        foreach ($methodsCheck as $methodTitle) {
-            // Get information about the method
-            $method = $em->createQuery('
-                SELECT m FROM BluelineMethodsBundle:Method m
-                LEFT JOIN m.performances p
-                LEFT JOIN m.collections c
-                WHERE m.title = :title')
-            ->setParameter('title', $methodTitle['title'])
-            ->getSingleResult();
-            $methods[] = $method;
-        }
+        $method = $methodRepository->findByURLJoiningPerformancesAndCollections($url);
 
         // Create response
         switch ($format) {
             case 'png':
-                if ((intval($request->query->get('scale')) ?: 1) > 4 && $this->container->getParameter('kernel.environment') == 'prod') {
-                    throw $this->createAccessDeniedException('Maximum scale is 4 unless in developer mode.');
-                }
-                $section = $request->query->get('style');
-                if( !$section || intval($request->query->get('scale')) === 0 ) {
-                    $url = $this->generateUrl('Blueline_Methods_view', array(
-                        'scale'   => (intval($request->query->get('scale')) ?: 1),
-                        'style'   => (!$section)? 'numbers' : $section,
-                        'title'   => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)),
-                        '_format' => 'png'
-                    ) );
-                    return $this->redirect($url, 301);
-                }
-                if (!in_array($section, ['numbers', 'line', 'grid'])) {
-                    throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'line' or 'grid'.");
-                }
-                $process = new Process('phantomjs --disk-cache=true --load-images=false "'.__DIR__.'/../Resources/phantomjs/render.js" "'.$this->generateUrl('Blueline_Methods_view', array( 'title' => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)) ), UrlGeneratorInterface::ABSOLUTE_URL).'" "'.$section.'" '.(intval($request->query->get('scale')) ?: 1).' 2>&1');
+                $process = new Process('phantomjs --disk-cache=true --load-images=false "'.__DIR__.'/../Resources/phantomjs/render.js" "'.$this->generateUrl('Blueline_Methods_view', array('url' => $url), UrlGeneratorInterface::ABSOLUTE_URL).'" "'.$section.'" '.(intval($request->query->get('scale')) ?: 1).' 2>&1');
                 $process->mustRun();
                 return new Response($process->getOutput());
             default:
-                return $this->render('BluelineMethodsBundle::view.'.$format.'.twig', compact('pageTitle', 'methods'));
+                return $this->render('BluelineMethodsBundle::view.'.$format.'.twig', compact('method'));
         }
     }
 
@@ -193,13 +150,12 @@ class MethodsController extends Controller
             ->setParameter('stage', $vars['stage'])
             ->getArrayResult();
         if (!empty($methodsCheck)) {
-            $url = $this->generateUrl('Blueline_Methods_view', array( 'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null), 'title' => implode('|', array_map(function ($m) { return $m['url']; }, $methodsCheck)), '_format' => $format ));
+            $url = $this->generateUrl('Blueline_Methods_view', array( 'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null), 'url' => $methodsCheck[0]['url'], '_format' => $format ));
             return $this->redirect($url, 301);
         }
 
         // Otherwise create and display the custom method
-        $methods = array( new Method($vars) );
-        $pageTitle = $vars['title'];
+        $method = new Method($vars);
         $custom = true;
 
         // Create response
@@ -209,6 +165,9 @@ class MethodsController extends Controller
                     throw $this->createAccessDeniedException('Maximum scale is 4 unless in developer mode.');
                 }
                 $section = $request->query->get('style');
+                if (!in_array($section, ['numbers', 'line', 'grid'])) {
+                    throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'line' or 'grid'.");
+                }
                 if (!$section || intval($request->query->get('scale')) === 0) {
                     $url = $this->generateUrl('Blueline_Methods_custom_view', array(
                         'stage'    => $vars['stage'],
@@ -219,9 +178,6 @@ class MethodsController extends Controller
                     ));
                     return $this->redirect($url, 301);
                 }
-                if (!in_array($section, ['numbers', 'line', 'grid'])) {
-                    throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'line' or 'grid'.");
-                }
                 $processUrl = $this->generateUrl('Blueline_Methods_custom_view', array(
                     'stage'    => $vars['stage'],
                     'notation' => $vars['notation']
@@ -230,7 +186,7 @@ class MethodsController extends Controller
                 $process->mustRun();
                 return new Reponse($process->getOutput());
             default:
-                return $this->render('BluelineMethodsBundle::view.'.$format.'.twig', compact('pageTitle', 'methods', 'custom'));
+                return $this->render('BluelineMethodsBundle::view.'.$format.'.twig', compact('method', 'custom'));
         }
     }
 

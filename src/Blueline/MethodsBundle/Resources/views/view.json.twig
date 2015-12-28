@@ -1,2 +1,1 @@
-[{% for method in methods %}
-{{ method|toArray|json_encode|raw }}{{ not loop.last ? "," }}{% endfor %}]
+[{{ method|toArray|json_encode|raw }}]

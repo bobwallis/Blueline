@@ -17,7 +17,7 @@
 		{% if methods is not empty %}
 		<ol>
 		{% for method in methods %}
-			<li><a href="{{ path( 'Blueline_Methods_view', { 'title': method.url } ) }}">{{ method.title }}</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': method.url } ) }}">{{ method.title }}</a></li>
 		{% endfor %}
 		</ol>
 		{{ paging( 'Blueline_Methods_search', searchVariables, pageActive, pageCount, count ) }}

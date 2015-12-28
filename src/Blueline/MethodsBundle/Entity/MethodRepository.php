@@ -116,4 +116,20 @@ class MethodRepository extends EntityRepository
 
         return intval($result[0]['num']);
     }
+
+    public function findByURLJoiningPerformancesAndCollections($url)
+    {
+        $query = $this->getEntityManager()->createQuery(
+            'SELECT m, p, c FROM BluelineMethodsBundle:Method m
+             LEFT JOIN m.performances p
+             LEFT JOIN m.collections c
+             WHERE m.url = :url'
+        )->setParameter('url', $url);
+
+        try {
+            return $query->getSingleResult();
+        } catch (\Doctrine\ORM\NoResultException $e) {
+            return null;
+        }
+    }
 }
