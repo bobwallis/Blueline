@@ -1,6 +1,7 @@
 <?php
 // Contains overrides for certain problematic locations
 $method_towers = array(
+    'Ashton under Lyme'         => 'ASHTON_ULM',
     'Barnsley'                  => 'BARNSLEY_Y',
     'Barrow on Humber'          => 'BARROW_UH',
     'Birmingham Cathedral'      => 'BIRMIN__CA',
@@ -35,6 +36,7 @@ $method_towers = array(
     'Scofton with Osberton'     => 'SCOFTON',
     'Sprotborough'              => 'SPROTBROUG',
     'Sutton on Hull'            => 'KINGSTN6',
+    'Tewkesbury Abbey'          => 'TEWKESBRY3',
     'Upper Armley'              => 'LEEDS_UARM',
     'Wath on Dearne'            => 'WATH_UPOND',
     'West Hunsbury'             => 'NORTHAMP16',
