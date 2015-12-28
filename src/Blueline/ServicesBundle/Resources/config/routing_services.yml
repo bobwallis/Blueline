@@ -22,4 +22,4 @@ Blueline_Services_siril:
 
 Blueline_Services_siril_why:
     path: /siril/about
-    defaults: { _controller: BluelinePagesBundle:Pages:page, page: 'siril_about' }
+    defaults: { _controller: BluelineBundle:Default:page, page: 'siril_about' }
