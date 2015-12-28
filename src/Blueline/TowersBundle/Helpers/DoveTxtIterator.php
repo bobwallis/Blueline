@@ -10,7 +10,6 @@
 
 namespace Blueline\TowersBundle\Helpers;
 
-
 class DoveTxtIterator implements \Iterator, \Countable
 {
     private $file;
@@ -107,10 +106,12 @@ class DoveTxtIterator implements \Iterator, \Countable
             }
         } else {
             switch ($towerData['Country']) {
-                case 'Channel Is' :
-                    $towerData['Country'] = 'Channel Islands'; break;
-                case 'Windward Is' :
-                    $towerData['Country'] = 'Windward Islands'; break;
+                case 'Channel Is':
+                    $towerData['Country'] = 'Channel Islands';
+                    break;
+                case 'Windward Is':
+                    $towerData['Country'] = 'Windward Islands';
+                    break;
             }
         }
         $this->currentTower['country'] = $towerData['Country'];
@@ -130,13 +131,15 @@ class DoveTxtIterator implements \Iterator, \Countable
         // Replace abbreviations in dedications
         if (!empty($towerData['Dedicn'])) {
             $towerData['Dedicn'] = str_replace(
-                array( 'Eng',     'Univ',       'RC ',             'SS ', 'S ',  'Cath ',      'Cath,',      'P Church',      'Ch ',     ' ch ',     ' K&M',             ' Gt',        'John Bapt',        ' Magd',     'Senara V',          'Mary V',          'BVM',                 'BV',             'Nativity St',    ' of Blessed',     '& Blessed',     'SMV',                'John Ev',             'Mark Ev',             'James Ap',          'Andrew Ap',          'Thomas Ap',          ' A&M',                    ' V&M',                   ' B&M',                   'Margaret Q',         'Edward Conf & K',               'Edward Conf',          'Edward M',          'George M',          'Thomas M',          'Stephen M',          'Laurence M',          'Matthew AEM' ),
-                array( 'English', 'University', 'Roman Catholic ', 'Ss ', 'St ', 'Cathedral ', 'Cathedral,', 'Parish Church', 'Church ', ' church ', ' King and Martyr', ' the Great', 'John the Baptist', ' Magdalen', 'Senara the Virgin', 'Mary the Virgin', 'Blessed Virgin Mary', 'Blessed Virgin', 'Nativity of St', ' of the Blessed', '& the Blessed', 'St Mary the Virgin', 'John the Evangelist', 'Mark the Evangelist', 'James the Apostle', 'Andrew the Apostle', 'Thomas the Apostle', ' the Apostle and Martyr', ' the Virgin and Martyr', ' the Bishop and Martyr', 'Margaret the Queen', 'Edward the Confessor and King', 'Edward the Confessor', 'Edward the Martyr', 'George the Martyr', 'Thomas the Martyr', 'Stephen the Martyr', 'Laurence the Martyr', 'Matthew the Apostle, Evangelist and Martyr' ),
-                $towerData['Dedicn']);
+                array( 'Eng',     'Univ',       'RC ',             'SS ', 'S ',  'Cath ',      'Cath,',      'P Church',      'Ch ',     ' ch ',     ' K&M',             ' Gt',        'John Bapt',        'Senara V',          'Mary V',          'BVM',                 'BV',             'Nativity St',    ' of Blessed',     '& Blessed',     'SMV',                'John Ev',             'Mark Ev',             'James Ap',          'Andrew Ap',          'Thomas Ap',          ' A&M',                    ' V&M',                   ' B&M',                   'Margaret Q',         'Edward Conf & K',               'Edward Conf',          'Edward M',          'George M',          'Thomas M',          'Stephen M',          'Laurence M',          'Matthew AEM' ),
+                array( 'English', 'University', 'Roman Catholic ', 'Ss ', 'St ', 'Cathedral ', 'Cathedral,', 'Parish Church', 'Church ', ' church ', ' King and Martyr', ' the Great', 'John the Baptist', 'Senara the Virgin', 'Mary the Virgin', 'Blessed Virgin Mary', 'Blessed Virgin', 'Nativity of St', ' of the Blessed', '& the Blessed', 'St Mary the Virgin', 'John the Evangelist', 'Mark the Evangelist', 'James the Apostle', 'Andrew the Apostle', 'Thomas the Apostle', ' the Apostle and Martyr', ' the Virgin and Martyr', ' the Bishop and Martyr', 'Margaret the Queen', 'Edward the Confessor and King', 'Edward the Confessor', 'Edward the Martyr', 'George the Martyr', 'Thomas the Martyr', 'Stephen the Martyr', 'Laurence the Martyr', 'Matthew the Apostle, Evangelist and Martyr' ),
+                $towerData['Dedicn']
+            );
             $towerData['Dedicn'] = preg_replace(
                 array( '/Cath$/',   '/Ch$/' ),
                 array( 'Cathedral', 'Church' ),
-                $towerData['Dedicn']);
+                $towerData['Dedicn']
+            );
             if ($towerData['Dedicn'] == '(unknown)') {
                 $towerData['Dedicn'] = null;
             }
@@ -145,31 +148,31 @@ class DoveTxtIterator implements \Iterator, \Countable
 
         // Replace abbreviated dioceses
         switch ($towerData['Diocese']) {
-            case 'PrivOwnership' :
+            case 'PrivOwnership':
                 $towerData['Diocese'] = 'Private Ownership';
                 break;
-            case '(Not Anglican)' :
+            case '(Not Anglican)':
                 $towerData['Diocese'] = 'Non-Anglican';
                 break;
-            case 'AnglicanNonUK' :
+            case 'AnglicanNonUK':
                 $towerData['Diocese'] = 'Anglican (Non-UK)';
                 break;
-            case 'ExtraParochial' :
+            case 'ExtraParochial':
                 $towerData['Diocese'] = 'Extra-Parochial';
                 break;
-            case '(RC)' :
+            case '(RC)':
                 $towerData['Diocese'] = 'Roman Catholic';
                 break;
-            case '(Ireland)' :
+            case '(Ireland)':
                 $towerData['Diocese'] = 'Ireland';
                 break;
-            case '(Scotland)' :
+            case '(Scotland)':
                 $towerData['Diocese'] = 'Scotland';
                 break;
-            case 'ChConsvnTrust' :
+            case 'ChConsvnTrust':
                 $towerData['Diocese'] = 'Churches Conservation Trust';
                 break;
-            case 'LocalAuthority' :
+            case 'LocalAuthority':
                 $towerData['Diocese'] = 'Local Authority';
                 break;
             case 'Trust (nonCCT)':
@@ -192,7 +195,7 @@ class DoveTxtIterator implements \Iterator, \Countable
 
         // Replace abbreviated contractors
         switch ($towerData['Contractor']) {
-            case 'Local labour/guild/assn' :
+            case 'Local labour/guild/assn':
                 $towerData['Contractor'] = 'Local labour';
                 break;
             case '(The owner)':
