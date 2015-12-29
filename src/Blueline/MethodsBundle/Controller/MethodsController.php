@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Blueline\BluelineBundle\Helpers\Search;
 use Blueline\BluelineBundle\Helpers\Text;
 use Blueline\MethodsBundle\Entity\Method;
+use Blueline\MethodsBundle\Helpers\URL;
 use Blueline\MethodsBundle\Helpers\Stages;
 use Blueline\MethodsBundle\Helpers\Classifications;
 use Blueline\MethodsBundle\Helpers\PlaceNotation;
@@ -48,7 +49,6 @@ class MethodsController extends Controller
     {
         $format = $request->getRequestFormat();
         $methodRepository = $this->getDoctrine()->getManager()->getRepository('BluelineMethodsBundle:Method');
-        $em = $this->getDoctrine()->getManager();
 
         // If the title is empty redirect to version without slash
         if (empty($url)) {
@@ -58,17 +58,8 @@ class MethodsController extends Controller
         }
 
         // Decode and canonicalise the requested URLs
-        $url = urldecode($url);
-        // Replace S with Surprise, etc...
-        $classificationsInitials = array_map(function ($c) {
-            return implode('', array_map(function ($w) { return $w[0]; }, explode(' ', $c)));
-        }, Classifications::toArray());
-        $matches = array();
-        if (preg_match('/_('.implode('|', $classificationsInitials).')_('.implode('|', Stages::toArray()).')$/', $url, $matches)) {
-            $initial = $matches[1];
-            $classification = str_replace(' ', '_', Classifications::toArray()[array_search($initial, $classificationsInitials)]);
-            $url = preg_replace('/'.$initial.'_('.implode('|', Stages::toArray()).')$/', $classification.'_$1', $url);
-        }
+        $url = URL::canonical($url);
+
         // Redirect to the right URL if we're at a wrong one
         if ($request->get('url') !== $url) {
             $redirect = $this->generateUrl('Blueline_Methods_view', array(
