@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <!-- Derived from: http://en.wikipedia.org/wiki/File:External.svg -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="10" height="10">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" width="10" height="12">
 	<path fill="#FFF" stroke="#29404C" stroke-width="10" stroke-linecap="miter" stroke-miterlimit="4" d="m 5,35 60,0 0,60 -60,0 0,-60 z" />
 	<path fill="#FFF" stroke="#29404C" stroke-width="10" stroke-linecap="miter" stroke-miterlimit="4"  d="m 45,15 0,-10 50,0 0,50 -10,0 L 75,45 45,75 25,55 55,25 45,15 z" />
 </svg>
