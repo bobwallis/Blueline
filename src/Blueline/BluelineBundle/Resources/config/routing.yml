@@ -1,6 +1,12 @@
-BluelineAssociationsBundle:
-    resource: "@BluelineAssociationsBundle/Resources/config/routing_associations.yml"
-    prefix:   /associations/
+Blueline_welcome:
+    path: /
+    defaults: { _controller: BluelineBundle:Default:page, page: 'welcome' }
+
+Blueline_manifest:
+    path: /site.{_format}
+    defaults: { _controller: BluelineBundle:Default:manifest }
+    requirements:
+        _format: manifest
 
 BluelineMethodsBundle:
     resource: "@BluelineMethodsBundle/Resources/config/routing_methods.yml"
@@ -10,15 +16,9 @@ BluelineTowersBundle:
     resource: "@BluelineTowersBundle/Resources/config/routing_towers.yml"
     prefix:   /towers/
 
-BluelineServicesBundle:
-    resource: "@BluelineServicesBundle/Resources/config/routing_services.yml"
-    prefix:   /services/
-
-
-# Static pages
-Blueline_welcome:
-    path: /
-    defaults: { _controller: BluelineBundle:Default:page, page: 'welcome' }
+BluelineAssociationsBundle:
+    resource: "@BluelineAssociationsBundle/Resources/config/routing_associations.yml"
+    prefix:   /associations/
 
 Blueline_Pages_view:
     path: /{page}.{_format}
@@ -34,12 +34,6 @@ Blueline_resource:
         page: robots|humans|sitemap|sitemap_root|browserconfig|manifest
         _format: json|txt|xml
 
-Blueline_manifest:
-    path: /site.{_format}
-    defaults: { _controller: BluelineBundle:Default:manifest }
-    requirements:
-        _format: manifest
-
 Blueline_Pages_redirect1:
     path: /copyright
     defaults:
@@ -52,6 +46,10 @@ Blueline_Pages_redirect2:
         _controller: FrameworkBundle:Redirect:urlRedirect
         path: /methods/tutorials
         permanent: true
+
+BluelineServicesBundle:
+    resource: "@BluelineServicesBundle/Resources/config/routing_services.yml"
+    prefix:   /services/
 
 
 ## Table exports
