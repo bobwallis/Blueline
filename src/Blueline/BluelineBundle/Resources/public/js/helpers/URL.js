@@ -28,7 +28,7 @@ define( ['jquery'], function( $ ) {
 		},
 		// Test if a given URL is to another page of the app
 		isInternal: function( href ) {
-			if( href.indexOf( 'javascript:' ) === 0 ) {
+			if( href.indexOf( 'javascript:' ) === 0 || href.indexOf( '_profiler/' ) !== -1 ) {
 				return false;
 			}
 			return regExp_isInternalLink.exec( URL.absolutise( href ) ) !== null;
