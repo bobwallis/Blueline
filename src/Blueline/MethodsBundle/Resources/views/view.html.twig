@@ -71,9 +71,9 @@
 {% endif %}
 				<dt>Download as image</dt>
 				{% if custom is not defined or not custom %}
-				<dd><a href="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 2, 'style': 'line' } ) }}" class="external" data-forcerefresh="true">Line</a><br/><a href="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 2, 'style': 'numbers' } ) }}" class="external" data-forcerefresh="true">Numbers</a><br/><a href="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 2, 'style': 'grid' } ) }}" class="external" data-forcerefresh="true">Grid</a></dd>
+				<dd><a href="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 2, 'style': 'numbers' } ) }}" class="external" data-forcerefresh="true">Numbers</a><br/><a href="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 2, 'style': 'grid' } ) }}" class="external" data-forcerefresh="true">Grid</a></dd>
 				{% else %}
-				<dd><a href="{{ path( 'Blueline_Methods_custom_view', { 'stage': method.stage, 'notation': method.notation, '_format': 'png', 'scale': 2, 'style': 'line' } ) }}" class="external" data-forcerefresh="true">Line</a><br/><a href="{{ path( 'Blueline_Methods_custom_view', { 'stage': method.stage, 'notation': method.notation, '_format': 'png', 'scale': 2, 'style': 'numbers' } ) }}" class="external" data-forcerefresh="true">Numbers</a><br/><a href="{{ path( 'Blueline_Methods_custom_view', { 'stage': method.stage, 'notation': method.notation, '_format': 'png', 'scale': 2, 'style': 'grid' } ) }}" class="external" data-forcerefresh="true">Grid</a></dd>
+				<dd><a href="{{ path( 'Blueline_Methods_custom_view', { 'stage': method.stage, 'notation': method.notation, '_format': 'png', 'scale': 2, 'style': 'numbers' } ) }}" class="external" data-forcerefresh="true">Numbers</a><br/><a href="{{ path( 'Blueline_Methods_custom_view', { 'stage': method.stage, 'notation': method.notation, '_format': 'png', 'scale': 2, 'style': 'grid' } ) }}" class="external" data-forcerefresh="true">Grid</a></dd>
 				{% endif %}
 				<dt>Data Source and Copyright</dt>
 				<dd>Details on the <a href="{{ path( 'Blueline_Pages_view', { 'page': 'about' } ) }}">about page</a>.</dd>
