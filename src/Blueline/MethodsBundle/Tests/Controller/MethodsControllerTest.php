@@ -9,7 +9,7 @@ class MethodsControllerTest extends WebTestCase
     public function testMethods()
     {
         // Test welcome page and some other basic requests
-        foreach (array('/methods/', '/methods/view/Cambridge_Surprise_Minor') as $page) {
+        foreach (array('/methods/', '/methods/tutorials', '/methods/view/Cambridge_Surprise_Minor', '/methods/view/Wee_Willie_Winkie_Hybrid_Maximus', '/methods/view?stage=8&notation=x1x1x45x27') as $page) {
             $client = static::createClient();
             $crawler = $client->request('GET', $page);
             $this->assertTrue($client->getResponse()->isSuccessful(), $page.' request unsuccessful');
@@ -56,7 +56,7 @@ class MethodsControllerTest extends WebTestCase
     {
         foreach (array('/methods/sitemap_1', '/methods/sitemap_2') as $xml) {
             $client = static::createClient();
-            $crawler = $client->request('GET', '/'.$xml.'.xml');
+            $crawler = $client->request('GET', $xml.'.xml');
             $this->assertTrue($client->getResponse()->isSuccessful(), $xml.'.xml request unsuccessful');
             $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'text/xml; charset=UTF-8'), $xml.'.xml Content-Type header wrong');
         }
