@@ -46,6 +46,10 @@ doctrine:
                             Blueline\BluelineBundle\Doctrine\Extension\Regexp
                         concat_ws:
                             Blueline\BluelineBundle\Doctrine\Extension\ConcatWs
+                        levenshtein:
+                            Blueline\BluelineBundle\Doctrine\Extension\Levenshtein
+                        levenshtein_less_equal:
+                            Blueline\BluelineBundle\Doctrine\Extension\LevenshteinLessEqual
                         levenshtein_ratio:
                             Blueline\BluelineBundle\Doctrine\Extension\LevenshteinRatio
                     numeric_functions:

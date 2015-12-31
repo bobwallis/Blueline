@@ -95,6 +95,7 @@ class MethodsController extends Controller
         }
 
         $method = $methodRepository->findByURLJoiningPerformancesAndCollections($url);
+        $similarMethods = $methodRepository->similarMethods($method->getNotation(), $method->getStage());
 
         if (!$method) {
             throw $this->createNotFoundException('The method does not exist');
@@ -107,7 +108,7 @@ class MethodsController extends Controller
                 $process->mustRun();
                 return new Response($process->getOutput());
             default:
-                return $this->render('BluelineMethodsBundle::view.'.$format.'.twig', compact('method'));
+                return $this->render('BluelineMethodsBundle::view.'.$format.'.twig', compact('method', 'similarMethods'));
         }
     }
 

@@ -1,1 +1,1 @@
-[{{ method|toArray|json_encode|raw }}]
+[{{ method|toArray|merge({"similar":similarMethods})|json_encode|raw }}]

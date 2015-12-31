@@ -132,4 +132,22 @@ class MethodRepository extends EntityRepository
             return null;
         }
     }
+
+    public function similarMethods($notation, $stage)
+    {
+        $query = $this->getEntityManager()->createQuery(
+            'SELECT partial m.{url,title,notation} FROM BluelineMethodsBundle:Method m
+            WHERE m.stage = :stage
+             AND LEVENSHTEIN_LESS_EQUAL( SUBSTRING(m.notation,0,255), SUBSTRING(:notation,0,255), 2 ) = 1
+            ORDER BY m.magic ASC'
+        )
+        ->setParameter('stage', $stage)
+        ->setParameter('notation', $notation);
+
+        try {
+            return $query->getArrayResult();
+        } catch (\Doctrine\ORM\NoResultException $e) {
+            return null;
+        }
+    }
 }
