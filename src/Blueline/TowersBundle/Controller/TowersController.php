@@ -27,7 +27,7 @@ class TowersController extends Controller
         $searchVariables = empty($searchVariables) ? Search::requestToSearchVariables($request, array( 'id', 'gridReference', 'postcode', 'country', 'county', 'diocese', 'place', 'dedication', 'note', 'contractor' )) : $searchVariables;
 
         $towers = $towerRepository->findBySearchVariables($searchVariables);
-        $count = (count($towers) > 0) ? $towerRepository->findCountBySearchVariables($searchVariables) : 0;
+        $count = (count($towers) < $searchVariables['count'])? count($towers) : $towerRepository->findCountBySearchVariables($searchVariables);
 
         $pageActive = max(1, ceil(($searchVariables['offset']+1)/$searchVariables['count']));
         $pageCount =  max(1, ceil($count / $searchVariables['count']));

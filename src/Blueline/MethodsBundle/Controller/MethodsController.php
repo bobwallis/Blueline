@@ -32,9 +32,9 @@ class MethodsController extends Controller
     {
         $methodRepository = $this->getDoctrine()->getManager()->getRepository('BluelineMethodsBundle:Method');
         $searchVariables = empty($searchVariables) ? Search::requestToSearchVariables($request, array( 'title', 'stage', 'classification', 'notation', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef', 'tdmmRef', 'pmmRef', 'lengthOfLead', 'numberOfHunts', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational' )) : $searchVariables;
-
+        
         $methods = $methodRepository->findBySearchVariables($searchVariables);
-        $count = (count($methods) > 0) ? $methodRepository->findCountBySearchVariables($searchVariables) : 0;
+        $count = (count($methods) < $searchVariables['count'])? count($methods) : $methodRepository->findCountBySearchVariables($searchVariables);
 
         $pageActive = max(1, ceil(($searchVariables['offset']+1)/$searchVariables['count']));
         $pageCount =  max(1, ceil($count / $searchVariables['count']));
