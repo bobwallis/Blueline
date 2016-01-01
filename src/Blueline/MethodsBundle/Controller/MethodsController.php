@@ -28,14 +28,83 @@ class MethodsController extends Controller
     /**
     * @Cache(maxage="129600", public=true, lastModified="database_update")
     */
-    public function searchAction($searchVariables = array(), Request $request)
+    public function searchAction(Request $request)
     {
-        $methodRepository = $this->getDoctrine()->getManager()->getRepository('BluelineMethodsBundle:Method');
-        $searchVariables = empty($searchVariables) ? Search::requestToSearchVariables($request, array( 'title', 'stage', 'classification', 'notation', 'leadHeadCode', 'leadHead', 'fchGroups', 'lengthOfLead', 'numberOfHunts', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational')) : $searchVariables;
-        
-        $methods = $methodRepository->findBySearchVariables($searchVariables);
-        $count = (count($methods) < $searchVariables['count'])? count($methods) : $methodRepository->findCountBySearchVariables($searchVariables);
+        $em = $this->getDoctrine()->getManager();
+        $methodRepository = $em->getRepository('BluelineMethodsBundle:Method');
+        $methodMetadata   = $em->getClassMetadata('BluelineMethodsBundle:Method');
 
+        // Parse search variables
+        $searchVariables = Search::requestToSearchVariables($request, array_values($methodMetadata->fieldNames));
+        $searchVariables['fields'] = array_values(array_unique(empty($searchVariables['fields'])? array('title', 'url', 'notation') : array_merge($searchVariables['fields'], ($request->getRequestFormat()=='html')?array('title', 'url'):array())));
+        $searchVariables['sort']   = empty($searchVariables['sort'])? 'magic' : $searchVariables['sort'];
+
+        // Create query
+        $query = Search::searchVariablesToBasicQuery($searchVariables, $methodRepository, $methodMetadata);
+        if (isset($searchVariables['q'])) {
+            if (strpos($searchVariables['q'], '/') === 0 && strlen($searchVariables['q']) > 1) {
+                if (@preg_match($searchVariables['q'].'/', ' ') === false) {
+                    throw new BadRequestHttpException('Invalid regular expression');
+                }
+                $query->andWhere('REGEXP(e.title, :qRegexp) = TRUE')
+                    ->setParameter('qRegexp', trim($searchVariables['q'], '/'));
+            } else {
+                $qExplode = explode(' ', $searchVariables['q']);
+                if (count($qExplode) > 1) {
+                    $last = array_pop($qExplode);
+                    // If the search ends in a number then use that to filter by stage and remove it from the title search
+                    $lastStage = Stages::toInt($last);
+                    if ($lastStage > 0) {
+                        $query->andWhere('e.stage = :stageFromQ')
+                            ->setParameter('stageFromQ', $lastStage);
+                        $searchVariables['q'] = implode(' ', $qExplode);
+                        $last = array_pop($qExplode);
+                    } else {
+                        $searchVariables['q'] = implode(' ', $qExplode).($last ? ' '.$last : '');
+                    }
+
+                    // Remove non-name parts of the search to test against nameMetaphone
+                    if (Classifications::isClass($last)) {
+                        $query->andWhere('e.classification = :classificationFromQ')
+                            ->setParameter('classificationFromQ', ucwords(strtolower($last)));
+                        $last = array_pop($qExplode);
+                    }
+                    while (1) {
+                        switch (strtolower($last)) {
+                            case 'little':
+                                $query->andWhere('e.little = :littleFromQ')
+                                    ->setParameter('littleFromQ', true);
+                                $last = array_pop($qExplode);
+                                break;
+                            case 'differential':
+                                $query->andWhere('e.differential = :differentialFromQ')
+                                    ->setParameter('differentialFromQ', true);
+                                $last = array_pop($qExplode);
+                                break;
+                            default:
+                                break 2;
+                        }
+                    }
+                    // This will be used to test against nameMetaphone
+                    $nameMetaphone = metaphone(implode(' ', $qExplode).($last ? ' '.$last : ''));
+                } else {
+                    $nameMetaphone = metaphone($searchVariables['q']);
+                }
+
+                if (empty($nameMetaphone)) {
+                    $query->andWhere('LOWER(e.title) LIKE :qLike')
+                        ->setParameter('qLike', Search::prepareStringForLike($searchVariables['q']));
+                } else {
+                    $query->andWhere($query->expr()->orx('LOWER(e.title) LIKE :qLike', 'LEVENSHTEIN_RATIO( :qMetaphone, e.nameMetaphone ) > 90'))
+                       ->setParameter('qLike', Search::prepareStringForLike($searchVariables['q']))
+                       ->setParameter('qMetaphone', $nameMetaphone);
+                }
+            }
+        }
+
+        // Execute
+        $methods = $query->getQuery()->getResult();
+        $count = (count($methods) < $searchVariables['count'])? count($methods) : Search::queryToCountQuery($query, $methodMetadata)->getQuery()->getSingleScalarResult();
         $pageActive = max(1, ceil(($searchVariables['offset']+1)/$searchVariables['count']));
         $pageCount =  max(1, ceil($count / $searchVariables['count']));
 

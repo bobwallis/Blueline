@@ -23,12 +23,29 @@ class TowersController extends Controller
     */
     public function searchAction($searchVariables = array(), Request $request)
     {
-        $towerRepository = $this->getDoctrine()->getManager()->getRepository('BluelineTowersBundle:Tower');
-        $searchVariables = empty($searchVariables) ? Search::requestToSearchVariables($request, array( 'id', 'gridReference', 'postcode', 'country', 'county', 'diocese', 'place', 'dedication', 'note', 'contractor' )) : $searchVariables;
+        $em = $this->getDoctrine()->getManager();
+        $towerRepository = $em->getRepository('BluelineTowersBundle:Tower');
+        $towerMetadata   = $em->getClassMetadata('BluelineTowersBundle:Tower');
 
-        $towers = $towerRepository->findBySearchVariables($searchVariables);
-        $count = (count($towers) < $searchVariables['count'])? count($towers) : $towerRepository->findCountBySearchVariables($searchVariables);
+        // Parse search variables
+        $searchVariables = Search::requestToSearchVariables($request, array_values($towerMetadata->fieldNames));
+        $searchVariables['fields'] = array_values(array_unique(empty($searchVariables['fields'])? array('id', 'place', 'dedication', 'county', 'country') : array_merge($searchVariables['fields'], ($request->getRequestFormat()=='html')?array('id', 'place', 'dedication', 'county', 'country'):array())));
+        $searchVariables['sort']   = empty($searchVariables['sort'])? 'id' : $searchVariables['sort'];
 
+        // Create query
+        $query = Search::searchVariablesToBasicQuery($searchVariables, $towerRepository, $towerMetadata);
+        if (isset($searchVariables['q'])) {
+            if (strpos($searchVariables['q'], ' ') !== false) {
+                $query->andWhere("CONCAT_WS(' ', LOWER(e.dedication), LOWER(e.place) ,LOWER(e.dedication)) LIKE :qLike");
+            } else {
+                $query->andWhere('LOWER(e.place) LIKE :qLike');
+            }
+            $query->setParameter('qLike', Search::prepareStringForLike($searchVariables['q']));
+        }
+
+        // Execute
+        $towers = $query->getQuery()->getResult();
+        $count = (count($towers) < $searchVariables['count'])? count($towers) : Search::queryToCountQuery($query, $towerMetadata)->getQuery()->getSingleScalarResult();
         $pageActive = max(1, ceil(($searchVariables['offset']+1)/$searchVariables['count']));
         $pageCount =  max(1, ceil($count / $searchVariables['count']));
 

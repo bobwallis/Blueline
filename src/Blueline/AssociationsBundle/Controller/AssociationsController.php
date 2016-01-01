@@ -23,12 +23,33 @@ class AssociationsController extends Controller
     */
     public function searchAction($searchVariables = array(), Request $request)
     {
-        $associationsRepository = $this->getDoctrine()->getManager()->getRepository('BluelineAssociationsBundle:Association');
-        $searchVariables = empty($searchVariables) ? Search::requestToSearchVariables($request, array( 'id', 'name' )) : $searchVariables;
+        $em = $this->getDoctrine()->getManager();
+        $associationsRepository = $em->getRepository('BluelineAssociationsBundle:Association');
+        $associationsMetadata   = $em->getClassMetadata('BluelineAssociationsBundle:Association');
 
-        $associations = $associationsRepository->findBySearchVariables($searchVariables);
-        $count = (count($associations) < $searchVariables['count'])? count($associations) : $associationsRepository->findCountBySearchVariables($searchVariables);
+        // Parse search variables
+        $searchVariables = Search::requestToSearchVariables($request, array_values($associationsMetadata->fieldNames));
+        $searchVariables['fields'] = array_values(array_unique(empty($searchVariables['fields'])? array('id', 'name') : array_merge($searchVariables['fields'], ($request->getRequestFormat()=='html')?array('id', 'name'):array())));
+        $searchVariables['sort']   = empty($searchVariables['sort'])? 'id' : $searchVariables['sort'];
 
+        // Create query
+        $query = Search::searchVariablesToBasicQuery($searchVariables, $associationsRepository, $associationsMetadata);
+        if (isset($searchVariables['q'])) {
+            if (strpos($searchVariables['q'], '/') === 0 && strlen($searchVariables['q']) > 1) {
+                if (@preg_match($searchVariables['q'].'/', ' ') === false) {
+                    throw new BadRequestHttpException('Invalid regular expression');
+                }
+                $query->andWhere('REGEXP(e.name, :qRegexp) = TRUE')
+                    ->setParameter('qRegexp', trim($searchVariables['q'], '/'));
+            } else {
+                $query->andWhere('LOWER(e.name) LIKE :qLike OR LOWER(e.id) LIKE :qLike')
+                    ->setParameter('qLike', Search::prepareStringForLike($searchVariables['q']));
+            }
+        }
+
+        // Execute
+        $associations = $query->getQuery()->getResult();
+        $count = (count($associations) < $searchVariables['count'])? count($associations) : Search::queryToCountQuery($query, $associationsMetadata)->getQuery()->getSingleScalarResult();
         $pageActive = max(1, ceil(($searchVariables['offset']+1)/$searchVariables['count']));
         $pageCount =  max(1, ceil($count / $searchVariables['count']));
 
