@@ -11,7 +11,7 @@ class MethodRepository extends EntityRepository
 {
     private function createQueryForFindBySearchVariables($searchVariables, $initialQuery = null)
     {
-        $query = ($initialQuery === null) ? $this->createQueryBuilder('m')->select('partial m.{title,url}') : $initialQuery;
+        $query = ($initialQuery === null) ? $this->createQueryBuilder('m')->select('partial m.{title,url,notation}') : $initialQuery;
 
         if (isset($searchVariables['q'])) {
             if (strpos($searchVariables['q'], '/') === 0 && strlen($searchVariables['q']) > 1) {
@@ -75,7 +75,7 @@ class MethodRepository extends EntityRepository
         }
 
         // String variables
-        foreach (array( 'title', 'classification', 'leadHeadCode', 'leadHead', 'fchGroups' ) as $key) {
+        foreach (array('title', 'classification', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef') as $key) {
             if (isset($searchVariables[$key])) {
                 if (strpos($searchVariables[$key], '/') === 0 && strlen($searchVariables[$key]) > 1) {
                     $query->andWhere('REGEXP(m.'.$key.', :'.$key.'Regexp) = TRUE')
@@ -84,6 +84,43 @@ class MethodRepository extends EntityRepository
                     $query->andWhere('LOWER(m.'.$key.') LIKE :'.$key.'Like')
                         ->setParameter($key.'Like', Search::prepareStringForLike($searchVariables[$key]));
                 }
+            }
+        }
+
+        // Number variabes
+        foreach (array('stage', 'lengthOfLead', 'numberOfHunts') as $key) {
+            if (isset($searchVariables[$key])) {
+                $splitValues = preg_split('/,(?![^(\[]*[)\]])/', $searchVariables[$key]);
+                $splitValuesDQL = array();
+                $splitValuesParams = array();
+                foreach ($splitValues as $i => $v) {
+                    // Interval notation (for ranges), e.g. [0,2), [3,4]
+                    if ($v{0} == '[' || $v{0} == '(') {
+                        $c1 = $v{0} == '['? ' >= ' : ' > ';
+                        $c2 = substr($v, -1) == ']'? ' <=' : ' < ';
+                        $vs = explode(',', substr($v, 1, strlen($v)-2));
+                        $splitValuesDQL[] = $query->expr()->andx('m.'.$key.$c1.':'.$key.$i.'lower', 'm.'.$key.$c2.':'.$key.$i.'upper');
+                        $splitValuesParams[$key.$i.'lower'] = intval($vs[0]);
+                        $splitValuesParams[$key.$i.'upper'] = intval($vs[1]);
+                    // Or just single numbers
+                    } else {
+                        $splitValuesDQL[] = 'm.'.$key.' = :'.$key.$i;
+                        $splitValuesParams[$key.$i] = intval($v);
+                    }
+                }
+                if (count($splitValuesDQL) > 0) {
+                    $query->andWhere($query->expr()->orx()->addMultiple($splitValuesDQL));
+                    foreach ($splitValuesParams as $k => $v) {
+                        $query->setParameter($k, $v);
+                    }
+                }
+            }
+        }
+
+        // Boolean varianbes
+        foreach (array('little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational') as $key) {
+            if (isset($searchVariables[$key])) {
+                $query->andWhere('m.'.$key.(filter_var($searchVariables[$key], FILTER_VALIDATE_BOOLEAN)?' = TRUE':' = FALSE'));
             }
         }
 

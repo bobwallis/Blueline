@@ -31,7 +31,7 @@ class MethodsController extends Controller
     public function searchAction($searchVariables = array(), Request $request)
     {
         $methodRepository = $this->getDoctrine()->getManager()->getRepository('BluelineMethodsBundle:Method');
-        $searchVariables = empty($searchVariables) ? Search::requestToSearchVariables($request, array( 'title', 'stage', 'classification', 'notation', 'leadHeadCode', 'leadHead', 'fchGroups', 'rwRef', 'bnRef', 'tdmmRef', 'pmmRef', 'lengthOfLead', 'numberOfHunts', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational' )) : $searchVariables;
+        $searchVariables = empty($searchVariables) ? Search::requestToSearchVariables($request, array( 'title', 'stage', 'classification', 'notation', 'leadHeadCode', 'leadHead', 'fchGroups', 'lengthOfLead', 'numberOfHunts', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational')) : $searchVariables;
         
         $methods = $methodRepository->findBySearchVariables($searchVariables);
         $count = (count($methods) < $searchVariables['count'])? count($methods) : $methodRepository->findCountBySearchVariables($searchVariables);

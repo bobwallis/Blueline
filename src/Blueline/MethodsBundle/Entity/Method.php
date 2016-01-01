@@ -349,6 +349,16 @@ class Method
     }
 
     /**
+     * Get notationSiril
+     *
+     * @return string
+     */
+    public function getNotationSiril()
+    {
+        return PlaceNotation::siril($this->getNotationExpanded(), $this->getStage());
+    }
+
+    /**
      * Set leadHeadCode
      *
      * @param  string $leadHeadCode
