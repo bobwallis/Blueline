@@ -10,6 +10,8 @@
 
 namespace Blueline\MethodsBundle\Helpers;
 
+use Blueline\TowersBundle\Helpers\LongCounty;
+
 class MethodXMLIterator implements \Iterator, \Countable
 {
     private $data;
@@ -134,40 +136,25 @@ class MethodXMLIterator implements \Iterator, \Countable
                         'location_country' => strval($node->performances->firstHandbellPeal->location->country) ?: null,
                     ), function ($e) { return !is_null($e); });
                 }
-                require __DIR__.'/../../TowersBundle/Resources/data/abbreviations.php';
                 // Remove abbreviations in the location data
                 foreach ($array['performances'] as &$p) {
                     // Fix countries
+                    $countries = array(
+                        'AU' => 'Australia',
+                        'CA' => 'Canada',
+                        'US' => 'USA'
+                    );
                     if (isset($p['location_country']) && !in_array($p['location_country'], $countries)) {
-                        if (array_key_exists($p['location_country'], $countries)) {
-                            $p['location_country'] = $countries[$p['location_country']];
-                        }
+                        $p['location_country'] = $countries[$p['location_country']];
                     }
                     // Fix regions
                     $regionSearchArray = array();
-                    if (isset($p['location_region'], $p['location_country'])) {
-                        switch ($p['location_country']) {
-                            case 'Australia':
-                                $regionSearchArray = $australianAreas;
-                                break;
-                            case 'Canada':
-                                $regionSearchArray = $canadianStates;
-                                break;
-                            case 'USA':
-                                $regionSearchArray = $states;
-                                break;
-                        }
-                        if (!in_array($p['location_region'], $regionSearchArray)) {
-                            if (array_key_exists($p['location_region'], $regionSearchArray)) {
-                                $p['location_region'] = $regionSearchArray[$p['location_region']];
-                            }
-                        }
+                    if (isset($p['location_region'])) {
+                        $p['location_region'] = LongCounty::get($p['location_region'], isset($p['location_country'])?$p['location_country']:'England');
                     }
                     // Fix counties
-                    if (isset($p['location_county']) && !in_array($p['location_county'], $counties)) {
-                        if (array_key_exists($p['location_county'], $counties)) {
-                            $p['location_county'] = $counties[$p['location_county']];
-                        }
+                    if (isset($p['location_county'])) {
+                        $p['location_county'] = LongCounty::get($p['location_county'], isset($p['location_country'])?$p['location_country']:'England');
                     }
                 }
             }
