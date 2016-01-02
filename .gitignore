@@ -1,12 +1,17 @@
+# Web server logs and composer
 .directory
 blueline.error.log
 blueline.access.log
 composer.phar
 
+# Parameters
 app/config/parameters.yml
-*/logs/*
-*/cache/*
 
+# Cache and logs
+/app/logs/*
+/app/cache/*
+
+# Assets managed by Gulp
 web/favicon.*
 web/assetic
 web/bundles
@@ -16,6 +21,13 @@ web/js
 web/fonts
 web/images
 
-vendor/*
-bower_components/
+# Managed by Composer
+/web/config.php
+/app/bootstrap.php.cache
+/bin/*
+!bin/console
+!bin/symfony_requirements
+/vendor/
+
+# Managed by NPM
 node_modules/
