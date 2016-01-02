@@ -1,25 +1,27 @@
 var DEST = './web/';
 
-var gulp         = require( 'gulp' );
-var plumber      = require( 'gulp-plumber' );
-var rename       = require( 'gulp-rename' );
-var concat       = require( 'gulp-concat');
-var flatten      = require( 'gulp-flatten' );
-var gzip         = require( 'gulp-gzip' );
-var es           = require( 'event-stream' );
-var merge        = require( 'merge-stream' );
-var svg2png      = require( 'gulp-svg2png' );
-var less         = require( 'gulp-less' );
-var autoprefixer = require( 'gulp-autoprefixer' );
-var minifyCss    = require( 'gulp-minify-css' );
-var imagemin     = require( 'gulp-imagemin' );
-var imageresize  = require( 'gulp-image-resize' );
-var requirejs    = require( 'gulp-requirejs' );
-var amdclean     = require( 'gulp-amdclean' );
-var uglify       = require( 'gulp-uglify' );
-var sourcemaps   = require( 'gulp-sourcemaps' );
+var gulp            = require( 'gulp' );
+var plumber         = require( 'gulp-plumber' );
+var rename          = require( 'gulp-rename' );
+var concat          = require( 'gulp-concat');
+var flatten         = require( 'gulp-flatten' );
+var zopfli          = require( 'gulp-zopfli' );
+var es              = require( 'event-stream' );
+var merge           = require( 'merge-stream' );
+var svg2png         = require( 'gulp-svg2png' );
+var less            = require( 'gulp-less' );
+var autoprefixer    = require( 'gulp-autoprefixer' );
+var minifyCss       = require( 'gulp-minify-css' );
+var imagemin        = require( 'gulp-imagemin' );
+var imagemin_zopfli = require( 'imagemin-zopfli' );
+var imageresize     = require( 'gulp-image-resize' );
+var requirejs       = require( 'gulp-requirejs' );
+var amdclean        = require( 'gulp-amdclean' );
+var uglify          = require( 'gulp-uglify' );
+var sourcemaps      = require( 'gulp-sourcemaps' );
 
-gulp.task( 'default', ['appicon', 'favicon', 'maskicon', 'androidicon', 'splash', 'images', 'fonts', 'css', 'js'], function() {} );
+gulp.task( 'default', ['css', 'js', 'fonts'], function() {} );
+gulp.task( 'images_all', ['appicon', 'favicon', 'maskicon', 'androidicon', 'splash', 'images'], function() {} );
 
 // App Icon
 gulp.task( 'appicon', ['appicon-png', 'appicon-svg'], function() {} );
@@ -28,7 +30,7 @@ gulp.task( 'appicon-png', function() {
 	var tasks = appicon_sizes.map( function( size ) {
 		return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/appicon.svg' )
 			.pipe( svg2png( size/63 ) )
-			.pipe( imagemin() )
+			.pipe( imagemin( { use: [imagemin_zopfli()] } ) )
 			.pipe( rename( function( path ) {
 				path.basename += '-'+size+'x'+size;
 			} ) )
@@ -40,7 +42,7 @@ gulp.task( 'appicon-svg', function() {
 	return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/appicon.svg' )
 		.pipe( imagemin() )
 		.pipe( gulp.dest( DEST+'images/' ) )
-		.pipe( gzip() )
+		.pipe( zopfli() )
 		.pipe( gulp.dest( DEST+'images/' ) );
 } );
 
@@ -55,12 +57,12 @@ gulp.task( 'favicon-ico', function() {
 gulp.task( 'favicon-png', function() {
 	var fp1 = gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/favicon.svg' )
 		.pipe( svg2png( 64/63 ) )
-		.pipe( imagemin() )
+		.pipe( imagemin( { use: [imagemin_zopfli()] } ) )
 		.pipe( gulp.dest( DEST+'images/' ) );
 	var fp2 = es.merge.apply( null, favicon_sizes.map( function( size ) {
 		return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/favicon.svg' )
 			.pipe( svg2png( size/63 ) )
-			.pipe( imagemin() )
+			.pipe( imagemin( { use: [imagemin_zopfli()] } ) )
 			.pipe( rename( function( path ) {
 				path.basename += '-'+size+'x'+size;
 			} ) )
@@ -72,7 +74,7 @@ gulp.task( 'favicon-svg', function() {
 	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/favicon.svg' )
 		.pipe( imagemin() )
 		.pipe( gulp.dest( DEST ) )
-		.pipe( gzip() )
+		.pipe( zopfli() )
 		.pipe( gulp.dest( DEST ) );
 } );
 
@@ -83,7 +85,7 @@ gulp.task( 'maskicon-svg', function() {
 	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/maskicon.svg' )
 		.pipe( imagemin() )
 		.pipe( gulp.dest( DEST+'images/' ) )
-		.pipe( gzip() )
+		.pipe( zopfli() )
 		.pipe( gulp.dest( DEST+'images/' ) );
 } );
 
@@ -94,12 +96,12 @@ var androidicon_sizes = [48, 96, 128, 144, 192, 256, 384, 512];
 gulp.task( 'androidicon-png', function() {
 	var fp1 = gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/androidicon.svg' )
 		.pipe( svg2png( 64/192 ) )
-		.pipe( imagemin() )
+		.pipe( imagemin( { use: [imagemin_zopfli()] } ) )
 		.pipe( gulp.dest( DEST+'images/' ) );
 	var fp2 = es.merge.apply( null, androidicon_sizes.map( function( size ) {
 		return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/androidicon.svg' )
 			.pipe( svg2png( size/192 ) )
-			.pipe( imagemin() )
+			.pipe( imagemin( { use: [imagemin_zopfli()] } ) )
 			.pipe( rename( function( path ) {
 				path.basename += '-'+size+'x'+size;
 			} ) )
@@ -111,7 +113,7 @@ gulp.task( 'androidicon-svg', function() {
 	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/androidicon.svg' )
 		.pipe( imagemin() )
 		.pipe( gulp.dest( DEST+'images/' ) )
-		.pipe( gzip() )
+		.pipe( zopfli() )
 		.pipe( gulp.dest( DEST+'images/' ) );
 } );
 
@@ -124,7 +126,7 @@ gulp.task( 'splash-png', function() {
 		return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/splash.svg' )
 			.pipe( svg2png() )
 			.pipe( imageresize( { width: size[0], height: size[1], upscale: true, crop: true } ) )
-			.pipe( imagemin() )
+			.pipe( imagemin( { use: [imagemin_zopfli()] } ) )
 			.pipe( rename( function( path ) {
 				path.basename += '-'+size[0]+'x'+size[1];
 			} ) )
@@ -140,13 +142,13 @@ gulp.task( 'images-svg', function() {
 	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/!(favicon|appicon|splash|maskicon|androidicon).svg' )
 		.pipe( imagemin() )
 		.pipe( gulp.dest( DEST+'images/' ) )
-		.pipe( gzip() )
+		.pipe( zopfli() )
 		.pipe( gulp.dest( DEST+'images/' ) );
 } );
 gulp.task( 'images-png', function() {
 	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/!(favicon|appicon|splash|maskicon|androidicon).svg' )
 		.pipe( svg2png() )
-		.pipe( imagemin() )
+		.pipe( imagemin( { use: [imagemin_zopfli()] } ) )
 		.pipe( gulp.dest( DEST+'images/' ) );
 } );
 gulp.task( 'images-gif', function() {
@@ -171,7 +173,7 @@ gulp.task( 'js-old_ie', function() {
 		.pipe( concat( 'old_ie.js' ) )
 		.pipe( uglify() )
 		.pipe( gulp.dest( DEST+'js/' ) )
-		.pipe( gzip() )
+		.pipe( zopfli() )
 		.pipe( gulp.dest( DEST+'js/' ) );
 
 } );
@@ -201,13 +203,13 @@ gulp.task( 'js-main', function() {
 		.pipe( uglify() )
 		.pipe( sourcemaps.write( '.' ) )
 		.pipe( gulp.dest( DEST+'js/' ) )
-		.pipe( gzip() )
+		.pipe( zopfli() )
 		.pipe( gulp.dest( DEST+'js/' ) );
 } );
 gulp.task( 'js-workers', function() {
 	gulp.src( ['src/Blueline/ServicesBundle/Resources/public/js/gsiril.worker.js'] )
 		.pipe( gulp.dest( DEST+'js/' ) )
-		.pipe( gzip() )
+		.pipe( zopfli() )
 		.pipe( gulp.dest( DEST+'js/' ) );
 } );
 
@@ -221,7 +223,7 @@ gulp.task( 'css', function() {
 		.pipe( minifyCss( { keepSpecialComments: 0 } ) )
 		.pipe( sourcemaps.write( '.' ) )
 		.pipe( gulp.dest( DEST+'css/' ) )
-		.pipe( gzip() )
+		.pipe( zopfli() )
 		.pipe( gulp.dest( DEST+'css/' ) );
 } );
 

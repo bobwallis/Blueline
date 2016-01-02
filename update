@@ -101,15 +101,17 @@ php "$d/app/console" doctrine:schema:validate
 
 
 # Rebuild web assets
-echo -e "\n\033[1mRebuilding image, CSS and JS assets\033[0m"
-rm -rf "$d/web/css"
-rm -rf "$d/web/images"
-rm -rf "$d/web/js"
-rm -rf "$d/web/fonts"
+echo -e "\n\033[1mRebuilding CSS and JS assets\033[0m"
 rm -rf "$d/web/components"
 rm -rf "$d/web/bundles"
 rm -rf "$d/web/assetic"
+rm -rf "$d/web/css"
+rm -rf "$d/web/js"
+rm -rf "$d/web/fonts"
 gulp
+echo -e "\n\033[1mRebuilding image assets in the background\033[0m"
+rm -rf "$d/web/images"
+nohup gulp images_all &>/dev/null &
 
 
 if [[ $CCCBRDATA = true ]]
