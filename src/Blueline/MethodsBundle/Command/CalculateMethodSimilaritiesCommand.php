@@ -129,6 +129,7 @@ class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
             $output->writeln('<error>Failed to query methods table: '.pg_last_error($db).'</error>');
             return;
         }
+        $methods = new PgResultIterator( $result );
         $progress = new ProgressBar($output, count($methods));
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($methods))*2) - 10);
         $progress->setRedrawFrequency(max(1, min(20,count($methods)/100)));
