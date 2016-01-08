@@ -40,7 +40,7 @@ class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
             'SELECT title, stage, notationexpanded, lengthoflead
               FROM methods
               LEFT OUTER JOIN methods_similar ON (title = method1_title)
-             WHERE (stage = 14 AND method1_title IS NULL)
+             WHERE (method1_title IS NULL)
              ORDER BY stage ASC'
         );
         if( $result === false ) {

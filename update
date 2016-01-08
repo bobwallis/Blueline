@@ -109,10 +109,6 @@ rm -rf "$d/web/css"
 rm -rf "$d/web/js"
 rm -rf "$d/web/fonts"
 gulp
-echo -e "\n\033[1mRebuilding image assets in the background\033[0m"
-rm -rf "$d/web/images"
-nohup gulp images_all &>/dev/null &
-
 
 if [[ $CCCBRDATA = true ]]
 	then
@@ -135,10 +131,15 @@ if [[ $CCCBRDATA = true ]]
 	php "$d/app/console" blueline:importMethods
 	php "$d/app/console" blueline:importMethodExtras
 	php "$d/app/console" blueline:importCollections
+	php "$d/app/console" blueline:calculateMethodSimilarities
 	echo ""
 	php "$d/app/console" blueline:linkPerformancesToDove
 	sed -i -e"s/database_update: .*/database_update: `date "+%s"`/" "$d/app/config/parameters.yml"
 fi
+
+echo -e "\n\033[1mRebuilding image assets in the background\033[0m"
+rm -rf "$d/web/images"
+nohup gulp images_all &>/dev/null &
 
 # Update source timestamp to refresh caching headers etc
 sed -i -e"s/asset_update: .*/asset_update: `date "+%s"`/" "$d/app/config/parameters.yml"
