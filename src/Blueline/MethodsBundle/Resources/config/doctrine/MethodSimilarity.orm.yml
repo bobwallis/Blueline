@@ -1,0 +1,28 @@
+Blueline\MethodsBundle\Entity\MethodSimilarity:
+    type: entity
+    repositoryClass: Blueline\MethodsBundle\Entity\MethodSimilarity
+    table: methods_similar
+    id:
+        method1:
+            associationKey: true
+        method2:
+            associationKey: true
+    fields:
+        similarity:
+            type: float
+        onlyDifferentOverLeadEnd:
+            type: boolean
+            nullable: true
+    manyToOne:
+        method1:
+            targetEntity: Method
+            inversedBy: methodsimilarity1
+            joinColumn:
+                name: method1_title
+                referencedColumnName: title
+        method2:
+            targetEntity: Method
+            inversedBy: methodsimilarity2
+            joinColumn:
+                name: method2_title
+                referencedColumnName: title

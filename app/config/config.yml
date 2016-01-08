@@ -66,6 +66,8 @@ doctrine:
                             Blueline\BluelineBundle\Doctrine\Extension\Acos
                         cos:
                             Blueline\BluelineBundle\Doctrine\Extension\Cos
+                        floor:
+                            Blueline\BluelineBundle\Doctrine\Extension\Floor
                         sin:
                             Blueline\BluelineBundle\Doctrine\Extension\Sin
                         radians:

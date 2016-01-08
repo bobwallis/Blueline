@@ -25,17 +25,40 @@ class MethodRepository extends EntityRepository
         }
     }
 
-    public function similarMethods($notation, $stage)
+    public function similarMethodsDifferentOnlyAtTheLeadEnd($url)
     {
         $query = $this->getEntityManager()->createQuery(
             'SELECT partial m.{url,title,notation} FROM BluelineMethodsBundle:Method m
-            WHERE m.stage = :stage
-             AND LEVENSHTEIN_LESS_EQUAL( SUBSTRING(m.notation,0,255), SUBSTRING(:notation,0,255), 2 ) = 1
-            ORDER BY m.magic ASC'
+             LEFT JOIN m.methodsimilarity2 s
+             LEFT JOIN s.method1 m2
+             WHERE m2.url = :url AND m.url != :url AND s.onlyDifferentOverLeadEnd = TRUE
+            ORDER BY s.similarity ASC'
         )
-        ->setParameter('stage', $stage)
-        ->setParameter('notation', $notation);
+        ->setParameter('url', $url);
 
+        try {
+            return array_map( function($m) {
+                $m['leadEndNotation'] =  trim(strrchr($m['notation'], ','), ',');
+                unset($m['notation']);
+                return $m;
+            }, $query->getArrayResult());
+        } catch (\Doctrine\ORM\NoResultException $e) {
+            return null;
+        }
+    }
+
+    public function similarMethodsExcludingThoseOnlyDifferentAtTheLeadEnd($url)
+    {
+        $query = $this->getEntityManager()->createQuery(
+            'SELECT partial m.{url,title} FROM BluelineMethodsBundle:Method m
+             LEFT JOIN m.methodsimilarity2 s
+             LEFT JOIN s.method1 m2
+             WHERE m2.url = :url AND m.url != :url AND s.onlyDifferentOverLeadEnd IS NULL
+            ORDER BY s.similarity ASC'
+        )
+        ->setMaxResults(8)
+        ->setParameter('url', $url);
+        
         try {
             return $query->getArrayResult();
         } catch (\Doctrine\ORM\NoResultException $e) {

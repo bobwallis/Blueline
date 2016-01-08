@@ -34,6 +34,8 @@ class Method
                 // Don't try to drill down into sub-entities
                 case 'collections':
                 case 'performances':
+                case 'methodsimilarity1':
+                case 'methodsimilarity2':
                     $v = null;
                     break;
             }
@@ -182,6 +184,16 @@ class Method
      */
     private $performances;
 
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     */
+    private $methodsimilarity1;
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     */
+    private $methodsimilarity2;
+    
     // Getters and setters
     /**
      * Get title
@@ -1059,5 +1071,73 @@ class Method
         }
 
         return $this->leadHeads;
+    }
+
+    /**
+     * Add methodsimilarity1
+     *
+     * @param \Blueline\MethodsBundle\Entity\MethodSimilarity $methodsimilarity1
+     *
+     * @return Method
+     */
+    public function addMethodsimilarity1(\Blueline\MethodsBundle\Entity\MethodSimilarity $methodsimilarity1)
+    {
+        $this->methodsimilarity1[] = $methodsimilarity1;
+
+        return $this;
+    }
+
+    /**
+     * Remove methodsimilarity1
+     *
+     * @param \Blueline\MethodsBundle\Entity\MethodSimilarity $methodsimilarity1
+     */
+    public function removeMethodsimilarity1(\Blueline\MethodsBundle\Entity\MethodSimilarity $methodsimilarity1)
+    {
+        $this->methodsimilarity1->removeElement($methodsimilarity1);
+    }
+
+    /**
+     * Get methodsimilarity1
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getMethodsimilarity1()
+    {
+        return $this->methodsimilarity1;
+    }
+
+    /**
+     * Add methodsimilarity2
+     *
+     * @param \Blueline\MethodsBundle\Entity\MethodSimilarity $methodsimilarity2
+     *
+     * @return Method
+     */
+    public function addMethodsimilarity2(\Blueline\MethodsBundle\Entity\MethodSimilarity $methodsimilarity2)
+    {
+        $this->methodsimilarity2[] = $methodsimilarity2;
+
+        return $this;
+    }
+
+    /**
+     * Remove methodsimilarity2
+     *
+     * @param \Blueline\MethodsBundle\Entity\MethodSimilarity $methodsimilarity2
+     */
+    public function removeMethodsimilarity2(\Blueline\MethodsBundle\Entity\MethodSimilarity $methodsimilarity2)
+    {
+        $this->methodsimilarity2->removeElement($methodsimilarity2);
+    }
+
+    /**
+     * Get methodsimilarity2
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getMethodsimilarity2()
+    {
+        return $this->methodsimilarity2;
     }
 }

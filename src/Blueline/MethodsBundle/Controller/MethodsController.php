@@ -164,8 +164,11 @@ class MethodsController extends Controller
         }
 
         $method = $methodRepository->findByURLJoiningPerformancesAndCollections($url);
-        $similarMethods = $methodRepository->similarMethods($method->getNotation(), $method->getStage());
-
+        $similarMethods = array(
+            'differentOnlyAtLeadEnd' => $methodRepository->similarMethodsDifferentOnlyAtTheLeadEnd($method->getUrl()),
+            'other' => $methodRepository->similarMethodsExcludingThoseOnlyDifferentAtTheLeadEnd($method->getUrl())
+        );
+        
         if (!$method) {
             throw $this->createNotFoundException('The method does not exist');
         }

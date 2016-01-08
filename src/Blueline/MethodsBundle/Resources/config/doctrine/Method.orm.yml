@@ -87,3 +87,11 @@ Blueline\MethodsBundle\Entity\Method:
             targetEntity: MethodInCollection
             cascade: ["all"]
             mappedBy: method
+        methodsimilarity1:
+            targetEntity: MethodSimilarity
+            cascade: ["all"]
+            mappedBy: method1
+        methodsimilarity2:
+            targetEntity: MethodSimilarity
+            cascade: ["all"]
+            mappedBy: method2
