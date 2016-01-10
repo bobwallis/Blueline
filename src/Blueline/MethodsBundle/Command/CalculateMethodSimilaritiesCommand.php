@@ -63,7 +63,7 @@ class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
 
         // Generate rounds for each stage
         $rounds = array();
-        for ($i = 4; $i < 22; ++$i) {
+        for ($i = 4; $i < 23; ++$i) {
             $rounds[$i] = PlaceNotation::rounds($i);
         }
         // And a function that converts row arrays into string arrays
