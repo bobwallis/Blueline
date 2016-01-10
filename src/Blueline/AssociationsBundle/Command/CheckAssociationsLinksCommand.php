@@ -16,6 +16,7 @@ class CheckAssociationsLinksCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $time = -microtime(true);
         // Set up styles
         $output->getFormatter()
                ->setStyle('title', new OutputFormatterStyle('white', null, array( 'bold' )));
@@ -47,5 +48,8 @@ class CheckAssociationsLinksCommand extends ContainerAwareCommand
                 $output->writeln("<notfound>".$retcode."\t".$association['link'].'</notfound>');
             }
         }
+
+        $time += microtime(true);
+        $output->writeln("\n<info>Finished checking association links in ".gmdate("H:i:s", $time).". Peak memory usage: ".number_format(round(memory_get_peak_usage(true)/1048576,2)).' MiB.</info>');
     }
 }

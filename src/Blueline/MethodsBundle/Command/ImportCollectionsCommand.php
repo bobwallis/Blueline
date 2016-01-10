@@ -17,6 +17,7 @@ class ImportCollectionsCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $time = -microtime(true);
         // Set up styles
         $output->getFormatter()
                ->setStyle('title', new OutputFormatterStyle('white', null, array( 'bold' )));
@@ -59,6 +60,7 @@ class ImportCollectionsCommand extends ContainerAwareCommand
         $progress->finish();
         $output->writeln('');
 
-        $output->writeln("\n<info>Finished updating extra method data. Peak memory usage: ".number_format(memory_get_peak_usage()).' bytes.</info>');
+        $time += microtime(true);
+        $output->writeln("\n<info>Finished updating method collection data in ".gmdate("H:i:s", $time).". Peak memory usage: ".number_format(round(memory_get_peak_usage(true)/1048576,2)).' MiB.</info>');
     }
 }
