@@ -57,5 +57,5 @@ Blueline_Data_table:
     path: /data/{table}.{_format}
     defaults: { _controller: BluelineBundle:Data:table }
     requirements:
-        table: associations|collections|methods|methods_collections|performances|towers|towers_associations|towers_oldpks
+        table: associations|collections|methods|methods_collections|methods_similar|performances|towers|towers_associations|towers_oldpks
         _format: csv

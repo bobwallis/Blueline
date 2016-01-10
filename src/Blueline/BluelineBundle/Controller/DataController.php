@@ -5,6 +5,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Blueline\BluelineBundle\Helpers\PgResultIterator;
 
 /**
 * @Cache(maxage="604800", public=true, lastModified="database_update")
@@ -13,7 +14,6 @@ class DataController extends Controller
 {
     public function tableAction($table, Request $request)
     {
-        $container = $this->container;
         $response = new StreamedResponse();
 
         // Block Dove data
@@ -21,115 +21,85 @@ class DataController extends Controller
             throw $this->createAccessDeniedException('Data tables generated from the Dove data file cannot be exported.');
         }
 
+        // Get database
+        $db = pg_connect('host='.$this->container->getParameter('database_host').' port='.$this->container->getParameter('database_port').' dbname='.$this->container->getParameter('database_name').' user='.$this->container->getParameter('database_user').' password='.$this->container->getParameter('database_password').'');
+        if( $db === false ) {
+            throw new \Exception('Failed to connect to database.');
+            return;
+        }
+
         // Set content
         $response->headers->set('Content-Type', 'text/csv');
-        $response->setCallback(function () use ($table, $container) {
-            $em = $container->get('doctrine')->getManager();
+        $response->setCallback(function () use ($table, $db) {
             switch ($table) {
                 case 'associations':
-                    $query  = $em->createQuery('SELECT partial a.{id,name,link} FROM Blueline\AssociationsBundle\Entity\Association a ORDER BY a.id ASC');
+                    $result = pg_query( $db,
+                        'SELECT id, name, link
+                          FROM associations
+                         ORDER BY id ASC'
+                    );
                     break;
                 case 'collections':
-                    $query  = $em->createQuery('SELECT c FROM Blueline\MethodsBundle\Entity\Collection c ORDER BY c.id ASC');
+                    $result = pg_query( $db,
+                        'SELECT id, name, description
+                          FROM collections
+                         ORDER BY id ASC'
+                    );
                     break;
                 case 'methods':
-                    $query  = $em->createQuery('SELECT m FROM Blueline\MethodsBundle\Entity\Method m ORDER BY m.title ASC');
+                    $result = pg_query( $db,
+                        'SELECT *
+                          FROM methods
+                         ORDER BY stage, classification, title ASC'
+                    );
                     break;
                 case 'methods_collections':
-                    $query  = $em->createQuery('SELECT partial m.{title}, mc, partial c.{id} FROM Blueline\MethodsBundle\Entity\Method m JOIN m.collections mc JOIN mc.collection c ORDER BY c.id, mc.position ASC');
+                    $result = pg_query( $db,
+                        'SELECT collection_id as id, position, method_title
+                          FROM methods_collections
+                         ORDER BY id, position ASC'
+                    );
+                    break;
+                case 'methods_similar':
+                    $result = pg_query( $db,
+                        'SELECT method1_title, method2_title, stage, similarity, onlydifferentoverleadend as onlyDifferentOverLeadEnd
+                          FROM methods_similar
+                          JOIN methods ON (title = method1_title)
+                         ORDER BY stage, method1_title ASC'
+                    );
                     break;
                 case 'performances':
-                    $query  = $em->createQuery('SELECT p, partial m.{title}, partial t.{id} FROM Blueline\MethodsBundle\Entity\Performance p JOIN p.method m JOIN p.location_tower t ORDER BY p.id ASC');
-                    break;
-                case 'towers':
-                    $query  = $em->createQuery('SELECT t FROM Blueline\TowersBundle\Entity\Tower t ORDER BY t.id ASC');
-                    break;
-                case 'towers_associations':
-                    $query  = $em->createQuery('SELECT partial t.{id}, partial a.{id} FROM Blueline\TowersBundle\Entity\Tower t JOIN t.associations a ORDER BY t.id ASC');
-                    break;
-                case 'towers_oldpks':
-                    $query  = $em->createQuery('SELECT partial t.{id}, partial o.{oldpk} FROM Blueline\TowersBundle\Entity\Tower t JOIN t.oldpks o ORDER BY t.id ASC');
+                    $result = pg_query( $db,
+                        'SELECT *
+                          FROM performances
+                         ORDER BY location_tower_id, method_title ASC'
+                    );
                     break;
             }
-            $result = $query->getArrayResult();
+            if( $result === false ) {
+                throw new \Exception('Failed to query table: '.$table);
+                return;
+            }
+
+            // Get data and output handle
+            $data = new PgResultIterator( $result );
+            $handle = fopen('php://output', 'r+');
+
+            // Output the header row
+            fputcsv($handle, array_keys($data->current()));
+
+            // Output the rest
+            $data->rewind();
             $i = 0;
-            if (isset($result[0])) {
-                $handle = fopen('php://output', 'r+');
-                switch ($table) {
-                    case 'associations':
-                    case 'collections':
-                    case 'towers':
-                        fputcsv($handle, array_keys($result[0]));
-                        do {
-                            fputcsv($handle, $result[$i]);
-                            if( $i % 50 == 0 ) { flush(); }
-                        } while (isset($result[++$i]));
-                        break;
-                    case 'methods':
-                        fputcsv($handle, array_keys($result[0]));
-                        do {
-                            array_walk($result[$i], function (&$v, $k) use ($table) {
-                                switch ($k) {
-                                    case 'calls':
-                                    case 'ruleOffs':
-                                    case 'callingPositions':
-                                        $v = json_encode($v)?: '';
-                                        break;
-                                }
-                            });
-                            if( $i % 50 == 0 ) { flush(); }
-                            fputcsv($handle, $result[$i]);
-                        } while (isset($result[++$i]));
-                        break;
-                    case 'methods_collections':
-                        fputcsv($handle, array('collection_id', 'position', 'method_title'));
-                        do {
-                            foreach ($result[$i]['collections'] as $methodInCollection) {
-                                fputcsv($handle, array($methodInCollection['collection']['id'], $methodInCollection['position'], $result[$i]['title']));
-                            }
-                        } while (isset($result[++$i]));
-                        break;
-                    case 'performances':
-                        fputcsv($handle, array_keys($result[0]));
-                        do {
-                            array_walk($result[$i], function (&$v, $k) use ($table) {
-                                switch ($k) {
-                                    case 'date':
-                                        $v = $v->format('Y-m-d');
-                                        break;
-                                    case 'method':
-                                        $v = $v['title'];
-                                        break;
-                                    case 'location_tower':
-                                        $v = $v['id'];
-                                        break;
-                                }
-                            });
-                            fputcsv($handle, $result[$i]);
-                            if( $i % 50 == 0 ) { flush(); }
-                        } while (isset($result[++$i]));
-                        break;
-                    case 'towers_associations':
-                        fputcsv($handle, array('tower_id', 'association_id'));
-                        do {
-                            foreach ($result[$i]['associations'] as $association) {
-                                fputcsv($handle, array($result[$i]['id'], $association['id']));
-                            }
-                            if( $i % 50 == 0 ) { flush(); }
-                        } while (isset($result[++$i]));
-                        break;
-                    case 'towers_oldpks':
-                        fputcsv($handle, array('tower_id', 'oldpk'));
-                        do {
-                            foreach ($result[$i]['oldpks'] as $oldpk) {
-                                fputcsv($handle, array($result[$i]['id'], $oldpk['oldpk']));
-                            }
-                            if( $i % 50 == 0 ) { flush(); }
-                        } while (isset($result[++$i]));
-                        break;
+            foreach ($data as $row) {
+                fputcsv($handle, $row);
+                if ($i++ % 50 == 0) {
+                    flush();
                 }
-                fclose($handle);
             }
+
+            // Cleanup
+            fclose($handle);
         });
 
         return $response;

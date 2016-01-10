@@ -88,9 +88,9 @@ class ImportMethodsCommand extends ContainerAwareCommand
             foreach ($xmlIterator as $xmlRow) {
                 // Generate details not in the XML
                 $method = new Method($xmlRow);
-                $xmlRow['calls'] = serialize($method->getCalls());
-                $xmlRow['callingpositions'] = serialize($method->getCallingPositions());
-                $xmlRow['ruleoffs'] = serialize($method->getRuleOffs());
+                $xmlRow['calls'] = json_encode($method->getCalls());
+                $xmlRow['callingpositions'] = json_encode($method->getCallingPositions());
+                $xmlRow['ruleoffs'] = json_encode($method->getRuleOffs());
                 // Upsert the method data
                 \Blueline\BluelineBundle\Helpers\pg_upsert($db, 'methods', array_intersect_key($xmlRow, $validFields), array('title' => $xmlRow['title']));
                 // 'Treble Dodging Minor Method' and 'Plain Minor Method' collections

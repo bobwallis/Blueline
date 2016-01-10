@@ -42,8 +42,8 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
             $extrasIterator   = $method_extras->getIterator();
             foreach ($extrasIterator as $txtRow) {
                 // Import the row
-                $txtRow['calls'] = serialize($txtRow['calls']);
-                $txtRow['ruleoffs'] = serialize($txtRow['ruleoffs']);
+                $txtRow['calls'] = json_encode($txtRow['calls']);
+                $txtRow['ruleoffs'] = json_encode($txtRow['ruleoffs']);
                 if( pg_update( $db, 'methods', array_change_key_case($txtRow), array('title' => $txtRow['title']) ) === false ) {
                     $output->writeln('<comment> Failed to import method extras for "'.$txtRow['title'].'"</comment>');
                     $output->writeln('<comment> '.pg_last_error($db).'</comment>');

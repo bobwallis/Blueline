@@ -36,8 +36,8 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
         }
         require __DIR__.'/../Resources/data/method_towers.php';
 
-        // Get an iterator over the performances table
-        $result = pg_query('SELECT id, method_title, stage, location_room, location_building, location_town, location_county, location_region, location_country FROM performances LEFT JOIN methods ON method_title = title');
+        // Get an iterator over the un-linked performances in the table
+        $result = pg_query('SELECT id, method_title, stage, location_room, location_building, location_town, location_county, location_region, location_country FROM performances LEFT OUTER JOIN methods ON method_title = title WHERE location_tower_id IS NULL AND location_town != \'handbells\' ORDER BY location_room, location_building, location_town, location_county, location_region, location_country ASC');
         if( $result === false ) {
             $output->writeln('<error>Failed to query performances table: '.pg_last_error($db).'</error>');
             return;
@@ -46,7 +46,11 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
         $performanceCount = $dbIterator->count();
 
         // Prepare a query for searching for towers
-        if(pg_prepare($db, 'tryLocation', 'SELECT id from towers WHERE (place ILIKE $1 OR altname ILIKE $1 OR id ILIKE $1) AND bells >= $2') === false) {
+        if(pg_prepare($db, 'tryLocation', 'SELECT id from towers WHERE bells >= $1 AND (place ILIKE $2 OR altname ILIKE $2 OR id ILIKE $2)') === false) {
+            $output->writeln('<error>Failed to create prepared query: '.pg_last_error($db).'</error>');
+            return;
+        }
+        if(pg_prepare($db, 'tryLocation2', 'SELECT id from towers WHERE bells >= $1 AND (((place ILIKE $3 OR altname ILIKE $3) AND dedication ILIKE $2) OR ((place ILIKE $2 OR altname ILIKE $2) AND county ILIKE $3))') === false) {
             $output->writeln('<error>Failed to create prepared query: '.pg_last_error($db).'</error>');
             return;
         }
@@ -66,17 +70,15 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
                 if (array_key_exists($location, $method_towers)) {
                     $doveid = $method_towers[$location];
                 } else {
-                    // Place
+                    $locationExplode = explode(', ', $location);
                     if (strpos($location, ',') === false) {
-                        $try = pg_execute($db, 'tryLocation', array(strtolower($location), intval($performance['stage'])));
+                        $try = pg_execute($db, 'tryLocation', array(intval($performance['stage']), strtolower($location)));
                         if($try === false) {
                             $output->writeln('<error>Failed to query for location \''.$location.'\': '.pg_last_error($db).'</error>');
                             continue;
                         }
                         $try = pg_fetch_all($try);
-
-                        if($try === false)
-                        {
+                        if($try === false) {
                             $progress->clear();
                             $output->writeln("\r<comment> ".$performance['method_title'].": No tower found for '".$location."'</comment>");
                             $progress->display();
@@ -87,6 +89,29 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
                             $output->writeln("\r<comment> ".$performance['method_title'].": Multiple towers found for '".$location."' => ".join(array_map('current', $try), ', ')."</comment>");
                             $progress->display();
                         }
+                    }
+                    elseif (count($locationExplode) == 2) {
+                        $try = pg_execute($db, 'tryLocation2', array(intval($performance['stage']), strtolower($locationExplode[0]), strtolower($locationExplode[1])));
+                        if($try === false) {
+                            $output->writeln('<error>Failed to query for location \''.$location.'\': '.pg_last_error($db).'</error>');
+                            continue;
+                        }
+                        $try = pg_fetch_all($try);
+                        if($try === false) {
+                            $progress->clear();
+                            $output->writeln("\r<comment> ".$performance['method_title'].": No tower found for '".$location."'</comment>");
+                            $progress->display();
+                        } elseif (count($try) == 1) {
+                            $doveid = $try[0]['id'];
+                        } elseif (count($try) > 1) {
+                            $progress->clear();
+                            $output->writeln("\r<comment> ".$performance['method_title'].": Multiple towers found for '".$location."' => ".join(array_map('current', $try), ', ')."</comment>");
+                            $progress->display();
+                        }
+                    } else {
+                        $progress->clear();
+                        $output->writeln("\r<comment> ".$performance['method_title'].": Not searching for '".$location."'</comment>");
+                        $progress->display();
                     }
                 }
 

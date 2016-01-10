@@ -39,6 +39,7 @@ class ImportCollectionsCommand extends ContainerAwareCommand
             return;
         }
 
+        $output->writeln('<info>Importing collection data...</info>');
         // Load data
         require __DIR__.'/../Resources/data/collections.php';
         $collections = new \ArrayObject($collections);
