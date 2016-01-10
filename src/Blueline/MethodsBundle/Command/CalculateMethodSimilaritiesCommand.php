@@ -135,7 +135,9 @@ class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
         $progress->start();
         foreach ($methods as $method) {
             pg_update($db, 'methods_similar', array('onlydifferentoverleadend' => true), $method);
+            $progress->advance();
         }
+        pg_flush($db);
         $progress->finish();
         $output->writeln('');
 
