@@ -1,6 +1,9 @@
 {
   "name": "Blueline",
   "version": "0.2.0",
+  "license": "GPL",
+  "author": "Robert Wallis",
+  "homepage": "https://rsw.me.uk/blueline/",
   "repository": {
     "type": "git",
     "url": "git://github.com/bobwallis/Blueline.git"
