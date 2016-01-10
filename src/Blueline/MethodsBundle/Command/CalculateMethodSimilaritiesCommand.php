@@ -92,9 +92,8 @@ class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
             pg_insert($db, 'methods_similar', array('method1_title' => $method['title'], 'method2_title' => $method['title'], 'similarity' => 0));
 
             // Compare each one and add to the similarity table (if similar enough)
-            $limit1 = max(1, floor($method['lengthoflead']/5));
+            $limit = max(1, floor($method['lengthoflead']/5));
             foreach ($comparisons as $comparison) {
-                $limit = min($limit1, floor($comparison['lengthoflead']/2));
                 $similar = MethodSimilarity::calculate($methodRowArray, $comparison['notationexpanded'], $method['stage'], $limit);
                 if ($similar < $limit) {
                     pg_insert($db, 'methods_similar', array('method1_title' => $method['title'],     'method2_title' => $comparison['title'], 'similarity' => $similar));
