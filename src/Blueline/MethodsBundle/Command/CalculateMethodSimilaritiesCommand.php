@@ -116,7 +116,7 @@ class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
               LEFT JOIN methods AS m2 ON (method2_title = m2.title)
              WHERE (onlydifferentoverleadend IS NULL OR onlydifferentoverleadend = FALSE)
               AND similarity > 0
-              AND similarity <= 1
+              AND similarity <= 2
               AND m1.leadhead != m2.leadhead
               AND m1.lengthoflead = m2.lengthoflead
               AND strpos(m1.notation,\',\') > m1.lengthoflead/2
