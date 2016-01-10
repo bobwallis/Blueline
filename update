@@ -138,7 +138,6 @@ if [[ $CCCBRDATA = true ]]
 fi
 
 echo -e "\n\033[1mRebuilding image assets in the background\033[0m"
-rm -rf "$d/web/images"
 nohup gulp images_all &>/dev/null &
 
 # Update source timestamp to refresh caching headers etc
