@@ -65,7 +65,7 @@ class MethodXMLIterator implements \Iterator, \Countable
 
             // Manually fix non-unique URLs caused by odd naming choices
             if ($array['title'] == '"Northumberland" Surprise Major') {
-                $array['url'] = '_Northumberland_ Surprise Major';
+                $array['url'] = '_Northumberland__Surprise_Major';
             }
 
             // Parse place notation
