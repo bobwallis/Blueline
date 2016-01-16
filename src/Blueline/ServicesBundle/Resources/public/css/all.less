@@ -1,9 +1,8 @@
 .gsiril {
-	margin: @contentYPadding @contentXPadding;
-	max-width: 1200px;
+	padding: @contentYPadding @contentXPadding;
 
 	h2 {
-		margin-top: @contentYPadding*2;
+		margin-top: 0;
 	}
 
 	.expanding-clone {
@@ -35,8 +34,19 @@
 			}
 		}
 	}
-
 }
+@media (min-width: 900px) {
+	.gsiril {
+		width: 50%;
+		box-sizing: border-box;
+		float: left;
+
+		.buttons {
+			text-align: right;
+		}
+	}
+}
+
 
 #gsiril_input + pre {
 	pointer-events: none;
