@@ -36,7 +36,7 @@ class MethodsController extends Controller
 
         // Parse search variables
         $searchVariables = Search::requestToSearchVariables($request, array_values($methodMetadata->fieldNames));
-        $searchVariables['fields'] = array_values(array_unique(empty($searchVariables['fields'])? array('title', 'url', 'notation') : array_merge($searchVariables['fields'], ($request->getRequestFormat()=='html')?array('title', 'url'):array())));
+        $searchVariables['fields'] = implode(',', array_values(array_unique(empty($searchVariables['fields'])? array('title', 'url', 'notation') : array_merge($searchVariables['fields'], ($request->getRequestFormat()=='html')?array('title', 'url'):array()))));
         $searchVariables['sort']   = empty($searchVariables['sort'])? 'magic' : $searchVariables['sort'];
 
         // Create query

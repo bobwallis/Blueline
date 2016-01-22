@@ -29,7 +29,7 @@ class AssociationsController extends Controller
 
         // Parse search variables
         $searchVariables = Search::requestToSearchVariables($request, array_values($associationsMetadata->fieldNames));
-        $searchVariables['fields'] = array_values(array_unique(empty($searchVariables['fields'])? array('id', 'name') : array_merge($searchVariables['fields'], ($request->getRequestFormat()=='html')?array('id', 'name'):array())));
+        $searchVariables['fields'] = implode(',', array_values(array_unique(empty($searchVariables['fields'])? array('id', 'name') : array_merge($searchVariables['fields'], ($request->getRequestFormat()=='html')?array('id', 'name'):array()))));
         $searchVariables['sort']   = empty($searchVariables['sort'])? 'id' : $searchVariables['sort'];
 
         // Create query

@@ -50,6 +50,9 @@ class Search
 
     public static function searchVariablesToBasicQuery($searchVariables, $entityRepository, $entityMetadata)
     {
+        if (isset($searchVariables['fields'])) {
+            $searchVariables['fields'] = explode(',', $searchVariables['fields']);
+        }
         $query = $entityRepository->createQueryBuilder('e')->select('partial e.{'.implode(',', $searchVariables['fields']).'}');
 
         // Sort/Order

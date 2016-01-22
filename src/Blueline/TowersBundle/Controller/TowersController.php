@@ -29,7 +29,7 @@ class TowersController extends Controller
 
         // Parse search variables
         $searchVariables = Search::requestToSearchVariables($request, array_values($towerMetadata->fieldNames));
-        $searchVariables['fields'] = array_values(array_unique(empty($searchVariables['fields'])? array('id', 'place', 'dedication', 'county', 'country') : array_merge($searchVariables['fields'], ($request->getRequestFormat()=='html')?array('id', 'place', 'dedication', 'county', 'country'):array())));
+        $searchVariables['fields'] = implode(',', array_values(array_unique(empty($searchVariables['fields'])? array('id', 'place', 'dedication', 'county', 'country') : array_merge($searchVariables['fields'], ($request->getRequestFormat()=='html')?array('id', 'place', 'dedication', 'county', 'country'):array()))));
         $searchVariables['sort']   = empty($searchVariables['sort'])? 'id' : $searchVariables['sort'];
 
         // Create query
