@@ -14,7 +14,7 @@ define( ['jquery', '../helpers/PlaceNotation'], function( $, PlaceNotation ) {
 				.html( longNotation.replace( /(x|\.)/g, function(t) { return ' '+t+' '; } ) );
 		}
 		else {
-			$('#custom_method_notationParsed').addClass( 'placeholder' );
+			$('#custom_method_notationParsed').html( '…' ).addClass( 'placeholder' );
 		}
 	};
 
