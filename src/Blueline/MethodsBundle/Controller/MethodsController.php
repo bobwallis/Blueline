@@ -49,7 +49,8 @@ class MethodsController extends Controller
                 $query->andWhere('REGEXP(e.title, :qRegexp) = TRUE')
                     ->setParameter('qRegexp', trim($searchVariables['q'], '/'));
             } else {
-                $qExplode = explode(' ', $searchVariables['q']);
+                $reducedQ = $searchVariables['q'];
+                $qExplode = explode(' ', $reducedQ);
                 if (count($qExplode) > 1) {
                     $last = array_pop($qExplode);
                     // If the search ends in a number then use that to filter by stage and remove it from the title search
@@ -57,10 +58,10 @@ class MethodsController extends Controller
                     if ($lastStage > 0) {
                         $query->andWhere('e.stage = :stageFromQ')
                             ->setParameter('stageFromQ', $lastStage);
-                        $searchVariables['q'] = implode(' ', $qExplode);
+                        $reducedQ = implode(' ', $qExplode);
                         $last = array_pop($qExplode);
                     } else {
-                        $searchVariables['q'] = implode(' ', $qExplode).($last ? ' '.$last : '');
+                        $reducedQ = implode(' ', $qExplode).($last ? ' '.$last : '');
                     }
 
                     // Remove non-name parts of the search to test against nameMetaphone
@@ -92,13 +93,17 @@ class MethodsController extends Controller
                 }
 
                 if (empty($nameMetaphone)) {
-                    $query->andWhere('LOWER(e.title) LIKE :qLike')
-                        ->setParameter('qLike', Search::prepareStringForLike($searchVariables['q']));
+                    $query->andWhere('LOWER(e.title) LIKE :qLikeR')
+                        ->setParameter('qLikeR', Search::prepareStringForLike($reducedQ));
                 } else {
-                    $query->andWhere($query->expr()->orx('LOWER(e.title) LIKE :qLike', 'LEVENSHTEIN_RATIO( :qMetaphone, e.nameMetaphone ) > 90'))
-                       ->setParameter('qLike', Search::prepareStringForLike($searchVariables['q']))
+                    $query->andWhere($query->expr()->orx('LOWER(e.title) LIKE :qLikeR', 'LEVENSHTEIN_RATIO( :qMetaphone, e.nameMetaphone ) > 90'))
+                       ->setParameter('qLikeR', Search::prepareStringForLike($reducedQ))
                        ->setParameter('qMetaphone', $nameMetaphone);
                 }
+
+                // Never exclude a basic match
+                $query->orWhere('LOWER(e.title) LIKE :qLike')
+                    ->setParameter('qLike', Search::prepareStringForLike($searchVariables['q']));
             }
         }
 
