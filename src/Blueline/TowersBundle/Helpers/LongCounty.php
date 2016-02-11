@@ -72,6 +72,7 @@ class LongCounty
         'W Sussex'  => 'West Sussex',
         'TyneWear'  => 'Tyne and Wear',
         'Tyne&Wear' => 'Tyne and Wear',
+        'Tyne+Wear' => 'Tyne and Wear',
         'W Mids'    => 'West Midlands',
         'Warks'     => 'Warwickshire',
         'Wmld'      => 'Westmorland',
