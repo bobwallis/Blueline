@@ -26,6 +26,11 @@ class URL
             $url = preg_replace('/'.$initial.'_('.implode('|', Stages::toArray()).')$/', $classification.'_$1', $url);
         }
 
+        // If the title contains no spaces, then add them in (messed up a sitemap import in the distant past and still get crawler errors from it)
+        if (strpos($url, '_') === false) {
+            $url = trim(preg_replace( '/([A-Z]{1})/', '_\1', $url ), '_');
+        }
+
         // Re-do the ASCII conversion
         $url = str_replace([' ', '$', '&', '+', ',', '/', ':', ';', '=', '?', '@', '"', "'", '<', '>', '#', '%', '{', '}', '|', "\\", '^', '~', '[', ']', '.'], ['_'], iconv(mb_detect_encoding($url, 'UTF-8, ISO-8859-1, ASCII', true), 'ASCII//TRANSLIT', $url));
 
