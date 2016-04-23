@@ -72,7 +72,6 @@
 
 		{# JavaScript #}
 		<!--[if lt IE 9]><script src="{{ app.request.basepath }}/js/old_ie.js?v={{ html_age }}"></script><![endif]-->
-		<script src="{{ app.request.basepath }}/js/main.js?v={{ html_age }}" async></script>
 
 		{# Analytics code #}
 		{% if analytics_code is not empty %}
@@ -99,6 +98,7 @@
 		<div id="content" role="main"{{ search|default(false) ? ' class="searchable"' : '' }}>
 			{% block body %}{% endblock %}
 		</div>
+		<script src="{{ app.request.basepath }}/js/main.js?v={{ html_age }}" async></script>
 	</body>
 </html>
 {% endspaceless %}
