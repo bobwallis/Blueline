@@ -22,5 +22,5 @@ define( ['jquery', 'eve'], function( $, eve ) {
 			}
 		}
 		document.title = windowTitle + 'Blueline';
-	} );
+	} )(-1);
 } );
