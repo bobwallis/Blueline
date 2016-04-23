@@ -53,7 +53,7 @@ define( ['jquery'], function( $ ) {
 	if ( URL.baseURL.substr(-1) != '/' ) {
 		URL.baseURL += '/';
 	}
-	URL.baseResourceURL = location.protocol+'//'+location.host + $( '#top a:first' ).attr( 'href' ).replace( 'app_dev.php/', '' );
+	URL.baseResourceURL = URL.baseURL.replace( 'app_dev.php/', '' );
 	if ( URL.baseURL.substr(-1) != '/' ) {
 		URL.baseURL += '/';
 	}
