@@ -26,6 +26,7 @@ class RequestListener
         $event->getRequest()->setFormat('jpg', 'image/jpg');
         $event->getRequest()->setFormat('bmp', 'image/bmp');
         $event->getRequest()->setFormat('svg', 'image/svg+xml');
+        $event->getRequest()->setFormat('pdf', 'application/pdf');
         $event->getRequest()->setFormat('woff', 'application/font-woff');
         $event->getRequest()->setFormat('woff2', 'application/font-woff2');
 
@@ -33,8 +34,7 @@ class RequestListener
         if ($this->container->getParameter('kernel.environment') == 'prod') {
             $event->getRequest()->attributes->set('asset_update', new \DateTime('@'.$this->container->getParameter('asset_update')));
             $event->getRequest()->attributes->set('database_update', new \DateTime('@'.$this->container->getParameter('database_update')));
-        }
-        else {
+        } else {
             $event->getRequest()->attributes->set('asset_update', new \DateTime());
             $event->getRequest()->attributes->set('database_update', new \DateTime());
         }

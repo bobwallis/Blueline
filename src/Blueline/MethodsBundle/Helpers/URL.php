@@ -28,7 +28,7 @@ class URL
 
         // If the title contains no spaces, then add them in (messed up a sitemap import in the distant past and still get crawler errors from it)
         if (strpos($url, '_') === false) {
-            $url = trim(preg_replace( '/([A-Z]{1})/', '_\1', $url ), '_');
+            $url = trim(preg_replace('/([A-Z]{1})/', '_\1', $url), '_');
         }
 
         // Re-do the ASCII conversion

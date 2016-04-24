@@ -15,6 +15,18 @@ Blueline_Methods_custom_view:
     requirements:
         _format: html|json|png
 
+Blueline_Methods_print:
+    path: /print
+    defaults: { _controller: BluelineMethodsBundle:Methods:print, _format: html }
+    requirements:
+        _format: html|json|png
+
+Blueline_Methods_export:
+    path: /export.{_format}
+    defaults: { _controller: BluelineMethodsBundle:Methods:export }
+    requirements:
+        _format: html|png|pdf
+
 Blueline_Methods_search:
     path: /search.{_format}
     defaults: { _controller: BluelineMethodsBundle:Methods:search, _format: html }

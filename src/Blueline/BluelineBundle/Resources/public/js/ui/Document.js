@@ -1,6 +1,6 @@
 // Manage changes to the UI at a document/body level
 
-define( ['jquery', 'eve', 'Modernizr', '../lib/fastclick', '../helpers/URL', '../data/Page', './Document/Title', './Document/Fallback', './Document/Hotkeys'], function( $, eve, Modernizr, FastClick, URL, Page ) {
+define( ['jquery', 'eve', 'Modernizr', '../lib/fastclick', '../helpers/URL', '../data/Page', './Document/Title', './Document/Fallback', './Document/Hotkeys', './Document/Forms'], function( $, eve, Modernizr, FastClick, URL, Page ) {
 	// Enable 'fastclick' on the whole document
 	// This is a polyfill to remove the delay when clicking with a touch device.
 	// See: https://github.com/ftlabs/fastclick

@@ -7,11 +7,12 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 
 		// Calculate various attributes of the method
 		this.stage = parseInt( options.stage, 10 );
-		var rounds = PlaceNotation.rounds( this.stage );
+		var rounds = PlaceNotation.rounds( this.stage ),
+			notation = PlaceNotation.expand( options.notation, this.stage );
 		this.notation = {
-			text: options.notation,
-			exploded: PlaceNotation.explode( options.notation ),
-			parsed: PlaceNotation.parse( options.notation, this.stage )
+			text: notation,
+			exploded: PlaceNotation.explode( notation ),
+			parsed: PlaceNotation.parse( notation, this.stage )
 		};
 		this.ruleOffs = (typeof options.ruleOffs == 'object')? options.ruleOffs : { from: 0, every: this.notation.exploded.length };
 		this.callingPositions = (typeof options.callingPositions === 'object')? options.callingPositions : false;
@@ -28,14 +29,22 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 		this.workGroups = PlaceNotation.cycles( this.leadHead );
 
 		// For the plain course image, we'll draw a line through the heaviest working bell of each type and the hunt bells
-		var toFollow = this.workGroups.map( function( g ) { return Math.max.apply( Math, g ); } ),
-			placeStarts = toFollow.filter( function( b ) { return this.huntBells.indexOf( b ) === -1; }, this );
+		var toFollow = this.workGroups.map( function( g ) {
+			if( typeof options.workingBell == 'string' && options.workingBell == 'lightest' ) {
+				return Math.min.apply( Math, g );
+			}
+			else {
+				return Math.max.apply( Math, g );
+			}
+		} );
+		var placeStarts = toFollow.filter( function( b ) { return this.huntBells.indexOf( b ) === -1; }, this );
 
 		// Calculate some sizing to help with creating default grid options objects
-		var fontSize = 12;
+		var fontSize = (typeof options.fontSize == 'number')? options.fontSize : 12,
+			font = fontSize+'px '+((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : 'Blueline, "Andale Mono", Consolas, ')+'monospace',
 			columnPadding = fontSize,
 			rowHeight = Math.floor( fontSize*1.1 ),
-			rowWidth = Math.floor( 1.2*MeasureCanvasText( Array( this.stage + 1 ).join( '0' ), fontSize+'px '+((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : 'Blueline, "Andale Mono", Consolas, ')+'monospace' ) );
+			rowWidth = Math.floor( 1.2*MeasureCanvasText( Array( this.stage + 1 ).join( '0' ), font ) );
 
 		// Default line colors and widths
 		var workingBellColor = ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'],
@@ -50,10 +59,10 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 		// Plain course
 		var sharedPlainCourseGridOptions = {
 			id: 'plainCourse_'+options.id,
-			notation: this.notation,
+			notation: $.extend( true, {}, this.notation ),
 			stage: this.stage,
-			ruleOffs: { every: this.ruleOffs.every, from: this.ruleOffs.from },
-			callingPositions: (this.callingPositions === false)? false: $.extend( { show: true }, this.callingPositions ),
+			ruleOffs: $.extend( {}, this.ruleOffs ),
+			callingPositions: (this.callingPositions === false)? false: $.extend( { show: true, font: (fontSize*0.8)+'"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif' }, this.callingPositions ),
 			dimensions: {
 				row: {
 					height: rowHeight,
@@ -71,7 +80,8 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 			},
 			placeStarts: {
 				show: true,
-				bells: placeStarts
+				bells: placeStarts,
+				size: fontSize*1.083
 			},
 			sideNotation: {
 				show: true
@@ -117,7 +127,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 					call.startRow = (start === 0)? PlaceNotation.rounds( this.stage ) : PlaceNotation.apply( notationParsed.slice( 0, start ), PlaceNotation.rounds( this.stage ) );
 
 					// Adjust rule offs to compensate for the fact we just sliced off some of the start of the method
-					call.ruleOffs = { every: this.ruleOffs.every, from: this.ruleOffs.from };
+					call.ruleOffs = $.extend( {}, this.ruleOffs );
 					call.ruleOffs.from -= start;
 
 					// Calculate which bells are affected by the call
@@ -167,7 +177,10 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 		// Create seperate objects for the numbers, line and grid styles
 		this.gridOptions.plainCourse.numbers = $.extend( true, {}, sharedPlainCourseGridOptions, {
 			id: sharedPlainCourseGridOptions.id+'_numbers',
-			numbers: { show: true, bells: rounds.map( function( b ) { return { color: (toFollow.indexOf( b ) !== -1)? 'transparent' : '#000' }; }, this ) }
+			numbers: {
+				show: true,
+				font: font,
+				bells: rounds.map( function( b ) { return { color: (toFollow.indexOf( b ) !== -1)? 'transparent' : '#000' }; }, this ) }
 		} );
 		this.gridOptions.calls.numbers = $.extend( true, [], sharedCallsGridOptions );
 
@@ -222,7 +235,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 			this.gridOptions.calls.numbers[callIndex].id += '_numbers';
 			this.gridOptions.calls.lines[callIndex].id += '_lines';
 			this.gridOptions.calls.grid[callIndex].id += '_grid';
-			this.gridOptions.calls.numbers[callIndex].numbers = { show: true, bells: rounds.map( function( b ) { return { color: (this.gridOptions.calls.numbers[callIndex].affected.indexOf( b ) !== -1 || this.huntBells.indexOf( b ) !== -1)? 'transparent' : '#000' }; }, this ) };
+			this.gridOptions.calls.numbers[callIndex].numbers = { show: true, font: font, bells: rounds.map( function( b ) { return { color: (this.gridOptions.calls.numbers[callIndex].affected.indexOf( b ) !== -1 || this.huntBells.indexOf( b ) !== -1)? 'transparent' : '#000' }; }, this ) };
 			this.gridOptions.calls.lines[callIndex].numbers = this.gridOptions.calls.grid[callIndex].numbers = false;
 			this.gridOptions.calls.lines[callIndex].verticalGuides = { shading: { show: true } };
 			this.gridOptions.calls.grid[callIndex].sideNotation = { show: true };
@@ -244,9 +257,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 				} );
 			}
 		}, this );
-
 		return this;
 	};
-
 	return Method;
 } );

@@ -1,3 +1,20 @@
+#print_form {
+	p {
+		line-height: 28px;
+	}
+}
+
+fieldset {
+	margin-top: @contentYPadding;
+	padding: 0 @contentXPadding;
+	border: 1px dashed @lightGrey;
+	legend {
+		margin: 0;
+		padding: 0;
+		font-size: 14px;
+	}
+}
+
 input[type="submit"], input[type="reset"] {
 	border-radius: 2px;
 	border: 0;
@@ -14,7 +31,7 @@ input[type="submit"], input[type="reset"] {
 	}
 }
 input[type="submit"] {
-	background-color: #002856;
+	background-color: @headerBackground;
 	color: white;
 }
 input[type="reset"] {
@@ -24,17 +41,25 @@ input[type="reset"] {
 
 .select-wrapper, .input-wrapper {
 	display: inline-block;
-	border-radius: 2px;
+	border: 1px solid @lightGrey;
+	border-radius: 1px;
+	margin: 0 @contentYPadding 0 0;
 	background-color: #F3F3F3;
 	height: 28px;
 	box-shadow: 0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.24);
+	input, select {
+		border-radius: 1px;
+	}
+}
+span.select-wrapper, span.input-wrapper {
+	margin: 0;
 }
 .input-wrapper input {
 	box-sizing: border-box;
 }
 
-input[type="text"], select {
-	display: block;
+input[type="text"], input[type="number"], select {
+	display: inline-block;
 	background-color: #F3F3F3;
 	width: 100%;
 	height: 100%;
@@ -44,5 +69,53 @@ input[type="text"], select {
 	&:focus {
 		outline: 0;
 		border: 0;
+	}
+}
+input[type="number"] {
+	padding: 0 0 0 5px;
+}
+
+input.tiny {
+	width: 40px;
+}
+input.medium {
+	width: 220px;
+}
+input.long {
+	width: 320px;
+}
+input.right {
+	text-align: right;
+}
+input.center {
+	text-align: center;
+}
+
+// Checkboxes
+input[type="checkbox"] {
+	display: inline-block;
+	margin: 0 @contentXPadding/2;
+	line-height: 28px;
+}
+
+// Radio Buttons
+label.radio_image {
+	& > input {
+		visibility: hidden;
+		position: absolute;
+		top: -100px;
+		& + img {
+			display: inline-block;
+			margin: 0 @contentXPadding/2;
+			cursor: pointer;
+			border: 2px solid @lightGrey;
+			border-radius: 2px;
+			box-shadow: 0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.24);
+			transition-property: border-color;
+			transition-duration: .2s;
+		}
+		&:checked + img {
+			border-color: @headerBackground;
+		}
 	}
 }

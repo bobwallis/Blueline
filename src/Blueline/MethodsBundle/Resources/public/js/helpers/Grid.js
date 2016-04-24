@@ -14,11 +14,11 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 		this.draw = function(returnImage) {
 			returnImage = (typeof returnImage !== 'boolean')? false : returnImage;
 			// Set up canvas
-			var canvas =  new Canvas( {
+			var canvas =  new Canvas( $.extend( ((typeof options.scale === 'number')? { scale: options.scale } : {}), {
 				id: options.id,
 				width: options.dimensions.canvas.width,
 				height: options.dimensions.canvas.height
-			} );
+			} ) );
 
 			// Create some shortcut variables for later use
 			var i, j, k, l, m, h, w, x, y,

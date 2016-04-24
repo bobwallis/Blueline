@@ -16,6 +16,33 @@
 	}
 }
 
+#m_title_acomp {
+	box-sizing: border-box;
+	border: 1px solid @lightGrey;
+	background-color: #F6F6F6;
+	border-top: 0;
+	border-radius: 1px;
+	border-top-right-radius: 0;
+	border-top-left-radius: 0;
+	box-shadow: 0 0 4px #002856;
+	width: 320px;
+	font-size: 13px;
+	li {
+		box-sizing: border-box;
+		line-height: 13px;
+		padding: 7.5px @contentYPadding*0.75;
+		border-bottom: 1px solid @lightGrey;
+		cursor: pointer;
+		transition: background-color 0.1s ease;
+		&:hover {
+			background-color: #FFF;
+		}
+		&:last-child {
+			border: 0;
+		}
+	}
+}
+
 section.method {
 	h3 {
 		margin: 0;
@@ -56,96 +83,5 @@ section.method {
 	}
 	.numbers {
 		display: block;
-	}
-}
-
-#export {
-	fieldset {
-		margin: 15px 0;
-		border: 1px solid @lightGrey;
-		border-radius: 2px;
-		box-shadow: 0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.24);
-	}
-	.form-section {
-
-	}
-	legend {
-		padding: 0.2em 0.5em;
-		font-size: 16px;
-	}
-	label.large {
-		display: block;
-		margin: @contentYPadding 0 5px 0;
-		font-size: 12px;
-		font-weight: bold;
-		&:first-child {
-			margin: 0;
-		}
-	}
-	.form-group {
-		padding: 0 0 @contentYPadding @contentXPadding;
-		label {
-			display: inline-block;
-			width: 95px;
-			line-height: 23px;
-			&.internal {
-				width: auto !important;
-			}
-		}
-		.form-group label {
-			width: 95 - @contentXPadding;
-		}
-	}
-	input.text {
-		font-size: 12px;
-		height: 15px;
-		line-height: 15px;
-		border: 2px solid #DDD;
-		border-radius: 3px;
-		margin: 0 2px;
-		padding: 2px 5px;
-		&:required:invalid {
-			border-color: #F00;
-		}
-		&.tiny {
-			width: 38px;
-		}
-		&.small {
-			width: 70px;
-		}
-		&.medium {
-			width: 120px;
-		}
-		&.large {
-			width: 250px;
-		}
-	}
-	input.check {
-		margin: 0 5px;
-	}
-	select {
-		margin: 0 2px;
-	}
-	.colorPreview {
-		display: inline-block;
-		transition-property: background-color;
-		transition-duration: .15s;
-		width: 19px;
-		height: 19px;
-		margin: 0 0 0 4px;
-		line-height: 19px;
-		border: 2px solid #DDD;
-		border-radius: 3px;
-	}
-	.capPreview, .dashPreview, .widthPreview, .facePreview {
-		display: inline-block;
-		vertical-align: top;
-		margin: 0 0 0 4px;
-	}
-	.facePreview {
-		width: 125px;
-		height: 19px;
-		border: 2px solid #DDD;
-		border-radius: 3px;
 	}
 }

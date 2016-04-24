@@ -1,0 +1,108 @@
+@page {
+	margin: 0;
+}
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-family: -apple-system, "Helvetica Neue", "Roboto", "Segoe UI", "Lucida Grande", sans-serif;
+	font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "pnum" 0, "tnum" 0, "onum" 0, "lnum" 0, "dlig" 0;
+}
+
+.page {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	margin: 0 auto;
+	overflow: hidden;
+	&.A3 {
+		&.portrait {
+			width: 297mm;
+			height: 420mm;
+		}
+		&.landscape {
+			width: 420mm;
+			height: 297mm;
+		}
+	}
+	&.A4 {
+		&.portrait {
+			width: 210mm;
+			height: 297mm;
+		}
+		&.landscape {
+			width: 297mm;
+			height: 210mm;
+		}
+	}
+	&.A5 {
+		&.portrait {
+			width: 148mm;
+			height: 210mm;
+		}
+		&.landscape {
+			width: 210mm;
+			height: 148mm;
+		}
+	}
+	> div {
+		box-sizing: border-box;
+	}
+}
+
+// Title sizing
+h1 {
+	font-weight: normal;
+	&.top {
+		display: block;
+		box-sizing: border-box;
+		width: 100%;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		text-align: center;
+	}
+}
+// Default title sizes (will be scaled down with JS)
+.page.A5 h1.top {
+	font-size: 5mm;
+	padding: 10mm 10mm 4mm;
+}
+.page.A4 h1.top {
+	font-size: 8mm;
+	padding: 15mm 15mm 5mm;
+}
+.page.A3 h1.top {
+	font-size: 15mm;
+	padding: 15mm 15mm 5mm;
+}
+
+
+// Line layout
+div.line {
+	text-align: center;
+	canvas {
+		display: inline-block;
+	}
+}
+
+// Column/Row splits
+.loopingClass (@index) when (@index > 0) {
+	.columns-@{index} > div {
+		width: 100% / @index;
+	}
+	.rows-@{index} > div {
+		height: 100% / @index;
+	}
+	.loopingClass(@index - 1);
+}
+.loopingClass (0) {}
+.loopingClass (10);
+
+@media print {
+	.sf-toolbar {
+		display: none;
+	}
+}

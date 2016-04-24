@@ -1,0 +1,24 @@
+{% spaceless %}
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Export Blueline</title>
+		<style>@page{size:{{ options.paper_size }} {{ options.paper_orientation }};}</style>
+		<link rel="stylesheet" media="all" href="{{ app.request.basepath }}/css/export.css?v={{ html_age }}" />
+		<script src="{{ app.request.basepath }}/js/export.js?v={{ html_age }}" async></script>
+	</head>
+	<body>
+		<div class="page {{ options.paper_size }} {{ options.paper_orientation }} columns-{{ options.paper_columns }} rows-{{ options.paper_rows }}" data-options="{{ options|json_encode }}">
+			{% for i in 0..(options.paper_rows*options.paper_columns)-1 %}
+				<div id="m{{ i }}" class="{{ options.show_title_position }}">
+					{% if options.show_title %}
+						<h1 class="{{ options.show_title_position }}">{{ options.methods[i].title }}</h1>
+					{% endif %}
+					<div class="line"></div>
+				</div>
+			{% endfor %}
+		</div>
+	</body>
+</html>
+{% endspaceless %}
