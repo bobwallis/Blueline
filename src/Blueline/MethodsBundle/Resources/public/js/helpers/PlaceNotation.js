@@ -62,12 +62,12 @@ define( function() {
 
 			// Parse microSiril format notation
 			if( fullNotation.indexOf( ',' ) !== -1 ) {
-				var splitOnComma = fullNotation.split( ',' ).map( function(s) { return s.trim(); } );
+				var splitOnComma = fullNotation.split( ',' ).map( function( s ) { return s.trim(); } );
 				if( splitOnComma.reduce( function( prev, cur ) { // If every block starts with either an & or a +
 					return prev && ( cur.charAt(0) == '&' || cur.charAt(0) == '+' );
 				}, true ) ) {
 					fullNotation = splitOnComma.reduce( function( prev, cur ) { // Expand the symmetrical blocks, keep the asymmetrical ones as they are but remove the +
-						return prev + ((cur.charAt(0) == '&')?  PlaceNotation.expandHalf( cur ) : cur.replace( '+', '' ));
+						return prev + '.' + ((cur.charAt(0) == '&')?  PlaceNotation.expandHalf( cur ) : cur.replace( '+', '' ));
 					}, '' );
 				}
 			}
@@ -190,8 +190,8 @@ define( function() {
 			// Expands a symmetrical block of place notation
 			notation = notation.replace( /^&/, '' );
 			var notationReversed = notation.split( '' ).reverse().join( '' ),
-				firstDot = notationReversed.indexOf( '.' ),
-				firstX = notationReversed.indexOf( 'x' ),
+				firstDot = (notationReversed.indexOf( '.' ) === -1)? 9999 : notationReversed.indexOf( '.' ),
+				firstX = (notationReversed.indexOf( 'x' ) === -1)? 9999 : notationReversed.indexOf( 'x' ),
 				trim;
 			if( firstDot < 0 && firstX < 0 ) {
 				return notation;
