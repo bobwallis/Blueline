@@ -121,6 +121,8 @@ class ImportMethodsCommand extends ContainerAwareCommand
         foreach ($idsInDatabase as $m) {
             $m = current($m);
             if (!in_array($m, $importedMethods)) {
+                pg_delete($db, 'methods_similar', array('method1_title' => $m));
+                pg_delete($db, 'methods_similar', array('method2_title' => $m));
                 pg_delete($db, 'methods', array('title' => $m));
                 $progress->clear();
                 $output->writeln("\r<comment>".str_pad(" Method '".$m."' deleted", $targetConsoleWidth, ' ')."</comment>");
