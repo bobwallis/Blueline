@@ -212,7 +212,7 @@ class MethodsController extends Controller
         }
 
         // Do some basic conversion
-        $vars['stage'] = isset($vars['stage'])? intval($vars['stage']) : max(array_map(function ($c) { return PlaceNotation::bellToInt($c); }, array_filter(str_split($vars['notation']), function ($c) { return preg_match('/[0-9A-Z]/', $c); })));
+        $vars['stage'] = isset($vars['stage'])? intval($vars['stage']) : PlaceNotation::guessStage($vars['notation']);
         $vars['notationExpanded'] = PlaceNotation::expand($vars['notation'], $vars['stage']);
         $vars['title'] = isset($vars['title']) ? $vars['title'] : 'Unrung '.Stages::toString($vars['stage']).' Method';
 

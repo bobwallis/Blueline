@@ -7,40 +7,31 @@ define( function() {
 		charToBell: function( ch ) {
 			var bell = parseInt( ch, 10 );
 			if( isNaN( bell ) || bell === 0 ) {
-				switch( ch ) {
-					case '0': return 9;
-					case 'E': return 10;
-					case 'T': return 11;
-					case 'A': return 12;
-					case 'B': return 13;
-					case 'C': return 14;
-					case 'D': return 15;
-					case 'F': return 16;
-					case 'G': return 17;
-					case 'H': return 18;
-					case 'J': return 19;
-					case 'K': return 20;
-					case 'L': return 21;
-					default: return null;
+				bell = PlaceNotation.bellToCharMap.indexOf( ch );
+				if( bell === -1 ) {
+					return null;
 				}
 			}
-			return --bell;
+			else {
+				--bell;
+			}
+			return bell;
 		},
 		expand: function( notation, stage ) {
 			// Tries to normalise place notation given in abbreviated form into full notation
 			var fullNotation, matches, stageText;
-
-			// If stage isn't given try to guess
-			if( typeof stage === 'undefined' ) {
-				stage = Math.max.apply( Math, notation.split( '' ).map( PlaceNotation.charToBell ) ) + 1;
-			}
-			stageText = PlaceNotation.bellToChar( stage-1 );
 			
 			fullNotation = notation
 				.toUpperCase().replace( /X/g, 'x' ) // Tidy up cases
-				.replace( /[\(\[{<].*[\)\]}>]/, '' ).replace( / FCH.*$/, '' ) // Remove anything inside brackets, or appended fch details
+				.replace( /[\[{<].*[\]}>]/, '' ).replace( / FCH.*$/, '' ) // Remove anything inside (non normal) brackets, or appended fch details
 				.replace( /\.?x\.?/g, 'x' ) // Remove weird input that might mess things up later
 				.trim();
+
+			// If stage isn't given try to guess
+			if( typeof stage === 'undefined' ) {
+				stage = Math.max.apply( Math, notation.replace( /( HL |LH|LE)/g , '' ).split( '' ).map( PlaceNotation.charToBell ) ) + 1;
+			}
+			stageText = PlaceNotation.bellToChar( stage-1 );
 
 			// Deal with notation like 'x1x1x1-2' (After checking for this form we can assume - means x)
 			matches = fullNotation.match( /^([^-]+)-([^-\.,x]+)$/ );
@@ -164,23 +155,47 @@ define( function() {
 				.replace( /\.+/g, '.' )       // Remove any unecessary doubling up of dots
 				.replace( /\.?x\.?/g, 'x' );  // and any .x.
 
-			// Explode the notation so we can work on each piece individually, the join back together
+			// Explode the notation so we can work on each piece individually, then join back together
 			fullNotation = PlaceNotation.explode( fullNotation ).map( function( piece ) {
 				// Tidy up 'x' on odd stages
-				if( piece == 'x' ) {
+				if( piece === 'x' ) {
 					return (stage % 2 === 0)? 'x' : stageText;
 				}
-				// First sort what we have
-				piece = piece.split( '' ).map( PlaceNotation.charToBell ).sort().map( PlaceNotation.bellToChar ).join( '' );
+				// Work out which places are affected
+				var affected = piece.match( /[A-Z\d]+/g ).join( '' ).split( '' ).map( PlaceNotation.charToBell ).sort( function( a, b ) { return a - b;} );
 				// Then add missing external places
 				// If the first bell is even, prepend a 1
-				if( (PlaceNotation.charToBell( piece.charAt( 0 ) )+1) % 2 === 0 ) {
+				if( (affected[0]+1) % 2 === 0 ) {
 					piece = '1'+piece;
 				}
 				// If stage odd and last bell even, or stage even and last bell odd, append an n
-				if( (stage % 2 === 0) ? ((PlaceNotation.charToBell( piece.charAt( piece.length-1 ) )+1) % 2 !== 0) : ((PlaceNotation.charToBell( piece.charAt( piece.length-1 ) )+1) % 2 === 0) ) {
+				if( (stage % 2 === 0) ? ((affected[affected.length-1]+1) % 2 !== 0) : ((affected[affected.length-1]+1) % 2 === 0) ) {
 					piece = piece + stageText;
 				}
+				// Sort the piece characters numerically
+				// Since we don't want to sort inside '()' (for jump changes), map those from '(abc)' to max(a, b, c) for sorting purposes (keeping
+				// both the original value and the 'sort key').
+				// This is a bit messy because we need to split twice, once from 12(354)6 to ['12', '(354)' '6'],
+				// then again to [['1','2'], '(354)', ['6']], then flatten the array before sorting and joining back to a string.
+				// There's probably a clearer way to do this.
+				piece = [].concat.apply( [],
+					piece.replace( /\(/g, '~(' ).replace( /\)/g, ')~' ).split('~')
+						.filter( function( e ) { return e !== ''; } )
+						.map( function( e ) {
+							if( e.charAt( 0 ) == '(' ) {
+								return { sort: Math.max.apply( Math, e.split( '' ).map( PlaceNotation.charToBell ) ), value: e };
+								}
+							else {
+								return e.split( '' ).map( function( f ) { return { sort: PlaceNotation.charToBell( f ), value: f }; } );
+							}
+						} ) )
+					.sort( function( a, b ) {
+						return a.sort - b.sort;
+					} )
+					.map( function( e ) {
+						return e.value;
+					} )
+					.join( '' );
 				return piece;
 			} ).join( '.' ).replace( /\.?x\.?/g, 'x' );
 
@@ -189,7 +204,7 @@ define( function() {
 		expandHalf: function( notation ) {
 			// Expands a symmetrical block of place notation
 			notation = notation.replace( /^&/, '' );
-			var notationReversed = notation.split( '' ).reverse().join( '' ),
+			var notationReversed = notation.split( '' ).reverse().join( '' ).replace( /\)(.+?)\(/g, function( m, p1 ) { return '('+p1.split( '' ).reverse().join( '' )+')'; } ),
 				firstDot = (notationReversed.indexOf( '.' ) === -1)? 9999 : notationReversed.indexOf( '.' ),
 				firstX = (notationReversed.indexOf( 'x' ) === -1)? 9999 : notationReversed.indexOf( 'x' ),
 				trim;
