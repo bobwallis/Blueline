@@ -15,7 +15,15 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 			parsed: PlaceNotation.parse( notation, this.stage )
 		};
 		this.ruleOffs = (typeof options.ruleOffs == 'object')? options.ruleOffs : { from: 0, every: this.notation.exploded.length };
-		this.callingPositions = (typeof options.callingPositions === 'object')? options.callingPositions : false;
+		if( typeof this.ruleOffs.show == 'undefined' ) { this.ruleOffs.show = true; }
+		if( typeof options.callingPositions === 'object' ) {
+			this.callingPositions = options.callingPositions;
+			if( typeof this.callingPositions.show == 'undefined' ) { this.callingPositions.show = true; }
+			if( typeof this.callingPositions.font == 'undefined' ) { this.callingPositions.font = (fontSize*0.8)+'"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif'; }
+		}
+		else {
+			this.callingPositions = false;
+		}
 		this.huntBells = PlaceNotation.huntBells( this.notation.parsed, this.stage );
 		this.leadHead = PlaceNotation.apply( this.notation.parsed, rounds );
 		this.leadHeads = [rounds, this.leadHead];
@@ -41,10 +49,11 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 
 		// Calculate some sizing to help with creating default grid options objects
 		var fontSize = (typeof options.fontSize == 'number')? options.fontSize : 12,
-			font = fontSize+'px '+((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : 'Blueline, "Andale Mono", Consolas, ')+'monospace',
+			fontFace = ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : 'Blueline, "Andale Mono", Consolas, ')+'monospace',
+			font = fontSize+'px '+fontFace,
 			columnPadding = fontSize,
 			rowHeight = Math.floor( fontSize*1.1 ),
-			rowWidth = Math.floor( 1.2*MeasureCanvasText( Array( this.stage + 1 ).join( '0' ), font ) );
+			rowWidth = Math.floor( (this.stage < 9? 1.4 : 1.2)*MeasureCanvasText( Array( this.stage + 1 ).join( '0' ), font ) );
 
 		// Default line colors and widths
 		var workingBellColor = ['#11D','#1D1','#D1D', '#DD1', '#1DD', '#306754', '#AF7817', '#F75D59', '#736AFF'],
@@ -52,17 +61,13 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 			workingBellWidth = fontSize/6,
 			huntBellWidth = workingBellWidth*0.6;
 
-
-		// Set up options objects
-		this.gridOptions = { plainCourse: {}, calls: {} };
-
 		// Plain course
 		var sharedPlainCourseGridOptions = {
 			id: 'plainCourse_'+options.id,
-			notation: $.extend( true, {}, this.notation ),
+			notation: this.notation,
 			stage: this.stage,
-			ruleOffs: $.extend( {}, this.ruleOffs ),
-			callingPositions: (this.callingPositions === false)? false: $.extend( { show: true, font: (fontSize*0.8)+'"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif' }, this.callingPositions ),
+			ruleOffs: this.ruleOffs,
+			callingPositions: this.callingPositions,
 			dimensions: {
 				row: {
 					height: rowHeight,
@@ -173,90 +178,243 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 			}
 		}
 
+		// Create an options object for each line style on-demand
+		this.gridOptions = { plainCourse: {}, calls: {} };
+		var that = this;
 
-		// Create seperate objects for the numbers, line and grid styles
-		this.gridOptions.plainCourse.numbers = $.extend( true, {}, sharedPlainCourseGridOptions, {
-			id: sharedPlainCourseGridOptions.id+'_numbers',
-			numbers: {
-				show: true,
-				font: font,
-				bells: rounds.map( function( b ) { return { color: (toFollow.indexOf( b ) !== -1)? 'transparent' : '#000' }; }, this ) }
-		} );
-		this.gridOptions.calls.numbers = $.extend( true, [], sharedCallsGridOptions );
-
-		this.gridOptions.plainCourse.lines = $.extend( true, {}, sharedPlainCourseGridOptions, {
-			id: sharedPlainCourseGridOptions.id+'_lines',
-			numbers: false,
-			verticalGuides: {
-				shading: {
-					show: true
+		// 'Numbers'
+		var thisgridOptionsplainCoursenumbers;
+		this.gridOptions.plainCourse.numbers = function() {
+			if( typeof thisgridOptionsplainCoursenumbers === 'object' ) {
+				return thisgridOptionsplainCoursenumbers;
+			}
+			// Create initial object
+			thisgridOptionsplainCoursenumbers = $.extend( true, {}, sharedPlainCourseGridOptions, {
+				id: sharedPlainCourseGridOptions.id+'_numbers',
+				numbers: {
+					show: true,
+					font: font,
+					bells: rounds.map( function( b ) {
+						return { color: (toFollow.indexOf( b ) !== -1)? 'transparent' : '#000' };
+					} )
 				}
-			}
-		} );
-		this.gridOptions.calls.lines = $.extend( true, [], sharedCallsGridOptions );
-
-		this.gridOptions.plainCourse.grid = $.extend( true, {}, sharedPlainCourseGridOptions, {
-			id: sharedPlainCourseGridOptions.id+'_grid',
-			title: false,
-			numberOfLeadsmbers: false,
-			numbers: false,
-			placeStarts: false,
-			callingPositions: false,
-			layout: {
-				numberOfLeads: 1,
-				numberOfColumns: 1
-			}
-		} );
-		this.gridOptions.calls.grid = $.extend( true, [], sharedCallsGridOptions );
-
-
-		// Set the colors and stroke widths of the lines in plain courses
-		var isHuntBell, isWorkingBell, isAffected;
-		for( i = 0, j = 0, k = 0, l = 0; i < this.stage; ++i ) {
-			isHuntBell = this.huntBells.indexOf( i ) !== -1;
-			isWorkingBell = toFollow.indexOf( i ) !== -1;
-			this.gridOptions.plainCourse.numbers.lines.bells.push( {
-				width: isHuntBell? huntBellWidth : workingBellWidth,
-				stroke: isHuntBell? huntBellColor : (isWorkingBell? workingBellColor[j++] || workingBellColor[j = 0, j++] : 'transparent')
 			} );
-			this.gridOptions.plainCourse.lines.lines.bells.push( {
-				width: (isHuntBell || !isWorkingBell)? huntBellWidth : workingBellWidth,
-				stroke: isHuntBell? huntBellColor : (isWorkingBell? workingBellColor[k++] || workingBellColor[k = 0, k++] : 'rgba(0,0,0,0.1)')
-			} );
-			this.gridOptions.plainCourse.grid.lines.bells.push( {
-				width: isHuntBell? huntBellWidth : workingBellWidth,
-				stroke: isHuntBell? huntBellColor : workingBellColor[l++] || workingBellColor[l = 0, l++]
-			} );
-		}
-
-		// and for calls
-		sharedCallsGridOptions.forEach( function( call, callIndex ) {
-			// Set IDs and other options
-			this.gridOptions.calls.numbers[callIndex].id += '_numbers';
-			this.gridOptions.calls.lines[callIndex].id += '_lines';
-			this.gridOptions.calls.grid[callIndex].id += '_grid';
-			this.gridOptions.calls.numbers[callIndex].numbers = { show: true, font: font, bells: rounds.map( function( b ) { return { color: (this.gridOptions.calls.numbers[callIndex].affected.indexOf( b ) !== -1 || this.huntBells.indexOf( b ) !== -1)? 'transparent' : '#000' }; }, this ) };
-			this.gridOptions.calls.lines[callIndex].numbers = this.gridOptions.calls.grid[callIndex].numbers = false;
-			this.gridOptions.calls.lines[callIndex].verticalGuides = { shading: { show: true } };
-			this.gridOptions.calls.grid[callIndex].sideNotation = { show: true };
-			// Set line colors
-			for( i = 0, j = 0, k = 0, l = 0; i < this.stage; ++i ) {
-				isHuntBell = this.huntBells.indexOf( i ) !== -1;
-				isAffected = call.affected.indexOf( i ) !== -1;
-				this.gridOptions.calls.numbers[callIndex].lines.bells.push( {
+			// Set the colors and stroke widths of the lines in the plain course
+			var isHuntBell, isWorkingBell, isAffected;
+			for( var i = 0, j = 0; i < that.stage; ++i ) {
+				isHuntBell = that.huntBells.indexOf( i ) !== -1;
+				isWorkingBell = toFollow.indexOf( i ) !== -1;
+				thisgridOptionsplainCoursenumbers.lines.bells.push( {
 					width: isHuntBell? huntBellWidth : workingBellWidth,
-					stroke: isHuntBell? huntBellColor : (isAffected? workingBellColor[j++] || workingBellColor[j = 0, j++] : 'transparent')
-				} );
-				this.gridOptions.calls.lines[callIndex].lines.bells.push( {
-					width: isAffected? workingBellWidth : huntBellWidth,
-					stroke: isHuntBell? huntBellColor : (isAffected? workingBellColor[k++] || workingBellColor[k = 0, k++] : 'rgba(0,0,0,0.1)')
-				} );
-				this.gridOptions.calls.grid[callIndex].lines.bells.push( {
-					width: isHuntBell? huntBellWidth : workingBellWidth,
-					stroke: isHuntBell? huntBellColor : workingBellColor[l++] || workingBellColor[l = 0, l++]
+					stroke: isHuntBell? huntBellColor : (isWorkingBell? workingBellColor[j++] || workingBellColor[j = 0, j++] : 'transparent')
 				} );
 			}
-		}, this );
+			return thisgridOptionsplainCoursenumbers;
+		};
+		var thisgridOptionscallsnumbers;
+		this.gridOptions.calls.numbers = function() {
+			if( typeof thisgridOptionscallsnumbers === 'object' ) {
+				return thisgridOptionscallsnumbers;
+			}
+			// Create initial object
+			thisgridOptionscallsnumbers = $.extend( true, [], sharedCallsGridOptions );
+			// Set the colors and stroke widths of the lines in the calls
+			sharedCallsGridOptions.forEach( function( call, callIndex ) {
+				var isHuntBell, isWorkingBell, isAffected;
+				// Set IDs and other options
+				thisgridOptionscallsnumbers[callIndex].numbers = { show: true, font: font, bells: rounds.map( function( b ) { return { color: (thisgridOptionscallsnumbers[callIndex].affected.indexOf( b ) !== -1 || this.huntBells.indexOf( b ) !== -1)? 'transparent' : '#000' }; }, that ) };
+				// Set line colors
+				for( i = 0, j = 0; i < that.stage; ++i ) {
+					isHuntBell = that.huntBells.indexOf( i ) !== -1;
+					isAffected = call.affected.indexOf( i ) !== -1;
+					thisgridOptionscallsnumbers[callIndex].lines.bells.push( {
+						width: isHuntBell? huntBellWidth : workingBellWidth,
+						stroke: isHuntBell? huntBellColor : (isAffected? workingBellColor[j++] || workingBellColor[j = 0, j++] : 'transparent')
+					} );
+				}
+			} );
+			return thisgridOptionscallsnumbers
+		};
+
+		// 'Diagrams'
+		var thisgridOptionsplainCoursediagrams;
+		this.gridOptions.plainCourse.diagrams = function() {
+			if( typeof thisgridOptionsplainCoursediagrams === 'object' ) {
+				return thisgridOptionsplainCoursediagrams;
+			}
+			// Create initial object
+			thisgridOptionsplainCoursediagrams = $.extend( true, {}, sharedPlainCourseGridOptions, {
+				id: sharedPlainCourseGridOptions.id+'_numbers',
+				numbers: {
+					show: true,
+					font: (fontSize*0.8)+'px '+fontFace,
+					bells: rounds.map( function( b ) { return { color: '#002856' }; } )
+				},
+				sideNotation: false,
+				callingPositions: false,
+				placeStarts: {
+					showSmallCircle: false,
+					color: '#002856'
+				},
+				ruleOffs: {
+					stroke: '#002856',
+					dash: [0,0]
+				}
+			} );
+			// Set the colors and stroke widths of the lines in the plain course
+			var isHuntBell, isWorkingBell, isAffected;
+			for( var i = 0, j = 0; i < that.stage; ++i ) {
+				isHuntBell = that.huntBells.indexOf( i ) !== -1;
+				isWorkingBell = toFollow.indexOf( i ) !== -1;
+				thisgridOptionsplainCoursediagrams.lines.bells.push( {
+					width: 1,
+					stroke: isHuntBell? huntBellColor : (isWorkingBell? '#002856' : 'transparent')
+				} );
+			}
+			return thisgridOptionsplainCoursediagrams;
+		};
+		var thisgridOptionscallsdiagrams;
+		this.gridOptions.calls.diagrams = function() {
+			if( typeof thisgridOptionscallsdiagrams === 'object' ) {
+				return thisgridOptionscallsdiagrams;
+			}
+			// Create initial object
+			thisgridOptionscallsdiagrams = $.extend( true, [], sharedCallsGridOptions );
+			// Set the colors and stroke widths of the lines in the calls
+			sharedCallsGridOptions.forEach( function( call, callIndex ) {
+				var isHuntBell, isWorkingBell, isAffected;
+				// Set IDs and other options
+				thisgridOptionscallsdiagrams[callIndex].id += '_diagrams';
+				thisgridOptionscallsdiagrams[callIndex].sideNotation = false;
+				thisgridOptionscallsdiagrams[callIndex].ruleOffs.stroke = '#002856';
+				thisgridOptionscallsdiagrams[callIndex].ruleOffs.dash = [0,0];
+				thisgridOptionscallsdiagrams[callIndex].numbers = { show: true, font: (fontSize*0.8)+'px '+fontFace, bells: rounds.map( function( b ) { return { color: '#002856' }; } ) };
+				// Set line colors
+				for( i = 0, j = 0; i < that.stage; ++i ) {
+					isHuntBell = that.huntBells.indexOf( i ) !== -1;
+					isAffected = call.affected.indexOf( i ) !== -1;
+					thisgridOptionscallsdiagrams[callIndex].lines.bells.push( {
+						width: 1,
+						stroke: isHuntBell? huntBellColor : (isAffected? '#002856' : 'transparent')
+					} );
+				}
+			} );
+			return thisgridOptionscallsdiagrams
+		};
+
+		// 'Lines'
+		var thisgridOptionsplainCourselines;
+		this.gridOptions.plainCourse.lines = function() {
+			if( typeof thisgridOptionsplainCourselines === 'object' ) {
+				return thisgridOptionsplainCourselines;
+			}
+			// Create initial object
+			thisgridOptionsplainCourselines = $.extend( true, {}, sharedPlainCourseGridOptions, {
+				id: sharedPlainCourseGridOptions.id+'_lines',
+				numbers: false,
+				verticalGuides: {
+					shading: {
+						show: true
+					}
+				}
+			} );
+			// Set the colors and stroke widths of the lines in the plain course
+			var isHuntBell, isWorkingBell, isAffected;
+			for( i = 0, j = 0; i < that.stage; ++i ) {
+				isHuntBell = that.huntBells.indexOf( i ) !== -1;
+				isWorkingBell = toFollow.indexOf( i ) !== -1;
+				thisgridOptionsplainCourselines.lines.bells.push( {
+					width: (isHuntBell || !isWorkingBell)? huntBellWidth : workingBellWidth,
+					stroke: isHuntBell? huntBellColor : (isWorkingBell? workingBellColor[j++] || workingBellColor[j = 0, j++] : 'rgba(0,0,0,0.1)')
+				} );
+			}
+			return thisgridOptionsplainCourselines;
+		};
+		var thisgridOptionscallslines;
+		this.gridOptions.calls.lines = function() {
+			if( typeof thisgridOptionscallslines === 'object' ) {
+				return thisgridOptionscallslines;
+			}
+			// Create initial object
+			thisgridOptionscallslines = $.extend( true, [], sharedCallsGridOptions );
+			// Set the colors and stroke widths of the lines in the calls
+			sharedCallsGridOptions.forEach( function( call, callIndex ) {
+				var isHuntBell, isWorkingBell, isAffected;
+				// Set IDs and other options
+				thisgridOptionscallslines[callIndex].id += '_lines';
+				thisgridOptionscallslines[callIndex].numbers = false;
+				thisgridOptionscallslines[callIndex].verticalGuides = { shading: { show: true } };
+				// Set line colors
+				for( i = 0, j = 0; i < that.stage; ++i ) {
+					isHuntBell = that.huntBells.indexOf( i ) !== -1;
+					isAffected = call.affected.indexOf( i ) !== -1;
+					thisgridOptionscallslines[callIndex].lines.bells.push( {
+						width: isAffected? workingBellWidth : huntBellWidth,
+						stroke: isHuntBell? huntBellColor : (isAffected? workingBellColor[j++] || workingBellColor[j = 0, j++] : 'rgba(0,0,0,0.1)')
+					} );
+				}
+			} );
+			return thisgridOptionscallslines
+		};
+
+		// Grid
+		var thisgridOptionsplainCoursegrid;
+		this.gridOptions.plainCourse.grid = function() {
+			if( typeof thisgridOptionsplainCoursegrid === 'object' ) {
+				return thisgridOptionsplainCoursegrid;
+			}
+			// Create initial object
+			thisgridOptionsplainCoursegrid = $.extend( true, {}, sharedPlainCourseGridOptions, {
+				id: sharedPlainCourseGridOptions.id+'_grid',
+				title: false,
+				numberOfLeadsmbers: false,
+				numbers: false,
+				placeStarts: false,
+				callingPositions: false,
+				layout: {
+					numberOfLeads: 1,
+					numberOfColumns: 1
+				}
+			} );
+			// Set the colors and stroke widths of the lines in the plain course
+			var isHuntBell, isWorkingBell, isAffected;
+			for( i = 0, j = 0; i < that.stage; ++i ) {
+				isHuntBell = that.huntBells.indexOf( i ) !== -1;
+				isWorkingBell = toFollow.indexOf( i ) !== -1;
+				thisgridOptionsplainCoursegrid.lines.bells.push( {
+					width: isHuntBell? huntBellWidth : workingBellWidth,
+					stroke: isHuntBell? huntBellColor : workingBellColor[j++] || workingBellColor[j = 0, j++]
+				} );
+			}
+			return thisgridOptionsplainCoursegrid;
+		};
+		var thisgridOptionscallsgrid;
+		this.gridOptions.calls.grid = function() {
+			if( typeof thisgridOptionscallsgrid === 'object' ) {
+				return thisgridOptionscallsgrid;
+			}
+			// Create initial object
+			thisgridOptionscallsgrid = $.extend( true, [], sharedCallsGridOptions );
+			// Set the colors and stroke widths of the lines in the calls
+			sharedCallsGridOptions.forEach( function( call, callIndex ) {
+				var isHuntBell, isWorkingBell, isAffected;
+				// Set IDs and other options
+				thisgridOptionscallsgrid[callIndex].id += '_grid';
+				thisgridOptionscallsgrid[callIndex].numbers = false;
+				thisgridOptionscallsgrid[callIndex].sideNotation = { show: true };
+				// Set line colors
+				for( i = 0, j = 0; i < that.stage; ++i ) {
+					isHuntBell = that.huntBells.indexOf( i ) !== -1;
+					isAffected = call.affected.indexOf( i ) !== -1;
+					thisgridOptionscallsgrid[callIndex].lines.bells.push( {
+						width: isHuntBell? huntBellWidth : workingBellWidth,
+						stroke: isHuntBell? huntBellColor : workingBellColor[j++] || workingBellColor[j = 0, j++]
+					} );
+				}
+			} );
+			return thisgridOptionscallsgrid
+		};
+
 		return this;
 	};
 	return Method;

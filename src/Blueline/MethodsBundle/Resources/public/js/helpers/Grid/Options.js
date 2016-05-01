@@ -46,6 +46,7 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 		},
 		placeStarts: {
 			show: false,
+			showSmallCircle: true,
 			font: '"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif',
 			color: '#000',
 			size: 13,
@@ -57,7 +58,7 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 			color: '#000'
 		},
 		ruleOffs: {
-			show: true,
+			show: false,
 			stroke: 'rgba(0,0,0,0.4)',
 			dash:   [3,1],
 			width:  1,
@@ -113,6 +114,9 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 					}
 					return bells;
 				} )( passedOptions.stage )
+			},
+			ruleOffs: {
+				every: passedOptions.notation.exploded.length
 			},
 			placeStarts: {
 				every: passedOptions.notation.exploded.length

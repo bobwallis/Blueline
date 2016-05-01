@@ -39,9 +39,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 				canvasLeftPadding = options.dimensions.canvas.padding.left,
 				columnRightPadding = options.dimensions.column.padding.right,
 				interColumnPadding = options.dimensions.column.padding.between,
-				rowWidthWithPadding = options.dimensions.column.padding.between + options.dimensions.column.padding.left + options.dimensions.column.padding.right + options.dimensions.row.width,
-
-				textMetrics;
+				rowWidthWithPadding = options.dimensions.column.padding.between + options.dimensions.column.padding.left + options.dimensions.column.padding.right + options.dimensions.row.width;
 
 			// If we're displaying multiple leads, pre-calculate the lead heads for later use
 			var leadHeads = [options.startRow];
@@ -130,33 +128,61 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 
 			// Draw numbers
 			if( options.numbers.show ) {
-				// Calculate reused offsets
-				textMetrics = MeasureCanvasTextOffset( Math.max(bellWidth, rowHeight ), options.numbers.font, '0' );
-				var columnSidePadding = interColumnPadding + columnRightPadding,
-					sidePadding = canvasLeftPadding + (bellWidth/2) + textMetrics.x,
-					topPadding = canvasTopPadding + (rowHeight/2) + textMetrics.y;
-
-				// Set up the context
-				context.font = options.numbers.font;
-				context.textAlign = 'center';
-				context.textBaseline = 'middle';
-
-				options.numbers.bells.forEach( function( bellOptions, bell ) { // For each number
-					if( bellOptions.color !== 'transparent' ) { // Only bother drawing at all if not transparent
+				// Cache pre-rendered numbers
+				var fillTextCache_numbers = (function() {
+					var textMetrics = MeasureCanvasTextOffset( Math.max(bellWidth, rowHeight ), options.numbers.font, '0' );
+					return options.numbers.bells.map( function( bellOptions, bell ) {
+						if( bellOptions.color === 'transparent' ) {
+							return null;
+						}
+						var size = Math.max(bellWidth, rowHeight ),
+						cacheCanvas = new Canvas( {
+							id: 'ccn'+bell,
+							width: size,
+							height: size
+						} );
+						var context = cacheCanvas.context;
+						context.font = options.numbers.font;
+						context.textAlign = 'center';
+						context.textBaseline = 'middle';
 						context.fillStyle = bellOptions.color;
+						context.fillText( PlaceNotation.bellToChar( bell ), size/2 + textMetrics.x, size/2 + textMetrics.y );
+						return cacheCanvas;
+					} );
+				})();
 
-						var char = PlaceNotation.bellToChar( bell ),
-							row = options.startRow;
+				// Calculate reused offsets
+				var columnSidePadding = interColumnPadding + columnRightPadding,
+					sidePadding = canvasLeftPadding + (bellWidth/2) - (Math.max(bellWidth, rowHeight )/2),
+					topPadding = canvasTopPadding + (rowHeight/2) - (Math.max(bellWidth, rowHeight )/2);
 
-						for( i = 0; i < numberOfColumns; ++i ) {
-							for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
-								if( j === 0 ) {
-									context.fillText( char, sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding), topPadding );
-								}
-								for( k = 0; k < leadLength; ) {
-									row = PlaceNotation.apply( options.notation.parsed[k], row );
-									context.fillText( char, sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding), topPadding+(j*leadLength*rowHeight)+(++k*rowHeight) );
-								}
+				// Draw each bell separately
+				options.numbers.bells.forEach( function( bellOptions, bell ) { // For each number
+					if( bellOptions.color === 'transparent' ) { // Only bother drawing at all if not transparent
+						return;
+					}
+					var row = options.startRow,
+						fillTextCacheScale = fillTextCache_numbers[bell].scale,
+						fillTextCacheSize  = Math.max(bellWidth, rowHeight ),
+						fillTextSourceSize = Math.floor(fillTextCacheSize*fillTextCacheScale);
+					for( i = 0; i < numberOfColumns; ++i ) {
+						for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
+							if( j === 0 ) {
+								context.drawImage( fillTextCache_numbers[bell].element,
+									0, 0,
+									fillTextSourceSize, fillTextSourceSize,
+									sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding),
+									topPadding,
+									fillTextCacheSize, fillTextCacheSize );
+							}
+							for( k = 0; k < leadLength; ) {
+								row = PlaceNotation.apply( options.notation.parsed[k], row );
+								context.drawImage( fillTextCache_numbers[bell].element,
+									0, 0,
+									fillTextSourceSize, fillTextSourceSize,
+									sidePadding + (row.indexOf( bell )*bellWidth) + i*(rowWidth+columnSidePadding),
+									topPadding+(j*leadLength*rowHeight)+(++k*rowHeight),
+									fillTextCacheSize, fillTextCacheSize );
 							}
 						}
 					}
@@ -238,16 +264,20 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 						k, l, m;
 					for( k = 0; k < numberOfColumns; ++k ) {
 						for( l = 0; l < leadsPerColumn && (k*leadsPerColumn)+l < numberOfLeads; ++l ) {
-							var positionInLeadHead = leadHeads[(k*leadsPerColumn)+l].indexOf( j );
+							var positionInLeadHead = leadHeads[(k*leadsPerColumn)+l].indexOf( j ),
+							x, y;
+
+							y = canvasTopPadding + (l*rowHeight*leadLength) + Math.max(options.placeStarts.size/2, rowHeight/2);
 
 							// The little circle
-							var x = canvasLeftPadding + (k*rowWidthWithPadding) + ((positionInLeadHead+0.5)*bellWidth),
-								y = canvasTopPadding + (l*rowHeight*leadLength) + Math.max(options.placeStarts.size/2, rowHeight/2);
-							context.fillStyle = options.lines.bells[j].stroke;
-							context.beginPath();
-							context.arc( x, y, 2, 0, Math.PI*2, true);
-							context.closePath();
-							context.fill();
+							if( options.placeStarts.showSmallCircle ) {
+								x = canvasLeftPadding + (k*rowWidthWithPadding) + ((positionInLeadHead+0.5)*bellWidth);
+								context.fillStyle = options.lines.bells[j].stroke;
+								context.beginPath();
+								context.arc( x, y, 2, 0, Math.PI*2, true);
+								context.closePath();
+								context.fill();
+							}
 
 							// The big circle
 							x = canvasLeftPadding + (k*rowWidthWithPadding) + rowWidth + options.placeStarts.size*(pos+0.75);

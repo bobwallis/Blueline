@@ -25,12 +25,12 @@ define( ['jquery', 'eve', 'Modernizr', 'shared/lib/webfont', '../helpers/Method'
 		var that = this;
 
 		// Create grids
-		var numbers_plainCourse = new MethodGrid( this.method.gridOptions.plainCourse.numbers ),
-			numbers_calls = this.method.gridOptions.calls.numbers.map( function( callOptions ) { return new MethodGrid( callOptions ); } ),
-			lines_plainCourse = new MethodGrid( this.method.gridOptions.plainCourse.lines ),
-			lines_calls = this.method.gridOptions.calls.lines.map( function( callOptions ) { return new MethodGrid( callOptions ); } ),
-			grid_plainCourse = new MethodGrid( this.method.gridOptions.plainCourse.grid ),
-			grid_calls = this.method.gridOptions.calls.grid.map( function( callOptions ) { return new MethodGrid( callOptions ); } );
+		var numbers_plainCourse = new MethodGrid( this.method.gridOptions.plainCourse.numbers() ),
+			numbers_calls = this.method.gridOptions.calls.numbers().map( function( callOptions ) { return new MethodGrid( callOptions ); } ),
+			lines_plainCourse = new MethodGrid( this.method.gridOptions.plainCourse.lines() ),
+			lines_calls = this.method.gridOptions.calls.lines().map( function( callOptions ) { return new MethodGrid( callOptions ); } ),
+			grid_plainCourse = new MethodGrid( this.method.gridOptions.plainCourse.grid() ),
+			grid_calls = this.method.gridOptions.calls.grid().map( function( callOptions ) { return new MethodGrid( callOptions ); } );
 
 		// Determine the number of columns for the plain course to ensure it fits on the page
 		var setNumberOfColumns = (function() {
