@@ -871,22 +871,35 @@ class Method
                     $this->callingPositions = array( 'from' => 0, 'every' => $lengthOfLead, 'titles' => array_map(function ($leadEnd) use ($stage) {
                         $position = array_search(PlaceNotation::intToBell($stage), $leadEnd);
                         switch ($position+1) {
+                            case $stage:
+                                return 'H';
+                            case $stage-1:
+                                if ($stage%2 == 0) {
+                                    return 'W';
+                                }
+                                return 'M';
+                            case $stage-2:
+                                if ($stage%2 == 0) {
+                                    return 'M';
+                                }
+                                return 'W';
                             case 2:
                                 return 'I';
                             case 3:
                                 return 'B';
                             case 4:
                                 return 'F';
-                            case $stage-2:
-                                return 'M';
-                            case $stage-1:
-                                return 'W';
-                            case $stage:
-                                return 'H';
                             case 5:
                                 return 'V';
+                            case 6:
+                                return 'X';
+                            case 7:
+                                return 'S';
+                            case 8:
+                                return 'E';
+                            case 9:
+                                return 'N';
                         }
-
                         return;
                     }, $bobbedLeadHeads) );
                 }
