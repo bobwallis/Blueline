@@ -878,17 +878,17 @@ class Method
                                     return 'W';
                                 }
                                 return 'M';
-                            case $stage-2:
-                                if ($stage%2 == 0) {
-                                    return 'M';
-                                }
-                                return 'W';
                             case 2:
                                 return 'I';
                             case 3:
                                 return 'B';
                             case 4:
                                 return 'F';
+                            case $stage-2:
+                                if ($stage%2 == 0) {
+                                    return 'M';
+                                }
+                                return 'W';
                             case 5:
                                 return 'V';
                             case 6:
