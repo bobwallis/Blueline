@@ -167,8 +167,8 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 			left: 0,
 			between: (typeof options.dimensions.column.padding.between === 'number' )? options.dimensions.column.padding.between : ((options.layout.numberOfColumns > 1)? 10 : 0)
 		};
-		options.dimensions.canvas.padding.top += options.title.show? parseInt(options.title.font)*1.2 : 0;
-		options.dimensions.canvas.padding.left += options.sideNotation.show? (function() {
+		options.dimensions.canvas.padding.top += options.title.show? Math.ceil( parseInt( options.title.font )*1.2 ) : 0;
+		options.dimensions.canvas.padding.left += options.sideNotation.show? Math.ceil((function() {
 			var longest = 0, text = '', i;
 			for( i = 0; i < options.sideNotation.text.length; ++i ) {
 				if( options.sideNotation.text[i].length > longest ) {
@@ -177,14 +177,14 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 				}
 			}
 			return MeasureCanvasText( new Array(text.length + 1).join( '0' ), options.sideNotation.font ) + 4;
-		})() : 0;
+		})()) : 0;
 
 		if( options.placeStarts.show ) {
-			options.dimensions.column.padding.right = Math.max( options.dimensions.column.padding.right, 10 + ( options.placeStarts.bells.length * options.placeStarts.size ) );
-			options.dimensions.canvas.padding.top = Math.max( options.dimensions.canvas.padding.top, 1 + options.placeStarts.size - options.dimensions.row.height);
+			options.dimensions.column.padding.right = Math.ceil( Math.max( options.dimensions.column.padding.right, 10 + ( options.placeStarts.bells.length * options.placeStarts.size ) ) );
+			options.dimensions.canvas.padding.top = Math.ceil( Math.max( options.dimensions.canvas.padding.top, 1 + options.placeStarts.size - options.dimensions.row.height) );
 		}
 		if( options.callingPositions.show ) {
-			options.dimensions.column.padding.right = Math.max( options.dimensions.column.padding.right, 15 );
+			options.dimensions.column.padding.right = Math.ceil( Math.max( options.dimensions.column.padding.right, 15 ) );
 		}
 
 		// Canvas dimensions
