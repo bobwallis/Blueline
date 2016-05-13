@@ -83,7 +83,7 @@ class DataController extends Controller
 
             // Get data and output handle
             $data = new PgResultIterator( $result );
-            $handle = fopen('php://output', 'r+');
+            $handle = fopen('php://output', 'w+');
 
             // Output the header row
             fputcsv($handle, array_keys($data->current()));
