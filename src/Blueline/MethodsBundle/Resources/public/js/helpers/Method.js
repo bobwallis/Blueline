@@ -48,11 +48,11 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 		var placeStarts = toFollow.filter( function( b ) { return this.huntBells.indexOf( b ) === -1; }, this );
 
 		// Calculate some sizing to help with creating default grid options objects
-		var fontSize = (typeof options.fontSize == 'number')? options.fontSize : 12,
+		var fontSize = (typeof options.fontSize == 'number')? options.fontSize : 14,
 			fontFace = ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : 'Blueline, "Andale Mono", Consolas, ')+'monospace',
 			font = fontSize+'px '+fontFace,
 			columnPadding = fontSize,
-			rowHeight = Math.floor( fontSize*1.1 ),
+			rowHeight = Math.floor( fontSize*(fontSize < 15? 1.1 : 1.05) ),
 			rowWidth = Math.floor( (this.stage < 9? 1.4 : 1.2)*MeasureCanvasText( Array( this.stage + 1 ).join( '0' ), font ) );
 
 		// Default line colors and widths
@@ -89,6 +89,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 				size: fontSize*1.083
 			},
 			sideNotation: {
+				font: (fontSize*0.8333)+'px sans-serif',
 				show: true
 			}
 		};
@@ -171,6 +172,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 							bells: []
 						},
 						sideNotation: {
+							font: (fontSize*0.8333)+'px sans-serif',
 							show: true
 						}
 					} );
@@ -258,6 +260,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 				},
 				ruleOffs: {
 					stroke: '#002856',
+					width: fontSize/20,
 					dash: [0,0]
 				}
 			} );
@@ -267,7 +270,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 				isHuntBell = that.huntBells.indexOf( i ) !== -1;
 				isWorkingBell = toFollow.indexOf( i ) !== -1;
 				thisgridOptionsplainCoursediagrams.lines.bells.push( {
-					width: 1,
+					width: fontSize/15,
 					stroke: isHuntBell? huntBellColor : (isWorkingBell? '#002856' : 'transparent')
 				} );
 			}
@@ -287,6 +290,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 				thisgridOptionscallsdiagrams[callIndex].id += '_diagrams';
 				thisgridOptionscallsdiagrams[callIndex].sideNotation = false;
 				thisgridOptionscallsdiagrams[callIndex].ruleOffs.stroke = '#002856';
+				thisgridOptionscallsdiagrams[callIndex].ruleOffs.width = fontSize/20;
 				thisgridOptionscallsdiagrams[callIndex].ruleOffs.dash = [0,0];
 				thisgridOptionscallsdiagrams[callIndex].numbers = { show: true, font: (fontSize*0.8)+'px '+fontFace, bells: rounds.map( function( b ) { return { color: '#002856' }; } ) };
 				// Set line colors
@@ -294,7 +298,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 					isHuntBell = that.huntBells.indexOf( i ) !== -1;
 					isAffected = call.affected.indexOf( i ) !== -1;
 					thisgridOptionscallsdiagrams[callIndex].lines.bells.push( {
-						width: 1,
+						width: fontSize/15,
 						stroke: isHuntBell? huntBellColor : (isAffected? '#002856' : 'transparent')
 					} );
 				}
@@ -401,7 +405,6 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 				// Set IDs and other options
 				thisgridOptionscallsgrid[callIndex].id += '_grid';
 				thisgridOptionscallsgrid[callIndex].numbers = false;
-				thisgridOptionscallsgrid[callIndex].sideNotation = { show: true };
 				// Set line colors
 				for( i = 0, j = 0; i < that.stage; ++i ) {
 					isHuntBell = that.huntBells.indexOf( i ) !== -1;

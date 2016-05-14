@@ -71,7 +71,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 				context.textBaseline = 'middle';
 				y = canvasTopPadding + rowHeight + textMetrics.y;
 				for( i = 0; i < options.sideNotation.text.length; ++i ) {
-					context.fillText( options.sideNotation.text[i], canvasLeftPadding - 4, (i*rowHeight)+y );
+					context.fillText( options.sideNotation.text[i], canvasLeftPadding - parseInt( options.sideNotation.font )/2, (i*rowHeight)+y );
 				}
 			}
 
@@ -274,7 +274,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 								x = canvasLeftPadding + (k*rowWidthWithPadding) + ((positionInLeadHead+0.5)*bellWidth);
 								context.fillStyle = options.lines.bells[j].stroke;
 								context.beginPath();
-								context.arc( x, y, 2, 0, Math.PI*2, true);
+								context.arc( x, y, options.lines.bells[j].width, 0, Math.PI*2, true);
 								context.closePath();
 								context.fill();
 							}

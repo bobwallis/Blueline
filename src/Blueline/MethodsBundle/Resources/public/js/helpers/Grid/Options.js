@@ -176,7 +176,7 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 					text = options.sideNotation.text[i];
 				}
 			}
-			return MeasureCanvasText( new Array(text.length + 1).join( '0' ), options.sideNotation.font ) + 4;
+			return MeasureCanvasText( new Array(text.length + 1).join( '0' ), options.sideNotation.font ) + parseInt(options.sideNotation.font)/2;
 		})()) : 0;
 
 		if( options.placeStarts.show ) {
