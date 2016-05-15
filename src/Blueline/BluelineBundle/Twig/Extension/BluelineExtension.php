@@ -54,7 +54,7 @@ class BluelineExtension extends \Twig_Extension implements \Twig_Extension_Globa
             'admin_email'    => $this->config['admin_email'],
             'analytics_code' => $this->config['analytics_code'],
             'chromeless'     => $this->chromeless,
-            'html_age'       => ($this->environment == 'prod') ? $this->config['asset_update'] : 'dev',
+            'html_age'       => ($this->environment == 'prod') ? $this->config['asset_update'] : date('YmdHis'),
             'isAppStartPage' => ($this->path == '/') && ($this->environment == 'prod'),
         );
     }

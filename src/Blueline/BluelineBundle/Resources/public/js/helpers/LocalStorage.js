@@ -2,7 +2,7 @@ define( ['Modernizr'], function( Modernizr ) {
 	var prefix = 'blueline_',
 		dataAge = document.getElementsByTagName('html')[0].getAttribute( 'data-age' ),
 		LocalStorage = {
-			age: (dataAge == 'dev')? 'dev' : parseInt(dataAge)
+			age: parseInt(dataAge)
 		};
 	if( Modernizr.localstorage && typeof window.JSON === 'object' ) {
 		LocalStorage.getItem = function( key ) {
@@ -21,7 +21,7 @@ define( ['Modernizr'], function( Modernizr ) {
 		// Clear out the cache if the app's age has changed
 		var cacheAge = LocalStorage.getItem( 'cacheAge' );
 		if( cacheAge === null ) { cacheAge = 0; }
-		if( LocalStorage.age === 'dev' || cacheAge < LocalStorage.age ) {
+		if( cacheAge < LocalStorage.age ) {
 			LocalStorage.clear();
 		}
 		LocalStorage.setItem( 'cacheAge', LocalStorage.age );
