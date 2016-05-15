@@ -102,7 +102,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 				context.lineWidth = options.verticalGuides.lines.width;
 				context.lineCap = options.verticalGuides.lines.cap;
 				context.strokeStyle = options.verticalGuides.lines.stroke;
-				context.setLineDash( options.verticalGuides.lines.dash );
+				context.setLineDash( (options.verticalGuides.lines.dash === null)? [] : options.verticalGuides.lines.dash );
 				context.beginPath();
 				for( i = 0; i < numberOfColumns; ++i ) {
 					if( options.verticalGuides.shading.fullHeight ) {
@@ -226,7 +226,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 						context.lineWidth = options.lines.bells[j].width;
 						context.lineCap = options.lines.bells[j].cap;
 						context.lineJoin = options.lines.bells[j].join;
-						context.setLineDash( options.lines.bells[j].dash );
+						context.setLineDash( (options.lines.bells[j].dash === null)? [] : options.lines.bells[j].dash );
 						context.stroke();
 					}
 				}
@@ -237,7 +237,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 				context.lineWidth = options.ruleOffs.width;
 				context.lineCap = options.ruleOffs.cap;
 				context.strokeStyle = options.ruleOffs.stroke;
-				context.setLineDash( options.ruleOffs.dash );
+				context.setLineDash( (options.ruleOffs.dash === null)? [] : options.ruleOffs.dash );
 				context.beginPath();
 				for( i = 0; i < numberOfColumns; ++i ) {
 					for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {

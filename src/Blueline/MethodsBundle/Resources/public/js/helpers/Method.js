@@ -260,8 +260,9 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 				},
 				ruleOffs: {
 					stroke: '#002856',
-					width: fontSize/20,
-					dash: [0,0]
+					width: fontSize/15,
+					cap: 'round',
+					dash: null
 				}
 			} );
 			// Set the colors and stroke widths of the lines in the plain course
