@@ -48,7 +48,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 		var placeStarts = toFollow.filter( function( b ) { return this.huntBells.indexOf( b ) === -1; }, this );
 
 		// Calculate some sizing to help with creating default grid options objects
-		var fontSize = (typeof options.fontSize == 'number')? options.fontSize : 14,
+		var fontSize = (typeof options.fontSize == 'number')? options.fontSize : 12,
 			fontFace = ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : 'Blueline, "Andale Mono", Consolas, ')+'monospace',
 			font = fontSize+'px '+fontFace,
 			columnPadding = fontSize,
