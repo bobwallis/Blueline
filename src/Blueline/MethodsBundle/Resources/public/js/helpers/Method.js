@@ -86,10 +86,11 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 			placeStarts: {
 				show: true,
 				bells: placeStarts,
-				size: fontSize*1.083
+				diameter: fontSize*1.083,
+				width: fontSize/10
 			},
 			sideNotation: {
-				font: (fontSize*0.8333)+'px sans-serif',
+				font: (fontSize*0.8333)+'px "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif',
 				show: true
 			}
 		};
@@ -256,7 +257,8 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 				callingPositions: false,
 				placeStarts: {
 					showSmallCircle: false,
-					color: '#002856'
+					color: '#002856',
+					width: fontSize/15
 				},
 				ruleOffs: {
 					stroke: '#002856',

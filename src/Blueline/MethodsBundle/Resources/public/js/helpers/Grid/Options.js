@@ -49,7 +49,8 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 			showSmallCircle: true,
 			font: '"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif',
 			color: '#000',
-			size: 13,
+			diameter: 13,
+			width: 1.25,
 			from: 0
 		},
 		callingPositions: {
@@ -180,8 +181,8 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 		})()) : 0;
 
 		if( options.placeStarts.show ) {
-			options.dimensions.column.padding.right = Math.ceil( Math.max( options.dimensions.column.padding.right, 10 + ( options.placeStarts.bells.length * options.placeStarts.size ) ) );
-			options.dimensions.canvas.padding.top = Math.ceil( Math.max( options.dimensions.canvas.padding.top, 1 + options.placeStarts.size - options.dimensions.row.height) );
+			options.dimensions.column.padding.right = Math.ceil( Math.max( options.dimensions.column.padding.right, 10 + ( options.placeStarts.bells.length * options.placeStarts.diameter ) ) );
+			options.dimensions.canvas.padding.top = Math.ceil( Math.max( options.dimensions.canvas.padding.top, 1 + options.placeStarts.diameter - options.dimensions.row.height) );
 		}
 		if( options.callingPositions.show ) {
 			options.dimensions.column.padding.right = Math.ceil( Math.max( options.dimensions.column.padding.right, 15 ) );

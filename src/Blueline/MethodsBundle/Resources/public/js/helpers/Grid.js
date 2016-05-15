@@ -257,7 +257,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 			// Draw place starts
 			if( options.placeStarts.show ) {
 				options.placeStarts.bells.sort( function(a,b) { return a - b; } );
-				context.lineWidth = options.placeStarts.size*0.1;
+				context.lineWidth = options.placeStarts.width;
 				context.setLineDash( [] );
 				options.placeStarts.bells.forEach( function( i, pos ) {
 					var j = (typeof options.startRow === 'object')? options.startRow[i] : i,
@@ -267,7 +267,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 							var positionInLeadHead = leadHeads[(k*leadsPerColumn)+l].indexOf( j ),
 							x, y;
 
-							y = canvasTopPadding + (l*rowHeight*leadLength) + Math.max(options.placeStarts.size/2, rowHeight/2);
+							y = canvasTopPadding + (l*rowHeight*leadLength) + Math.max(options.placeStarts.diameter/2, rowHeight/2);
 
 							// The little circle
 							if( options.placeStarts.showSmallCircle ) {
@@ -280,16 +280,16 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 							}
 
 							// The big circle
-							x = canvasLeftPadding + (k*rowWidthWithPadding) + rowWidth + options.placeStarts.size*(pos+0.75);
+							x = canvasLeftPadding + (k*rowWidthWithPadding) + rowWidth + options.placeStarts.diameter*(pos+0.75);
 							context.strokeStyle = options.lines.bells[j].stroke;
 							context.beginPath();
-							context.arc( x, y, options.placeStarts.size/2, 0, Math.PI*2, true );
+							context.arc( x, y, options.placeStarts.diameter/2, 0, Math.PI*2, true );
 							context.closePath();
 							context.stroke();
 
 							// The text inside the big circle
-							var placeStartFontSize = Math.round( 10*Math.min( options.placeStarts.size-((positionInLeadHead<9)?2:4), (((positionInLeadHead<9)?0.75:0.6)*options.placeStarts.size) )/10 ),
-								textMetrics = MeasureCanvasTextOffset( Math.ceil(options.placeStarts.size), placeStartFontSize+'px '+options.placeStarts.font, (positionInLeadHead+1).toString() );
+							var placeStartFontSize = Math.round( 10*Math.min( options.placeStarts.diameter-((positionInLeadHead<9)?2:4), (((positionInLeadHead<9)?0.75:0.6)*options.placeStarts.diameter) )/10 ),
+								textMetrics = MeasureCanvasTextOffset( Math.ceil(options.placeStarts.diameter), placeStartFontSize+'px '+options.placeStarts.font, (positionInLeadHead+1).toString() );
 							context.fillStyle = options.placeStarts.color;
 							context.font = placeStartFontSize+'px '+options.placeStarts.font;
 							context.textAlign = 'center';
