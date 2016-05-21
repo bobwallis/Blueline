@@ -10,7 +10,7 @@ define( ['../ui/Canvas', './LocalStorage'], function( Canvas, LocalStorage ) {
 	*/
 	var measureXAndYTextPadding = function( size, font, text ) {
 		if( typeof text == 'undefined' ) { text = '0'; }
-		var padding = LocalStorage.getItem( 'Offset.'+font+text );
+		var padding = LocalStorage.getCache( 'Offset.'+font+text );
 		if( padding === null ) {
 			var canvas = new Canvas( {
 				id: 'metric'+Math.floor((Math.random()*100)+1),
@@ -77,7 +77,7 @@ define( ['../ui/Canvas', './LocalStorage'], function( Canvas, LocalStorage ) {
 						y: Math.round(1000*((dim - bottomOfText) - topOfText) / (canvas.scale*2))/1000
 					};
 
-					LocalStorage.setItem( 'Offset.'+font+text, padding );
+					LocalStorage.setCache( 'Offset.'+font+text, padding );
 				}
 				catch( e ) {
 					padding.x = padding.y = 0;
