@@ -31,8 +31,7 @@ define( ['eve', 'jquery', 'Modernizr', '../../helpers/URL', '../../data/Page'], 
 
 			// Set the new search query if the search box isn't focussed and will be visible
 			if( !$q.is( ':focus' ) || ( Modernizr.history && window.history.state !== null && window.history.state.type !== 'keyup' && window.history.state.type !== 'clipboard' ) ) {
-				var queryString = location.href.replace( /^.*?(\?|$)/, '' );
-				$q.val( (queryString.indexOf( 'q=' ) !== -1)? decodeURIComponent( queryString.replace( /^.*q=(.*?)(&.*$|$)/, '$1' ).replace( /\+/g, '%20' ) ) : '' );
+				$q.val( URL.parameter( 'q' ) );
 			}
 
 			if( Search.visible === false ) {
