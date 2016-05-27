@@ -1,12 +1,26 @@
-{% macro header( title, subtitle, tabs ) %}
+{% macro header( title, subtitle, tabs, settings ) %}
 <header>
+	{% if settings is defined %}
+		{% if settings == 'method' %}
+			<div id="settings" class="method" style="display: none">
+				<h3>Settings</h3>
+				<form id="settings_form" method="get">
+					<p>Draw lines through the&nbsp;&nbsp;<span class="select-wrapper"><select id="method_follow" name="method_follow"><option value="heaviest" selected="selected">heaviest</option><option value="lightest">lightest</option></select></span>&nbsp;&nbsp;bell in each group.</p>
+					<h4>Line Style</h4>
+					<p><label class="radio_image"><input type="radio" name="method_style" value="numbers" checked="checked"><img src="{{ app.request.basepath }}/images/preview_numbers.png" style="width:79px;height:25px;"></label><label class="radio_image"><input type="radio" name="method_style" value="lines"><img src="{{ app.request.basepath }}/images/preview_lines.png" style="width:79px;height:25px;"></label><label class="radio_image"><input type="radio" name="method_style" value="diagrams"><img src="{{ app.request.basepath }}/images/preview_diagrams.png" style="width:79px;height:25px;"></label></p>
+					<p><input id="settings_submit" value="Done" type="submit" /></p>
+				</form>
+			</div>
+		{% endif %}
+	{% endif %}
 	<h1>{% if title.title is defined %}{{ title.title }}{% if title.title2 is defined and title.title2 is not empty %} <span class="normalweight">({{ title.title2 }})</span>{% endif %}{% else %}{{ title }}{% endif %}</h1>
 	{% if subtitle is not empty %}<h2>{{ subtitle }}</h2>{% endif %}
 	{% if tabs is not empty %}
 		<span id="{{ tabs.id }}" class="TabBar" data-set="{{ {
 			landmark: tabs.id,
 			tabs: tabs.tabs,
-			active: tabs.active|default(0)
+			active: tabs.active|default(0),
+			settings: true
 		}|json_encode() }}"></span>
 	{% endif %}
 </header>

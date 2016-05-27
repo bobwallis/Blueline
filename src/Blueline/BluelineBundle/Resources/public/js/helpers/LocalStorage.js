@@ -41,7 +41,7 @@ define( ['Modernizr'], function( Modernizr ) {
 		};
 		LocalStorage.getSetting = function( key, defaultSetting ) {
 			var value = LocalStorage.getItem( 'setting_'+key );
-			return (typeof value === 'undefined')? defaultSetting : value;
+			return (value === null)? defaultSetting : value;
 		};
 		LocalStorage.setSetting = function( key, value ) {
 			LocalStorage.setItem( 'setting_'+key, value );

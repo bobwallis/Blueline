@@ -153,8 +153,8 @@ class MethodsController extends Controller
             }
             // Validate section parameter
             $section = $request->query->get('style');
-            if (!in_array($section, ['numbers', 'line', 'grid'])) {
-                throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'line' or 'grid'.");
+            if (!in_array($section, ['numbers', 'lines', 'diagrams', 'grid'])) {
+                throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'lines', 'diagrams' or 'grid'.");
             }
             // Normalise
             if (!$section || intval($request->query->get('scale')) === 0) {

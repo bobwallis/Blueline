@@ -20,6 +20,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 			this.callingPositions = options.callingPositions;
 			if( typeof this.callingPositions.show == 'undefined' ) { this.callingPositions.show = true; }
 			if( typeof this.callingPositions.font == 'undefined' ) { this.callingPositions.font = (fontSize*0.8)+'"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif'; }
+			if( typeof options.workingBell == 'string' && options.workingBell == 'lightest' ) { this.callingPositions.show = false; }
 		}
 		else {
 			this.callingPositions = false;

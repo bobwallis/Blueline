@@ -1,111 +1,120 @@
-define( ['jquery', 'eve', 'Modernizr', 'shared/lib/webfont', '../helpers/Method',  '../helpers/Grid', '../helpers/PlaceNotation'], function( $, eve, Modernizr, webfont, Method, MethodGrid, PlaceNotation ) {
+define( ['jquery', 'eve', 'Modernizr', 'shared/lib/webfont', 'shared/helpers/URL', 'shared/helpers/LocalStorage', '../helpers/Method',  '../helpers/Grid', '../helpers/PlaceNotation'], function( $, eve, Modernizr, webfont, URL, LocalStorage, Method, MethodGrid, PlaceNotation ) {
+	var newMethodView;
+
 	// Display messages if canvas is not supported
 	if( !Modernizr.canvas ) {
-		return function( options ) {
-			$( options.numbersContainer ).html( '<div class="wrap"><img src="'+location.href+'.png" /></div>' );
-			$( options.lineContainer ).html( '<div class="wrap"><img src="'+location.href+'.png?style=line" /></div>' );
-			$( options.gridContainer ).html( '<div class="wrap"><img src="'+location.href+'.png?style=grid" /></div>' );
+		newMethodView = function( options ) {
+			$( options.lineContainer ).html( '<div class="wrap"><img src="'+location.href+'.png?style=numbers&scale=1" /></div>' );
+			$( options.gridContainer ).html( '<div class="wrap"><img src="'+location.href+'.png?style=grid&scale=1" /></div>' );
 		};
 	}
 
-	var MethodView = function( options ) {
-		this.id = options.id.toString();
+	var options, method,
+		lineContainer, gridContainer,
+		active = false,
+		lastStyle, lastFollow, lastScale, lastNumberOfColumns,
+		line_plainCourse, line_calls;
 
-		// Containers
-		this.container = {
-			numbers: $( options.numbersContainer ).empty(),
-			lines: $( options.lineContainer ).empty(),
-			grid: $( options.gridContainer ).empty()
-		};
+	newMethodView = function( o ) {
+		options = o;
+		active = true;
+		lastStyle = lastFollow = lastScale = lastNumberOfColumns = null;
+		lineContainer = $( options.lineContainer );
+		gridContainer = $( options.gridContainer );
+		redrawMethodView();
+	};
 
-		// Fetch method details
-		this.method = new Method( $.extend( true, {}, options ) );
+	var redrawMethodView = function() {
+		if( active ) {
+			// Re-fetch options
+			var newScale = (typeof window.devicePixelRatio === 'number')? window.devicePixelRatio : 1,
+				newFollow = LocalStorage.getSetting( 'method_follow', 'heaviest' ),
+				newStyle = (URL.parameter( 'style' ) !== null)? URL.parameter( 'style' ) : LocalStorage.getSetting( 'method_style', 'numbers' ),
+				widths, maxWidth;
 
-		// Store a reference to the main scope
-		var that = this;
+			// Re-create method object if the bell being followed has changed
+			if( newFollow !== lastFollow ) {
+				options.workingBell = newFollow;
+				method = new Method( $.extend( true, {}, options ) );
+			}
 
-		// Create grids
-		var numbers_plainCourse = new MethodGrid( this.method.gridOptions.plainCourse.numbers() ),
-			numbers_calls = this.method.gridOptions.calls.numbers().map( function( callOptions ) { return new MethodGrid( callOptions ); } ),
-			lines_plainCourse = new MethodGrid( this.method.gridOptions.plainCourse.lines() ),
-			lines_calls = this.method.gridOptions.calls.lines().map( function( callOptions ) { return new MethodGrid( callOptions ); } ),
-			grid_plainCourse = new MethodGrid( this.method.gridOptions.plainCourse.grid() ),
-			grid_calls = this.method.gridOptions.calls.grid().map( function( callOptions ) { return new MethodGrid( callOptions ); } );
+			// If the style has changed re-create the whole Grid object for the line
+			if( newFollow !== lastFollow || newStyle !== lastStyle ) {
+				line_plainCourse = new MethodGrid( method.gridOptions.plainCourse[newStyle]() );
+				line_calls = method.gridOptions.calls[newStyle]().map( function( callOptions ) { return new MethodGrid( callOptions ); } );
+			}
 
-		// Determine the number of columns for the plain course to ensure it fits on the page
-		var setNumberOfColumns = (function() {
-			var numberOfLeads = that.method.numberOfLeads,
-				callWidth = (typeof numbers_calls[0] === 'object')? numbers_calls[0].measure().canvas.width : 0;
-			return function() {
-				var leadsPerColumn = 1,
-					numberOfColumns = numberOfLeads,
-					maxWidth = $('#content').width() - 24; // leave space for scrollbar
-				numbers_plainCourse.setOptions( { layout: { numberOfColumns: numberOfColumns } } );
-				while( leadsPerColumn <= numberOfLeads && numbers_plainCourse.measure().canvas.width + callWidth + 48 > maxWidth ) {
-					++leadsPerColumn;
-					numberOfColumns = Math.ceil( numberOfLeads / leadsPerColumn );
-					numbers_plainCourse.setOptions( { layout: { numberOfColumns: numberOfColumns } } );
-					lines_plainCourse.setOptions( { layout: { numberOfColumns: numberOfColumns } } );
-				}
-				return numberOfColumns;
-			};
-		})();
+			// Now we're sure to have a line_* object, check the number of columns
+			var newNumberOfColumns = (function() {
+				var numberOfLeads = method.numberOfLeads,
+					callWidth = (typeof line_calls[0] === 'object')? line_calls[0].measure().canvas.width : 0;
+				return function() {
+					var leadsPerColumn = 1,
+						numberOfColumns = numberOfLeads,
+						maxWidth = $('#content').width() - 24; // leave space for scrollbar
+					line_plainCourse.setOptions( { layout: { numberOfColumns: numberOfColumns } } );
+					while( leadsPerColumn <= numberOfLeads && line_plainCourse.measure().canvas.width + callWidth + 48 > maxWidth ) {
+						++leadsPerColumn;
+						numberOfColumns = Math.ceil( numberOfLeads / leadsPerColumn );
+						line_plainCourse.setOptions( { layout: { numberOfColumns: numberOfColumns } } );
+					}
+					return numberOfColumns;
+				};
+			})()();
 
-		// Function to redraw lines
-		var lastDrawnScale = 0,
-			lastDrawnNumberOfColumns = 0;
-		var reDraw = function() {
-			var newNumberOfColumns = setNumberOfColumns(),
-				newScale = (typeof window.devicePixelRatio === 'number')? window.devicePixelRatio : 1,
-				widthds, maxWidth;
-			// If the scale has changed redraw everything
-			if( lastDrawnScale !== newScale ) {
-				that.container.numbers.empty().append( numbers_plainCourse.draw(), numbers_calls.map( function(e) { return e.draw(); } ) );
-				that.container.lines.empty().append( lines_plainCourse.draw(), lines_calls.map( function(e) { return e.draw(); } ) );
-				that.container.grid.empty().append( grid_plainCourse.draw(), grid_calls.map( function(e) { return e.draw(); } ) );
+			// The only reason to redraw the grids is if the scale has changed
+			if( newScale !== lastScale ) {
+				var grid_plainCourse = new MethodGrid( method.gridOptions.plainCourse.grid() ),
+					grid_calls = method.gridOptions.calls.grid().map( function( callOptions ) { return new MethodGrid( callOptions ); } );
+				gridContainer.empty().append(
+					grid_plainCourse.draw(),
+					grid_calls.map( function(e) { return e.draw(); } )
+				);
 				// Give all the grids the same width
-				widths = $( 'canvas', that.container.grid ).map( function( i, e ) { return $(e).width(); } ).toArray();
+				widths = $( 'canvas', gridContainer ).map( function( i, e ) { return $(e).width(); } ).toArray();
 				maxWidth = Math.max.apply( Math, widths );
-				$( 'canvas', that.container.grid ).map( function( i, e ) {
-					$(e).css( 'margin-left', (12 + maxWidth - widths[i])+'px' );
-				} );
-				// Give all the calls the same with on the numbers and line bits
-				widths = $( 'canvas:not(:first)', that.container.numbers ).map( function( i, e ) { return $(e).width(); } ).toArray();
-				maxWidth = Math.max.apply( Math, widths );
-				$( 'canvas:not(:first)', that.container.numbers ).map( function( i, e ) {
-					$(e).css( 'margin-left', (12 + maxWidth - widths[i])+'px' );
-				} );
-				$( 'canvas:not(:first)', that.container.lines ).map( function( i, e ) {
+				$( 'canvas', gridContainer ).map( function( i, e ) {
 					$(e).css( 'margin-left', (12 + maxWidth - widths[i])+'px' );
 				} );
 			}
-			// If the leads per column has changed then redraw the plain courses
-			else if( lastDrawnNumberOfColumns !== newNumberOfColumns ) {
-				that.container.numbers.children(':first-child').remove();
-				that.container.lines.children(':first-child').remove();
-				that.container.numbers.prepend( numbers_plainCourse.draw() );
-				that.container.lines.prepend( lines_plainCourse.draw() );
+
+			// Redraw the calls on the line view if the scale or style has changed
+			if( newScale !== lastScale || newStyle !== lastStyle ) {
+				lineContainer.empty().append( line_plainCourse.draw(), line_calls.map( function(e) { return e.draw(); } ) );
+				// Give all the calls the same with on the line tab
+				widths = $( 'canvas:not(:first)', lineContainer ).map( function( i, e ) { return $(e).width(); } ).toArray();
+				maxWidth = Math.max.apply( Math, widths );
+				$( 'canvas:not(:first)', lineContainer ).map( function( i, e ) {
+					$(e).css( 'margin-left', (12 + maxWidth - widths[i])+'px' );
+				} );
 			}
 
-			lastDrawnScale = newScale;
-			lastDrawnNumberOfColumns = newNumberOfColumns;
-		};
-		reDraw();
-		$(window).resize( reDraw );
+			// Redraw the plain course in some other cases
+			if( newScale !== lastScale || newFollow !== lastFollow || newStyle !== lastStyle || newNumberOfColumns !== lastNumberOfColumns ) {
+				lineContainer.children(':first-child').remove();
+				lineContainer.prepend( line_plainCourse.draw() );
+			}
 
-		return this;
+			lastStyle = newStyle;
+			lastScale = newScale;
+			lastNumberOfColumns = newNumberOfColumns;
+			lastFollow = newFollow;
+		}
 	};
 
 	// Check and listen for new MethodView requests
 	var checkForNewSettings = function() {
+		active = false;
 		webfont( function() {
 			$( '.MethodView' ).each( function( i, e ) {
-				new MethodView( $(e).data('set') );
+				newMethodView( $(e).data('set') );
 			} );
 		} );
 	};
 	eve.on( 'page.loaded', checkForNewSettings );
-	$(checkForNewSettings);
+	checkForNewSettings();
+	$(window).resize( redrawMethodView );
+	eve.on( 'setting.changed.*', redrawMethodView );
 
-	return MethodView;
+	return newMethodView;
 } );

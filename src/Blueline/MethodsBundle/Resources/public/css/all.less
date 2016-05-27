@@ -44,32 +44,6 @@
 }
 
 section.method {
-	h3 {
-		margin: 0;
-		padding: (@contentYPadding - 2) @contentXPadding 2px @contentXPadding;
-		border-top: 1px solid @lightGrey;
-		&+ol {
-			margin-top: 0;
-			margin-left: 0;
-			li {
-				padding: 2px 0;
-				border-color: lighten(@lightGrey, 6%) !important;
-				&.none {
-					padding: 4px @contentXPadding 4px (@contentXPadding*2);
-				}
-				a {
-					padding: 4px @contentXPadding 4px (@contentXPadding*2);
-				}
-				&:first-child {
-					padding-top: 0;
-				}
-				&:last-child {
-					padding-bottom: (@contentYPadding - 4);
-				}
-			}
-		}
-	}
-
 	// Grids
 	canvas {
 		display: block;
@@ -78,10 +52,10 @@ section.method {
 	}
 
 	// Default tab shows/hides
-	.details, .line, .grid {
+	.details, .grid {
 		display: none;
 	}
-	.numbers {
+	.line {
 		display: block;
 	}
 }

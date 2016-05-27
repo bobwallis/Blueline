@@ -16,10 +16,9 @@
 	<section class="method">
 		{{ header( { 'title': method.title }, null, { 'id': 'method_tabBar', 'active': 1, 'tabs': [
 			{ 'title': 'Details', 'content': 'method_details' },
-			{ 'title': 'Numbers', 'content': 'method_numbers' },
 			{ 'title': 'Line', 'content': 'method_line' },
 			{ 'title': 'Grid', 'content': 'method_grid' }
-		] } ) }}
+		] }, 'method' ) }}
 		<div id="method_details" class="details">
 			<dl>
 {% if method.provisional %}
@@ -96,12 +95,10 @@
 				<dd>Details on the <a href="{{ path( 'Blueline_Pages_view', { 'page': 'about' } ) }}">about page</a>.</dd>
 			</dl>
 		</div>
-		<div id="method_numbers" class="numbers"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 1, 'style': 'numbers' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
-		<div id="method_line" class="line"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 1, 'style': 'line' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
+		<div id="method_line" class="line"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 1, 'style': 'numbers' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
 		<div id="method_grid" class="grid"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 1, 'style': 'grid' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
 		<div class="MethodView" data-set="{{ {
 			id: 0,
-			numbersContainer: '#method_numbers',
 			lineContainer: '#method_line',
 			gridContainer: '#method_grid',
 			stage: method.stage,
