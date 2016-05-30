@@ -17,15 +17,22 @@ define( ['jquery', 'eve', 'Modernizr', '../lib/fastclick', '../helpers/URL', '..
 	if( Modernizr.history ) {
 		// Listen at the document.body level for click events, and request new pages without reload
 		$( document.body ).on( 'click', 'a', function( e ) {
-			var $target = $( e.target ).closest( 'a' );
-			if( $target.length > 0 ) {
-				// Get the href of the link
-				var href = $target.attr( 'href' );
-				// If the URL is internal, push it (which will trigger a statechange)
-				if( href && URL.isInternal( href ) && !($target.data( 'forcerefresh' ) === true) ) {
-					e.preventDefault();
-					Page.request( href, 'click' );
-				}
+			var $target = $( e.target );
+			// Get the href of the link
+			var href = $target.attr( 'href' );
+			// If the URL is internal, push it (which will trigger a statechange)
+			if( href && URL.isInternal( href ) && !($target.data( 'forcerefresh' ) === true) ) {
+				e.preventDefault();
+				Page.request( href, 'click' );
+			}
+		} );
+		$( document.body ).on( 'mouseenter', 'a', function( e ) {
+			var $target = $( e.target );
+			// Get the href of the link
+			var href = $target.attr( 'href' );
+			// If the URL is internal, push it (which will trigger a statechange)
+			if( href && URL.isInternal( href ) && !($target.data( 'forcerefresh' ) === true) ) {
+				Page.prefetch( href );
 			}
 		} );
 

@@ -5,6 +5,29 @@ define( ['eve', 'jquery', 'Modernizr', './Page/Cache', '../helpers/URL'], functi
 
 	// Exposed API
 	return {
+		prefetch: function( url ) {
+			if( Cache.works ) {
+				// Check the URL is absolute
+				url = URL.absolutise( url );
+				Cache.get( url, $.noop, function() {
+					// Check if the browser is set to offline, and fail instantly if so
+					if( typeof navigator.onLine === 'boolean' && navigator.onLine === false ) {
+						return;
+					}
+					// Otherwise, try and get the content using an AJAX request
+					else {
+						$.ajax( {
+							url: url,
+							data: 'chromeless=1',
+							dataType: 'html',
+							cache: false,
+							success: function( content ) { Cache.set( url, content ); },
+							error: $.noop
+						} );
+					}
+				} );
+			}
+		},
 		request: function( url, type ) {
 			// Check the URL is absolute
 			url = URL.absolutise( url );
