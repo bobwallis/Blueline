@@ -11,7 +11,7 @@ var merge           = require( 'merge-stream' );
 var svg2png         = require( 'gulp-svg2png' );
 var less            = require( 'gulp-less' );
 var autoprefixer    = require( 'gulp-autoprefixer' );
-var minifyCss       = require( 'gulp-minify-css' );
+var cleanCSS        = require( 'gulp-clean-css' );
 var imagemin        = require( 'gulp-imagemin' );
 var imagemin_zopfli = require( 'imagemin-zopfli' );
 var imageresize     = require( 'gulp-image-resize' );
@@ -252,7 +252,7 @@ gulp.task( 'css', function() {
 		.pipe( less() )
 		.pipe( autoprefixer( { browsers: ['> 5%'] } ) )
 		.pipe( sourcemaps.init() )
-		.pipe( minifyCss( { keepSpecialComments: 0 } ) )
+		.pipe( cleanCSS( { keepSpecialComments: 0 } ) )
 		.pipe( sourcemaps.write( '.' ) )
 		.pipe( gulp.dest( DEST+'css/' ) )
 		.pipe( zopfli() )
