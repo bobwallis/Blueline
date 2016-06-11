@@ -12,6 +12,8 @@
 				</form>
 			</div>
 		{% endif %}
+	{% else %}
+		{% set settings = false %}
 	{% endif %}
 	<h1>{% if title.title is defined %}{{ title.title }}{% if title.title2 is defined and title.title2 is not empty %} <span class="normalweight">({{ title.title2 }})</span>{% endif %}{% else %}{{ title }}{% endif %}</h1>
 	{% if subtitle is not empty %}<h2>{{ subtitle }}</h2>{% endif %}
@@ -20,7 +22,7 @@
 			landmark: tabs.id,
 			tabs: tabs.tabs,
 			active: tabs.active|default(0),
-			settings: true
+			settings: (settings == false) ? false : true
 		}|json_encode() }}"></span>
 	{% endif %}
 </header>
