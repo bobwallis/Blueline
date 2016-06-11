@@ -54,6 +54,12 @@
 		{# Chrome Android theme tag #}
 		<meta name="theme-color" content="#002856" />
 
+		{# Meta description #}
+		{% set _block = block('og_description') %}
+		{% if _block is not empty %}
+		<meta name="description" content="{{ _block|raw }}" />
+		{% endif %}
+		
 		{# Opengraph tags #}
 		<meta property="og:title" content="{% block og_title %}Blueline{% endblock %}" />
 		<meta property="og:description" content="{% block og_description %}Information for bellringers{% endblock %}" />

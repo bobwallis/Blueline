@@ -1,6 +1,10 @@
 {% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
 
 {% block title %}Composition Prover | {{ parent() }}{% endblock %}
+
+{% block og_title %}Composition Prover{% endblock %}
+{% block og_description %}Online version of GSiril, a program for proving touches.{% endblock %}
+
 {% set search = false %}
 
 {% block body %}

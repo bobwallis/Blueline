@@ -3,7 +3,7 @@
 {% block title %}{{ association.name }} | Associations | {{ parent() }}{% endblock %}
 
 {% block og_title %}{{ association.name }}{% endblock %}
-{% block og_description %}Information about {{ association.name }}, a bellringing association.{% endblock %}
+{% block og_description %}Information about {{ association.name }}, a bellringing association covering {{ count( association.towers ) }} tower{{ count( association.towers ) > 1? 's' : '' }}.{% endblock %}
 
 {% set breadcrumb = { 'title': 'Associations', 'href': path('Blueline_Associations_welcome') } %}
 
