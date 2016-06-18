@@ -1,4 +1,4 @@
-define( ['jquery', 'eve', 'Modernizr', 'shared/lib/webfont', 'shared/helpers/URL', 'shared/helpers/LocalStorage', '../helpers/Method',  '../helpers/Grid', '../helpers/PlaceNotation'], function( $, eve, Modernizr, webfont, URL, LocalStorage, Method, MethodGrid, PlaceNotation ) {
+define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', 'shared/lib/webfont', 'shared/helpers/URL', 'shared/helpers/LocalStorage', '../helpers/Method',  '../helpers/Grid', '../helpers/PlaceNotation', '../helpers/Text'], function( $, eve, Modernizr, InteractiveGridOverlay, webfont, URL, LocalStorage, Method, MethodGrid, PlaceNotation, Text ) {
 	var newMethodView;
 
 	// Display messages if canvas is not supported
@@ -9,10 +9,10 @@ define( ['jquery', 'eve', 'Modernizr', 'shared/lib/webfont', 'shared/helpers/URL
 		};
 	}
 
-	var options, method,
+	var options, method, methodTexts,
 		lineContainer, gridContainer,
 		active = false,
-		lastStyle, lastFollow, lastScale, lastNumberOfColumns,
+		lastShowToolTips, lastStyle, lastFollow, lastScale, lastNumberOfColumns,
 		line_plainCourse, line_calls;
 
 	newMethodView = function( o ) {
@@ -27,7 +27,8 @@ define( ['jquery', 'eve', 'Modernizr', 'shared/lib/webfont', 'shared/helpers/URL
 	var redrawMethodView = function() {
 		if( active ) {
 			// Re-fetch options
-			var newScale = (typeof window.devicePixelRatio === 'number')? window.devicePixelRatio : 1,
+			var newShowTooltips = LocalStorage.getSetting( 'method_tooltips', true ),
+				newScale = (typeof window.devicePixelRatio === 'number')? window.devicePixelRatio : 1,
 				newFollow = LocalStorage.getSetting( 'method_follow', 'heaviest' ),
 				newStyle = (URL.parameter( 'style' ) !== null)? URL.parameter( 'style' ) : LocalStorage.getSetting( 'method_style', 'numbers' ),
 				widths, maxWidth;
@@ -36,6 +37,16 @@ define( ['jquery', 'eve', 'Modernizr', 'shared/lib/webfont', 'shared/helpers/URL
 			if( newFollow !== lastFollow ) {
 				options.workingBell = newFollow;
 				method = new Method( $.extend( true, {}, options ) );
+			}
+			if( newShowTooltips !== lastShowToolTips || newFollow !== lastFollow ) {
+				methodTexts = newShowTooltips? method.workGroups.map( function( e ) {
+					var toFollow = (newFollow == 'lightest')? Math.min.apply( Math, e ) : Math.max.apply( Math, e );
+					return {
+						bell: toFollow,
+						hunt: (e.length === 1),
+						text: Text.fromNotation( (new Array( method.numberOfLeads + 1 )).join( method.notation.text+'.' ), method.stage, toFollow, true )
+					};
+				} ) : [];
 			}
 
 			// If the style has changed re-create the whole Grid object for the line
@@ -89,12 +100,16 @@ define( ['jquery', 'eve', 'Modernizr', 'shared/lib/webfont', 'shared/helpers/URL
 				} );
 			}
 
-			// Redraw the plain course in some other cases
-			if( newScale !== lastScale || newFollow !== lastFollow || newStyle !== lastStyle || newNumberOfColumns !== lastNumberOfColumns ) {
+			// Redraw the plain course (and update the interactive grid overlay) in some other cases
+			if( lastShowToolTips !== newShowTooltips || newScale !== lastScale || newFollow !== lastFollow || newStyle !== lastStyle || newNumberOfColumns !== lastNumberOfColumns ) {
 				lineContainer.children(':first-child').remove();
 				lineContainer.prepend( line_plainCourse.draw() );
+				if( newShowTooltips ) {
+					InteractiveGridOverlay( line_plainCourse, method, methodTexts );
+				}
 			}
 
+			lastShowToolTips = newShowTooltips;
 			lastStyle = newStyle;
 			lastScale = newScale;
 			lastNumberOfColumns = newNumberOfColumns;

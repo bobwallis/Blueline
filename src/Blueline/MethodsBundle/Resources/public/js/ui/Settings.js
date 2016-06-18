@@ -1,11 +1,17 @@
 define( ['jquery', 'eve', 'shared/helpers/LocalStorage'], function( $, eve, LocalStorage ) {
 	var $document = $( document ),
-		settings = ['method_follow', 'method_style'];
+		settings = ['method_follow', 'method_style', 'method_tooltips'];
 
 	// Update stored settings when form is changed
 	settings.forEach( function( setting ) {
 		$document.on( 'change', '#'+setting+', input[name='+setting+']', function( e ) {
-			LocalStorage.setSetting( setting, $( e.target ).val() );
+			$target = $( e.target );
+			if( $target.is( ':checkbox' ) ) {
+				LocalStorage.setSetting( setting, $target.is(':checked') );
+			}
+			else {
+				LocalStorage.setSetting( setting, $target.val() );
+			}
 			eve( 'setting.changed.'+setting );
 		} );
 	} );
@@ -15,7 +21,12 @@ define( ['jquery', 'eve', 'shared/helpers/LocalStorage'], function( $, eve, Loca
 		settings.forEach( function( setting ) {
 			var $element = $('#'+setting+', input[name='+setting+']' );
 			if( $element.length > 0 ) {
-				$element.val( [LocalStorage.getSetting( setting, $element.val() )] );
+				if( $element.is( ':checkbox' ) ) {
+					$element.prop( 'checked', !!LocalStorage.getSetting( setting, $element.is( ':checked' ) ) );
+				}
+				else {
+					$element.val( [LocalStorage.getSetting( setting, $element.val() )] );
+				}
 			}
 		} );
 	};
