@@ -73,7 +73,7 @@
 				<br /><em>Other Similar Methods</em><br />
 {% endif %}
 				{% for method2 in similarMethods.other %}
-					&nbsp;<a href="{{ path( 'Blueline_Methods_view', { 'url': method2.url } ) }}">{{ method2.title }}</a><br />
+					{% if similarMethods.differentOnlyAtLeadEnd is not empty %}&nbsp;{% endif %}<a href="{{ path( 'Blueline_Methods_view', { 'url': method2.url } ) }}">{{ method2.title }}</a><br />
 				{% endfor %}
 				</dd>
 {% endif %}
