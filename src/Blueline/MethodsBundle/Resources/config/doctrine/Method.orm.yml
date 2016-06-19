@@ -43,6 +43,9 @@ Blueline\MethodsBundle\Entity\Method:
             nullable: true
         lengthOfLead:
             type: integer
+        lengthOfCourse:
+            type: integer
+            nullable: true
         numberOfHunts:
             type: smallint
         little:

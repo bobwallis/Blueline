@@ -70,7 +70,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
 
         // Import data
         $output->writeln("<info>Importing method data...</info>");
-        $validFields = array_flip(array('title', 'provisional', 'url', 'stage', 'classification', 'namemetaphone','notation', 'notationexpanded', 'leadheadcode', 'leadhead', 'fchgroups', 'lengthoflead', 'numberofhunts', 'little', 'differential', 'plain', 'trebledodging', 'palindromic', 'doublesym', 'rotational', 'calls', 'ruleoffs', 'callingpositions', 'magic'));
+        $validFields = array_flip(array('title', 'provisional', 'url', 'stage', 'classification', 'namemetaphone','notation', 'notationexpanded', 'leadheadcode', 'leadhead', 'fchgroups', 'lengthoflead', 'lengthofcourse', 'numberofhunts', 'little', 'differential', 'plain', 'trebledodging', 'palindromic', 'doublesym', 'rotational', 'calls', 'ruleoffs', 'callingpositions', 'magic'));
         $importedMethods = array();
         
         // Iterate over all appropriate files
@@ -88,6 +88,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
             foreach ($xmlIterator as $xmlRow) {
                 // Generate details not in the XML
                 $method = new Method($xmlRow);
+                $xmlRow['lengthofcourse'] = $method->getLengthOfCourse();
                 $xmlRow['calls'] = json_encode($method->getCalls());
                 $xmlRow['callingpositions'] = json_encode($method->getCallingPositions());
                 $xmlRow['ruleoffs'] = json_encode($method->getRuleOffs());

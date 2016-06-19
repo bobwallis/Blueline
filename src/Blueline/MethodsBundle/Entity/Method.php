@@ -113,6 +113,10 @@ class Method
      * @var integer $lengthOfLead
      */
     private $lengthOfLead;
+    /**
+     * @var integer $lengthOfCourse
+     */
+    private $lengthOfCourse;
 
     /**
      * @var integer $numberOfHunts
@@ -476,6 +480,39 @@ class Method
         }
 
         return $this->lengthOfLead;
+    }
+
+    /**
+     * Set lengthOfCourse
+     *
+     * @param  integer $lengthOfCourse
+     * @return Method
+     */
+    public function setLengthOfCourse($lengthOfCourse)
+    {
+        $this->lengthOfCourse = $lengthOfCourse;
+
+        return $this;
+    }
+
+    /**
+     * Get lengthOfCourse
+     *
+     * @return integer
+     */
+    public function getLengthOfCourse()
+    {
+        if (!$this->lengthOfCourse) {
+            $permutation = array_map(function ($b) { return PlaceNotation::bellToInt($b) - 1; }, str_split($this->getLeadHead()));
+            $rounds = PlaceNotation::rounds($this->getStage());
+            $test = PlaceNotation::permute($rounds, $permutation);
+            for ($numberOfLeads = 1; !PlaceNotation::rowsEqual($test, $rounds); ++$numberOfLeads) {
+                $test = PlaceNotation::permute($test, $permutation);
+            }
+            $this->lengthOfCourse = $this->getLengthOfLead() * $numberOfLeads;
+        }
+
+        return $this->lengthOfCourse;
     }
 
     /**

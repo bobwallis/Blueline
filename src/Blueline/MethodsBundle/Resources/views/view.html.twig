@@ -49,8 +49,8 @@
 				<dt>Hunt&nbsp;Bells</dt>
 				<dd>{{ ( method.numberOfHunts > 0 )? method.hunts|join(', ') : 'None' }}</dd>
 {% if method.lengthOfLead > 0 %}
-				<dt>Lead&nbsp;Length</dt>
-				<dd>{{ method.lengthOfLead }} rows</dd>
+				<dt>Lengths</dt>
+				<dd>{{ method.lengthOfLead }} rows per lead<br/>{{ method.lengthOfCourse }} rows per course ({{ method.lengthOfCourse / method.lengthOfLead }} leads)</dd>
 {% endif %}
 {% if method.duplicates is not empty %}
 				<dt>Method also pealed as</dt>
