@@ -419,7 +419,7 @@ class PlaceNotation
      */
     public static function explode($notation)
     {
-        return array_filter(explode('.', str_replace('x', '.x.', $notation)));
+        return array_values(array_filter(explode('.', str_replace('x', '.x.', $notation))));
     }
 
     /**

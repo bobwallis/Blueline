@@ -29,17 +29,20 @@ class Method
     public function __toArray()
     {
         $objectVars = get_object_vars($this);
-        array_walk($objectVars, function (&$v, $k) {
+        foreach ($objectVars as $k => $v) {
             switch ($k) {
-                // Don't try to drill down into sub-entities
+                // Don't try to drill down into sub-entities or show stuff only used internally
+                case 'leadHeads':
                 case 'collections':
                 case 'performances':
                 case 'methodsimilarity1':
                 case 'methodsimilarity2':
                     $v = null;
                     break;
+                default:
+                    $objectVars[$k] = $this->{'get'.ucwords($k)}();
             }
-        });
+        }
 
         return array_filter($objectVars);
     }
@@ -62,7 +65,6 @@ class Method
      * @var string $title
      */
     private $title;
-
 
     /**
      * @var boolean $provisional
@@ -113,10 +115,16 @@ class Method
      * @var integer $lengthOfLead
      */
     private $lengthOfLead;
+
     /**
      * @var integer $lengthOfCourse
      */
     private $lengthOfCourse;
+
+    /**
+     * @var integer $numberOfLeads
+     */
+    private $numberOfLeads;
 
     /**
      * @var integer $numberOfHunts
@@ -218,7 +226,6 @@ class Method
     public function setTitle($title)
     {
         $this->title = $title;
-
         return $this;
     }
 
@@ -231,7 +238,6 @@ class Method
     public function setProvisional($provisional)
     {
         $this->provisional = $provisional;
-
         return $this;
     }
 
@@ -254,7 +260,6 @@ class Method
     public function setStage($stage)
     {
         $this->stage = $stage;
-
         return $this;
     }
 
@@ -265,6 +270,9 @@ class Method
      */
     public function getStage()
     {
+        if (!isset($this->stage)) {
+            $this->setStage(PlaceNotation::guessStage($this->getNotation()));
+        }
         return $this->stage;
     }
     public function getStageText()
@@ -281,7 +289,6 @@ class Method
     public function setClassification($classification)
     {
         $this->classification = $classification;
-
         return $this;
     }
 
@@ -304,7 +311,6 @@ class Method
     public function setNameMetaphone($nameMetaphone)
     {
         $this->nameMetaphone = $nameMetaphone;
-
         return $this;
     }
 
@@ -315,6 +321,9 @@ class Method
      */
     public function getNameMetaphone()
     {
+        if (!isset($this->nameMetaphone)) {
+            $this->setNameMetaphone(metaphone(preg_replace('(Differential)?\s*(Little)?\s*(Alliance|Bob|Delight|Hybrid|Place|Surprise|Slow Course|Treble Bob|Treble Place)?\s*(Singles|Minimus|Doubles|Minor|Triples|Major|Caters|Royal|Cinques|Maximus|Sextuples|Fourteen|Septuples|Sixteen|Octuples|Eighteen|Nineteen|Twenty|Twenty-one|Twenty-two)$', '')));
+        }
         return $this->nameMetaphone;
     }
 
@@ -327,7 +336,6 @@ class Method
     public function setNotation($notation)
     {
         $this->notation = $notation;
-
         return $this;
     }
 
@@ -350,7 +358,6 @@ class Method
     public function setNotationExpanded($notationExpanded)
     {
         $this->notationExpanded = $notationExpanded;
-
         return $this;
     }
 
@@ -361,6 +368,9 @@ class Method
      */
     public function getNotationExpanded()
     {
+        if (!isset($this->notationExpanded)) {
+            $this->setNotationExpanded(PlaceNotation::expand($this->getNotation(), $this->getStage()));
+        }
         return $this->notationExpanded;
     }
 
@@ -383,7 +393,6 @@ class Method
     public function setLeadHeadCode($leadHeadCode)
     {
         $this->leadHeadCode = $leadHeadCode;
-
         return $this;
     }
 
@@ -394,13 +403,12 @@ class Method
      */
     public function getLeadHeadCode()
     {
-        if (!$this->leadHeadCode) {
+        if (!isset($this->leadHeadCode)) {
             $notationExploded = PlaceNotation::explode($this->getNotationExpanded());
             $leadHeadNotation = end($notationExploded);
             $postLeadEndNotation = ($this->getNumberOfHunts() == 2) ? $notationExploded[0] : '';
-            $this->leadHeadCode = LeadHeadCodes::toCode($this->getLeadHead(), $this->getStage(), $this->getNumberOfHunts(), $leadHeadNotation, $postLeadEndNotation);
+            $this->setLeadHeadCode(LeadHeadCodes::toCode($this->getLeadHead(), $this->getStage(), $this->getNumberOfHunts(), $leadHeadNotation, $postLeadEndNotation));
         }
-
         return $this->leadHeadCode;
     }
 
@@ -413,7 +421,6 @@ class Method
     public function setLeadHead($leadHead)
     {
         $this->leadHead = $leadHead;
-
         return $this;
     }
 
@@ -424,11 +431,10 @@ class Method
      */
     public function getLeadHead()
     {
-        if (!$this->leadHead) {
+        if (!isset($this->leadHead)) {
             $lead = PlaceNotation::apply(PlaceNotation::explodedToPermutations($this->getStage(), PlaceNotation::explode($this->getNotationExpanded())), PlaceNotation::rounds($this->getStage()));
-            $this->leadHead = implode('', end($lead));
+            $this->setLeadHead(implode('', end($lead)));
         }
-
         return $this->leadHead;
     }
 
@@ -441,7 +447,6 @@ class Method
     public function setFchGroups($fchGroups)
     {
         $this->fchGroups = $fchGroups;
-
         return $this;
     }
 
@@ -464,7 +469,6 @@ class Method
     public function setLengthOfLead($lengthOfLead)
     {
         $this->lengthOfLead = $lengthOfLead;
-
         return $this;
     }
 
@@ -475,10 +479,9 @@ class Method
      */
     public function getLengthOfLead()
     {
-        if (!$this->lengthOfLead) {
-            $this->lengthOfLead = count(PlaceNotation::explode($this->getNotationExpanded()));
+        if (!isset($this->lengthOfLead)) {
+            $this->setLengthOfLead(count(PlaceNotation::explode($this->getNotationExpanded())));
         }
-
         return $this->lengthOfLead;
     }
 
@@ -491,7 +494,6 @@ class Method
     public function setLengthOfCourse($lengthOfCourse)
     {
         $this->lengthOfCourse = $lengthOfCourse;
-
         return $this;
     }
 
@@ -503,16 +505,40 @@ class Method
     public function getLengthOfCourse()
     {
         if (!$this->lengthOfCourse) {
+            $this->setLengthOfCourse($this->lengthOfLead * $this->numberOfLeads);
+        }
+        return $this->lengthOfCourse;
+    }
+
+    /**
+     * Set numberOfLeads
+     *
+     * @param  integer $numberOfLeads
+     * @return Method
+     */
+    public function setNumberOfLeads($numberOfLeads)
+    {
+        $this->numberOfLeads = $numberOfLeads;
+        return $this;
+    }
+
+    /**
+     * Get numberOfLeads
+     *
+     * @return integer
+     */
+    public function getNumberOfLeads()
+    {
+        if (!$this->numberOfLeads) {
             $permutation = array_map(function ($b) { return PlaceNotation::bellToInt($b) - 1; }, str_split($this->getLeadHead()));
             $rounds = PlaceNotation::rounds($this->getStage());
             $test = PlaceNotation::permute($rounds, $permutation);
             for ($numberOfLeads = 1; !PlaceNotation::rowsEqual($test, $rounds); ++$numberOfLeads) {
                 $test = PlaceNotation::permute($test, $permutation);
             }
-            $this->lengthOfCourse = $this->getLengthOfLead() * $numberOfLeads;
+            $this->setNumberOfLeads($numberOfLeads);
         }
-
-        return $this->lengthOfCourse;
+        return $this->numberOfLeads;
     }
 
     /**
@@ -524,7 +550,6 @@ class Method
     public function setNumberOfHunts($numberOfHunts)
     {
         $this->numberOfHunts = $numberOfHunts;
-
         return $this;
     }
 
@@ -535,17 +560,16 @@ class Method
      */
     public function getNumberOfHunts()
     {
-        if (!$this->numberOfHunts) {
+        if (!isset($this->numberOfHunts)) {
             $this->numberOfHunts = count($this->getHunts());
         }
-
         return $this->numberOfHunts;
     }
 
     private $hunts;
     public function getHunts()
     {
-        if (!$this->hunts) {
+        if (!isset($this->hunts)) {
             $hunts = array();
             $leadHead = array_map(function ($n) { return PlaceNotation::bellToInt($n); }, str_split($this->getLeadHead()));
             for ($i = 0, $iLim = count($leadHead); $i < $iLim; ++$i) {
@@ -555,7 +579,6 @@ class Method
             }
             $this->hunts = $hunts;
         }
-
         return $this->hunts;
     }
 
@@ -568,7 +591,6 @@ class Method
     public function setLittle($little)
     {
         $this->little = $little;
-
         return $this;
     }
 
@@ -591,7 +613,6 @@ class Method
     public function setDifferential($differential)
     {
         $this->differential = $differential;
-
         return $this;
     }
 
@@ -602,6 +623,9 @@ class Method
      */
     public function getDifferential()
     {
+        if (!isset($this->differential)) {
+            $this->setDifferential($this->getNumberOfLeads() < $this->getStage() - $this->getNumberOfHunts());
+        }
         return $this->differential;
     }
 
@@ -614,7 +638,6 @@ class Method
     public function setPlain($plain)
     {
         $this->plain = $plain;
-
         return $this;
     }
 
@@ -637,7 +660,6 @@ class Method
     public function setTrebleDodging($trebleDodging)
     {
         $this->trebleDodging = $trebleDodging;
-
         return $this;
     }
 
@@ -660,7 +682,6 @@ class Method
     public function setPalindromic($palindromic)
     {
         $this->palindromic = $palindromic;
-
         return $this;
     }
 
@@ -671,6 +692,16 @@ class Method
      */
     public function getPalindromic()
     {
+        if (!isset($this->palindromic)) {
+            $notationExploded = PlaceNotation::explode($this->getNotationExpanded());
+            $notationExplodedBackwards = array_reverse($notationExploded);
+            $same = $notationExploded == $notationExplodedBackwards;
+            for ($i = 0; !$same && $i < count($notationExploded) + 1; ++$i) {
+                array_push($notationExplodedBackwards, array_shift($notationExplodedBackwards));
+                $same = $notationExploded == $notationExplodedBackwards;
+            }
+            $this->setPalindromic($same);
+        }
         return $this->palindromic;
     }
 
@@ -683,7 +714,6 @@ class Method
     public function setDoubleSym($doubleSym)
     {
         $this->doubleSym = $doubleSym;
-
         return $this;
     }
 
@@ -694,6 +724,27 @@ class Method
      */
     public function getDoubleSym()
     {
+        if (!isset($this->doubleSym)) {
+            $stage = $this->getStage();
+            $notationExploded = PlaceNotation::explode($this->getNotationExpanded());
+            $notationExplodedReversed = array_map(function ($e) use ($stage) {
+                if ($e == 'x') {
+                    return $e;
+                } else {
+                    $eExplode = str_split($e);
+                    for ($i = 0; $i < count($eExplode); ++$i) {
+                        $eExplode[$i] = PlaceNotation::intToBell($stage + 1 - PlaceNotation::bellToInt($eExplode[$i]));
+                    }
+                    return implode(array_reverse($eExplode));
+                }
+            }, $notationExploded);
+            $same = $notationExploded == $notationExplodedReversed;
+            for ($i = 0; !$same && $i < count($notationExploded) + 1; ++$i) {
+                array_push($notationExplodedReversed, array_shift($notationExplodedReversed));
+                $same = $notationExploded == $notationExplodedReversed;
+            }
+            $this->setDoubleSym($same);
+        }
         return $this->doubleSym;
     }
 
@@ -706,7 +757,6 @@ class Method
     public function setRotational($rotational)
     {
         $this->rotational = $rotational;
-
         return $this;
     }
 
@@ -717,12 +767,14 @@ class Method
      */
     public function getRotational()
     {
+        if (!isset($this->rotational)) {
+            $this->setRotational($this->getPalindromic() && $this->getDoubleSym());
+        }
         return $this->rotational;
     }
-
     public function getSymmetryText()
     {
-        return ucfirst(Text::toList(array_filter(array( ($this->getPalindromic() ? 'palindromic' : ''), ($this->getDoublesym() ? 'double' : ''), ($this->getRotational() ? 'rotational' : '') ))));
+        return ucfirst(Text::toList(array_filter(array( ($this->getPalindromic() ? 'palindromic' : ''), ($this->getDoubleSym() ? 'double' : ''), ($this->getRotational() ? 'rotational' : '') ))));
     }
 
     /**
@@ -734,7 +786,6 @@ class Method
     public function setCalls($calls)
     {
         $this->calls = $calls;
-
         return $this;
     }
 
@@ -829,7 +880,6 @@ class Method
     public function setRuleOffs($ruleOffs)
     {
         $this->ruleOffs = $ruleOffs;
-
         return $this;
     }
 
@@ -872,7 +922,6 @@ class Method
     public function setCallingPositions($callingPositions)
     {
         $this->callingPositions = $callingPositions;
-
         return $this;
     }
 
@@ -942,7 +991,6 @@ class Method
                 }
             }
         }
-
         return $this->callingPositions ?: array();
     }
 
@@ -955,7 +1003,6 @@ class Method
     public function setMagic($magic)
     {
         $this->magic = $magic;
-
         return $this;
     }
 
@@ -983,7 +1030,6 @@ class Method
     public function setUrl($url)
     {
         $this->url = $url;
-
         return $this;
     }
 
@@ -994,6 +1040,9 @@ class Method
      */
     public function getUrl()
     {
+        if (!isset($this->url)) {
+            $this->setUrl(str_replace([' ', '$', '&', '+', ',', '/', ':', ';', '=', '?', '@', '"', "'", '<', '>', '#', '%', '{', '}', '|', "\\", '^', '~', '[', ']', '.'], ['_'], iconv('UTF-8', 'ASCII//TRANSLIT', $this->getTitle())));
+        }
         return $this->url;
     }
 
@@ -1039,7 +1088,6 @@ class Method
     public function addPerformance(\Blueline\MethodsBundle\Entity\Performance $performance)
     {
         $this->performances[] = $performance;
-
         return $this;
     }
 
@@ -1119,7 +1167,6 @@ class Method
             }
             $this->leadHeads = $leadHeads;
         }
-
         return $this->leadHeads;
     }
 
@@ -1133,7 +1180,6 @@ class Method
     public function addMethodsimilarity1(\Blueline\MethodsBundle\Entity\MethodSimilarity $methodsimilarity1)
     {
         $this->methodsimilarity1[] = $methodsimilarity1;
-
         return $this;
     }
 
@@ -1167,7 +1213,6 @@ class Method
     public function addMethodsimilarity2(\Blueline\MethodsBundle\Entity\MethodSimilarity $methodsimilarity2)
     {
         $this->methodsimilarity2[] = $methodsimilarity2;
-
         return $this;
     }
 
