@@ -231,6 +231,10 @@ class MethodsController extends Controller
         // Otherwise create and display the custom method
         $method = new Method($vars);
         $custom = true;
+        $similarMethods = array(
+            'differentOnlyAtLeadEnd' => null,
+            'other' => null
+        );
 
         // Create response
         switch ($format) {
@@ -239,8 +243,8 @@ class MethodsController extends Controller
                     throw $this->createAccessDeniedException('Maximum scale is 4 unless in developer mode.');
                 }
                 $section = $request->query->get('style');
-                if (!in_array($section, ['numbers', 'line', 'grid'])) {
-                    throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'line' or 'grid'.");
+                if (!in_array($section, ['numbers', 'lines', 'diagrams', 'grid'])) {
+                    throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'lines', 'diagrams' or 'grid'.");
                 }
                 if (!$section || intval($request->query->get('scale')) === 0) {
                     $url = $this->generateUrl('Blueline_Methods_custom_view', array(
@@ -260,7 +264,7 @@ class MethodsController extends Controller
                 $process->mustRun();
                 return new Response($process->getOutput());
             default:
-                return $this->render('BluelineMethodsBundle::view.'.$format.'.twig', compact('method', 'custom'));
+                return $this->render('BluelineMethodsBundle::view.'.$format.'.twig', compact('method', 'custom', 'similarMethods'));
         }
     }
 
