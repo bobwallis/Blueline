@@ -1,6 +1,6 @@
 /*!
- * modernizr v3.2.0
- * Build http://modernizr.com/download?-applicationcache-canvas-canvastext-csspointerevents-fontface-geolocation-history-indexeddb-input-localstorage-sessionstorage-svg-websqldatabase-webworkers-hasevent-prefixed-prefixes-testallprops-testprop-teststyles-dontmin
+ * modernizr v3.3.1
+ * Build https://modernizr.com/download?-applicationcache-canvas-canvastext-csspointerevents-fontface-geolocation-history-indexeddb-input-localstorage-sessionstorage-svg-websqldatabase-webworkers-hasevent-prefixed-prefixes-setclasses-testallprops-testprop-teststyles-dontmin
  *
  * Copyright (c)
  *  Faruk Ates
@@ -23,6 +23,9 @@
 */
 
 ;(function(window, document, undefined){
+  var classes = [];
+  
+
   var tests = [];
   
 
@@ -36,15 +39,15 @@
 
   var ModernizrProto = {
     // The current version, dummy
-    _version: '3.2.0',
+    _version: '3.3.1',
 
     // Any settings that don't work as separate modules
     // can go in here as configuration.
     _config: {
-      'classPrefix' : '',
-      'enableClasses' : true,
-      'enableJSClass' : true,
-      'usePrefixes' : true
+      'classPrefix': '',
+      'enableClasses': true,
+      'enableJSClass': true,
+      'usePrefixes': true
     },
 
     // Queue of tests
@@ -65,11 +68,11 @@
     },
 
     addTest: function(name, fn, options) {
-      tests.push({name : name, fn : fn, options : options});
+      tests.push({name: name, fn: fn, options: options});
     },
 
     addAsyncTest: function(fn) {
-      tests.push({name : null, fn : fn});
+      tests.push({name: null, fn: fn});
     }
   };
 
@@ -148,7 +151,7 @@ Detects support for the Geolocation API for users to provide their location to w
   "authors": ["Hay Kranen", "Alexander Farkas"],
   "notes": [{
     "name": "W3C Spec",
-    "href": "http://www.w3.org/TR/html51/browsers.html#the-history-interface"
+    "href": "https://www.w3.org/TR/html51/browsers.html#the-history-interface"
   }, {
     "name": "MDN documentation",
     "href": "https://developer.mozilla.org/en-US/docs/Web/API/window.history"
@@ -299,7 +302,7 @@ Detects support for SVG in `<embed>` or `<object>` elements.
   "tags": ["performance", "workers"],
   "notes": [{
     "name": "W3C Reference",
-    "href": "http://www.w3.org/TR/workers/"
+    "href": "https://www.w3.org/TR/workers/"
   }, {
     "name": "HTML5 Rocks article",
     "href": "http://www.html5rocks.com/en/tutorials/workers/basics/"
@@ -349,14 +352,13 @@ Detects support for the basic `Worker` API from the Web Workers spec. Web Worker
    * ```
    */
 
-  var prefixes = (ModernizrProto._config.usePrefixes ? ' -webkit- -moz- -o- -ms- '.split(' ') : []);
+  // we use ['',''] rather than an empty array in order to allow a pattern of .`join()`ing prefixes to test
+  // values in feature detects to continue to work
+  var prefixes = (ModernizrProto._config.usePrefixes ? ' -webkit- -moz- -o- -ms- '.split(' ') : ['','']);
 
   // expose these for the plugin API. Look in the source for how to join() them against your input
   ModernizrProto._prefixes = prefixes;
 
-  
-
-  var classes = [];
   
 
   /**
@@ -446,40 +448,6 @@ Detects support for the basic `Worker` API from the Web Workers spec. Web Worker
   ;
 
   /**
-   * cssToDOM takes a kebab-case string and converts it to camelCase
-   * e.g. box-sizing -> boxSizing
-   *
-   * @access private
-   * @function cssToDOM
-   * @param {string} name - String name of kebab-case prop we want to convert
-   * @returns {string} The camelCase version of the supplied name
-   */
-
-  function cssToDOM(name) {
-    return name.replace(/([a-z])-([a-z])/g, function(str, m1, m2) {
-      return m1 + m2.toUpperCase();
-    }).replace(/^-/, '');
-  }
-  ;
-
-
-  /**
-   * contains checks to see if a string contains another string
-   *
-   * @access private
-   * @function contains
-   * @param {string} str - The string we want to check for substrings
-   * @param {string} substr - The substring we want to search the first string for
-   * @returns {boolean}
-   */
-
-  function contains(str, substr) {
-    return !!~('' + str).indexOf(substr);
-  }
-
-  ;
-
-  /**
    * docElement is a convenience wrapper to grab the root element of the document
    *
    * @access private
@@ -498,6 +466,41 @@ Detects support for the basic `Worker` API from the Web Workers spec. Web Worker
 
   var isSVG = docElement.nodeName.toLowerCase() === 'svg';
   
+
+  /**
+   * setClasses takes an array of class names and adds them to the root element
+   *
+   * @access private
+   * @function setClasses
+   * @param {string[]} classes - Array of class names
+   */
+
+  // Pass in an and array of class names, e.g.:
+  //  ['no-webp', 'borderradius', ...]
+  function setClasses(classes) {
+    var className = docElement.className;
+    var classPrefix = Modernizr._config.classPrefix || '';
+
+    if (isSVG) {
+      className = className.baseVal;
+    }
+
+    // Change `no-js` to `js` (independently of the `enableClasses` option)
+    // Handle classPrefix on this too
+    if (Modernizr._config.enableJSClass) {
+      var reJS = new RegExp('(^|\\s)' + classPrefix + 'no-js(\\s|$)');
+      className = className.replace(reJS, '$1' + classPrefix + 'js$2');
+    }
+
+    if (Modernizr._config.enableClasses) {
+      // Add the new classes
+      className += ' ' + classPrefix + classes.join(' ' + classPrefix);
+      isSVG ? docElement.className.baseVal = className : docElement.className = className;
+    }
+
+  }
+
+  ;
 
   /**
    * createElement is a convenience wrapper around document.createElement. Since we
@@ -533,8 +536,8 @@ Detects support for the basic `Worker` API from the Web Workers spec. Web Worker
    * @optionProp hasEvent
    * @access public
    * @function hasEvent
-   * @param  {string|*}       eventName  is the name of an event to test for (e.g. "resize")
-   * @param  {Element|string} [element=HTMLDivElement] is the element|document|window|tagName to test on
+   * @param  {string|*} eventName - the name of an event to test for (e.g. "resize")
+   * @param  {Element|string} [element=HTMLDivElement] - is the element|document|window|tagName to test on
    * @returns {boolean}
    * @example
    *  `Modernizr.hasEvent` lets you determine if the browser supports a supplied event.
@@ -553,7 +556,7 @@ Detects support for the basic `Worker` API from the Web Workers spec. Web Worker
    *
    */
 
-  var hasEvent = (function(undefined) {
+  var hasEvent = (function() {
 
     // Detect whether event support can be detected via `in`. Test on a DOM element
     // using the "blur" event b/c it should always exist. bit.ly/event-detection
@@ -651,17 +654,17 @@ Detects support for the text APIs for `<canvas>` elements.
   "notes": [
     {
       "name": "MDN Docs",
-      "href": "http://developer.mozilla.org/en/CSS/pointer-events"
+      "href": "https://developer.mozilla.org/en-US/docs/Web/CSS/pointer-events"
     },{
       "name": "Test Project Page",
-      "href": "http://ausi.github.com/Feature-detection-technique-for-pointer-events/"
+      "href": "https://ausi.github.com/Feature-detection-technique-for-pointer-events/"
     },{
       "name": "Test Project Wiki",
-      "href": "http://github.com/ausi/Feature-detection-technique-for-pointer-events/wiki"
+      "href": "https://github.com/ausi/Feature-detection-technique-for-pointer-events/wiki"
     },
     {
       "name": "Related Github Issue",
-      "href": "http://github.com/Modernizr/Modernizr/issues/80"
+      "href": "https://github.com/Modernizr/Modernizr/issues/80"
     }
   ]
 }
@@ -673,6 +676,23 @@ Detects support for the text APIs for `<canvas>` elements.
     return style.pointerEvents === 'auto';
   });
 
+
+  /**
+   * cssToDOM takes a kebab-case string and converts it to camelCase
+   * e.g. box-sizing -> boxSizing
+   *
+   * @access private
+   * @function cssToDOM
+   * @param {string} name - String name of kebab-case prop we want to convert
+   * @returns {string} The camelCase version of the supplied name
+   */
+
+  function cssToDOM(name) {
+    return name.replace(/([a-z])-([a-z])/g, function(str, m1, m2) {
+      return m1 + m2.toUpperCase();
+    }).replace(/^-/, '');
+  }
+  ;
 
   /**
    * since we have a fairly large number of input tests that don't mutate the input
@@ -692,7 +712,7 @@ Detects support for the text APIs for `<canvas>` elements.
   "authors": ["Mike Taylor"],
   "notes": [{
     "name": "WHATWG spec",
-    "href": "http://www.whatwg.org/specs/web-apps/current-work/multipage/the-input-element.html#input-type-attr-summary"
+    "href": "https://html.spec.whatwg.org/multipage/forms.html#input-type-attr-summary"
   }],
   "knownBugs": ["Some blackberry devices report false positive for input.multiple"]
 }
@@ -726,7 +746,7 @@ Modernizr.input.step
   var inputattrs = 'autocomplete autofocus list placeholder max min multiple pattern required step'.split(' ');
   var attrs = {};
 
-  Modernizr['input'] = (function(props) {
+  Modernizr.input = (function(props) {
     for (var i = 0, len = props.length; i < len; i++) {
       attrs[ props[i] ] = !!(props[i] in inputElem);
     }
@@ -904,8 +924,8 @@ Modernizr.input.step
   "authors": ["Diego Perini", "Mat Marquis"],
   "tags": ["css"],
   "knownBugs": [
-    "False Positive: WebOS http://github.com/Modernizr/Modernizr/issues/342",
-    "False Postive: WP7 http://github.com/Modernizr/Modernizr/issues/538"
+    "False Positive: WebOS https://github.com/Modernizr/Modernizr/issues/342",
+    "False Postive: WP7 https://github.com/Modernizr/Modernizr/issues/538"
   ],
   "notes": [{
     "name": "@font-face detection routine by Diego Perini",
@@ -918,7 +938,7 @@ Modernizr.input.step
     "href": "https://docs.google.com/spreadsheet/ccc?key=0Ag5_yGvxpINRdHFYeUJPNnZMWUZKR2ItMEpRTXZPdUE#gid=0"
   },{
     "name": "CSS fonts on Android",
-    "href": "http://stackoverflow.com/questions/3200069/css-fonts-on-android"
+    "href": "https://stackoverflow.com/questions/3200069/css-fonts-on-android"
   },{
     "name": "@font-face and Android",
     "href": "http://archivist.incutio.com/viewlist/css-discuss/115960"
@@ -946,6 +966,23 @@ Modernizr.input.step
     });
   }
 ;
+
+
+  /**
+   * contains checks to see if a string contains another string
+   *
+   * @access private
+   * @function contains
+   * @param {string} str - The string we want to check for substrings
+   * @param {string} substr - The substring we want to search the first string for
+   * @returns {boolean}
+   */
+
+  function contains(str, substr) {
+    return !!~('' + str).indexOf(substr);
+  }
+
+  ;
 
   /**
    * If the browsers follow the spec, then they would expose vendor-specific style as:
@@ -981,7 +1018,7 @@ Modernizr.input.step
    * @access public
    * @function atRule
    * @param {string} prop - String name of the @-rule to test for
-   * @returns {string|false} The string representing the (possibly prefixed)
+   * @returns {string|boolean} The string representing the (possibly prefixed)
    * valid version of the @-rule, or `false` when it is unsupported.
    * @example
    * ```js
@@ -1080,6 +1117,12 @@ Modernizr.input.step
   /**
    * testDOMProps is a generic DOM property test; if a browser supports
    *   a certain property, it won't return undefined for it.
+   *
+   * @access private
+   * @function testDOMProps
+   * @param {array.<string>} props - An array of properties to test for
+   * @param {object} obj - An object or Element you want to use to test the parameters again
+   * @param {boolean|object} elem - An Element to bind the property lookup again. Use `false` to prevent the check
    */
   function testDOMProps(props, obj, elem) {
     var item;
@@ -1116,7 +1159,7 @@ Modernizr.input.step
    */
 
   var modElem = {
-    elem : createElement('modernizr')
+    elem: createElement('modernizr')
   };
 
   // Clean up this element
@@ -1127,7 +1170,7 @@ Modernizr.input.step
   
 
   var mStyle = {
-    style : modElem.elem.style
+    style: modElem.elem.style
   };
 
   // kill ref for gc, must happen before mod.elem is removed, so we unshift on to
@@ -1168,7 +1211,7 @@ Modernizr.input.step
 
   // Accepts a list of property names and a single value
   // Returns `undefined` if native detection not available
-  function nativeTestProps (props, value) {
+  function nativeTestProps(props, value) {
     var i = props.length;
     // Start with the JS API: http://www.w3.org/TR/css3-conditional/#the-css-interface
     if ('CSS' in window && 'supports' in window.CSS) {
@@ -1229,8 +1272,9 @@ Modernizr.input.step
     // inside of an SVG element, in certain browsers, the `style` element is only
     // defined for valid tags. Therefore, if `modernizr` does not have one, we
     // fall back to a less used element and hope for the best.
-    var elems = ['modernizr', 'tspan'];
-    while (!mStyle.style) {
+    // for strict XHTML browsers the hardly used samp element is used
+    var elems = ['modernizr', 'tspan', 'samp'];
+    while (!mStyle.style && elems.length) {
       afterInit = true;
       mStyle.modElem = createElement(elems.shift());
       mStyle.style = mStyle.modElem.style;
@@ -1333,6 +1377,14 @@ Modernizr.input.step
    * We specify literally ALL possible (known and/or likely) properties on
    * the element including the non-vendor prefixed one, for forward-
    * compatibility.
+   *
+   * @access private
+   * @function testPropsAll
+   * @param {string} prop - A string of the property to test for
+   * @param {string|object} [prefixed] - An object to check the prefixed properties on. Use a string to skip
+   * @param {HTMLElement|SVGElement} [elem] - An element used to test the property and value against
+   * @param {string} [value] - A string of a css value
+   * @param {boolean} [skipValueTest] - An boolean representing if you want to test if value sticks when set
    */
   function testPropsAll(prop, prefixed, elem, value, skipValueTest) {
 
@@ -1369,7 +1421,8 @@ Modernizr.input.step
    * @access public
    * @function prefixed
    * @param {string} prop - String name of the property to test for
-   * @param {object} [obj]- An object to test for the prefixed properties on
+   * @param {object} [obj] - An object to test for the prefixed properties on
+   * @param {HTMLElement} [elem] - An element used to test specific properties against
    * @returns {string|false} The string representing the (possibly prefixed) valid
    * version of the property, or `false` when it is unsupported.
    * @example
@@ -1459,7 +1512,12 @@ Detects support for the IndexedDB client-side storage API (final spec).
   // - Firefox shipped moz_indexedDB before FF4b9, but since then has been mozIndexedDB
   // For speed, we don't test the legacy (and beta-only) indexedDB
 
-  var indexeddb = prefixed('indexedDB', window);
+  var indexeddb;
+  try {
+    indexeddb = prefixed('indexedDB', window);
+  } catch (e) {
+  }
+
   Modernizr.addTest('indexeddb', !!indexeddb);
 
   if (!!indexeddb) {
@@ -1504,7 +1562,7 @@ Detects support for the IndexedDB client-side storage API (final spec).
    * ```
    */
 
-  function testAllProps (prop, value, skipValueTest) {
+  function testAllProps(prop, value, skipValueTest) {
     return testPropsAll(prop, undefined, undefined, value, skipValueTest);
   }
   ModernizrProto.testAllProps = testAllProps;
@@ -1512,6 +1570,9 @@ Detects support for the IndexedDB client-side storage API (final spec).
 
   // Run each test
   testRunner();
+
+  // Remove the "no-js" class if it exists
+  setClasses(classes);
 
   delete ModernizrProto.addTest;
   delete ModernizrProto.addAsyncTest;
