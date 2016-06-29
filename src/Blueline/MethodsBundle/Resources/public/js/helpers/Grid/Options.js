@@ -80,6 +80,20 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 	return function( passedOptions ) {
 		var options = {};
 
+		// Parse notation passed as a string
+		if( typeof passedOptions.notation === 'string' ) {
+			passedOptions.notation = {
+				text: PlaceNotation.expand( passedOptions.notation, ((typeof passedOptions.stage !== 'undefined')? passedOptions.stage : undefined) ),
+			};
+			passedOptions.notation.exploded = PlaceNotation.explode( passedOptions.notation.text );
+			passedOptions.notation.parsed = PlaceNotation.parse( passedOptions.notation.text, ((typeof passedOptions.stage !== 'undefined')? passedOptions.stage : undefined) );
+		}
+
+		// Parse startRow passed as a string
+		if( typeof passedOptions.startRow === 'string' ) {
+			passedOptions.startRow = passedOptions.startRow.split( '' ).map( PlaceNotation.charToBell );
+		}
+
 		// Make runtime adjustments to the default options object
 		var defaultRuntimeOptions = {
 			id: 'grid_'+(++counter),
