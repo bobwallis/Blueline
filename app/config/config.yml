@@ -9,7 +9,7 @@ parameters:
 framework:
     #esi:             ~
     #translator:      { fallback: %locale% }
-    secret:          %secret%
+    secret:          "%secret%"
     router:
         resource: "%kernel.root_dir%/config/routing.yml"
         strict_requirements: ~
@@ -31,21 +31,21 @@ framework:
 
 # Twig Configuration
 twig:
-    debug:            %kernel.debug%
-    strict_variables: %kernel.debug%
+    debug:            "%kernel.debug%"
+    strict_variables: "%kernel.debug%"
 
 # Doctrine Configuration
 doctrine:
     dbal:
-        driver:   %database_driver%
-        host:     %database_host%
-        port:     %database_port%
-        dbname:   %database_name%
-        user:     %database_user%
-        password: %database_password%
+        driver:   "%database_driver%"
+        host:     "%database_host%"
+        port:     "%database_port%"
+        dbname:   "%database_name%"
+        user:     "%database_user%"
+        password: "%database_password%"
         charset:  UTF8
     orm:
-        auto_generate_proxy_classes: %kernel.debug%
+        auto_generate_proxy_classes: "%kernel.debug%"
         entity_managers:
             default:
                 auto_mapping: true
@@ -74,9 +74,9 @@ doctrine:
                             Blueline\BluelineBundle\Doctrine\Extension\Radians
 
 blueline:
-    admin_email: %admin_email%
-    analytics_code: %analytics_code%
+    admin_email: "%admin_email%"
+    analytics_code: "%analytics_code%"
 
     # The below parameters will automatically update themselves
-    asset_update: %asset_update%
-    database_update: %database_update%
+    asset_update: "%asset_update%"
+    database_update: "%database_update%"
