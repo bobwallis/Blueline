@@ -214,7 +214,6 @@ class MethodsController extends Controller
         // Do some basic conversion
         $vars['stage'] = isset($vars['stage'])? intval($vars['stage']) : PlaceNotation::guessStage($vars['notation']);
         $vars['notationExpanded'] = PlaceNotation::expand($vars['notation'], $vars['stage']);
-        $vars['title'] = isset($vars['title']) ? $vars['title'] : 'Unrung '.Stages::toString($vars['stage']).' Method';
 
         // Check whether the method already exists and redirect to it if so
         $methodsCheck = $this->getDoctrine()->getManager()->createQuery('
