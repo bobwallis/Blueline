@@ -3,12 +3,11 @@
 	{% if settings is defined %}
 		{% if settings == 'method' %}
 			<div id="settings" class="method" style="display: none">
-				<h3>Settings</h3>
+				<h3>Method Settings</h3>
 				<form id="settings_form" method="get">
-					<p>Draw lines through the&nbsp;&nbsp;<span class="select-wrapper"><select id="method_follow" name="method_follow"><option value="heaviest" selected="selected">heaviest</option><option value="lightest">lightest</option></select></span>&nbsp;&nbsp;bell in each group.</p>
-					<p><input type="checkbox" id="method_tooltips" name="method_tooltips" checked="checked"><label for="method_tooltips">Show descriptive tooltips.</label></p>
-					<h4>Line Style</h4>
-					<p><label class="radio_image"><input type="radio" name="method_style" value="numbers" checked="checked"><img src="{{ app.request.basepath }}/images/preview_numbers.png" style="width:79px;height:25px;"></label><label class="radio_image"><input type="radio" name="method_style" value="lines"><img src="{{ app.request.basepath }}/images/preview_lines.png" style="width:79px;height:25px;"></label><label class="radio_image"><input type="radio" name="method_style" value="diagrams"><img src="{{ app.request.basepath }}/images/preview_diagrams.png" style="width:79px;height:25px;"></label></p>
+					<p>Draw lines through the&nbsp;&nbsp;<span class="select-wrapper"><select id="method_follow" name="method_follow"><option value="heaviest" selected="selected">heaviest</option><option value="lightest">lightest</option></select></span>&nbsp;&nbsp;bell in each group by default.</p>
+					<p>Use the following style: <label class="radio_image"><input type="radio" name="method_style" value="numbers" checked="checked"><img src="{{ app.request.basepath }}/images/preview_numbers.png" style="width:79px;height:25px;"></label><label class="radio_image"><input type="radio" name="method_style" value="lines"><img src="{{ app.request.basepath }}/images/preview_lines.png" style="width:79px;height:25px;"></label><label class="radio_image"><input type="radio" name="method_style" value="diagrams"><img src="{{ app.request.basepath }}/images/preview_diagrams.png" style="width:79px;height:25px;"></label></p>
+					<p><label for="method_tooltips">Show descriptive tooltips?</label><input type="checkbox" id="method_tooltips" name="method_tooltips" checked="checked"></p>
 					<p><input id="settings_submit" value="Done" type="submit" /></p>
 				</form>
 			</div>
