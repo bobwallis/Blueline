@@ -60,7 +60,8 @@ define( ['Modernizr', './Null', '../../../helpers/LocalStorage'], function( Mode
 
 					// Do an initial clear of the cache if needed
 					var dbAge = LocalStorage.getItem( 'websqlAge' );
-					if( dbAge === null ) {
+					if( dbAge === null ) { dbAge = 0; }
+					if( dbAge < LocalStorage.age ) {
 						WebSQL.clear();
 						LocalStorage.setItem( 'websqlAge', LocalStorage.age );
 					}

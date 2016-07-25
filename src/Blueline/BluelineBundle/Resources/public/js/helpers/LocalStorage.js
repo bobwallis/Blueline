@@ -68,8 +68,8 @@ define( ['Modernizr'], function( Modernizr ) {
 		if( cacheAge === null ) { cacheAge = 0; }
 		if( cacheAge < LocalStorage.age ) {
 			LocalStorage.clearCache();
+			LocalStorage.setItem( 'cacheAge', LocalStorage.age );
 		}
-		LocalStorage.setItem( 'cacheAge', LocalStorage.age );
 	}
 	else {
 		LocalStorage.setItem = LocalStorage.removeItem = LocalStorage.clear =

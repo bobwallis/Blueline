@@ -71,7 +71,8 @@ define( ['Modernizr', '../../../lib/db', './Null', '../../../helpers/LocalStorag
 
 			// Do an initial clear of the cache if needed
 			var dbAge = LocalStorage.getItem( 'dbAge' );
-			if( dbAge === null ) {
+			if( dbAge === null ) { dbAge = 0; }
+			if( dbAge < LocalStorage.age ) {
 				IndexedDB.clear();
 				LocalStorage.setItem( 'dbAge', LocalStorage.age );
 			}
