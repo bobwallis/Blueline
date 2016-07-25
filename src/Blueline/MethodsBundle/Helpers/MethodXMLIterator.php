@@ -52,7 +52,7 @@ class MethodXMLIterator implements \Iterator, \Countable
                 'url'            => strval($node->title) ? str_replace([' ', '$', '&', '+', ',', '/', ':', ';', '=', '?', '@', '"', "'", '<', '>', '#', '%', '{', '}', '|', "\\", '^', '~', '[', ']', '.'], ['_'], iconv('UTF-8', 'ASCII//TRANSLIT', strval($node->title))) : null,
                 'title'          => strval($node->title) ?: null,
                 'namemetaphone'  => metaphone($node->name ?: '') ?: null,
-                'notation'       => strval($node->notation) ?: null,
+                'notation'       => str_replace(['-','.,'], ['x',','], strval($node->notation)) ?: null,
                 ), array_filter(array(
                 'stage'          => intval($node->stage) ?: null,
                 'classification' => strval($node->classification) ?: null,
