@@ -4,6 +4,7 @@ namespace Blueline\MethodsBundle\Command;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Blueline\BluelineBundle\Helpers\PgResultIterator;
@@ -49,6 +50,17 @@ class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
             return;
         }
         $methods = new PgResultIterator( $result );
+
+        // Check there's not hundreds of methods to do
+        if (count($methods) > 25) {
+            $helper = $this->getHelper('question');
+            $output->writeln('<comment>There\'s >25 methods without similarity information. Calculating it can take some time (over a day for the whole method library).</comment>');
+            $output->writeln('<comment>If you prefer then skip this step and run this command later:</comment> \'./app/console blueline:calculateMethodSimilarities\'');
+            $question = new ConfirmationQuestion('Continue calculating similarities? (Y/N) ', false);
+            if (!$helper->ask($input, $output, $question)) {
+                return;
+            }
+        }
 
         // Prepare a query for searching for methods to compare against
         $comparisonMethod = pg_prepare($db, 'comparisonMethods',
