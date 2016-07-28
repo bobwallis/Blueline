@@ -321,7 +321,7 @@ class PlaceNotation
         // Explode notation
         $notationExploded = self::explode($notationFull);
 
-        // Worj through each piece of notation individually to do last bits of cleannup
+        // Worj through each piece of notation individually to do last bits of cleanup
         foreach ($notationExploded as &$split) {
             if ($split == 'x') {
                 if ($stage%2 != 0) {
@@ -419,7 +419,7 @@ class PlaceNotation
      */
     public static function explode($notation)
     {
-        return array_values(array_filter(explode('.', str_replace('x', '.x.', $notation))));
+        return array_values(array_filter(explode('.', str_replace('x', '.x.', $notation)), 'strlen'));
     }
 
     /**
@@ -546,7 +546,7 @@ class PlaceNotation
                     } else {
                         return array_map(function ($e) { return array('sort' => self::bellToInt($e), 'value' => $e); }, str_split($e));
                     }
-                }, array_filter(explode('~', $section)));
+                }, array_filter(explode('~', $section), 'strlen'));
                 $sectionSplit = call_user_func_array('array_merge', $sectionSplitArrays);
                 usort($sectionSplit, function ($a, $b) {
                     return $a['sort'] - $b['sort'];
