@@ -312,7 +312,7 @@ class Method
 
                 // For Plain there is a special case for 'Slow Course', and then if all bells only make places and hunt then it's 'Place', otherwise 'Bob'
                 if ($principalHuntType == 'Plain') {
-                    // Generate a lead, and a "lead+1 change" (we'll need the latter to do things like 'check if all bells only hunt and make places' since we'll need to check for dodges/points over the lead end)
+                    // Generate a lead, and a "lead+1 change" (we'll need the latter to  check if all bells only hunt and make places since we'll need to check for dodges/points over the lead end)
                     $lead = PlaceNotation::apply(PlaceNotation::explodedToPermutations($this->getStage(), PlaceNotation::explode($this->getNotationExpanded())), PlaceNotation::rounds($this->getStage()));
                     array_unshift($lead, PlaceNotation::rounds($this->getStage()));
                     $leadPlusOneChangeFromNextLead = $lead;
@@ -347,7 +347,7 @@ class Method
                         // If all bells only make places and hunt then it's 'Place', otherwise 'Bob'
                         $this->setClassification($placesOnly? 'Place' : 'Bob');
                     }
-                // For Treble Dodging see if internal places are made at each cross section. All => 'Surprise', None => 'Treble Bob', Some =? 'Delight'
+                // For Treble Dodging see if internal places are made at each cross section. All => 'Surprise', None => 'Treble Bob', Some => 'Delight'
                 } elseif ($principalHuntType == 'Treble Dodging') {
                     // Generate a lead
                     $lead = PlaceNotation::apply(PlaceNotation::explodedToPermutations($this->getStage(), PlaceNotation::explode($this->getNotationExpanded())), PlaceNotation::rounds($this->getStage()));
