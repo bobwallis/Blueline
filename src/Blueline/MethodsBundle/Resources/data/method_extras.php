@@ -139,7 +139,10 @@ $method_extras = array (
   ),
   array (
     'title' => 'Shipway Royal',
-    'calls' => array (),
+    'calls' => array(
+      'Bob' => array('notation' => '38', 'every' => 8, 'from' => 2),
+      'Single' => array('notation' => '3890', 'every' => 8, 'from' => 2),
+    ),
     'ruleoffs' => array('every' => 8, 'from' => 2),
   ),
   array (
