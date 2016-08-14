@@ -88,6 +88,7 @@ class ImportMethodsCommand extends ContainerAwareCommand
             foreach ($xmlIterator as $xmlRow) {
                 // Generate details not in the XML
                 $method = new Method($xmlRow);
+                $xmlRow['abbreviation'] = $method->getAbbreviation();
                 $xmlRow['lengthofcourse'] = $method->getLengthOfCourse();
                 $xmlRow['calls'] = json_encode($method->getCalls());
                 $xmlRow['callingpositions'] = json_encode($method->getCallingPositions());

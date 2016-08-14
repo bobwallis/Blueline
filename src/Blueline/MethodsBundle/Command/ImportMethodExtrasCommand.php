@@ -30,22 +30,34 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
 
         // Get access to the database and other services
         $db = pg_connect('host='.$this->getContainer()->getParameter('database_host').' port='.$this->getContainer()->getParameter('database_port').' dbname='.$this->getContainer()->getParameter('database_name').' user='.$this->getContainer()->getParameter('database_user').' password='.$this->getContainer()->getParameter('database_password').'');
-        if( $db === false ) {
+        if ($db === false) {
             $output->writeln('<error>Failed to connect to database</error>');
             return;
         }
 
-        if (file_exists(__DIR__.'/../Resources/data/method_extras.php')) {
-            $output->writeln('<info>Adding extra method data...</info>');
-            require __DIR__.'/../Resources/data/method_extras.php';
-            $method_extras = new \ArrayObject($method_extras);
-            $extrasIterator   = $method_extras->getIterator();
+        // Import the extra call and abbreviation info
+        if (file_exists(__DIR__.'/../Resources/data/method_extras_calls.php')) {
+            $output->writeln('<info>Adding extra call data...</info>');
+            require __DIR__.'/../Resources/data/method_extras_calls.php';
+            $method_extras_calls = new \ArrayObject($method_extras_calls);
+            $extrasIterator   = $method_extras_calls->getIterator();
             foreach ($extrasIterator as $txtRow) {
-                // Import the row
                 $txtRow['calls'] = json_encode($txtRow['calls']);
                 $txtRow['ruleoffs'] = json_encode($txtRow['ruleoffs']);
-                if( pg_update( $db, 'methods', array_change_key_case($txtRow), array('title' => $txtRow['title']) ) === false ) {
-                    $output->writeln('<comment> Failed to import method extras for "'.$txtRow['title'].'"</comment>');
+                if (pg_update($db, 'methods', array_change_key_case($txtRow), array('title' => $txtRow['title'])) === false) {
+                    $output->writeln('<comment> Failed to import call information for "'.$txtRow['title'].'"</comment>');
+                    $output->writeln('<comment> '.pg_last_error($db).'</comment>');
+                }
+            }
+        }
+        if (file_exists(__DIR__.'/../Resources/data/method_extras_abbreviations.php')) {
+            $output->writeln('<info>Adding extra abbreviation data...</info>');
+            require __DIR__.'/../Resources/data/method_extras_abbreviations.php';
+            $method_extras_abbreviations = new \ArrayObject($method_extras_abbreviations);
+            $extrasIterator   = $method_extras_abbreviations->getIterator();
+            foreach ($extrasIterator as $txtRow) {
+                if (pg_update($db, 'methods', array_change_key_case($txtRow), array('title' => $txtRow['title'])) === false) {
+                    $output->writeln('<comment> Failed to import abbreviation information for "'.$txtRow['title'].'"</comment>');
                     $output->writeln('<comment> '.pg_last_error($db).'</comment>');
                 }
             }

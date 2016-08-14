@@ -69,6 +69,11 @@ class Method
     private $title;
 
     /**
+     * @var string $abbreviation
+     */
+    private $abbreviation;
+
+    /**
      * @var boolean $provisional
      */
     private $provisional;
@@ -232,6 +237,31 @@ class Method
     public function setTitle($title)
     {
         $this->title = $title;
+        return $this;
+    }
+
+    /**
+     * Get abbreviation
+     *
+     * @return string
+     */
+    public function getAbbreviation()
+    {
+        if (!isset($this->abbreviation)) {
+            $this->setAbbreviation(substr(trim(str_replace(array($this->getStageText(), $this->getClassification(), 'Differential', 'Little'), '', $this->getTitle())), 0, 2));
+        }
+        return $this->abbreviation;
+    }
+
+    /**
+     * Set abbreviation
+     *
+     * @param  string $abbreviation
+     * @return Method
+     */
+    public function setAbbreviation($abbreviation)
+    {
+        $this->abbreviation = $abbreviation;
         return $this;
     }
 
