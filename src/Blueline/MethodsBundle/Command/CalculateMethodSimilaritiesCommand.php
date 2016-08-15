@@ -11,6 +11,8 @@ use Blueline\BluelineBundle\Helpers\PgResultIterator;
 use Blueline\MethodsBundle\Helpers\MethodSimilarity;
 use Blueline\MethodsBundle\Helpers\PlaceNotation;
 
+require_once(__DIR__.'/../../BluelineBundle/Helpers/pg_upsert.php'); // Can use 'use function' when PHP 5.6 is more common
+
 class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
 {
     protected function configure()
@@ -32,7 +34,7 @@ class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
 
         // Get access to the database
         $db = pg_connect('host='.$this->getContainer()->getParameter('database_host').' port='.$this->getContainer()->getParameter('database_port').' dbname='.$this->getContainer()->getParameter('database_name').' user='.$this->getContainer()->getParameter('database_user').' password='.$this->getContainer()->getParameter('database_password').'');
-        if( $db === false ) {
+        if ($db === false) {
             $output->writeln('<error>Failed to connect to database</error>');
             return;
         }
@@ -45,11 +47,11 @@ class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
              WHERE (method1_title IS NULL)
              ORDER BY stage ASC'
         );
-        if( $result === false ) {
+        if ($result === false) {
             $output->writeln('<error>Failed to query methods table: '.pg_last_error($db).'</error>');
             return;
         }
-        $methods = new PgResultIterator( $result );
+        $methods = new PgResultIterator($result);
 
         // Check there's not hundreds of methods to do
         if (count($methods) > 25) {
@@ -69,7 +71,7 @@ class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
               LEFT OUTER JOIN methods_similar ON (title = method1_title AND method2_title = $2)
              WHERE (stage = $1 AND title != $2 AND method1_title IS NULL AND (ABS(lengthoflead - $3) < 1 OR ABS(lengthoflead - $3) < FLOOR((CASE WHEN $3 < lengthoflead THEN $3 ELSE lengthoflead END)/5)))'
         );
-        if($comparisonMethod === false) {
+        if ($comparisonMethod === false) {
             $output->writeln('<error>Failed to create prepared query: '.pg_last_error($db).'</error>');
             return;
         }
@@ -80,14 +82,14 @@ class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
             $rounds[$i] = PlaceNotation::rounds($i);
         }
         // And a function that converts row arrays into string arrays
-        $mapper = function($a) {
-            return implode( array_map( array('Blueline\MethodsBundle\Helpers\PlaceNotation', 'intToBell'), $a ) );
+        $mapper = function ($a) {
+            return implode(array_map(array('Blueline\MethodsBundle\Helpers\PlaceNotation', 'intToBell'), $a));
         };
 
         // Set-up the progress bar
         $progress = new ProgressBar($output, count($methods));
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($methods))*2) - 10);
-        $progress->setRedrawFrequency(max(1, min(20,count($methods)/100)));
+        $progress->setRedrawFrequency(max(1, min(20, count($methods)/100)));
         $progress->start();
         foreach ($methods as $method) {
             // Generate the array for the method we're generating indexes for
@@ -95,7 +97,7 @@ class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
 
             // Get methods to compare against
             $comparisons = pg_execute($db, 'comparisonMethods', array($method['stage'], $method['title'], $method['lengthoflead']));
-            if($comparisons === false) {
+            if ($comparisons === false) {
                 $output->writeln('<error>Failed to query for methods to compare \''.' '.'\'against: '.pg_last_error($db).'</error>');
                 continue;
             }
@@ -123,31 +125,99 @@ class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
         // Flag methods which only differ from each other over the lead end
         $output->writeln('<title>Checking for methods differing only at the lead end</title>');
         $leadHeadCheck = pg_query(
-            'SELECT method1_title, method2_title
-              FROM methods_similar
-              LEFT JOIN methods AS m1 ON (method1_title = m1.title)
-              LEFT JOIN methods AS m2 ON (method2_title = m2.title)
-             WHERE (onlydifferentoverleadend IS NULL OR onlydifferentoverleadend = FALSE)
-              AND similarity > 0
-              AND similarity <= 2
-              AND m1.leadhead != m2.leadhead
-              AND m1.lengthoflead = m2.lengthoflead
-              AND strpos(m1.notation,\',\') > m1.lengthoflead/2
-              AND strpos(m2.notation,\',\') > m2.lengthoflead/2
-              AND left(m1.notation,strpos(m1.notation,\',\')) = left(m2.notation,strpos(m2.notation,\',\'))
-            ORDER BY m1.title ASC;'
+            'SELECT matches.method1_title, matches.method2_title
+              FROM (
+               SELECT method1.title as method1_title, method2.title as method2_title
+                FROM methods method1, LATERAL (
+                 SELECT title
+                  FROM methods
+                  WHERE replace(notation, substring(notation from \'(,[0-9A-Z]*)$\'), \'\') = replace(method1.notation, substring(method1.notation from \'(,[0-9A-Z]*)$\'), \'\')
+                   AND title != method1.title
+                   AND stage = method1.stage
+                   AND lengthoflead = method1.lengthoflead
+                 ) method2) matches
+               LEFT OUTER JOIN methods_similar ON (matches.method1_title = methods_similar.method1_title AND matches.method2_title = methods_similar.method2_title)
+             WHERE methods_similar.onlydifferentoverleadend IS NULL;'
         );
-        if( $leadHeadCheck === false ) {
+        if ($leadHeadCheck === false) {
             $output->writeln('<error>Failed to query methods table: '.pg_last_error($db).'</error>');
             return;
         }
-        $methods = new PgResultIterator( $leadHeadCheck );
+        $methods = new PgResultIterator($leadHeadCheck);
         $progress = new ProgressBar($output, count($methods));
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($methods))*2) - 10);
-        $progress->setRedrawFrequency(max(1, min(20,count($methods)/100)));
+        $progress->setRedrawFrequency(max(1, min(20, count($methods)/100)));
         $progress->start();
         foreach ($methods as $method) {
-            pg_update($db, 'methods_similar', array('onlydifferentoverleadend' => true), $method);
+            \Blueline\BluelineBundle\Helpers\pg_upsert($db, 'methods_similar', array('onlydifferentoverleadend' => true), $method);
+            $progress->advance();
+        }
+        pg_flush($db);
+        $progress->finish();
+        $output->writeln('');
+
+        // Flag methods different only over half-lead
+        $output->writeln('<title>Checking for methods differing only at the half lead</title>');
+        $halfLeadCheck = pg_query(
+            'SELECT matches.method1_title, matches.method2_title
+              FROM (
+               SELECT method1.title as method1_title, method2.title as method2_title
+                FROM methods method1, LATERAL (
+                 SELECT title
+                  FROM methods
+                  WHERE replace(notation, substring(notation from \'([0-9A-Z]*,)[0-9A-Z]*$\'), \'\') = replace(method1.notation, substring(method1.notation from \'([0-9A-Z]*,)[0-9A-Z]*$\'), \'\')
+                   AND title != method1.title
+                   AND stage = method1.stage
+                   AND lengthoflead = method1.lengthoflead
+                 ) method2) matches
+               LEFT OUTER JOIN methods_similar ON (matches.method1_title = methods_similar.method1_title AND matches.method2_title = methods_similar.method2_title)
+             WHERE methods_similar.onlydifferentoverhalflead IS NULL;'
+        );
+        if ($halfLeadCheck === false) {
+            $output->writeln('<error>Failed to query methods table: '.pg_last_error($db).'</error>');
+            return;
+        }
+        $methods  = new PgResultIterator($halfLeadCheck);
+        $progress = new ProgressBar($output, count($methods));
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($methods))*2) - 10);
+        $progress->setRedrawFrequency(max(1, min(20, count($methods)/100)));
+        $progress->start();
+        foreach ($methods as $method) {
+            \Blueline\BluelineBundle\Helpers\pg_upsert($db, 'methods_similar', array('onlydifferentoverhalflead' => true), $method);
+            $progress->advance();
+        }
+        pg_flush($db);
+        $progress->finish();
+        $output->writeln('');
+        
+        // Flag methods different only over half-lead and lead end
+        $output->writeln('<title>Checking for methods differing only at the half lead and lead end</title>');
+        $leadEndHalfLeadCheck = pg_query(
+            'SELECT matches.method1_title, matches.method2_title
+              FROM (
+               SELECT method1.title as method1_title, method2.title as method2_title
+                FROM methods method1, LATERAL (
+                 SELECT title
+                  FROM methods
+                  WHERE replace(notation, substring(notation from \'([0-9A-Z]*,[0-9A-Z]*)$\'), \'\') = replace(method1.notation, substring(method1.notation from \'([0-9A-Z]*,[0-9A-Z]*)$\'), \'\')
+                   AND title != method1.title
+                   AND stage = method1.stage
+                   AND lengthoflead = method1.lengthoflead
+                 ) method2) matches
+               LEFT OUTER JOIN methods_similar ON (matches.method1_title = methods_similar.method1_title AND matches.method2_title = methods_similar.method2_title)
+             WHERE methods_similar.onlydifferentoverhalflead IS NULL AND methods_similar.onlydifferentoverleadend IS NULL AND methods_similar.onlydifferentoverleadendandhalflead IS NULL;'
+        );
+        if ($leadEndHalfLeadCheck === false) {
+            $output->writeln('<error>Failed to query methods table: '.pg_last_error($db).'</error>');
+            return;
+        }
+        $methods  = new PgResultIterator($leadEndHalfLeadCheck);
+        $progress = new ProgressBar($output, count($methods));
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($methods))*2) - 10);
+        $progress->setRedrawFrequency(max(1, min(20, count($methods)/100)));
+        $progress->start();
+        foreach ($methods as $method) {
+            \Blueline\BluelineBundle\Helpers\pg_upsert($db, 'methods_similar', array('onlydifferentoverleadendandhalflead' => true), $method);
             $progress->advance();
         }
         pg_flush($db);
@@ -155,6 +225,6 @@ class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
         $output->writeln('');
 
         $time += microtime(true);
-        $output->writeln("\n<info>Finished updating method similarities in ".gmdate("H:i:s", $time).". Peak memory usage: ".number_format(round(memory_get_peak_usage(true)/1048576,2)).' MiB.</info>');
+        $output->writeln("\n<info>Finished updating method similarities in ".gmdate("H:i:s", $time).". Peak memory usage: ".number_format(round(memory_get_peak_usage(true)/1048576, 2)).' MiB.</info>');
     }
 }

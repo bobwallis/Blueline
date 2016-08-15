@@ -37,7 +37,7 @@ class MethodRepository extends EntityRepository
         ->setParameter('url', $url);
 
         try {
-            return array_map( function($m) {
+            return array_map(function ($m) {
                 $m['leadEndNotation'] =  trim(strrchr($m['notation'], ','), ',');
                 unset($m['notation']);
                 return $m;
@@ -47,13 +47,60 @@ class MethodRepository extends EntityRepository
         }
     }
 
-    public function similarMethodsExcludingThoseOnlyDifferentAtTheLeadEnd($url)
+    public function similarMethodsDifferentOnlyAtTheHalfLead($url)
+    {
+        $query = $this->getEntityManager()->createQuery(
+            'SELECT partial m.{url,title,notation} FROM BluelineMethodsBundle:Method m
+             LEFT JOIN m.methodsimilarity2 s
+             LEFT JOIN s.method1 m2
+             WHERE m2.url = :url AND m.url != :url AND s.onlyDifferentOverHalfLead = TRUE
+            ORDER BY s.similarity ASC'
+        )
+        ->setParameter('url', $url);
+
+        try {
+            return array_map(function ($m) {
+                preg_match('/([0-9A-Z]*),[0-9A-Z]*$/', $m['notation'], $matches);
+                $m['halfLeadNotation'] =  $matches[1];
+                unset($m['notation']);
+                return $m;
+            }, $query->getArrayResult());
+        } catch (\Doctrine\ORM\NoResultException $e) {
+            return null;
+        }
+    }
+
+    public function similarMethodsDifferentOnlyAtTheHalfLeadAndLeadEnd($url)
+    {
+        $query = $this->getEntityManager()->createQuery(
+            'SELECT partial m.{url,title,notation} FROM BluelineMethodsBundle:Method m
+             LEFT JOIN m.methodsimilarity2 s
+             LEFT JOIN s.method1 m2
+             WHERE m2.url = :url AND m.url != :url AND s.onlyDifferentOverLeadEndAndHalfLead = TRUE
+            ORDER BY s.similarity ASC'
+        )
+        ->setParameter('url', $url);
+
+        try {
+            return array_map(function ($m) {
+                preg_match('/([0-9A-Z]*),([0-9A-Z]*)$/', $m['notation'], $matches);
+                $m['halfLeadNotation'] =  $matches[1];
+                $m['leadEndNotation'] =  $matches[2];
+                unset($m['notation']);
+                return $m;
+            }, $query->getArrayResult());
+        } catch (\Doctrine\ORM\NoResultException $e) {
+            return null;
+        }
+    }
+
+    public function similarMethodsExcludingThoseOnlyDifferentAtTheLeadEndOrHalfLead($url)
     {
         $query = $this->getEntityManager()->createQuery(
             'SELECT partial m.{url,title} FROM BluelineMethodsBundle:Method m
              LEFT JOIN m.methodsimilarity2 s
              LEFT JOIN s.method1 m2
-             WHERE m2.url = :url AND m.url != :url AND s.onlyDifferentOverLeadEnd IS NULL
+             WHERE m2.url = :url AND m.url != :url AND s.onlyDifferentOverLeadEnd IS NULL AND s.onlyDifferentOverHalfLead IS NULL AND s.onlyDifferentOverLeadEndAndHalfLead IS NULL
             ORDER BY s.similarity ASC'
         )
         ->setMaxResults(8)

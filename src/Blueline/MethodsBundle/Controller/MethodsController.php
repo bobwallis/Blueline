@@ -176,7 +176,9 @@ class MethodsController extends Controller
         
         $similarMethods = array(
             'differentOnlyAtLeadEnd' => $methodRepository->similarMethodsDifferentOnlyAtTheLeadEnd($method->getUrl()),
-            'other' => $methodRepository->similarMethodsExcludingThoseOnlyDifferentAtTheLeadEnd($method->getUrl())
+            'differentOnlyAtHalfLead' => $methodRepository->similarMethodsDifferentOnlyAtTheHalfLead($method->getUrl()),
+            'differentOnlyAtHalfLeadAndLeadEnd' => $methodRepository->similarMethodsDifferentOnlyAtTheHalfLeadAndLeadEnd($method->getUrl()),
+            'other' => $methodRepository->similarMethodsExcludingThoseOnlyDifferentAtTheLeadEndOrHalfLead($method->getUrl())
         );
 
         // Create response

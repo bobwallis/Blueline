@@ -11,10 +11,21 @@ class MethodSimilarity
      * @var float
      */
     private $similarity;
+
     /**
      * @var boolean
      */
     private $onlyDifferentOverLeadEnd;
+    
+    /**
+     * @var boolean
+     */
+    private $onlyDifferentOverHalfLead;
+    
+    /**
+     * @var boolean
+     */
+    private $onlyDifferentOverLeadEndAndHalfLead;
 
     /**
      * @var \Blueline\MethodsBundle\Entity\Method
@@ -51,6 +62,53 @@ class MethodSimilarity
         return $this->similarity;
     }
 
+    /**
+     * Set onlyDifferentOverHalfLead
+     *
+     * @param boolean $onlyDifferentOverHalfLead
+     *
+     * @return MethodSimilarity
+     */
+    public function setOnlyDifferentOverHalfLead($onlyDifferentOverHalfLead)
+    {
+        $this->onlyDifferentOverHalfLead = $onlyDifferentOverHalfLead;
+
+        return $this;
+    }
+
+    /**
+     * Get onlyDifferentOverHalfLead
+     *
+     * @return boolean
+     */
+    public function getOnlyDifferentOverHalfLead()
+    {
+        return $this->onlyDifferentOverHalfLead;
+    }
+
+    /**
+     * Set onlyDifferentOverLeadEndAndHalfLead
+     *
+     * @param boolean $onlyDifferentOverLeadEndAndHalfLead
+     *
+     * @return MethodSimilarity
+     */
+    public function setOnlyDifferentOverLeadEndAndHalfLead($onlyDifferentOverLeadEndAndHalfLead)
+    {
+        $this->onlyDifferentOverLeadEndAndHalfLead = $onlyDifferentOverLeadEndAndHalfLead;
+
+        return $this;
+    }
+
+    /**
+     * Get onlyDifferentOverLeadEndAndHalfLead
+     *
+     * @return boolean
+     */
+    public function getOnlyDifferentOverLeadEndAndHalfLead()
+    {
+        return $this->onlyDifferentOverLeadEndAndHalfLead;
+    }
 
     /**
      * Set onlyDifferentOverLeadEnd

@@ -10,7 +10,14 @@ Blueline\MethodsBundle\Entity\MethodSimilarity:
     fields:
         similarity:
             type: float
+            nullable: true
         onlyDifferentOverLeadEnd:
+            type: boolean
+            nullable: true
+        onlyDifferentOverHalfLead:
+            type: boolean
+            nullable: true
+        onlyDifferentOverLeadEndAndHalfLead:
             type: boolean
             nullable: true
     manyToOne:

@@ -60,7 +60,7 @@
 				{% endfor %}
 				</dd>
 {% endif %}
-{% if similarMethods is defined and (similarMethods.differentOnlyAtLeadEnd is not empty or similarMethods.other is not empty ) %}
+{% if similarMethods is defined and (similarMethods.differentOnlyAtLeadEnd is not empty or similarMethods.differentOnlyAtHalfLead is not empty or similarMethods.differentOnlyAtHalfLeadAndLeadEnd or similarMethods.other is not empty ) %}
 				<dt>Similar Methods</dt>
 				<dd>
 {% if similarMethods.differentOnlyAtLeadEnd is not empty %}
@@ -69,11 +69,25 @@
 				{% for method2 in similarMethods.differentOnlyAtLeadEnd %}
 					&nbsp;<a href="{{ path( 'Blueline_Methods_view', { 'url': method2.url } ) }}">{{ method2.title }}</a> ({{ method2.leadEndNotation }})<br />
 				{% endfor %}
-{% if similarMethods.differentOnlyAtLeadEnd is not empty and similarMethods.other is not empty %}
+{% if similarMethods.differentOnlyAtHalfLead is not empty %}
+				{% if similarMethods.differentOnlyAtLeadEnd is not empty %}<br />{% endif %}
+				<em>Different Only Over Half Lead</em><br />
+{% endif %}
+				{% for method2 in similarMethods.differentOnlyAtHalfLead %}
+					&nbsp;<a href="{{ path( 'Blueline_Methods_view', { 'url': method2.url } ) }}">{{ method2.title }}</a> ({{ method2.halfLeadNotation }})<br />
+				{% endfor %}
+{% if similarMethods.differentOnlyAtHalfLeadAndLeadEnd is not empty %}
+				{% if similarMethods.differentOnlyAtLeadEnd is not empty or similarMethods.differentOnlyAtHalfLead is not empty %}<br />{% endif %}
+				<em>Different Only Over Lead End and Half Lead</em><br />
+{% endif %}
+				{% for method2 in similarMethods.differentOnlyAtHalfLeadAndLeadEnd %}
+					&nbsp;<a href="{{ path( 'Blueline_Methods_view', { 'url': method2.url } ) }}">{{ method2.title }}</a> ({{ method2.halfLeadNotation }}, {{ method2.leadEndNotation }})<br />
+				{% endfor %}
+{% if (similarMethods.differentOnlyAtLeadEnd is not empty or similarMethods.differentOnlyAtHalfLead is not empty or similarMethods.differentOnlyAtHalfLeadAndLeadEnd is not empty) and similarMethods.other is not empty %}
 				<br /><em>Other Similar Methods</em><br />
 {% endif %}
 				{% for method2 in similarMethods.other %}
-					{% if similarMethods.differentOnlyAtLeadEnd is not empty %}&nbsp;{% endif %}<a href="{{ path( 'Blueline_Methods_view', { 'url': method2.url } ) }}">{{ method2.title }}</a><br />
+					{% if similarMethods.differentOnlyAtLeadEnd is not empty or similarMethods.differentOnlyAtHalfLead is not empty or similarMethods.differentOnlyAtHalfLeadAndLeadEnd is not empty %}&nbsp;{% endif %}<a href="{{ path( 'Blueline_Methods_view', { 'url': method2.url } ) }}">{{ method2.title }}</a><br />
 				{% endfor %}
 				</dd>
 {% endif %}
