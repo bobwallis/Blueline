@@ -109,12 +109,10 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 					// Create a block of notation big enough to play with
 					var notationExploded = PlaceNotation.explode( options.notation ),
 						callNotationExploded = PlaceNotation.explode( call.notation );
-					while( notationExploded.length < (2*call.every)+call.from ) { notationExploded = notationExploded.concat( notationExploded ); }
+					while( notationExploded.length < (2*call.every)+call.from+call.cover ) { notationExploded = notationExploded.concat( notationExploded ); }
 
 					// Insert the call's notation
-					for( i = 0; i < callNotationExploded.length; ++i ) {
-						notationExploded[(i + call.from + call.every) - 1] = callNotationExploded[i];
-					}
+					Array.prototype.splice.apply( notationExploded, [call.from+call.every-1, call.cover].concat( callNotationExploded ) );
 
 					// Calculte a good amount of padding to display on either side of the call's notation
 					var padding = Math.max( 2, Math.floor((this.notation.exploded.length-7)/4) ),
@@ -135,6 +133,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 					call.startRow = (start === 0)? PlaceNotation.rounds( this.stage ) : PlaceNotation.apply( notationParsed.slice( 0, start ), PlaceNotation.rounds( this.stage ) );
 
 					// Adjust rule offs to compensate for the fact we just sliced off some of the start of the method
+					// TODO: adjust rule-offs when the call adjusts the lead length
 					call.ruleOffs = $.extend( {}, this.ruleOffs );
 					call.ruleOffs.from -= start;
 

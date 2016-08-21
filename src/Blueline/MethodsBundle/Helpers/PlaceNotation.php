@@ -446,7 +446,7 @@ class PlaceNotation
         foreach ($notationExploded as $piece) {
             // Mark all static bells
             for ($j = 0; isset($piece[$j]) && $piece[$j] != 'x'; ++$j) {
-                $pos = strpos(self::$_notationOrder, $piece[$j]);
+                $pos = self::bellToInt($piece[$j]) - 1;
                 $permutations[$i][$pos] = $pos;
             }
             // 'x' what's left
@@ -457,6 +457,7 @@ class PlaceNotation
                 $permutations[$i][$j] = $j+1;
                 $permutations[$i][$j+1] = $j;
             }
+            ksort($permutations[$i]);
             ++$i;
         }
 
