@@ -12,7 +12,7 @@
     "event-stream": "^3.3.4",
     "gulp": "^3.9.0",
     "gulp-amdclean": "^1.1.1",
-    "gulp-autoprefixer": "^3.1.0",
+    "gulp-autoprefixer": "^3.1.1",
     "gulp-clean-css": "^2.0.12",
     "gulp-concat": "^2.6.0",
     "gulp-flatten": "^0.2.0",
