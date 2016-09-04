@@ -170,7 +170,30 @@ gulp.task( 'fonts', function() {
 
 // Javascripts
 gulp.task( 'js', ['js-old_ie', 'js-main', 'js-export', 'js-workers'], function() {} );
-var old_ie_js_sources = ['src/Blueline/BluelineBundle/Resources/public/js/helpers/Array.js', 'src/Blueline/BluelineBundle/Resources/public/js/lib/html5shiv.js'];
+var old_ie_js_sources = ['src/Blueline/BluelineBundle/Resources/public/js/helpers/old_ie.js',
+                         'src/Blueline/BluelineBundle/Resources/public/js/lib/Array.filter.js',
+                         'src/Blueline/BluelineBundle/Resources/public/js/lib/Array.indexOf.js',
+                         'src/Blueline/BluelineBundle/Resources/public/js/lib/Array.map.js',
+                         'src/Blueline/BluelineBundle/Resources/public/js/lib/Array.forEach.js',
+                         'src/Blueline/BluelineBundle/Resources/public/js/lib/html5shiv.js'];
+var require_paths = {
+	shared:       'src/Blueline/BluelineBundle/Resources/public/js/',
+	methods:      'src/Blueline/MethodsBundle/Resources/public/js/',
+	towers:       'src/Blueline/TowersBundle/Resources/public/js/',
+	services:     'src/Blueline/ServicesBundle/Resources/public/js/',
+	jquery:       'src/Blueline/BluelineBundle/Resources/public/js/lib/jquery',
+	eve:          'src/Blueline/BluelineBundle/Resources/public/js/lib/eve',
+	Modernizr:    'src/Blueline/BluelineBundle/Resources/public/js/lib/modernizr',
+	'Array.fill': 'src/Blueline/BluelineBundle/Resources/public/js/lib/Array.fill'
+};
+var require_shim = {
+	'Modernizr': {
+		exports: 'Modernizr'
+	},
+	'Array.fill': {
+		exports: 'Array.prototype.fill'
+	}
+};
 gulp.task( 'js-old_ie', function() {
 	gulp.src( old_ie_js_sources )
 		.pipe( concat( 'old_ie.js' ) )
@@ -184,20 +207,8 @@ gulp.task( 'js-main', function() {
 	requirejs( {
 		baseUrl: './',
 		include: 'shared/main',
-		paths: {
-			shared: 'src/Blueline/BluelineBundle/Resources/public/js/',
-			methods: 'src/Blueline/MethodsBundle/Resources/public/js/',
-			towers: 'src/Blueline/TowersBundle/Resources/public/js/',
-			services: 'src/Blueline/ServicesBundle/Resources/public/js/',
-			jquery: 'src/Blueline/BluelineBundle/Resources/public/js/lib/jquery',
-			eve: 'src/Blueline/BluelineBundle/Resources/public/js/lib/eve',
-			Modernizr: 'src/Blueline/BluelineBundle/Resources/public/js/lib/modernizr'
-		},
-		shim: {
-			Modernizr: {
-				exports: 'Modernizr'
-			}
-		},
+		paths: require_paths,
+		shim: require_shim,
 		optimize: 'none',
 		out: 'main.js'
     } )
@@ -213,20 +224,8 @@ gulp.task( 'js-export', function() {
 	requirejs( {
 		baseUrl: './',
 		include: 'methods/export',
-		paths: {
-			shared: 'src/Blueline/BluelineBundle/Resources/public/js/',
-			methods: 'src/Blueline/MethodsBundle/Resources/public/js/',
-			towers: 'src/Blueline/TowersBundle/Resources/public/js/',
-			services: 'src/Blueline/ServicesBundle/Resources/public/js/',
-			jquery: 'src/Blueline/BluelineBundle/Resources/public/js/lib/jquery',
-			eve: 'src/Blueline/BluelineBundle/Resources/public/js/lib/eve',
-			Modernizr: 'src/Blueline/BluelineBundle/Resources/public/js/lib/modernizr'
-		},
-		shim: {
-			Modernizr: {
-				exports: 'Modernizr'
-			}
-		},
+		paths: require_paths,
+		shim: require_shim,
 		optimize: 'none',
 		out: 'export.js'
     } )
