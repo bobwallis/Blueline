@@ -234,6 +234,8 @@ class MethodsController extends Controller
         $custom = true;
         $similarMethods = array(
             'differentOnlyAtLeadEnd' => null,
+            'differentOnlyAtHalfLead' => null,
+            'differentOnlyAtHalfLeadAndLeadEnd' => null,
             'other' => null
         );
 
