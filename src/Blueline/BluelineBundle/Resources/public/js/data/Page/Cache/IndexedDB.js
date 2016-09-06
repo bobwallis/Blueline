@@ -1,4 +1,4 @@
-define( ['Modernizr', '../../../lib/db', './Null', '../../../helpers/LocalStorage'], function( Modernizr, db, Null, LocalStorage ) {
+define( ['Modernizr', 'db', './Null', '../../../helpers/LocalStorage'], function( Modernizr, db, Null, LocalStorage ) {
 	var IndexedDB;
 	if( Modernizr.indexeddb ) {
 		// The IndexedDB API is a bit of a moving target. Once it stablises it would be sensible to trim
@@ -15,7 +15,7 @@ define( ['Modernizr', '../../../lib/db', './Null', '../../../helpers/LocalStorag
 
 		db.open( {
 			server: 'Blueline',
-			version: 3,
+			version: 4,
 			schema: {
 				pages: {
 					key: {
@@ -29,44 +29,36 @@ define( ['Modernizr', '../../../lib/db', './Null', '../../../helpers/LocalStorag
 				}
 			}
 		} )
-		.done( function ( server ) {
-			IndexedDB.works = true;
+		.then( function ( server ) {
+			IndexedDB = { works: true };
 			IndexedDB.get = function( url, success, failure ) {
 				success = (typeof success === 'undefined') ? emptyFunction : success;
 				failure = (typeof failure === 'undefined') ? emptyFunction : failure;
 				server.get( 'pages', url )
 					.done( function( page ) {
-						if( typeof page === 'undefined' ) {
-							failure();
-						}
-						else {
-							success( page.content );
-						}
-					} )
-					.fail( failure );
+						if( typeof page === 'undefined' ) { failure(); }
+						else { success( page.content ); }
+					}, failure );
 			};
 			IndexedDB.set = function( url, content, success, failure ) {
 				success = (typeof success === 'undefined') ? emptyFunction : success;
 				failure = (typeof failure === 'undefined') ? emptyFunction : failure;
-				server.add( 'pages', { url: url, content: content, timestamp: Date.now() } )
-					.done( success )
-					.fail( failure );
+				server.put( 'pages', { url: url, content: content, timestamp: Date.now() } ).then( success, failure );
 			};
 			IndexedDB.remove = function( url, success, failure ) {
 				success = (typeof success === 'undefined') ? emptyFunction : success;
 				failure = (typeof failure === 'undefined') ? emptyFunction : failure;
-				server.remove( 'pages', url )
-					.done( success )
-					.fail( failure );
+				server.remove( 'pages', url ).then( success, failure );
 			};
 			IndexedDB.clear = function( success, failure ) {
 				success = (typeof success === 'undefined') ? emptyFunction : success;
 				failure = (typeof failure === 'undefined') ? emptyFunction : failure;
-				server.query( 'pages' ).execute().done( function( results ) {
-					results.forEach( function( e, i ) {
-						server.remove( 'pages', e.url );
+				server.query( 'pages' ).all().execute()
+					.then( function( results ) {
+						results.forEach( function( e, i ) {
+							server.remove( 'pages', e.url );
+						} );
 					} );
-				} );
 			};
 
 			// Do an initial clear of the cache if needed

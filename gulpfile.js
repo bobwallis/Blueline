@@ -183,6 +183,7 @@ var require_paths = {
 	services:     'src/Blueline/ServicesBundle/Resources/public/js/',
 	jquery:       'src/Blueline/BluelineBundle/Resources/public/js/lib/jquery',
 	eve:          'src/Blueline/BluelineBundle/Resources/public/js/lib/eve',
+	db:           'src/Blueline/BluelineBundle/Resources/public/js/lib/db',
 	Modernizr:    'src/Blueline/BluelineBundle/Resources/public/js/lib/modernizr',
 	'Array.fill': 'src/Blueline/BluelineBundle/Resources/public/js/lib/Array.fill'
 };
