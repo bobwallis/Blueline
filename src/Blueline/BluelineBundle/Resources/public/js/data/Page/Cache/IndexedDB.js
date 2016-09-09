@@ -19,7 +19,7 @@ define( ['Modernizr', './Null', '../../../helpers/LocalStorage'], function( Mode
 		DBOpenRequest.onupgradeneeded = function( e ) {
 			var db = e.target.result;
 			db.onerror = unsetup;
-			db.deleteObjectStore( 'pages' );
+			if( e.oldVersion > 0 ) { db.deleteObjectStore( 'pages' ); }
 			var objectStore = db.createObjectStore( 'pages', { keyPath: 'url' } );
 			objectStore.createIndex( 'timestamp', 'timestamp', { unique: false });
 		};
