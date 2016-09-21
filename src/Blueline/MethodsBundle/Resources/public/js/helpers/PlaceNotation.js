@@ -161,6 +161,10 @@ define( function() {
 				if( piece === 'x' ) {
 					return (stage % 2 === 0)? 'x' : stageText;
 				}
+				// Check for empty
+				if( piece.match( /[A-Z\d]+/g ) === null ) {
+					return '';
+				}
 				// Work out which places are affected
 				var affected = piece.match( /[A-Z\d]+/g ).join( '' ).split( '' ).map( PlaceNotation.charToBell ).sort( function( a, b ) { return a - b;} );
 				// Then add missing external places

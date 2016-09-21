@@ -19,8 +19,10 @@ define( ['jquery', 'eve', '../helpers/PlaceNotation'], function( $, eve, PlaceNo
 				notation = $input.val();
 			if( typeof notation !== 'undefined' ) {
 				var longNotation = PlaceNotation.expand( $input.val(), isNaN( stage )? undefined : stage );
-				$('#custom_method_notationParsed').removeClass( 'placeholder' )
-					.html( longNotation.replace( /(x|\.)/g, function(t) { return ' '+t+' '; } ) );
+				if( longNotation.length > 0 ) {
+					$('#custom_method_notationParsed').removeClass( 'placeholder' )
+						.html( longNotation.replace( /(x|\.)/g, function(t) { return ' '+t+' '; } ) );
+				}
 			}
 		}
 		else {
