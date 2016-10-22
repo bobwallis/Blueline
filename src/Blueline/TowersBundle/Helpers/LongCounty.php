@@ -225,6 +225,7 @@ class LongCounty
         'SA'   => 'South Australia',
         'NSW'  => 'New South Wales',
         'Vict' => 'Victoria',
+        'Vic'  => 'Victoria',
         'VIC'  => 'Victoria',
         'Qld'  => 'Queensland',
         'QLD'  => 'Queensland',
