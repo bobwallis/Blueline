@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 63 63" preserveAspectRatio="xMidYMid">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 16 16" preserveAspectRatio="xMidYMid">
 	<defs>
 		<mask id="mask" x="0" y="0" width="63" height="63">
 			<rect x="0" y="0" width="63" height="63" fill="#FFF" />
 		</mask>
 	</defs>
-	<g mask="url(#mask)">
-		<path fill="none" stroke="#000" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="round" d="M0,0l2.333,2 19.666,14.75 -19.666,14.75 59,44.25" />
-		<path fill="none" stroke="#000" stroke-width="5" stroke-linecap="square" stroke-linejoin="round" d="M63,0l-2.333,2 -39.333,29.5 19.666,14.75 -39.333,29.5" />
+	<g mask="url(#mask)" transform="scale(0.254)">
+		<path fill="none" stroke="#000" stroke-width="6" stroke-linecap="square" stroke-linejoin="round" d="M0,0l2.333,2 19.666,14.75 -19.666,14.75 59,44.25" />
+		<path fill="none" stroke="#000" stroke-width="7" stroke-linecap="square" stroke-linejoin="round" d="M63,0l-2.333,2 -39.333,29.5 19.666,14.75 -39.333,29.5" />
 	</g>
 </svg>
