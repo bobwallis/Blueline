@@ -27,20 +27,9 @@
 		<meta name="apple-mobile-web-app-title" content="Blueline" />
 		<meta name="format-detection" content="telephone=no" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-		{# The number of tags for this is just absurd... #}
-		{% for size in [57, 72, 76, 114, 144, 152, 180] %}
+		{% for size in [144, 152, 180] %}
 			<link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="{{ app.request.basepath }}/images/appicon-{{ size }}x{{ size }}.png" />
 		{% endfor %}
-		<link href="{{ app.request.basepath }}/images/splash-1536x2008.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" rel="apple-touch-startup-image" />
-		<link href="{{ app.request.basepath }}/images/splash-1496x2048.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" rel="apple-touch-startup-image" />
-		<link href="{{ app.request.basepath }}/images/splash-768x1004.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 1) and (orientation: portrait)" rel="apple-touch-startup-image" />
-		<link href="{{ app.request.basepath }}/images/splash-748x1024.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 1) and (orientation: landscape)" rel="apple-touch-startup-image" />
-		<link href="{{ app.request.basepath }}/images/splash-1242x2148.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" rel="apple-touch-startup-image" />
-		<link href="{{ app.request.basepath }}/images/splash-1182x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)" rel="apple-touch-startup-image" />
-		<link href="{{ app.request.basepath }}/images/splash-750x1294.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
-		<link href="{{ app.request.basepath }}/images/splash-640x1096.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
-		<link href="{{ app.request.basepath }}/images/splash-640x920.png" media="(device-width: 320px) and (device-height: 480px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
-		<link href="{{ app.request.basepath }}/images/splash-320x460.png" media="(device-width: 320px) and (device-height: 480px) and (-webkit-device-pixel-ratio: 1)" rel="apple-touch-startup-image" />
 
 		{# IE Pinned Sites tags #}
 		<meta name="application-name" content="Blueline" />
@@ -74,9 +63,9 @@
 		{# Stylesheets #}
 		<link rel="stylesheet" media="all" href="{{ app.request.basepath }}/css/all.css?v={{ html_age }}" />
 		<link rel="stylesheet" media="print" href="{{ app.request.basepath }}/css/print.css?v={{ html_age }}" />
-		<!--[if lt IE 9]><link rel="stylesheet" href="{{ app.request.basepath }}/css/old_ie.css?v={{ html_age }}" /><![endif]-->
 
-		{# JavaScript #}
+		{# IE8 fixes #}
+		<!--[if lt IE 9]><link rel="stylesheet" href="{{ app.request.basepath }}/css/old_ie.css?v={{ html_age }}" /><![endif]-->
 		<!--[if lt IE 9]><script src="{{ app.request.basepath }}/js/old_ie.js?v={{ html_age }}"></script><![endif]-->
 
 		{# Analytics code #}
