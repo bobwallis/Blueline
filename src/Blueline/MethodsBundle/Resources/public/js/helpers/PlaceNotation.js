@@ -276,6 +276,39 @@ define( function() {
 			while( i-- ) { row[i] = i; }
 			return row;
 		},
+		backRounds: function( stage ) {
+			return PlaceNotation.rounds( stage ).reverse();
+		},
+		queens: function( stage ) {
+			if( stage < 4 )  { throw null; }
+			if( stage % 2 === 1 ) { return PlaceNotation.queens( stage + 1 ).slice( 1 ).map( function( e ) { return --e; } ); }
+			var row = new Array( stage ), i = stage, mid = Math.ceil( stage / 2 );
+			while( i-- > mid ) { row[i] = 1 + (i-mid)*2; }
+			do { row[i] = i*2; } while( i-- );
+			return row;
+		},
+		kings: function( stage ) {
+			var mid = Math.floor( stage / 2 ),
+				queens = PlaceNotation.queens( stage );
+			return queens.slice( 0, mid ).reverse().concat( queens.slice( mid ) );
+		},
+		tittums: function( stage ) {
+			if( stage % 2 === 1 ) { return PlaceNotation.tittums( stage + 1 ).slice( 1 ).map( function( e ) { return --e; } ); }
+			var row = new Array( stage ), i = stage, mid = Math.floor( stage / 2 );
+			while( i-- ) { row[i] = Math.ceil( i / 2) + ((i%2 === 0)? 0 : mid); }
+			return row;
+		},
+		whittingtons: function( stage ) {
+			if( stage < 6 )  { throw null; }
+			if( stage % 2 === 1 ) { return PlaceNotation.whittingtons( stage + 1 ).slice( 1 ).map( function( e ) { return --e; } ); }
+			var row = new Array( stage ), i = stage, mid = Math.floor( stage / 2 );
+			while( i-- > stage - 3 ) { row[i] = 1 + (i-mid)*2; }
+			row[i] = row[i+1]-1;
+			row[--i] = row[i+1]+2;
+			if( i ) { row[--i] = row[i+1]+2 };
+			while( i-- ) { row[i] = i; }
+			return row;
+		},
 		rowsEqual: function( row1, row2 ) {
 			var i = row1.length;
 			if( i !== row2.length) {

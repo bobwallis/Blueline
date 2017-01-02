@@ -1,20 +1,6 @@
 define( ['jquery', 'eve', 'shared/helpers/LocalStorage'], function( $, eve, LocalStorage ) {
 	var $document = $( document ),
-		settings = ['method_follow', 'method_style', 'method_tooltips'];
-
-	// Update stored settings when form is changed
-	settings.forEach( function( setting ) {
-		$document.on( 'change', '#'+setting+', input[name='+setting+']', function( e ) {
-			$target = $( e.target );
-			if( $target.is( ':checkbox' ) ) {
-				LocalStorage.setSetting( setting, $target.is(':checked') );
-			}
-			else {
-				LocalStorage.setSetting( setting, $target.val() );
-			}
-			eve( 'setting.changed.'+setting );
-		} );
-	} );
+		settings = ['method_follow', 'method_style', 'method_tooltips', 'method_music'];
 
 	// Set initial settings when the page is loaded
 	var initialSet = function() {
@@ -30,9 +16,25 @@ define( ['jquery', 'eve', 'shared/helpers/LocalStorage'], function( $, eve, Loca
 			}
 		} );
 	};
-	eve.on( 'page.finished', initialSet );
+	eve.on( 'page.finished', function() {
+		initialSet();
+	} );
 	initialSet();
 
+	// Update stored settings when form is changed
+	settings.forEach( function( setting ) {
+		$document.on( 'change', '#'+setting+', input[name='+setting+']', function( e ) {
+			$target = $( e.target );
+			if( $target.is( ':checkbox' ) ) {
+				LocalStorage.setSetting( setting, $target.is(':checked') );
+			}
+			else {
+				LocalStorage.setSetting( setting, $target.val() );
+			}
+			eve( 'setting.changed.'+setting );
+		} );
+	} );
+		
 	// Close settings when done is clicked
 	var closeSettings = function( e ) {
 		e.preventDefault();

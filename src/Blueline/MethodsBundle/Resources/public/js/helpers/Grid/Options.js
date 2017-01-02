@@ -72,6 +72,10 @@ define( ['jquery', '../PlaceNotation', '../../../shared/helpers/MeasureCanvasTex
 		},
 		lines: {
 			show: true
+		},
+		highlighting: {
+			show: false,
+			colors: []
 		}
 	};
 	

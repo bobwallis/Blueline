@@ -15,7 +15,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 			return options.dimensions;
 		};
 
-		this.draw = function(returnImage) {
+		this.draw = function( returnImage ) {
 			returnImage = (typeof returnImage !== 'boolean')? false : returnImage;
 			// Set up canvas
 			var canvas =  new Canvas( $.extend( ((typeof options.scale === 'number')? { scale: options.scale } : {}), {
@@ -33,6 +33,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 				leadsPerColumn = options.layout.leadsPerColumn,
 				changesPerColumn = options.layout.changesPerColumn,
 				leadLength = options.layout.leadLength,
+				stage = options.stage,
 
 				rowHeight = options.dimensions.row.height,
 				rowWidth = options.dimensions.row.width,
@@ -95,10 +96,29 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 						}
 						y = canvasTopPadding + (bellHeight/2);
 					}
-					for( k = 1; k < options.stage; k+=2 ) {
+					for( k = 1; k < stage; k+=2 ) {
 						context.fillRect( canvasLeftPadding + (i*rowWidthWithPadding) + ((k-0.5)*bellWidth), y, bellWidth, h );
 					}
 				}
+			}
+
+			// Draw highlighting
+			if( options.highlighting.show ) {
+					for( i = 0; i < numberOfColumns; ++i ) {
+						for( j = 0; j < leadsPerColumn && (i*leadsPerColumn)+j < numberOfLeads; ++j ) {
+							for( k = 0; k < leadLength; ++k ) {
+								for( l = 0; l < stage; ++l ) {
+									context.fillStyle = options.highlighting.colors[(i*leadsPerColumn*leadLength) + (j*leadLength) + k][l];
+									context.fillRect( canvasLeftPadding + (i*rowWidthWithPadding) + (l*bellWidth), canvasTopPadding + ((j*leadLength) + k)*rowHeight, bellWidth, rowHeight );
+								}
+							}
+						}
+						// Draw the last row in each column
+						for( l = 0; l < stage; ++l ) {
+							context.fillStyle = options.highlighting.colors[(i*leadsPerColumn*leadLength) + (j*leadLength)][l];
+							context.fillRect( canvasLeftPadding + (i*rowWidthWithPadding) + (l*bellWidth), canvasTopPadding + ((j*leadLength))*rowHeight, bellWidth, rowHeight );
+						}
+					}
 			}
 
 			// Draw vertical guides - lines
@@ -121,7 +141,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 						}
 						y = canvasTopPadding + (bellHeight/2);
 					}
-					for( k = 0; k < options.stage; ++k ) {
+					for( k = 0; k < stage; ++k ) {
 						x = canvasLeftPadding + (i*rowWidthWithPadding) + ((0.5+k)*bellWidth);
 						context.moveTo( x, y );
 						context.lineTo( x, y + h );
@@ -195,7 +215,7 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../../shared
 
 			// Draw lines
 			if( options.lines.show ) {
-				i = options.stage;
+				i = stage;
 				while( i-- ) {
 					j = options.startRow[i];
 					if( typeof options.lines.bells[j] === 'object' && options.lines.bells[j].stroke !== 'transparent' ) {

@@ -1,4 +1,4 @@
-define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', 'shared/lib/webfont', 'shared/helpers/URL', 'shared/helpers/LocalStorage', '../helpers/Method',  '../helpers/Grid', '../helpers/PlaceNotation', '../helpers/Text'], function( $, eve, Modernizr, InteractiveGridOverlay, webfont, URL, LocalStorage, Method, MethodGrid, PlaceNotation, Text ) {
+define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', 'shared/lib/webfont', 'shared/helpers/URL', 'shared/helpers/LocalStorage', '../helpers/GridOptionsBuilder',  '../helpers/Grid', '../helpers/PlaceNotation', '../helpers/Text', '../helpers/Music'], function( $, eve, Modernizr, InteractiveGridOverlay, webfont, URL, LocalStorage, GridOptionsBuilder, MethodGrid, PlaceNotation, Text, Music ) {
 	var newMethodView;
 
 	// Display messages if canvas is not supported
@@ -12,13 +12,13 @@ define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', 's
 	var options, method, methodTexts,
 		lineContainer, gridContainer,
 		active = false,
-		lastShowToolTips, lastStyle, lastFollow, lastScale, lastNumberOfColumns,
-		line_plainCourse, line_calls;
+		lastShowToolTips, lastHighlightMusic, lastStyle, lastFollow, lastScale, lastNumberOfColumns,
+		options_plainCourse, line_plainCourse, line_calls;
 
 	newMethodView = function( o ) {
 		options = o;
 		active = true;
-		lastStyle = lastFollow = lastScale = lastNumberOfColumns = null;
+		lastShowToolTips = lastHighlightMusic = lastStyle = lastFollow = lastScale = lastNumberOfColumns = music = null
 		lineContainer = $( options.lineContainer );
 		gridContainer = $( options.gridContainer );
 		redrawMethodView();
@@ -28,6 +28,7 @@ define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', 's
 		if( active ) {
 			// Re-fetch options
 			var newShowTooltips = LocalStorage.getSetting( 'method_tooltips', true ),
+				newHighlightMusic = LocalStorage.getSetting( 'method_music', false ),
 				newScale = (typeof window.devicePixelRatio === 'number')? window.devicePixelRatio : 1,
 				newFollow = LocalStorage.getSetting( 'method_follow', 'heaviest' ),
 				newStyle = (URL.parameter( 'style' ) !== null)? URL.parameter( 'style' ) : LocalStorage.getSetting( 'method_style', 'numbers' ),
@@ -36,7 +37,7 @@ define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', 's
 			// Re-create method object if the bell being followed has changed
 			if( newFollow !== lastFollow ) {
 				options.workingBell = newFollow;
-				method = new Method( $.extend( true, {}, options ) );
+				method = new GridOptionsBuilder( $.extend( true, {}, options ) );
 			}
 			if( newShowTooltips !== lastShowToolTips || newFollow !== lastFollow ) {
 				methodTexts = newShowTooltips? method.workGroups.map( function( e ) {
@@ -49,9 +50,20 @@ define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', 's
 				} ) : [];
 			}
 
-			// If the style has changed re-create the whole Grid object for the line
-			if( newFollow !== lastFollow || newStyle !== lastStyle ) {
-				line_plainCourse = new MethodGrid( method.gridOptions.plainCourse[newStyle]() );
+			// Analyse music of plain course if needed
+			if( newHighlightMusic && music === null ) {
+				music = Music( PlaceNotation.allRows( [].concat.apply( [], Array( method.numberOfLeads ).fill( PlaceNotation.parse( options.notation, options.stage ) ) ), PlaceNotation.rounds( options.stage ) ) )
+					.map( function( e ) {
+						// Having this logic here isn't ideal. It should probably be in the scoring code instead...
+						return e.score.map( function( s ) { return 'rgba(0,255,0,'+(0.35*Math.min(Math.pow(s/(100-(method.stage*3)),1/1.4), 1))+')'; } );
+					} );
+			}
+
+			// If the style or music analysis settings have changed re-create the whole Grid object for the line
+			if( newHighlightMusic !== lastHighlightMusic || newFollow !== lastFollow || newStyle !== lastStyle ) {
+				options_plainCourse = method.gridOptions.plainCourse[newStyle]();
+				options_plainCourse.highlighting = newHighlightMusic? { show: true, colors: music } : false;
+				line_plainCourse = new MethodGrid( options_plainCourse );
 				line_calls = method.gridOptions.calls[newStyle]().map( function( callOptions ) { return new MethodGrid( callOptions ); } );
 			}
 
@@ -91,7 +103,7 @@ define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', 's
 
 			// Redraw the calls on the line view if the scale or style has changed
 			if( newScale !== lastScale || newStyle !== lastStyle ) {
-				lineContainer.empty().append( line_plainCourse.draw(), line_calls.map( function(e) { return e.draw(); } ) );
+				lineContainer.empty().append( line_calls.map( function(e) { return e.draw(); } ) );
 				// Give all the calls the same with on the line tab
 				widths = $( 'canvas:not(:first)', lineContainer ).map( function( i, e ) { return $(e).width(); } ).toArray();
 				maxWidth = Math.max.apply( Math, widths );
@@ -100,8 +112,8 @@ define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', 's
 				} );
 			}
 
-			// Redraw the plain course (and update the interactive grid overlay) in some other cases
-			if( lastShowToolTips !== newShowTooltips || newScale !== lastScale || newFollow !== lastFollow || newStyle !== lastStyle || newNumberOfColumns !== lastNumberOfColumns ) {
+			// Redraw the plain course (and update the interactive grid overlay) in those and some other cases
+			if( lastHighlightMusic !== newHighlightMusic || lastShowToolTips !== newShowTooltips || newScale !== lastScale || newFollow !== lastFollow || newStyle !== lastStyle || newNumberOfColumns !== lastNumberOfColumns ) {
 				lineContainer.children(':first-child').remove();
 				lineContainer.prepend( line_plainCourse.draw() );
 				if( newShowTooltips ) {
@@ -110,6 +122,7 @@ define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', 's
 			}
 
 			lastShowToolTips = newShowTooltips;
+			lastHighlightMusic = newHighlightMusic;
 			lastStyle = newStyle;
 			lastScale = newScale;
 			lastNumberOfColumns = newNumberOfColumns;

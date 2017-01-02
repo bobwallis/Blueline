@@ -1,4 +1,4 @@
-require( ['jquery', 'shared/lib/webfont', 'methods/helpers/Method', 'methods/helpers/Grid', 'methods/helpers/PlaceNotation'], function( $, webfont, Method, Grid, PlaceNotation ) {
+require( ['jquery', 'shared/lib/webfont', 'methods/helpers/GridOptionsBuilder', 'methods/helpers/Grid', 'methods/helpers/PlaceNotation'], function( $, webfont, GridOptionsBuilder, Grid, PlaceNotation ) {
 	$( function() {
 		// Preload the webfont
 		webfont( $.noop );
@@ -10,7 +10,7 @@ require( ['jquery', 'shared/lib/webfont', 'methods/helpers/Method', 'methods/hel
 			// Create each method
 			options.methods.forEach( function( m, i ) {
 				// Create a grid with basic options
-				var method = new Method( $.extend( { id: i }, m ) );
+				var method = new GridOptionsBuilder( $.extend( { id: i }, m ) );
 				method.gridOptions.plainCourse.grid.layout = method.gridOptions.plainCourse.numbers.layout;
 				var grid = new Grid( $.extend( true, method.gridOptions.plainCourse[options.style], {
 					scale: 2,

@@ -2,7 +2,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 
 	// Helps generate options for Grid.js to display full plain courses and calls for a particular method
 
-	var Method = function( options ) {
+	var GridOptionsBuilder = function( options ) {
 		var i, j, k, l;
 
 		// Calculate various attributes of the method
@@ -225,6 +225,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 			sharedCallsGridOptions.forEach( function( call, callIndex ) {
 				var isHuntBell, isWorkingBell, isAffected;
 				// Set IDs and other options
+				thisgridOptionscallsnumbers[callIndex].id += '_numbers';
 				thisgridOptionscallsnumbers[callIndex].numbers = { show: true, font: font, bells: rounds.map( function( b ) { return { color: (thisgridOptionscallsnumbers[callIndex].affected.indexOf( b ) !== -1 || this.huntBells.indexOf( b ) !== -1)? 'transparent' : '#000' }; }, that ) };
 				// Set line colors
 				for( i = 0, j = 0; i < that.stage; ++i ) {
@@ -423,5 +424,5 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 
 		return this;
 	};
-	return Method;
+	return GridOptionsBuilder;
 } );
