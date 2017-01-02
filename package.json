@@ -13,7 +13,7 @@
     "gulp": "^3.9.0",
     "gulp-amdclean": "^1.1.1",
     "gulp-autoprefixer": "^3.1.1",
-    "gulp-clean-css": "^2.0.12",
+    "gulp-clean-css": "^2.3.2",
     "gulp-concat": "^2.6.0",
     "gulp-flatten": "^0.2.0",
     "gulp-gzip": "^1.2.0",
