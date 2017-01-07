@@ -39,6 +39,7 @@ define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', 's
 				options.workingBell = newFollow;
 				method = new GridOptionsBuilder( $.extend( true, {}, options ) );
 			}
+
 			if( newShowTooltips !== lastShowToolTips || newFollow !== lastFollow ) {
 				methodTexts = newShowTooltips? method.workGroups.map( function( e ) {
 					var toFollow = (newFollow == 'lightest')? Math.min.apply( Math, e ) : Math.max.apply( Math, e );
@@ -105,16 +106,18 @@ define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', 's
 			if( newScale !== lastScale || newStyle !== lastStyle ) {
 				lineContainer.empty().append( line_calls.map( function(e) { return e.draw(); } ) );
 				// Give all the calls the same with on the line tab
-				widths = $( 'canvas:not(:first)', lineContainer ).map( function( i, e ) { return $(e).width(); } ).toArray();
+				widths = $( 'canvas', lineContainer ).map( function( i, e ) { return $(e).width(); } ).toArray();
 				maxWidth = Math.max.apply( Math, widths );
-				$( 'canvas:not(:first)', lineContainer ).map( function( i, e ) {
+				$( 'canvas', lineContainer ).map( function( i, e ) {
 					$(e).css( 'margin-left', (12 + maxWidth - widths[i])+'px' );
 				} );
 			}
 
 			// Redraw the plain course (and update the interactive grid overlay) in those and some other cases
 			if( lastHighlightMusic !== newHighlightMusic || lastShowToolTips !== newShowTooltips || newScale !== lastScale || newFollow !== lastFollow || newStyle !== lastStyle || newNumberOfColumns !== lastNumberOfColumns ) {
-				lineContainer.children(':first-child').remove();
+				if( !(newScale !== lastScale || newStyle !== lastStyle) ) { // If the calls have been re-drawn then no need to remove the first child since that bit clears the whole container
+					lineContainer.children(':first-child').remove();
+				}
 				lineContainer.prepend( line_plainCourse.draw() );
 				if( newShowTooltips ) {
 					InteractiveGridOverlay( line_plainCourse, method, methodTexts );
