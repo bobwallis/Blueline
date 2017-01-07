@@ -56,7 +56,10 @@ define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', 's
 				music = Music( PlaceNotation.allRows( [].concat.apply( [], Array( method.numberOfLeads ).fill( PlaceNotation.parse( options.notation, options.stage ) ) ), PlaceNotation.rounds( options.stage ) ) )
 					.map( function( e ) {
 						// Having this logic here isn't ideal. It should probably be in the scoring code instead...
-						return e.score.map( function( s ) { return 'rgba(0,255,0,'+(0.35*Math.min(Math.pow(s/(100-(method.stage*3)),1/1.4), 1))+')'; } );
+						return e.score.map( function( s ) {
+							var s2 = 0.35*Math.min(Math.pow(s/(100-(method.stage*3)),1/1.4), 1);
+							return 'rgba(0,255,0,'+(s2<0.1?0:s2)+')';
+						} );
 					} );
 			}
 
