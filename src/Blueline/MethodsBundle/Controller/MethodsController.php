@@ -153,11 +153,11 @@ class MethodsController extends Controller
             }
             // Validate section parameter
             $section = $request->query->get('style');
-            if (!in_array($section, ['numbers', 'lines', 'diagrams', 'grid'])) {
+            if (isset($section) && !in_array($section, ['numbers', 'lines', 'diagrams', 'grid'])) {
                 throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'lines', 'diagrams' or 'grid'.");
             }
             // Normalise
-            if (!$section || intval($request->query->get('scale')) === 0) {
+            if (!isset($section) || intval($request->query->get('scale')) === 0) {
                 $url = $this->generateUrl('Blueline_Methods_view', array(
                     'scale'   => (intval($request->query->get('scale')) ?: 1),
                     'style'   => (!$section)? 'numbers' : $section,
