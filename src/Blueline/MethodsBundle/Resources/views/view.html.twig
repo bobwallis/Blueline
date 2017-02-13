@@ -4,7 +4,7 @@
 
 {% block og_title %}{{ method.title }}{% endblock %}
 {% block og_description %}Blue line and other details for {{ method.title }}. Classification: {{ (method.differential? 'Differential ':'') ~ (method.little? 'Little ':'') ~ method.classification ~ ' ' ~ method.stageText }}, Place Notation: {{ method.notation }}{% endblock %}
-{% block og_image %}{{ url( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png' } ) }}{% endblock %}
+{% block og_image %}{{ url( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 1, 'style': 'numbers' } ) }}{% endblock %}
 {% block oembed %}<link rel="alternate" type="application/json+oembed" href="{{ url('Blueline_Services_oembed', {'_format': 'json', 'url': url('Blueline_Methods_view', {'url': method.url})}) }}" title="{{ method.title }}" />{% endblock %}
 
 {% set breadcrumb = { 'title': 'Methods', 'href': path('Blueline_Methods_welcome') } %}
