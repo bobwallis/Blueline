@@ -87,7 +87,7 @@ fi
 
 # Clear cache
 echo -e "\n\033[1mClearing Symfony cache\033[0m"
-php "$d/app/console" cache:clear --env=prod
+php "$d/app/console" cache:clear --no-warmup --env=prod
 php "$d/app/console" cache:warm --env=prod
 php "$d/app/console" doctrine:cache:clear-metadata
 php "$d/app/console" doctrine:cache:clear-query
