@@ -36,7 +36,7 @@ Blueline\MethodsBundle\Entity\Method:
             length: 1023
         leadHeadCode:
             type: string
-            length: 4
+            length: 31
             nullable: true
         leadHead:
             type: string
