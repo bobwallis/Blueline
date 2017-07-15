@@ -1,6 +1,6 @@
 define( ['./PlaceNotation', 'Array.fill'], function( PlaceNotation, ArrayFill ) {
 
-	// These functions operatate on objects that look like:
+	// These functions operate on objects that look like:
 	//  { row: [0,1,2,3,4,5], score: [0.1,0.1,0.1,0,0,0], namedRows: [] }
 	// and adds in scoring for the requested music type on top of what is already there
 

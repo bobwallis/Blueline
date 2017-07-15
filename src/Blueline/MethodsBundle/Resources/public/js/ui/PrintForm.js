@@ -39,8 +39,8 @@ define( ['jquery', 'shared/helpers/URL'], function( $, URL ) {
 	$document.on( 'keyup', 'input.method_title', function( e ) {
 		var $target = $(e.target),
 			requestTimestamp = Date.now(),
-			q = $target.val();
-		methodFormBeingCompleted2 = $target.attr( 'id' ).replace( /m(\d{1}).*/, '$1' );
+			q = $target.val(),
+			methodFormBeingCompleted2 = $target.attr( 'id' ).replace( /m(\d{1}).*/, '$1' );
 		
 		if( q && ( methodFormBeingCompleted2 != methodFormBeingCompleted || q != lastRequestQ ) ) { // To ensure we don't send multiple requests for the same thing when the user's typing fast
 			methodFormBeingCompleted = methodFormBeingCompleted2;
@@ -105,7 +105,7 @@ define( ['jquery', 'shared/helpers/URL'], function( $, URL ) {
 	$document.on( 'submit', '#print_form', function( e ) {
 		// Remove any extra method forms we don't actually need before submitting
 		var methodFormCount = $( 'fieldset.method_form' ).length;
-		for( i = (rows*columns)+1; i <= methodFormCount; ++i ) {
+		for( var i = (rows*columns)+1; i <= methodFormCount; ++i ) {
 			$( '#m'+i+'_title' ).closest( 'fieldset' ).remove();
 		}
 	} );

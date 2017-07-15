@@ -13,6 +13,7 @@ define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', 's
 		lineContainer, gridContainer,
 		active = false,
 		lastShowToolTips, lastHighlightMusic, lastStyle, lastFollow, lastScale, lastNumberOfColumns,
+		music,
 		options_plainCourse, line_plainCourse, line_calls;
 
 	newMethodView = function( o ) {
@@ -23,7 +24,7 @@ define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', 's
 		gridContainer = $( options.gridContainer );
 		redrawMethodView();
 	};
-
+ 
 	var redrawMethodView = function() {
 		if( active ) {
 			// Re-fetch options

@@ -152,7 +152,7 @@ define( function() {
 			fullNotation = fullNotation
 				.replace( /\s+/g, '.' )       // Replace any remaining whitespace with dots
 				.replace( /(^\.+|\.+$)/g, '') // Remove trailing or preceding dots
-				.replace( /\.+/g, '.' )       // Remove any unecessary doubling up of dots
+				.replace( /\.+/g, '.' )       // Remove any unnecessary doubling up of dots
 				.replace( /\.?x\.?/g, 'x' );  // and any .x.
 
 			// Explode the notation so we can work on each piece individually, then join back together

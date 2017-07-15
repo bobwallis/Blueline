@@ -2,7 +2,7 @@
 // It also receives user input into the search box, and issues appropriate
 // data requests
 
-define( ['eve', 'jquery', 'Modernizr', '../../helpers/URL', '../../data/Page'], function( eve, $, Moernizr, URL, Page ) {
+define( ['eve', 'jquery', 'Modernizr', '../../helpers/URL', '../../data/Page'], function( eve, $, Modernizr, URL, Page ) {
 	var $top = $( '#top' ),
 		$content = $( '#content' ),
 		$search = $( '#search' ),

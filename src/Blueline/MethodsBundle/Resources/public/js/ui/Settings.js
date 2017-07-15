@@ -24,7 +24,7 @@ define( ['jquery', 'eve', 'shared/helpers/LocalStorage'], function( $, eve, Loca
 	// Update stored settings when form is changed
 	settings.forEach( function( setting ) {
 		$document.on( 'change', '#'+setting+', input[name='+setting+']', function( e ) {
-			$target = $( e.target );
+			var $target = $( e.target );
 			if( $target.is( ':checkbox' ) ) {
 				LocalStorage.setSetting( setting, $target.is(':checked') );
 			}

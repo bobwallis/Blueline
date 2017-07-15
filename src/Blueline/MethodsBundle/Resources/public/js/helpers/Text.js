@@ -99,7 +99,7 @@ define( ['./PlaceNotation'], function( PlaceNotation ) {
 			coreText = coreText
 				// Tell up dodges from down double-dodges, and dodges from fishtails. Note that we have to run this one twice so that it can pick up when dodges and fishtails are close together
 				.replace( coreDodgeDownFix, coreDodgeDownFixFunction )
-				// Double/triple/etc dodgges
+				// Double/triple/etc dodges
 				.replace( coreDodgeMultipleFix, coreDodgeMultipleFixFunction )
 				// More than one blow in a place
 				.replace( corePlaceMultipleFix, CorePlaceMultipleFixFunction )

@@ -19,7 +19,7 @@ define( ['jquery', 'eve'], function( $, eve ) {
 		if( methodTexts.length !== 1 ) { return; }
 		var $grid = $( '#'+grid.getOptions().id ),
 			$gridOffset = $grid.offset(),
-			gridOptions = grid.getOptions()
+			gridOptions = grid.getOptions(),
 			topPadding = $gridOffset.top + gridOptions.dimensions.canvas.padding.top,
 			leftPadding = $gridOffset.left + gridOptions.dimensions.canvas.padding.left,
 			rowHeight = gridOptions.dimensions.row.height,

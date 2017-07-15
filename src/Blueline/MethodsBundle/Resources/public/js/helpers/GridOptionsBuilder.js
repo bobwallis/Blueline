@@ -114,7 +114,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 					// Insert the call's notation
 					Array.prototype.splice.apply( notationExploded, [call.from+call.every-1, call.cover].concat( callNotationExploded ) );
 
-					// Calculte a good amount of padding to display on either side of the call's notation
+					// Calculate a good amount of padding to display on either side of the call's notation
 					var padding = Math.max( 2, Math.floor((this.notation.exploded.length-7)/4) ),
 						start = Math.max( 0, (call.from+call.every-1)-padding ),
 						end = Math.min( notationExploded.length, (call.from+call.every+callNotationExploded.length-1)+padding );
@@ -375,7 +375,7 @@ define( ['jquery', './PlaceNotation', '../../shared/helpers/MeasureCanvasText'],
 			thisgridOptionsplainCoursegrid = $.extend( true, {}, sharedPlainCourseGridOptions, {
 				id: sharedPlainCourseGridOptions.id+'_grid',
 				title: false,
-				numberOfLeadsmbers: false,
+				numberOfLeads: false,
 				numbers: false,
 				placeStarts: false,
 				callingPositions: false,
