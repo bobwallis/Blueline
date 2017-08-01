@@ -60,10 +60,13 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) $performanceCount)*2) - 10);
         $progress->setRedrawFrequency(max(1, $performanceCount/100));
 
+        // Cache a list of towers that we've failed to find
+        $noTowerFound = array();
+
         foreach ($dbIterator as $performance) {
             $location = trim(str_replace('-', ' ', Text::toList(array_intersect_key($performance, array_flip(array('location_room', 'location_building', 'location_town', 'location_county', 'location_region', 'location_country'))), ', ', ', ')));
 
-            if ($location != '' && $location != 'handbells') {
+            if ($location != '' && $location != 'handbells' && !in_array($location, $noTowerFound)) {
                 $doveid = false;
 
                 // Check if the location and method are in the overrides array
@@ -80,13 +83,14 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
                         $try = pg_fetch_all($try);
                         if($try === false) {
                             $progress->clear();
-                            $output->writeln("\r<comment> ".$performance['method_title'].": No tower found for '".$location."'</comment>");
+                            $output->writeln("\r<comment> No tower found for '".$location."'</comment>");
                             $progress->display();
+                            $noTowerFound[] = $location;
                         } elseif (count($try) == 1) {
                             $doveid = $try[0]['id'];
                         } elseif (count($try) > 1) {
                             $progress->clear();
-                            $output->writeln("\r<comment> ".$performance['method_title'].": Multiple towers found for '".$location."' => ".join(array_map('current', $try), ', ')."</comment>");
+                            $output->writeln("\r<comment> ".$performance['method_title'].": Multiple possible towers found for '".$location."' => ".join(array_map('current', $try), ', ')."</comment>");
                             $progress->display();
                         }
                     }
@@ -99,19 +103,21 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
                         $try = pg_fetch_all($try);
                         if($try === false) {
                             $progress->clear();
-                            $output->writeln("\r<comment> ".$performance['method_title'].": No tower found for '".$location."'</comment>");
+                            $output->writeln("\r<comment> No tower found for '".$location."'</comment>");
                             $progress->display();
+                            $noTowerFound[] = $location;
                         } elseif (count($try) == 1) {
                             $doveid = $try[0]['id'];
                         } elseif (count($try) > 1) {
                             $progress->clear();
-                            $output->writeln("\r<comment> ".$performance['method_title'].": Multiple towers found for '".$location."' => ".join(array_map('current', $try), ', ')."</comment>");
+                            $output->writeln("\r<comment> ".$performance['method_title'].": Multiple possible towers found for '".$location."' => ".join(array_map('current', $try), ', ')."</comment>");
                             $progress->display();
                         }
                     } else {
                         $progress->clear();
-                        $output->writeln("\r<comment> ".$performance['method_title'].": Not searching for '".$location."'</comment>");
+                        $output->writeln("\r<comment> Not searching for '".$location."' as too long</comment>");
                         $progress->display();
+                        $noTowerFound[] = $location;
                     }
                 }
 
