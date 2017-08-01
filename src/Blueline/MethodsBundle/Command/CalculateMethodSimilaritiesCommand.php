@@ -56,7 +56,7 @@ class CalculateMethodSimilaritiesCommand extends ContainerAwareCommand
         // Check there's not hundreds of methods to do
         if (count($methods) > 25) {
             $helper = $this->getHelper('question');
-            $output->writeln('<comment>There\'s >25 methods without similarity information. Calculating it can take some time (over a day for the whole method library).</comment>');
+            $output->writeln('<comment>There\'s '.number_format(count($methods)).' methods without similarity information. Calculating it can take some time (over a day for the whole method library).</comment>');
             $output->writeln('<comment>If you prefer then skip this step and run this command later:</comment> \'./app/console blueline:calculateMethodSimilarities\'');
             $question = new ConfirmationQuestion('Continue calculating similarities? (Y/N) ', false);
             if (!$helper->ask($input, $output, $question)) {
