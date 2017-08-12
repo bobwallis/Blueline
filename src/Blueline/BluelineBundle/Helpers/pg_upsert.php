@@ -3,8 +3,8 @@ namespace Blueline\BluelineBundle\Helpers;
 
 function pg_upsert($connection, $table_name, $data, $condition)
 {
-    $data       = pg_convert($connection, $table_name, $data);
-    $condition  = pg_convert($connection, $table_name, $condition);
+    if (($data       = pg_convert($connection, $table_name, $data)) === false)     { return false; }
+    if (($condition = pg_convert($connection, $table_name, $condition)) === false) { return false; }
     $table_name = pg_escape_identifier($connection, $table_name);
 
     $dataAndCondition = array_merge($data, $condition);
@@ -26,5 +26,5 @@ function pg_upsert($connection, $table_name, $data, $condition)
     $insert = 'INSERT INTO '.$table_name.' ('.$insertKeys.') SELECT '.$insertValues;
     $upsert = 'UPDATE '.$table_name.' SET '.$updateSet.' WHERE '.$updateConditions;
 
-    return pg_query($connection, 'WITH upsert AS ('.$upsert.' RETURNING *) '.$insert.' WHERE NOT EXISTS (SELECT * FROM upsert)');
+    return @pg_query($connection, 'WITH upsert AS ('.$upsert.' RETURNING *) '.$insert.' WHERE NOT EXISTS (SELECT * FROM upsert)');
 }

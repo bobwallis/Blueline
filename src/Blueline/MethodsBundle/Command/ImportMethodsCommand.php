@@ -94,17 +94,29 @@ class ImportMethodsCommand extends ContainerAwareCommand
                 $xmlRow['callingpositions'] = json_encode($method->getCallingPositions());
                 $xmlRow['ruleoffs'] = json_encode($method->getRuleOffs());
                 // Upsert the method data
-                \Blueline\BluelineBundle\Helpers\pg_upsert($db, 'methods', array_intersect_key($xmlRow, $validFields), array('title' => $xmlRow['title']));
+                if (\Blueline\BluelineBundle\Helpers\pg_upsert($db, 'methods', array_intersect_key($xmlRow, $validFields), array('title' => $xmlRow['title'])) === false) {
+                    $progress->clear();
+                    $output->writeln('<error>Failed to insert '.$xmlRow['title'].': '.pg_last_error($db).'</error>');
+                    $progress->display();
+                }
                 // 'Treble Dodging Minor Method' and 'Plain Minor Method' collections
                 foreach (array( 'tdmm', 'pmm' ) as $t) {
                     if (isset($xmlRow[$t.'ref'])) {
-                        pg_insert($db, 'methods_collections', array('collection_id' => $t, 'method_title' => $xmlRow['title'], 'position' => intval($xmlRow[$t.'ref'])));
+                        if (pg_insert($db, 'methods_collections', array('collection_id' => $t, 'method_title' => $xmlRow['title'], 'position' => intval($xmlRow[$t.'ref']))) === false) {
+                            $progress->clear();
+                            $output->writeln('<error>Failed to add '.$xmlRow['title'].' to collection '.$t.': '.pg_last_error($db).'</error>');
+                            $progress->display();
+                        }
                     }
                 }
                 // Performances
                 if (isset($xmlRow['performances'])) {
                     foreach ($xmlRow['performances'] as $performanceRow) {
-                        pg_insert($db, 'performances', $performanceRow);
+                        if (pg_insert($db, 'performances', $performanceRow) === false) {
+                            $progress->clear();
+                            $output->writeln('<error>Failed to add performance for '.$xmlRow['title'].': '.pg_last_error($db).'</error>');
+                            $progress->display();
+                        }
                     }
                 }
                 $importedMethods[] = $xmlRow['title'];
