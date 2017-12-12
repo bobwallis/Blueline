@@ -13,7 +13,7 @@ class BluelineExtension extends \Twig_Extension implements \Twig_Extension_Globa
     public function __construct(ContainerInterface $container, $config)
     {
         try {
-            $request          = $container->get('request');
+            $request          = $container->get('request_stack')->getCurrentRequest();
             $this->path       = $request->getPathInfo();
             $this->chromeless = ($request->getRequestFormat() == 'html' && intval($request->query->get('chromeless')) == 1);
         } catch (\Exception $e) {

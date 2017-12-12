@@ -7,4 +7,4 @@ d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 cd "$d"
 
 echo -e "\n\033[1mRunning tests\033[0m"
-phpunit -c "$d/app/"
+phpunit -c "$d/"

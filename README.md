@@ -42,7 +42,7 @@ the command line:
     php app/check.php
 
 If you get any warnings or recommendations, fix them before moving on. The [Symfony installation notes][3]
-will help. The `app/cache` and `app/logs` directories must be writable both by the web server and the command
+will help. The `var/cache` and `var/logs` directories must be writable both by the web server and the command
 line user.
 
 
@@ -84,7 +84,7 @@ Don't blindly run the script in a production environment though, as things may b
 
 [1]:  http://symfony.com/
 [2]:  http://getcomposer.org/
-[3]:  http://symfony.com/doc/2.8/book/installation.html#checking-symfony-application-configuration-and-setup
+[3]:  https://symfony.com/doc/3.4/setup.html#checking-symfony-application-configuration-and-setup
 [4]:  http://gulpjs.com/
 [5]:  http://nodejs.org/
 [6]:  http://phantomjs.org/

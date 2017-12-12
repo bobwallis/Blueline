@@ -87,17 +87,17 @@ fi
 
 # Clear cache
 echo -e "\n\033[1mClearing Symfony cache\033[0m"
-php "$d/app/console" cache:clear --no-warmup --env=prod
-php "$d/app/console" cache:warm --env=prod
-php "$d/app/console" doctrine:cache:clear-metadata
-php "$d/app/console" doctrine:cache:clear-query
-php "$d/app/console" doctrine:cache:clear-result
+php "$d/bin/console" cache:clear --no-warmup --env=prod
+php "$d/bin/console" cache:warm --env=prod
+php "$d/bin/console" doctrine:cache:clear-metadata
+php "$d/bin/console" doctrine:cache:clear-query
+php "$d/bin/console" doctrine:cache:clear-result
 
 
 # Verify that Doctrine is properly configured for a production environment, and mappings are up to date
 echo -e "\n\033[1mChecking Doctrine configuration\033[0m"
-php "$d/app/console" doctrine:ensure-production-settings --env=prod
-php "$d/app/console" doctrine:schema:validate
+php "$d/bin/console" doctrine:ensure-production-settings --env=prod
+php "$d/bin/console" doctrine:schema:validate
 
 
 # Rebuild web assets
@@ -119,21 +119,21 @@ if [[ $CCCBRDATA = true ]]
 	echo ""
 
 	# Import updated association data
-	php "$d/app/console" blueline:importAssociations
+	php "$d/bin/console" blueline:importAssociations
 	echo ""
 
 	# Import updated tower data
-	php "$d/app/console" blueline:importTowers
-	php "$d/app/console" blueline:importOldPKs
+	php "$d/bin/console" blueline:importTowers
+	php "$d/bin/console" blueline:importOldPKs
 	echo ""
 
 	# Import updated method data
-	php "$d/app/console" blueline:importMethods
-	php "$d/app/console" blueline:importMethodExtras
-	php "$d/app/console" blueline:importCollections
-	php "$d/app/console" blueline:calculateMethodSimilarities
+	php "$d/bin/console" blueline:importMethods
+	php "$d/bin/console" blueline:importMethodExtras
+	php "$d/bin/console" blueline:importCollections
+	php "$d/bin/console" blueline:calculateMethodSimilarities
 	echo ""
-	php "$d/app/console" blueline:linkPerformancesToDove
+	php "$d/bin/console" blueline:linkPerformancesToDove
 	sed -i -e"s/database_update: .*/database_update: `date "+%s"`/" "$d/app/config/parameters.yml"
 fi
 
