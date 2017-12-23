@@ -14,8 +14,8 @@ class BluelineExtension extends \Twig_Extension implements \Twig_Extension_Globa
     {
         try {
             $request          = $container->get('request_stack')->getCurrentRequest();
-            $this->path       = $request->getPathInfo();
-            $this->chromeless = ($request->getRequestFormat() == 'html' && intval($request->query->get('chromeless')) == 1);
+            $this->path       = is_null($request)? '/' : $request->getPathInfo();
+            $this->chromeless = is_null($request)? false : ($request->getRequestFormat() == 'html' && intval($request->query->get('chromeless')) == 1);
         } catch (\Exception $e) {
             $this->path       = '/';
             $this->chromeless = false;
