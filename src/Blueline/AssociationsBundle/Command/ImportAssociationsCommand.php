@@ -5,6 +5,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Blueline\BluelineBundle\Helpers\PgResultIterator;
 
 require_once(__DIR__.'/../../BluelineBundle/Helpers/pg_upsert.php'); // Can use 'use function' when PHP 5.6 is more common
@@ -38,13 +39,12 @@ class ImportAssociationsCommand extends ContainerAwareCommand
             $output->writeln('<error>Failed to connect to database</error>');
             return;
         }
-        $progress = $this->getHelperSet()->get('progress');
 
         // Iterate over the data and import/update
         $output->writeln('<info>Importing new data...</info>');
         $txtIterator = $associations->getIterator();
         $importedAssociations = array();
-        $progress->start($output, count($associations));
+        $progress = new ProgressBar($output, count($associations));
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($associations))*2) - 10);
         $progress->setRedrawFrequency(max(1, count($associations)/100));
         while ($txtIterator->valid()) {
@@ -59,7 +59,7 @@ class ImportAssociationsCommand extends ContainerAwareCommand
         // Check for deletions
         $output->writeln('<info>Checking for deletion of old data...</info>');
         $idsInDatabase = new PgResultIterator( pg_query('SELECT id FROM associations') );
-        $progress->start($output, count($idsInDatabase));
+        $progress = new ProgressBar($output, count($idsInDatabase));
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($idsInDatabase))*2) - 10);
         $progress->setRedrawFrequency(max(1, count($idsInDatabase)/100));
         foreach ($idsInDatabase as $a) {
