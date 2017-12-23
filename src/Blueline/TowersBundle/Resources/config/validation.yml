@@ -21,13 +21,13 @@ Blueline\TowersBundle\Entity\Tower:
             - LessThanOrEqual:
                 value: 180
         note:
-            - Regex: "/^[A-G]{1}[#b]?$/"
+            - Regex: '/^[A-G]{1}[#b]?$/'
         practiceNight:
             - GreaterThanOrEqual:
                 value: 1
             - LessThanOrEqual:
                 value: 7
         practiceStart:
-            - Regex: "/^\d\d:\d\d$/"
+            - Regex: '/^\d\d:\d\d$/'
         webPage:
             - Url: ~
