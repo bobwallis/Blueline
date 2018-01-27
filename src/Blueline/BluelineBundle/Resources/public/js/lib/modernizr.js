@@ -1,5 +1,5 @@
 /*!
- * modernizr v3.3.1
+ * modernizr v3.5.0
  * Build https://modernizr.com/download?-applicationcache-canvas-canvastext-csspointerevents-fontface-geolocation-history-indexeddb-input-localstorage-sessionstorage-svg-websqldatabase-webworkers-hasevent-prefixed-prefixes-setclasses-testallprops-testprop-teststyles-dontmin
  *
  * Copyright (c)
@@ -39,7 +39,7 @@
 
   var ModernizrProto = {
     // The current version, dummy
-    _version: '3.3.1',
+    _version: '3.5.0',
 
     // Any settings that don't work as separate modules
     // can go in here as configuration.
@@ -176,7 +176,11 @@ Detects support for the History API for manipulating the browser session history
         (ua.indexOf('Android 4.0') !== -1)) &&
         ua.indexOf('Mobile Safari') !== -1 &&
         ua.indexOf('Chrome') === -1 &&
-        ua.indexOf('Windows Phone') === -1) {
+        ua.indexOf('Windows Phone') === -1 &&
+    // Since all documents on file:// share an origin, the History apis are
+    // blocked there as well
+        location.protocol !== 'file:'
+    ) {
       return false;
     }
 
@@ -211,6 +215,31 @@ Detects support for SVG in `<embed>` or `<object>` elements.
 
 /*!
 {
+  "name": "Session Storage",
+  "property": "sessionstorage",
+  "tags": ["storage"],
+  "polyfills": ["joshuabell-polyfill", "cupcake", "sessionstorage"]
+}
+!*/
+
+  // Because we are forced to try/catch this, we'll go aggressive.
+
+  // Just FWIW: IE8 Compat mode supports these features completely:
+  //   www.quirksmode.org/dom/html5.html
+  // But IE8 doesn't support either with local files
+  Modernizr.addTest('sessionstorage', function() {
+    var mod = 'modernizr';
+    try {
+      sessionStorage.setItem(mod, mod);
+      sessionStorage.removeItem(mod);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  });
+
+/*!
+{
   "name": "Local Storage",
   "property": "localstorage",
   "caniuse": "namevalue-storage",
@@ -231,8 +260,11 @@ Detects support for SVG in `<embed>` or `<object>` elements.
   // In FF4, if disabled, window.localStorage should === null.
 
   // Normally, we could not test that directly and need to do a
-  //   `('localStorage' in window) && ` test first because otherwise Firefox will
+  //   `('localStorage' in window)` test first because otherwise Firefox will
   //   throw bugzil.la/365772 if cookies are disabled
+
+  // Similarly, in Chrome with "Block third-party cookies and site data" enabled,
+  // attempting to access `window.sessionStorage` will throw an exception. crbug.com/357625
 
   // Also in iOS5 Private Browsing mode, attempting to use localStorage.setItem
   // will throw the exception:
@@ -250,31 +282,6 @@ Detects support for SVG in `<embed>` or `<object>` elements.
     try {
       localStorage.setItem(mod, mod);
       localStorage.removeItem(mod);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  });
-
-/*!
-{
-  "name": "Session Storage",
-  "property": "sessionstorage",
-  "tags": ["storage"],
-  "polyfills": ["joshuabell-polyfill", "cupcake", "sessionstorage"]
-}
-!*/
-
-  // Because we are forced to try/catch this, we'll go aggressive.
-
-  // Just FWIW: IE8 Compat mode supports these features completely:
-  //   www.quirksmode.org/dom/html5.html
-  // But IE8 doesn't support either with local files
-  Modernizr.addTest('sessionstorage', function() {
-    var mod = 'modernizr';
-    try {
-      sessionStorage.setItem(mod, mod);
-      sessionStorage.removeItem(mod);
       return true;
     } catch (e) {
       return false;
@@ -432,7 +439,6 @@ Detects support for the basic `Worker` API from the Web Workers spec. Web Worker
             Modernizr[featureNameSplit[0]] = result;
           } else {
             // cast to a Boolean, if not one already
-            /* jshint -W053 */
             if (Modernizr[featureNameSplit[0]] && !(Modernizr[featureNameSplit[0]] instanceof Boolean)) {
               Modernizr[featureNameSplit[0]] = new Boolean(Modernizr[featureNameSplit[0]]);
             }
@@ -444,23 +450,6 @@ Detects support for the basic `Worker` API from the Web Workers spec. Web Worker
         }
       }
     }
-  }
-  ;
-
-  /**
-   * cssToDOM takes a kebab-case string and converts it to camelCase
-   * e.g. box-sizing -> boxSizing
-   *
-   * @access private
-   * @function cssToDOM
-   * @param {string} name - String name of kebab-case prop we want to convert
-   * @returns {string} The camelCase version of the supplied name
-   */
-
-  function cssToDOM(name) {
-    return name.replace(/([a-z])-([a-z])/g, function(str, m1, m2) {
-      return m1 + m2.toUpperCase();
-    }).replace(/^-/, '');
   }
   ;
 
@@ -512,7 +501,11 @@ Detects support for the basic `Worker` API from the Web Workers spec. Web Worker
     if (Modernizr._config.enableClasses) {
       // Add the new classes
       className += ' ' + classPrefix + classes.join(' ' + classPrefix);
-      isSVG ? docElement.className.baseVal = className : docElement.className = className;
+      if (isSVG) {
+        docElement.className.baseVal = className;
+      } else {
+        docElement.className = className;
+      }
     }
 
   }
@@ -695,6 +688,23 @@ Detects support for the text APIs for `<canvas>` elements.
 
 
   /**
+   * cssToDOM takes a kebab-case string and converts it to camelCase
+   * e.g. box-sizing -> boxSizing
+   *
+   * @access private
+   * @function cssToDOM
+   * @param {string} name - String name of kebab-case prop we want to convert
+   * @returns {string} The camelCase version of the supplied name
+   */
+
+  function cssToDOM(name) {
+    return name.replace(/([a-z])-([a-z])/g, function(str, m1, m2) {
+      return m1 + m2.toUpperCase();
+    }).replace(/^-/, '');
+  }
+  ;
+
+  /**
    * since we have a fairly large number of input tests that don't mutate the input
    * we create a single element that can be shared with all of those tests for a
    * minor perf boost
@@ -758,23 +768,6 @@ Modernizr.input.step
     return attrs;
   })(inputattrs);
 
-
-
-  /**
-   * contains checks to see if a string contains another string
-   *
-   * @access private
-   * @function contains
-   * @param {string} str - The string we want to check for substrings
-   * @param {string} substr - The substring we want to search the first string for
-   * @returns {boolean}
-   */
-
-  function contains(str, substr) {
-    return !!~('' + str).indexOf(substr);
-  }
-
-  ;
 
   /**
    * getBody returns the body of a document, or an element that can stand in for
@@ -864,6 +857,7 @@ Modernizr.input.step
       body.parentNode.removeChild(body);
       docElement.style.overflow = docOverflow;
       // Trigger layout so kinetic scrolling isn't disabled in iOS6+
+      // eslint-disable-next-line
       docElement.offsetHeight;
     } else {
       div.parentNode.removeChild(div);
@@ -965,11 +959,9 @@ Modernizr.input.step
 
   var blacklist = (function() {
     var ua = navigator.userAgent;
-    var wkvers = ua.match(/applewebkit\/([0-9]+)/gi) && parseFloat(RegExp.$1);
     var webos = ua.match(/w(eb)?osbrowser/gi);
     var wppre8 = ua.match(/windows phone/gi) && ua.match(/iemobile\/([0-9])+/gi) && parseFloat(RegExp.$1) >= 9;
-    var oldandroid = wkvers < 533 && ua.match(/android/gi);
-    return webos || oldandroid || wppre8;
+    return webos || wppre8;
   }());
   if (blacklist) {
     Modernizr.addTest('fontface', false);
@@ -985,12 +977,270 @@ Modernizr.input.step
 ;
 
   /**
-   * If the browsers follow the spec, then they would expose vendor-specific style as:
+   * hasOwnProp is a shim for hasOwnProperty that is needed for Safari 2.0 support
+   *
+   * @author kangax
+   * @access private
+   * @function hasOwnProp
+   * @param {object} object - The object to check for a property
+   * @param {string} property - The property to check for
+   * @returns {boolean}
+   */
+
+  // hasOwnProperty shim by kangax needed for Safari 2.0 support
+  var hasOwnProp;
+
+  (function() {
+    var _hasOwnProperty = ({}).hasOwnProperty;
+    /* istanbul ignore else */
+    /* we have no way of testing IE 5.5 or safari 2,
+     * so just assume the else gets hit */
+    if (!is(_hasOwnProperty, 'undefined') && !is(_hasOwnProperty.call, 'undefined')) {
+      hasOwnProp = function(object, property) {
+        return _hasOwnProperty.call(object, property);
+      };
+    }
+    else {
+      hasOwnProp = function(object, property) { /* yes, this can give false positives/negatives, but most of the time we don't care about those */
+        return ((property in object) && is(object.constructor.prototype[property], 'undefined'));
+      };
+    }
+  })();
+
+  
+
+
+   // _l tracks listeners for async tests, as well as tests that execute after the initial run
+  ModernizrProto._l = {};
+
+  /**
+   * Modernizr.on is a way to listen for the completion of async tests. Being
+   * asynchronous, they may not finish before your scripts run. As a result you
+   * will get a possibly false negative `undefined` value.
+   *
+   * @memberof Modernizr
+   * @name Modernizr.on
+   * @access public
+   * @function on
+   * @param {string} feature - String name of the feature detect
+   * @param {function} cb - Callback function returning a Boolean - true if feature is supported, false if not
+   * @example
+   *
+   * ```js
+   * Modernizr.on('flash', function( result ) {
+   *   if (result) {
+   *    // the browser has flash
+   *   } else {
+   *     // the browser does not have flash
+   *   }
+   * });
+   * ```
+   */
+
+  ModernizrProto.on = function(feature, cb) {
+    // Create the list of listeners if it doesn't exist
+    if (!this._l[feature]) {
+      this._l[feature] = [];
+    }
+
+    // Push this test on to the listener list
+    this._l[feature].push(cb);
+
+    // If it's already been resolved, trigger it on next tick
+    if (Modernizr.hasOwnProperty(feature)) {
+      // Next Tick
+      setTimeout(function() {
+        Modernizr._trigger(feature, Modernizr[feature]);
+      }, 0);
+    }
+  };
+
+  /**
+   * _trigger is the private function used to signal test completion and run any
+   * callbacks registered through [Modernizr.on](#modernizr-on)
+   *
+   * @memberof Modernizr
+   * @name Modernizr._trigger
+   * @access private
+   * @function _trigger
+   * @param {string} feature - string name of the feature detect
+   * @param {function|boolean} [res] - A feature detection function, or the boolean =
+   * result of a feature detection function
+   */
+
+  ModernizrProto._trigger = function(feature, res) {
+    if (!this._l[feature]) {
+      return;
+    }
+
+    var cbs = this._l[feature];
+
+    // Force async
+    setTimeout(function() {
+      var i, cb;
+      for (i = 0; i < cbs.length; i++) {
+        cb = cbs[i];
+        cb(res);
+      }
+    }, 0);
+
+    // Don't trigger these again
+    delete this._l[feature];
+  };
+
+  /**
+   * addTest allows you to define your own feature detects that are not currently
+   * included in Modernizr (under the covers it's the exact same code Modernizr
+   * uses for its own [feature detections](https://github.com/Modernizr/Modernizr/tree/master/feature-detects)). Just like the offical detects, the result
+   * will be added onto the Modernizr object, as well as an appropriate className set on
+   * the html element when configured to do so
+   *
+   * @memberof Modernizr
+   * @name Modernizr.addTest
+   * @optionName Modernizr.addTest()
+   * @optionProp addTest
+   * @access public
+   * @function addTest
+   * @param {string|object} feature - The string name of the feature detect, or an
+   * object of feature detect names and test
+   * @param {function|boolean} test - Function returning true if feature is supported,
+   * false if not. Otherwise a boolean representing the results of a feature detection
+   * @example
+   *
+   * The most common way of creating your own feature detects is by calling
+   * `Modernizr.addTest` with a string (preferably just lowercase, without any
+   * punctuation), and a function you want executed that will return a boolean result
+   *
+   * ```js
+   * Modernizr.addTest('itsTuesday', function() {
+   *  var d = new Date();
+   *  return d.getDay() === 2;
+   * });
+   * ```
+   *
+   * When the above is run, it will set Modernizr.itstuesday to `true` when it is tuesday,
+   * and to `false` every other day of the week. One thing to notice is that the names of
+   * feature detect functions are always lowercased when added to the Modernizr object. That
+   * means that `Modernizr.itsTuesday` will not exist, but `Modernizr.itstuesday` will.
+   *
+   *
+   *  Since we only look at the returned value from any feature detection function,
+   *  you do not need to actually use a function. For simple detections, just passing
+   *  in a statement that will return a boolean value works just fine.
+   *
+   * ```js
+   * Modernizr.addTest('hasJquery', 'jQuery' in window);
+   * ```
+   *
+   * Just like before, when the above runs `Modernizr.hasjquery` will be true if
+   * jQuery has been included on the page. Not using a function saves a small amount
+   * of overhead for the browser, as well as making your code much more readable.
+   *
+   * Finally, you also have the ability to pass in an object of feature names and
+   * their tests. This is handy if you want to add multiple detections in one go.
+   * The keys should always be a string, and the value can be either a boolean or
+   * function that returns a boolean.
+   *
+   * ```js
+   * var detects = {
+   *  'hasjquery': 'jQuery' in window,
+   *  'itstuesday': function() {
+   *    var d = new Date();
+   *    return d.getDay() === 2;
+   *  }
+   * }
+   *
+   * Modernizr.addTest(detects);
+   * ```
+   *
+   * There is really no difference between the first methods and this one, it is
+   * just a convenience to let you write more readable code.
+   */
+
+  function addTest(feature, test) {
+
+    if (typeof feature == 'object') {
+      for (var key in feature) {
+        if (hasOwnProp(feature, key)) {
+          addTest(key, feature[ key ]);
+        }
+      }
+    } else {
+
+      feature = feature.toLowerCase();
+      var featureNameSplit = feature.split('.');
+      var last = Modernizr[featureNameSplit[0]];
+
+      // Again, we don't check for parent test existence. Get that right, though.
+      if (featureNameSplit.length == 2) {
+        last = last[featureNameSplit[1]];
+      }
+
+      if (typeof last != 'undefined') {
+        // we're going to quit if you're trying to overwrite an existing test
+        // if we were to allow it, we'd do this:
+        //   var re = new RegExp("\\b(no-)?" + feature + "\\b");
+        //   docElement.className = docElement.className.replace( re, '' );
+        // but, no rly, stuff 'em.
+        return Modernizr;
+      }
+
+      test = typeof test == 'function' ? test() : test;
+
+      // Set the value (this is the magic, right here).
+      if (featureNameSplit.length == 1) {
+        Modernizr[featureNameSplit[0]] = test;
+      } else {
+        // cast to a Boolean, if not one already
+        if (Modernizr[featureNameSplit[0]] && !(Modernizr[featureNameSplit[0]] instanceof Boolean)) {
+          Modernizr[featureNameSplit[0]] = new Boolean(Modernizr[featureNameSplit[0]]);
+        }
+
+        Modernizr[featureNameSplit[0]][featureNameSplit[1]] = test;
+      }
+
+      // Set a single class (either `feature` or `no-feature`)
+      setClasses([(!!test && test != false ? '' : 'no-') + featureNameSplit.join('-')]);
+
+      // Trigger the event
+      Modernizr._trigger(feature, test);
+    }
+
+    return Modernizr; // allow chaining.
+  }
+
+  // After all the tests are run, add self to the Modernizr prototype
+  Modernizr._q.push(function() {
+    ModernizrProto.addTest = addTest;
+  });
+
+  
+
+
+
+  /**
+   * contains checks to see if a string contains another string
+   *
+   * @access private
+   * @function contains
+   * @param {string} str - The string we want to check for substrings
+   * @param {string} substr - The substring we want to search the first string for
+   * @returns {boolean}
+   */
+
+  function contains(str, substr) {
+    return !!~('' + str).indexOf(substr);
+  }
+
+  ;
+
+  /**
+   * If the browsers follow the spec, then they would expose vendor-specific styles as:
    *   elem.style.WebkitBorderRadius
-   * instead of something like the following, which would be technically incorrect:
+   * instead of something like the following (which is technically incorrect):
    *   elem.style.webkitBorderRadius
 
-   * Webkit ghosts their properties in lowercase but Opera & Moz do not.
+   * WebKit ghosts their properties in lowercase but Opera & Moz do not.
    * Microsoft uses a lowercase `ms` instead of the correct `Ms` in IE8+
    *   erik.eae.net/archives/2008/03/10/21.48.10/
 
@@ -1123,6 +1373,7 @@ Modernizr.input.step
    * @param {array.<string>} props - An array of properties to test for
    * @param {object} obj - An object or Element you want to use to test the parameters again
    * @param {boolean|object} elem - An Element to bind the property lookup again. Use `false` to prevent the check
+   * @returns {false|*} returns false if the prop is unsupported, otherwise the value that is supported
    */
   function testDOMProps(props, obj, elem) {
     var item;
@@ -1148,6 +1399,73 @@ Modernizr.input.step
       }
     }
     return false;
+  }
+
+  ;
+
+  /**
+   * Create our "modernizr" element that we do most feature tests on.
+   *
+   * @access private
+   */
+
+  var modElem = {
+    elem: createElement('modernizr')
+  };
+
+  // Clean up this element
+  Modernizr._q.push(function() {
+    delete modElem.elem;
+  });
+
+  
+
+  var mStyle = {
+    style: modElem.elem.style
+  };
+
+  // kill ref for gc, must happen before mod.elem is removed, so we unshift on to
+  // the front of the queue.
+  Modernizr._q.unshift(function() {
+    delete mStyle.style;
+  });
+
+  
+
+
+  /**
+   * wrapper around getComputedStyle, to fix issues with Firefox returning null when
+   * called inside of a hidden iframe
+   *
+   * @access private
+   * @function computedStyle
+   * @param {HTMLElement|SVGElement} - The element we want to find the computed styles of
+   * @param {string|null} [pseudoSelector]- An optional pseudo element selector (e.g. :before), of null if none
+   * @returns {CSSStyleDeclaration}
+   */
+
+  function computedStyle(elem, pseudo, prop) {
+    var result;
+
+    if ('getComputedStyle' in window) {
+      result = getComputedStyle.call(window, elem, pseudo);
+      var console = window.console;
+
+      if (result !== null) {
+        if (prop) {
+          result = result.getPropertyValue(prop);
+        }
+      } else {
+        if (console) {
+          var method = console.error ? 'error' : 'log';
+          console[method].call(console, 'getComputedStyle returning null, its possible modernizr test results are inaccurate');
+        }
+      }
+    } else {
+      result = !pseudo && elem.currentStyle && elem.currentStyle[prop];
+    }
+
+    return result;
   }
 
   ;
@@ -1203,41 +1521,12 @@ Modernizr.input.step
       }
       conditionText = conditionText.join(' or ');
       return injectElementWithStyles('@supports (' + conditionText + ') { #modernizr { position: absolute; } }', function(node) {
-        return getComputedStyle(node, null).position == 'absolute';
+        return computedStyle(node, null, 'position') == 'absolute';
       });
     }
     return undefined;
   }
   ;
-
-  /**
-   * Create our "modernizr" element that we do most feature tests on.
-   *
-   * @access private
-   */
-
-  var modElem = {
-    elem: createElement('modernizr')
-  };
-
-  // Clean up this element
-  Modernizr._q.push(function() {
-    delete modElem.elem;
-  });
-
-  
-
-  var mStyle = {
-    style: modElem.elem.style
-  };
-
-  // kill ref for gc, must happen before mod.elem is removed, so we unshift on to
-  // the front of the queue.
-  Modernizr._q.unshift(function() {
-    delete mStyle.style;
-  });
-
-  
 
   // testProps is a generic CSS / DOM property test.
 
@@ -1385,11 +1674,12 @@ Modernizr.input.step
    * @param {HTMLElement|SVGElement} [elem] - An element used to test the property and value against
    * @param {string} [value] - A string of a css value
    * @param {boolean} [skipValueTest] - An boolean representing if you want to test if value sticks when set
+   * @returns {false|string} returns the string version of the property, or false if it is unsupported
    */
   function testPropsAll(prop, prefixed, elem, value, skipValueTest) {
 
     var ucProp = prop.charAt(0).toUpperCase() + prop.slice(1),
-    props = (prop + ' ' + cssomPrefixes.join(ucProp + ' ') + ucProp).split(' ');
+      props = (prop + ' ' + cssomPrefixes.join(ucProp + ' ') + ucProp).split(' ');
 
     // did they call .prefixed('boxSizing') or are we just testing a prop?
     if (is(prefixed, 'string') || is(prefixed, 'undefined')) {
@@ -1500,7 +1790,8 @@ Modernizr.input.step
   "property": "indexeddb",
   "caniuse": "indexeddb",
   "tags": ["storage"],
-  "polyfills": ["indexeddb"]
+  "polyfills": ["indexeddb"],
+  "async": true
 }
 !*/
 /* DOC
@@ -1512,17 +1803,48 @@ Detects support for the IndexedDB client-side storage API (final spec).
   // - Firefox shipped moz_indexedDB before FF4b9, but since then has been mozIndexedDB
   // For speed, we don't test the legacy (and beta-only) indexedDB
 
-  var indexeddb;
-  try {
-    indexeddb = prefixed('indexedDB', window);
-  } catch (e) {
+  Modernizr.addAsyncTest(function() {
+
+    var indexeddb;
+
+    try {
+      // Firefox throws a Security Error when cookies are disabled
+      indexeddb = prefixed('indexedDB', window);
+    } catch (e) {
+    }
+
+    if (!!indexeddb) {
+      var testDBName = 'modernizr-' + Math.random();
+      var req = indexeddb.open(testDBName);
+
+      req.onerror = function() {
+        if (req.error && req.error.name === 'InvalidStateError') {
+          addTest('indexeddb', false);
+        } else {
+          addTest('indexeddb', true);
+          detectDeleteDatabase(indexeddb, testDBName);
+        }
+      };
+
+      req.onsuccess = function() {
+        addTest('indexeddb', true);
+        detectDeleteDatabase(indexeddb, testDBName);
+      };
+    } else {
+      addTest('indexeddb', false);
+    }
+  });
+
+  function detectDeleteDatabase(indexeddb, testDBName) {
+    var deleteReq = indexeddb.deleteDatabase(testDBName);
+    deleteReq.onsuccess = function() {
+      addTest('indexeddb.deletedatabase', true);
+    };
+    deleteReq.onerror = function() {
+      addTest('indexeddb.deletedatabase', false);
+    };
   }
 
-  Modernizr.addTest('indexeddb', !!indexeddb);
-
-  if (!!indexeddb) {
-    Modernizr.addTest('indexeddb.deletedatabase', 'deleteDatabase' in indexeddb);
-  }
 ;
 
   /**
