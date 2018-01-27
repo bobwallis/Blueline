@@ -6,6 +6,7 @@ composer.phar
 
 # Parameters
 app/config/parameters.yml
+app/config/parameters.ini
 
 # Assets managed by Gulp
 web/favicon.*
@@ -18,7 +19,7 @@ web/fonts
 web/images
 
 # Managed by Composer
-/web/config.php
+/app/bootstrap.php.cache
 /var/bootstrap.php.cache
 /bin/*
 !bin/console
