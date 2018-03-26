@@ -54,26 +54,20 @@ h1, h2, fieldset legend {
 
 // Links
 a {
-	text-decoration: none;
-	text-shadow: .03em 0 #FFF, -.03em 0 #FFF, 0 .03em #FFF, 0 -.03em #FFF, .06em 0 #FFF, -.06em 0 #FFF, .09em 0 #FFF, -.09em 0 #FFF, .12em 0 #FFF, -.12em 0 #FFF, .15em 0 #FFF, -.15em 0 #FFF;
-	background-image: linear-gradient(#FFF, #FFF), linear-gradient(#FFF, #FFF), linear-gradient(#A1C4D0, #A1C4D0);
-	background-size: .05em 1px, .05em 1px, 1px 1px;
-	background-repeat: no-repeat, no-repeat, repeat-x;
-	background-position: 0% 99%, 100% 99%, 0% 99%;
-	transition-property: color;
-	transition-duration: .4s;
+	text-decoration: underline;
+	text-decoration-color: #A1C4D0;
+	transition-property: color, text-decoration-color;
+	transition-duration: .15s;
 	&:link { color: #29404C; }
 	&:visited { color: #4C2940; }
 	&:active { color: #404C29; }
+	&:hover { text-decoration-color: #29404C; }
 	&.external {
 		padding-right: 13px;
-		background-image: url(../images/external.svg), linear-gradient(#FFF, #FFF), linear-gradient(#FFF, #FFF), linear-gradient(#A1C4D0, #A1C4D0);
-		background-size: auto, .05em 1px, .05em 1px, 1px 1px;
-		background-repeat: no-repeat, no-repeat, no-repeat, repeat-x;
-		background-position: right center, 0% 99%, 100% 99%, 0% 99%;
-	}
-	&::selection {
-		text-shadow: none;
+		background-image: url(../images/external.svg);
+		background-size: auto;
+		background-repeat: no-repeat;
+		background-position: bottom 2px right 0;
 	}
 }
 .sf-toolbar, #towerMap {
