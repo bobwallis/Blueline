@@ -95,9 +95,17 @@ class ImportMethodsCommand extends ContainerAwareCommand
                 $xmlRow['ruleoffs'] = json_encode($method->getRuleOffs());
                 // Upsert the method data
                 if (\Blueline\BluelineBundle\Helpers\pg_upsert($db, 'methods', array_intersect_key($xmlRow, $validFields), array('title' => $xmlRow['title'])) === false) {
-                    $progress->clear();
-                    $output->writeln('<error>Failed to insert '.$xmlRow['title'].': '.pg_last_error($db).'</error>');
-                    $progress->display();
+                    if (pg_delete($db, 'methods', array('title' => $xmlRow['title'], 'provisional' => true))
+                         && \Blueline\BluelineBundle\Helpers\pg_upsert($db, 'methods', array_intersect_key($xmlRow, $validFields), array('title' => $xmlRow['title']))) {
+                        $progress->clear();
+                        $output->writeln('<comment>Removed provisionally-named '.$xmlRow['title'].' as name conflicts with a real method.</comment>');
+                        $progress->display();
+                    }
+                    else {
+                        $progress->clear();
+                        $output->writeln('<error>Failed to insert '.$xmlRow['title'].': '.pg_last_error($db).'</error>');
+                        $progress->display();
+                    }
                 }
                 // 'Treble Dodging Minor Method' and 'Plain Minor Method' collections
                 foreach (array( 'tdmm', 'pmm' ) as $t) {
