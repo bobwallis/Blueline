@@ -517,4 +517,22 @@ $collections = array (
       7 => 'Bristol Surprise Major',
     ),
   ),
+  9 => 
+  array (
+    'id' => 'ProjectPickledEgg',
+    'name' => 'Project Pickled Egg',
+    'description' => 'Methods included in a series of articles by Simon Linford. Aiming to develop a new set of Core Surprise Major methods to replace the Standard 8.',
+    'methods' => 
+    array (
+      0 => 'Cambridge Surprise Major',
+      1 => 'Yorkshire Surprise Major',
+      2 => 'Cornwall Surprise Major',
+      3 => 'Superlative Surprise Major',
+      4 => 'Bristol Surprise Major',
+      5 => 'Lessness Surprise Major',
+      6 => 'London Surprise Major',
+      7 => 'Deva Surprise Major',
+      8 => 'Lancashire Surprise Major',
+    ),
+  ),
 );
