@@ -7,16 +7,15 @@ cd "$d"
 
 # Download data
 echo "Downloading method data..."
-urls=( "http://www.methods.org.uk/method-collections/xml-zip-files/plain-xml.zip"
-       "http://www.methods.org.uk/method-collections/xml-zip-files/surprise-xml.zip"
-       "http://www.methods.org.uk/method-collections/xml-zip-files/delight-xml.zip"
-       "http://www.methods.org.uk/method-collections/xml-zip-files/trebob-xml.zip"
-       "http://www.methods.org.uk/method-collections/xml-zip-files/alliance-xml.zip"
-       "http://www.methods.org.uk/method-collections/xml-zip-files/treplace-xml.zip"
-       "http://www.methods.org.uk/method-collections/xml-zip-files/hybrid-xml.zip"
-       "http://www.methods.org.uk/method-collections/xml-zip-files/principl-xml.zip"
-       "http://www.methods.org.uk/method-collections/xml-zip-files/diferntl-xml.zip"
-       "http://www.methods.org.uk/method-collections/xml-zip-files/difhuntr-xml.zip"
+urls=( "https://cccbr.github.io/methods-library/xml/CCCBR_Plain.xml.zip"
+       "https://cccbr.github.io/methods-library/xml/CCCBR_Surprise.xml.zip"
+       "https://cccbr.github.io/methods-library/xml/CCCBR_Delight.xml.zip"
+       "https://cccbr.github.io/methods-library/xml/CCCBR_Alliance.xml.zip"
+       "https://cccbr.github.io/methods-library/xml/CCCBR_TreblePlace.xml.zip"
+       "https://cccbr.github.io/methods-library/xml/CCCBR_Hybrid.xml.zip"
+       "https://cccbr.github.io/methods-library/xml/CCCBR_TrebleBob.xml.zip"
+       "https://cccbr.github.io/methods-library/xml/CCCBR_Principle.xml.zip"
+       "https://cccbr.github.io/methods-library/xml/CCCBR_Differential.xml.zip"
        "http://www.methods.org.uk/supplement/provisionally-named/provisional-xml.zip"
        "http://methods.org.uk/other/renamed.htm"
        "http://methods.org.uk/other/duplicate.htm"
@@ -26,7 +25,9 @@ for url in "${urls[@]}"; do
 done
 
 # Unzip all zip files
+rm -f *.xml
 unzip -qq -u -d "$d" -o "$d/*.zip"
 find . -name "*.zip" -exec rm -rf "{}" \;
+chmod +r *.xml
 
 echo "Done"
