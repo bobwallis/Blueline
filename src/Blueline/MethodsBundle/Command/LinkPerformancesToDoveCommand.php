@@ -45,7 +45,7 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
         $dbIterator = new PgResultIterator( $result );
         $performanceCount = $dbIterator->count();
 
-        // Prepare a query for searching for towers
+        // Prepare queries for searching for towers
         if(pg_prepare($db, 'tryLocation', 'SELECT id from towers WHERE bells >= $1 AND (place ILIKE $2 OR altname ILIKE $2 OR id ILIKE $2)') === false) {
             $output->writeln('<error>Failed to create prepared query: '.pg_last_error($db).'</error>');
             return;
@@ -95,6 +95,27 @@ class LinkPerformancesToDoveCommand extends ContainerAwareCommand
                         }
                     }
                     elseif (count($locationExplode) == 2) {
+                        $try = pg_execute($db, 'tryLocation2', array(intval($performance['stage']), strtolower($locationExplode[0]), strtolower($locationExplode[1])));
+                        if($try === false) {
+                            $output->writeln('<error>Failed to query for location \''.$location.'\': '.pg_last_error($db).'</error>');
+                            continue;
+                        }
+                        $try = pg_fetch_all($try);
+                        if($try === false) {
+                            $progress->clear();
+                            $output->writeln("\r<comment> No tower found for '".$location."'</comment>");
+                            $progress->display();
+                            $noTowerFound[] = $location;
+                        } elseif (count($try) == 1) {
+                            $doveid = $try[0]['id'];
+                        } elseif (count($try) > 1) {
+                            $progress->clear();
+                            $output->writeln("\r<comment> ".$performance['method_title'].": Multiple possible towers found for '".$location."' => ".join(array_map('current', $try), ', ')."</comment>");
+                            $progress->display();
+                        }
+                    }
+                    elseif (count($locationExplode) == 3) {
+                        // Try to find by just dropping the 3rd section
                         $try = pg_execute($db, 'tryLocation2', array(intval($performance['stage']), strtolower($locationExplode[0]), strtolower($locationExplode[1])));
                         if($try === false) {
                             $output->writeln('<error>Failed to query for location \''.$location.'\': '.pg_last_error($db).'</error>');
