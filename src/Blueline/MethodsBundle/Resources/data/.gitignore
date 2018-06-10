@@ -1,2 +1,3 @@
 *.xml
 *.htm
+!Blueline_ExtraMethods.xml

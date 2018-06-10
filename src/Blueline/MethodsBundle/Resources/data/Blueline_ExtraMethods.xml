@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<collection xmlns:mx="http://www.cccbr.org.uk/methods/schemas/2007/05/methods" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.cccbr.org.uk/methods/schemas/2007/05/methods http://www.cccbr.org.uk/methods/schemas/2007/05/methods.xsd"
+  date="2018-06-01"
+  uuid="http://www.cccbr.org.uk/methods/uuid/6726"
+  mx:decisionsYear="2017" xmlns="http://www.cccbr.org.uk/methods/schemas/2007/05/methods">
+  <collectionName>Extra 'methods' added to Blueline not in the CCCBR database</collectionName>
+  <methodSet>
+    <notes>Plain Hunt</notes>
+    <properties>
+      <classification></classification>
+      <lengthOfLead>2</lengthOfLead>
+      <numberOfHunts>0</numberOfHunts>
+      <symmetry>palindromic double rotational</symmetry>
+      <huntbellPath />
+    </properties>
+    <method>
+      <title>Plain Hunt Minimus</title>
+      <name>Plain Hunt</name>
+      <stage>4</stage>
+      <notation>-14</notation>
+      <leadHead>2413</leadHead>
+    </method>
+    <method>
+      <title>Plain Hunt Doubles</title>
+      <name>Plain Hunt</name>
+      <stage>5</stage>
+      <notation>5.1</notation>
+      <leadHead>24153</leadHead>
+    </method>
+    <method>
+      <title>Plain Hunt Minor</title>
+      <name>Plain Hunt</name>
+      <stage>6</stage>
+      <notation>-16</notation>
+      <leadHead>241635</leadHead>
+    </method>
+    <method>
+      <title>Plain Hunt Triples</title>
+      <name>Plain Hunt</name>
+      <stage>7</stage>
+      <notation>7.1</notation>
+      <leadHead>2416375</leadHead>
+    </method>
+    <method>
+      <title>Plain Hunt Major</title>
+      <name>Plain Hunt</name>
+      <stage>8</stage>
+      <notation>-18</notation>
+      <leadHead>24163857</leadHead>
+    </method>
+    <method>
+      <title>Plain Hunt Caters</title>
+      <name>Plain Hunt</name>
+      <stage>9</stage>
+      <notation>9.1</notation>
+      <leadHead>241638597</leadHead>
+    </method>
+    <method>
+      <title>Plain Hunt Royal</title>
+      <name>Plain Hunt</name>
+      <stage>10</stage>
+      <notation>-10</notation>
+      <leadHead>2416385079</leadHead>
+    </method>
+    <method>
+      <title>Plain Hunt Cinques</title>
+      <name>Plain Hunt</name>
+      <stage>11</stage>
+      <notation>E.1</notation>
+      <leadHead>241638507E9</leadHead>
+    </method>
+    <method>
+      <title>Plain Hunt Maximus</title>
+      <name>Plain Hunt</name>
+      <stage>12</stage>
+      <notation>-1T</notation>
+      <leadHead>241638507T9E</leadHead>
+    </method>
+  </methodSet>
+</collection>

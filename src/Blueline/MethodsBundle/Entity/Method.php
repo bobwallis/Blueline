@@ -1007,7 +1007,7 @@ class Method
     public function getCalls()
     {
         // Set default calls
-        if (empty($this->calls)) {
+        if ($this->calls !== null && empty($this->calls)) {
             $stage = $this->getStage();
             $notationExploded = PlaceNotation::explode($this->getNotationExpanded());
             $calls = array();
