@@ -56,7 +56,7 @@
 #search, #search_dummy {
 	div {
 		width: @searchWidth;
-		margin: @contentYPadding @contentXPadding @contentYPadding 0;
+		margin: @contentYPadding @contentXPadding;
 		overflow: hidden;
 		border-radius: 2px;
 		border: 1px solid @lightGrey;
@@ -91,6 +91,7 @@
 #search_dummy div {
 	background: @titleBackground url(../images/search.svg) no-repeat right center;
 	background-size: contain;
+	margin-left: 0;
 }
 
 @media screen and (max-width: 480px) {
