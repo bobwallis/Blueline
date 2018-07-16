@@ -7,7 +7,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '145.3.1',   'every' => 10, 'from' => -2, 'cover' => 3),
       'Single' => array('symbol' => 's', 'notation' => '145.3.123', 'every' => 10, 'from' => -2, 'cover' => 3),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 10, 'from' => 1),
   ),
   array(
@@ -16,7 +16,7 @@ $method_extras_calls = array(
       'Lead-End Bob'  => array('symbol' => '-', 'notation' => '125', 'every' => 8, 'from' => 0, 'cover' => 1),
       'Half-Lead Bob' => array('symbol' => 'h', 'notation' => '145', 'every' => 8, 'from' => -4, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 8, 'from' => 0),
   ),
   array(
@@ -25,7 +25,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '3',   'every' => 18, 'from' => 4, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '123', 'every' => 18, 'from' => 4, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 18, 'from' => 0),
   ),
   array(
@@ -34,7 +34,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '3',   'every' => 22, 'from' => 4, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '123', 'every' => 22, 'from' => 4, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 22, 'from' => 0),
   ),
   array(
@@ -43,7 +43,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '7',   'every' => 6, 'from' => -5, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '789', 'every' => 6, 'from' => -5, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 6, 'from' => -5),
   ),
   array(
@@ -52,7 +52,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '9',   'every' => 6, 'from' => -5, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '90E', 'every' => 6, 'from' => -5, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 6, 'from' => -5),
   ),
   array(
@@ -60,7 +60,7 @@ $method_extras_calls = array(
     'calls' => array(
       'Single' => array('symbol' => 's', 'notation' => '345', 'every' => 6, 'from' => -2, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 6, 'from' => -5),
   ),
   array(
@@ -69,7 +69,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => 'C',   'every' => 6, 'from' => -5, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => 'CDF', 'every' => 6, 'from' => -5, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 6, 'from' => -5),
   ),
   array(
@@ -78,7 +78,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => 'A',   'every' => 6, 'from' => -5, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => 'ABC', 'every' => 6, 'from' => -5, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 6, 'from' => -5),
   ),
   array(
@@ -87,7 +87,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => 'E',   'every' => 6, 'from' => -5, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => 'ETA', 'every' => 6, 'from' => -5, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 6, 'from' => -5),
   ),
   array(
@@ -96,7 +96,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '5',   'every' => 6, 'from' => -5, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '567', 'every' => 6, 'from' => -5, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 6, 'from' => -5),
   ),
   array(
@@ -105,7 +105,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '7',   'every' => 2, 'from' => -1, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '789', 'every' => 2, 'from' => -1, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => 0),
   ),
   array(
@@ -114,7 +114,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '9',   'every' => 2, 'from' => -1, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '90E', 'every' => 2, 'from' => -1, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => 0),
   ),
   array(
@@ -123,7 +123,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '3',   'every' => 2, 'from' => -1, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '345', 'every' => 2, 'from' => -1, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => 0),
   ),
   array(
@@ -132,7 +132,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '5',   'every' => 2, 'from' => -1, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '567', 'every' => 2, 'from' => -1, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => 0),
   ),
   array(
@@ -142,7 +142,7 @@ $method_extras_calls = array(
       'Blue'  => array('symbol' => '-', 'notation' => '3.7.3', 'every' => 30, 'from' => 15, 'cover' => 3),
       'Green' => array('symbol' => '-', 'notation' => '3.7.3', 'every' => 30, 'from' => 23, 'cover' => 3),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 30, 'from' => 0),
   ),
   array(
@@ -151,7 +151,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '34',   'every' => 8, 'from' => 2, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '3456', 'every' => 8, 'from' => 2, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 8, 'from' => 2),
   ),
   array(
@@ -160,7 +160,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '36',   'every' => 8, 'from' => 2, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '3678', 'every' => 8, 'from' => 2, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 8, 'from' => 2),
   ),
   array(
@@ -169,7 +169,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '38',   'every' => 8, 'from' => 2, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '3890', 'every' => 8, 'from' => 2, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 8, 'from' => 2),
   ),
   array(
@@ -178,7 +178,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '7',   'every' => 6, 'from' => -3, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '789', 'every' => 6, 'from' => -3, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 6, 'from' => -3),
   ),
   array(
@@ -187,7 +187,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '9',   'every' => 6, 'from' => -3, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '90E', 'every' => 6, 'from' => -3, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 6, 'from' => -3),
   ),
   array(
@@ -195,7 +195,7 @@ $method_extras_calls = array(
     'calls' => array(
       'Single' => array('symbol' => 's', 'notation' => '45', 'every' => 6, 'from' => 0, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 6, 'from' => -3),
   ),
   array(
@@ -204,7 +204,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => 'A',   'every' => 6, 'from' => -3, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => 'ABC', 'every' => 6, 'from' => -3, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 6, 'from' => -3),
   ),
   array(
@@ -213,7 +213,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => 'E',   'every' => 6, 'from' => -3, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => 'ETA', 'every' => 6, 'from' => -3, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 6, 'from' => -3),
   ),
   array(
@@ -222,7 +222,7 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '5',   'every' => 6, 'from' => -3, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '567', 'every' => 6, 'from' => -3, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 6, 'from' => -3),
   ),
   array(
@@ -231,13 +231,13 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '9',   'every' => 2, 'from' => -1, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '90E', 'every' => 2, 'from' => -1, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
   array(
     'title' => 'Titanic Doubles',
-    'calls' => null,
-    'callingPositions' => null,
+    'calls' => array(),
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
   array(
@@ -246,61 +246,61 @@ $method_extras_calls = array(
       'Bob'    => array('symbol' => '-', 'notation' => '5',   'every' => 2, 'from' => -1, 'cover' => 1),
       'Single' => array('symbol' => 's', 'notation' => '567', 'every' => 2, 'from' => -1, 'cover' => 1),
     ),
-    'callingPositions' => null,
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
   array(
     'title' => 'Plain Hunt Minimus',
-    'calls' => null,
-    'callingPositions' => null,
+    'calls' => array(),
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
   array(
     'title' => 'Plain Hunt Doubles',
-    'calls' => null,
-    'callingPositions' => null,
+    'calls' => array(),
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
   array(
     'title' => 'Plain Hunt Minor',
-    'calls' => null,
-    'callingPositions' => null,
+    'calls' => array(),
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
   array(
     'title' => 'Plain Hunt Triples',
-    'calls' => null,
-    'callingPositions' => null,
+    'calls' => array(),
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
   array(
     'title' => 'Plain Hunt Major',
-    'calls' => null,
-    'callingPositions' => null,
+    'calls' => array(),
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
   array(
     'title' => 'Plain Hunt Caters',
-    'calls' => null,
-    'callingPositions' => null,
+    'calls' => array(),
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
   array(
     'title' => 'Plain Hunt Royal',
-    'calls' => null,
-    'callingPositions' => null,
+    'calls' => array(),
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
   array(
     'title' => 'Plain Hunt Cinques',
-    'calls' => null,
-    'callingPositions' => null,
+    'calls' => array(),
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
   array(
     'title' => 'Plain Hunt Maximus',
-    'calls' => null,
-    'callingPositions' => null,
+    'calls' => array(),
+    'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
 );

@@ -43,6 +43,7 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
             $extrasIterator   = $method_extras_calls->getIterator();
             foreach ($extrasIterator as $txtRow) {
                 $txtRow['calls'] = json_encode($txtRow['calls']);
+                $txtRow['callingpositions'] = json_encode($txtRow['callingpositions']);
                 $txtRow['ruleoffs'] = json_encode($txtRow['ruleoffs']);
                 if (pg_update($db, 'methods', array_change_key_case($txtRow), array('title' => $txtRow['title'])) === false) {
                     $output->writeln('<comment> Failed to import call information for "'.$txtRow['title'].'"</comment>');
