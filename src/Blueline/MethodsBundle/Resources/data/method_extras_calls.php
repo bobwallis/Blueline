@@ -236,7 +236,7 @@ $method_extras_calls = array(
   ),
   array(
     'title' => 'Titanic Doubles',
-    'calls' => array(),
+    'calls' => null,
     'callingPositions' => null,
     'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
@@ -264,6 +264,7 @@ $method_extras_calls = array(
   array(
     'title' => 'Plain Hunt Minor',
     'calls' => null,
+    'callingPositions' => null,
     'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
   array(
