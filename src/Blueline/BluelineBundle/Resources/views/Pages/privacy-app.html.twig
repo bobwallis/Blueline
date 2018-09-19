@@ -1,0 +1,51 @@
+{% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
+
+{% block title %}Privacy Policy (Android App) | {{ parent() }}{% endblock %}
+{% set search = false %}
+
+{% block body %}
+	{% from 'BluelineBundle:Macros:header.html.twig' import header %}
+	<section class="text">
+		{{ header('Privacy Policy for Android Application') }}
+		<div class="wrap">
+			<p>This privacy policy covers my use of your data when you use the Android app available for download <a href="https://play.google.com/store/apps/details?id=uk.me.rsw.bl" class="external">on the Google Play Store</a>.</p>
+			<h2>Policy</h2>
+			<p>This pri­vacy policy is for the Android application "Blueline", and gov­erns the pri­vacy of its users who choose to use it.</p>
+			<p>The app takes a proactive approach to user privacy, and I request access only to a limited amount of data for the purposes of:<ul><li>Investigating the causes of crashes</li><li>Monitoring how users engage with the app in order to better understand how they use it</li></ul></p>
+			<p>For these purposes I have included the <a href="https://firebase.google.com/" class="external">Google Firebase</a> service within the app. No personal data is collected or stored by this app other than the data transmitted to the Firebase service.</p>
+			<p>The Firebase service uses an app-instance identifier to identify a unique installation of the app with which to associate other data. By default, on Android, the service collects the Advertising ID. If the Advertising ID is not collected, the device's hardware identifier, e.g., Android ID (SSAID), is collected instead.</p>
+			<p>When monitoring usage of the app, or examples of crashes, information relating to your device and activity within the app is sent to Firebase for analysis. The type of information collected includes:
+				<ul>
+					<li>The previously mentioned, pseudonymous app-instance identifier</li>
+					<li>General device information, such as model, OS, and orientation</li>
+					<li>App version</li>
+					<li>Session duration</li>
+					<li>First launches</li>
+					<li>App opens</li>
+					<li>App updates</li>
+					<li>RAM and disk size</li>
+					<li>Carrier (based on Mobile Country and Network Code)</li>
+					<li>Radio/Network information (for example, WiFi, LTE, 3G)</li>
+					<li>Country (based on IP address)</li>
+					<li>Locale/language</li>
+					<li>Signal strength</li>
+					<li>Jailbroken or rooted status of device</li>
+					<li>Battery level and battery-charging state</li>
+					<li>App foreground or background state</li>
+					<li>App package name</li>
+					<li>Network URLs (not including URL parameters or payload content), response codes, payload size, response times</li>
+				</ul>
+			</p>
+			<p>If you wish to opt out of the data collection you can do so without affecting any of the app's other functionality by:
+				<ul>
+					<li>Selecting "no" on the prompt displayed on first launch of the app
+					<li>Re-launching the prompt at any time later on from the main navigation drawer of the app and change your mind</li>
+					<li>Changing the setting on the Settings page of the app.</li>
+				</ul>
+			</p>
+			<p>The app may con­tain links to other web­sites or services. Please note that I have no con­trol of web­sites out­side rsw.me.uk do­main. If you provide in­form­a­tion to a web­site to which I link, I am not re­spons­ible for its pro­tec­tion and pri­vacy.</p>
+			<h2>Source code</h2>
+			<p>The source code for the app is <a href="https://github.com/bobwallis/BluelineAndroid" class="external">made available</a> for interested people.</p>
+		</div>
+	</section>
+{% endblock %}
