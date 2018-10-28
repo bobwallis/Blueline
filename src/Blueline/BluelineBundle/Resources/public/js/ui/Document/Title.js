@@ -1,13 +1,14 @@
 // Manage the window title
 
-define( ['jquery', 'eve'], function( $, eve ) {
+define( ['eve'], function( eve ) {
 	var regExp_section = /\/(associations|methods|towers)\//,
 		regExp_search = /\/(associations|methods|towers)\/search/;
 
 	// Update the window title on page changes
 	eve.on( 'page.finished', function( url ) {
 		var windowTitle = '',
-			pageTitle = $.makeArray( $( '#content h1' ).map( function( i, e ) { return $(e).text(); } ) ).join( ', ' ),
+			pageTitleEl = document.querySelectorAll( '#content h1' ),
+			pageTitle = (typeof pageTitleEl[0] !== 'undefined')? pageTitleEl[0].innerText : '',
 			section = regExp_section.exec( url );
 		if( pageTitle !== '' ) {
 			windowTitle += pageTitle + ' | ';

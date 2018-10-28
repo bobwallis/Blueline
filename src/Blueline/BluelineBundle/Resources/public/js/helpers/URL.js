@@ -1,6 +1,6 @@
 // Utility functions for dealing with URLs
 
-define( ['jquery'], function( $ ) {
+define( function() {
 	var regExp_showSearchBar = /\/search/,
 		regExp_showTowerMap = /(\/towers\/view\/|\/associations\/view\/)/,
 		regExp_section = /^(.*)\/(associations|methods|towers)\//,
@@ -57,7 +57,7 @@ define( ['jquery'], function( $ ) {
 	};
 
 	// Initialise
-	URL.baseURL = location.protocol+'//'+location.host + $( '#top a:first' ).attr( 'href' );
+	URL.baseURL = document.querySelectorAll('#top a')[0].href;
 	if ( URL.baseURL.substr(-1) != '/' ) {
 		URL.baseURL += '/';
 	}

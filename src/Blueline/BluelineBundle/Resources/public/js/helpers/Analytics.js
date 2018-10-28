@@ -1,4 +1,4 @@
-define( ['jquery', 'eve', '../helpers/URL'], function( $, eve, URL ) {
+define( ['eve'], function( eve ) {
 	if( typeof ga === 'function' ) {
 		// Set options
 		ga( 'set', 'anonymizeIp', true );
@@ -38,12 +38,14 @@ define( ['jquery', 'eve', '../helpers/URL'], function( $, eve, URL ) {
 	} );
 
 	// Track outbound links
-	$( document.body ).on( 'click', 'a', function( e ) {
-		if( typeof ga === 'function' ) {
-			var $target = $( e.target ).closest( 'a' );
-			if( $target.length > 0 && $target[0].hostname !== location.hostname ) {
-				ga( 'send', 'event', 'outbound', 'click', $target[0].href, { transport: 'beacon' } );
-			}
+	document.addEventListener( 'click', function( e ) {
+		if( typeof ga !== 'function' || (e.which != 1 && e.which != 2) ) {
+			return;
 		}
-	} );
+		var el = e.srcElement || e.target;
+		while( el && (typeof el.tagName == 'undefined' || el.tagName.toLowerCase() != 'a' || !el.href ) ) { el = el.parentNode; }
+		if( el && el.href && el.hostname !== location.hostname ) {
+			ga( 'send', 'event', 'outbound', 'click', el.href, { transport: 'beacon' } );	
+		}
+	}, false);
 } );

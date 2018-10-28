@@ -1,4 +1,4 @@
-require( ['jquery', 'eve', 'shared/ui', 'shared/helpers/Analytics', 'shared/lib/webfont'], function( $, eve, ui, analytics, webfont ) {
+require( ['eve', 'shared/ui', 'shared/helpers/Analytics', 'shared/lib/webfont'], function( eve, ui, analytics, webfont ) {
 	// How this will work:
 	// This site will run as a single page app if it can (using the HTML5 History API to change the
 	// the URL in the address bar). This minimises page reloads, makes everything faster, and allows
@@ -19,6 +19,6 @@ require( ['jquery', 'eve', 'shared/ui', 'shared/helpers/Analytics', 'shared/lib/
 		eve( 'app.ready' );
 
 		// Preload the webfont
-		webfont( $.noop );
+		webfont();
 	} );
 } );

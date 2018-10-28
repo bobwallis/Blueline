@@ -11,6 +11,7 @@ define( ['jquery', 'eve'], function( $, eve ) {
 	};
 
 	return function( callback ) {
+		if( typeof callback !== 'function' ) { callback = function() {}; }
 		if( loaded ) {
 			callback();
 		}

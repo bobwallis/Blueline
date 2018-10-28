@@ -1,10 +1,15 @@
-define( ['jquery'], function( $ ) {
-	return function( colorToTest ) {
-		var $dummy = $('<div>').appendTo( $(document.body) );
-		$dummy.css( 'backgroundColor', 'white' );
-		$dummy.css( 'backgroundColor', colorToTest );
-		var check = ($dummy.css('backgroundColor') != 'rgb(255, 255, 255)' || colorToTest == 'white'|| colorToTest == '#FFF'|| colorToTest == '#FFFFFF');
-		$dummy.remove();
-		return check;
+define( function() {
+	return function(stringToTest) {
+		if( stringToTest === '' )            { return false; }
+		if( stringToTest === 'inherit' )     { return false; }
+		if( stringToTest === 'transparent' ) { return false; }
+
+		var image = document.createElement( 'img' );
+		image.style.color = 'rgb(0, 0, 0)';
+		image.style.color = stringToTest;
+		if( image.style.color !== 'rgb(0, 0, 0)' ) { return true; }
+		image.style.color = 'rgb(255, 255, 255)';
+		image.style.color = stringToTest;
+		return image.style.color !== 'rgb(255, 255, 255)';
 	};
 } );

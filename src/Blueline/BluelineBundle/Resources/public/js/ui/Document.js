@@ -1,11 +1,6 @@
 // Manage changes to the UI at a document/body level
 
-define( ['jquery', 'eve', 'Modernizr', '../lib/fastclick', '../helpers/URL', '../data/Page', './Document/Title', './Document/Fallback', './Document/Hotkeys', './Document/Forms'], function( $, eve, Modernizr, FastClick, URL, Page ) {
-	// Enable 'fastclick' on the whole document
-	// This is a polyfill to remove the delay when clicking with a touch device.
-	// See: https://github.com/ftlabs/fastclick
-	new FastClick( document.body );
-
+define( ['jquery', 'eve', 'Modernizr', '../helpers/URL', '../data/Page', './Document/Title', './Document/Hotkeys', './Document/Forms'], function( $, eve, Modernizr, URL, Page ) {
 	// Remove the app start screen (the loading overlay that covers the page while waiting for the
 	// UI to load properly when we are running as an iOS web app)
 	eve.once( 'app.ready', function() {

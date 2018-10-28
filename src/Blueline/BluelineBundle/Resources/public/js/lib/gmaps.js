@@ -2,7 +2,7 @@
  * Loads Google Maps
  * It uses my API key, which won't work on your domain, you should change it.
  */
-define( ['jquery', 'eve'], function( $, eve ) {
+define( ['eve'], function( eve ) {
 	var loaded = false,
 		loading = false;
 
@@ -22,7 +22,10 @@ define( ['jquery', 'eve'], function( $, eve ) {
 				}
 				window['gmLoaded'] = null;
 			};
-			$.getScript( 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBnhfCWGHk7v1k3jNUJuSsEMOq-d3b4GbA&callback=gmLoaded&sensor=true' );
+			var gmapsScript = document.createElement( 'script' );
+			gmapsScript.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBnhfCWGHk7v1k3jNUJuSsEMOq-d3b4GbA&callback=gmLoaded&sensor=true';
+			gmapsScript.async = true;
+			document.getElementsByTagName('head')[0].appendChild( gmapsScript );
 		}
 	};
 } );

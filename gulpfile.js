@@ -146,13 +146,8 @@ gulp.task( 'fonts', function() {
 
 
 // Javascripts
-gulp.task( 'js', ['js-old_ie', 'js-main', 'js-export', 'js-workers'], function() {} );
-var old_ie_js_sources = ['src/Blueline/BluelineBundle/Resources/public/js/helpers/old_ie.js',
-                         'src/Blueline/BluelineBundle/Resources/public/js/lib/Array.filter.js',
-                         'src/Blueline/BluelineBundle/Resources/public/js/lib/Array.indexOf.js',
-                         'src/Blueline/BluelineBundle/Resources/public/js/lib/Array.map.js',
-                         'src/Blueline/BluelineBundle/Resources/public/js/lib/Array.forEach.js',
-                         'src/Blueline/BluelineBundle/Resources/public/js/lib/html5shiv.js'];
+gulp.task( 'js', ['js-main', 'js-export', 'js-workers'], function() {} );
+
 var require_paths = {
 	shared:       'src/Blueline/BluelineBundle/Resources/public/js/',
 	methods:      'src/Blueline/MethodsBundle/Resources/public/js/',
@@ -171,15 +166,6 @@ var require_shim = {
 		exports: 'Array.prototype.fill'
 	}
 };
-gulp.task( 'js-old_ie', function() {
-	gulp.src( old_ie_js_sources )
-		.pipe( concat( 'old_ie.js' ) )
-		.pipe( uglify() )
-		.pipe( gulp.dest( DEST+'js/' ) )
-		.pipe( zopfli() )
-		.pipe( gulp.dest( DEST+'js/' ) );
-
-} );
 gulp.task( 'js-main', function() {
 	requirejs( {
 		baseUrl: './',
@@ -224,7 +210,7 @@ gulp.task( 'js-workers', function() {
 
 // CSS
 gulp.task( 'css', function() {
-	var all = gulp.src( ['src/Blueline/BluelineBundle/Resources/public/css/all.less', 'src/Blueline/BluelineBundle/Resources/public/css/print.less', 'src/Blueline/BluelineBundle/Resources/public/css/old_ie.less', 'src/Blueline/MethodsBundle/Resources/public/css/export.less'] )
+	var all = gulp.src( ['src/Blueline/BluelineBundle/Resources/public/css/all.less', 'src/Blueline/BluelineBundle/Resources/public/css/print.less', 'src/Blueline/MethodsBundle/Resources/public/css/export.less'] )
 		.pipe( less() )
 		.pipe( autoprefixer( { browsers: ['> 5%'] } ) )
 		.pipe( sourcemaps.init() )
