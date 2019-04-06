@@ -533,6 +533,11 @@ $collections = array (
       6 => 'London Surprise Major',
       7 => 'Deva Surprise Major',
       8 => 'Lancashire Surprise Major',
+      9 => 'Kenninghall Surprise Major',
+      10 => 'Cooktown Orchid Delight Major',
+      11 => 'Glasgow Surprise Major',
+      12 => 'Mareham Delight Major',
+      13 => 'Rook and Gaskill Surprise Major',
     ),
   ),
 );
