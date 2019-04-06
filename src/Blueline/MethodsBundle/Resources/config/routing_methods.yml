@@ -6,7 +6,6 @@ Blueline_Methods_view:
     path: /view/{url}.{_format}
     defaults: { _controller: BluelineMethodsBundle:Methods:view, _format: html }
     requirements:
-        url: ^(?(?=.*\.(html|json|png)$).*(?=\.)|.*$)
         _format: html|json|png
 
 Blueline_Methods_custom_view:
