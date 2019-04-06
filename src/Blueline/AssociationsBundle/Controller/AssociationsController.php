@@ -49,7 +49,7 @@ class AssociationsController extends Controller
 
         // Execute
         $associations = $query->getQuery()->getResult();
-        $count = (count($associations) < $searchVariables['count'])? count($associations) : Search::queryToCountQuery($query, $associationsMetadata)->getQuery()->getSingleScalarResult();
+        $count = (count($associations)+$searchVariables['offset'] < $searchVariables['count'])? count($associations) : Search::queryToCountQuery($query, $associationsMetadata)->getQuery()->getSingleScalarResult();
         $pageActive = max(1, ceil(($searchVariables['offset']+1)/$searchVariables['count']));
         $pageCount =  max(1, ceil($count / $searchVariables['count']));
 

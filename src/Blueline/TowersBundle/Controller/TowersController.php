@@ -45,7 +45,7 @@ class TowersController extends Controller
 
         // Execute
         $towers = $query->getQuery()->getResult();
-        $count = (count($towers) < $searchVariables['count'])? count($towers) : Search::queryToCountQuery($query, $towerMetadata)->getQuery()->getSingleScalarResult();
+        $count = (count($towers)+$searchVariables['offset'] < $searchVariables['count'])? count($towers) : Search::queryToCountQuery($query, $towerMetadata)->getQuery()->getSingleScalarResult();
         $pageActive = max(1, ceil(($searchVariables['offset']+1)/$searchVariables['count']));
         $pageCount =  max(1, ceil($count / $searchVariables['count']));
 

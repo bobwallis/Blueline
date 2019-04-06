@@ -109,7 +109,7 @@ class MethodsController extends Controller
 
         // Execute
         $methods = $query->getQuery()->getResult();
-        $count = (count($methods) < $searchVariables['count'])? count($methods) : Search::queryToCountQuery($query, $methodMetadata)->getQuery()->getSingleScalarResult();
+        $count = (count($methods)+$searchVariables['offset'] < $searchVariables['count'])? count($methods) : Search::queryToCountQuery($query, $methodMetadata)->getQuery()->getSingleScalarResult();
         $pageActive = max(1, ceil(($searchVariables['offset']+1)/$searchVariables['count']));
         $pageCount =  max(1, ceil($count / $searchVariables['count']));
 
