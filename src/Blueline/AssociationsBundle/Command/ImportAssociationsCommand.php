@@ -55,6 +55,7 @@ class ImportAssociationsCommand extends ContainerAwareCommand
             $progress->advance();
         }
         $progress->finish();
+        $output->writeln('');
 
         // Check for deletions
         $output->writeln('<info>Checking for deletion of old data...</info>');
