@@ -71,42 +71,6 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
             return;
         }
 
-        // Import data about renamed methods
-        $output->writeln("<info>Importing renamed method data...</info>");
-        $renamedIterator = new RenamedHTMLIterator(__DIR__.'/../Resources/data/renamed.htm');
-        $renamedIterator->rewind();
-        while ($renamedIterator->valid()) {
-            try {
-                $renamedRow = $renamedIterator->current();
-                $renamedRow['date'] = $renamedRow['date']->format('Y-m-d');
-            } catch (\Exception $e) {
-                $output->writeln("\r<error>".$e->getMessage().'</error>');
-            }
-            if( @pg_insert($db, 'performances', $renamedRow) === false ) {
-                $output->writeln('<comment> Failed to import renamed method information for "'.$renamedRow['rung_title'].'"</comment>');
-                $output->writeln('<comment> '.pg_last_error($db).'</comment>');
-            }
-            $renamedIterator->next();
-        }
-
-        // Import data about duplicate methods
-        $output->writeln("<info>Importing duplicate method data...</info>");
-        $duplicateIterator = new DuplicateHTMLIterator(__DIR__.'/../Resources/data/duplicate.htm');
-        $duplicateIterator->rewind();
-        while ($duplicateIterator->valid()) {
-            try {
-                $duplicateRow = $duplicateIterator->current();
-                $duplicateRow['date'] = $duplicateRow['date']->format('Y-m-d');
-            } catch (\Exception $e) {
-                $output->writeln("\r<error>".$e->getMessage().'</error>');
-            }
-            if( @pg_insert($db, 'performances', $duplicateRow) === false ) {
-                $output->writeln('<comment> Failed to import duplicate method information for "'.$duplicateRow['rung_title'].'"</comment>');
-                $output->writeln('<comment> '.pg_last_error($db).'</comment>');
-            }
-            $duplicateIterator->next();
-        }
-
         $time += microtime(true);
         $output->writeln("\n<info>Finished updating extra method data in ".gmdate("H:i:s", $time).". Peak memory usage: ".number_format(round(memory_get_peak_usage(true)/1048576,2)).' MiB.</info>');
     }
