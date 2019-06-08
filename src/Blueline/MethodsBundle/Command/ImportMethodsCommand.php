@@ -145,7 +145,12 @@ class ImportMethodsCommand extends ContainerAwareCommand
             if (!in_array($m, $importedMethods)) {
                 pg_delete($db, 'methods_similar', array('method1_title' => $m));
                 pg_delete($db, 'methods_similar', array('method2_title' => $m));
-                pg_delete($db, 'methods', array('title' => $m));
+                if (pg_delete($db, 'methods', array('title' => $m)) === false) {
+                    $progress->clear();
+                    $output->writeln('<error>Failed to delete '.$m.': '.pg_last_error($db).'</error>');
+                    $progress->display();
+                    continue;   
+                }
                 $progress->clear();
                 $output->writeln("\r<comment>".str_pad(" Method '".$m."' deleted", $targetConsoleWidth, ' ')."</comment>");
                 $progress->display();

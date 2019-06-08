@@ -12,4 +12,19 @@ use Doctrine\ORM\EntityRepository;
  */
 class PerformanceRepository extends EntityRepository
 {
+    public function findByRungUrl($url)
+    {
+        $query = $this->getEntityManager()->createQuery(
+            'SELECT p, m FROM BluelineMethodsBundle:Performance p
+             LEFT JOIN p.method m
+             WHERE p.type = \'renamedMethod\' AND p.rung_url = :url'
+        )->setParameter('url', $url);
+
+        try {
+            $result = $query->getSingleResult();
+            return $result->getMethod()->getUrl();
+        } catch (\Doctrine\ORM\NoResultException $e) {
+            return null;
+        }
+    }
 }

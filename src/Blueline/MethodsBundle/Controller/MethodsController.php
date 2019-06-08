@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Blueline\BluelineBundle\Helpers\Search;
 use Blueline\BluelineBundle\Helpers\Text;
 use Blueline\MethodsBundle\Entity\Method;
+use Blueline\MethodsBundle\Entity\Performance;
 use Blueline\MethodsBundle\Helpers\URL;
 use Blueline\MethodsBundle\Helpers\Stages;
 use Blueline\MethodsBundle\Helpers\Classifications;
@@ -134,7 +135,7 @@ class MethodsController extends Controller
         // Decode and canonicalise the requested URLs
         $url = URL::canonical($url);
 
-        // Redirect to the right URL if we're at a wrong one
+        // Redirect to the canonical URL if we're at a wrong one
         if ($request->get('url') !== $url) {
             $redirect = $this->generateUrl('Blueline_Methods_view', array(
                 'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null),
@@ -171,6 +172,20 @@ class MethodsController extends Controller
         $method = $methodRepository->findByURLJoiningPerformancesAndCollections($url);
         
         if (!$method) {
+            // Try and find a renamed method
+            $peformanceRepository = $this->getDoctrine()->getManager()->getRepository('BluelineMethodsBundle:Performance');
+            $renamedUrl = $peformanceRepository->findByRungUrl($url);
+            if ($renamedUrl !== null) {
+                $redirect = $this->generateUrl('Blueline_Methods_view', array(
+                    'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null),
+                    'scale'      => intval($request->query->get('scale')) ?: null,
+                    'style'      => strtolower($request->query->get('style')) ?: null,
+                    'url'      => $renamedUrl,
+                    '_format'    => $format
+                ));
+                return $this->redirect($redirect, 301);
+            }
+            // Otherwise fail
             throw $this->createNotFoundException('The method does not exist');
         }
         

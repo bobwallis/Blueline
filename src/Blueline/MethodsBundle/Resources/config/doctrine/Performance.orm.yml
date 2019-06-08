@@ -22,6 +22,10 @@ Blueline\MethodsBundle\Entity\Performance:
             type: string
             length: 255
             nullable: true
+        rung_url:
+            type: string
+            length: 255
+            nullable: true
         reference:
             type: string
             length: 255

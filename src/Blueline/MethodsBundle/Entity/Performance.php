@@ -84,6 +84,11 @@ class Performance
     /**
      * @var string
      */
+    private $rung_url;
+
+    /**
+     * @var string
+     */
     private $reference;
 
     /**
@@ -232,6 +237,29 @@ class Performance
     public function getRungTitle()
     {
         return $this->rung_title;
+    }
+
+    /**
+     * Set rung_url
+     *
+     * @param  string      $rungUrl
+     * @return Performance
+     */
+    public function setRungUrl($rungUrl)
+    {
+        $this->rung_url = $rungUrl;
+
+        return $this;
+    }
+
+    /**
+     * Get rung_url
+     *
+     * @return string
+     */
+    public function getRungUrl()
+    {
+        return $this->rung_url;
     }
 
     /**

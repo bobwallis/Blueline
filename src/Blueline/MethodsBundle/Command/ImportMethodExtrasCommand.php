@@ -9,6 +9,7 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Blueline\MethodsBundle\Helpers\MethodXMLIterator;
 use Blueline\MethodsBundle\Helpers\RenamedHTMLIterator;
 use Blueline\MethodsBundle\Helpers\DuplicateHTMLIterator;
+use Blueline\MethodsBundle\Helpers\URL;
 
 class ImportMethodExtrasCommand extends ContainerAwareCommand
 {
@@ -69,6 +70,24 @@ class ImportMethodExtrasCommand extends ContainerAwareCommand
         if (pg_query($db, "DELETE FROM performances WHERE type = 'renamedMethod' OR type = 'duplicateMethod'") === false) {
             $output->writeln('<error>Failed to clear existing data: '.pg_last_error($db).'</error>');
             return;
+        }
+
+        if (file_exists(__DIR__.'/../Resources/data/method_renamed.php')) {
+            $output->writeln('<info>Adding renamed method data...</info>');
+            require __DIR__.'/../Resources/data/method_renamed.php';
+            $method_renamed = new \ArrayObject($method_renamed);
+            $renamedIterator   = $method_renamed->getIterator();
+            foreach ($renamedIterator as $oldName => $newName) {
+                if( @pg_insert($db, 'performances', array(
+                    'type'         => 'renamedMethod',
+                    'method_title' => $newName,
+                    'rung_title'   => $oldName,
+                    'rung_url'     => str_replace([' ', '$', '&', '+', ',', '/', ':', ';', '=', '?', '@', '"', "'", '<', '>', '#', '%', '{', '}', '|', "\\", '^', '~', '[', ']', '.'], ['_'], iconv('UTF-8', 'ASCII//TRANSLIT', $oldName))
+                )) === false ) {
+                    $output->writeln('<comment> Failed to import renamed method information for "'.$oldName.'"</comment>');
+                    $output->writeln('<comment> '.pg_last_error($db).'</comment>');
+                }
+            }
         }
 
         $time += microtime(true);
