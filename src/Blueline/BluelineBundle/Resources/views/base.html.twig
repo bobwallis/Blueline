@@ -1,4 +1,4 @@
-{% spaceless %}
+{% apply spaceless %}
 <!DOCTYPE html>
 <html lang="en"{{ isAppStartPage ? ' manifest="site.manifest"' : '' }} data-age="{{ html_age }}">
 	<head>
@@ -92,4 +92,4 @@
 		<script src="{{ app.request.basepath }}/js/main.js?v={{ html_age }}" async></script>
 	</body>
 </html>
-{% endspaceless %}
+{% endapply %}

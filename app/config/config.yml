@@ -78,6 +78,10 @@ doctrine:
                         radians:
                             Blueline\BluelineBundle\Doctrine\Extension\Radians
 
+sensio_framework_extra:
+    router:
+        annotations: false
+
 blueline:
     admin_email:     '%admin_email%'
     analytics_code:  '%analytics_code%'
