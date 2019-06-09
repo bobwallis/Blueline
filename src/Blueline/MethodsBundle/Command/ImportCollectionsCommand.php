@@ -54,7 +54,12 @@ class ImportCollectionsCommand extends ContainerAwareCommand
             unset($collection['methods']);
             pg_insert($db, 'collections', $collection);
             foreach ($methods as $index => $method_title) {
-                pg_insert($db, 'methods_collections', array('collection_id' => $collection['id'], 'method_title' => $method_title, 'position' => $index));
+                if (pg_insert($db, 'methods_collections', array('collection_id' => $collection['id'], 'method_title' => $method_title, 'position' => $index)) === false) {
+                    $progress->clear();
+                    $output->writeln("<comment> Failed to add '".$method_title."' to '".$collection['id']."'</comment>");
+                    $output->writeln('<comment> '.pg_last_error($db).'</comment>');
+                    $progress->display();
+                }
             }
             $progress->advance();
         }
