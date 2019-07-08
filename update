@@ -65,16 +65,16 @@ if [[ ! ( -e "$d/composer.phar" ) ]]; then
 	curl -sS https://getcomposer.org/installer | php
 else
 	echo -e "\n\033[1mUpdating Composer\033[0m"
-	php "$d/composer.phar" self-update
+	php -d memory_limit=2G "$d/composer.phar" self-update
 fi
 
 # Update vendors
 echo -e "\n\033[1mUpdating /vendors\033[0m"
 if [[ $DEV = true ]]; then
-	php "$d/composer.phar" update
+	php -d memory_limit=2G "$d/composer.phar" update
 else
-	php "$d/composer.phar" install
-	php "$d/composer.phar" dump-autoload --optimize
+	php -d memory_limit=2G "$d/composer.phar" install
+	php -d memory_limit=2G "$d/composer.phar" dump-autoload --optimize
 fi
 
 # Update node_modules
