@@ -17,7 +17,7 @@
     "gulp-concat": "^2.6.0",
     "gulp-flatten": "^0.2.0",
     "gulp-gzip": "^1.4.2",
-    "gulp-image-resize": "^0.13.0",
+    "gulp-image-resize": "^0.13.1",
     "gulp-imagemin": "^2.4.0",
     "gulp-less": "^3.5.0",
     "gulp-plumber": "^1.2.1",
