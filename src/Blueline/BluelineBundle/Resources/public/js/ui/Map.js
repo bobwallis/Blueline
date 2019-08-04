@@ -98,7 +98,7 @@ define( ['eve', 'jquery', '../lib/gmaps'], function( eve, $, GMaps ) {
 							zoom: (typeof options.zoom !== 'undefined')? options.zoom : 8,
 							center: (typeof options.center !== 'undefined')? options.center : new google.maps.LatLng( 51.75015, -1.25436 ),
 							mapTypeControlOptions: {
-								mapTypeIds: [google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID, 'openStreetMap', 'osMap', google.maps.MapTypeId.ROADMAP]
+								mapTypeIds: [google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID, google.maps.MapTypeId.ROADMAP]
 							},
 							mapTypeId: google.maps.MapTypeId.ROADMAP,
 							noClear: false,
@@ -107,16 +107,6 @@ define( ['eve', 'jquery', '../lib/gmaps'], function( eve, $, GMaps ) {
 							fusionTable: FUSION_TABLE_ID,
 							fusionTableQuery: (typeof options.fusionTableQuery !== 'undefined')? options.fusionTableQuery : ''
 						} );
-
-						// Add OSM and OS maps
-						TowerMap.map.mapTypes.set( 'openStreetMap', new google.maps.ImageMapType( {
-							name: 'OSM',
-							alt: 'MapQuest\'s Mapnik-rendered map',
-							getTileUrl: function( coord, zoom ) { return 'http://otile'+[1,2,3,4][Math.floor(Math.random()*4)]+'.mqcdn.com/tiles/1.0.0/map/'+zoom+'/'+coord.x+'/'+coord.y+'.png'; },
-							maxZoom: 18,
-							tileSize: new google.maps.Size( 256, 256 ),
-							isPng: true
-						} ) );
 
 						// Add the Fusion Table layer and set up its Info Window
 						TowerMap.fusionTableLayer = new google.maps.FusionTablesLayer( { map: TowerMap.map, suppressInfoWindows: true } );
