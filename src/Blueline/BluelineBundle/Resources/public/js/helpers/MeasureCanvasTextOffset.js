@@ -44,27 +44,27 @@ define( ['../ui/Canvas', './LocalStorage'], function( Canvas, LocalStorage ) {
 							}
 						}
 					}
-					// Find bottom
-					for( row = dim; bottomOfText === false && row > 0; --row ) {
-						for( column = 0; column < dim ; ++column ) {
-							if( imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
-								bottomOfText = row + 1;
-								break;
-							}
-						}
-					}
 					// Find left
 					for( column = 0; leftOfText === false && column < dim; ++column ) {
-						for( row = 0; row < dim ; ++row ) {
+						for( row = topOfText; row < dim ; ++row ) {
 							if( imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
 								leftOfText = column;
 								break;
 							}
 						}
 					}
+					// Find bottom
+					for( row = dim; bottomOfText === false && row > 0; --row ) {
+						for( column = leftOfText; column < dim ; ++column ) {
+							if( imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
+								bottomOfText = row + 1;
+								break;
+							}
+						}
+					}
 					// Find right
 					for( column = dim; rightOfText === false && column > 0; --column ) {
-						for( row = 0; row < dim ; ++row ) {
+						for( row = topOfText; row < bottomOfText ; ++row ) {
 							if( imageData.data[((row*(dim*4)) + (column*4))] > 0 ) {
 								rightOfText = column + 1;
 								break;
