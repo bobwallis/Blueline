@@ -4,12 +4,6 @@ Blueline_Services_oembed:
     requirements:
         _format: json|xml
 
-Blueline_FontPreview:
-    path: /previewFont.{_format}
-    defaults: { _controller: BluelineServicesBundle:FontPreview:preview }
-    requirements:
-        _format: png
-
 Blueline_Notation_expand:
     path: /notation.{_format}
     defaults: { _controller: BluelineServicesBundle:Notation:parse }
