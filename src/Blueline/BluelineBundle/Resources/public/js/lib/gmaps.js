@@ -23,7 +23,7 @@ define( ['eve'], function( eve ) {
 				window['gmLoaded'] = null;
 			};
 			var gmapsScript = document.createElement( 'script' );
-			gmapsScript.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBnhfCWGHk7v1k3jNUJuSsEMOq-d3b4GbA&callback=gmLoaded&sensor=true';
+			gmapsScript.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBnhfCWGHk7v1k3jNUJuSsEMOq-d3b4GbA&callback=gmLoaded';
 			gmapsScript.async = true;
 			document.getElementsByTagName('head')[0].appendChild( gmapsScript );
 		}
