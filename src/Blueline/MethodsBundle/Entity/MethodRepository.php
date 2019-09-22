@@ -25,6 +25,20 @@ class MethodRepository extends EntityRepository
         }
     }
 
+    public function findByURL($url)
+    {
+        $query = $this->getEntityManager()->createQuery(
+            'SELECT m FROM BluelineMethodsBundle:Method m
+             WHERE m.url = :url'
+        )->setParameter('url', $url);
+
+        try {
+            return $query->getSingleResult();
+        } catch (\Doctrine\ORM\NoResultException $e) {
+            return null;
+        }
+    }
+
     public function similarMethodsDifferentOnlyAtTheLeadEnd($url)
     {
         $query = $this->getEntityManager()->createQuery(

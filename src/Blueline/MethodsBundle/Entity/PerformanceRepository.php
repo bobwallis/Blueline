@@ -12,7 +12,7 @@ use Doctrine\ORM\EntityRepository;
  */
 class PerformanceRepository extends EntityRepository
 {
-    public function findByRungUrl($url)
+    public function findURLByRungURL($url)
     {
         $query = $this->getEntityManager()->createQuery(
             'SELECT p, m FROM BluelineMethodsBundle:Performance p
