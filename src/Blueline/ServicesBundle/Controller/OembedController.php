@@ -4,8 +4,10 @@ namespace Blueline\ServicesBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints\Regex as RegexConstraint;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class OembedController extends Controller
 {
@@ -20,11 +22,11 @@ class OembedController extends Controller
 
         // Check it's a valid URL
         $allowedURLs = array(
-            'methods_view' => '^'.str_replace( array('/','.','TITLE'), array('\/','\.','.+'), $this->generateUrl('Blueline_Methods_view', array('url' => 'TITLE'), true))
+            'methods_view' => '^'.str_replace( array('/','.','TITLE'), array('\/','\.','.+'), $this->generateUrl('Blueline_Methods_view', array('url' => 'TITLE'), UrlGeneratorInterface::ABSOLUTE_URL))
         );
-        $urlConstraint = new RegexConstraint(array('pattern' => '/'.implode('|', array_values($allowedURLs)).'/'));
-        $urlConstraint->message = 'Invalid URL';
-        $errors = $this->get('validator')->validateValue($url, $urlConstraint);
+        $urlConstraint = new RegexConstraint(array('pattern' => '/'.implode('|', array_values($allowedURLs)).'/', 'message' => 'Invalid URL'));
+        $validator = Validation::createValidator();
+        $errors = $validator->validate($url, $urlConstraint);
         if ($errors->offsetExists(0)) {
             throw new \Exception($errors[0]);
         }
