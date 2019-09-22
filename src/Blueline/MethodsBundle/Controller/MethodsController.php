@@ -231,7 +231,7 @@ class MethodsController extends Controller
         foreach (array('notation', 'title', 'stage') as $key) {
             $value = trim($request->query->get($key));
             if (!empty($value)) {
-                $vars[$key] = $value;
+                $vars[$key] = urldecode($value);
             }
         }
 
