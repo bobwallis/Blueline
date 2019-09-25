@@ -340,49 +340,35 @@ class Method
                 $principalHunts = array_values(array_filter($this->getHuntDetails(), function ($h) { return $h['principal']; } ));
                 $principalHuntType = $principalHunts[0]['type'];
 
-                // For Plain there is a special case for 'Slow Course', and then if all bells only make places and hunt then it's 'Place', otherwise 'Bob'
+                // For Plain if all bells only make places and hunt then it's 'Place', otherwise 'Bob'
                 if ($principalHuntType == 'Plain') {
-                    // Generate a lead, and a "lead+1 change" (we'll need the latter to  check if all bells only hunt and make places since we'll need to check for dodges/points over the lead end)
+                    // Generate a lead, and a "lead+1 change" (we'll need the latter to check if all bells only hunt and make places since we'll need to check for dodges/points over the lead end)
                     $lead = PlaceNotation::apply(PlaceNotation::explodedToPermutations($this->getStage(), PlaceNotation::explode($this->getNotationExpanded())), PlaceNotation::rounds($this->getStage()));
                     array_unshift($lead, PlaceNotation::rounds($this->getStage()));
                     $leadPlusOneChangeFromNextLead = $lead;
                     array_push($leadPlusOneChangeFromNextLead, PlaceNotation::apply(PlaceNotation::explodedToPermutations($this->getStage(), PlaceNotation::explode($this->getNotationExpanded()))[0], end($leadPlusOneChangeFromNextLead)));
 
-                    // 'Slow Course' methods have one principal hunt, and another hunt bell that makes 2nds when the principal hunt is leading
-                    $slowCourse = false;
-                    if ($this->getNumberOfHunts() == 2 && count($principalHunts) == 1) {
-                        $principalHunt = $principalHunts[0]['bell'];
-                        // Filter the lead for all the rows where the principal hunt is leading
-                        $rowsWithPrincipalHuntLeading = array_filter($lead, function ($row) use ($principalHunt) { return $row[0] == $principalHunt; });
-                        // Then check that in all of them there is a different hunt bell in 2nds place and that the hunt bell has a well-formed path
-                        $hunts = array_map(function ($h) { return PlaceNotation::intToBell($h['bell']); }, array_values(array_filter($this->getHuntDetails(), function ($h) { return $h['wellFormedPath']; } )));
-                        $slowCourse = array_reduce($rowsWithPrincipalHuntLeading, function ($carry, $row) use($hunts) { return $carry && in_array($row[1], $hunts); }, true );
-                    }
-                    if ($slowCourse) {
-                        $this->setClassification('Slow Course');
+                    // Work out if every bell only ever hunts or makes places
+                    $placesOnly = array_reduce(array_map(function ($bell) use ($leadPlusOneChangeFromNextLead) {
+                        // Extract the path of each bell
+                        $positions = array_map(function ($row) use ($bell) { return array_search($bell, $row); }, $leadPlusOneChangeFromNextLead);
+                        // Then iterate through and check that the line only ever contains hunts or places
+                        $bellPlacesOnly = true;
+                        for ($i = 2; $bellPlacesOnly && $i < count($positions); ++$i) {
+                            $bellPlacesOnly = abs(($positions[$i] - $positions[$i-1]) - ($positions[$i-1] - $positions[$i-2])) <= 1;
+                        }
+                        return $bellPlacesOnly;
+                    }, PlaceNotation::rounds($this->getStage())), function ($carry, $val) { return $carry && $val; }, true);
 
-                    // If not Slow Course then look into the other options
-                    } else {
-                        // Work out if every bell only ever hunts or makes places
-                        $placesOnly = array_reduce(array_map(function ($bell) use ($leadPlusOneChangeFromNextLead) {
-                            // Extract the path of each bell
-                            $positions = array_map(function ($row) use ($bell) { return array_search($bell, $row); }, $leadPlusOneChangeFromNextLead);
-                            // Then iterate through and check that the line only ever contains hunts or places
-                            $bellPlacesOnly = true;
-                            for ($i = 2; $bellPlacesOnly && $i < count($positions); ++$i) {
-                                $bellPlacesOnly = abs(($positions[$i] - $positions[$i-1]) - ($positions[$i-1] - $positions[$i-2])) <= 1;
-                            }
-                            return $bellPlacesOnly;
-                        }, PlaceNotation::rounds($this->getStage())), function ($carry, $val) { return $carry && $val; }, true);
-                        // If all bells only make places and hunt then it's 'Place', otherwise 'Bob'
-                        $this->setClassification($placesOnly? 'Place' : 'Bob');
-                    }
+                    // If all bells only make places and hunt then it's 'Place', otherwise 'Bob'
+                    $this->setClassification($placesOnly? 'Place' : 'Bob');
+                
                 // For Treble Dodging see if internal places are made at each cross section. All => 'Surprise', None => 'Treble Bob', Some => 'Delight'
                 } elseif ($principalHuntType == 'Treble Dodging') {
                     // Generate a lead
                     $lead = PlaceNotation::apply(PlaceNotation::explodedToPermutations($this->getStage(), PlaceNotation::explode($this->getNotationExpanded())), PlaceNotation::rounds($this->getStage()));
                     array_unshift($lead, PlaceNotation::rounds($this->getStage()));
-                    // If the hunt bell dodges in only one position it's Treble Bob
+                    // If the hunt bell dodges in only one position it's Treble Bob (since there are no cross sections, and that edge case is defined Treble Bob)
                     if (array_reduce($principalHunts, function ($carry, $val) { return $carry && max($val['path']) - min($val['path']) == 1; }, true)) {
                         $this->setClassification('Treble Bob');
                     // Otherwise inspect cross sections
@@ -723,19 +709,27 @@ class Method
                 foreach ($this->getHunts() as $i => $hunt) {
                     $huntText = PlaceNotation::intToBell($hunt);
                     $huntDetails[$i]['bell'] = $hunt;
+
+                    // Generate the hunt bell's path
                     $huntDetails[$i]['path'] = array_map(function ($row) use ($huntText) {
                         return array_search($huntText, $row) + 1;
                     }, $lead);
                     array_unshift($huntDetails[$i]['path'], array_pop($huntDetails[$i]['path']));
+
                     // Well-formed paths are the same when rung backwards
                     $huntDetails[$i]['wellFormedPath'] = count($huntDetails[$i]['path'])%2 == 0 && arrays_equal_in_some_rotation($huntDetails[$i]['path'], array_reverse($huntDetails[$i]['path']));
+
                     // A path is little if it doesn't reach the front or back
                     $huntDetails[$i]['little'] = min($huntDetails[$i]['path']) > 1 || max($huntDetails[$i]['path']) < $this->getStage();
+
+                    // Count the number of places in the hunt bell's path
                     $numberOfPlacesInPath = array_reduce($huntDetails[$i]['path'], function ($carry, $pos) {
                         $carry['places'] = ($carry['lastPos'] == $pos)? $carry['places'] + 1 : $carry['places'];
                         $carry['lastPos'] = $pos;
                         return $carry;
                     }, array('lastPos' => end($huntDetails[$i]['path']), 'places' => 0))['places'];
+
+                    // Count the number of blows the hunt bell makes in each position
                     $blowsInEachPosition = array_reduce($huntDetails[$i]['path'], function ($carry, $pos) {
                         if (isset($carry[$pos])) {
                             $carry[$pos]++;
@@ -745,32 +739,37 @@ class Method
                         ksort($carry);
                         return $carry;
                     }, array());
+
+                    // Check if the hunt bell makes the same number of blows in each position
                     $sameNumberOfBlowsInEachPosition = count(array_unique($blowsInEachPosition)) == 1;
-                    // Well-formed paths are classified into a few different types
+                    
+                    // Well-formed paths are then classified into a few different types using the 3 things we just calculated
                     if ($huntDetails[$i]['wellFormedPath']) {
                         // If the hunt makes two blows in every place - it's Plain
                         if (array_sum($blowsInEachPosition)/2 == count($blowsInEachPosition)) {
                             $huntDetails[$i]['type'] = 'Plain';
-                        } elseif ($sameNumberOfBlowsInEachPosition && $numberOfPlacesInPath >= 2) { // Don't think we actually need the 2nd condition here?
-                            // If the same number of blows in each position and no more than two places in the lead then 'Treble Dodging'
-                            if ($numberOfPlacesInPath == 2) {
-                                $huntDetails[$i]['type'] = 'Treble Dodging';
-                            // If the same number of blows in each position and more than 2 places then 'Treble Place'
-                            } else {
-                                $huntDetails[$i]['type'] = 'Treble Place';
-                            }
+                        // If the same number of blows in each position and no more than two places in the lead then 'Treble Dodging'
+                        } elseif ($sameNumberOfBlowsInEachPosition && $numberOfPlacesInPath == 2) {
+                            $huntDetails[$i]['type'] = 'Treble Dodging';
+                        // If the same number of blows in each position and more than 2 places then 'Treble Place'
+                        } elseif ($sameNumberOfBlowsInEachPosition && $numberOfPlacesInPath > 2 ) {
+                            $huntDetails[$i]['type'] = 'Treble Place';
                         // If a different number of blows in each position then 'Alliance'
                         } else {
                             $huntDetails[$i]['type'] = 'Alliance';
                         }
+
                     // Non-well-formed paths are Hybrid
                     } else {
                         $huntDetails[$i]['type'] = 'Hybrid';
                     }
                 }
-                // Determine which are the principal hunts. Which is all the hunts of the first type of hunt which has an example (and just the non-little ones if there are both little and non-little hunts of that type)
+
+                // Determine which are the principal hunts
+                // If there's only one it is the principal hunt
                 if (count($huntDetails) == 1) {
                     $huntDetails[0]['principal'] = true;
+                // Otherwise there is a hierachy of hunt types defined in the rules (and just the non-little hunts of that type if there are both little and non-little examples)
                 } else {
                     foreach (array('Plain', 'Treble Dodging', 'Treble Place', 'Alliance', 'Hybrid') as $type) {
                         $numberOfHuntsOfType = count(array_filter($huntDetails, function ($h) use ($type) { return $h['type'] == $type; }));
