@@ -17,7 +17,7 @@ $method_extras_calls = array(
       'Half-Lead Bob' => array('symbol' => 'h', 'notation' => '145', 'every' => 8, 'from' => -4, 'cover' => 1),
     ),
     'callingpositions' => array(),
-    'ruleoffs' => array('every' => 8, 'from' => 0),
+    'ruleoffs' => array('every' => 4, 'from' => 0),
   ),
   array(
     'title' => 'Double Norwich Court Bob Caters',
