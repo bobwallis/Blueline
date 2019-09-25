@@ -526,8 +526,8 @@ $collections = array (
     array (
       0 => 'Cambridge Surprise Major',
       1 => 'Yorkshire Surprise Major',
-      2 => 'Cornwall Surprise Major',
-      3 => 'Superlative Surprise Major',
+      2 => 'Superlative Surprise Major',
+      3 => 'Cornwall Surprise Major',
       4 => 'Bristol Surprise Major',
       5 => 'Lessness Surprise Major',
       6 => 'London Surprise Major',
@@ -536,8 +536,10 @@ $collections = array (
       9 => 'Kenninghall Surprise Major',
       10 => 'Cooktown Orchid Delight Major',
       11 => 'Glasgow Surprise Major',
-      12 => 'Mareham Delight Major',
-      13 => 'Rook and Gaskill Surprise Major',
+      12 => 'Jovium Surprise Major',
+      13 => 'Bolonium Surprise Major',
+      14 => 'Mareham Delight Major',
+      15 => 'Rook and Gaskill Surprise Major',
     ),
   ),
 );
