@@ -225,10 +225,10 @@ class PlaceNotation
         if (strpos($notationFull, ',') !== false) {
             $splitOnComma = array_map('trim', explode(',', $notationFull));
             if (array_reduce($splitOnComma, function ($carry, $item) {
-                return ($carry && ($item{0} == '+' || $item{0} == '&'));
+                return ($carry && ($ite[0] == '+' || $item[0] == '&'));
             }, true)) {
                 $notationFull = array_reduce($splitOnComma, function ($carry, $item) {
-                    return $carry . '.' . ($item{0} == '&'? self::expandHalf($item) : trim($item, '+'));
+                    return $carry . '.' . ($item[0] == '&'? self::expandHalf($item) : trim($item, '+'));
                 }, '');
             }
         }
@@ -244,17 +244,17 @@ class PlaceNotation
         $notationFull = str_replace('+', ' ', $notationFull);
 
         // Convert 'a &-1-1-1' type notation into '&x1x1x1 2' type
-        if (preg_match('/^[A-S]{1}[1-9]?\s/', $notationFull) == 1) {
+        if (preg_match('/^[A-S][1][1-9]?\s/', $notationFull) == 1) {
             // For even bell methods
             if ($stage % 2 == 0) {
                 // a to f is 12
-                if (preg_match('/^([A-F]{1}[1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
+                if (preg_match('/^([A-F][1][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                     $notationFull = $match[2].' 12';
                 // g to m is 1n
-                } elseif (preg_match('/^([G-M]{1}[1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
+                } elseif (preg_match('/^([G-M][1][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                     $notationFull = $match[2].' 1'.self::$_notationOrder[$stage-1];
                 // p, q is 3n post lead head (if 3n isn't the start of $match[2] then add it to the start)
-                } elseif (preg_match('/^([P-Q]{1}[1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
+                } elseif (preg_match('/^([P-Q][1][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                     if (strpos($match[2], '3'.self::$_notationOrder[$stage-1]) === 0) {
                         $notationFull = $match[2];
                     } else {
@@ -264,7 +264,7 @@ class PlaceNotation
                 // r, s is n post lead head (similar to above)
                 // I don't know why I think this... but it doesn't seem to be true looking at actual methods in the current collections.
                 // Let me know if you know!
-                //elseif (preg_match('/^([R-S]{1}[1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
+                //elseif (preg_match('/^([R-S][1][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                 //    if (strpos($match[2], self::$_notationOrder[$stage-1]) === 0) {
                 //        $notationFull = $match[2];
                 //    } else {
@@ -274,24 +274,24 @@ class PlaceNotation
             // For odd bell methods
             } else {
                 // a to f is 3 post lead head (if 3 isn't the start of $match[2] then add it to the start)
-                if (preg_match('/^([A-F]{1}[1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
+                if (preg_match('/^([A-F][1][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                     if (strpos($match[2], '3') === 0) {
                         $notationFull = $match[2];
                     } else {
                         $notationFull = '3 '.$match[2];
                     }
                 // g to m is n post lead head (similar to above)
-                } elseif (preg_match('/^([G-M]{1}[1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
+                } elseif (preg_match('/^([G-M][1][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                     if (strpos($match[2], self::$_notationOrder[$stage-1]) === 0) {
                         $notationFull = $match[2];
                     } else {
                         $notationFull = self::$_notationOrder[$stage-1].' '.$match[2];
                     }
                 // p, q is 12n
-                } elseif (preg_match('/^([P-Q]{1}[1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
+                } elseif (preg_match('/^([P-Q][1][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                     $notationFull = $match[2].' 12'.self::$_notationOrder[$stage-1];
                 // r, s is 1
-                } elseif (preg_match('/^([R-S]{1}[1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
+                } elseif (preg_match('/^([R-S][1][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                     $notationFull = $match[2].' 1';
                 }
             }
@@ -368,13 +368,13 @@ class PlaceNotation
         $expandedAndExploded = array_map(function ($pn) use ($stage) {
             if ($pn != 'x') {
                 if (strlen($pn) > 1 &&
-                    $pn{0} == '1' && PlaceNotation::bellToInt($pn{1})%2 ==0
+                    $pn[0] == '1' && PlaceNotation::bellToInt($pn[1])%2 ==0
                    ) {
                     $pn = substr($pn, 1);
                 }
                 if (strlen($pn) > 1 &&
-                    $pn{strlen($pn)-1} == PlaceNotation::intToBell($stage) &&
-                    PlaceNotation::bellToInt($pn{strlen($pn)-2})%2 != $stage%2
+                    $pn[strlen($pn)-1] == PlaceNotation::intToBell($stage) &&
+                    PlaceNotation::bellToInt($pn[strlen($pn)-2])%2 != $stage%2
                    ) {
                     $pn = substr($pn, 0, strlen($pn)-1);
                 }

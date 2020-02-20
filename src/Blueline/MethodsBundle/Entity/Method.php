@@ -1117,7 +1117,7 @@ class Method
                 $leadEndChange = array_pop($notationExploded);
                 array_shift($notationExploded);
                 $postLeadEndChange2 = array_shift($notationExploded);
-                if ($hunts[0] == 1 && $hunts[1] == 2 && $leadEndChange{0} == '1' && (strlen($leadEndChange) == 1 || $leadEndChange{1} != '2') && $postLeadEndChange2{0} == '1') {
+                if ($hunts[0] == 1 && $hunts[1] == 2 && $leadEndChange[0] == '1' && (strlen($leadEndChange) == 1 || $leadEndChange[1] != '2') && $postLeadEndChange2[0] == '1') {
                     $this->ruleOffs = array( 'every' => $this->getLengthOfLead(), 'from' => 1 );
                 }
             }
