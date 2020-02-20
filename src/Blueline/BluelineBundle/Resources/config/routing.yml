@@ -12,14 +12,6 @@ BluelineMethodsBundle:
     resource: "@BluelineMethodsBundle/Resources/config/routing_methods.yml"
     prefix:   /methods/
 
-BluelineTowersBundle:
-    resource: "@BluelineTowersBundle/Resources/config/routing_towers.yml"
-    prefix:   /towers/
-
-BluelineAssociationsBundle:
-    resource: "@BluelineAssociationsBundle/Resources/config/routing_associations.yml"
-    prefix:   /associations/
-
 Blueline_Pages_view:
     path: /{page}.{_format}
     defaults: { _controller: BluelineBundle:Default:page, _format: 'html' }
@@ -57,5 +49,5 @@ Blueline_Data_table:
     path: /data/{table}.{_format}
     defaults: { _controller: BluelineBundle:Data:table }
     requirements:
-        table: associations|collections|methods|methods_collections|methods_similar|performances|towers|towers_associations|towers_oldpks
+        table: collections|methods|methods_collections|methods_similar|performances
         _format: csv

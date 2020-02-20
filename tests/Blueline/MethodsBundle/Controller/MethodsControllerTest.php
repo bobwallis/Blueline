@@ -9,7 +9,7 @@ class MethodsControllerTest extends WebTestCase
     public function testMethods()
     {
         // Test welcome page and some other basic requests
-        foreach (array('/methods/', '/methods/tutorials', '/methods/view/Cambridge_Surprise_Minor', '/methods/view/Wee_Willie_Winkie_Hybrid_Maximus', '/methods/view?stage=8&notation=x1x1x45x27') as $page) {
+        foreach (array('/methods/', '/methods/tutorials', '/methods/view/Cambridge_Surprise_Minor', '/methods/view/Wee_Willie_Winkie_Maximus', '/methods/view?stage=8&notation=x1x1x45x27') as $page) {
             $client = static::createClient();
             $crawler = $client->request('GET', $page);
             $this->assertTrue($client->getResponse()->isSuccessful(), $page.' request unsuccessful');

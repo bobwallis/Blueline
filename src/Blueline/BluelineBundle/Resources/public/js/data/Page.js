@@ -52,16 +52,14 @@ define( ['eve', 'jquery', 'Modernizr', './Page/Cache', '../helpers/URL'], functi
 
 			// Generate the information object issued with the page.request event
 			var newURL_section = URL.section( url ),
-				newURL_showSearchBar = URL.showSearchBar( url ),
-				newURL_showTowerMap = URL.showTowerMap( url );
+				newURL_showSearchBar = URL.showSearchBar( url );
 
 			// Emit the page.request event
 			eve( 'page.request', window, {
 				oldURL: URL.currentURL,
 				newURL: url,
 				section: newURL_section,
-				showSearchBar: newURL_showSearchBar,
-				showTowerMap: newURL_showTowerMap
+				showSearchBar: newURL_showSearchBar
 			} );
 			URL.currentURL = mostRecentRequest = url;
 
@@ -74,8 +72,7 @@ define( ['eve', 'jquery', 'Modernizr', './Page/Cache', '../helpers/URL'], functi
 						URL: url,
 						content: content,
 						section: newURL_section,
-						showSearchBar: newURL_showSearchBar,
-						showTowerMap: newURL_showTowerMap
+						showSearchBar: newURL_showSearchBar
 					} );
 				}
 			};
@@ -103,8 +100,7 @@ define( ['eve', 'jquery', 'Modernizr', './Page/Cache', '../helpers/URL'], functi
 					URL: url,
 					content: content,
 					section: newURL_section,
-					showSearchBar: newURL_showSearchBar,
-					showTowerMap: false
+					showSearchBar: newURL_showSearchBar
 				} );
 			};
 

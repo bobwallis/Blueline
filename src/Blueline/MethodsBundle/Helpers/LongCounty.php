@@ -7,7 +7,7 @@
  *
  */
 
-namespace Blueline\TowersBundle\Helpers;
+namespace Blueline\MethodsBundle\Helpers;
 
 class LongCounty
 {

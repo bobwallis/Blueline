@@ -4,7 +4,7 @@ Blueline\MethodsBundle\Entity\Method:
     properties:
         stage:
             - GreaterThanOrEqual:
-                value: 4
+                value: 3
         lengthOfLead:
             - GreaterThanOrEqual:
                 value: 1

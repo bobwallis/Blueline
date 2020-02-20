@@ -29,7 +29,6 @@ class Performance
                 // Filter out id because that's only really meaningful internally, and don't try to drill down into sub-entities
                 case 'id':
                 case 'method':
-                case 'location_tower':
                     $v = null;
                     break;
                 // Convert date object
@@ -125,11 +124,6 @@ class Performance
      * @var string
      */
     private $location_country;
-
-    /**
-     * @var \Blueline\TowersBundle\Entity\Tower
-     */
-    private $location_tower;
 
     /**
      * @var \Blueline\MethodsBundle\Entity\Method
@@ -462,29 +456,6 @@ class Performance
             $this->getLocationRegion(),
             $this->getLocationCountry(),
         )), ', ', ', ');
-    }
-
-    /**
-     * Set location_tower
-     *
-     * @param  \Blueline\TowersBundle\Entity\Tower $locationTower
-     * @return Performance
-     */
-    public function setLocationTower(\Blueline\TowersBundle\Entity\Tower $locationTower = null)
-    {
-        $this->location_tower = $locationTower;
-
-        return $this;
-    }
-
-    /**
-     * Get location_tower
-     *
-     * @return \Blueline\TowersBundle\Entity\Tower
-     */
-    public function getLocationTower()
-    {
-        return $this->location_tower;
     }
 
     /**

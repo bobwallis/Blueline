@@ -115,16 +115,6 @@ if [[ $CCCBRDATA = true ]]
 	# Download external data
 	echo -e "\n\033[1mDownloading external data\033[0m"
 	"$d/src/Blueline/MethodsBundle/Resources/data/fetch"
-	"$d/src/Blueline/TowersBundle/Resources/data/fetch"
-	echo ""
-
-	# Import updated association data
-	php "$d/bin/console" blueline:importAssociations
-	echo ""
-
-	# Import updated tower data
-	php "$d/bin/console" blueline:importTowers
-	php "$d/bin/console" blueline:importOldPKs
 	echo ""
 
 	# Import updated method data
@@ -133,7 +123,6 @@ if [[ $CCCBRDATA = true ]]
 	php "$d/bin/console" blueline:importCollections
 	php "$d/bin/console" blueline:calculateMethodSimilarities
 	echo ""
-	php "$d/bin/console" blueline:linkPerformancesToDove
 	sed -i -e"s/database_update: .*/database_update: `date "+%s"`/" "$d/app/config/parameters.yml"
 fi
 

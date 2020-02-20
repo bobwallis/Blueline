@@ -151,7 +151,6 @@ gulp.task( 'js', ['js-main', 'js-export', 'js-workers'], function() {} );
 var require_paths = {
 	shared:       'src/Blueline/BluelineBundle/Resources/public/js/',
 	methods:      'src/Blueline/MethodsBundle/Resources/public/js/',
-	towers:       'src/Blueline/TowersBundle/Resources/public/js/',
 	services:     'src/Blueline/ServicesBundle/Resources/public/js/',
 	jquery:       'src/Blueline/BluelineBundle/Resources/public/js/lib/jquery',
 	eve:          'src/Blueline/BluelineBundle/Resources/public/js/lib/eve',
@@ -229,7 +228,7 @@ gulp.task( 'watch', function() {
 	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/androidicon.svg'], ['androidicon'] );
 	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/!(favicon|appicon|splash|maskicon|androidicon).svg'], ['images'] );
 	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/fonts/*'], ['fonts'] );
-	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/css/**/*', 'src/Blueline/AssociationsBundle/Resources/public/css/**/*', 'src/Blueline/MethodsBundle/Resources/public/css/**/*', 'src/Blueline/ServicesBundle/Resources/public/css/**/*', 'src/Blueline/TowersBundle/Resources/public/css/**/*'], ['css'] );
-	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/js/**/*', 'src/Blueline/AssociationsBundle/Resources/public/js/**/*', 'src/Blueline/MethodsBundle/Resources/public/js/**/*', 'src/Blueline/ServicesBundle/Resources/public/js/**/*', 'src/Blueline/TowersBundle/Resources/public/js/**/*'], ['js-main', 'js-export'] );
+	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/css/**/*', 'src/Blueline/MethodsBundle/Resources/public/css/**/*', 'src/Blueline/ServicesBundle/Resources/public/css/**/*'], ['css'] );
+	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/js/**/*', 'src/Blueline/MethodsBundle/Resources/public/js/**/*', 'src/Blueline/ServicesBundle/Resources/public/js/**/*'], ['js-main', 'js-export'] );
 	gulp.watch( old_ie_js_sources, ['js-old_ie'] );
 } );

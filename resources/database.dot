@@ -17,17 +17,6 @@ digraph "largeRelationshipsDiagram" {
   edge [
     arrowsize="0.8"
   ];
-  "associations" [
-    label=<
-    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#ffffff">
-      <TR><TD COLSPAN="3" BGCOLOR="#002856" ALIGN="CENTER"><FONT COLOR="#E0DED9"><B>associations</B></FONT></TD></TR>
-      <TR><TD PORT="id" COLSPAN="3" BGCOLOR="#F3F3F3" ALIGN="LEFT">id</TD></TR>
-      <TR><TD PORT="name" COLSPAN="3" ALIGN="LEFT">name</TD></TR>
-      <TR><TD PORT="link" COLSPAN="3" ALIGN="LEFT">link</TD></TR>
-    </TABLE>>
-    URL="tables/associations.html"
-    tooltip="associations"
-  ];
   "collections" [
     label=<
     <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#ffffff">
@@ -85,7 +74,6 @@ digraph "largeRelationshipsDiagram" {
     <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#ffffff">
       <TR><TD COLSPAN="3" BGCOLOR="#002856" ALIGN="CENTER"><FONT COLOR="#E0DED9"><B>performances</B></FONT></TD></TR>
       <TR><TD PORT="id" COLSPAN="3" BGCOLOR="#F3F3F3" ALIGN="LEFT">id</TD></TR>
-      <TR><TD PORT="location_tower_id" COLSPAN="3" BGCOLOR="#F3F3F3" ALIGN="LEFT">location_tower_id</TD></TR>
       <TR><TD PORT="method_title" COLSPAN="3" BGCOLOR="#F3F3F3" ALIGN="LEFT">method_title</TD></TR>
       <TR><TD PORT="type" COLSPAN="3" ALIGN="LEFT">type</TD></TR>
       <TR><TD PORT="date" COLSPAN="3" ALIGN="LEFT">date</TD></TR>
@@ -103,69 +91,7 @@ digraph "largeRelationshipsDiagram" {
     URL="tables/performances.html"
     tooltip="performances"
   ];
-  "towers" [
-    label=<
-    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#ffffff">
-      <TR><TD COLSPAN="3" BGCOLOR="#002856" ALIGN="CENTER"><FONT COLOR="#E0DED9"><B>towers</B></FONT></TD></TR>
-      <TR><TD PORT="id" COLSPAN="3" BGCOLOR="#F3F3F3" ALIGN="LEFT">id</TD></TR>
-      <TR><TD PORT="gridreference" COLSPAN="3" ALIGN="LEFT">gridreference</TD></TR>
-      <TR><TD PORT="latitude" COLSPAN="3" ALIGN="LEFT">latitude</TD></TR>
-      <TR><TD PORT="longitude" COLSPAN="3" ALIGN="LEFT">longitude</TD></TR>
-      <TR><TD PORT="latitudesatnav" COLSPAN="3" ALIGN="LEFT">latitudesatnav</TD></TR>
-      <TR><TD PORT="longitudesatnav" COLSPAN="3" ALIGN="LEFT">longitudesatnav</TD></TR>
-      <TR><TD PORT="postcode" COLSPAN="3" ALIGN="LEFT">postcode</TD></TR>
-      <TR><TD PORT="country" COLSPAN="3" ALIGN="LEFT">country</TD></TR>
-      <TR><TD PORT="county" COLSPAN="3" ALIGN="LEFT">county</TD></TR>
-      <TR><TD PORT="diocese" COLSPAN="3" ALIGN="LEFT">diocese</TD></TR>
-      <TR><TD PORT="place" COLSPAN="3" ALIGN="LEFT">place</TD></TR>
-      <TR><TD PORT="altname" COLSPAN="3" ALIGN="LEFT">altname</TD></TR>
-      <TR><TD PORT="dedication" COLSPAN="3" ALIGN="LEFT">dedication</TD></TR>
-      <TR><TD PORT="bells" COLSPAN="3" ALIGN="LEFT">bells</TD></TR>
-      <TR><TD PORT="weight" COLSPAN="3" ALIGN="LEFT">weight</TD></TR>
-      <TR><TD PORT="weightapprox" COLSPAN="3" ALIGN="LEFT">weightapprox</TD></TR>
-      <TR><TD PORT="note" COLSPAN="3" ALIGN="LEFT">note</TD></TR>
-      <TR><TD PORT="hz" COLSPAN="3" ALIGN="LEFT">hz</TD></TR>
-      <TR><TD PORT="practicenight" COLSPAN="3" ALIGN="LEFT">practicenight</TD></TR>
-      <TR><TD PORT="practicestart" COLSPAN="3" ALIGN="LEFT">practicestart</TD></TR>
-      <TR><TD PORT="practicenotes" COLSPAN="3" ALIGN="LEFT">practicenotes</TD></TR>
-      <TR><TD PORT="groundfloor" COLSPAN="3" ALIGN="LEFT">groundfloor</TD></TR>
-      <TR><TD PORT="toilet" COLSPAN="3" ALIGN="LEFT">toilet</TD></TR>
-      <TR><TD PORT="unringable" COLSPAN="3" ALIGN="LEFT">unringable</TD></TR>
-      <TR><TD PORT="simulator" COLSPAN="3" ALIGN="LEFT">simulator</TD></TR>
-      <TR><TD PORT="overhaulyear" COLSPAN="3" ALIGN="LEFT">overhaulyear</TD></TR>
-      <TR><TD PORT="contractor" COLSPAN="3" ALIGN="LEFT">contractor</TD></TR>
-      <TR><TD PORT="tunedyear" COLSPAN="3" ALIGN="LEFT">tunedyear</TD></TR>
-      <TR><TD PORT="extrainfo" COLSPAN="3" ALIGN="LEFT">extrainfo</TD></TR>
-      <TR><TD PORT="webpage" COLSPAN="3" ALIGN="LEFT">webpage</TD></TR>
-    </TABLE>>
-    URL="tables/towers.html"
-    tooltip="towers"
-  ];
-  "towers_associations" [
-    label=<
-    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#ffffff">
-      <TR><TD COLSPAN="3" BGCOLOR="#002856" ALIGN="CENTER"><FONT COLOR="#E0DED9"><B>towers_associations</B></FONT></TD></TR>
-      <TR><TD PORT="tower_id" COLSPAN="3" BGCOLOR="#F3F3F3" ALIGN="LEFT">tower_id</TD></TR>
-      <TR><TD PORT="association_id" COLSPAN="3" BGCOLOR="#F3F3F3" ALIGN="LEFT">association_id</TD></TR>
-    </TABLE>>
-    URL="tables/towers_associations.html"
-    tooltip="towers_associations"
-  ];
-  "towers_oldpks" [
-    label=<
-    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#ffffff">
-      <TR><TD COLSPAN="3" BGCOLOR="#002856" ALIGN="CENTER"><FONT COLOR="#E0DED9"><B>towers_oldpks</B></FONT></TD></TR>
-      <TR><TD PORT="oldpk" COLSPAN="3" BGCOLOR="#F3F3F3" ALIGN="LEFT">oldpk</TD></TR>
-      <TR><TD PORT="tower_id" COLSPAN="3" BGCOLOR="#F3F3F3" ALIGN="LEFT">tower_id</TD></TR>
-    </TABLE>>
-    URL="tables/towers_oldpks.html"
-    tooltip="towers_oldpks"
-  ];
   "methods_collections":"collection_id":w -> "collections":"id":e [arrowhead=none dir=back arrowtail=crowodot];
   "methods_collections":"method_title":w -> "methods":"title":e [arrowhead=none dir=back arrowtail=crowodot];
-  "performances":"location_tower_id":w -> "towers":"id":e [arrowhead=none dir=back arrowtail=crowodot];
   "performances":"method_title":w -> "methods":"title":e [arrowhead=none dir=back arrowtail=crowodot];
-  "towers_associations":"association_id":w -> "associations":"id":e [arrowhead=none dir=back arrowtail=crowodot];
-  "towers_associations":"tower_id":w -> "towers":"id":e [arrowhead=none dir=back arrowtail=crowodot];
-  "towers_oldpks":"tower_id":w -> "towers":"id":e [arrowhead=none dir=back arrowtail=crowodot];
 }

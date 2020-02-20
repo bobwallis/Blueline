@@ -10,7 +10,7 @@
 
 namespace Blueline\MethodsBundle\Helpers;
 
-use Blueline\TowersBundle\Helpers\LongCounty;
+use Blueline\MethodsBundle\Helpers\LongCounty;
 
 class MethodXMLIterator implements \Iterator, \Countable
 {

@@ -9,7 +9,7 @@ class MethodTest extends \PHPUnit\Framework\TestCase
     {
         $tests = array(
             array( 'set' => array( 'title' => 'Cambridge Surprise Minor', 'notation' => '-36-14-12-36-14-56,12'), 'result' => 'Surprise' ),
-            array( 'set' => array( 'title' => 'Slapton Slow Course Doubles', 'notation' => '5.1.5.123.125,125'), 'result' => 'Slow Course' ),
+            array( 'set' => array( 'title' => 'Slapton Slow Bob Doubles', 'notation' => '5.1.5.123.125,125'), 'result' => 'Bob' ),
             array( 'set' => array( 'title' => 'Vincula Surprise Royal', 'notation' => '-50-16-70-18-12-30-14-50-16-70,14'), 'result' => 'Surprise' ),
             array( 'set' => array( 'title' => 'Carfax Delight Minor', 'notation' => '-36-14-12-16-34.1234.56,16'), 'result' => 'Delight' ),
             array( 'set' => array( 'title' => 'St Clement\'s College Bob Triples', 'notation' => '3,1.7.1.7.3.7.3'), 'result' => 'Bob' ),

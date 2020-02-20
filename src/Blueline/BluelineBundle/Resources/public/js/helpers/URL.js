@@ -2,7 +2,6 @@
 
 define( function() {
 	var regExp_showSearchBar = /\/search/,
-		regExp_showTowerMap = /(\/towers\/view\/|\/associations\/view\/)/,
 		regExp_section = /^(.*)\/(associations|methods|towers)\//,
 		regExp_isInternalLink;
 
@@ -50,9 +49,6 @@ define( function() {
 		},
 		showSearchBar: function( href ) {
 			return regExp_showSearchBar.test( href );
-		},
-		showTowerMap: function( href ) {
-			return regExp_showTowerMap.test( href );
 		}
 	};
 

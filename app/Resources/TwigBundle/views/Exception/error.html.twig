@@ -9,6 +9,9 @@
 		{{ header(status_text) }}
 		<div class="wrap">
 			<p>An error has ocurred. The server returned a "{{ status_code }} {{ status_text }}" status code.</p>
+			{% if status_code = 404 %}
+			<p>If you're looking for the tower or association pages, they have been removed. Please use <a href="https://dove.cccbr.org.uk/">dove.cccbr.org.uk</a> instead.</p>
+			{% endif %}
 		</div>
 	</section>
 {% endblock %}
