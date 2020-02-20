@@ -46,7 +46,7 @@ define( ['./PlaceNotation'], function( PlaceNotation ) {
 		},
 		coreDodgeMultipleFix = /(Dodge \d+\/\d+ (up|down),)+/g,
 		coreDodgeMultipleFixFunction = function( match ) {
-			var count = Math.max( 1, (match.split( ',' ).length - 2) / 2 );
+			var count = Math.max( 1, Math.floor((match.split( ',' ).length - 2) / 2) );
 			switch( count ) {
 				case 1:  return match;
 				case 2:  return match.replace( dodge, 'Double-dodge' );
@@ -62,6 +62,7 @@ define( ['./PlaceNotation'], function( PlaceNotation ) {
 
 	var Text = {
 		fromRows: function( rows, bell, wrap ) {
+			var wrapRows;
 			if( typeof wrap === 'undefined' ) { wrap = false; }
 			var bell = (typeof bell === 'number')? bell : PlaceNotation.charToBell( bell ), pos,
 				intermediate = '', coreText;
@@ -75,13 +76,14 @@ define( ['./PlaceNotation'], function( PlaceNotation ) {
 				intermediate += '{'+(rows[i-1].indexOf( bell )+1)+'},';
 			}
 			if( wrap ) {
-				// If the 'wrap' option is on, then add the first change to the end as well (so we can detect dodging over the lead end and stuff)
-				--i;
-				pos = rows[1].indexOf( rows[0][rows[i].indexOf( bell )] ) - rows[i].indexOf( bell );
-				if( pos < 0 )      { intermediate += '-'; }
-				else if( pos > 0 ) { intermediate += '+'; }
-				else               { intermediate += '|'  }
-				intermediate += '{'+(rows[i].indexOf( bell )+1)+'},';
+				// If the 'wrap' option is on, then add more changes to the end (so we can detect dodging over the lead end and stuff)
+				for( wrapRows = 1; wrapRows < rows.length && wrapRows < 10; ++wrapRows ) {
+					pos = rows[wrapRows].indexOf( bell ) - rows[wrapRows-1].indexOf( bell );
+					if( pos < 0 )      { intermediate += '-'; }
+					else if( pos > 0 ) { intermediate += '+'; }
+					else               { intermediate += '|'  }
+					intermediate += '{'+(rows[wrapRows-1].indexOf( bell )+1)+'},';
+				}
 			}
 			intermediate = intermediate.replace( trimtrailingcommaregex, '' );
 
@@ -115,7 +117,9 @@ define( ['./PlaceNotation'], function( PlaceNotation ) {
 				.replace( / 3ths/g, ' 3rds' )
 			// If we've added an extra place on the end to wrap into the next lead, then remove the extra row again now
 			if( wrap ) {
-				coreText = coreText.replace( trimlastlistitemregex, '' );
+				while( --wrapRows ) {
+					coreText = coreText.replace( trimlastlistitemregex, '' );
+				}
 			}
 			// Make a note of whether things happen at hand or back
 			var coreRows = coreText.split( ',' );
