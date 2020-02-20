@@ -1,8 +1,9 @@
-# Web server logs and composer
+# Web server logs, Composer, caches
 .directory
 blueline.error.log
 blueline.access.log
 composer.phar
+.phpunit.result.cache
 
 # Parameters
 app/config/parameters.yml
