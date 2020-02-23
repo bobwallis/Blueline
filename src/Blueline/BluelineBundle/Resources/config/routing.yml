@@ -51,3 +51,30 @@ Blueline_Data_table:
     requirements:
         table: collections|methods|methods_collections|methods_similar|performances
         _format: csv
+
+# Deleted
+Blueline_deleted_towers:
+    path: /towers
+    defaults:
+        _controller: BluelineBundle:Error:httpError
+        code: 410
+Blueline_deleted_towers2:
+    path: /towers/{del}
+    defaults:
+        _controller: BluelineBundle:Error:httpError
+        code: 410
+    requirements:
+        del: .*
+Blueline_deleted_associations:
+    path: /associations
+    defaults:
+        _controller: BluelineBundle:Error:httpError
+        code: 410
+Blueline_deleted_associations2:
+    path: /associations/{del}
+    defaults:
+        _controller: BluelineBundle:Error:httpError
+        code: 410
+    requirements:
+        del: .*
+    
