@@ -225,7 +225,7 @@ class PlaceNotation
         if (strpos($notationFull, ',') !== false) {
             $splitOnComma = array_map('trim', explode(',', $notationFull));
             if (array_reduce($splitOnComma, function ($carry, $item) {
-                return ($carry && ($ite[0] == '+' || $item[0] == '&'));
+                return ($carry && ($item[0] == '+' || $item[0] == '&'));
             }, true)) {
                 $notationFull = array_reduce($splitOnComma, function ($carry, $item) {
                     return $carry . '.' . ($item[0] == '&'? self::expandHalf($item) : trim($item, '+'));
