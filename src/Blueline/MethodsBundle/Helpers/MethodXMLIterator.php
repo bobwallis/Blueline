@@ -10,6 +10,7 @@
 
 namespace Blueline\MethodsBundle\Helpers;
 
+use Blueline\MethodsBundle\Helpers\Country;
 use Blueline\MethodsBundle\Helpers\LongCounty;
 
 class MethodXMLIterator implements \Iterator, \Countable
@@ -148,13 +149,8 @@ class MethodXMLIterator implements \Iterator, \Countable
                 // Remove abbreviations in the location data
                 foreach ($array['performances'] as &$p) {
                     // Fix countries
-                    $countries = array(
-                        'AU' => 'Australia',
-                        'CA' => 'Canada',
-                        'US' => 'USA'
-                    );
-                    if (isset($p['location_country']) && !in_array($p['location_country'], $countries)) {
-                        $p['location_country'] = $countries[$p['location_country']];
+                    if (isset($p['location_country']) && !in_array($p['location_country'], Country::$iso3166_2)) {
+                        $p['location_country'] = Country::$iso3166_2[$p['location_country']];
                     }
                     // Fix regions
                     $regionSearchArray = array();
