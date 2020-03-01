@@ -230,5 +230,4 @@ gulp.task( 'watch', function() {
 	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/fonts/*'], ['fonts'] );
 	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/css/**/*', 'src/Blueline/MethodsBundle/Resources/public/css/**/*', 'src/Blueline/ServicesBundle/Resources/public/css/**/*'], ['css'] );
 	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/js/**/*', 'src/Blueline/MethodsBundle/Resources/public/js/**/*', 'src/Blueline/ServicesBundle/Resources/public/js/**/*'], ['js-main', 'js-export'] );
-	gulp.watch( old_ie_js_sources, ['js-old_ie'] );
 } );
