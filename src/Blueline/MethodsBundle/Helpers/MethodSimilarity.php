@@ -29,12 +29,13 @@ class MethodSimilarity
 			$rowArray2 = array_map($mapper, PlaceNotation::apply(PlaceNotation::explodedToPermutations($stage, PlaceNotation::explode($rowArray2)), $rounds));
 		}
 
-		// Calculate arrays to compare
+		// Get the lengths
 		$count1 = count($rowArray1);
 		$count2 = count($rowArray2);
 
 		// Calculate a matrix of size i=count($rowArray1) x j=count($rowArray2) with each element containing
 		// the distance between the first i rows of 1 and the first j rows of 2.
+		// Basically this: https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm
 		$d = new SplFixedArray($count1);
 		for ($i = 0; $i < $count1; ++$i) {
 			$d[$i] = new SplFixedArray($count2);
