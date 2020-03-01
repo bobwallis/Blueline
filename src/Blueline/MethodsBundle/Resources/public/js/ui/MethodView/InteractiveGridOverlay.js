@@ -62,7 +62,6 @@ define( ['eve'], function( eve ) {
 			}
 			// Move the tooltip
 			tooltipElement.style.top = (e.pageY - 5)+'px';
-			console.log("offset 20");
 			tooltipElement.style.left = (e.pageX + 20)+'px';
 		} );
 		gridElement.addEventListener( 'mouseout', function( e ) {
