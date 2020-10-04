@@ -21,8 +21,12 @@
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
+		"github.vscode-pull-request-github",
 		"felixfbecker.php-debug",
 		"felixfbecker.php-intellisense",
+		"mblode.twig-language-2",
+		"redhat.vscode-yaml",
+		"mikestead.dotenv",
 		"mtxr.sqltools",
 		"mtxr.sqltools-driver-pg"
 	],
