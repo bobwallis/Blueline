@@ -59,22 +59,13 @@ if [[ $GITPULL = true && $DEV = false ]]
 	exit
 fi
 
-# Update composer.phar
-if [[ ! ( -e "$d/composer.phar" ) ]]; then
-	echo -e "\n\033[1mInstalling Composer\033[0m"
-	curl -sS https://getcomposer.org/installer | php
-else
-	echo -e "\n\033[1mUpdating Composer\033[0m"
-	php -d memory_limit=2G "$d/composer.phar" self-update
-fi
-
 # Update vendors
 echo -e "\n\033[1mUpdating /vendors\033[0m"
 if [[ $DEV = true ]]; then
-	php -d memory_limit=2G "$d/composer.phar" update
+	symfony composer update
 else
-	php -d memory_limit=2G "$d/composer.phar" install
-	php -d memory_limit=2G "$d/composer.phar" dump-autoload --optimize
+	symfony composer install
+	symfony composer dump-autoload --optimize
 fi
 
 # Update node_modules
@@ -84,50 +75,28 @@ if [[ $DEV = true ]]; then
 else
 	npm install
 fi
+npm audit fix
 
 # Clear cache
 echo -e "\n\033[1mClearing Symfony cache\033[0m"
-php "$d/bin/console" cache:clear --no-warmup --env=prod
-php "$d/bin/console" cache:warm --env=prod
-php "$d/bin/console" doctrine:cache:clear-metadata
-php "$d/bin/console" doctrine:cache:clear-query
-php "$d/bin/console" doctrine:cache:clear-result
+symfony console cache:clear
+symfony console cache:clear --env=prod
+symfony console cache:warm --env=prod
+symfony console doctrine:cache:clear-metadata
+symfony console doctrine:cache:clear-query
+symfony console doctrine:cache:clear-result
 
 
 # Verify that Doctrine is properly configured for a production environment, and mappings are up to date
 echo -e "\n\033[1mChecking Doctrine configuration\033[0m"
-php "$d/bin/console" doctrine:ensure-production-settings --env=prod
-php "$d/bin/console" doctrine:schema:validate
+symfony console doctrine:ensure-production-settings --env=prod
+symfony console doctrine:schema:validate
 
 
 # Rebuild web assets
-echo -e "\n\033[1mRebuilding CSS and JS assets\033[0m"
-rm -rf "$d/web/components"
-rm -rf "$d/web/bundles"
-rm -rf "$d/web/assetic"
-rm -rf "$d/web/css"
-rm -rf "$d/web/js"
-rm -rf "$d/web/fonts"
-gulp
+"$d/bin/buildFrontendAssets"
 
 if [[ $CCCBRDATA = true ]]
 	then
-	# Download external data
-	echo -e "\n\033[1mDownloading external data\033[0m"
-	"$d/src/Blueline/MethodsBundle/Resources/data/fetch"
-	echo ""
-
-	# Import updated method data
-	php "$d/bin/console" blueline:importMethods
-	php "$d/bin/console" blueline:importMethodExtras
-	php "$d/bin/console" blueline:importCollections
-	php "$d/bin/console" blueline:calculateMethodSimilarities
-	echo ""
-	sed -i -e"s/database_update: .*/database_update: `date "+%s"`/" "$d/app/config/parameters.yml"
+	"$d/bin/fetchAndImportData"
 fi
-
-echo -e "\n\033[1mRebuilding image assets in the background\033[0m"
-nohup gulp images_all &>/dev/null &
-
-# Update source timestamp to refresh caching headers etc
-sed -i -e"s/asset_update: .*/asset_update: `date "+%s"`/" "$d/app/config/parameters.yml"

@@ -1,153 +1,44 @@
 var DEST = './web/';
 
-var gulp            = require( 'gulp' );
-var plumber         = require( 'gulp-plumber' );
-var rename          = require( 'gulp-rename' );
-var concat          = require( 'gulp-concat');
-var flatten         = require( 'gulp-flatten' );
-var zopfli          = require( 'gulp-zopfli' );
-var es              = require( 'event-stream' );
-var merge           = require( 'merge-stream' );
-var svg2png         = require( 'gulp-svg2png' );
-var less            = require( 'gulp-less' );
-var autoprefixer    = require( 'gulp-autoprefixer' );
-var cleanCSS        = require( 'gulp-clean-css' );
-var imagemin        = require( 'gulp-imagemin' );
-var imagemin_zopfli = require( 'imagemin-zopfli' );
-var imageresize     = require( 'gulp-image-resize' );
-var requirejs       = require( 'gulp-requirejs' );
-var amdclean        = require( 'gulp-amdclean' );
-var uglify          = require( 'gulp-uglify' );
-var sourcemaps      = require( 'gulp-sourcemaps' );
-
-gulp.task( 'default', ['css', 'js', 'fonts'], function() {} );
-gulp.task( 'images_all', ['appicon', 'favicon', 'maskicon', 'androidicon', 'images'], function() {} );
-
-// App Icon
-gulp.task( 'appicon', ['appicon-png', 'appicon-svg'], function() {} );
-var appicon_sizes = [144, 152, 180];
-gulp.task( 'appicon-png', function() {
-	var tasks = appicon_sizes.map( function( size ) {
-		return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/appicon.svg' )
-			.pipe( svg2png( size/63 ) )
-			.pipe( imagemin( { use: [imagemin_zopfli()] } ) )
-			.pipe( rename( function( path ) {
-				path.basename += '-'+size+'x'+size;
-			} ) )
-			.pipe( gulp.dest( DEST+'images/' ) );
-	} );
-	return es.merge.apply( null, tasks );
-} );
-gulp.task( 'appicon-svg', function() {
-	return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/appicon.svg' )
-		.pipe( imagemin() )
-		.pipe( gulp.dest( DEST+'images/' ) )
-		.pipe( zopfli() )
-		.pipe( gulp.dest( DEST+'images/' ) );
-} );
+var gulp         = require( 'gulp' );
+var mergeStream  = require( 'merge-stream' );
+var streamify    = require( 'gulp-streamify' );
+var gzip         = require( 'gulp-gzip' );
+var less         = require( 'gulp-less' );
+var autoprefixer = require( 'gulp-autoprefixer' );
+var cleanCSS     = require( 'gulp-clean-css' );
+var imagemin     = require( 'gulp-imagemin' );
+var requirejs    = require( 'gulp-requirejs' );
+var amdclean     = require( 'gulp-amdclean' );
+var terser       = require( 'gulp-terser' );
+var sourcemaps   = require( 'gulp-sourcemaps' );
 
 
-// Favicon
-gulp.task( 'favicon', ['favicon-png', 'favicon-ico', 'favicon-svg'], function() {} );
-var favicon_sizes = [70, 150, 310];
-gulp.task( 'favicon-ico', function() {
-	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/favicon.ico' )
-		.pipe( gulp.dest( DEST ) );
-} );
-gulp.task( 'favicon-png', function() {
-	var fp1 = gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/favicon.svg' )
-		.pipe( svg2png( 64/63 ) )
-		.pipe( imagemin( { use: [imagemin_zopfli()] } ) )
-		.pipe( gulp.dest( DEST+'images/' ) );
-	var fp2 = es.merge.apply( null, favicon_sizes.map( function( size ) {
-		return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/favicon.svg' )
-			.pipe( svg2png( size/63 ) )
-			.pipe( imagemin( { use: [imagemin_zopfli()] } ) )
-			.pipe( rename( function( path ) {
-				path.basename += '-'+size+'x'+size;
-			} ) )
-			.pipe( gulp.dest( DEST+'images/' ) );
-	} ) );
-	return merge( fp1, fp2 );
-} );
-gulp.task( 'favicon-svg', function() {
-	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/favicon.svg' )
-		.pipe( imagemin() )
-		.pipe( gulp.dest( DEST ) )
-		.pipe( zopfli() )
-		.pipe( gulp.dest( DEST ) );
-} );
-
-
-// Mask icon
-gulp.task( 'maskicon', ['maskicon-svg'], function() {} );
-gulp.task( 'maskicon-svg', function() {
-	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/maskicon.svg' )
-		.pipe( imagemin() )
-		.pipe( gulp.dest( DEST+'images/' ) )
-		.pipe( zopfli() )
-		.pipe( gulp.dest( DEST+'images/' ) );
-} );
-
-
-// Android Icon
-gulp.task( 'androidicon', ['androidicon-png', 'androidicon-svg'], function() {} );
-var androidicon_sizes = [48, 96, 128, 144, 192, 256, 384, 512];
-gulp.task( 'androidicon-png', function() {
-	return es.merge.apply( null, androidicon_sizes.map( function( size ) {
-		return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/androidicon.svg' )
-			.pipe( svg2png( size/192 ) )
-			.pipe( imagemin( { use: [imagemin_zopfli()] } ) )
-			.pipe( rename( function( path ) {
-				path.basename += '-'+size+'x'+size;
-			} ) )
-			.pipe( gulp.dest( DEST+'images/' ) );
-	} ) );
-} );
-gulp.task( 'androidicon-svg', function() {
-	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/androidicon.svg' )
-		.pipe( imagemin() )
-		.pipe( gulp.dest( DEST+'images/' ) )
-		.pipe( zopfli() )
-		.pipe( gulp.dest( DEST+'images/' ) );
-} );
-
-
-// Other images
-gulp.task( 'images', ['images-svg', 'images-png', 'images-gif'], function() {} );
-gulp.task( 'images-svg', function() {
-	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/!(favicon|appicon|splash|maskicon|androidicon).svg' )
-		.pipe( imagemin() )
-		.pipe( gulp.dest( DEST+'images/' ) )
-		.pipe( zopfli() )
-		.pipe( gulp.dest( DEST+'images/' ) );
-} );
-gulp.task( 'images-png', function() {
-	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/!(favicon|appicon|splash|maskicon|androidicon).svg' )
-		.pipe( svg2png() )
-		.pipe( imagemin( { use: [imagemin_zopfli()] } ) )
-		.pipe( gulp.dest( DEST+'images/' ) );
-	gulp.src( 'src/Blueline/MethodsBundle/Resources/public/images/*.png' )
-		.pipe( imagemin( { use: [imagemin_zopfli()] } ) )
-		.pipe( gulp.dest( DEST+'images/' ) );
-} );
-gulp.task( 'images-gif', function() {
-	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/images/*.gif' )
-		.pipe( imagemin() )
-		.pipe( gulp.dest( DEST+'images/' ) );
-} );
+// Images
+function images() {
+	return mergeStream(
+		gulp.src( ['src/Blueline/BluelineBundle/Resources/public/images/*.svg',
+		           'src/Blueline/BluelineBundle/Resources/public/images/*.png',
+				   'src/Blueline/BluelineBundle/Resources/public/images/*.gif',
+				   'src/Blueline/MethodsBundle/Resources/public/images/*.png'] )
+			.pipe( imagemin() )
+			.pipe( gulp.dest( DEST+'images/' ) ),
+		gulp.src( ['src/Blueline/BluelineBundle/Resources/public/images/favicon.ico',
+		           'src/Blueline/BluelineBundle/Resources/public/images/favicon.svg'] )
+			.pipe( imagemin() )
+			.pipe( gulp.dest( DEST ) )
+	);
+};
 
 
 // Fonts
-gulp.task( 'fonts', function() {
-	gulp.src( 'src/Blueline/BluelineBundle/Resources/public/fonts/*' )
+function fonts() {
+	return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/fonts/*' )
 		.pipe( gulp.dest( DEST+'fonts/' ) );
-} );
+};
 
 
-// Javascripts
-gulp.task( 'js', ['js-main', 'js-export', 'js-workers'], function() {} );
-
+// Javascript
 var require_paths = {
 	shared:       'src/Blueline/BluelineBundle/Resources/public/js/',
 	methods:      'src/Blueline/MethodsBundle/Resources/public/js/',
@@ -165,8 +56,8 @@ var require_shim = {
 		exports: 'Array.prototype.fill'
 	}
 };
-gulp.task( 'js-main', function() {
-	requirejs( {
+function js() {
+	return requirejs( {
 		baseUrl: './',
 		include: 'shared/main',
 		paths: require_paths,
@@ -175,59 +66,40 @@ gulp.task( 'js-main', function() {
 		out: 'main.js'
     } )
 		.pipe( amdclean.gulp() )
-		.pipe( sourcemaps.init() )
-		.pipe( uglify() )
-		.pipe( sourcemaps.write( '.' ) )
-		.pipe( gulp.dest( DEST+'js/' ) )
-		.pipe( zopfli() )
+		.pipe( streamify( terser() ) )
 		.pipe( gulp.dest( DEST+'js/' ) );
-} );
-gulp.task( 'js-export', function() {
-	requirejs( {
-		baseUrl: './',
-		include: 'methods/export',
-		paths: require_paths,
-		shim: require_shim,
-		optimize: 'none',
-		out: 'export.js'
-    } )
-		.pipe( amdclean.gulp() )
-		.pipe( sourcemaps.init() )
-		.pipe( uglify() )
-		.pipe( sourcemaps.write( '.' ) )
-		.pipe( gulp.dest( DEST+'js/' ) )
-		.pipe( zopfli() )
-		.pipe( gulp.dest( DEST+'js/' ) );
-} );
-gulp.task( 'js-workers', function() {
-	gulp.src( ['src/Blueline/ServicesBundle/Resources/public/js/gsiril.worker.js'] )
-		.pipe( gulp.dest( DEST+'js/' ) )
-		.pipe( zopfli() )
-		.pipe( gulp.dest( DEST+'js/' ) );
-} );
+};
 
 
 // CSS
-gulp.task( 'css', function() {
-	var all = gulp.src( ['src/Blueline/BluelineBundle/Resources/public/css/all.less', 'src/Blueline/BluelineBundle/Resources/public/css/print.less', 'src/Blueline/MethodsBundle/Resources/public/css/export.less'] )
-		.pipe( less() )
-		.pipe( autoprefixer( { browsers: ['> 5%'] } ) )
+function css() {
+	return gulp.src( ['src/Blueline/BluelineBundle/Resources/public/css/all.less', 'src/Blueline/BluelineBundle/Resources/public/css/print.less'] )
 		.pipe( sourcemaps.init() )
+		.pipe( less() )
+		.pipe( autoprefixer() )
 		.pipe( cleanCSS( { keepSpecialComments: 0 } ) )
-		.pipe( sourcemaps.write( '.' ) )
-		.pipe( gulp.dest( DEST+'css/' ) )
-		.pipe( zopfli() )
+		.pipe( sourcemaps.write() )
 		.pipe( gulp.dest( DEST+'css/' ) );
-} );
+};
+
+
+// Compress
+function compressGzip() {
+	return gulp.src( [DEST+'/**/*.svg', DEST+'/**/*.html', DEST+'/**/*.js', DEST+'/**/*.css'] )
+		.pipe( gzip({ gzipOptions: { level: 9 } }) )
+		.pipe( gulp.dest( DEST+'/' ) );
+};
 
 
 // Watch task
-gulp.task( 'watch', function() {
-	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/appicon.svg'], ['appicon'] );
-	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/favicon.svg'], ['favicon'] );
-	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/androidicon.svg'], ['androidicon'] );
-	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/!(favicon|appicon|splash|maskicon|androidicon).svg'], ['images'] );
-	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/fonts/*'], ['fonts'] );
-	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/css/**/*', 'src/Blueline/MethodsBundle/Resources/public/css/**/*', 'src/Blueline/ServicesBundle/Resources/public/css/**/*'], ['css'] );
-	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/js/**/*', 'src/Blueline/MethodsBundle/Resources/public/js/**/*', 'src/Blueline/ServicesBundle/Resources/public/js/**/*'], ['js-main', 'js-export'] );
-} );
+function watch() {
+	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/**/*'], images );
+	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/fonts/*'], fonts );
+	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/css/**/*', 'src/Blueline/MethodsBundle/Resources/public/css/**/*', 'src/Blueline/ServicesBundle/Resources/public/css/**/*'], css );
+	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/js/**/*', 'src/Blueline/MethodsBundle/Resources/public/js/**/*', 'src/Blueline/ServicesBundle/Resources/public/js/**/*'], js );
+};
+
+
+exports.default = gulp.series( gulp.parallel( css, js, fonts ), compressGzip );
+exports.images = gulp.series( gulp.parallel( images ), compressGzip );
+exports.watch = watch;

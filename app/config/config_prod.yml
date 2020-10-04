@@ -2,16 +2,16 @@ imports:
     - { resource: config.yml }
 
 framework:
-    validation:
-        cache: validator.mapping.cache.doctrine.apc
-    serializer:
-        cache: serializer.mapping.cache.apc
+    cache:
+        directory: '%kernel.cache_dir%/pools'
+        app: cache.adapter.filesystem
+        system: cache.adapter.system
 
 doctrine:
     orm:
-        metadata_cache_driver: apc
-        result_cache_driver: apc
-        query_cache_driver: apc
+        metadata_cache_driver: project.doctrine_filesystem_cache
+        result_cache_driver: project.doctrine_filesystem_cache
+        query_cache_driver: project.doctrine_filesystem_cache
 
 monolog:
     handlers:

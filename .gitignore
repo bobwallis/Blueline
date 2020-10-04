@@ -25,6 +25,8 @@ web/images
 /bin/*
 !bin/console
 !bin/symfony_requirements
+!bin/fetchAndImportData
+!bin/buildFrontendAssets
 /vendor/
 
 # Managed by NPM

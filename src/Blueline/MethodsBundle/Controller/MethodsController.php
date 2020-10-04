@@ -170,7 +170,7 @@ class MethodsController extends Controller
         }
 
         $method = $methodRepository->findByURLJoiningPerformancesAndCollections($url);
-        
+
         if (!$method) {
             // Try and find a renamed method
             $peformanceRepository = $this->getDoctrine()->getManager()->getRepository('BluelineMethodsBundle:Performance');
@@ -200,7 +200,7 @@ class MethodsController extends Controller
             // Otherwise fail
             throw $this->createNotFoundException('The method does not exist');
         }
-        
+
         $similarMethods = array(
             'differentOnlyAtLeadEnd' => $methodRepository->similarMethodsDifferentOnlyAtTheLeadEnd($method->getUrl()),
             'differentOnlyAtHalfLead' => $methodRepository->similarMethodsDifferentOnlyAtTheHalfLead($method->getUrl()),

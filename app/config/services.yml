@@ -6,3 +6,6 @@ parameters:
 services:
     #AppBundle\:
     #    resource: '../../src/AppBundle/*'
+    project.doctrine_filesystem_cache:
+        parent: doctrine_cache.abstract.file_system
+        arguments: ['%kernel.cache_dir%/doctrine']

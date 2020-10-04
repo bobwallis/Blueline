@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Get script directory, and cd to the parent folder
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
+d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+cd "$d/../"
+
+echo -e "\n\033[1mRebuilding CSS and JS assets\033[0m"
+rm -rf "./web/components"
+rm -rf "./web/bundles"
+rm -rf "./web/assetic"
+rm -rf "./web/css"
+rm -rf "./web/js"
+rm -rf "./web/fonts"
+gulp
+
+echo -e "\n\033[1mRebuilding image assets\033[0m"
+gulp images
+
+# Update source timestamp to refresh caching headers etc
+sed -i -e"s/asset_update: .*/asset_update: `date "+%s"`/" "./app/config/parameters.yml"

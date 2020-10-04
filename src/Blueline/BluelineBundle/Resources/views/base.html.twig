@@ -4,6 +4,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>{% block title %}Blueline{% endblock %}</title>
+		<meta name="application-name" content="Blueline" />
 
 		{# Icons #}
 		<link rel="icon" type="image/svg+xml" sizes="any" href="{{ app.request.basepath }}/favicon.svg" />
@@ -26,34 +27,28 @@
 		<meta name="apple-mobile-web-app-title" content="Blueline" />
 		<meta name="format-detection" content="telephone=no" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-		{% for size in [144, 152, 180] %}
-			<link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="{{ app.request.basepath }}/images/appicon-{{ size }}x{{ size }}.png" />
-		{% endfor %}
+		<link rel="apple-touch-icon" href="{{ app.request.basepath }}/images/appicon-180x180.png" />
 
 		{# IE Pinned Sites tags #}
-		<meta name="application-name" content="Blueline" />
-		<meta name="msapplication-navbutton-color" content="#002856" />
 		<meta name="msapplication-starturl" content="{{ app.request.scheme ~  '://' ~ app.request.host ~ path( 'Blueline_welcome' ) }}" />
-		<meta name="msapplication-TileColor" content="#EFE5BD">
-		<meta name="msapplication-TileImage" content="{{ app.request.basepath }}/images/appicon-144x144.png">
-		<meta name="msapplication-tooltip" content="Blueline - Information for bellringers" />
 		<meta name="msapplication-config" content="{{ path( 'Blueline_resource', { page: 'browserconfig', _format: 'xml' } ) }}" />
 
-		{# Chrome Android theme tag #}
+		{# Color browser address bars #}
 		<meta name="theme-color" content="#002856" />
+		<meta name="msapplication-navbutton-color" content="#002856" />
 
 		{# Meta description #}
 		{% set _block = block('og_description') %}
 		{% if _block is not empty %}
 		<meta name="description" content="{{ _block|raw }}" />
 		{% endif %}
-		
+
 		{# Opengraph tags #}
 		<meta property="og:title" content="{% block og_title %}Blueline{% endblock %}" />
 		<meta property="og:description" content="{% block og_description %}Information for bellringers{% endblock %}" />
 		{% if status_code is not defined %}<meta property="og:url" content="{{ url( app.request.attributes.get( '_route' ), app.request.attributes.get( '_route_params' ) ) }}" />{% endif %}
 		<meta property="og:type" content="{% block og_type %}website{% endblock %}" />
-		<meta property="og:image" content="{% block og_image %}{{ app.request.basepath }}/images/appicon-144x144.png{% endblock %}" />
+		<meta property="og:image" content="{% block og_image %}{{ app.request.basepath }}/images/appicon-180x180.png{% endblock %}" />
 		<meta property="og:site_name" content="Blueline" />
 
 		{# oEmbed tags #}
