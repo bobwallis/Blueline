@@ -1,5 +1,4 @@
 # Blueline
-========================
 
 This document contains some notes on how to install, and start developing and using Blueline.
 
