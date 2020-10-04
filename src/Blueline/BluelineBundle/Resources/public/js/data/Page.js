@@ -63,7 +63,7 @@ define( ['eve', 'jquery', 'Modernizr', './Page/Cache', '../helpers/URL'], functi
 			} );
 			URL.currentURL = mostRecentRequest = url;
 
-			
+
 			// These functions will be executed depending on the result of the content request
 			var success = function( content ) {
 				Cache.set( url, content );
@@ -76,7 +76,7 @@ define( ['eve', 'jquery', 'Modernizr', './Page/Cache', '../helpers/URL'], functi
 					} );
 				}
 			};
-			
+
 			var failure = function( jqXHR, textStatus, errorThrown ) {
 				var content;
 				switch( textStatus ) {
@@ -89,7 +89,7 @@ define( ['eve', 'jquery', 'Modernizr', './Page/Cache', '../helpers/URL'], functi
 					case 'error':
 						if( !errorThrown ) {
 							// Assume any undefined errors are due to being offline
-							content = '<section class="text"><div class="wrap"><p class="appError">Content is unavailable while offline. <a href="javascript:history.go(-1)">Go back</a>.</p></div></section>';
+							content = '<section class="text"><div class="wrap"><p class="appError">Unknown error, you may be offline. Try reloading. <a href="javascript:history.go(-1)">Go back</a>.</p></div></section>';
 							break;
 						}
 					default:

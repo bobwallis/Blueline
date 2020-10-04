@@ -22,10 +22,8 @@
 					<button type="submit" title="Search"><span class="hide">Search</span></button>
 				</div>
 			</form>
-			<p>Search for methods by name/stage using the box. Queries beginning with '/' will be interpreted as a <a href="https://en.wikipedia.org/wiki/Regular_expression" class="external">regular expression</a>.</p>
-			<p>All methods in the <a href="http://methods.cccbr.org.uk" class="external">Central Council method collections</a> are included in the database, and this site will draw blue lines of them for your reference.</p>
-			<h2>Tutorials</h2>
-			<p>I've written some <a href="{{ path( 'Blueline_Pages_view', {page: 'methods/tutorials'} ) }}">interactive method tutorials</a> which you may find useful.</p>
+			<p>Search for methods using the box. Queries beginning with '/' will be interpreted as a <a href="https://en.wikipedia.org/wiki/Regular_expression" class="external">regular expression</a>.</p>
+			<p>The database is created from the <a href="http://methods.cccbr.org.uk" class="external">Central Council method collections</a> and was last updated on {{ db_age|date("Y-m-d") }}.</p>
 			<h2>Custom Method</h2>
 			<p>To view a method not in the collections enter the stage and place notation below. Various abbreviated place notation formats are supported, <a href="{{ path( 'Blueline_Pages_view', {page: 'methods/notation'} ) }}">see here for a guide</a>.</p>
 			<form id="custom_method" action="{{ path( 'Blueline_Methods_custom_view' ) }}">
