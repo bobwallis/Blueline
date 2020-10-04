@@ -37,7 +37,7 @@ class MethodsController extends Controller
 
         // Parse search variables
         $searchVariables = Search::requestToSearchVariables($request, array_values($methodMetadata->fieldNames));
-        $searchVariables['fields'] = implode(',', array_values(array_unique(empty($searchVariables['fields'])? array('title', 'url', 'notation') : array_merge($searchVariables['fields'], ($request->getRequestFormat()=='html')?array('title', 'url'):array()))));
+        $searchVariables['fields'] = implode(',', array_values(array_unique(empty($searchVariables['fields'])? array('title', 'abbreviation', 'url', 'classification', 'stage', 'notation', 'ruleOffs', 'calls', 'callingPositions') : array_merge($searchVariables['fields'], ($request->getRequestFormat()=='html')?array('title', 'url'):array()))));
         $searchVariables['sort']   = empty($searchVariables['sort'])? 'magic' : $searchVariables['sort'];
 
         // Create query
@@ -102,9 +102,11 @@ class MethodsController extends Controller
                        ->setParameter('qMetaphone', $nameMetaphone);
                 }
 
+                // This is commented out as it breaks the ability to filter searches by stage, classification, etc (using &stage=6&classification=Surprise and similar)
+                // TODO: Remember why I added this in the first place
                 // Never exclude a basic match
-                $query->orWhere('LOWER(e.title) LIKE :qLike')
-                    ->setParameter('qLike', Search::prepareStringForLike($searchVariables['q']));
+                //$query->orWhere('LOWER(e.title) LIKE :qLike')
+                //    ->setParameter('qLike', Search::prepareStringForLike($searchVariables['q']));
             }
         }
 
