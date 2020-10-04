@@ -12,8 +12,14 @@ Blueline_Notation_expand:
 
 Blueline_Services_siril:
     path: /siril
-    defaults: { _controller: BluelineServicesBundle:Siril:index }
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
+    defaults:
+        path: 'https://bobwallis.github.io/CompositionProver/'
+        permanent: true
 
 Blueline_Services_siril_why:
     path: /siril/about
-    defaults: { _controller: BluelineBundle:Default:page, page: 'siril_about' }
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
+    defaults:
+        path: 'https://bobwallis.github.io/CompositionProver/'
+        permanent: true

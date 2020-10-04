@@ -42,7 +42,6 @@ function fonts() {
 var require_paths = {
 	shared:       'src/Blueline/BluelineBundle/Resources/public/js/',
 	methods:      'src/Blueline/MethodsBundle/Resources/public/js/',
-	services:     'src/Blueline/ServicesBundle/Resources/public/js/',
 	jquery:       'src/Blueline/BluelineBundle/Resources/public/js/lib/jquery',
 	eve:          'src/Blueline/BluelineBundle/Resources/public/js/lib/eve',
 	Modernizr:    'src/Blueline/BluelineBundle/Resources/public/js/lib/modernizr',
