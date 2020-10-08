@@ -1,0 +1,50 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+parameters:
+    database_connect: 'host=%env(key:host:url:DATABASE_URL)% port=%env(key:port:url:DATABASE_URL)% dbname=%env(key:path:url:DATABASE_URL)% user=%env(key:user:url:DATABASE_URL)% password=%env(key:pass:url:DATABASE_URL)%'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    Blueline\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/EventListener/'
+            - '../src/Entity/'
+            - '../src/Helpers/'
+            - '../src/Kernel.php'
+            - '../src/Resources/'
+            - '../src/Tests/'
+
+    # Give certain commands access to a string usable in pg_connect
+    Blueline\Command\CalculateMethodSimilaritiesCommand:
+        arguments: ['%database_connect%']
+    Blueline\Command\ImportCollectionsCommand:
+        arguments: ['%database_connect%']
+    Blueline\Command\ImportMethodsCommand:
+        arguments: ['%database_connect%']
+    Blueline\Command\ImportMethodExtrasCommand:
+        arguments: ['%database_connect%']
+    Blueline\Command\CheckClassificationsCommand:
+        arguments: ['%database_connect%']
+
+    # controllers are imported separately to make sure services can be injected
+    # as action arguments even if you don't extend any base controller class
+    Blueline\Controller\:
+        resource: '../src/Controller/'
+        tags: ['controller.service_arguments']
+
+    Blueline\EventListener\RequestListener:
+        arguments:
+            - '@service_container'
+        tags:
+            - { name: kernel.event_listener, event: kernel.request }

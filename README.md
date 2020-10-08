@@ -29,6 +29,8 @@ Run `symfony composer install` to install all the PHP dependencies into `./vendo
 default settings for missing parameters when prompted unless you are working outside the development
 container and need to connect to a different database.
 
+Copy `.env` to `.env.local`.
+
 Run `npm install && npm audit fix` to install all the Javascript dependencies into `./node_modules`
 and automatically address any easy-to-resolve security issues in them.
 

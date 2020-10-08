@@ -1,0 +1,19 @@
+Blueline\Entity\Collection:
+    type: entity
+    repositoryClass: Blueline\Repository\CollectionRepository
+    table: collections
+    id:
+        id:
+            type: string
+            length: 255
+    fields:
+        name:
+            type: string
+            length: 255
+        description:
+            type: text
+    oneToMany:
+        methods:
+            targetEntity: MethodInCollection
+            cascade: ["all"]
+            mappedBy: collection

@@ -1,0 +1,13 @@
+Blueline\Entity\Method:
+    constraints:
+        - Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity: url
+    properties:
+        stage:
+            - GreaterThanOrEqual:
+                value: 3
+        lengthOfLead:
+            - GreaterThanOrEqual:
+                value: 1
+        numberOfHunts:
+            - GreaterThanOrEqual:
+                value: 0

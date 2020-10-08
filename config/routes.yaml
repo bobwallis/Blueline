@@ -1,0 +1,147 @@
+## Homepage
+Blueline_welcome:
+    path: /
+    defaults: { _controller: Blueline\Controller\DefaultController::page, page: 'welcome' }
+
+
+## Simple pages and other resources
+Blueline_Pages_view:
+    path: /{page}.{_format}
+    defaults: { _controller: Blueline\Controller\DefaultController::page, _format: 'html' }
+    requirements:
+        page:    about|privacy-app|methods/tutorials|methods/notation
+        _format: html
+Blueline_resource:
+    path: /{page}.{_format}
+    defaults: { _controller: Blueline\Controller\DefaultController::resource }
+    requirements:
+        page: robots|humans|sitemap|sitemap_root|browserconfig|manifest
+        _format: json|txt|xml
+Blueline_manifest:
+    path: /site.{_format}
+    defaults: { _controller: Blueline\Controller\DefaultController::manifest }
+    requirements:
+        _format: manifest
+
+
+## Methods
+Blueline_Methods_welcome:
+    path: /methods/
+    defaults: { _controller: Blueline\Controller\MethodsController::welcome }
+
+Blueline_Methods_view:
+    path: /methods/view/{url}.{_format}
+    defaults: { _controller: Blueline\Controller\MethodsController::view, _format: html }
+    requirements:
+        _format: html|json|png
+
+Blueline_Methods_custom_view:
+    path: /methods/view.{_format}
+    defaults: { _controller: Blueline\Controller\MethodsController::viewCustom, _format: html }
+    requirements:
+        _format: html|json|png
+
+Blueline_Methods_print:
+    path: /methods/print
+    defaults: { _controller: Blueline\Controller\MethodsController::print, _format: html }
+    requirements:
+        _format: html|json|png
+
+Blueline_Methods_export:
+    path: /methods/export.{_format}
+    defaults: { _controller: Blueline\Controller\MethodsController::export }
+    requirements:
+        _format: html|png|pdf
+
+Blueline_Methods_search:
+    path: /methods/search.{_format}
+    defaults: { _controller: Blueline\Controller\MethodsController::search, _format: html }
+    requirements:
+        _format: html|json
+
+Blueline_Methods_sitemap:
+    path: /methods/sitemap_{page}.{_format}
+    defaults: { _controller: Blueline\Controller\MethodsController::sitemap }
+    requirements:
+        page: \d+
+        _format: xml
+
+
+
+## Services
+Blueline_Services_oembed:
+    path: /services/oembed.{_format}
+    defaults: { _controller: Blueline\Controller\OembedController::index }
+    requirements:
+        _format: json|xml
+Blueline_Notation_expand:
+    path: /services/notation.{_format}
+    defaults: { _controller: Blueline\Controller\NotationController::parse }
+    requirements:
+        _format: txt|json
+
+
+## Table exports
+Blueline_Data_table:
+    path: /data/{table}.{_format}
+    defaults: { _controller: Blueline\Controller\DataController::table }
+    requirements:
+        table: collections|methods|methods_collections|methods_similar|performances
+        _format: csv
+
+
+## Towers and Associations sections (now deleted)
+Blueline_deleted_towers:
+    path: /towers
+    defaults:
+        _controller: Blueline\Controller\ErrorController::httpError
+        code: 410
+Blueline_deleted_towers2:
+    path: /towers/{del}
+    defaults:
+        _controller: Blueline\Controller\ErrorController::httpError
+        code: 410
+    requirements:
+        del: .*
+Blueline_deleted_associations:
+    path: /associations
+    defaults:
+        _controller: Blueline\Controller\ErrorController::httpError
+        code: 410
+Blueline_deleted_associations2:
+    path: /associations/{del}
+    defaults:
+        _controller: Blueline\Controller\ErrorController::httpError
+        code: 410
+    requirements:
+        del: .*
+
+
+## Composition prover (now moved to seperate project)
+Blueline_Services_siril:
+    path: /services/siril
+    controller: FrameworkBundle:Redirect:urlRedirect
+    defaults:
+        path: 'https://bobwallis.github.io/CompositionProver/'
+        permanent: true
+Blueline_Services_siril_why:
+    path: /services/siril/about
+    controller: FrameworkBundle:Redirect:urlRedirect
+    defaults:
+        path: 'https://bobwallis.github.io/CompositionProver/'
+        permanent: true
+
+
+## Other moved/deleted pages
+Blueline_Pages_redirect1:
+    path: /copyright
+    defaults:
+        _controller: FrameworkBundle:Redirect:urlRedirect
+        path: /about
+        permanent: true
+Blueline_Pages_redirect2:
+    path: /tutorials
+    defaults:
+        _controller: FrameworkBundle:Redirect:urlRedirect
+        path: /methods/tutorials
+        permanent: true

@@ -8,13 +8,13 @@ cd "$d/../"
 
 # Download external data
 echo -e "\n\033[1mDownloading external data\033[0m"
-"./src/Blueline/MethodsBundle/Resources/data/fetch"
+"./src/Resources/data/fetch"
 echo ""
 
 # Import updated method data
-symfony console blueline:importMethods
-symfony console blueline:importMethodExtras
-symfony console blueline:importCollections
-symfony console blueline:calculateMethodSimilarities
+#symfony console blueline:importMethods
+#symfony console blueline:importMethodExtras
+#symfony console blueline:importCollections
+#symfony console blueline:calculateMethodSimilarities
 echo ""
-sed -i -e"s/database_update: .*/database_update: `date "+%s"`/" ".pel/app/config/parameters.yml"
+sed -i -e"s/DATABASE_UPDATE=.*/DATABASE_UPDATE=`date "+%s"`/" ".env.local"

@@ -1,0 +1,106 @@
+// Normalize
+@import './lib/normalize.less';
+
+// Layout
+@standaloneStatusBarHeight: 18px;
+@headerHeight: 35px;
+@searchBoxHeight: 51px;
+@contentXPadding: 12px;
+@contentYPadding: 10px;
+@smallScreenSize: 800px;
+
+// Colors
+@background: #FFF;
+@headerBackground: #002856;
+@titleBackground: #F3F3F3;
+@lightGrey: #E0DED9;
+
+// Fonts
+@sans-stack: -apple-system, "Helvetica Neue", "Roboto", "Segoe UI", "Lucida Grande", sans-serif;
+@serif-stack: Palatino, "Palatino Linotype", "Palatino LT STD", "URW Palladio L", "Book Antiqua", Constantia, serif;
+@font-face {
+	font-family: Blueline;
+	font-style: normal;
+	font-weight: normal;
+	src: local('Droid Sans Mono'), url(../fonts/Blueline.woff2) format('woff2'), url(../fonts/Blueline.woff) format('woff');
+}
+.fontPreload {
+	position: absolute;
+	display: block;
+	top: -999px;
+	left: 0;
+	margin: 0;
+	padding: 0;
+	font-size: 500px;
+	font-variant: normal;
+}
+
+// Basic color and font definitions
+html, body {
+	color: #000;
+	background: @background;
+	font-size: 14px;
+	line-height: 1.25em;
+	-webkit-font-smoothing: antialiased;
+	-webkit-overflow-scrolling: touch;
+	min-width: 320px;
+	font-family: @sans-stack;
+	font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "pnum" 0, "tnum" 0, "onum" 0, "lnum" 0, "dlig" 0;
+}
+h1, h2, fieldset legend {
+	font-family: @serif-stack;
+	text-rendering: optimizeLegibility;
+}
+
+// Links
+a {
+	text-decoration: underline;
+	text-decoration-color: #A1C4D0;
+	transition-property: color, text-decoration-color;
+	transition-duration: .15s;
+	&:link { color: #29404C; }
+	&:visited { color: #4C2940; }
+	&:active { color: #404C29; }
+	&:hover { text-decoration-color: #29404C; }
+	&.external {
+		padding-right: 13px;
+		background-image: url(../images/external.svg);
+		background-size: auto;
+		background-repeat: no-repeat;
+		background-position: bottom 2px right 0;
+	}
+}
+.sf-toolbar, #towerMap {
+	a {
+		text-shadow: none !important;
+	}
+}
+
+// Selection styles
+::selection {
+    background: @headerBackground;
+    color: #FFF;
+}
+
+// Placeholder text
+::placeholder, .placeholder { color: #999; }
+
+// Abbr
+abbr[title] {
+  border-bottom: 1px dotted;
+  text-decoration: none;
+}
+
+.hide { display: none; }
+.center { text-align: center; }
+.normalweight { font-weight: normal; }
+
+// Import general CSS styles
+@import 'all/scrollbars.less';
+@import 'all/overlays.less';
+@import 'all/header.less';
+@import 'all/content.less';
+@import 'all/standalone.less';
+@import 'all/forms.less';
+@import 'all/welcome.less';
+@import 'all/methods.less';

@@ -1,3 +1,0 @@
-BluelineSiteBundle:
-    resource: "@BluelineBundle/Resources/config/routing.yml"
-    prefix:   /

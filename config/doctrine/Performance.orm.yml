@@ -1,0 +1,68 @@
+Blueline\Entity\Performance:
+    type: entity
+    repositoryClass: Blueline\Repository\PerformanceRepository
+    table: performances
+    id:
+        id:
+            type: integer
+            generator:
+                strategy: IDENTITY
+    fields:
+        type:
+            type: string
+            length: 255
+        date:
+            type: date
+            nullable: true
+        society:
+            type: string
+            length: 255
+            nullable: true
+        rung_title:
+            type: string
+            length: 255
+            nullable: true
+        rung_url:
+            type: string
+            length: 255
+            nullable: true
+        reference:
+            type: string
+            length: 255
+            nullable: true
+        location_room:
+            type: string
+            length: 255
+            nullable: true
+        location_building:
+            type: string
+            length: 255
+            nullable: true
+        location_address:
+            type: string
+            length: 255
+            nullable: true
+        location_town:
+            type: string
+            length: 255
+            nullable: true
+        location_county:
+            type: string
+            length: 255
+            nullable: true
+        location_region:
+            type: string
+            length: 255
+            nullable: true
+        location_country:
+            type: string
+            length: 255
+            nullable: true
+    manyToOne:
+        method:
+            targetEntity: Method
+            cascade: ["merge","persist"]
+            inversedBy: performances
+            joinColumn:
+                name: method_title
+                referencedColumnName: title

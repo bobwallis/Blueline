@@ -1,0 +1,39 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+    orm:
+        auto_generate_proxy_classes: true
+        entity_managers:
+            default:
+                naming_strategy: doctrine.orm.naming_strategy.default
+                auto_mapping: true
+                mappings:
+                    Blueline:
+                        is_bundle: false
+                        type: yml
+                        dir: '%kernel.project_dir%/config/doctrine'
+                        prefix: 'Blueline\Entity'
+                        alias: Blueline
+                dql:
+                    string_functions:
+                        regexp:
+                            Blueline\Doctrine\Regexp
+                        concat_ws:
+                            Blueline\Doctrine\ConcatWs
+                        levenshtein:
+                            Blueline\Doctrine\Levenshtein
+                        levenshtein_less_equal:
+                            Blueline\Doctrine\LevenshteinLessEqual
+                        levenshtein_ratio:
+                            Blueline\Doctrine\LevenshteinRatio
+                    numeric_functions:
+                        acos:
+                            Blueline\Doctrine\Acos
+                        cos:
+                            Blueline\Doctrine\Cos
+                        floor:
+                            Blueline\Doctrine\Floor
+                        sin:
+                            Blueline\Doctrine\Sin
+                        radians:
+                            Blueline\Doctrine\Radians

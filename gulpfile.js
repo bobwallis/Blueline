@@ -1,4 +1,4 @@
-var DEST = './web/';
+var DEST = './public/';
 
 var gulp         = require( 'gulp' );
 var mergeStream  = require( 'merge-stream' );
@@ -17,14 +17,14 @@ var sourcemaps   = require( 'gulp-sourcemaps' );
 // Images
 function images() {
 	return mergeStream(
-		gulp.src( ['src/Blueline/BluelineBundle/Resources/public/images/*.svg',
-		           'src/Blueline/BluelineBundle/Resources/public/images/*.png',
-				   'src/Blueline/BluelineBundle/Resources/public/images/*.gif',
-				   'src/Blueline/MethodsBundle/Resources/public/images/*.png'] )
+		gulp.src( ['src/Resources/images/*.svg',
+		           'src/Resources/images/*.png',
+				   'src/Resources/images/*.gif',
+				   'src/Resources/images/*.png'] )
 			.pipe( imagemin() )
 			.pipe( gulp.dest( DEST+'images/' ) ),
-		gulp.src( ['src/Blueline/BluelineBundle/Resources/public/images/favicon.ico',
-		           'src/Blueline/BluelineBundle/Resources/public/images/favicon.svg'] )
+		gulp.src( ['src/Resources/images/favicon.ico',
+		           'src/Resources/images/favicon.svg'] )
 			.pipe( imagemin() )
 			.pipe( gulp.dest( DEST ) )
 	);
@@ -33,19 +33,18 @@ function images() {
 
 // Fonts
 function fonts() {
-	return gulp.src( 'src/Blueline/BluelineBundle/Resources/public/fonts/*' )
+	return gulp.src( 'src/Resources/public/fonts/*' )
 		.pipe( gulp.dest( DEST+'fonts/' ) );
 };
 
 
 // Javascript
 var require_paths = {
-	shared:       'src/Blueline/BluelineBundle/Resources/public/js/',
-	methods:      'src/Blueline/MethodsBundle/Resources/public/js/',
-	jquery:       'src/Blueline/BluelineBundle/Resources/public/js/lib/jquery',
-	eve:          'src/Blueline/BluelineBundle/Resources/public/js/lib/eve',
-	Modernizr:    'src/Blueline/BluelineBundle/Resources/public/js/lib/modernizr',
-	'Array.fill': 'src/Blueline/BluelineBundle/Resources/public/js/lib/Array.fill'
+	blueline:     'src/Resources/js/',
+	jquery:       'src/Resources/js/lib/jquery',
+	eve:          'src/Resources/js/lib/eve',
+	Modernizr:    'src/Resources/js/lib/modernizr',
+	'Array.fill': 'src/Resources/js/lib/Array.fill'
 };
 var require_shim = {
 	'Modernizr': {
@@ -58,12 +57,12 @@ var require_shim = {
 function js() {
 	return requirejs( {
 		baseUrl: './',
-		include: 'shared/main',
+		include: 'blueline/main',
 		paths: require_paths,
 		shim: require_shim,
 		optimize: 'none',
 		out: 'main.js'
-    } )
+	} )
 		.pipe( amdclean.gulp() )
 		.pipe( streamify( terser() ) )
 		.pipe( gulp.dest( DEST+'js/' ) );
@@ -72,7 +71,7 @@ function js() {
 
 // CSS
 function css() {
-	return gulp.src( ['src/Blueline/BluelineBundle/Resources/public/css/all.less', 'src/Blueline/BluelineBundle/Resources/public/css/print.less'] )
+	return gulp.src( ['src/Resources/css/all.less', 'src/Resources/css/print.less'] )
 		.pipe( sourcemaps.init() )
 		.pipe( less() )
 		.pipe( autoprefixer() )
@@ -92,13 +91,15 @@ function compressGzip() {
 
 // Watch task
 function watch() {
-	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/images/**/*'], images );
-	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/fonts/*'], fonts );
-	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/css/**/*', 'src/Blueline/MethodsBundle/Resources/public/css/**/*', 'src/Blueline/ServicesBundle/Resources/public/css/**/*'], css );
-	gulp.watch( ['src/Blueline/BluelineBundle/Resources/public/js/**/*', 'src/Blueline/MethodsBundle/Resources/public/js/**/*', 'src/Blueline/ServicesBundle/Resources/public/js/**/*'], js );
+	gulp.watch( ['src/Resources/public/images/**/*'], images );
+	gulp.watch( ['src/Resources/public/fonts/*'], fonts );
+	gulp.watch( ['src/Resources/public/css/**/*'], css );
+	gulp.watch( ['src/Resources/public/js/**/*'], js );
 };
 
 
 exports.default = gulp.series( gulp.parallel( css, js, fonts ), compressGzip );
+exports.css = gulp.series( css, compressGzip );
+exports.js = gulp.series( js, compressGzip );
 exports.images = gulp.series( gulp.parallel( images ), compressGzip );
 exports.watch = watch;
