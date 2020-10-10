@@ -10,7 +10,7 @@
 			"name": "Container database",
 			"driver": "PostgreSQL",
 			"previewLimit": 50,
-			"server": "localhost",
+			"server": "db",
 			"port": 5432,
 			"database": "blueline",
 			"username": "user",
@@ -30,8 +30,6 @@
 		"mtxr.sqltools",
 		"mtxr.sqltools-driver-pg"
 	],
-
-	"forwardPorts": [8000],
 
 	"workspaceFolder": "/workspace",
 

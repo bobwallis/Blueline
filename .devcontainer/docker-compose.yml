@@ -1,6 +1,7 @@
 version: "3"
 
 services:
+  # Main container
   php:
     # Uncomment the next line to use a non-root user for all processes.
     # See https://aka.ms/vscode-remote/containers/non-root for details.
@@ -20,20 +21,20 @@ services:
     volumes:
       - ..:/workspace:cached
 
+    ports:
+        - 8000:8000
+
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
 
-    # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function
-    # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
-    network_mode: service:db
-
+  # Database image
   db:
     image: postgres
     restart: unless-stopped
     volumes:
       - postgres-data:/var/lib/postgresql/data/ # persist data even if container shuts down
-    ports:
-      - 5432:5432
+    expose:
+      - 5432
     environment:
       POSTGRES_PASSWORD: pass
       POSTGRES_USER: user

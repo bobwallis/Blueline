@@ -17,7 +17,6 @@ If you aren't developing in the container you will need to install/set-up:
  - [Symfony][1] which is the PHP framework that Blueline is built with;
  - [Node][5] and [Gulp][4] to build front-end assets;
  - [PostgrSQL][9] to host the database;
- - [PhantomJS][6] to allow the PNG image generation to work.
 
 
 ## 1) Setting Up Blueline
@@ -51,8 +50,13 @@ Run `./bin/buildFrontendAssets` to generate the CSS, JS and image files used by 
 
 ## 3) Run and Develop
 
-Launch a Symfony development server with `symfony server:start -d`. You will then be able to access
-the development version of the site at `http://localhost:8000/`.
+Launch a Symfony development server with `symfony server:start -d`. The development container
+exposes port 8000 by default so you will be able to access the development version of the
+site at `http://localhost:8000/` from the host environment.
+
+The container installs the [SQLTools][6] VSCode extension which you can use to inspect the
+database and run queries direcly against it, or you can use `psql` to connect to it using
+the settings in `.env`.
 
 After making changes to CSS/JS files or images you will need to re-reun `./bin/buildFrontendAssets`
 to regenerate the assets. Running `gulp watch` in a terminal will watch for changes to these files
@@ -102,7 +106,7 @@ to a new major version of Symfony, which should be done following [their instruc
 [3]:  https://git-scm.com/
 [4]:  http://gulpjs.com/
 [5]:  http://nodejs.org/
-[6]:  http://phantomjs.org/
+[6]:  https://vscode-sqltools.mteixeira.dev/
 [7]:  https://code.visualstudio.com/docs/remote/containers
 [8]:  https://code.visualstudio.com/
 [9]:  https://www.postgresql.org/
