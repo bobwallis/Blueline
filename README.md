@@ -35,7 +35,7 @@ and automatically address any easy-to-resolve security issues in them.
 
 Run `symfony console doctrine:database:create` to create the database.
 
-Run `psql -h 127.0.0.1 -p 5432 -d blueline -U user -c "CREATE EXTENSION fuzzystrmatch"` to add the
+Run `psql -h db -p 5432 -d blueline -U user -c "CREATE EXTENSION fuzzystrmatch"` to add the
 fuzzystrmatch extension to the database so the search functionality can work.
 
 Run `symfony console doctrine:schema:creatsymfony console doctrine:database:createsymfony console doctrine:database:createe` to create the database schema.
