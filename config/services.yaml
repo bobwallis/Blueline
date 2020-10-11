@@ -5,6 +5,9 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     database_connect: 'host=%env(key:host:url:DATABASE_URL)% port=%env(key:port:url:DATABASE_URL)% dbname=%env(key:path:url:DATABASE_URL)% user=%env(key:user:url:DATABASE_URL)% password=%env(key:pass:url:DATABASE_URL)%'
+    blueline.endpoint: '%env(ENDPOINT)%'
+    blueline.asset_update: '%env(ASSET_UPDATE)%'
+    blueline.database_update: '%env(DATABASE_UPDATE)%'
 
 services:
     # default configuration for services in *this* file

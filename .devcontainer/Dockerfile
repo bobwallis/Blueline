@@ -19,7 +19,13 @@ RUN if [ "${INSTALL_NODE}" = "true" ]; then su vscode -c "source /usr/local/shar
 
 # Install additional OS packages and PHP extensions
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends wget curl ca-certificates unzip bash git libpq-dev postgresql-client zlib1g-dev libicu-dev g++ automake \
+    && apt-get -y install --no-install-recommends wget curl ca-certificates unzip bash git \
+        # Postgres
+        libpq-dev postgresql-client \
+        # Gifsicle
+        zlib1g-dev libicu-dev g++ automake \
+        # Pupeteer
+        dumb-init libnss3 libatk1.0 libatk-bridge2.0 libx11-xcb1 libxcb-dri3-0 libxcomposite1 libxdamage1 libcups2 libdrm2 libxrandr2 libgbm1 libasound2 libpangocairo-1.0 libgtk-3-0 \
     # Opcache
     && docker-php-ext-install opcache \
     && docker-php-ext-enable opcache \
@@ -39,3 +45,5 @@ RUN wget https://get.symfony.com/cli/installer -O - | bash && mv /root/.symfony/
 RUN apt-get clean \
     && pecl clear-cache \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* || true
+
+ENTRYPOINT ["dumb-init", "--"]

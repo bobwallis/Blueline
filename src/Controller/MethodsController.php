@@ -151,8 +151,8 @@ class MethodsController extends AbstractController
         // Perform extra checks for PNG format requests
         if ($format == 'png') {
             // Validate scale parameter
-            if ((intval($request->query->get('scale')) ?: 1) > 4 && $this->container->getParameter('kernel.environment') == 'prod') {
-                throw $this->createAccessDeniedException('Maximum scale is 4 unless in developer mode.');
+            if ((intval($request->query->get('scale')) ?: 1) > 4) {
+                throw $this->createAccessDeniedException('Maximum scale is 4.');
             }
             // Validate section parameter
             $section = $request->query->get('style');
@@ -213,7 +213,8 @@ class MethodsController extends AbstractController
         // Create response
         switch ($format) {
             case 'png':
-                $process = new Process('phantomjs --disk-cache=true --load-images=false "'.__DIR__.'/../Resources/phantomjs/render.js" "'.$this->generateUrl('Blueline_Methods_view', array('url' => $url), UrlGeneratorInterface::ABSOLUTE_URL).'" "'.$section.'" '.(intval($request->query->get('scale')) ?: 1).' 2>&1');
+                $process = new Process(['node', __DIR__.'/../Resources/pupeteer/render.js', $request->attributes->get('endpoint').$this->generateUrl('Blueline_Methods_view', array('url' => $url)), $section, (intval($request->query->get('scale')) ?: 1)]);
+                $process->setTimeout(10);
                 $process->mustRun();
                 return new Response($process->getOutput());
             default:
@@ -271,8 +272,8 @@ class MethodsController extends AbstractController
         // Create response
         switch ($format) {
             case 'png':
-                if ((intval($request->query->get('scale')) ?: 1) > 4 && $this->container->getParameter('kernel.environment') == 'prod') {
-                    throw $this->createAccessDeniedException('Maximum scale is 4 unless in developer mode.');
+                if ((intval($request->query->get('scale')) ?: 1) > 4) {
+                    throw $this->createAccessDeniedException('Maximum scale is 4.');
                 }
                 $section = $request->query->get('style');
                 if (!in_array($section, ['numbers', 'lines', 'diagrams', 'grid'])) {
@@ -292,7 +293,8 @@ class MethodsController extends AbstractController
                     'stage'    => $vars['stage'],
                     'notation' => $vars['notation']
                 ), true);
-                $process = new Process('phantomjs --disk-cache=true --load-images=false "'.__DIR__.'/../Resources/phantomjs/render.js" "'.$processUrl.'" "'.$section.'" '.(intval($request->query->get('scale')) ?: 1).' 2>&1');
+                $process = new Process(['node', __DIR__.'/../Resources/pupeteer/render.js', $request->attributes->get('endpoint').$this->generateUrl('Blueline_Methods_view', array('url' => $url)), $section, (intval($request->query->get('scale')) ?: 1)]);
+                $process->setTimeout(10);
                 $process->mustRun();
                 return new Response($process->getOutput());
             default:
@@ -306,47 +308,6 @@ class MethodsController extends AbstractController
     public function print(Request $request)
     {
         return $this->render('Methods/print.html.twig');
-    }
-
-    /**
-    * @Cache(maxage="129600", public=true, lastModified="asset_update")
-    */
-    public function export(Request $request)
-    {
-        // Get options
-        $options = array(
-            'methods' => array(),
-            'paper_size' => strtoupper($request->query->get('paper_size', 'A4')),
-            'paper_orientation' => strtolower($request->query->get('paper_orientation', 'landscape')),
-            'paper_columns' => $request->query->getInt('paper_columns', 1),
-            'paper_rows' => $request->query->getInt('paper_rows', 1),
-            'show_title' => $request->query->getBoolean('show_title', true),
-            'show_title_position' => $request->query->get('show_title_position', 'top'),
-            'show_notation' => $request->query->getBoolean('show_notation', 'false'),
-            'show_placestarts' => $request->query->getBoolean('show_placestarts', true),
-            'style' => $request->query->get('style', 'numbers')
-        );
-        $optionsForURL = $options;
-        for ($i = 0; $i < $options['paper_rows']*$options['paper_columns']; ++$i) {
-            $options['methods'][$i] = array(
-                'title'    => $request->query->get('m'.$i.'_title', 'Untitled Method'),
-                'stage'    => $request->query->getInt('m'.$i.'_stage', 4),
-                'notation' => $request->query->get('m'.$i.'_notation', 'x'),
-            );
-            $optionsForURL['m'.$i.'_title'] = $request->query->get('m'.$i.'_title', 'Untitled Method');
-            $optionsForURL['m'.$i.'_stage'] = $request->query->getInt('m'.$i.'_stage', 4);
-            $optionsForURL['m'.$i.'_notation'] = $request->query->get('m'.$i.'_notation', 'x');
-        }
-
-        switch ($request->getRequestFormat()) {
-            case 'html':
-                return $this->render('Methods/export.html.twig', compact('options'));
-            case 'pdf':
-                $processUrl = $this->generateUrl('Blueline_Methods_export', $optionsForURL + array( '_format' => 'html' ), true);
-                $process = new Process('phantomjs --disk-cache=true --load-images=false "'.__DIR__.'/../Resources/phantomjs/export.js" "'.$processUrl.'" "'.$options['paper_size'].'" "'.$options['paper_orientation'].'" 2>&1');
-                $process->mustRun();
-                return new Response($process->getOutput());
-        }
     }
 
     /**

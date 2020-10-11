@@ -47,12 +47,6 @@ Blueline_Methods_print:
     requirements:
         _format: html|json|png
 
-Blueline_Methods_export:
-    path: /methods/export.{_format}
-    defaults: { _controller: Blueline\Controller\MethodsController::export }
-    requirements:
-        _format: html|png|pdf
-
 Blueline_Methods_search:
     path: /methods/search.{_format}
     defaults: { _controller: Blueline\Controller\MethodsController::search, _format: html }
