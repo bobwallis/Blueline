@@ -12,9 +12,9 @@ echo -e "\n\033[1mDownloading external data\033[0m"
 echo ""
 
 # Import updated method data
-#symfony console blueline:importMethods
-#symfony console blueline:importMethodExtras
-#symfony console blueline:importCollections
-#symfony console blueline:calculateMethodSimilarities
+symfony console blueline:importMethods
+symfony console blueline:importMethodExtras
+symfony console blueline:importCollections
+symfony console blueline:calculateMethodSimilarities
 echo ""
 sed -i -e"s/DATABASE_UPDATE=.*/DATABASE_UPDATE=`date "+%s"`/" ".env.local"
