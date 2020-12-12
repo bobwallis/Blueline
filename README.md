@@ -28,7 +28,7 @@ Run `symfony composer install` to install all the PHP dependencies into `./vendo
 default settings for missing parameters when prompted unless you are working outside the development
 container and need to connect to a different database.
 
-Copy `.env` to `.env.local`.
+Copy `.env` to `.env.local` (and configure it if you aren't using a devcontainer).
 
 Run `npm install && npm audit fix` to install all the Javascript dependencies into `./node_modules`
 and automatically address any easy-to-resolve security issues in them.
@@ -38,7 +38,7 @@ Run `symfony console doctrine:database:create` to create the database.
 Run `psql -h db -p 5432 -d blueline -U user -c "CREATE EXTENSION fuzzystrmatch"` to add the
 fuzzystrmatch extension to the database so the search functionality can work.
 
-Run `symfony console doctrine:schema:creatsymfony console doctrine:database:createsymfony console doctrine:database:createe` to create the database schema.
+Run `symfony console doctrine:schema:create` to create the database schema.
 
 
 ## 2) Import data and create assets
