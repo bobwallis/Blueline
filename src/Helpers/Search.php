@@ -88,8 +88,8 @@ class Search
                 $splitValuesParams = array();
                 foreach ($splitValues as $i => $v) {
                     // Interval notation (for ranges), e.g. [0,2), [3,4]
-                    if ($v{0} == '[' || $v{0} == '(') {
-                        $c1 = $v{0} == '['? ' >= ' : ' > ';
+                    if ($v[0] == '[' || $v[0] == '(') {
+                        $c1 = $v[0] == '['? ' >= ' : ' > ';
                         $c2 = substr($v, -1) == ']'? ' <=' : ' < ';
                         $vs = explode(',', substr($v, 1, strlen($v)-2));
                         $splitValuesDQL[] = $query->expr()->andx('e.'.$key.$c1.':'.$key.$i.'lower', 'e.'.$key.$c2.':'.$key.$i.'upper');
