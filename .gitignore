@@ -10,6 +10,7 @@ public/css
 public/js
 public/fonts
 public/images
+public/maps
 
 # Managed by NPM
 node_modules/

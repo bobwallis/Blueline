@@ -2,7 +2,6 @@ var DEST = './public/';
 
 var gulp         = require( 'gulp' );
 var mergeStream  = require( 'merge-stream' );
-var streamify    = require( 'gulp-streamify' );
 var gzip         = require( 'gulp-gzip' );
 var less         = require( 'gulp-less' );
 var autoprefixer = require( 'gulp-autoprefixer' );
@@ -64,7 +63,9 @@ function js() {
 		out: 'main.js'
 	} )
 		.pipe( amdclean.gulp() )
-		.pipe( streamify( terser() ) )
+		.pipe( sourcemaps.init() )
+		.pipe( terser() )
+		.pipe( sourcemaps.write('../maps') )
 		.pipe( gulp.dest( DEST+'js/' ) );
 };
 
@@ -76,7 +77,7 @@ function css() {
 		.pipe( less() )
 		.pipe( autoprefixer() )
 		.pipe( cleanCSS( { keepSpecialComments: 0 } ) )
-		.pipe( sourcemaps.write() )
+		.pipe( sourcemaps.write('../maps') )
 		.pipe( gulp.dest( DEST+'css/' ) );
 };
 
