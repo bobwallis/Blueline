@@ -12,12 +12,12 @@ const scale = Math.round( parseFloat( process.argv[4] ) * 100 ) / 100,
 // Launch page
 const puppeteer = require( 'puppeteer' );
 ( async () => {
+    const browser = await puppeteer.launch( {
+        args: ['--no-sandbox'],
+        timeout: 10000,
+        ignoreHTTPSErrors: true
+    } );
     try {
-        const browser = await puppeteer.launch( {
-            args: ['--no-sandbox'],
-            timeout: 10000,
-            ignoreHTTPSErrors: true
-        } );
         const page = await browser.newPage();
         await page.setViewport( { width: 5000, height: 1200, deviceScaleFactor: scale } );
         await page.goto( url, { waitUntil: 'networkidle2' } );
@@ -76,3 +76,4 @@ const puppeteer = require( 'puppeteer' );
         await browser.close();
     }
 } )();
+process.exit();
