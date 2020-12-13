@@ -20,7 +20,7 @@ const puppeteer = require( 'puppeteer' );
     try {
         const page = await browser.newPage();
         await page.setViewport( { width: 5000, height: 1200, deviceScaleFactor: scale } );
-        await page.goto( url, { waitUntil: 'networkidle2' } );
+        await page.goto( url, { waitUntil: 'load' } );
         const session = await page.target().createCDPSession();
         await session.send( 'Emulation.setPageScaleFactor', {
             pageScaleFactor: scale
