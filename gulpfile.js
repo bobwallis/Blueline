@@ -33,7 +33,7 @@ function images() {
 
 // Fonts
 function fonts() {
-	return gulp.src( 'src/Resources/public/fonts/*' )
+	return gulp.src( 'src/Resources/fonts/*' )
 		.pipe( gulp.dest( DEST+'fonts/' ) );
 };
 
