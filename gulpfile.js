@@ -39,11 +39,10 @@ function fonts() {
 
 // Javascript
 var require_paths = {
-	blueline:     'src/Resources/js/',
-	jquery:       'src/Resources/js/lib/jquery',
-	eve:          'src/Resources/js/lib/eve',
-	Modernizr:    'src/Resources/js/lib/modernizr',
-	'Array.fill': 'src/Resources/js/lib/Array.fill'
+	jquery:       'lib/jquery',
+	eve:          'lib/eve',
+	Modernizr:    'lib/modernizr',
+	'Array.fill': 'lib/Array.fill'
 };
 var require_shim = {
 	'Modernizr': {
@@ -55,16 +54,17 @@ var require_shim = {
 };
 function js() {
 	return requirejs( {
-		baseUrl: './',
-		include: 'blueline/main',
+		baseUrl: 'src/Resources/js/',
+		include: 'main',
 		paths: require_paths,
+		generateSourceMaps: true,
 		shim: require_shim,
 		optimize: 'none',
 		out: 'main.js'
-	} )
+	} ).on('error', function( error ) { console.log( error ); } )
+		.pipe( sourcemaps.init( { loadMaps: true } ) )
 		.pipe( amdclean.gulp() )
-		.pipe( sourcemaps.init() )
-		.pipe( terser() )
+		.pipe( terser( { format: { comments: false } } ) )
 		.pipe( sourcemaps.write('../maps') )
 		.pipe( gulp.dest( DEST+'js/' ) );
 };
