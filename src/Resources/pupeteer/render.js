@@ -55,12 +55,27 @@ const puppeteer = require( 'puppeteer' );
 
         // Find the clip size
         const dimensions = await page.evaluate( (container) => {
-            return {
-                x: 0,
-                y: 0,
-                width: $('.method .'+container+' canvas').map( function(i,e) { return $(e).outerWidth( true ); } ).toArray().reduce( function( prev, cur ) { return prev + cur; }, 0 ),
-                height: $('.method .'+container+' canvas:first-child').outerHeight( true )
+            var outerHeight = function( el ) {
+                var height = el.offsetHeight;
+                var style = getComputedStyle( el );
+                height += parseInt(style.marginTop) + parseInt(style.marginBottom);
+                return height;
             };
+            var outerWidth = function( el ) {
+                var width = el.offsetWidth;
+                var style = getComputedStyle( el );
+
+                width += parseInt(style.marginLeft) + parseInt(style.marginRight);
+                return width;
+            }
+
+            var width = Array.from ( document.querySelectorAll( '.method .'+container+' canvas' ) )
+                .map( function( e ) { return outerWidth(e); } )
+                .reduce( function( prev, cur ) { return prev + cur; }, 0 );
+
+            var height = outerHeight( document.querySelector( '.method .'+container+' canvas:first-child' ) );
+
+            return { x: 0, y: 0, width: width, height: height };
         }, container );
 
         // Take and print screenshot, then close
