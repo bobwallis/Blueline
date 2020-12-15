@@ -1,6 +1,7 @@
 <?php
 namespace Blueline\Controller;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -11,6 +12,9 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class OembedController extends AbstractController
 {
+    /**
+    * @Cache(maxage="129600", public=true, lastModified="asset_update")
+    */
     public function index(Request $request)
     {
         $url = $request->query->get('url');
@@ -33,14 +37,6 @@ class OembedController extends AbstractController
 
         // Create basic response object
         $response = new JsonResponse();
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $response->setMaxAge(129600);
-            $response->setPublic();
-        }
-        $response->setLastModified(new \DateTime('@'.$this->container->getParameter('asset_update')));
-        if ($response->isNotModified($request)) {
-            return $response;
-        }
 
         // Method view
         if (preg_match('/'.$allowedURLs['methods_view'].'/', $url) == 1) {
