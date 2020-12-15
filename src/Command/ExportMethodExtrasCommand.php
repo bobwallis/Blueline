@@ -31,5 +31,6 @@ class ExportMethodExtrasCommand extends Command
         $output->write("<?php\n// Extra method data exported ".date('Y/m/d, H:i')."\n\$method_extras = ");
         $output->write(var_export($methods, true));
         $output->write(";\n");
+        return 0;
     }
 }

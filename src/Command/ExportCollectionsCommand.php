@@ -40,5 +40,6 @@ class ExportCollectionsCommand extends Command
         $output->write("<?php\n// Collections data exported ".date('Y/m/d, H:i')."\n\$collections = ");
         $output->write(var_export($collections, true));
         $output->write(";\n");
+        return 0;
     }
 }
