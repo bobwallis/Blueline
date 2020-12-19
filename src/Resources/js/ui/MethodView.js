@@ -1,13 +1,5 @@
-define( ['jquery', 'eve', 'Modernizr', './MethodView/InteractiveGridOverlay', '../lib/webfont', '../helpers/URL', '../helpers/LocalStorage', '../helpers/GridOptionsBuilder',  '../helpers/Grid', '../helpers/PlaceNotation', '../helpers/Text', '../helpers/Music'], function( $, eve, Modernizr, InteractiveGridOverlay, webfont, URL, LocalStorage, GridOptionsBuilder, MethodGrid, PlaceNotation, Text, Music ) {
+define( ['jquery', 'eve', './MethodView/InteractiveGridOverlay', '../lib/webfont', '../helpers/URL', '../helpers/LocalStorage', '../helpers/GridOptionsBuilder',  '../helpers/Grid', '../helpers/PlaceNotation', '../helpers/Text', '../helpers/Music'], function( $, eve, InteractiveGridOverlay, webfont, URL, LocalStorage, GridOptionsBuilder, MethodGrid, PlaceNotation, Text, Music ) {
 	var newMethodView;
-
-	// Display messages if canvas is not supported
-	if( !Modernizr.canvas ) {
-		newMethodView = function( options ) {
-			$( options.lineContainer ).html( '<div class="wrap"><img src="'+location.href+'.png?style=numbers&scale=1" /></div>' );
-			$( options.gridContainer ).html( '<div class="wrap"><img src="'+location.href+'.png?style=grid&scale=1" /></div>' );
-		};
-	}
 
 	var options, method, methodTexts,
 		lineContainer, gridContainer,

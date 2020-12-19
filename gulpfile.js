@@ -42,7 +42,6 @@ var require_paths = {
 	jquery:       'lib/jquery',
 	eve:          'lib/eve',
 	ready:        'lib/ready',
-	Modernizr:    'lib/modernizr',
 	'Array.fill': 'lib/Array.fill'
 };
 var require_shim = {

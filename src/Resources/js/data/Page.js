@@ -1,6 +1,6 @@
 // This module manages the retrieval and caching of page content and emits the page.* global events
 
-define( ['eve', 'jquery', 'Modernizr', '../helpers/URL'], function ( eve, $, Modernizr, URL ) {
+define( ['eve', 'jquery', '../helpers/URL'], function ( eve, $, URL ) {
 	var mostRecentRequest = URL.currentURL;
 
 	// Exposed API
@@ -8,11 +8,6 @@ define( ['eve', 'jquery', 'Modernizr', '../helpers/URL'], function ( eve, $, Mod
 		request: function( url, type ) {
 			// Check the URL is absolute
 			url = URL.absolutise( url );
-
-			if( !Modernizr.history ) {
-				location.href = url;
-				return;
-			}
 
 			// Update the history object, and other things that rely on knowing the current URL
 			if( type !== 'popstate') {
