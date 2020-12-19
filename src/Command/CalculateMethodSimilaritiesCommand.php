@@ -69,7 +69,7 @@ class CalculateMethodSimilaritiesCommand extends Command
             $output->writeln('<comment>If you prefer then skip this step and run this command later:</comment> \'./app/console blueline:calculateMethodSimilarities\'');
             $question = new ConfirmationQuestion('Continue calculating similarities? (Y/N) ', false);
             if (!$helper->ask($input, $output, $question)) {
-                return;
+                return 0;
             }
         }
 
