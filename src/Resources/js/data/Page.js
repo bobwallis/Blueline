@@ -1,33 +1,10 @@
 // This module manages the retrieval and caching of page content and emits the page.* global events
 
-define( ['eve', 'jquery', 'Modernizr', './Page/Cache', '../helpers/URL'], function ( eve, $, Modernizr, Cache, URL ) {
+define( ['eve', 'jquery', 'Modernizr', '../helpers/URL'], function ( eve, $, Modernizr, URL ) {
 	var mostRecentRequest = URL.currentURL;
 
 	// Exposed API
 	return {
-		prefetch: function( url ) {
-			if( Cache.works ) {
-				// Check the URL is absolute
-				url = URL.absolutise( url );
-				Cache.get( url, $.noop, function() {
-					// Check if the browser is set to offline, and fail instantly if so
-					if( typeof navigator.onLine === 'boolean' && navigator.onLine === false ) {
-						return;
-					}
-					// Otherwise, try and get the content using an AJAX request
-					else {
-						$.ajax( {
-							url: url,
-							data: 'chromeless=1',
-							dataType: 'html',
-							cache: false,
-							success: function( content ) { Cache.set( url, content ); },
-							error: $.noop
-						} );
-					}
-				} );
-			}
-		},
 		request: function( url, type ) {
 			// Check the URL is absolute
 			url = URL.absolutise( url );
@@ -66,7 +43,6 @@ define( ['eve', 'jquery', 'Modernizr', './Page/Cache', '../helpers/URL'], functi
 
 			// These functions will be executed depending on the result of the content request
 			var success = function( content ) {
-				Cache.set( url, content );
 				if( mostRecentRequest === URL.currentURL ) {
 					eve( 'page.loaded', window, {
 						URL: url,
@@ -104,23 +80,13 @@ define( ['eve', 'jquery', 'Modernizr', './Page/Cache', '../helpers/URL'], functi
 				} );
 			};
 
-			// Request the content from the cache
-			Cache.get( url, success, function() {
-				// Check if the browser is set to offline, and fail instantly if so
-				if( typeof navigator.onLine === 'boolean' && navigator.onLine === false ) {
-					failure( null, 'offline' );
-				}
-				// Otherwise, try and get the content using an AJAX request
-				else {
-					$.ajax( {
-						url: url,
-						data: 'chromeless=1',
-						dataType: 'html',
-						cache: Cache.works? false: true, // Bypass the browser's cache if our own is implemented
-						success: success,
-						error: failure
-					} );
-				}
+			// Request the content
+			$.ajax( {
+				url: url,
+				data: 'chromeless=1',
+				dataType: 'html',
+				success: success,
+				error: failure
 			} );
 		}
 	};

@@ -11,6 +11,8 @@ public/js
 public/fonts
 public/images
 public/maps
+public/service_worker.js
+public/service_worker.js.*
 
 # Managed by NPM
 node_modules/

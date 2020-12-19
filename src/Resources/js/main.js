@@ -1,4 +1,4 @@
-require( ['eve', './ui', './helpers/Analytics', './lib/webfont'], function( eve, ui, analytics, webfont ) {
+require( ['eve', 'ready', './ui', './helpers/Analytics', './lib/webfont', './helpers/ServiceWorker'], function( eve, ready, ui, analytics, webfont, ServiceWorker ) {
 	// How this will work:
 	// This site will run as a single page app if it can (using the HTML5 History API to change the
 	// the URL in the address bar). This minimises page reloads, makes everything faster, and allows
@@ -14,11 +14,14 @@ require( ['eve', './ui', './helpers/Analytics', './lib/webfont'], function( eve,
 	//  - page.loaded:   Emitted when new page content is ready for use.
 	//  - page.finished: Emitted when the content has all been put in place.
 
-	$( function() {
+	ready( function() {
 		// Ready to go!
 		eve( 'app.ready' );
 
 		// Preload the webfont
 		webfont();
+
+		// Load service worker
+		ServiceWorker.load();
 	} );
 } );

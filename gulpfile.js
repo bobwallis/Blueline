@@ -41,6 +41,7 @@ function fonts() {
 var require_paths = {
 	jquery:       'lib/jquery',
 	eve:          'lib/eve',
+	ready:        'lib/ready',
 	Modernizr:    'lib/modernizr',
 	'Array.fill': 'lib/Array.fill'
 };
@@ -68,6 +69,13 @@ function js() {
 		.pipe( sourcemaps.write('../maps') )
 		.pipe( gulp.dest( DEST+'js/' ) );
 };
+function js_serviceWorker() {
+	return gulp.src( 'src/Resources/js/service_worker.js' )
+	.pipe( sourcemaps.init() )
+	.pipe( terser( { format: { comments: false } } ) )
+	.pipe( sourcemaps.write( 'maps' ) )
+	.pipe( gulp.dest( DEST ) );
+};
 
 
 // CSS
@@ -92,15 +100,15 @@ function compressGzip() {
 
 // Watch task
 function watch() {
-	gulp.watch( ['src/Resources/public/images/**/*'], images );
-	gulp.watch( ['src/Resources/public/fonts/*'], fonts );
-	gulp.watch( ['src/Resources/public/css/**/*'], css );
-	gulp.watch( ['src/Resources/public/js/**/*'], js );
+	gulp.watch( ['src/Resources/images/**/*'], images );
+	gulp.watch( ['src/Resources/fonts/*'], fonts );
+	gulp.watch( ['src/Resources/css/**/*'], css );
+	gulp.watch( ['src/Resources/js/**/*'], gulp.parallel( js, js_serviceWorker ) );
 };
 
 
-exports.default = gulp.series( gulp.parallel( css, js, fonts ), compressGzip );
+exports.default = gulp.series( gulp.parallel( css, js, js_serviceWorker, fonts ), compressGzip );
 exports.css = gulp.series( css, compressGzip );
-exports.js = gulp.series( js, compressGzip );
+exports.js = gulp.series( gulp.parallel( js, js_serviceWorker ), compressGzip );
 exports.images = gulp.series( gulp.parallel( images ), compressGzip );
 exports.watch = watch;

@@ -1,6 +1,6 @@
 // Manage changes to the UI at a document/body level
 
-define( ['jquery', 'eve', 'Modernizr', '../helpers/URL', '../data/Page', './Document/Title', './Document/Hotkeys', './Document/Forms'], function( $, eve, Modernizr, URL, Page ) {
+define( ['jquery', 'eve', 'Modernizr', '../helpers/ServiceWorker', '../helpers/URL', '../data/Page', './Document/Title', './Document/Hotkeys', './Document/Forms'], function( $, eve, Modernizr, ServiceWorker, URL, Page ) {
 	// Remove the app start screen (the loading overlay that covers the page while waiting for the
 	// UI to load properly when we are running as an iOS web app)
 	eve.once( 'app.ready', function() {
@@ -25,9 +25,9 @@ define( ['jquery', 'eve', 'Modernizr', '../helpers/URL', '../data/Page', './Docu
 			var $target = $( e.target );
 			// Get the href of the link
 			var href = $target.attr( 'href' );
-			// If the URL is internal, push it (which will trigger a statechange)
+			// If the URL is internal, ask the service worker to prefetch it
 			if( href && URL.isInternal( href ) && !($target.data( 'forcerefresh' ) === true) ) {
-				Page.prefetch( href );
+				ServiceWorker.prefetch( href );
 			}
 		} );
 
