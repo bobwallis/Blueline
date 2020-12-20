@@ -8,35 +8,37 @@ define( ['jquery', 'eve', '../helpers/ServiceWorker', '../helpers/URL', '../data
 		$('body script:first-child').remove();
 	} );
 
-	// Listen at the document.body level for click events, and request new pages without reload
-	$( document.body ).on( 'click', 'a', function( e ) {
-		var $target = $( e.target );
-		// Get the href of the link
-		var href = $target.attr( 'href' );
-		// If the URL is internal, push it (which will trigger a statechange)
-		if( href && URL.isInternal( href ) && !($target.data( 'forcerefresh' ) === true) ) {
-			e.preventDefault();
-			Page.request( href, 'click' );
-		}
-	} );
-	$( document.body ).on( 'mouseenter', 'a', function( e ) {
-		var $target = $( e.target );
-		// Get the href of the link
-		var href = $target.attr( 'href' );
-		// If the URL is internal, ask the service worker to prefetch it
-		if( href && URL.isInternal( href ) && !($target.data( 'forcerefresh' ) === true) ) {
-			ServiceWorker.prefetch( href );
-		}
-	} );
-
-	// Capture and process back/forward events
-	window.history.replaceState( { url: location.href, type: 'load' }, null, location.href );
-	$( function() {
-		$( window ).on( 'popstate', function( e ) {
-			var state = e.originalEvent.state;
-			if( state !== null && typeof state.url === 'string' ) {
-				Page.request( state.url, 'popstate' );
+	if( 'serviceWorker' in navigator ) {
+		// Listen at the document.body level for click events, and request new pages without reload
+		$( document.body ).on( 'click', 'a', function( e ) {
+			var $target = $( e.target );
+			// Get the href of the link
+			var href = $target.attr( 'href' );
+			// If the URL is internal, push it (which will trigger a statechange)
+			if( href && URL.isInternal( href ) && !($target.data( 'forcerefresh' ) === true) ) {
+				e.preventDefault();
+				Page.request( href, 'click' );
 			}
 		} );
-	} );
+		$( document.body ).on( 'mouseenter', 'a', function( e ) {
+			var $target = $( e.target );
+			// Get the href of the link
+			var href = $target.attr( 'href' );
+			// If the URL is internal, ask the service worker to prefetch it
+			if( href && URL.isInternal( href ) && !($target.data( 'forcerefresh' ) === true) ) {
+				ServiceWorker.prefetch( href );
+			}
+		} );
+
+		// Capture and process back/forward events
+		window.history.replaceState( { url: location.href, type: 'load' }, null, location.href );
+		$( function() {
+			$( window ).on( 'popstate', function( e ) {
+				var state = e.originalEvent.state;
+				if( state !== null && typeof state.url === 'string' ) {
+					Page.request( state.url, 'popstate' );
+				}
+			} );
+		} );
+	}
 } );

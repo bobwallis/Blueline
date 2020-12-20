@@ -67,48 +67,50 @@ define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve
 		$search.finish();
 	} );
 
-	// Capture keypresses and load in the page without a refresh if the browser supports it
-	$(document).on( 'keyup', '#q, #q2', function( e ) {
-		var $input = $( e.target ),
-			$form = $input.closest( 'form' ),
-			href;
+	if( 'serviceWorker' in navigator ) {
+		// Capture keypresses and load in the page without a refresh if the browser supports it
+		$(document).on( 'keyup', '#q, #q2', function( e ) {
+			var $input = $( e.target ),
+				$form = $input.closest( 'form' ),
+				href;
 
-		// Don't fire for various non-character keys, or if the input has been
-		// focussed by a '/' press
-		if( e.type === 'keyup' && ( [13,16,17,27,33,34,35,36,37,38,39,40,45,91].indexOf( e.which ) !== -1 || ( e.which === 191 && $input.val().indexOf( '/' ) === -1 ) ) ) {
-			return true;
-		}
+			// Don't fire for various non-character keys, or if the input has been
+			// focussed by a '/' press
+			if( e.type === 'keyup' && ( [13,16,17,27,33,34,35,36,37,38,39,40,45,91].indexOf( e.which ) !== -1 || ( e.which === 191 && $input.val().indexOf( '/' ) === -1 ) ) ) {
+				return true;
+			}
 
-		// Check if the search box, has been emptied. If this is the case then
-		// hop back up to the main section page
-		if( $input.val() === '' ) {
-			href = $form.attr( 'action' ).replace( /search$/, '' );
-			eve.once( 'page.loaded', function() {
-				$( '#q2' ).focus();
-			} );
-		}
-		// Otherwise, submit the form
-		else if( $form.length > 0 ) {
-			href = $form.attr( 'action' ) + '?' + $form.serialize();
-		}
-		// If starting a search from the dummy search box on welcome pages the hop into the main search box
-		if( $input.is('#q2') ) {
-			$search.show();
-			$q.focus().val( $input.val() );
-		}
+			// Check if the search box, has been emptied. If this is the case then
+			// hop back up to the main section page
+			if( $input.val() === '' ) {
+				href = $form.attr( 'action' ).replace( /search$/, '' );
+				eve.once( 'page.loaded', function() {
+					$( '#q2' ).focus();
+				} );
+			}
+			// Otherwise, submit the form
+			else if( $form.length > 0 ) {
+				href = $form.attr( 'action' ) + '?' + $form.serialize();
+			}
+			// If starting a search from the dummy search box on welcome pages the hop into the main search box
+			if( $input.is('#q2') ) {
+				$search.show();
+				$q.focus().val( $input.val() );
+			}
 
-		// Defer the eve event handlers until the next time the event loop comes around, to
-		// minimise the any delay in updating the UI
-		setTimeout( function() { Page.request( href, e.type ); }, 1 );
-	} );
+			// Defer the eve event handlers until the next time the event loop comes around, to
+			// minimise the any delay in updating the UI
+			setTimeout( function() { Page.request( href, e.type ); }, 1 );
+		} );
 
-	// Submit. Triggered when a form is submitted
-	$( document.body ).on( 'submit', '#search, #custom_method', function( e ) {
-		var $form = $( e.target ),
-			href = $form.attr( 'action' ) + '?' + $form.serialize();
-		e.preventDefault();
-		Page.request( href, 'submit' );
-	} );
+		// Submit. Triggered when a form is submitted
+		$( document.body ).on( 'submit', '#search, #custom_method', function( e ) {
+			var $form = $( e.target ),
+				href = $form.attr( 'action' ) + '?' + $form.serialize();
+			e.preventDefault();
+			Page.request( href, 'submit' );
+		} );
+	}
 
 	return Search;
 } );
