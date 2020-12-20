@@ -26,15 +26,6 @@ class DefaultControllerTest extends WebTestCase
         }
     }
 
-    // .manifest
-    public function testManifest()
-    {
-        $client = static::createClient();
-        $crawler = $client->request('GET', '/site.manifest');
-        $this->assertTrue($client->getResponse()->isSuccessful(), 'site.manifest request unsuccessful');
-        $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'text/cache-manifest; charset=UTF-8'), '.site.manifest Content-Type header wrong');
-    }
-
     // XML sitemaps/browserconfig
     public function testSitemaps()
     {
