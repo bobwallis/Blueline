@@ -48,40 +48,13 @@ define( ['eve', 'jquery', '../helpers/URL'], function ( eve, $, URL ) {
 				}
 			};
 
-			var failure = function( jqXHR, textStatus, errorThrown ) {
-				var content;
-				switch( textStatus ) {
-					case 'offline':
-						content = '<section class="text"><div class="wrap"><p class="appError">Content is unavailable while offline. <a href="javascript:history.go(-1)">Go back</a>.</p></div></section>';
-						break;
-					case 'timeout':
-						content = '<section class="text"><div class="wrap"><p class="appError">Request timed out. <a href="javascript:location.reload(true)">Refresh</a> to retry.</p></div></section>';
-						break;
-					case 'error':
-						if( !errorThrown ) {
-							// Assume any undefined errors are due to being offline
-							content = '<section class="text"><div class="wrap"><p class="appError">Unknown error, you may be offline. Try reloading. <a href="javascript:history.go(-1)">Go back</a>.</p></div></section>';
-							break;
-						}
-					default:
-						content = '<section class="text"><header><h1>'+errorThrown+'</h1></header><div class="wrap"><p>An error has ocurred. The server returned a "'+errorThrown+'" status code.</p></div></section>';
-						break;
-				}
-				eve( 'page.loaded', window, {
-					URL: url,
-					content: content,
-					section: newURL_section,
-					showSearchBar: newURL_showSearchBar
-				} );
-			};
-
 			// Request the content
 			$.ajax( {
 				url: url,
 				data: 'chromeless=1',
 				dataType: 'html',
 				success: success,
-				error: failure
+				error: success
 			} );
 		}
 	};

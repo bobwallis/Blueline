@@ -53,10 +53,16 @@ self.addEventListener( 'fetch', function( event ) {
     event.respondWith(
         caches.open( currentCacheName ).then( function( cache ) {
             return cache.match( event.request ).then( function( response ) {
-                return response || fetch( event.request ).then( function( response ) {
-                    cache.put( event.request, response.clone() );
-                    return response;
-                } );
+                return response || fetch( event.request )
+                    .then( function( response ) {
+                        if( response.ok ) {
+                            cache.put( event.request, response.clone() );
+                        }
+                        return response;
+                    } )
+                    .catch( function( error ) {
+                        return new Response( '<section class="text"><div class="wrap"><p class="appError">An error occurred, you may be offline. Try <a href="javascript:location.reload(true)">reloading</a>, or <a href="javascript:history.go(-1)">go back</a>.</p></div></section>', { status: 200, headers: { 'Content-Type': 'text/html; charset=UTF-8' } } );
+                    } );
             } );
         } )
     );
