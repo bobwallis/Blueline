@@ -1,4 +1,4 @@
-define( ['jquery', '../PlaceNotation', '../MeasureCanvasText'], function( $, PlaceNotation, MeasureCanvasText ) {
+define( ['deepmerge', '../PlaceNotation', '../MeasureCanvasText'], function( deepmerge, PlaceNotation, MeasureCanvasText ) {
 
 	// Default options (note runtime defaults are set later)
 	var defaultOptions = {
@@ -83,6 +83,7 @@ define( ['jquery', '../PlaceNotation', '../MeasureCanvasText'], function( $, Pla
 
 	return function( passedOptions ) {
 		var options = {};
+		passedOptions = passedOptions || {};
 
 		// Parse notation passed as a string
 		if( typeof passedOptions.notation === 'string' ) {
@@ -150,7 +151,7 @@ define( ['jquery', '../PlaceNotation', '../MeasureCanvasText'], function( $, Pla
 		} );
 
 		// Merge options object with the defaults
-		options = $.extend( true, {}, defaultOptions, defaultRuntimeOptions, passedOptions );
+		options = deepmerge.all( [{}, defaultOptions, defaultRuntimeOptions, passedOptions] );
 
 		// Allow title to be shown by just setting title.text
 		if( options.title.text !== null ) { options.title.show = true; }

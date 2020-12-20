@@ -1,21 +1,20 @@
-define( ['jquery', 'eve'], function( $, eve ) {
-	var $content = $( '#content' ),
-		$loading = $( '<div id="loading"></div>' ),
+define( ['eve'], function( eve ) {
+	var contentEl = document.getElementById( 'content' ),
+		loadingEl = document.createElement( 'div' ),
 		showLoadingTimeout;
 
-	$( document.body ).append( $loading );
+	loadingEl.id = 'loading';
+	document.body.appendChild( loadingEl );
 
 	eve.on( 'page.request', function() {
 		// Only clear the current content if the history event isn't a 'keyup' one
-		if( window.history.state === null || typeof window.history.state.type !== 'string' || window.history.state.type !== 'keyup' || $('#q2').length ) {
-			$content.queue( function( next ) {
-				$content.empty().hide();
-				next();
-			} );
+		if( window.history.state === null || typeof window.history.state.type !== 'string' || window.history.state.type !== 'keyup' ) {
+			contentEl.style.display = 'none';
+			contentEl.innerHTML = '';
 
 			// Show the loading overlay
 			showLoadingTimeout = setTimeout( function() {
-				$loading.fadeIn( 200 );
+				loadingEl.style.display = 'block';
 			} , 150 );
 		}
 	} );
@@ -23,20 +22,13 @@ define( ['jquery', 'eve'], function( $, eve ) {
 	eve.on( 'page.loaded', function( result ) {
 		// Hide the loading overlay
 		clearTimeout( showLoadingTimeout );
-		$loading.stop().hide();
+		loadingEl.style.display = 'none';
 
 		if( typeof result.content !== 'undefined' ) {
 			// Add the content to #content (the container will be cleared and hidden already)
-			$content.queue( function( next ) {
-				$content.html( result.content );
-				next();
-			} );
-
-			$content.queue( function( next ) {
-				$content.show();
-				eve( 'page.finished', window, result.URL );
-				next();
-			} );
+			contentEl.innerHTML = result.content;
+			contentEl.style.display = 'block';
+			eve( 'page.finished', window, result.URL );
 		}
 	} );
 } );

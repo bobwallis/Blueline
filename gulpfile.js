@@ -42,6 +42,8 @@ var require_paths = {
 	jquery:       'lib/jquery',
 	eve:          'lib/eve',
 	ready:        'lib/ready',
+	deepmerge:    'lib/deepmerge',
+	matches:      'lib/matches',
 	'Array.fill': 'lib/Array.fill'
 };
 var require_shim = {

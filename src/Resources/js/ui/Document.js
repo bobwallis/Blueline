@@ -1,6 +1,6 @@
 // Manage changes to the UI at a document/body level
 
-define( ['jquery', 'eve', '../helpers/ServiceWorker', '../helpers/URL', '../data/Page', './Document/Title', './Document/Hotkeys', './Document/Forms'], function( $, eve, ServiceWorker, URL, Page ) {
+define( ['jquery', 'eve', '../helpers/ServiceWorker', '../helpers/URL', '../data/Page', './Document/Title', './Document/Hotkeys'], function( $, eve, ServiceWorker, URL, Page ) {
 	// Remove the app start screen (the loading overlay that covers the page while waiting for the
 	// UI to load properly when we are running as an iOS web app)
 	eve.once( 'app.ready', function() {

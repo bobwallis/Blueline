@@ -1,8 +1,8 @@
 // Manage the window title
 
 define( ['eve'], function( eve ) {
-	var regExp_section = /\/(associations|methods|towers)\//,
-		regExp_search = /\/(associations|methods|towers)\/search/;
+	var regExp_section = /\/(methods)\//,
+		regExp_search = /\/(methods)\/search/;
 
 	// Update the window title on page changes
 	eve.on( 'page.finished', function( url ) {

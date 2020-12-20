@@ -1,4 +1,4 @@
-define( ['jquery', 'eve', './MethodView/InteractiveGridOverlay', '../lib/webfont', '../helpers/URL', '../helpers/LocalStorage', '../helpers/GridOptionsBuilder',  '../helpers/Grid', '../helpers/PlaceNotation', '../helpers/Text', '../helpers/Music'], function( $, eve, InteractiveGridOverlay, webfont, URL, LocalStorage, GridOptionsBuilder, MethodGrid, PlaceNotation, Text, Music ) {
+define( ['jquery', 'deepmerge', 'eve', './MethodView/InteractiveGridOverlay', '../lib/webfont', '../helpers/URL', '../helpers/LocalStorage', '../helpers/GridOptionsBuilder',  '../helpers/Grid', '../helpers/PlaceNotation', '../helpers/Text', '../helpers/Music'], function( $, deepmerge, eve, InteractiveGridOverlay, webfont, URL, LocalStorage, GridOptionsBuilder, MethodGrid, PlaceNotation, Text, Music ) {
 	var newMethodView;
 
 	var options, method, methodTexts,
@@ -30,7 +30,7 @@ define( ['jquery', 'eve', './MethodView/InteractiveGridOverlay', '../lib/webfont
 			// Re-create method object if the bell being followed has changed
 			if( newFollow !== lastFollow ) {
 				options.workingBell = newFollow;
-				method = new GridOptionsBuilder( $.extend( true, {}, options ) );
+				method = new GridOptionsBuilder( deepmerge( {}, options ) );
 			}
 
 			if( newShowTooltips !== lastShowToolTips || newFollow !== lastFollow ) {

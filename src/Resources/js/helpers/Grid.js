@@ -1,10 +1,10 @@
-define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../ui/Canvas', './MeasureCanvasTextOffset'], function( require, $, GridOptions, PlaceNotation, Canvas, MeasureCanvasTextOffset ) {
+define( ['deepmerge', './Grid/Options', './PlaceNotation', '../ui/Canvas', './MeasureCanvasTextOffset'], function( deepmerge, GridOptions, PlaceNotation, Canvas, MeasureCanvasTextOffset ) {
 
 	var MethodGrid = function( passedOptions ) {
 		var options = {};
 
 		this.setOptions = function( passedOptions ) {
-			options = GridOptions( $.extend( true, options, passedOptions ) );
+			options = GridOptions( deepmerge( options, passedOptions ) );
 		};
 
 		this.getOptions = function() {
@@ -18,11 +18,11 @@ define( ['require', 'jquery', './Grid/Options', './PlaceNotation', '../ui/Canvas
 		this.draw = function( returnImage ) {
 			returnImage = (typeof returnImage !== 'boolean')? false : returnImage;
 			// Set up canvas
-			var canvas =  new Canvas( $.extend( ((typeof options.scale === 'number')? { scale: options.scale } : {}), {
+			var canvas =  new Canvas( deepmerge.all( [((typeof options.scale === 'number')? { scale: options.scale } : {}), {
 				id: options.id,
 				width: options.dimensions.canvas.width,
 				height: options.dimensions.canvas.height
-			} ) );
+			}] ) );
 
 			// Create some shortcut variables for later use
 			var i, j, k, l, m, h, w, x, y,

@@ -3,8 +3,7 @@
 // data requests
 
 define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve, $, URL, Page ) {
-	var $top = $( '#top' ),
-		$content = $( '#content' ),
+	var $content = $( '#content' ),
 		$search = $( '#search' ),
 		$q = $( '#q' );
 

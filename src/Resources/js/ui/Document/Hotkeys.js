@@ -27,14 +27,11 @@ define( ['jquery'], function( $ ) {
 				windowScrollBottom = windowScrollTop + $window.height();
 			switch( e.which ) {
 				// Open sections when on the welcome page
-				case a:
-					$( '#welcome_associations a:first' ).click();
-					break;
 				case m:
 					$( '#welcome_methods a:first' ).click();
 					break;
 				case t:
-					$( '#welcome_towers a:first' ).click();
+					$( '#welcome_tutorials a:first' ).click();
 					break;
 
 				// Click paging links
