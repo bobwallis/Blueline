@@ -1,6 +1,6 @@
 // This module manages the retrieval and caching of page content and emits the page.* global events
 
-define( ['eve', 'jquery', '../helpers/URL'], function ( eve, $, URL ) {
+define( ['eve', '../helpers/URL'], function ( eve, URL ) {
 	var mostRecentRequest = URL.currentURL;
 
 	// Exposed API
@@ -35,9 +35,10 @@ define( ['eve', 'jquery', '../helpers/URL'], function ( eve, $, URL ) {
 			} );
 			URL.currentURL = mostRecentRequest = url;
 
-
-			// These functions will be executed depending on the result of the content request
-			var success = function( content ) {
+			var request = new XMLHttpRequest();
+			request.open( 'GET', ((url.indexOf( '?' ) === -1)? url+'?chromeless=1' : url + '&chromeless=1'), true );
+			request.onload = function() {
+				var content = this.response;
 				if( mostRecentRequest === URL.currentURL ) {
 					eve( 'page.loaded', window, {
 						URL: url,
@@ -47,15 +48,7 @@ define( ['eve', 'jquery', '../helpers/URL'], function ( eve, $, URL ) {
 					} );
 				}
 			};
-
-			// Request the content
-			$.ajax( {
-				url: url,
-				data: 'chromeless=1',
-				dataType: 'html',
-				success: success,
-				error: success
-			} );
+			request.send();
 		}
 	};
 } );
