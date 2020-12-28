@@ -15,7 +15,7 @@ Blueline_resource:
     path: /{page}.{_format}
     defaults: { _controller: Blueline\Controller\DefaultController::resource }
     requirements:
-        page: robots|humans|sitemap|sitemap_root|browserconfig|manifest
+        page: robots|humans|sitemap|sitemap_root|manifest
         _format: json|txt|xml
 
 

@@ -8,8 +8,7 @@
 
 		{# Icons #}
 		<link rel="icon" type="image/svg+xml" sizes="any" href="{{ app.request.basepath }}/favicon.svg" />
-		<link rel="alternate icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="{{ app.request.basepath }}/favicon.ico" />
-		<link rel="mask-icon" href="{{ app.request.basepath }}/images/maskicon.svg" color="#002856" />
+		<link rel="icon" href="{{ app.request.basepath }}/favicon.ico" />
 
 		{# Web app manifest #}
 		<link rel="manifest" href="{{ path( 'Blueline_resource', { page: 'manifest', _format: 'json' } ) }}" />
@@ -19,7 +18,6 @@
 
 		{# Chrome web app tags #}
 		<meta name="mobile-web-app-capable" content="yes" />
-		<link rel="icon" sizes="192x192" href="{{ app.request.basepath }}/images/androidicon-192x192.png" />
 
 		{# iOS meta tags #}
 		<meta name="apple-mobile-web-app-capable" content="yes" />
@@ -29,13 +27,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="apple-touch-icon" href="{{ app.request.basepath }}/images/appicon-180x180.png" />
 
-		{# IE Pinned Sites tags #}
-		<meta name="msapplication-starturl" content="{{ app.request.scheme ~  '://' ~ app.request.host ~ path( 'Blueline_welcome' ) }}" />
-		<meta name="msapplication-config" content="{{ path( 'Blueline_resource', { page: 'browserconfig', _format: 'xml' } ) }}" />
-
 		{# Color browser address bars #}
 		<meta name="theme-color" content="#002856" />
-		<meta name="msapplication-navbutton-color" content="#002856" />
 
 		{# Meta description #}
 		{% set _block = block('og_description') %}
