@@ -101,30 +101,34 @@ class CalculateMethodSimilaritiesCommand extends Command
         $progress->setRedrawFrequency(max(1, min(20, count($methods)/100)));
         $progress->start();
         foreach ($methods as $method) {
-            // Generate the array for the method we're generating indexes for
-            $methodRowArray = array_map($mapper, PlaceNotation::apply(PlaceNotation::explodedToPermutations($method['stage'], PlaceNotation::explode($method['notationexpanded'])), $rounds[$method['stage']]));
+            try {
+                // Generate the array for the method we're generating indexes for
+                $methodRowArray = array_map($mapper, PlaceNotation::apply(PlaceNotation::explodedToPermutations($method['stage'], PlaceNotation::explode($method['notationexpanded'])), $rounds[$method['stage']]));
 
-            // Get methods to compare against
-            $comparisons = pg_execute($db, 'comparisonMethods', array($method['stage'], $method['title'], $method['lengthoflead']));
-            if ($comparisons === false) {
-                $output->writeln('<error>Failed to query for methods to compare \''.' '.'\'against: '.pg_last_error($db).'</error>');
-                continue;
-            }
-            $comparisons = pg_fetch_all($comparisons) ?: array();
-
-            // Insert the obvious similar method so we don't try to recalculate everything the next time the command runs
-            pg_insert($db, 'methods_similar', array('method1_title' => $method['title'], 'method2_title' => $method['title'], 'similarity' => 0));
-
-            // Compare each one and add to the similarity table (if similar enough)
-            $limit = max(1, floor($method['lengthoflead']/5));
-            foreach ($comparisons as $comparison) {
-                $similar = MethodSimilarity::calculate($methodRowArray, $comparison['notationexpanded'], $method['stage'], $limit);
-                if ($similar < $limit) {
-                    pg_insert($db, 'methods_similar', array('method1_title' => $method['title'],     'method2_title' => $comparison['title'], 'similarity' => $similar));
-                    pg_insert($db, 'methods_similar', array('method1_title' => $comparison['title'], 'method2_title' => $method['title'], 'similarity' => $similar));
+                // Get methods to compare against
+                $comparisons = pg_execute($db, 'comparisonMethods', array($method['stage'], $method['title'], $method['lengthoflead']));
+                if ($comparisons === false) {
+                    $output->writeln('<error>Failed to query for methods to compare \''.$method['title'].'\'against: '.pg_last_error($db).'</error>');
+                    continue;
                 }
+                $comparisons = pg_fetch_all($comparisons) ?: array();
+
+                // Insert the obvious similar method so we don't try to recalculate everything the next time the command runs
+                pg_insert($db, 'methods_similar', array('method1_title' => $method['title'], 'method2_title' => $method['title'], 'similarity' => 0));
+
+                // Compare each one and add to the similarity table (if similar enough)
+                $limit = max(1, floor($method['lengthoflead']/5));
+                foreach ($comparisons as $comparison) {
+                    $similar = MethodSimilarity::calculate($methodRowArray, $comparison['notationexpanded'], $method['stage'], $limit);
+                    if ($similar < $limit) {
+                        pg_insert($db, 'methods_similar', array('method1_title' => $method['title'],     'method2_title' => $comparison['title'], 'similarity' => $similar));
+                        pg_insert($db, 'methods_similar', array('method1_title' => $comparison['title'], 'method2_title' => $method['title'], 'similarity' => $similar));
+                    }
+                }
+                pg_flush($db);
+            } catch(Exception $e) {
+                $output->writeln('<error>Failed to calculate similartities for \''.$method['title'].'\' with notation \''.$method['notationexpanded'].'\'</error>');
             }
-            pg_flush($db);
             $progress->advance();
         }
         $progress->finish();
