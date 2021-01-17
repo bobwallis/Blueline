@@ -91,3 +91,6 @@ if [[ $CCCBRDATA = true ]]
 	then
 	"$d/bin/fetchAndImportData"
 fi
+
+# Dump environment
+symfony composer dump-env prod
