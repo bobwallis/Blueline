@@ -21,7 +21,7 @@
     "gulp-less": "^4.0.1",
     "gulp-requirejs": "^1.4.0",
     "gulp-sourcemaps": "^3.0.0",
-    "gulp-terser": "^2.0.0",
+    "gulp-terser": "^2.0.1",
     "merge-stream": "^2.0.0",
     "puppeteer": "^5.5.0"
   },

@@ -317,6 +317,9 @@
     "symfony/property-info": {
         "version": "v4.4.15"
     },
+    "symfony/proxy-manager-bridge": {
+        "version": "v5.2.1"
+    },
     "symfony/routing": {
         "version": "5.1",
         "recipe": {
