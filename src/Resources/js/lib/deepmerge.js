@@ -46,18 +46,17 @@
 			return cloneUnlessOtherwiseSpecified(element, options)
         })
     */
-        var destination = target.slice()
-
+        var destination = target.slice();
         source.forEach( function(item, index) {
             if (typeof destination[index] === 'undefined') {
                 destination[index] = options.cloneUnlessOtherwiseSpecified(item, options);
             } else if (options.isMergeableObject(item)) {
                 destination[index] = deepmerge(target[index], item, options);
-            } else if (target.indexOf(item) === -1) {
-                destination.push(item);
+            } else {
+                destination[index] = item;
             }
         } );
-        return destination
+        return destination;
 	}
 
 	function getMergeFunction(key, options) {
