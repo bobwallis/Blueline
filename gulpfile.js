@@ -11,6 +11,7 @@ var requirejs    = require( 'gulp-requirejs' );
 var amdclean     = require( 'gulp-amdclean' );
 var terser       = require( 'gulp-terser' );
 var sourcemaps   = require( 'gulp-sourcemaps' );
+var footer       = require( 'gulp-footer' );
 
 
 // Images
@@ -74,6 +75,7 @@ function js_serviceWorker() {
 	return gulp.src( 'src/Resources/js/service_worker.js' )
 	.pipe( sourcemaps.init() )
 	.pipe( terser( { format: { comments: false } } ) )
+	.pipe( footer( "\n//# "+(new Date().toISOString()) ) )
 	.pipe( sourcemaps.write( 'maps' ) )
 	.pipe( gulp.dest( DEST ) );
 };

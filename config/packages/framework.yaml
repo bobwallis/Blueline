@@ -16,3 +16,5 @@ framework:
     php_errors:
         log: true
     validation: { enable_annotations: true }
+    assets:
+        version: '%env(ASSET_UPDATE)%'
