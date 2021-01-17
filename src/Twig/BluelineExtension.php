@@ -51,7 +51,6 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
     public function getGlobals(): array
     {
         return array(
-            'analytics_code' => getenv('ANALYTICS_CODE'),
             'chromeless'     => $this->chromeless,
             'html_age'       => ($this->environment == 'prod') ? getenv('ASSET_UPDATE') : date('YmdHis'),
             'db_age'         => getenv('DATABASE_UPDATE'),

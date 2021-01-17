@@ -1,4 +1,4 @@
-require( ['eve', 'ready', './ui', './helpers/Analytics', './lib/webfont', './helpers/ServiceWorker'], function( eve, ready, ui, analytics, webfont, ServiceWorker ) {
+require( ['eve', 'ready', './ui', './lib/webfont', './helpers/ServiceWorker'], function( eve, ready, ui, webfont, ServiceWorker ) {
 	// How this will work:
 	// This site will run as a single page app if it can (using the HTML5 History API to change the
 	// the URL in the address bar). This minimises page reloads, makes everything faster, and allows
