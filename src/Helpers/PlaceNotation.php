@@ -321,7 +321,7 @@ class PlaceNotation
         // Explode notation
         $notationExploded = self::explode($notationFull);
 
-        // Worj through each piece of notation individually to do last bits of cleanup
+        // Work through each piece of notation individually to do last bits of cleanup
         foreach ($notationExploded as &$split) {
             if ($split == 'x') {
                 if ($stage%2 != 0) {
