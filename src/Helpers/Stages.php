@@ -14,6 +14,7 @@ class Stages
      * @access private
      */
     private static $_numberToStage = array(
+        2 =>    'Two',
         3 =>    'Singles',
         4 =>    'Minimus',
         5 =>    'Doubles',

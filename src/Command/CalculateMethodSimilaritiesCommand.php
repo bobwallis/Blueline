@@ -87,7 +87,7 @@ class CalculateMethodSimilaritiesCommand extends Command
 
         // Generate rounds for each stage
         $rounds = array();
-        for ($i = 3; $i < 23; ++$i) {
+        for ($i = 2; $i < 23; ++$i) {
             $rounds[$i] = PlaceNotation::rounds($i);
         }
         // And a function that converts row arrays into string arrays
@@ -102,7 +102,9 @@ class CalculateMethodSimilaritiesCommand extends Command
         $progress->start();
         foreach ($methods as $method) {
             // Generate the array for the method we're generating indexes for
-            $methodRowArray = array_map($mapper, PlaceNotation::apply(PlaceNotation::explodedToPermutations($method['stage'], PlaceNotation::explode($method['notationexpanded'])), $rounds[$method['stage']]));
+            $notationExploded     = PlaceNotation::explode($method['notationexpanded']);
+            $notationPermutations = PlaceNotation::explodedToPermutations($method['stage'], $notationExploded);
+            $methodRowArray       = array_map($mapper, PlaceNotation::apply($notationPermutations, $rounds[$method['stage']]));
 
             // Get methods to compare against
             $comparisons = pg_execute($db, 'comparisonMethods', array($method['stage'], $method['title'], $method['lengthoflead']));
