@@ -35,6 +35,7 @@ while getopts_long :dpfeh opt \
 		case "$opt" in
 			d|nodata) CCCBRDATA=false;;
 			p|nopull) GITPULL=false;;
+			e|dev) DEV=true;;
 			h|help) usage; exit 0;;
 			:) printf >&2 '%s: %s\n' "${0##*/}" "$OPTLERR"
 				usage
@@ -60,12 +61,22 @@ fi
 
 # Update vendors
 echo -e "\n\033[1mUpdating /vendors\033[0m"
-symfony composer install
+if [[ $DEV = true ]]
+	then
+	symfony composer update
+	else
+	symfony composer install
+fi
 symfony composer dump-autoload --optimize
 
 # Update node_modules
 echo -e "\n\033[1mUpdating /node_modules\033[0m"
-npm install
+if [[ $DEV = true ]]
+	then
+	npm update --save-dev
+	else
+	npm install
+fi
 npm audit fix
 
 # Clear cache
