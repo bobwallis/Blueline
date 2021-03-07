@@ -1,8 +1,9 @@
 define( function() {
 	var prefix = 'blueline_',
 		dataAge = document.getElementsByTagName('html')[0].getAttribute( 'data-age' ),
+		now = (new Date()).toISOString().substr(0,19).replace(/[-:T]/g,''),
 		LocalStorage = {
-			age: parseInt(dataAge)
+			age: parseInt( (dataAge === 'dev')? now : dataAge )
 		};
 	LocalStorage.getItem = function( key ) {
 		return JSON.parse( localStorage.getItem( prefix+key ) );
