@@ -4,7 +4,7 @@ self.addEventListener( 'install', function( event ) {
     var swScriptUrl = new URL( self.location ),
         base    = swScriptUrl.searchParams.get( 'base' ),
         currentCacheName = 'static-'+version;
-    self.skipWaiting();
+    // Populate initial cache
     event.waitUntil(
         caches.open( currentCacheName ).then( function( cache ) {
             return cache.addAll( [
@@ -26,11 +26,11 @@ self.addEventListener( 'install', function( event ) {
             ] );
         } )
     );
+    self.skipWaiting();
 } );
 
 self.addEventListener( 'activate', function( event ) {
-    var swScriptUrl = new URL( self.location ),
-        currentCacheName = 'static-'+version;
+    var currentCacheName = 'static-'+version;
 
     // Clear old caches
     event.waitUntil(
@@ -41,14 +41,12 @@ self.addEventListener( 'activate', function( event ) {
             );
         } )
     );
-    self.clients.claim();
+    event.waitUntil(clients.claim());
 } );
 
 // Fetch URLs when requested, through a cache
 self.addEventListener( 'fetch', function( event ) {
-    var swScriptUrl = new URL( self.location ),
-        version = swScriptUrl.searchParams.get( 'v' ),
-        currentCacheName = 'static-'+version;
+    var currentCacheName = 'static-'+version;
 
     event.respondWith(
         caches.open( currentCacheName ).then( function( cache ) {
@@ -71,7 +69,6 @@ self.addEventListener( 'fetch', function( event ) {
 // Prefetch URLs when requested
 self.addEventListener( 'message', function( event ) {
     var swScriptUrl = new URL( self.location ),
-        version = swScriptUrl.searchParams.get( 'v' ),
         base    = swScriptUrl.searchParams.get( 'base' ),
         currentCacheName = 'static-'+version;
 
