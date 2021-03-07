@@ -25,7 +25,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         # Gifsicle
         zlib1g-dev libicu-dev g++ automake \
         # Pupeteer
-        dumb-init libnss3 libatk1.0 libatk-bridge2.0 libx11-xcb1 libxcb-dri3-0 libxcomposite1 libxdamage1 libcups2 libdrm2 libxrandr2 libgbm1 libasound2 libpangocairo-1.0 libgtk-3-0 \
+        dumb-init libnss3 libatk1.0 libatk-bridge2.0 libx11-xcb1 libxcb-dri3-0 libxcomposite1 libxdamage1 libcups2 libdrm2 libxrandr2 libgbm1 libasound2 libpangocairo-1.0 libgtk-3-0 libxshmfence1 \
     # Opcache
     && docker-php-ext-install opcache \
     && docker-php-ext-enable opcache \
