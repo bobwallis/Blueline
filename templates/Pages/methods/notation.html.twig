@@ -21,14 +21,14 @@
 			<h2>Shortened Forms</h2>
 			<p>Writing out the full place notation can be quite lengthy. The below are ways to shorten place notation.</p>
 			<h3>Implicit Places</h3>
-			<p>External places are those made at the start or end of the change (leading or lying). These can be omitted if they are implied by the other places made in the change (due to the fact that bells can't swap in pairs if there is an odd number of positions left).<br />e.g. on Minor: 'x1x145' => 'x16x1456'; 'x456x6' => 'x1456x16'.</p>
+			<p>External places are those made at the start or end of the change (leading or lying). These can be omitted if they are implied by the other places made in the change (due to the fact that bells can't swap in pairs if there is an odd number of positions left).<br />e.g. on Minor: 'x1x145' => 'x16x1456'; or 'x456x6' => 'x1456x16'.</p>
 			<p>Internal places can also be implied, e.g. '124' => '1234', but this isn't that commonly used.</p>
 			<h3>microSIRIL Format</h3>
-			<p>This format is widely used in peal proving programs and other blue line generators. It allows for symmetrical blocks of notation to be shortened. Many methods are symmetric about the half-lead so this is quite effective.</p>
-			<p>The place notation is broken up into chunks, with each chunk separated by a comma. Symmetrical chunks are preceded by a '&amp;' (and only the notation up to the symmetry point is written), and asymmetrical chunks are preceded by a '+' and written in full.</p>
+			<p>This format is widely used in peal proving programs and other blue line generators. It allows for symmetrical blocks of notation to be shortened by only writing out the first half. Many methods are symmetric about the half-lead so this is quite effective in pratice.</p>
+			<p>The place notation is broken up into chunks, with each chunk separated by a comma. Symmetrical chunks are preceded by a '&amp;', and only the notation up to the symmetry point is written. Asymmetrical chunks are preceded by a '+', and written in full.</p>
 			<p>For example Plain Bob Minor is written "&amp;x1x1x1,+2"; Grandsire Doubles, "+3,&amp;1.5.1.5.1"</p>
-			<h3>Examples of Other Shortened Forms</h3>
-			<p>Various other shortened forms are in use which are similar to the microSIRIL format, which tend to simply be ways of expressing methods consisting of one large symmetric block and a single change over the lead end. All of the following are ways of expressing Plain Bob Minor:</p>
+			<h3>Other Shortened Forms</h3>
+			<p>Although microSIRIL format is probably most common, various other shortened forms are in use which are similar. These tend to simply be ways of expressing methods consisting of one large symmetric block and a single change over the lead end. Many also use '-' instead of 'x'. All of the following are ways of expressing Plain Bob Minor:</p>
 			<ul>
 				<li>x16x16x16x16x16x12</li>
 				<li>&amp;x16x16x16,+12</li>
@@ -44,7 +44,7 @@
 				<li>&amp;x1x1x1 2</li>
 			</ul>
 			<h2>Testing</h2>
-			<p>Use the below box to test how this website parses place notation, and click 'View' to see the resulting method. If the stage is blank it will be guessed.</p>
+			<p>This site can parse most of the forms above. Use the below box to test how this website parses place notation, and click 'View' to see the resulting method. If the stage is blank it will be guessed.</p>
 			<form id="custom_method" action="{{ path( 'Blueline_Methods_custom_view' ) }}">
 				<h3>Stage</h3>
 				<div class="select-wrapper">
