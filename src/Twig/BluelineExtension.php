@@ -2,26 +2,30 @@
 namespace Blueline\Twig;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
 
 class BluelineExtension extends AbstractExtension implements GlobalsInterface
 {
+    protected $params;
     protected $path;
     protected $chromeless;
     protected $environment;
 
-    public function __construct(ContainerInterface $container)
+    public function __construct(RequestStack $requestStack, ParameterBagInterface $params)
     {
+        $this->params = $params;
         try {
-            $request          = $container->get('request_stack')->getCurrentRequest();
+            $request = $requestStack->getCurrentRequest();
             $this->path       = is_null($request)? '/' : $request->getPathInfo();
             $this->chromeless = is_null($request)? false : ($request->getRequestFormat() == 'html' && intval($request->query->get('chromeless')) == 1);
         } catch (\Exception $e) {
             $this->path       = '/';
             $this->chromeless = false;
         }
-        $this->environment = $container->getParameter('kernel.environment');
+        $this->environment = $params->get('kernel.environment');
     }
 
     public function getName()
@@ -52,8 +56,8 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
     {
         return array(
             'chromeless'     => $this->chromeless,
-            'html_age'       => ($this->environment == 'prod') ? getenv('ASSET_UPDATE') : date('YmdHis'),
-            'db_age'         => getenv('DATABASE_UPDATE'),
+            'html_age'       => ($this->environment == 'prod') ? date('YmdHis', $this->params->get('blueline.asset_update')) : 'dev',
+            'db_age'         => date('YmdHis', $this->params->get('blueline.database_update')),
             'isAppStartPage' => ($this->path == '/') && ($this->environment == 'prod'),
         );
     }
