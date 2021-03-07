@@ -60,11 +60,6 @@ define( ['jquery'], function( $ ) {
 						$searchBox.focus();
 						$searchBox.select();
 					}
-					else if( $('#q2').is( ':visible:not(:focus)' ) ) {
-						e.preventDefault();
-						$('#q2').focus();
-						$('#q2').select();
-					}
 					break;
 
 				// Search navigation using the keyboard

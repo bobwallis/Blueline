@@ -68,7 +68,7 @@ define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve
 
 	if( 'serviceWorker' in navigator ) {
 		// Capture keypresses and load in the page without a refresh if the browser supports it
-		$(document).on( 'keyup', '#q, #q2', function( e ) {
+		$(document).on( 'keyup', '#q', function( e ) {
 			var $input = $( e.target ),
 				$form = $input.closest( 'form' ),
 				href;
@@ -83,18 +83,10 @@ define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve
 			// hop back up to the main section page
 			if( $input.val() === '' ) {
 				href = $form.attr( 'action' ).replace( /search$/, '' );
-				eve.once( 'page.loaded', function() {
-					$( '#q2' ).focus();
-				} );
 			}
 			// Otherwise, submit the form
 			else if( $form.length > 0 ) {
 				href = $form.attr( 'action' ) + '?' + $form.serialize();
-			}
-			// If starting a search from the dummy search box on welcome pages the hop into the main search box
-			if( $input.is('#q2') ) {
-				$search.show();
-				$q.focus().val( $input.val() );
 			}
 
 			// Defer the eve event handlers until the next time the event loop comes around, to

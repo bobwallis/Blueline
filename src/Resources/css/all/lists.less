@@ -6,7 +6,7 @@ ol, ul {
 		padding: 0;
 		border-bottom: 1px solid lighten(@lightGrey,5%);
 		&.none {
-			padding: (@contentYPadding - 2) @contentXPadding;
+			padding: (@contentYPadding - 2) (@contentXPadding*3/2);
 		}
 		&:first-child {
 			padding-top: 0;
@@ -17,7 +17,7 @@ ol, ul {
 		}
 		a {
 			display: block;
-			padding: (@contentYPadding - 2) @contentXPadding;
+			padding: (@contentYPadding - 2) (@contentXPadding*3/2);
 			border: 0 !important;
 			background-image: none;
 		}

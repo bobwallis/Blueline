@@ -38,7 +38,7 @@
 
 
 /* Search */
-@searchWidth: 440px;
+@searchWidth: 600px;
 @searchWidth_smallScreen: 304px;
 #search {
 	display: block;
@@ -53,26 +53,25 @@
 	background-color: rgba(red(@titleBackground),green(@titleBackground),blue(@titleBackground),0.95);
 	box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
-#search, #search_dummy {
+#search {
 	div {
 		width: @searchWidth;
 		margin: @contentYPadding @contentXPadding;
 		overflow: hidden;
 		border-radius: 2px;
 		border: 1px solid @lightGrey;
-		height: 28px;
+		height: 32px;
 		background: #FFF url(../images/search.svg) no-repeat right center;
 		background-size: contain;
-		box-shadow: 0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.24);
 	}
 	input {
 		display: block;
 		float: left;
 		background-color: transparent;
 		border: 0;
-		font-size: 13px;
-		width: @searchWidth - 40;
-		height: 24px;
+		font-size: 14px;
+		width: 95%;
+		height: 28px;
 		line-height: 24px;
 		padding: 2px 5px;
 		&:focus {
@@ -88,20 +87,14 @@
 		background-color: transparent;
 	}
 }
-#search_dummy div {
-	background: @titleBackground url(../images/search.svg) no-repeat right center;
-	background-size: contain;
-	margin-left: 0;
-}
 
-@media screen and (max-width: 480px) {
-	#search, #search_dummy {
+@media screen and (max-width: @smallScreenSize) {
+	#search {
 		div {
-			width: 100%*(@searchWidth/480);
+			width: 95%;
 			min-width: @searchWidth_smallScreen;
-		}
-		input {
-			width: @searchWidth_smallScreen - 40;
+			margin-left: auto;
+			margin-right: auto;
 		}
 	}
 }

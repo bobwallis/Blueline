@@ -7,21 +7,13 @@
 
 {% set breadcrumb = { 'title': 'Methods', 'href': path('Blueline_Methods_welcome') } %}
 
-{% set search = false %}
+{% set search = true %}
 {% set search_action = path( 'Blueline_Methods_search' ) %}
 {% set search_placeholder = 'Search methods' %}
 
 {% block body %}
-	{% from 'Macros/header.html.twig' import header %}
 	<section class="text">
-		{{ header('Methods') }}
 		<div class="wrap">
-		<form id="search_dummy" role="search" action="{{ search_action }}">
-				<div>
-					<input type="text" name="q" id="q2" spellcheck="false" autocomplete="off" placeholder="{{ search_placeholder }}" value="" />
-					<button type="submit" title="Search"><span class="hide">Search</span></button>
-				</div>
-			</form>
 			<p>Search for methods using the box. Queries beginning with '/' will be interpreted as a <a href="https://en.wikipedia.org/wiki/Regular_expression" class="external">regular expression</a>.</p>
 			<p>The database is created from the <a href="http://methods.cccbr.org.uk" class="external">Central Council method collections</a> and was last updated on {{ db_age|date("Y-m-d") }}.</p>
 			<h2>Custom Method</h2>

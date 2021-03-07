@@ -1,7 +1,7 @@
 // Utility functions for dealing with URLs
 
 define( function() {
-	var regExp_showSearchBar = /\/search/,
+	var regExp_showSearchBar = /(methods\/$|\/search)/,
 		regExp_section = /^(.*)\/(associations|methods|towers)\//,
 		regExp_isInternalLink;
 
