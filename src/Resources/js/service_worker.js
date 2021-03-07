@@ -1,6 +1,7 @@
+var version = (new Date()).toISOString().substr(0,19).replace(/[-:T]/g,'');
+
 self.addEventListener( 'install', function( event ) {
     var swScriptUrl = new URL( self.location ),
-        version = swScriptUrl.searchParams.get( 'v' ),
         base    = swScriptUrl.searchParams.get( 'base' ),
         currentCacheName = 'static-'+version;
     self.skipWaiting();
@@ -29,7 +30,6 @@ self.addEventListener( 'install', function( event ) {
 
 self.addEventListener( 'activate', function( event ) {
     var swScriptUrl = new URL( self.location ),
-        version = swScriptUrl.searchParams.get( 'v' ),
         currentCacheName = 'static-'+version;
 
     // Clear old caches

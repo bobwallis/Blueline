@@ -6,6 +6,11 @@ while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
 d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 cd "$d/../"
 
+# Update source timestamp to refresh caching headers etc
+cachebuster=`date "+%s"`
+sed -i -e"s/ASSET_UPDATE=.*/ASSET_UPDATE=$cachebuster/" ".env.local"
+sed -i -e"s/var version = .*/var version = \"`date --date="@$cachebuster" "+%Y%m%d%H%I%S"`\";/" "src/Resources/js/service_worker.js"
+
 echo -e "\n\033[1mRebuilding CSS and JS assets\033[0m"
 rm -rf "./public/components"
 rm -rf "./public/bundles"
@@ -15,8 +20,8 @@ rm -rf "./public/js"
 rm -rf "./public/fonts"
 gulp
 
+# Revert cache buster in service worker
+sed -i -e"s/var version = .*/var version = (new Date()).toISOString().substr(0,19).replace(\/[-:T]\/g,'');/" "src/Resources/js/service_worker.js"
+
 echo -e "\n\033[1mRebuilding image assets\033[0m"
 gulp images
-
-# Update source timestamp to refresh caching headers etc
-sed -i -e"s/ASSET_UPDATE=.*/ASSET_UPDATE=`date "+%s"`/" ".env.local"
