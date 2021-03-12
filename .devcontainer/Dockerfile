@@ -1,5 +1,5 @@
-# Update the VARIANT arg in docker-compose.yml to pick a PHP version: 7, 7.4, 7.3
-ARG VARIANT=7.4
+# Update the VARIANT arg in docker-compose.yml to pick a PHP version: 8, 7, 7.4, 7.3
+ARG VARIANT=8
 FROM mcr.microsoft.com/vscode/devcontainers/php:0-${VARIANT}
 
 # Update args in docker-compose.yaml to set the UID/GID of the "vscode" user.
@@ -11,6 +11,9 @@ RUN if [ "$USER_GID" != "1000" ] || [ "$USER_UID" != "1000" ]; then \
         && chmod -R $USER_UID:$USER_GID /home/vscode \
         && chmod -R $USER_UID:root /usr/local/share/nvm; \
     fi
+
+# Update expired keys
+RUN for K in $(apt-key list | grep expired | cut -d'/' -f2 | cut -d' ' -f1); do sudo apt-key adv --recv-keys --keyserver keys.gnupg.net $K; done
 
 # Install a version of Node.js using nvm for front end dev
 ARG INSTALL_NODE="true"
