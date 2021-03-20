@@ -6,13 +6,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Blueline\Helpers\PgResultIterator;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 /**
 * @Cache(maxage="604800", public=true, lastModified="database_update")
 */
 class DataController extends AbstractController
 {
-    public function table($table, Request $request)
+    public function table($table, Request $request, ParameterBagInterface $params)
     {
         $response = new StreamedResponse();
 
@@ -22,7 +23,7 @@ class DataController extends AbstractController
         }
 
         // Get database
-        $db = pg_connect('host='.$this->container->getParameter('database_host').' port='.$this->container->getParameter('database_port').' dbname='.$this->container->getParameter('database_name').' user='.$this->container->getParameter('database_user').' password='.$this->container->getParameter('database_password').'');
+        $db = pg_connect($params->get('database_connect'));
         if( $db === false ) {
             throw new \Exception('Failed to connect to database.');
             return;
@@ -72,7 +73,7 @@ class DataController extends AbstractController
                     $result = pg_query( $db,
                         'SELECT *
                           FROM performances
-                         ORDER BY location_tower_id, method_title ASC'
+                         ORDER BY method_title ASC'
                     );
                     break;
             }
