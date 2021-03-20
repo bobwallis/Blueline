@@ -26,11 +26,11 @@ class DefaultControllerTest extends WebTestCase
         }
     }
 
-    // XML sitemaps/browserconfig
+    // XML sitemaps
     public function testSitemaps()
     {
         $client = static::createClient();
-        foreach (array('sitemap', 'sitemap_root', 'browserconfig') as $xml) {
+        foreach (array('sitemap', 'sitemap_root') as $xml) {
             $crawler = $client->request('GET', '/'.$xml.'.xml');
             $this->assertTrue($client->getResponse()->isSuccessful(), $xml.'.xml request unsuccessful');
             $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'text/xml; charset=UTF-8'), $xml.'.xml Content-Type header wrong');
