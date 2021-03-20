@@ -9,13 +9,14 @@ use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints\Regex as RegexConstraint;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class OembedController extends AbstractController
 {
     /**
     * @Cache(maxage="129600", public=true, lastModified="asset_update")
     */
-    public function index(Request $request)
+    public function index(Request $request, ParameterBagInterface $params)
     {
         $url = $request->query->get('url');
 
@@ -26,7 +27,7 @@ class OembedController extends AbstractController
 
         // Check it's a valid URL
         $allowedURLs = array(
-            'methods_view' => '^'.str_replace( array('/','.','TITLE'), array('\/','\.','.+'), $this->generateUrl('Blueline_Methods_view', array('url' => 'TITLE'), UrlGeneratorInterface::ABSOLUTE_URL))
+            'methods_view' => '^'.str_replace( array('/','.','TITLE'), array('\/','\.','.+'), $params->get('blueline.endpoint') . $this->generateUrl('Blueline_Methods_view', array('url' => 'TITLE')))
         );
         $urlConstraint = new RegexConstraint(array('pattern' => '/'.implode('|', array_values($allowedURLs)).'/', 'message' => 'Invalid URL'));
         $validator = Validation::createValidator();
@@ -52,10 +53,10 @@ class OembedController extends AbstractController
                 'version' => '1.0',
                 'title' => $method[0]->title,
                 'provider_name' => 'Blueline',
-                'provider_url' => $this->generateUrl('Blueline_welcome', array(), UrlGeneratorInterface::ABSOLUTE_URL),
+                'provider_url' => $params->get('blueline.endpoint') . $this->generateUrl('Blueline_welcome'),
                 'url' => $url.'.png?scale=1&style=numbers',
-                'width' => $imageSize[0],
-                'height' => $imageSize[1]
+                'width' => $imageSize[0] ?? 0,
+                'height' => $imageSize[1] ?? 0
             ));
         }
         else {
