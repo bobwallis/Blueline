@@ -25,7 +25,8 @@ const puppeteer = require( 'puppeteer' );
         await session.send( 'Emulation.setPageScaleFactor', {
             pageScaleFactor: scale
         } );
-
+        // Wait for line to draw
+        await page.waitForSelector( '.method .line canvas:first-child' );
         // Prepare page for the screenshot
         await page.evaluate( (container) => {
             // Remove elements not needed
