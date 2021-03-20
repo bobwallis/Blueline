@@ -15,6 +15,16 @@ class DefaultControllerTest extends WebTestCase
         }
     }
 
+    // 301 Redirects
+    public function testRedirects()
+    {
+        $client = static::createClient();
+        foreach (array('services/siril', 'services/siril/about', 'copyright', 'tutorials') as $html) {
+            $crawler = $client->request('GET', '/'.$html);
+            $this->assertSame(301, $client->getResponse()->getStatusCode());
+        }
+    }
+
     // .txt files
     public function testRobots()
     {
