@@ -62,6 +62,10 @@ After making changes to CSS/JS files or images you will need to re-reun `./bin/b
 to regenerate the assets. Running `gulp watch` in a terminal will watch for changes to these files
 and rebuild on-demand, which is helpful.
 
+Running `./test` will run PHPUnit to execute the tests under `./tests/`. You might want to launch
+XDebug before running. I'm definitely not as diligent at creating unit tests as I should be, a lot
+of things don't have a test.
+
 
 ## 4) Maintain
 

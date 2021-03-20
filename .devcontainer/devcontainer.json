@@ -16,7 +16,7 @@
 			"username": "user",
 			"password": "pass"
 		}],
-		"php.executablePath": "/usr/local/bin/php"
+		"php.validate.executablePath": "/usr/local/bin/php"
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.

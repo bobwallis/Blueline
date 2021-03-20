@@ -36,7 +36,9 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install pdo pdo_pgsql pgsql \
     # Intl
-    && docker-php-ext-install intl
+    && docker-php-ext-install intl \
+    # Xdebug
+    && docker-php-ext-enable xdebug
 
 # Install global node packages.
 RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g gulp" 2>&1
