@@ -3,21 +3,22 @@
 	clear: both;
 	margin: 10px 0 -10px 0 !important;
 	padding: 0;
-	height: 21px;
-	font-size: 11px;
+	height: 25px;
+	font-size: 12px;
 	list-style: none;
 	user-select: none;
+	text-align: left;
 	li {
-		float: left;
+		display: inline-block;
 		border-top-right-radius: 3px;
 		border-top-left-radius: 3px;
 		border: 1px solid @lightGrey;
 		background-color: @titleBackground;
 		border-bottom: 0;
 		cursor: pointer;
-		margin-right: 8px;
-		line-height: 20px;
-		padding: 0 10px;
+		margin-right: 10px;
+		line-height: 24px;
+		padding: 0 14px;
 		transition-property: background-color;
 		transition-duration: .4s;
 		&:hover { background: @background; }
@@ -31,12 +32,12 @@
 	}
 }
 
-/* Size specific hiding */
-.l700 {
-	display: none;
-}
-@media screen and (max-width: 700px) {
-	.l700 {
-		display: block;
+@media screen and (max-width: @tinyScreenSize) {
+	.tabBar {
+		height: 30px;
+		li {
+			line-height: 29px;
+			padding: 0 18px;
+		}
 	}
 }
