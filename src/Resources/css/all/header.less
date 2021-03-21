@@ -98,3 +98,49 @@
 		}
 	}
 }
+
+#settings_button {
+	float: right;
+	height: @headerHeight;
+	width: @headerHeight;
+	cursor: pointer;
+	background: @headerBackground url(../images/settings.svg) no-repeat center center;
+	opacity: 0.6;
+	transition-property: opacity;
+	transition-duration: .15s;
+	&:hover {
+		opacity: 1;
+	}
+}
+
+#settings_wrap {
+	display: none;
+	box-sizing: border-box;
+	position: absolute;
+	z-index: 999;
+	right: 0;
+	text-align: right;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	background-color: rgba(255,255,255,0.8);
+	backdrop-filter: blur(1px);
+	transition: opacity 200ms;
+	&.active {
+		display: block;
+		opacity: 1;
+	}
+}
+#settings {
+	display: inline-block;
+	max-width: 600px;
+	margin: (@headerHeight+@contentYPadding) @contentXPadding 0;
+	border: 1px solid @lightGrey;
+	padding: @contentYPadding @contentXPadding*2;
+	background: #FFF;
+	text-align: left;
+}
+
+#settings_submit {
+	cursor: pointer;
+}

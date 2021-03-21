@@ -1,4 +1,4 @@
-define( ['jquery', 'eve', '../helpers/LocalStorage'], function( $, eve, LocalStorage ) {
+define( ['jquery', 'eve', '../../helpers/LocalStorage'], function( $, eve, LocalStorage ) {
 	var $document = $( document ),
 		settings = ['method_follow', 'method_style', 'method_tooltips', 'method_music'];
 
@@ -35,11 +35,15 @@ define( ['jquery', 'eve', '../helpers/LocalStorage'], function( $, eve, LocalSto
 		} );
 	} );
 
-	// Close settings when done is clicked
+	// Open/close settings
+	var settingsEl = document.getElementById( 'settings_wrap' );
+	document.getElementById( 'settings_button' ).addEventListener( 'click', function() {
+		settingsEl.className = (settingsEl.className == 'active') ? '' : 'active';
+	} );
 	var closeSettings = function( e ) {
 		e.preventDefault();
-		$( '#settings' ).slideUp( 150 );
+		settingsEl.className = '';
 	};
-	$document.on( 'click', '#settings_submit', closeSettings );
-	$document.on( 'submit', '#settings_form', closeSettings );
+	document.getElementById( 'settings_submit' ).addEventListener( 'click', closeSettings );
+	document.getElementById( 'settings_form' ).addEventListener( 'submit', closeSettings );
 } );

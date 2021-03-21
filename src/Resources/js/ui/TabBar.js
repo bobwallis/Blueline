@@ -4,19 +4,14 @@ define( ['jquery', 'eve'], function( $, eve ) {
 		var target = $( e.target );
 		if( !target.is( 'li' ) ) { return; }
 
-		if( target.is( '#tab_settings' ) ) {
-			$( '#settings' ).slideToggle( 150 );
-		}
-		else {
-			target.addClass( 'active' );
-			$( '#'+target.attr( 'id' ).replace( /^tab_/, '' ) ).show();
+		target.addClass( 'active' );
+		$( '#'+target.attr( 'id' ).replace( /^tab_/, '' ) ).show();
 
-			target.siblings().each( function( i, tab ) {
-				tab = $( tab ).removeClass( 'active' );
-				$( '#'+tab.attr( 'id' ).replace( /^tab_/, '' ) ).hide();
-			} );
-			$( window ).scroll();
-		}
+		target.siblings().each( function( i, tab ) {
+			tab = $( tab ).removeClass( 'active' );
+			$( '#'+tab.attr( 'id' ).replace( /^tab_/, '' ) ).hide();
+		} );
+		$( window ).scroll();
 	};
 
 	var TabBar = function( options ) {
@@ -25,7 +20,6 @@ define( ['jquery', 'eve'], function( $, eve ) {
 			$container = $( '<ul id="'+options.landmark+'_" class="tabBar">'+ options.tabs.map( function( t, i ) {
 					return typeof t.content == 'string'? ('<li id="tab_'+t.content+'"'+(t.className? ' class="'+t.className+'"' : '')+'>'+t.title+'</li>') : '';
 				} ).join( '' ) +
-				((typeof options.settings === 'boolean' && options.settings)? '<li id="tab_settings"></li>' : '') +
 				'</ul>' );
 			$( $container.children()[(typeof options.active === 'number' )?options.active:0] ).addClass( 'active' );
 			$( '#'+options.landmark ).replaceWith( $container );
