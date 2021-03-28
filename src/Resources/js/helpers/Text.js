@@ -111,7 +111,7 @@ define( ['./PlaceNotation'], function( PlaceNotation ) {
 				.replace( / 1ths/g, ' lead' )
 				// nths vs 'Lie'
 				.replace(new RegExp( 'Make '+rows[0].length+'ths', 'g' ), 'Lie behind' )
-				.replace(new RegExp( '(\d+) blows in '+rows[0].length+'ths', 'g' ), 'Lie for $1 blows' )
+				.replace(new RegExp( '([0-9]+) blows in '+rows[0].length+'ths', 'g' ), 'Lie for $1 blows' )
 				// Ordinals
 				.replace( / 2ths/g, ' 2nds' )
 				.replace( / 3ths/g, ' 3rds' )
