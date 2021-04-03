@@ -33,6 +33,7 @@ define( ['jquery', 'deepmerge', 'eve', './MethodView/InteractiveGridOverlay', '.
 				method = new GridOptionsBuilder( deepmerge( {}, options ) );
 			}
 
+			// Re-create the text version of the method if either the "show tooltips" setting or the bell being followed changed
 			if( newShowTooltips !== lastShowToolTips || newFollow !== lastFollow ) {
 				methodTexts = newShowTooltips? method.workGroups.map( function( e ) {
 					var toFollow = (newFollow == 'lightest')? Math.min.apply( Math, e ) : Math.max.apply( Math, e );
