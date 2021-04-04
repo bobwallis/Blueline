@@ -251,7 +251,7 @@ define( ['deepmerge', './PlaceNotation', './MeasureCanvasText'], function( deepm
 				id: sharedPlainCourseGridOptions.id+'_numbers',
 				numbers: {
 					show: true,
-					font: (fontSize*0.8)+'px '+fontFace,
+					font: (fontSize*0.9)+'px '+fontFace,
 					bells: rounds.map( function( b ) { return { color: '#002856' }; } )
 				},
 				sideNotation: false,
@@ -296,7 +296,7 @@ define( ['deepmerge', './PlaceNotation', './MeasureCanvasText'], function( deepm
 				thisgridOptionscallsdiagrams[callIndex].ruleOffs.stroke = '#002856';
 				thisgridOptionscallsdiagrams[callIndex].ruleOffs.width = fontSize/20;
 				thisgridOptionscallsdiagrams[callIndex].ruleOffs.dash = [0,0];
-				thisgridOptionscallsdiagrams[callIndex].numbers = { show: true, font: (fontSize*0.8)+'px '+fontFace, bells: rounds.map( function( b ) { return { color: '#002856' }; } ) };
+				thisgridOptionscallsdiagrams[callIndex].numbers = { show: true, font: (fontSize*0.9)+'px '+fontFace, bells: rounds.map( function( b ) { return { color: '#002856' }; } ) };
 				// Set line colors
 				for( i = 0, j = 0; i < that.stage; ++i ) {
 					isHuntBell = that.huntBells.indexOf( i ) !== -1;
