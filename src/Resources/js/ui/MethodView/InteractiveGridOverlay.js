@@ -61,8 +61,8 @@ define( ['eve'], function( eve ) {
 				lastRow = row;
 			}
 			// Move the tooltip
-			tooltipElement.style.top = (e.pageY - 5)+'px';
-			tooltipElement.style.left = (e.pageX + 20)+'px';
+			tooltipElement.style.top = (e.pageY - 10)+'px';
+			tooltipElement.style.left = (e.pageX + 15)+'px';
 		} );
 		gridElement.addEventListener( 'mouseout', function( e ) {
 			lastRow = -1;
