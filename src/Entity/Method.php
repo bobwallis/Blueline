@@ -1048,6 +1048,11 @@ class Method
                                         'Single' => array('symbol' => 's', 'notation' => '1'.$n_2.$n_1.$n, 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1)
                                     );
                                 }
+                            } elseif ($leadEndChange == '14' && $stage == 6) {
+                                $calls = array(
+                                    'Bob' => array('symbol' => '-', 'notation' => '16', 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1),
+                                    'Single' => array('symbol' => 's', 'notation' => '156', 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1)
+                                );
                             }
                         } else {
                             if ($leadEndChange == '12'.$n || $leadEndChange == '1') {
