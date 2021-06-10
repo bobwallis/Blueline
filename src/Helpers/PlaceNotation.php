@@ -189,7 +189,7 @@ class PlaceNotation
     public static function expand($notation, $stage = null)
     {
         // If stage isn't given, try to guess it
-        if (is_null($stage) || $stage < 3) {
+        if (is_null($stage) || $stage < 2) {
             $stage = self::guessStage($notation);
         }
 
