@@ -14,17 +14,18 @@
   "devDependencies": {
     "gulp": "^4.0.2",
     "gulp-amdclean": "^1.1.1",
-    "gulp-autoprefixer": "^7.0.1",
+    "gulp-autoprefixer": "^8.0.0",
     "gulp-clean-css": "^4.3.0",
     "gulp-footer": "^2.0.2",
     "gulp-gzip": "^1.4.2",
     "gulp-imagemin": "^7.1.0",
-    "gulp-less": "^4.0.1",
+    "gulp-less": "^5.0.0",
     "gulp-requirejs": "^1.4.0",
     "gulp-sourcemaps": "^3.0.0",
     "gulp-terser": "^2.0.1",
     "merge-stream": "^2.0.0",
-    "puppeteer": "^8.0.0"
+    "postcss": "^8.3.5",
+    "puppeteer": "^10.0.0"
   },
   "dependencies": {}
 }

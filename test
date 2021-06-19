@@ -6,5 +6,17 @@ while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
 d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 cd "$d"
 
-echo -e "\n\033[1mRunning tests\033[0m"
+echo -e "\n\033[1mRunning PHPUnit tests\033[0m"
 "$d/bin/phpunit"
+
+echo -e "\n\033[1mLint Symfony container\033[0m"
+symfony console lint:container
+
+echo -e "\n\033[1mLint Twig templates\033[0m"
+symfony console lint:twig
+
+echo -e "\n\033[1mValidate database schema and mapping files\033[0m"
+symfony console doctrine:schema:validate
+
+echo -e "\n\033[1mCheck migrations\033[0m"
+symfony console doctrine:migrations:up-to-date

@@ -2,7 +2,7 @@
 # Files in the packages/ subdirectory configure your dependencies.
 
 # Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     database_connect: 'host=%env(key:host:url:DATABASE_URL)% port=%env(key:port:url:DATABASE_URL)% dbname=%env(key:path:url:DATABASE_URL)% user=%env(key:user:url:DATABASE_URL)% password=%env(key:pass:url:DATABASE_URL)%'
     blueline.endpoint: '%env(ENDPOINT)%'
@@ -27,6 +27,9 @@ services:
             - '../src/Kernel.php'
             - '../src/Resources/'
             - '../src/Tests/'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
 
     # Give certain commands access to a string usable in pg_connect
     Blueline\Command\CalculateMethodSimilaritiesCommand:

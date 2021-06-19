@@ -14,7 +14,7 @@
 {% block body %}
 	<section class="text">
 		<div class="wrap">
-			<p>Search for methods using the box. Queries beginning with '/' will be interpreted as a <a href="https://en.wikipedia.org/wiki/Regular_expression" class="external">regular expression</a>.</p>
+			<p>Search for methods using the box above. Queries beginning with '/' will be interpreted as a <a href="https://en.wikipedia.org/wiki/Regular_expression" class="external">regular expression</a>.</p>
 			<p>The database is created from the <a href="http://methods.cccbr.org.uk" class="external">Central Council method collections</a> and was last updated on {{ db_age|date("Y-m-d") }}.</p>
 			<h2>Custom Method</h2>
 			<p>To view a method not in the collections enter the stage and place notation below. Various abbreviated place notation formats are supported, <a href="{{ path( 'Blueline_Pages_view', {page: 'methods/notation'} ) }}">see here for a guide</a>.</p>

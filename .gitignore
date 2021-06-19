@@ -28,9 +28,9 @@ node_modules/
 ###< symfony/framework-bundle ###
 
 ###> symfony/phpunit-bridge ###
-.phpunit
 .phpunit.result.cache
 /phpunit.xml
+/bin/.phpunit/
 ###< symfony/phpunit-bridge ###
 
 ###> phpunit/phpunit ###
