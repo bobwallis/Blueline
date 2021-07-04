@@ -20,10 +20,10 @@ define( function() {
 		expand: function( notation, stage ) {
 			// Tries to normalise place notation given in abbreviated form into full notation
 			var fullNotation, matches, stageText;
-			
+
 			fullNotation = notation
 				.toUpperCase().replace( /X/g, 'x' ) // Tidy up cases
-				.replace( /[\[{<].*[\]}>]/, '' ).replace( / FCH.*$/, '' ) // Remove anything inside (non normal) brackets, or appended fch details
+				.replace( /[{<].*[}>]/, '' ).replace( / FCH.*$/, '' ) // Remove anything inside (non normal) brackets, or appended fch details
 				.replace( /\.?x\.?/g, 'x' ) // Remove weird input that might mess things up later
 				.trim();
 
@@ -177,16 +177,16 @@ define( function() {
 					piece = piece + stageText;
 				}
 				// Sort the piece characters numerically
-				// Since we don't want to sort inside '()' (for jump changes), map those from '(abc)' to max(a, b, c) for sorting purposes (keeping
+				// Since we don't want to sort inside '()' or '[]' (for jump changes), map those from '[abc]' to max(a, b, c) for sorting purposes (keeping
 				// both the original value and the 'sort key').
-				// This is a bit messy because we need to split twice, once from 12(354)6 to ['12', '(354)' '6'],
-				// then again to [['1','2'], '(354)', ['6']], then flatten the array before sorting and joining back to a string.
+				// This is a bit messy because we need to split twice, once from 12(35)6 to ['12', '(35)' '6'],
+				// then again to [['1','2'], '(35)', ['6']], then flatten the array before sorting and joining back to a string.
 				// There's probably a clearer way to do this.
 				piece = [].concat.apply( [],
-					piece.replace( /\(/g, '~(' ).replace( /\)/g, ')~' ).split('~')
+					piece.replace( /\(/g, '~(' ).replace( /\)/g, ')~' ).replace( /\[/g, '~[' ).replace( /\]/g, ']~' ).split('~')
 						.filter( function( e ) { return e !== ''; } )
 						.map( function( e ) {
-							if( e.charAt( 0 ) == '(' ) {
+							if( e.charAt( 0 ) == '(' || e.charAt( 0 ) == '[' ) {
 								return { sort: Math.max.apply( Math, e.split( '' ).map( PlaceNotation.charToBell ) ), value: e };
 								}
 							else {
@@ -208,7 +208,9 @@ define( function() {
 		expandHalf: function( notation ) {
 			// Expands a symmetrical block of place notation
 			notation = notation.replace( /^&/, '' );
-			var notationReversed = notation.split( '' ).reverse().join( '' ).replace( /\)(.+?)\(/g, function( m, p1 ) { return '('+p1.split( '' ).reverse().join( '' )+')'; } ),
+			var notationReversed = notation.split( '' ).reverse().join( '' )
+			    	.replace( /\)(.+?)\(/g, function( m, p1 ) { return '('+p1+')'; } )
+			    	.replace( /\](.+?)\[/g, function( m, p1 ) { return '['+p1.split( '' ).reverse().join( '' )+']'; } ),
 				firstDot = (notationReversed.indexOf( '.' ) === -1)? 9999 : notationReversed.indexOf( '.' ),
 				firstX = (notationReversed.indexOf( 'x' ) === -1)? 9999 : notationReversed.indexOf( 'x' ),
 				trim;

@@ -202,7 +202,7 @@ class PlaceNotation
         $notationFull = str_replace(array( '.-.', '-.', '.-'), '-', $notationFull);
 
         // Remove anything inside brackets, or appended fch details (arise when people copy notation from somewhere with extra information at the start or end)
-        $notationFull = preg_replace(array( '/[\[{\<].*[\]}\>]/', '/ FCH.*$/' ), '', $notationFull);
+        $notationFull = preg_replace(array( '/[{\<].*[}\>]/', '/ FCH.*$/' ), '', $notationFull);
 
         // Deal with notation like 'x1x1x1-2' (After checking for this form we can assume - means x)
         if (preg_match('/^([^-]+)-([^-\.,x]+)$/', $notationFull, $match) == 1) {
@@ -514,7 +514,8 @@ class PlaceNotation
     private static function expandHalf($notation)
     {
         $notation = trim($notation, '&');
-        $notationReversed = preg_replace_callback('/\)(.+?)\(/', function ($m) { return '('.strrev($m[1]).')'; }, strrev($notation) );
+        $notationReversed = preg_replace_callback('/\)(.+?)\(/', function ($m) { return '('.$m[1].')'; }, strrev($notation) );
+        $notationReversed = preg_replace_callback('/\](.+?)\[/', function ($m) { return '['.strrev($m[1]).']'; }, notationReversed );
         $firstDot = (strpos($notationReversed, '.') !== false) ? strpos($notationReversed, '.') : 99999;
         $firstX = (strpos($notationReversed, 'x') !== false) ? strpos($notationReversed, 'x') : 99999;
         $trim = 0;
@@ -539,11 +540,11 @@ class PlaceNotation
         foreach ($splitNotation as &$section) {
             if ($section != 'x') {
                 // Sort the piece characters numerically
-                // Since we don't want to sort inside '()' (for jump changes), map those from '(abc)' to max(a, b, c) for sorting purposes (keeping
+                // Since we don't want to sort inside '()' or '[]' (for jump changes), map those from '[abc]' to max(a, b, c) for sorting purposes (keeping
                 // both the original value and the 'sort key').
-                $section = str_replace(array('(', ')'), array('~(', ')~'), $section);
+                $section = str_replace(array('(', ')', '[', ']'), array('~(', ')~','~[', ']~'), $section);
                 $sectionSplitArrays = array_map(function ($e) {
-                    if ($e[0] == '(') {
+                    if ($e[0] == '(' || $e[0] == '[') {
                         return array( array('sort' => max(array_filter(array_map('self::bellToInt', str_split($e)))), 'value' => $e) );
                     } else {
                         return array_map(function ($e) { return array('sort' => self::bellToInt($e), 'value' => $e); }, str_split($e));
