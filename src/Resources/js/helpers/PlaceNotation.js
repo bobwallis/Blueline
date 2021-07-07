@@ -227,27 +227,63 @@ define( function() {
 		},
 		parse: function( notation, stage ) {
 			// Parses normalised place notation into permutations
-			var parsed = [],
+			var i, j, k, l,
+				parsed = [],
 				exploded = this.explode( notation ),
 				xPermutation = new Array( stage );
+
 			// Construct the X permutation for stage
-			for( var i = 0; i < stage; i+=2 ) { xPermutation[i] = i+1; xPermutation[i+1] = i; }
+			for( i = 0; i < stage; i+=2 ) { xPermutation[i] = i+1; xPermutation[i+1] = i; }
 			if( i-1 === stage ) { xPermutation[i-1] = i-1; }
 
 			// Then parse section by section
 			for( i = 0; i < exploded.length; i++ ) {
-				// For an x, push our pregenerated x permutation
+				// For an x, push our pre-generated x permutation
 				if( exploded[i] === 'x' ) {
 					parsed.push( xPermutation );
 				}
-				// Otherwise calculate the permutation
 				else {
-					var stationary = exploded[i].split( '' ).map( this.charToBell ),
-						permutation = new Array( stage ),
-						j;
-					// First put in any stationary bells
-					for( j = 0; j < stationary.length; j++ ) {
-						permutation[stationary[j]] = stationary[j];
+					var permutation = new Array( stage ),
+						notationCharacters = exploded[i].split( '' );
+					for( j = 0; j < notationCharacters.length; j++ ) {
+						// A jump change (XY) sends the bell in the 1st place to the 2nd, and the bells in the span shift
+						// (13) takes 1234 to 2314,
+						// (14) takes 1234 to 2341,
+						// (31) takes 1234 to 3124,
+						// (41) takes 1234 to 4123 and so on
+						if( notationCharacters[j] === '(' ) {
+							var from = this.charToBell( notationCharacters[j+1] ),
+								to   = this.charToBell( notationCharacters[j+2] );
+							permutation[to] = from;
+							if( from < to ) {
+								for( k = from; k < to; k++ ) {
+									permutation[k] = k+1;
+								}
+							}
+							else {
+								for( k = from; k > to; k-- ) {
+									permutation[k] = k-1;
+								}
+							}
+							j += 3;
+						}
+						// A jump change [ABCD] describes what happens to position between min(A,B,C,D) and max(A,B,C,D)
+						// [4321] takes 1234 to 4321 and so on
+						else if( notationCharacters[j] === '[' ) {
+							++j;
+							k = notationCharacters.indexOf( ']', j );
+							l = 0;
+							var lowestBell = Math.min.apply( Math, notationCharacters.slice( j, k ).map( this.charToBell ) );
+							while( j < k ) {
+								permutation[lowestBell+l] = this.charToBell( notationCharacters[j] );
+								++j;
+								++l;
+							}
+						}
+						else {
+							var stationary = this.charToBell( notationCharacters[j] );
+							permutation[stationary] = stationary;
+						}
 					}
 					// Then 'x' what's left
 					for( j = 0; j < stage; j++ ) {

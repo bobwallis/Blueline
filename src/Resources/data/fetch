@@ -15,6 +15,7 @@ urls=( "https://cccbr.github.io/methods-library/xml/CCCBR_Plain.xml.zip"
        "https://cccbr.github.io/methods-library/xml/CCCBR_TreblePlace.xml.zip"
        "https://cccbr.github.io/methods-library/xml/CCCBR_Hybrid.xml.zip"
        "https://cccbr.github.io/methods-library/xml/CCCBR_Principle.xml.zip"
+       "https://cccbr.github.io/methods-library/xml/CCCBR_Jump.xml.zip"
      )
 for url in "${urls[@]}"; do
       curl --progress-bar --referer "http://www.methods.org.uk" --user-agent "Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.224 Safari/534.10" -o "$d/`basename "$url"`" "$url"

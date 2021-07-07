@@ -139,6 +139,11 @@ class Method
     private $numberOfHunts;
 
     /**
+     * @var boolean $jump
+     */
+    private $jump;
+
+    /**
      * @var boolean $little
      */
     private $little;
@@ -248,7 +253,7 @@ class Method
     public function getAbbreviation()
     {
         if (!isset($this->abbreviation)) {
-            $this->setAbbreviation(substr(trim(str_replace(array($this->getStageText(), $this->getClassification(), 'Differential', 'Little'), '', $this->getTitle())), 0, 2));
+            $this->setAbbreviation(substr(trim(str_replace(array($this->getStageText(), $this->getClassification(), 'Differential', 'Little', 'Jump'), '', $this->getTitle())), 0, 2));
         }
         return $this->abbreviation;
     }
@@ -336,7 +341,9 @@ class Method
     public function getClassification()
     {
         if (!isset($this->classification)) {
-            if ($this->getNumberOfHunts() > 0) {
+            if ($this->getJump()) {
+                $this->setClassification('Jump');
+            } elseif ($this->getNumberOfHunts() > 0) {
                 $principalHunts = array_values(array_filter($this->getHuntDetails(), function ($h) { return $h['principal']; } ));
                 $principalHuntType = $principalHunts[0]['type'];
 
@@ -437,7 +444,7 @@ class Method
     public function getNameMetaphone()
     {
         if (!isset($this->nameMetaphone)) {
-            $this->setNameMetaphone(metaphone(preg_replace('/(Differential)?\s*(Little)?\s*(Alliance|Bob|Delight|Hybrid|Place|Surprise|Slow Course|Treble Bob|Treble Place)?\s*(Singles|Minimus|Doubles|Minor|Triples|Major|Caters|Royal|Cinques|Maximus|Sextuples|Fourteen|Septuples|Sixteen|Octuples|Eighteen|Nineteen|Twenty|Twenty-one|Twenty-two)$/', '', $this->getTitle())));
+            $this->setNameMetaphone(metaphone(preg_replace('/(Differential)?\s*(Little)?\s*(Alliance|Bob|Delight|Hybrid|Place|Surprise|Slow Course|Treble Bob|Treble Place)?\s*(Jump)?\s*(Two|Singles|Minimus|Doubles|Minor|Triples|Major|Caters|Royal|Cinques|Maximus|Sextuples|Fourteen|Septuples|Sixteen|Octuples|Eighteen|Nineteen|Twenty|Twenty-one|Twenty-two)$/', '', $this->getTitle())));
         }
         return $this->nameMetaphone;
     }
@@ -786,6 +793,31 @@ class Method
             $this->huntDetails = $huntDetails;
         }
         return $this->huntDetails;
+    }
+
+    /**
+     * Set jump
+     *
+     * @param  boolean $jump
+     * @return Method
+     */
+    public function setJump($jump)
+    {
+        $this->jump = $jump;
+        return $this;
+    }
+
+    /**
+     * Get jump
+     *
+     * @return boolean
+     */
+    public function getJump()
+    {
+        if (!isset($this->jump)) {
+            $this->setJump(strpos($this->getNotationExpanded(),'(') !== false || strpos($this->getNotationExpanded(),'[') !== false);
+        }
+        return $this->jump;
     }
 
     /**

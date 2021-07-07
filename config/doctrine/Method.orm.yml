@@ -52,6 +52,9 @@ Blueline\Entity\Method:
             nullable: true
         numberOfHunts:
             type: smallint
+        jump:
+            type: boolean
+            nullable: true
         little:
             type: boolean
             nullable: true

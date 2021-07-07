@@ -226,6 +226,23 @@ $method_extras_calls = array(
     'ruleoffs' => array('every' => 6, 'from' => -3),
   ),
   array(
+    'title' => 'Stedman No.2 Jump Doubles',
+    'calls' => array(
+      'Single' => array('symbol' => 's', 'notation' => '45', 'every' => 6, 'from' => 0, 'cover' => 1),
+    ),
+    'callingpositions' => array(),
+    'ruleoffs' => array('every' => 6, 'from' => -3),
+  ),
+  array(
+    'title' => 'Stedman Jump Triples',
+    'calls' => array(
+      'Bob'    => array('symbol' => '-', 'notation' => '5',   'every' => 6, 'from' => 1, 'cover' => 1),
+      'Single' => array('symbol' => 's', 'notation' => '567', 'every' => 6, 'from' => 1, 'cover' => 1),
+    ),
+    'callingpositions' => array(),
+    'ruleoffs' => array('every' => 6, 'from' => 1),
+  ),
+  array(
     'title' => 'Titanic Cinques',
     'calls' => array(
       'Bob'    => array('symbol' => '-', 'notation' => '9',   'every' => 2, 'from' => -1, 'cover' => 1),

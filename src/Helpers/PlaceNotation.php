@@ -445,10 +445,50 @@ class PlaceNotation
         $permutations = array();
         $i = 0;
         foreach ($notationExploded as $piece) {
-            // Mark all static bells
-            for ($j = 0; isset($piece[$j]) && $piece[$j] != 'x'; ++$j) {
-                $pos = self::bellToInt($piece[$j]) - 1;
-                $permutations[$i][$pos] = $pos;
+            // Work through the notation piece
+            for ($j = 0; $j < strlen( $piece ); ++$j) {
+                if ($piece[$j] == 'x') {
+                    break;
+                }
+                // A jump change (XY) sends the bell in the 1st place to the 2nd, and the bells in the span shift
+                // (13) takes 1234 to 2314,
+                // (14) takes 1234 to 2341,
+                // (31) takes 1234 to 3124,
+                // (41) takes 1234 to 4123 and so on
+                elseif ($piece[$j] == '(') {
+                    $from = self::bellToInt($piece[$j+1]) - 1;
+                    $to   = self::bellToInt($piece[$j+2]) - 1;
+                    $permutations[$i][$to] = $from;
+                    if( $from < $to ) {
+                        for( $k = $from; $k < $to; $k++ ) {
+                            $permutations[$i][$k] = $k+1;
+                        }
+                    }
+                    else {
+                        for( $k = $from; $k > $to; $k-- ) {
+                            $permutations[$i][$k] = $k-1;
+                        }
+                    }
+                    $j += 3;
+                }
+                // A jump change [ABCD] describes what happens to position between min(A,B,C,D) and max(A,B,C,D)
+                // [4321] takes 1234 to 4321 and so on
+                elseif ($piece[$j] == '[') {
+                    $k = strpos($piece, ']', $j);
+                    $l = 0;
+                    $lowestBell = min(array_map('self::bellToInt', str_split(substr($piece, $j+1, $k-$j-1)))) - 1;
+                    ++$j;
+                    while( $j < $k ) {
+                        $permutations[$i][$lowestBell+$l] = self::bellToInt($piece[$j]) - 1;
+                        ++$j;
+                        ++$l;
+                    }
+                }
+                // Static bells
+                else {
+                    $pos = self::bellToInt($piece[$j]) - 1;
+                    $permutations[$i][$pos] = $pos;
+                }
             }
             // 'x' what's left
             for ($j = 0; $j < $stage; ++$j) {
@@ -515,7 +555,7 @@ class PlaceNotation
     {
         $notation = trim($notation, '&');
         $notationReversed = preg_replace_callback('/\)(.+?)\(/', function ($m) { return '('.$m[1].')'; }, strrev($notation) );
-        $notationReversed = preg_replace_callback('/\](.+?)\[/', function ($m) { return '['.strrev($m[1]).']'; }, notationReversed );
+        $notationReversed = preg_replace_callback('/\](.+?)\[/', function ($m) { return '['.strrev($m[1]).']'; }, $notationReversed );
         $firstDot = (strpos($notationReversed, '.') !== false) ? strpos($notationReversed, '.') : 99999;
         $firstX = (strpos($notationReversed, 'x') !== false) ? strpos($notationReversed, 'x') : 99999;
         $trim = 0;
