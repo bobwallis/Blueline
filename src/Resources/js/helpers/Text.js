@@ -10,8 +10,9 @@ define( ['./PlaceNotation'], function( PlaceNotation ) {
 			return newString.replace( trimtrailingcommaregex, '' );
 		};
 
-	// 'Core' work is defined as hunting, dodging, making places, making points and doing fishtails
+	// 'Core' work is defined as jumping, hunting, dodging, making places, making points and doing fishtails
 	var core = [
+		{ regex: /J\[(\d+)\]/g, text: 'Jump to $1ths' },
 		{ regex: /-\{(\d+)\}(,\+\{(\d+)\},-\{(\d+)\})\2*/g, text: 'Dodge $3/$1 down' },
 		{ regex: /\+\{(\d+)\}(,-\{(\d+)\},\+\{(\d+)\})\2*/g, text: 'Dodge $1/$3 up' },
 		{ regex: /-\{(\d+)\},\+\{(\d+)\}/g, text: 'Point $2ths' },
@@ -70,23 +71,32 @@ define( ['./PlaceNotation'], function( PlaceNotation ) {
 			// Create intermediate string showing movements and places
 			for( var i = 1; i < rows.length; ++i ) {
 				pos = rows[i].indexOf( bell ) - rows[i-1].indexOf( bell );
-				if( pos < 0 )      { intermediate += '-'; }
-				else if( pos > 0 ) { intermediate += '+'; }
-				else               { intermediate += '|'  }
-				intermediate += '{'+(rows[i-1].indexOf( bell )+1)+'},';
+				if( Math.abs( pos ) > 1 ) {
+					intermediate +='J['+(rows[i].indexOf( bell )+1)+'],';
+				}
+				else {
+					if( pos < 0 )      { intermediate += '-'; }
+					else if( pos > 0 ) { intermediate += '+'; }
+					else               { intermediate += '|'; }
+					intermediate += '{'+(rows[i-1].indexOf( bell )+1)+'},';
+				}
 			}
 			if( wrap ) {
 				// If the 'wrap' option is on, then add more changes to the end (so we can detect dodging over the lead end and stuff)
 				for( wrapRows = 1; wrapRows < rows.length && wrapRows < 10; ++wrapRows ) {
 					pos = rows[wrapRows].indexOf( bell ) - rows[wrapRows-1].indexOf( bell );
-					if( pos < 0 )      { intermediate += '-'; }
-					else if( pos > 0 ) { intermediate += '+'; }
-					else               { intermediate += '|'  }
-					intermediate += '{'+(rows[wrapRows-1].indexOf( bell )+1)+'},';
+					if( Math.abs( pos ) > 1 ) {
+						intermediate +='J['+(rows[wrapRows].indexOf( bell )+1)+'],';
+					}
+					else {
+						if( pos < 0 )      { intermediate += '-'; }
+						else if( pos > 0 ) { intermediate += '+'; }
+						else               { intermediate += '|'  }
+						intermediate += '{'+(rows[wrapRows-1].indexOf( bell )+1)+'},';
+					}
 				}
 			}
 			intermediate = intermediate.replace( trimtrailingcommaregex, '' );
-
 			// Convert to text
 			coreText = intermediate;
 			// Have a first bash at it by converting as much as possible
