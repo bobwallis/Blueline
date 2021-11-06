@@ -77,13 +77,13 @@ Blueline\Entity\Method:
             type: boolean
             nullable: true
         calls:
-            type: json_array
+            type: json
             nullable: true
         ruleOffs:
-            type: json_array
+            type: json
             nullable: true
         callingPositions:
-            type: json_array
+            type: json
             nullable: true
         magic:
             type: smallint
