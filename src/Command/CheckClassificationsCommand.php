@@ -93,7 +93,7 @@ class CheckClassificationsCommand extends Command
         $output->writeln('');
 
         $time += microtime(true);
-        $output->writeln("\n<info>Finished updating method similarities in ".gmdate("H:i:s", $time).". Peak memory usage: ".number_format(round(memory_get_peak_usage(true)/1048576, 2)).' MiB.</info>');
+        $output->writeln("\n<info>Finished in ".gmdate("H:i:s", $time).". Peak memory usage: ".number_format(round(memory_get_peak_usage(true)/1048576, 2)).' MiB.</info>');
         return 0;
     }
 }
