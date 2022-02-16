@@ -290,7 +290,7 @@ class MethodsController extends AbstractController
                     'stage'    => $vars['stage'],
                     'notation' => $vars['notation']
                 ), true);
-                $process = new Process(['node', __DIR__.'/../Resources/pupeteer/render.js', $request->attributes->get('endpoint').$this->generateUrl('Blueline_Methods_view', array('url' => $url)), $section, (intval($request->query->get('scale')) ?: 1)]);
+                $process = new Process(['node', __DIR__.'/../Resources/pupeteer/render.js', $this->generateUrl('Blueline_Methods_view', array('url' => $url), UrlGeneratorInterface::ABSOLUTE_URL), $section, (intval($request->query->get('scale')) ?: 1)]);
                 $process->setTimeout(10);
                 $process->mustRun();
                 return new Response($process->getOutput());
