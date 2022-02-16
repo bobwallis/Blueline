@@ -290,13 +290,10 @@ class MethodsController extends AbstractController
                     'stage'    => $vars['stage'],
                     'notation' => $vars['notation']
                 ), true);
-                return $this->redirect($this->getParameter('blueline.image_endpoint').'?url='.$this->generateUrl('Blueline_Methods_custom_view', array(
+                return $this->redirect($this->getParameter('blueline.image_endpoint').'?url='.urlencode($this->generateUrl('Blueline_Methods_custom_view', array(
                     'stage'    => $vars['stage'],
-                    'notation' => $vars['notation'],
-                    'scale'    => (intval($request->query->get('scale')) ?: 1),
-                    'style'    => (!$section)? 'numbers' : $section,
-                    '_format'  => 'png'
-                ), UrlGeneratorInterface::ABSOLUTE_URL).'&scale='.$request->query->get('scale').'&style='.$request->query->get('style'), 302);
+                    'notation' => $vars['notation']
+                ), UrlGeneratorInterface::ABSOLUTE_URL)).'&scale='.$request->query->get('scale').'&style='.$request->query->get('style'), 302);
             default:
                 return $this->render('Methods/view.'.$format.'.twig', compact('method', 'custom', 'similarMethods'));
         }
