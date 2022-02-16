@@ -26,8 +26,7 @@
     "gulp-sourcemaps": "^3.0.0",
     "gulp-terser": "^2.1.0",
     "merge-stream": "^2.0.0",
-    "postcss": "^8.3.11",
-    "puppeteer": "^11.0.0"
+    "postcss": "^8.4.6"
   },
   "dependencies": {}
 }

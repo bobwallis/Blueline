@@ -182,7 +182,7 @@ class MethodsController extends AbstractController
                     'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null),
                     'scale'      => intval($request->query->get('scale')) ?: null,
                     'style'      => strtolower($request->query->get('style')) ?: null,
-                    'url'      => $renamedUrl,
+                    'url'        => $renamedUrl,
                     '_format'    => $format
                 ));
                 return $this->redirect($redirect, 301);
@@ -194,7 +194,7 @@ class MethodsController extends AbstractController
                     'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null),
                     'scale'      => intval($request->query->get('scale')) ?: null,
                     'style'      => strtolower($request->query->get('style')) ?: null,
-                    'url'      => $capitalisedMethod->getUrl(),
+                    'url'        => $capitalisedMethod->getUrl(),
                     '_format'    => $format
                 ));
                 return $this->redirect($redirect, 301);
@@ -213,10 +213,7 @@ class MethodsController extends AbstractController
         // Create response
         switch ($format) {
             case 'png':
-                $process = new Process(['node', __DIR__.'/../Resources/pupeteer/render.js', $request->attributes->get('endpoint').$this->generateUrl('Blueline_Methods_view', array('url' => $url)), $section, (intval($request->query->get('scale')) ?: 1)]);
-                $process->setTimeout(10);
-                $process->mustRun();
-                return new Response($process->getOutput());
+                return $this->redirect($this->getParameter('blueline.image_endpoint').'?url='.$this->getParameter('blueline.endpoint').$this->generateUrl('Blueline_Methods_view', array('url' => $url)).'&scale='.$request->query->get('scale').'&style='.$request->query->get('style'), 302);
             default:
                 return $this->render('Methods/view.'.$format.'.twig', compact('method', 'similarMethods'));
         }
