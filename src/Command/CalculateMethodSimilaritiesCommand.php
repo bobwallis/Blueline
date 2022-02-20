@@ -114,9 +114,6 @@ class CalculateMethodSimilaritiesCommand extends Command
             }
             $comparisons = pg_fetch_all($comparisons) ?: array();
 
-            // Insert the obvious similar method so we don't try to recalculate everything the next time the command runs
-            pg_insert($db, 'methods_similar', array('method1_title' => $method['title'], 'method2_title' => $method['title'], 'similarity' => 0));
-
             // Compare each one and add to the similarity table (if similar enough)
             $limit = max(1, floor($method['lengthoflead']/10));
             foreach ($comparisons as $comparison) {
@@ -126,6 +123,10 @@ class CalculateMethodSimilaritiesCommand extends Command
                     pg_insert($db, 'methods_similar', array('method1_title' => $comparison['title'], 'method2_title' => $method['title'], 'similarity' => $similar));
                 }
             }
+
+            // Insert the obvious similar method so we don't try to recalculate everything the next time the command runs
+            pg_insert($db, 'methods_similar', array('method1_title' => $method['title'], 'method2_title' => $method['title'], 'similarity' => 0));
+
             pg_flush($db);
             $progress->advance();
         }
