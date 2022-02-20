@@ -18,25 +18,10 @@ doctrine:
                     string_functions:
                         regexp:
                             Blueline\Doctrine\Regexp
-                        concat_ws:
-                            Blueline\Doctrine\ConcatWs
                         levenshtein:
                             Blueline\Doctrine\Levenshtein
-                        levenshtein_less_equal:
-                            Blueline\Doctrine\LevenshteinLessEqual
                         levenshtein_ratio:
                             Blueline\Doctrine\LevenshteinRatio
-                    numeric_functions:
-                        acos:
-                            Blueline\Doctrine\Acos
-                        cos:
-                            Blueline\Doctrine\Cos
-                        floor:
-                            Blueline\Doctrine\Floor
-                        sin:
-                            Blueline\Doctrine\Sin
-                        radians:
-                            Blueline\Doctrine\Radians
 
 when@test:
     doctrine:

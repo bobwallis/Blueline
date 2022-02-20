@@ -39,6 +39,7 @@ class Regexp extends FunctionNode
                     $this->regexp->dispatch($sqlWalker).
                 ')';
             case 'mysql':
+            case 'sqlite':
                 return '('.
                     $this->string->dispatch($sqlWalker).
                     ' REGEXP '.

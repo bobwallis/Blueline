@@ -36,12 +36,15 @@ class LevenshteinRatio extends FunctionNode
                     'CHAR_LENGTH('.$this->firstString->dispatch($sqlWalker).'),'.
                     'CHAR_LENGTH('.$this->secondString->dispatch($sqlWalker).')'.
                 ')))*100)';
-
-            case 'mysql':
-                return 'LEVENSHTEIN_RATIO('.
+            case 'sqlite':
+                return '((1 - (CAST(editdist3('.
                     $this->firstString->dispatch($sqlWalker).', '.
                     $this->secondString->dispatch($sqlWalker).
-                ')';
+                ') AS REAL) / '.
+                'MAX('.
+                    'LENGTH('.$this->firstString->dispatch($sqlWalker).'),'.
+                    'LENGTH('.$this->secondString->dispatch($sqlWalker).')'.
+                ')))*100)';
         }
     }
 }

@@ -78,7 +78,7 @@ class CalculateMethodSimilaritiesCommand extends Command
             'SELECT title, notationexpanded, lengthoflead
               FROM methods
               LEFT OUTER JOIN methods_similar ON (title = method1_title AND method2_title = $2)
-             WHERE (stage = $1 AND title != $2 AND method1_title IS NULL AND (ABS(lengthoflead - $3) < 1 OR ABS(lengthoflead - $3) < FLOOR((CASE WHEN $3 < lengthoflead THEN $3 ELSE lengthoflead END)/5)))'
+             WHERE (stage = $1 AND title != $2 AND method1_title IS NULL AND (ABS(lengthoflead - $3) < 1 OR ABS(lengthoflead - $3) < FLOOR((CASE WHEN $3 < lengthoflead THEN $3 ELSE lengthoflead END)/10)))'
         );
         if ($comparisonMethod === false) {
             $output->writeln('<error>Failed to create prepared query: '.pg_last_error($db).'</error>');
@@ -118,7 +118,7 @@ class CalculateMethodSimilaritiesCommand extends Command
             pg_insert($db, 'methods_similar', array('method1_title' => $method['title'], 'method2_title' => $method['title'], 'similarity' => 0));
 
             // Compare each one and add to the similarity table (if similar enough)
-            $limit = max(1, floor($method['lengthoflead']/5));
+            $limit = max(1, floor($method['lengthoflead']/10));
             foreach ($comparisons as $comparison) {
                 $similar = MethodSimilarity::calculate($methodRowArray, $comparison['notationexpanded'], $method['stage'], $limit);
                 if ($similar < $limit) {

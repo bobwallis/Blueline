@@ -32,6 +32,11 @@ class Levenshtein extends FunctionNode
                     $this->firstString->dispatch($sqlWalker).', '.
                     $this->secondString->dispatch($sqlWalker).
                 ')';
+            case 'sqlite':
+                return 'editdist3('.
+                    $this->firstString->dispatch($sqlWalker).', '.
+                    $this->secondString->dispatch($sqlWalker).
+                ')';
         }
     }
 }
