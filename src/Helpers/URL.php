@@ -26,6 +26,9 @@ class URL
             $url = preg_replace('/'.$initial.'_('.implode('|', Stages::toArray()).')$/', $classification.'_$1', $url);
         }
 
+        // Replace "No." with "No. "
+        $url = preg_replace( '/No([0-9]+)/', 'No_\1', $url );
+
         // If the title contains no spaces, then add them in (messed up a sitemap import in the distant past and still get crawler errors from it)
         if (strpos($url, '_') === false) {
             $url = trim(preg_replace('/([A-Z]{1})/', '_\1', $url), '_');
