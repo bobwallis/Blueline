@@ -300,14 +300,6 @@ class MethodsController extends AbstractController
     }
 
     /**
-    * @Cache(maxage="129600", public=true, lastModified="asset_update")
-    */
-    public function print(Request $request)
-    {
-        return $this->render('Methods/print.html.twig');
-    }
-
-    /**
     * @Cache(maxage="604800", public=true, lastModified="database_update")
     */
     public function sitemap($page)
