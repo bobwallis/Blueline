@@ -18,7 +18,15 @@ define( ['jquery', 'eve'], function( $, eve ) {
 		var $container = $( '#'+options.landmark+'_' );
 		if( $container.length === 0 ) {
 			$container = $( '<ul id="'+options.landmark+'_" class="tabBar">'+ options.tabs.map( function( t, i ) {
-					return typeof t.content == 'string'? ('<li id="tab_'+t.content+'"'+(t.className? ' class="'+t.className+'"' : '')+'>'+t.title+'</li>') : '';
+					if( typeof t.external === 'string' ) {
+						return '<li id="tab_'+t.content+'"><a href="'+t.external+'" class="external"'+(t.onclick? ' onclick="'+t.onclick+'"' : '')+'>'+t.title+'</a></li>';
+					}
+					if( typeof t.content === 'string' ) {
+						return '<li id="tab_'+t.content+'"'+(t.className? ' class="'+t.className+'"' : '')+'>'+t.title+'</li>';
+					}
+					else {
+						return '';
+					}
 				} ).join( '' ) +
 				'</ul>' );
 			$( $container.children()[(typeof options.active === 'number' )?options.active:0] ).addClass( 'active' );

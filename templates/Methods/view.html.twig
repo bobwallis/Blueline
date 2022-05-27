@@ -17,7 +17,8 @@
 		{{ header( { 'title': method.title }, null, { 'id': 'method_tabBar', 'active': 1, 'tabs': [
 			{ 'title': 'Details', 'content': 'method_details' },
 			{ 'title': 'Line', 'content': 'method_line' },
-			{ 'title': 'Grid', 'content': 'method_grid' }
+			{ 'title': 'Grid', 'content': 'method_grid' },
+			(method.stage <= 12)? { 'title': 'Practice', 'content': 'method_practice', 'external': 'https://bobwallis.github.io/MethodTutor/#title='~method.title|url_encode~'&notation='~method.notation|url_encode~'&stage='~method.stage~'&ruleoffs='~method.ruleOffs|json_encode()|url_encode, 'onclick': 'window.open(this.href,\'targetWindow\',\'toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=yes,width=500,height=650\');return false;' } : {}
 		] } ) }}
 		<div id="method_details" class="details">
 			<dl>
