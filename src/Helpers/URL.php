@@ -6,6 +6,12 @@ class URL
     private static $corrections = array(
         'Sutton_cum_Lound_S_Minor' => 'Sutton-cum-Lound_Surprise_Minor',
         'Willoughby_on_the_Wolds_S_Minor' => 'Willoughby-on-the-Wolds_Surprise_Minor',
+        'Ferret-replacement_Cat_No1_Differential_Bob_Minor' => 'Ferret-Replacement_Cat_No_1_Differential_Bob_Minor',
+        'Dead_Ringer_For_Love_Minimus' => 'Dead_Ringer_for_Love_Minimus',
+        'No_Place_Like_Kent_Treble_Bob_Minor' => 'No_Place_like_Kent_Treble_Bob_Minor',
+        'Armitage-is-the-name_Bob_Minor' => 'Armitage-Is-the-Name_Bob_Major',
+        'Tee-jay_Surprise_Major' => 'Tee-Jay_Surprise_Major',
+        'Sgurr_Fhuaran_Surprise_Minor' => 'Sgrr_Fhuaran_Surprise_Minor'
     );
 
     public static function canonical($url)
