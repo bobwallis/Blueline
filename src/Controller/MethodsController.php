@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Blueline\Helpers\Search;
 use Blueline\Helpers\Text;
 use Blueline\Entity\Method;
@@ -29,9 +30,8 @@ class MethodsController extends AbstractController
     /**
     * @Cache(maxage="129600", public=true, lastModified="database_update")
     */
-    public function search(Request $request)
+    public function search(Request $request, EntityManagerInterface $em)
     {
-        $em = $this->getDoctrine()->getManager();
         $methodRepository = $em->getRepository(Method::class);
         $methodMetadata   = $em->getClassMetadata(Method::class);
 
@@ -122,10 +122,10 @@ class MethodsController extends AbstractController
     /**
     * @Cache(maxage="129600", public=true, lastModified="database_update")
     */
-    public function view($url, Request $request)
+    public function view($url, Request $request, EntityManagerInterface $em)
     {
         $format = $request->getRequestFormat();
-        $methodRepository = $this->getDoctrine()->getManager()->getRepository(Method::class);
+        $methodRepository = $em->getRepository(Method::class);
 
         // If the title is empty redirect to version without slash
         if (empty($url)) {
@@ -175,7 +175,7 @@ class MethodsController extends AbstractController
 
         if (!$method) {
             // Try and find a renamed method
-            $peformanceRepository = $this->getDoctrine()->getManager()->getRepository(Performance::class);
+            $peformanceRepository = $em->getRepository(Performance::class);
             $renamedUrl = $peformanceRepository->findURLByRungURL($url);
             if ($renamedUrl !== null) {
                 $redirect = $this->generateUrl('Blueline_Methods_view', array(
@@ -245,7 +245,7 @@ class MethodsController extends AbstractController
         $vars['notationExpanded'] = PlaceNotation::expand($vars['notation'], $vars['stage']);
 
         // Check whether the method already exists and redirect to it if so
-        $methodsCheck = $this->getDoctrine()->getManager()->createQuery('
+        $methodsCheck = $em->createQuery('
             SELECT partial m.{title,url} FROM Blueline\Entity\Method m
             WHERE m.notationExpanded = (:notation) AND m.stage = (:stage)')
             ->setParameter('notation', $vars['notationExpanded'])
@@ -302,10 +302,9 @@ class MethodsController extends AbstractController
     /**
     * @Cache(maxage="604800", public=true, lastModified="database_update")
     */
-    public function sitemap($page)
+    public function sitemap($page, EntityManagerInterface $em)
     {
-        $methods = $this->getDoctrine()->getManager()
-                    ->createQuery('SELECT partial m.{title,url} FROM Blueline\Entity\Method m ORDER BY m.url')
+        $methods = $em->createQuery('SELECT partial m.{title,url} FROM Blueline\Entity\Method m ORDER BY m.url')
                     ->setMaxResults(12500)
                     ->setFirstResult(($page-1)*12500)
                     ->getArrayResult();
