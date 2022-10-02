@@ -19,7 +19,7 @@ class MethodXMLIterator implements \Iterator, \Countable
 
     public function __construct($file)
     {
-        // Prepare methodCollections data for easier methos sorting
+        // Prepare methodCollections data for easier method sorting
         require __DIR__.'/../Resources/data/collections.php';
         $methodCollections = array();
         foreach ($collections as $collection) {

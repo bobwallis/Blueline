@@ -1,35 +1,41 @@
-define( ['jquery', 'eve', '../helpers/PlaceNotation'], function( $, eve, PlaceNotation ) {
+define( ['eve', '$document_on', '../helpers/PlaceNotation'], function( eve, $document_on, PlaceNotation ) {
 	var prevURL = location.href; // Store the previous state so we can restore the form if user moves back
+
 	eve.on( 'page.finished', function( url ) {
-		var $custom_method_notation = $( '#custom_method_notation' );
-		if( $custom_method_notation.length > 0 ) {
-				var queryString = prevURL.replace( /^.*?(\?|$)/, '' );
-				$custom_method_notation.val( (queryString.indexOf( 'notation=' ) !== -1)? decodeURIComponent( queryString.replace( /^.*notation=(.*?)(&.*$|$)/, '$1' ).replace( /\+/g, '%20' ) ) : '' );
-				$( '#custom_method_stage' ).val( (queryString.indexOf( 'stage=' ) !== -1)? decodeURIComponent( queryString.replace( /^.*stage=(.*?)(&.*$|$)/, '$1' ).replace( /\+/g, '%20' ) ) : '' );
+		var custom_method_notation = document.getElementById( 'custom_method_notation' );
+		if( custom_method_notation !== null ) {
+			var queryString = prevURL.replace( /^.*?(\?|$)/, '' );
+			custom_method_notation.value = (queryString.indexOf( 'notation=' ) !== -1)? decodeURIComponent( queryString.replace( /^.*notation=(.*?)(&.*$|$)/, '$1' ).replace( /\+/g, '%20' ) ) : '';
+			document.getElementById( 'custom_method_stage' ).value = (queryString.indexOf( 'stage=' ) !== -1)? decodeURIComponent( queryString.replace( /^.*stage=(.*?)(&.*$|$)/, '$1' ).replace( /\+/g, '%20' ) ) : '';
+			updateExpansion();
 		}
-		updateExpansion();
 		prevURL = url;
 	} );
 
 	var updateExpansion = function( e ) {
-		var $input = $( '#custom_method_notation' );
+		var custom_method_notation       = document.getElementById( 'custom_method_notation' ),
+			custom_method_stage          = document.getElementById( 'custom_method_stage' ),
+			custom_method_notationParsed = document.getElementById( 'custom_method_notationParsed' );
 
-		if( $input.val() !== '' ) {
-			var stage = parseInt( $( '#custom_method_stage' ).val() ),
-				notation = $input.val();
-			if( typeof notation !== 'undefined' ) {
-				var longNotation = PlaceNotation.expand( $input.val(), isNaN( stage )? undefined : stage );
+		if( custom_method_notation !== null ) {
+			if( custom_method_notation.value !== '' ) {
+				var stage        = parseInt( custom_method_stage.value, 10 ),
+					notation     = custom_method_notation.value,
+					longNotation = PlaceNotation.expand( notation, isNaN( stage )? undefined : stage );
 				if( longNotation.length > 0 ) {
-					$('#custom_method_notationParsed').removeClass( 'placeholder' )
-						.html( longNotation.replace( /(x|\.)/g, function(t) { return ' '+t+' '; } ) );
+					custom_method_notationParsed.classList.remove( 'placeholder' );
+					custom_method_notationParsed.innerHTML = longNotation.replace( /(x|\.)/g, function(t) { return ' '+t+' '; } );
 				}
 			}
-		}
-		else {
-			$('#custom_method_notationParsed').html( '…' ).addClass( 'placeholder' );
+			else {
+				custom_method_notationParsed.innerHTML = '…';
+				custom_method_notationParsed.classList.add( 'placeholder' );
+			}
 		}
 	};
 
-	$(document).on( 'keyup cut paste', '#custom_method_notation', updateExpansion )
-		.on( 'change', '#custom_method_stage', updateExpansion );
+	$document_on( 'keyup',  '#custom_method_notation', updateExpansion );
+	$document_on( 'cut',    '#custom_method_notation', updateExpansion );
+	$document_on( 'paste',  '#custom_method_notation', updateExpansion );
+	$document_on( 'change', '#custom_method_stage',    updateExpansion );
 } );

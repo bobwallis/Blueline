@@ -54,7 +54,7 @@
 	</head>
 	<body>
 		{% if isAppStartPage %}
-			<script>if(('standalone' in navigator)&&navigator.standalone){document.write('<div id="appStart"><header></header><p>Loading</p></div>');document.body.className="standalone";}</script>
+			<script>if(('standalone' in navigator)&&navigator.standalone){document.body.className="standalone";}</script>
 		{% endif %}
 		<header id="top" role="banner">
 			<h1><a href="{{ path('Blueline_welcome') }}">Blueline</a></h1>

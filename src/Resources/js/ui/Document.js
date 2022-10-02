@@ -1,44 +1,33 @@
 // Manage changes to the UI at a document/body level
 
-define( ['jquery', 'eve', '../helpers/ServiceWorker', '../helpers/URL', '../data/Page', './Document/Title', './Document/Hotkeys'], function( $, eve, ServiceWorker, URL, Page ) {
-	// Remove the app start screen (the loading overlay that covers the page while waiting for the
-	// UI to load properly when we are running as an iOS web app)
-	eve.once( 'app.ready', function() {
-		$( '#appStart' ).fadeOut( 200, function() { $( '#appStart' ).remove(); } );
-		$('body script:first-child').remove();
-	} );
-
+define( ['eve', '$document_on', '../helpers/ServiceWorker', '../helpers/URL', '../data/Page', './Document/Title'], function( eve, $document_on, ServiceWorker, URL, Page ) {
 	if( 'serviceWorker' in navigator ) {
 		// Listen at the document.body level for click events, and request new pages without reload
-		$( document.body ).on( 'click', 'a', function( e ) {
-			var $target = $( e.target );
+		$document_on( 'click', 'a', function( e ) {
 			// Get the href of the link
-			var href = $target.attr( 'href' );
+			var href = e.target.href;
 			// If the URL is internal, push it (which will trigger a statechange)
-			if( href && URL.isInternal( href ) && !($target.data( 'forcerefresh' ) === true) ) {
+			if( href && URL.isInternal( href ) && !(!!e.target.dataset.forcerefresh === true) ) {
 				e.preventDefault();
 				Page.request( href, 'click' );
 			}
 		} );
-		$( document.body ).on( 'mouseenter', 'a', function( e ) {
-			var $target = $( e.target );
+		$document_on( 'mouseover', 'a', function( e ) {
 			// Get the href of the link
-			var href = $target.attr( 'href' );
+			var href = e.target.href;
 			// If the URL is internal, ask the service worker to prefetch it
-			if( href && URL.isInternal( href ) && !($target.data( 'forcerefresh' ) === true) ) {
+			if( href && URL.isInternal( href ) && !(!!e.target.dataset.forcerefresh === true) ) {
 				ServiceWorker.prefetch( href );
 			}
 		} );
 
 		// Capture and process back/forward events
 		window.history.replaceState( { url: location.href, type: 'load' }, null, location.href );
-		$( function() {
-			$( window ).on( 'popstate', function( e ) {
-				var state = e.originalEvent.state;
-				if( state !== null && typeof state.url === 'string' ) {
-					Page.request( state.url, 'popstate' );
-				}
-			} );
+		window.addEventListener( 'popstate', function( e ) {
+			var state = e.state;
+			if( state !== null && typeof state.url === 'string' ) {
+				Page.request( state.url, 'popstate' );
+			}
 		} );
 	}
 } );

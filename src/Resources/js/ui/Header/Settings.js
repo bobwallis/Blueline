@@ -1,18 +1,26 @@
-define( ['jquery', 'eve', '../../helpers/LocalStorage'], function( $, eve, LocalStorage ) {
-	var $document = $( document ),
-		settings = ['method_follow', 'method_style', 'method_tooltips', 'method_music'];
+define( ['eve', '$document_on', '../../helpers/LocalStorage'], function( eve, $document_on, LocalStorage ) {
+	var settings = ['method_follow', 'method_style', 'method_tooltips', 'method_music'];
 
 	// Set initial settings when the page is loaded
 	var initialSet = function() {
 		settings.forEach( function( setting ) {
-			var $element = $('#'+setting+', input[name='+setting+']' );
-			if( $element.length > 0 ) {
-				if( $element.is( ':checkbox' ) ) {
-					$element.prop( 'checked', !!LocalStorage.getSetting( setting, $element.is( ':checked' ) ) );
+			var elements = document.querySelectorAll( '#'+setting+', input[name='+setting+']' );
+			// Checkboxes and selector boxes
+			if( elements.length === 1 ) {
+				var element = elements[0];
+				if( element.type === 'checkbox' ) {
+					element.checked = !!LocalStorage.getSetting( setting, element.checked );
 				}
 				else {
-					$element.val( [LocalStorage.getSetting( setting, $element.val() )] );
+					element.value = LocalStorage.getSetting( setting, element.value );
 				}
+			}
+			// Radios
+			else {
+				var radioToCheck = LocalStorage.getSetting( setting, 'numbers' );
+				elements.forEach( function( element ) {
+					element.checked = (element.value === radioToCheck);
+				} );
 			}
 		} );
 	};
@@ -23,13 +31,12 @@ define( ['jquery', 'eve', '../../helpers/LocalStorage'], function( $, eve, Local
 
 	// Update stored settings when form is changed
 	settings.forEach( function( setting ) {
-		$document.on( 'change', '#'+setting+', input[name='+setting+']', function( e ) {
-			var $target = $( e.target );
-			if( $target.is( ':checkbox' ) ) {
-				LocalStorage.setSetting( setting, $target.is(':checked') );
+		$document_on( 'change', '#'+setting+', input[name='+setting+']', function( e ) {
+			if( e.target.type === 'checkbox' ) {
+				LocalStorage.setSetting( setting, e.target.checked );
 			}
 			else {
-				LocalStorage.setSetting( setting, $target.val() );
+				LocalStorage.setSetting( setting, e.target.value );
 			}
 			eve( 'setting.changed.'+setting );
 		} );

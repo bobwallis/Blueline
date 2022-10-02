@@ -47,7 +47,6 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
     {
         return array(
             new \Twig\TwigFilter('count', 'count'),
-            new \Twig\TwigFilter('addAccidentals', array($this, 'addAccidentals')),
             new \Twig\TwigFilter('toArray', array($this, 'toArray')),
         );
     }
@@ -73,11 +72,6 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
         } else {
             return array_pop($list);
         }
-    }
-
-    public function addAccidentals($str)
-    {
-        return preg_replace(array( '/(^|\s)([A-G1-9]{1})b($|\s)/', '/(^|\s)([A-G1-9]{1})#($|\s)/' ), array( '$1$2♭$3', '$1$2♯$3' ), $str);
     }
 
     private static $days = array( '', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' );

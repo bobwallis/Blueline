@@ -9,7 +9,6 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Blueline\Helpers\Search;
-use Blueline\Helpers\Text;
 use Blueline\Entity\Method;
 use Blueline\Entity\Performance;
 use Blueline\Helpers\URL;
@@ -222,7 +221,7 @@ class MethodsController extends AbstractController
     /**
     * @Cache(maxage="129600", public=true, lastModified="database_update")
     */
-    public function viewCustom(Request $request)
+    public function viewCustom(Request $request, EntityManagerInterface $em)
     {
         $format = $request->getRequestFormat();
 

@@ -14,14 +14,14 @@ class Stages
      * @access private
      */
     private static $_numberToStage = array(
-        2 =>    'Two',
-        3 =>    'Singles',
-        4 =>    'Minimus',
-        5 =>    'Doubles',
-        6 =>    'Minor',
-        7 =>    'Triples',
-        8 =>    'Major',
-        9 =>    'Caters',
+        2  =>    'Two',
+        3  =>    'Singles',
+        4  =>    'Minimus',
+        5  =>    'Doubles',
+        6  =>    'Minor',
+        7  =>    'Triples',
+        8  =>    'Major',
+        9  =>    'Caters',
         10 =>    'Royal',
         11 =>    'Cinques',
         12 =>    'Maximus',

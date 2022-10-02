@@ -4,8 +4,8 @@
 
 define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve, $, URL, Page ) {
 	var $content = $( '#content' ),
-		$search = $( '#search' ),
-		$q = $( '#q' );
+		$search  = $( '#search' ),
+		$q       = $( '#q' );
 
 	var Search = {
 		visible: false,
@@ -41,8 +41,6 @@ define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve
 		}
 	};
 
-	// On pages where the search box is hidden to start with, change the CSS so that the box is
-	// sat in the hidden position instead.
 	// Update Search.visible with an initial value
 	if( !$search.is( ':visible' ) ) {
 		Search.visible = false;
@@ -59,11 +57,6 @@ define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve
 		else {
 			Search.hide();
 		}
-	} );
-
-	// Accelerate animations if the page request loads
-	eve.on( 'page.loaded', function() {
-		$search.finish();
 	} );
 
 	if( 'serviceWorker' in navigator ) {
