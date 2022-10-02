@@ -39,12 +39,13 @@ function gulp_fonts() {
 
 // Javascript
 var require_paths = {
-	jquery:       'lib/jquery',
-	eve:          'lib/eve',
-	ready:        'lib/ready',
-	deepmerge:    'lib/deepmerge',
-	matches:      'lib/matches',
-	'Array.fill': 'lib/Array.fill'
+	jquery:         'lib/jquery',
+	eve:            'lib/eve',
+	ready:          'lib/ready',
+	deepmerge:      'lib/deepmerge',
+	matches:        'lib/matches',
+	'$document_on': 'lib/$document_on',
+	'Array.fill':   'lib/Array.fill'
 };
 var require_shim = {
 	'Modernizr': {
