@@ -9,7 +9,7 @@ class DefaultControllerTest extends WebTestCase
     public function testPages()
     {
         $client = static::createClient();
-        foreach (array('', 'about', 'methods/notation', 'methods/tutorials') as $html) {
+        foreach (array('', 'about', 'methods/notation') as $html) {
             $crawler = $client->request('GET', '/'.$html);
             $this->assertTrue($client->getResponse()->isSuccessful(), $html.' request unsuccessful');
         }
@@ -19,7 +19,7 @@ class DefaultControllerTest extends WebTestCase
     public function testRedirects()
     {
         $client = static::createClient();
-        foreach (array('services/siril', 'services/siril/about', 'copyright', 'tutorials') as $html) {
+        foreach (array('services/siril', 'services/siril/about', 'copyright', 'tutorials', 'methods/tutorials') as $html) {
             $crawler = $client->request('GET', '/'.$html);
             $this->assertSame(301, $client->getResponse()->getStatusCode());
         }
