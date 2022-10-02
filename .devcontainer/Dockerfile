@@ -14,8 +14,8 @@ RUN if [ "$USER_GID" != "1000" ] || [ "$USER_UID" != "1000" ]; then \
 
 # Update expired keys
 # Suppress an apt-key warning about standard out not being a terminal. Use in this script is safe.
-#ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
-#RUN for K in $(apt-key list | grep expired | cut -d'/' -f2 | cut -d' ' -f1); do sudo apt-key adv --recv-keys --keyserver keys.gnupg.net $K; done
+ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
+RUN for K in $(apt-key list | grep expired | cut -d'/' -f2 | cut -d' ' -f1); do sudo apt-key adv --recv-keys --keyserver keys.gnupg.net $K; done
 
 # Install a version of Node.js using nvm for front end dev
 ARG INSTALL_NODE="true"
@@ -29,8 +29,6 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         libpq-dev postgresql-client \
         # Gifsicle
         zlib1g-dev libicu-dev g++ automake \
-        # Pupeteer
-        dumb-init libnss3 libatk1.0 libatk-bridge2.0 libx11-xcb1 libxcb-dri3-0 libxcomposite1 libxdamage1 libcups2 libdrm2 libxrandr2 libgbm1 libasound2 libpangocairo-1.0 libgtk-3-0 libxshmfence1 \
     # Opcache
     && docker-php-ext-install opcache \
     && docker-php-ext-enable opcache \
@@ -42,7 +40,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     # Xdebug
     && docker-php-ext-enable xdebug
 
-# Install global node packages.
+# Install global node packages
 RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g gulp" 2>&1
 
 # Install Symfony
