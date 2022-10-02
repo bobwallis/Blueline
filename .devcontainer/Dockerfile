@@ -46,7 +46,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g gulp" 2>&1
 
 # Install Symfony
-RUN wget https://get.symfony.com/cli/installer -O - | bash && ln -s /root/.symfony/bin/symfony /usr/local/bin/symfony
+RUN wget https://get.symfony.com/cli/installer -O - | bash && ln -s /root/.symfony5/bin/symfony /usr/local/bin/symfony
 
 # Cleanup
 RUN apt-get clean \
