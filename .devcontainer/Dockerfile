@@ -13,7 +13,9 @@ RUN if [ "$USER_GID" != "1000" ] || [ "$USER_UID" != "1000" ]; then \
     fi
 
 # Update expired keys
-RUN for K in $(apt-key list | grep expired | cut -d'/' -f2 | cut -d' ' -f1); do sudo apt-key adv --recv-keys --keyserver keys.gnupg.net $K; done
+# Suppress an apt-key warning about standard out not being a terminal. Use in this script is safe.
+#ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
+#RUN for K in $(apt-key list | grep expired | cut -d'/' -f2 | cut -d' ' -f1); do sudo apt-key adv --recv-keys --keyserver keys.gnupg.net $K; done
 
 # Install a version of Node.js using nvm for front end dev
 ARG INSTALL_NODE="true"
