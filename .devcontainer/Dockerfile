@@ -1,5 +1,5 @@
-# Update the VARIANT arg in docker-compose.yml to pick a PHP version: 8, 7, 7.4, 7.3
-ARG VARIANT=8
+# [Choice] PHP version (use -bullseye variants on local arm64/Apple Silicon): 8, 8.1, 8.0, 7, 7.4, 7.3, 8-bullseye, 8.1-bullseye, 8.0-bullseye, 7-bullseye, 7.4-bullseye, 7.3-bullseye, 8-buster, 8.1-buster, 8.0-buster, 7-buster, 7.4-buster
+ARG VARIANT=8.0-buster
 FROM mcr.microsoft.com/vscode/devcontainers/php:0-${VARIANT}
 
 # Update args in docker-compose.yaml to set the UID/GID of the "vscode" user.
@@ -12,15 +12,12 @@ RUN if [ "$USER_GID" != "1000" ] || [ "$USER_UID" != "1000" ]; then \
         && chmod -R $USER_UID:root /usr/local/share/nvm; \
     fi
 
-# Update expired keys
-# Suppress an apt-key warning about standard out not being a terminal. Use in this script is safe.
-ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
-RUN for K in $(apt-key list | grep expired | cut -d'/' -f2 | cut -d' ' -f1); do sudo apt-key adv --recv-keys --keyserver keys.gnupg.net $K; done
+# Update
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive
 
-# Install a version of Node.js using nvm for front end dev
-ARG INSTALL_NODE="true"
+# Node.js version: none, lts/*, 16, 14, 12, 10
 ARG NODE_VERSION="lts/*"
-RUN if [ "${INSTALL_NODE}" = "true" ]; then su vscode -c "source /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
+RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
 
 # Install additional OS packages and PHP extensions
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
@@ -50,5 +47,3 @@ RUN wget https://get.symfony.com/cli/installer -O - | bash && ln -s /root/.symfo
 RUN apt-get clean \
     && pecl clear-cache \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* || true
-
-ENTRYPOINT ["dumb-init", "--"]

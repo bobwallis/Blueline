@@ -11,9 +11,8 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        # Update VARIANT to pick a PHP version: 8, 7, 7.4, 7.3
-        VARIANT: "8"
-        INSTALL_NODE: "true"
+        # Update VARIANT to pick a PHP version: 8.1, 8, 7, 7.4, 7.3
+        VARIANT: "8.0-buster"
         NODE_VERSION: "lts/*"
         USER_UID: 1000
         USER_GID: 1000

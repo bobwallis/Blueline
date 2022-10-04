@@ -30,7 +30,8 @@
 		"mikestead.dotenv",
 		"mtxr.sqltools",
 		"mtxr.sqltools-driver-pg",
-		"xdebug.php-debug"
+		"xdebug.php-debug",
+		"mrmlnc.vscode-less"
 	],
 
 	"workspaceFolder": "/workspace",
