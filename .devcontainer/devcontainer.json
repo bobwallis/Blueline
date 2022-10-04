@@ -29,7 +29,8 @@
 		"redhat.vscode-yaml",
 		"mikestead.dotenv",
 		"mtxr.sqltools",
-		"mtxr.sqltools-driver-pg"
+		"mtxr.sqltools-driver-pg",
+		"xdebug.php-debug"
 	],
 
 	"workspaceFolder": "/workspace",
