@@ -10,6 +10,9 @@
 		<link rel="icon" type="image/svg+xml" sizes="any" href="{{ app.request.basepath }}/favicon.svg" />
 		<link rel="icon" href="{{ app.request.basepath }}/favicon.ico" />
 
+		{# Preload tags #}
+		{% block preload %}{% endblock %}
+
 		{# Web app manifest #}
 		<link rel="manifest" href="{{ path( 'Blueline_resource', { page: 'manifest', _format: 'json' } ) }}" />
 

@@ -2,6 +2,8 @@
 
 {% block title %}{{ method.title }} | Methods | {{ parent() }}{% endblock %}
 
+{% block preload %}<link rel="preload" href="{{ app.request.basepath }}/fonts/Blueline.woff2" as="font" type="font/woff2" crossorigin="anonymous" />{% endblock %}
+
 {% block og_title %}{{ method.title }}{% endblock %}
 {% block og_description %}Blue line and other details for {{ method.title }}. Classification: {{ (method.differential? 'Differential ':'') ~ (method.little? 'Little ':'') ~ method.classification ~ ' ' ~ method.stageText }}, Place Notation: {{ method.notation }}{% endblock %}
 {% block og_image %}{{ url( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 1, 'style': 'numbers' } ) }}{% endblock %}
