@@ -320,4 +320,13 @@ $method_extras_calls = array(
     'callingpositions' => array(),
     'ruleoffs' => array('every' => 2, 'from' => -1),
   ),
+  array(
+    'title' => 'Bristol Surprise Maximus',
+    'calls' => array(
+      'Bob'    => array('symbol' => '-', 'notation' => '14',    'every' => 48, 'from' => 0, 'cover' => 1),
+      'Single' => array('symbol' => 's', 'notation' => '1234',  'every' => 48, 'from' => 0, 'cover' => 1),
+    ),
+    'callingpositions' => array(),
+    'ruleoffs' => array('every' => 48, 'from' => 0),
+  ),
 );
