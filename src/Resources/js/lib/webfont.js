@@ -2,7 +2,7 @@
  * Returns a function that tries to load the Blueline web font and then runs a callback whether it failed or not
  */
 define( ['eve'], function( eve ) {
-	var loaded = false,
+	var loaded  = false,
 		loading = false;
 
 	var load = function() {
@@ -27,7 +27,7 @@ define( ['eve'], function( eve ) {
 			}
 			// Use the CSS Font Loading Module if it's defined
 			else if( !!window.FontFace ) {
-				document.fonts.forEach( function(e) {
+				document.fonts.forEach( function( e ) {
 					if( e.family == 'Blueline' || e.family == '"Blueline"' ) {
 						e.load().then( load, load );
 					}
@@ -41,7 +41,7 @@ define( ['eve'], function( eve ) {
 					differenceLimit = 20, // WebKit seems to give slightly different widths even if the font hasn't loaded. Compensate by only confirming load if the difference is large
 					measureFont = function( container, family ) {
 						var width,
-							testEl = document.createElement('div');
+							testEl = document.createElement( 'div' );
 						testEl.innerHTML = 'BES';
 						testEl.className = 'fontPreload';
 						testEl.style.fontFamily = family;
