@@ -130,7 +130,7 @@ class MethodsController extends AbstractController
         // If the title is empty redirect to version without slash
         if (empty($url)) {
             return $this->redirect($this->generateUrl('Blueline_Methods_welcome', array(
-                'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null)
+                'chromeless' => (($format == 'html') ? (intval($request->query->get('chromeless')) ?: null) : null)
             ), 301));
         }
 
@@ -140,7 +140,7 @@ class MethodsController extends AbstractController
         // Redirect to the canonical URL if we're at a wrong one
         if ($request->get('url') !== $url) {
             $redirect = $this->generateUrl('Blueline_Methods_view', array(
-                'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null),
+                'chromeless' => (($format == 'html') ? (intval($request->query->get('chromeless')) ?: null) : null),
                 'scale'      => intval($request->query->get('scale')) ?: null,
                 'style'      => strtolower($request->query->get('style')) ?: null,
                 'url'      => $url,
@@ -179,7 +179,7 @@ class MethodsController extends AbstractController
             $renamedUrl = $peformanceRepository->findURLByRungURL($url);
             if ($renamedUrl !== null) {
                 $redirect = $this->generateUrl('Blueline_Methods_view', array(
-                    'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null),
+                    'chromeless' => (($format == 'html') ? (intval($request->query->get('chromeless')) ?: null) : null),
                     'scale'      => intval($request->query->get('scale')) ?: null,
                     'style'      => strtolower($request->query->get('style')) ?: null,
                     'url'        => $renamedUrl,
@@ -191,7 +191,7 @@ class MethodsController extends AbstractController
             $capitalisedMethod = $methodRepository->findByURL(preg_replace_callback('/(^|_)(.)/', function($w) { return $w[1].strtoupper($w[2]); }, $url));
             if ($capitalisedMethod !== null) {
                 $redirect = $this->generateUrl('Blueline_Methods_view', array(
-                    'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null),
+                    'chromeless' => (($format == 'html') ? (intval($request->query->get('chromeless')) ?: null) : null),
                     'scale'      => intval($request->query->get('scale')) ?: null,
                     'style'      => strtolower($request->query->get('style')) ?: null,
                     'url'        => $capitalisedMethod->getUrl(),
@@ -252,7 +252,7 @@ class MethodsController extends AbstractController
             ->setParameter('stage', $vars['stage'])
             ->getArrayResult();
         if (!empty($methodsCheck)) {
-            $url = $this->generateUrl('Blueline_Methods_view', array( 'chromeless' => (($format == 'html') ? intval($request->query->get('chromeless')) ?: null : null), 'url' => $methodsCheck[0]['url'], '_format' => $format ));
+            $url = $this->generateUrl('Blueline_Methods_view', array( 'chromeless' => (($format == 'html') ? (intval($request->query->get('chromeless')) ?: null) : null), 'url' => $methodsCheck[0]['url'], '_format' => $format ));
             return $this->redirect($url, 301);
         }
 
