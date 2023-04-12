@@ -17,11 +17,6 @@ class DataController extends AbstractController
     {
         $response = new StreamedResponse();
 
-        // Block Dove data
-        if ($table == 'towers' || $table == 'towers_associations' || $table == 'towers_oldpks') {
-            throw $this->createAccessDeniedException('Data tables generated from the Dove data file cannot be exported.');
-        }
-
         // Get database
         $db = pg_connect($params->get('database_connect'));
         if( $db === false ) {
@@ -33,13 +28,6 @@ class DataController extends AbstractController
         $response->headers->set('Content-Type', 'text/csv');
         $response->setCallback(function () use ($table, $db) {
             switch ($table) {
-                case 'associations':
-                    $result = pg_query( $db,
-                        'SELECT id, name, link
-                          FROM associations
-                         ORDER BY id ASC'
-                    );
-                    break;
                 case 'collections':
                     $result = pg_query( $db,
                         'SELECT id, name, description
