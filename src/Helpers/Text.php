@@ -24,7 +24,7 @@ class Text
             return '';
         }
         if (count($list) > 1) {
-            return implode($glue, array_slice($list, null, -1)).$last.array_pop($list);
+            return implode($glue, array_slice($list, 0, -1)).$last.array_pop($list);
         } else {
             return array_pop($list);
         }
