@@ -16,8 +16,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Blueline\Helpers\MethodXMLIterator;
-use Blueline\Helpers\RenamedHTMLIterator;
-use Blueline\Helpers\DuplicateHTMLIterator;
 use Blueline\Helpers\PgResultIterator;
 use Blueline\Entity\Method;
 require_once(__DIR__.'/../Helpers/pg_upsert.php');
