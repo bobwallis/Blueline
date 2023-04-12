@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
+use Twig\Error\RuntimeError;
 
 class BluelineExtension extends AbstractExtension implements GlobalsInterface
 {
@@ -68,7 +69,7 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
             return '';
         }
         if (count($list) > 1) {
-            return implode($glue, array_slice($list, null, -1)).$last.array_pop($list);
+            return implode($glue, array_slice($list, 0, -1)).$last.array_pop($list);
         } else {
             return array_pop($list);
         }
@@ -89,7 +90,7 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
         } elseif (is_callable(array( $obj, "toArray" ))) {
             return array_map(array( $this, 'toArray' ), $obj->toArray());
         } else {
-            throw \Twig_Error_Runtime("toArray requested on object that doesn't implement it");
+            throw new RuntimeError("toArray requested on object that doesn't implement it");
         }
     }
 }
