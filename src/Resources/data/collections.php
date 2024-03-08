@@ -551,6 +551,7 @@ $collections = array (
     array (
       0 => 'Double Bob Major',
       1 => 'Double Bob Royal',
+      2 => 'Double Bob Minor',
     ),
   ),
 );
