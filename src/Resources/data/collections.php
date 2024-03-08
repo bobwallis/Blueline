@@ -542,4 +542,15 @@ $collections = array (
       15 => 'Rook and Gaskill Surprise Major',
     ),
   ),
+  10 =>
+  array (
+    'id' => 'HigherRank',
+    'name' => 'Higher Rank',
+    'description' => 'Methods that I want to force higher up the search rankings which aren\'t featured elsewhere.',
+    'methods' =>
+    array (
+      0 => 'Double Bob Major',
+      1 => 'Double Bob Royal',
+    ),
+  ),
 );
