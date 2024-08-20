@@ -65,7 +65,7 @@ if [[ $DEV = true ]]
 	then
 	symfony composer update
 	else
-	symfony composer install
+	symfony composer install --no-dev
 fi
 symfony composer dump-autoload --optimize
 
