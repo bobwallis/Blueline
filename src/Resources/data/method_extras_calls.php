@@ -329,4 +329,13 @@ $method_extras_calls = array(
     'callingpositions' => array(),
     'ruleoffs' => array('every' => 48, 'from' => 0),
   ),
+  array(
+    'title' => 'Solihull Bob Doubles',
+    'calls' => array(
+      'Bob'    => array('symbol' => '-', 'notation' => '5.1',    'every' => 10, 'from' => -1, 'cover' => 2),
+      'Single' => array('symbol' => 's', 'notation' => '5.123',  'every' => 10, 'from' => -1, 'cover' => 2),
+    ),
+    'callingpositions' => array(),
+    'ruleoffs' => array('every' => 10, 'from' => 0),
+  ),
 );
