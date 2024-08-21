@@ -21,7 +21,7 @@ class Search
 
         // Conditions
         foreach (array_merge(array( 'q', 'sort', 'order' ), $searchable) as $key) {
-            $value = trim($request->query->get($key));
+            $value = trim($request->query->get($key) ?? '');
             if (!empty($value)) {
                 $searchVariables[$key] = $value;
             }
