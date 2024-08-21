@@ -48,7 +48,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         }
 
         // Get an iterator over all methods which don't have similarity indexes
-        $result = pg_query(
+        $result = pg_query($db,
             'SELECT title, stage, notationexpanded, lengthoflead
               FROM methods
               LEFT OUTER JOIN methods_similar ON (title = method1_title)
@@ -135,7 +135,7 @@ class CalculateMethodSimilaritiesCommand extends Command
 
         // Flag methods which only differ from each other over the lead end
         $output->writeln('<title>Checking for methods differing only at the lead end</title>');
-        $leadHeadCheck = pg_query(
+        $leadHeadCheck = pg_query($db,
             'SELECT matches.method1_title, matches.method2_title
               FROM (
                SELECT method1.title as method1_title, method2.title as method2_title
@@ -169,7 +169,7 @@ class CalculateMethodSimilaritiesCommand extends Command
 
         // Flag methods different only over half-lead
         $output->writeln('<title>Checking for methods differing only at the half lead</title>');
-        $halfLeadCheck = pg_query(
+        $halfLeadCheck = pg_query($db,
             'SELECT matches.method1_title, matches.method2_title
               FROM (
                SELECT method1.title as method1_title, method2.title as method2_title
@@ -203,7 +203,7 @@ class CalculateMethodSimilaritiesCommand extends Command
 
         // Flag methods different only over half-lead and lead end
         $output->writeln('<title>Checking for methods differing only at the half lead and lead end</title>');
-        $leadEndHalfLeadCheck = pg_query(
+        $leadEndHalfLeadCheck = pg_query($db,
             'SELECT matches.method1_title, matches.method2_title
               FROM (
                SELECT method1.title as method1_title, method2.title as method2_title
