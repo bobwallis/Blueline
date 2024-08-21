@@ -12,12 +12,16 @@ the project folder - the configuration for this is under `.devcontainer/`.
 If you aren't developing in the container you will need to install/set-up:
 
  - [Git][3] so you can download the code and submit changes;
- - [PHP][10] with Ctype, iconv, JSON, PCRE, Session, SimpleXML, and Tokenizer extensions;
+ - [PHP][10] with Ctype, iconv, JSON, PCRE, Session, SimpleXML, Intl and Tokenizer extensions;
  - [Composer][2] to manage PHP dependencies;
  - [Symfony][1] which is the PHP framework that Blueline is built with;
  - [Node][5] and [Gulp][4] to build front-end assets;
  - [PostgrSQL][9] to host the database;
 
+The site uses iconv to transliterate UTF-8 characters in method names into ASCII for the purposes of
+generating URLs. (e.g. 'E=mc² Surprise Major' is found at 'methods/view/Emc2_Surprise_Major'). This means
+that you should use an OS that has an iconv that supports transliteration. i.e. not Alpine, or any other
+distro that ships with [musl][14].
 
 ## 1) Setting Up Blueline
 
@@ -118,3 +122,4 @@ to a new major version of Symfony, which should be done following [their instruc
 [11]: https://nginx.org/
 [12]: https://docs.npmjs.com/auditing-package-dependencies-for-security-vulnerabilities
 [13]: https://symfony.com/doc/current/setup/upgrade_major.html
+[14]: https://wiki.musl-libc.org/functional-differences-from-glibc.html#iconv
