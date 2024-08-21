@@ -585,7 +585,7 @@ class PlaceNotation
                 $section = str_replace(array('(', ')', '[', ']'), array('~(', ')~','~[', ']~'), $section);
                 $sectionSplitArrays = array_map(function ($e) {
                     if ($e[0] == '(' || $e[0] == '[') {
-                        return array( array('sort' => max(array_filter(array_map('self::bellToInt', str_split($e)))), 'value' => $e) );
+                        return array( array('sort' => max(array_filter(array_map(self::class.'::bellToInt', str_split($e)))), 'value' => $e) );
                     } else {
                         return array_map(function ($e) { return array('sort' => self::bellToInt($e), 'value' => $e); }, str_split($e));
                     }
