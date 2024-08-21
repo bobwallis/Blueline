@@ -476,7 +476,7 @@ class PlaceNotation
                 elseif ($piece[$j] == '[') {
                     $k = strpos($piece, ']', $j);
                     $l = 0;
-                    $lowestBell = min(array_map('self::bellToInt', str_split(substr($piece, $j+1, $k-$j-1)))) - 1;
+                    $lowestBell = min(array_map(self::class.'::bellToInt', str_split(substr($piece, $j+1, $k-$j-1)))) - 1;
                     ++$j;
                     while( $j < $k ) {
                         $permutations[$i][$lowestBell+$l] = self::bellToInt($piece[$j]) - 1;
