@@ -39,7 +39,6 @@ function gulp_fonts() {
 
 // Javascript
 var require_paths = {
-	jquery:         'lib/jquery',
 	eve:            'lib/eve',
 	ready:          'lib/ready',
 	deepmerge:      'lib/deepmerge',

@@ -2,99 +2,143 @@
 // It also receives user input into the search box, and issues appropriate
 // data requests
 
-define( ['eve', 'jquery', '../../helpers/URL', '../../data/Page'], function( eve, $, URL, Page ) {
-	var $content = $( '#content' ),
-		$search  = $( '#search' ),
-		$q       = $( '#q' );
+define(['eve', '../../helpers/URL', '../../data/Page'], function(eve, URL, Page) {
 
-	var Search = {
-		visible: false,
-		hide: function() {
-			if( Search.visible === true ) {
-				$q.blur();
-				$search.hide();
-				Search.visible = false;
-				$content.removeClass( 'searchable' );
-			}
-		},
-		show: function( section ) {
-			// Update the placeholder and action of the search form
-			if( typeof section !== 'string' ) {
-				$search.attr( 'action', '' );
-				$q.attr( 'placeholder', 'Search' );
-			}
-			else {
-				$search.attr( 'action', URL.baseURL+section+'/search' );
-				$q.attr( 'placeholder', 'Search '+section );
-			}
+    var contentEl = document.getElementById('content');
+    var searchEl = document.getElementById('search');
+    var qEl = document.getElementById('q');
 
-			// Set the new search query if the search box isn't focussed and will be visible
-			if( !$q.is( ':focus' ) || ( window.history.state !== null && window.history.state.type !== 'keyup' && window.history.state.type !== 'clipboard' ) ) {
-				$q.val( URL.parameter( 'q' ) );
-			}
+    if (!contentEl || !searchEl || !qEl) {
+        console.error("Search UI elements (#content, #search, #q) not found.");
+        return {
+            visible: false,
+            hide: function() {},
+            show: function() {}
+        };
+    }
 
-			if( Search.visible === false ) {
-				$search.show();
-				Search.visible = true;
-				$content.addClass( 'searchable' );
-			}
-		}
-	};
+    var Search = {
+        visible: false,
+        hide: function() {
+            if (Search.visible === true) {
+                qEl.blur();
+                searchEl.style.display = 'none';
+                Search.visible = false;
+                contentEl.classList.remove('searchable');
+            }
+        },
+        show: function(section) {
+            if (typeof section !== 'string' || section === '') {
+                searchEl.setAttribute('action', '');
+                qEl.setAttribute('placeholder', 'Search');
+            } else {
+                searchEl.setAttribute('action', URL.baseURL + section + '/search');
+                qEl.setAttribute('placeholder', 'Search ' + section);
+            }
 
-	// Update Search.visible with an initial value
-	if( !$search.is( ':visible' ) ) {
-		Search.visible = false;
-	}
-	else {
-		Search.visible = true;
-	}
+            var isFocused = document.activeElement === qEl;
+            if (!isFocused || (window.history.state !== null && window.history.state.type !== 'keyup' && window.history.state.type !== 'clipboard')) {
+                qEl.value = URL.parameter('q') || '';
+            }
 
-	// Update the visibility of the search bar when a new page is requested
-	eve.on( 'page.request', function( request ) {
-		if( request.showSearchBar === true ) {
-			Search.show( request.section );
-		}
-		else {
-			Search.hide();
-		}
-	} );
+            if (Search.visible === false) {
+                searchEl.style.display = '';
+                Search.visible = true;
+                contentEl.classList.add('searchable');
+            }
+        }
+    };
 
-	if( 'serviceWorker' in navigator ) {
-		// Capture keypresses and load in the page without a refresh if the browser supports it
-		$(document).on( 'keyup', '#q', function( e ) {
-			var $input = $( e.target ),
-				$form = $input.closest( 'form' ),
-				href;
+    Search.visible = window.getComputedStyle(searchEl).display !== 'none';
 
-			// Don't fire for various non-character keys, or if the input has been
-			// focussed by a '/' press
-			if( e.type === 'keyup' && ( [13,16,17,27,33,34,35,36,37,38,39,40,45,91].indexOf( e.which ) !== -1 || ( e.which === 191 && $input.val().indexOf( '/' ) === -1 ) ) ) {
-				return true;
-			}
+    eve.on('page.request', function(request) {
+        if (request.showSearchBar === true) {
+            Search.show(request.section);
+        } else {
+            Search.hide();
+        }
+    });
 
-			// Check if the search box, has been emptied. If this is the case then
-			// hop back up to the main section page
-			if( $input.val() === '' ) {
-				href = $form.attr( 'action' ).replace( /search$/, '' );
-			}
-			// Otherwise, submit the form
-			else if( $form.length > 0 ) {
-				href = $form.attr( 'action' ) + '?' + $form.serialize();
-			}
+    if ('serviceWorker' in navigator) {
+        document.addEventListener('keyup', function(e) {
+            if (!e.target.matches || !e.target.matches('#q')) {
+                return;
+            }
 
-			// Defer the eve event handlers until the next time the event loop comes around, to
-			// minimise the any delay in updating the UI
-			setTimeout( function() { Page.request( href, e.type ); }, 1 );
-		} );
+            var inputEl = e.target;
+            var formEl = null;
 
-		// Submit. Triggered when a form is submitted
-		$( document.body ).on( 'submit', '#search, #custom_method', function( e ) {
-			var $form = $( e.target ),
-				href = $form.attr( 'action' ) + '?' + $form.serialize();
-			e.preventDefault();
-			Page.request( href, 'submit' );
-		} );
-	}
+            if (inputEl.closest) {
+                 formEl = inputEl.closest('form');
+            } else {
+                var parent = inputEl.parentNode;
+                while (parent && parent.tagName !== 'FORM') {
+                    parent = parent.parentNode;
+                }
+                formEl = parent;
+            }
 
-	return Search;
-} );
+            var href;
+            var ignoredKeys = [13, 16, 17, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45, 91];
+
+            if (ignoredKeys.indexOf(e.which) !== -1 || (e.which === 191 && inputEl.value.indexOf('/') === -1)) {
+                return;
+            }
+
+            if (inputEl.value === '') {
+                if (formEl && formEl.hasAttribute('action')) {
+                     href = formEl.getAttribute('action').replace(/search\/?$/, '');
+                } else {
+                    console.warn("Search form or action missing when trying to clear search.");
+                    return;
+                }
+            }
+            else if (formEl && formEl.hasAttribute('action')) {
+                if (typeof FormData !== 'undefined' && typeof URLSearchParams !== 'undefined') {
+                    var formData = new FormData(formEl);
+                    var params = new URLSearchParams(formData).toString();
+                    href = formEl.getAttribute('action') + '?' + params;
+                } else {
+                    console.warn("FormData or URLSearchParams not supported. Search may not work correctly.");
+                    href = formEl.getAttribute('action') + '?q=' + encodeURIComponent(inputEl.value);
+                }
+            } else {
+                 console.warn("Search form or action missing when trying to submit search.");
+                 return;
+            }
+
+            setTimeout(function() {
+                Page.request(href, e.type);
+            }, 1);
+        });
+
+        document.body.addEventListener('submit', function(e) {
+            if (!e.target.matches || !e.target.matches('#search, #custom_method')) {
+                return;
+            }
+
+            var formEl = e.target;
+            e.preventDefault();
+
+             if (!formEl.hasAttribute('action')) {
+                console.warn("Submitted form is missing an 'action' attribute.");
+                return;
+            }
+
+            var href;
+
+            if (typeof FormData !== 'undefined' && typeof URLSearchParams !== 'undefined') {
+                var formData = new FormData(formEl);
+                var params = new URLSearchParams(formData).toString();
+                href = formEl.getAttribute('action') + '?' + params;
+            } else {
+                 console.warn("FormData or URLSearchParams not supported. Search may not work correctly.");
+                 href = formEl.getAttribute('action') + '?q=' + encodeURIComponent(formEl.querySelector('[name="q"]').value);
+            }
+
+            Page.request(href, 'submit');
+        });
+    }
+
+    return Search;
+});
