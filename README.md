@@ -12,11 +12,11 @@ the project folder - the configuration for this is under `.devcontainer/`.
 If you aren't developing in the container you will need to install/set-up:
 
  - [Git][3] so you can download the code and submit changes;
- - [PHP][10] with Ctype, iconv, JSON, PCRE, Session, SimpleXML, Intl and Tokenizer extensions;
+ - [PHP][10] with Postgres, Ctype, iconv, JSON, PCRE, Session, SimpleXML, Intl and Tokenizer extensions;
  - [Composer][2] to manage PHP dependencies;
  - [Symfony][1] which is the PHP framework that Blueline is built with;
  - [Node][5] and [Gulp][4] to build front-end assets;
- - [PostgrSQL][9] to host the database;
+ - [PostgreSQL][9] to host the database;
 
 The site uses iconv to transliterate UTF-8 characters in method names into ASCII for the purposes of
 generating URLs. (e.g. 'E=mc² Surprise Major' is found at 'methods/view/Emc2_Surprise_Major'). This means
