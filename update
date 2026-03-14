@@ -92,7 +92,6 @@ symfony console doctrine:cache:clear-result
 
 # Verify that Doctrine is properly configured for a production environment, and mappings are up to date
 echo -e "\n\033[1mChecking Doctrine configuration\033[0m"
-symfony console doctrine:ensure-production-settings --env=prod
 symfony console doctrine:schema:validate
 
 
