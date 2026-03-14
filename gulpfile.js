@@ -17,8 +17,6 @@ var DEST = './public/';
 function gulp_images() {
 	return mergeStream(
 		gulp.src( ['src/Resources/images/*.svg',
-		           'src/Resources/images/*.png',
-				   'src/Resources/images/*.gif',
 				   'src/Resources/images/*.png'] )
 			.pipe( imagemin() )
 			.pipe( gulp.dest( DEST+'images/' ) ),
