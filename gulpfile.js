@@ -105,12 +105,12 @@ function gulp_watch() {
 	gulp.watch( ['src/Resources/images/**/*'], gulp_images );
 	gulp.watch( ['src/Resources/fonts/*'], gulp_fonts );
 	gulp.watch( ['src/Resources/css/**/*'], gulp_css );
-	gulp.watch( ['src/Resources/js/**/*'], gulp.parallel( gulp_js, gulp_js_serviceWorker ) );
+	gulp.watch( ['src/Resources/js/**/*'], gulp.parallel( [gulp_js, gulp_js_serviceWorker] ) );
 };
 
 
-export default gulp.series( gulp.parallel( gulp_css, gulp_js, gulp_js_serviceWorker, gulp_fonts ), gulp_compressGzip );
-export const css    = gulp.series( gulp_css, gulp_compressGzip );
-export const js     = gulp.series( gulp.parallel( gulp_js, gulp_js_serviceWorker ), gulp_compressGzip );
-export const images = gulp.series( gulp.parallel( gulp_images ), gulp_compressGzip );
+export default gulp.series( gulp.parallel( [gulp_css, gulp_js, gulp_js_serviceWorker, gulp_fonts] ), gulp_compressGzip );
+export const css    = gulp.series( [gulp_css, gulp_compressGzip] );
+export const js     = gulp.series( gulp.parallel( [gulp_js, gulp_js_serviceWorker] ), gulp_compressGzip );
+export const images = gulp.series( gulp.parallel( [gulp_images] ), gulp_compressGzip );
 export const watch  = gulp_watch;

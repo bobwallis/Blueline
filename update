@@ -77,6 +77,7 @@ if [[ $DEV = true ]]
 	else
 	npm install
 fi
+npx update-browserslist-db@latest
 npm audit fix
 
 # Clear cache
