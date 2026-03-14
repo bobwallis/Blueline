@@ -1,25 +1,23 @@
 <?php
 namespace Blueline\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Process\Process;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Attribute\Cache;
 use Blueline\Helpers\PlaceNotation;
 
 class NotationController extends AbstractController
 {
-    /**
-    * @Cache(maxage="129600", public=true)
-    */
+    #[Cache(maxage: 129600, public: true)]
     public function parse(Request $request)
     {
         // Collect passed in variables that are permissible
         $vars = array();
         foreach (array( 'notation', 'stage' ) as $key) {
-            $value = trim($request->query->get($key));
+            $value = $request->query->get($key);
+            $value = trim($value ?? '');
             if (!empty($value)) {
                 $vars[$key] = $value;
             }

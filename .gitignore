@@ -24,10 +24,12 @@ node_modules/
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
 /var/
+/!var/**/.gitignore
 /vendor/
 ###< symfony/framework-bundle ###
 
 ###> symfony/phpunit-bridge ###
+.phpunit.cache
 .phpunit.result.cache
 /phpunit.xml
 /bin/.phpunit/

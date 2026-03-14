@@ -1,13 +1,12 @@
 <?php
 namespace Blueline\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\HttpKernel\Attribute\Cache;
 use Doctrine\ORM\EntityManagerInterface;
 use Blueline\Helpers\Search;
 use Blueline\Entity\Method;
@@ -17,9 +16,6 @@ use Blueline\Helpers\Stages;
 use Blueline\Helpers\Classifications;
 use Blueline\Helpers\PlaceNotation;
 
-/**
-* @Cache(maxage="129600", public=true, lastModified="asset_update")
-*/
 class MethodsController extends AbstractController
 {
     public function welcome(Request $request)
@@ -27,9 +23,6 @@ class MethodsController extends AbstractController
         return $this->render('Methods/welcome.'.$request->getRequestFormat().'.twig');
     }
 
-    /**
-    * @Cache(maxage="129600", public=true, lastModified="database_update")
-    */
     public function search(Request $request, EntityManagerInterface $em)
     {
         $methodRepository = $em->getRepository(Method::class);
@@ -119,9 +112,6 @@ class MethodsController extends AbstractController
         return $this->render('Methods/search.'.$request->getRequestFormat().'.twig', compact('searchVariables', 'count', 'pageActive', 'pageCount', 'methods'));
     }
 
-    /**
-    * @Cache(maxage="129600", public=true, lastModified="database_update")
-    */
     public function view($url, Request $request, EntityManagerInterface $em)
     {
         $format = $request->getRequestFormat();
@@ -138,7 +128,7 @@ class MethodsController extends AbstractController
         $url = URL::canonical($url);
 
         // Redirect to the canonical URL if we're at a wrong one
-        if ($request->get('url') !== $url) {
+        if ($request->attributes->get('url') !== $url) {
             $redirect = $this->generateUrl('Blueline_Methods_view', array(
                 'chromeless' => (($format == 'html') ? (intval($request->query->get('chromeless')) ?: null) : null),
                 'scale'      => intval($request->query->get('scale')) ?: null,
@@ -299,9 +289,6 @@ class MethodsController extends AbstractController
         }
     }
 
-    /**
-    * @Cache(maxage="604800", public=true, lastModified="database_update")
-    */
     public function sitemap($page, EntityManagerInterface $em)
     {
         $methods = $em->createQuery('SELECT partial m.{title,url} FROM Blueline\Entity\Method m ORDER BY m.url')

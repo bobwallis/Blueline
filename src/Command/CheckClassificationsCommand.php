@@ -25,7 +25,7 @@ class CheckClassificationsCommand extends Command
         parent::__construct();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $time = -microtime(true);
         // Set up styles
@@ -34,20 +34,20 @@ class CheckClassificationsCommand extends Command
         $targetConsoleWidth = 75;
 
         // Print title
-        $output->writeln('<title>Checking classifications</title>');
+        $output->writeln('<ti$this->db_connecttle>Checking classifications</title>');
 
         // Get access to the database
         $db = pg_connect($this->db_connect);
         if ($db === false) {
             $output->writeln('<error>Failed to connect to database</error>');
-            return;
+            return 0;
         }
 
         // Get an iterator over all methods which don't have similarity indexes
-        $result = pg_query('SELECT title, stage, notationexpanded, classification, little, differential, plain, trebledodging FROM methods');
+        $result = pg_query($db, 'SELECT title, stage, notationexpanded, classification, little, differential, plain, trebledodging FROM methods');
         if ($result === false) {
             $output->writeln('<error>Failed to query methods table: '.pg_last_error($db).'</error>');
-            return;
+            return 0;
         }
         $methods = new PgResultIterator($result);
 

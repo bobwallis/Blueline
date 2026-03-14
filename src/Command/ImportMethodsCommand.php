@@ -37,7 +37,7 @@ class ImportMethodsCommand extends Command
         parent::__construct();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $time = -microtime(true);
         // Set up styles
@@ -52,7 +52,7 @@ class ImportMethodsCommand extends Command
         $db = pg_connect($this->db_connect);
         if ($db === false) {
             $output->writeln('<error>Failed to connect to database</error>');
-            return;
+            return 0;
         }
 
         // There are two 'standard' method collections in the methods.org.uk data that we will add methods to as we go along
@@ -64,14 +64,14 @@ class ImportMethodsCommand extends Command
         $output->writeln('<info>Clear existing PMM and TDMM collection data...</info>');
         if (pg_query($db, "DELETE FROM methods_collections WHERE collection_id = 'pmm' OR collection_id = 'tdmm'") === false) {
             $output->writeln('<error>Failed to clear existing data: '.pg_last_error($db).'</error>');
-            return;
+            return 0;
         }
 
         // Clear existing first peal data
         $output->writeln('<info>Clear existing first peal data...</info>');
         if (pg_query($db, "DELETE FROM performances WHERE type = 'firstTowerbellPeal' OR type = 'firstHandbellPeal'") === false) {
             $output->writeln('<error>Failed to clear existing data: '.pg_last_error($db).'</error>');
-            return;
+            return 0;
         }
 
         // Import data
@@ -142,7 +142,7 @@ class ImportMethodsCommand extends Command
 
         // Check for deletions
         $output->writeln('<info>Checking for deletion of old data...</info>');
-        $idsInDatabase = new PgResultIterator(pg_query('SELECT title FROM methods'));
+        $idsInDatabase = new PgResultIterator(pg_query($db, 'SELECT title FROM methods'));
         $progress = new ProgressBar($output, count($idsInDatabase));
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($idsInDatabase))*2) - 10);
         $progress->setRedrawFrequency(max(1, count($idsInDatabase)/100));

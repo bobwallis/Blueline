@@ -1,18 +1,15 @@
 <?php
 namespace Blueline\EventListener;
 
-use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 class RequestListener
 {
-
-    private $container;
-
-    public function __construct(Container $container)
-    {
-            $this->container = $container;
-    }
+    public function __construct(
+        private ParameterBagInterface $params,
+        private string $kernelEnvironment,
+    ) {}
 
     public function onKernelRequest(RequestEvent $event)
     {
@@ -29,10 +26,10 @@ class RequestListener
         $event->getRequest()->setFormat('woff2', 'application/font-woff2');
 
         // Set global parameters that can be used in @Cache annotations and other places
-        $event->getRequest()->attributes->set('endpoint', $this->container->getParameter('blueline.endpoint'));
-        if ($this->container->getParameter('kernel.environment') == 'prod') {
-            $event->getRequest()->attributes->set('asset_update', new \DateTime('@'.$this->container->getParameter('blueline.asset_update')));
-            $event->getRequest()->attributes->set('database_update', new \DateTime('@'.$this->container->getParameter('blueline.database_update')));
+        $event->getRequest()->attributes->set('endpoint', $this->params->get('blueline.endpoint'));
+        if ($this->kernelEnvironment == 'prod') {
+            $event->getRequest()->attributes->set('asset_update', new \DateTime('@'.$this->params->get('blueline.asset_update')));
+            $event->getRequest()->attributes->set('database_update', new \DateTime('@'.$this->params->get('blueline.database_update')));
         } else {
             $event->getRequest()->attributes->set('asset_update', new \DateTime());
             $event->getRequest()->attributes->set('database_update', new \DateTime());

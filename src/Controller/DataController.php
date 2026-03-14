@@ -1,18 +1,16 @@
 <?php
 namespace Blueline\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Attribute\Cache;
 use Blueline\Helpers\PgResultIterator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-/**
-* @Cache(maxage="604800", public=true, lastModified="database_update")
-*/
 class DataController extends AbstractController
 {
+    #[Cache(maxage: 604800, public: true, lastModified: 'request.attributes.get("database_update")')]
     public function table($table, Request $request, ParameterBagInterface $params)
     {
         $response = new StreamedResponse();
@@ -75,13 +73,13 @@ class DataController extends AbstractController
             $handle = fopen('php://output', 'w+');
 
             // Output the header row
-            fputcsv($handle, array_keys($data->current()));
+            fputcsv($handle, array_keys($data->current()), ',', '"', '\\', "\n");
 
             // Output the rest
             $data->rewind();
             $i = 0;
             foreach ($data as $row) {
-                fputcsv($handle, $row);
+                fputcsv($handle, $row, ',', '"', '\\', "\n");
                 if ($i++ % 50 == 0) {
                     flush();
                 }

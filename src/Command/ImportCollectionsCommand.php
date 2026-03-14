@@ -23,7 +23,7 @@ class ImportCollectionsCommand extends Command
         parent::__construct();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $time = -microtime(true);
         // Set up styles
@@ -38,13 +38,13 @@ class ImportCollectionsCommand extends Command
         $db = pg_connect($this->db_connect);
         if ($db === false) {
             $output->writeln('<error>Failed to connect to database</error>');
-            return;
+            return 0;
         }
 
         $output->writeln('<info>Clear existing extra collection data...</info>');
         if( pg_query($db, "DELETE FROM methods_collections WHERE collection_id != 'pmm' AND collection_id != 'tdmm'") === false || pg_query($db, "DELETE FROM collections WHERE id != 'pmm' AND id != 'tdmm'") === false ) {
             $output->writeln('<error>Failed to clear existing data: '.pg_last_error($db).'</error>');
-            return;
+            return 0;
         }
 
         $output->writeln('<info>Importing collection data...</info>');

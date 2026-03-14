@@ -1,7 +1,6 @@
 <?php
 namespace Blueline\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -9,13 +8,12 @@ use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints\Regex as RegexConstraint;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\HttpKernel\Attribute\Cache;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class OembedController extends AbstractController
 {
-    /**
-    * @Cache(maxage="129600", public=true, lastModified="asset_update")
-    */
+    #[Cache(maxage: 129600, public: true, lastModified: 'request.attributes.get("asset_update")')]
     public function index(Request $request, ParameterBagInterface $params)
     {
         $url = $request->query->get('url');
@@ -29,7 +27,7 @@ class OembedController extends AbstractController
         $allowedURLs = array(
             'methods_view' => '^'.str_replace( array('/','.','TITLE'), array('\/','\.','.+'), $params->get('blueline.endpoint') . $this->generateUrl('Blueline_Methods_view', array('url' => 'TITLE')))
         );
-        $urlConstraint = new RegexConstraint(array('pattern' => '/'.implode('|', array_values($allowedURLs)).'/', 'message' => 'Invalid URL'));
+        $urlConstraint = new RegexConstraint(pattern: '/'.implode('|', array_values($allowedURLs)).'/', message: 'Invalid URL');
         $validator = Validation::createValidator();
         $errors = $validator->validate($url, $urlConstraint);
         if ($errors->offsetExists(0)) {

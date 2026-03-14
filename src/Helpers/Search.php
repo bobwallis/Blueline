@@ -68,7 +68,7 @@ class Search
         }
 
         // String variables
-        foreach (array_keys(array_filter($entityMetadata->fieldMappings, function($f) { return in_array($f['type'], array('string', 'text')); })) as $key) {
+        foreach (array_keys(array_filter($entityMetadata->fieldMappings, function($f) { return in_array($f->type, array('string', 'text')); })) as $key) {
             if (isset($searchVariables[$key])) {
                 if (strpos($searchVariables[$key], '/') === 0 && strlen($searchVariables[$key]) > 1) {
                     $query->andWhere('REGEXP(e.'.$key.', :'.$key.'Regexp) = TRUE')
@@ -81,7 +81,7 @@ class Search
         }
 
         // Number variables
-        foreach (array_keys(array_filter($entityMetadata->fieldMappings, function($f) { return in_array($f['type'], array('smallint','integer','bigint','decimal','float')); })) as $key) {
+        foreach (array_keys(array_filter($entityMetadata->fieldMappings, function($f) { return in_array($f->type, array('smallint','integer','bigint','decimal','float')); })) as $key) {
             if (isset($searchVariables[$key])) {
                 $splitValues = preg_split('/,(?![^(\[]*[)\]])/', $searchVariables[$key]);
                 $splitValuesDQL = array();
@@ -111,7 +111,7 @@ class Search
         }
 
         // Boolean variables
-        foreach (array_keys(array_filter($entityMetadata->fieldMappings, function($f) { return in_array($f['type'], array('boolean')); })) as $key) {
+        foreach (array_keys(array_filter($entityMetadata->fieldMappings, function($f) { return in_array($f->type, array('boolean')); })) as $key) {
             if (isset($searchVariables[$key])) {
                 $query->andWhere('e.'.$key.(filter_var($searchVariables[$key], FILTER_VALIDATE_BOOLEAN)?' = TRUE':' = FALSE'));
             }

@@ -2,7 +2,7 @@
 namespace Blueline\Doctrine;
 
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
-use Doctrine\ORM\Query\Lexer;
+use Doctrine\ORM\Query\TokenType;
 
 /**
  * Usage: REGEXP(STR, REG)
@@ -18,33 +18,38 @@ class Regexp extends FunctionNode
     private $string = null;
     private $regexp = null;
 
-    public function parse(\Doctrine\ORM\Query\Parser $parser)
+    public function parse(\Doctrine\ORM\Query\Parser $parser): void
     {
-        $parser->match(Lexer::T_IDENTIFIER);
-        $parser->match(Lexer::T_OPEN_PARENTHESIS);
+        $parser->match(TokenType::T_IDENTIFIER);
+        $parser->match(TokenType::T_OPEN_PARENTHESIS);
         $this->string = $parser->ArithmeticPrimary();
-        $parser->match(Lexer::T_COMMA);
+        $parser->match(TokenType::T_COMMA);
         $this->regexp = $parser->ArithmeticPrimary();
-        $parser->match(Lexer::T_CLOSE_PARENTHESIS);
+        $parser->match(TokenType::T_CLOSE_PARENTHESIS);
     }
 
-    public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
+    public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker): string
     {
-        switch ($sqlWalker->getConnection()->getDatabasePlatform()->getName()) {
-            // TODO: Implement for more platforms
-            case 'postgresql':
-                return '('.
-                    $this->string->dispatch($sqlWalker).
-                    ' ~* '.
-                    $this->regexp->dispatch($sqlWalker).
-                ')';
-            case 'mysql':
-            case 'sqlite':
-                return '('.
-                    $this->string->dispatch($sqlWalker).
-                    ' REGEXP '.
-                    $this->regexp->dispatch($sqlWalker).
-                ')';
+        $platform = $sqlWalker->getConnection()->getDatabasePlatform();
+
+        if ($platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform) {
+            return '('.
+                $this->string->dispatch($sqlWalker).
+                ' ~* '.
+                $this->regexp->dispatch($sqlWalker).
+            ')';
         }
+
+        if ($platform instanceof \Doctrine\DBAL\Platforms\MySQLPlatform
+            || $platform instanceof \Doctrine\DBAL\Platforms\SqlitePlatform
+        ) {
+            return '('.
+                $this->string->dispatch($sqlWalker).
+                ' REGEXP '.
+                $this->regexp->dispatch($sqlWalker).
+            ')';
+        }
+
+        throw new \RuntimeException('REGEXP function is not supported on this database platform.');
     }
 }

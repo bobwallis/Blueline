@@ -2,11 +2,14 @@
 
 namespace Blueline\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
 use Blueline\Helpers\Text;
 
 /**
  * Performance
  */
+#[ORM\Entity(repositoryClass: \Blueline\Repository\PerformanceRepository::class)]
+#[ORM\Table(name: 'performances')]
 class Performance
 {
     // Constructor
@@ -58,76 +61,94 @@ class Performance
     /**
      * @var integer
      */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
     /**
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 255)]
     private $type;
 
     /**
      * @var \DateTime
      */
+    #[ORM\Column(type: 'date', nullable: true)]
     private $date;
 
     /**
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $society;
 
     /**
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $rung_title;
 
     /**
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $rung_url;
 
     /**
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $reference;
 
     /**
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $location_room;
 
     /**
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $location_building;
 
     /**
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $location_address;
 
     /**
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $location_town;
 
     /**
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $location_county;
 
     /**
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $location_region;
 
     /**
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $location_country;
 
     /**
      * @var \Blueline\Entity\Method
      */
+    #[ORM\ManyToOne(targetEntity: Method::class, inversedBy: 'performances', cascade: ['persist'])]
+    #[ORM\JoinColumn(name: 'method_title', referencedColumnName: 'title')]
     private $method;
 
     // Getters and setters
@@ -464,7 +485,7 @@ class Performance
      * @param  \Blueline\Entity\Method $method
      * @return Performance
      */
-    public function setMethod(\Blueline\Entity\Method $method = null)
+    public function setMethod(?\Blueline\Entity\Method $method)
     {
         $this->method = $method;
 

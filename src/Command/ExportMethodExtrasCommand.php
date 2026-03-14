@@ -22,7 +22,7 @@ class ExportMethodExtrasCommand extends Command
         parent::__construct();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Get an array of method data
         $methods = $this->entityManager->createQuery('SELECT m.title, m.calls, m.ruleOffs FROM Blueline\Entity\Method m WHERE m.calls IS NOT NULL OR m.ruleOffs IS NOT NULL ORDER BY m.title')

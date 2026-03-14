@@ -29,7 +29,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         parent::__construct();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $time = -microtime(true);
         // Set up styles
@@ -44,7 +44,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         $db = pg_connect($this->db_connect);
         if ($db === false) {
             $output->writeln('<error>Failed to connect to database</error>');
-            return;
+            return 0;
         }
 
         // Get an iterator over all methods which don't have similarity indexes
@@ -57,7 +57,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         );
         if ($result === false) {
             $output->writeln('<error>Failed to query methods table: '.pg_last_error($db).'</error>');
-            return;
+            return 0;
         }
         $methods = new PgResultIterator($result);
 
@@ -81,7 +81,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         );
         if ($comparisonMethod === false) {
             $output->writeln('<error>Failed to create prepared query: '.pg_last_error($db).'</error>');
-            return;
+            return 0;
         }
 
         // Generate rounds for each stage
@@ -152,7 +152,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         );
         if ($leadHeadCheck === false) {
             $output->writeln('<error>Failed to query methods table: '.pg_last_error($db).'</error>');
-            return;
+            return 0;
         }
         $methods = new PgResultIterator($leadHeadCheck);
         $progress = new ProgressBar($output, count($methods));
@@ -186,7 +186,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         );
         if ($halfLeadCheck === false) {
             $output->writeln('<error>Failed to query methods table: '.pg_last_error($db).'</error>');
-            return;
+            return 0;
         }
         $methods  = new PgResultIterator($halfLeadCheck);
         $progress = new ProgressBar($output, count($methods));
@@ -220,7 +220,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         );
         if ($leadEndHalfLeadCheck === false) {
             $output->writeln('<error>Failed to query methods table: '.pg_last_error($db).'</error>');
-            return;
+            return 0;
         }
         $methods  = new PgResultIterator($leadEndHalfLeadCheck);
         $progress = new ProgressBar($output, count($methods));

@@ -2,30 +2,41 @@
 
 namespace Blueline\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * MethodInCollection
  */
+#[ORM\Entity(repositoryClass: \Blueline\Repository\CollectionRepository::class)]
+#[ORM\Table(name: 'methods_collections')]
 class MethodInCollection
 {
     /**
      * @var integer
      */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
     /**
      * @var integer
      */
+    #[ORM\Column(type: 'integer')]
     private $position;
 
     /**
-     * @var \Blueline\Entity\Methods
+     * @var \Blueline\Entity\Method
      */
+    #[ORM\ManyToOne(targetEntity: Method::class, inversedBy: 'collections', cascade: ['persist'])]
+    #[ORM\JoinColumn(name: 'method_title', referencedColumnName: 'title')]
     private $method;
 
     /**
      * @var \Blueline\Entity\Collection
      */
+    #[ORM\ManyToOne(targetEntity: Collection::class, inversedBy: 'methods', cascade: ['persist'])]
+    #[ORM\JoinColumn(name: 'collection_id', referencedColumnName: 'id')]
     private $collection;
 
     /**
@@ -94,10 +105,10 @@ class MethodInCollection
     /**
      * Set method
      *
-     * @param  \Blueline\Entity\Method $method
+     * @param  \Blueline\Entity\Method|null $method
      * @return MethodInCollection
      */
-    public function setMethod(\Blueline\Entity\Method $method = null)
+    public function setMethod(?\Blueline\Entity\Method $method)
     {
         $this->method = $method;
 
@@ -117,10 +128,10 @@ class MethodInCollection
     /**
      * Set collection
      *
-     * @param  \Blueline\Entity\Collection $collection
+     * @param  \Blueline\Entity\Collection|null $collection
      * @return MethodInCollection
      */
-    public function setCollection(\Blueline\Entity\Collection $collection = null)
+    public function setCollection(?\Blueline\Entity\Collection $collection)
     {
         $this->collection = $collection;
 

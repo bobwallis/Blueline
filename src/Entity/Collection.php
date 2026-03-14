@@ -2,9 +2,13 @@
 
 namespace Blueline\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * Collection
  */
+#[ORM\Entity(repositoryClass: \Blueline\Repository\CollectionRepository::class)]
+#[ORM\Table(name: 'collections')]
 class Collection
 {
     // Constructor
@@ -50,21 +54,26 @@ class Collection
     /**
      * @var string
      */
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 255)]
     private $id;
 
     /**
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 255)]
     private $name;
 
     /**
      * @var string
      */
+    #[ORM\Column(type: 'text')]
     private $description;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
      */
+    #[ORM\OneToMany(targetEntity: MethodInCollection::class, mappedBy: 'collection', cascade: ['all'])]
     private $methods;
 
     // Getters and setters

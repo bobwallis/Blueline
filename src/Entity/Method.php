@@ -6,12 +6,15 @@ use Blueline\Helpers\Text;
 use Blueline\Helpers\PlaceNotation;
 use Blueline\Helpers\Stages;
 use Blueline\Helpers\LeadHeadCodes;
+use Doctrine\ORM\Mapping as ORM;
 require_once(__DIR__.'/../Helpers/arrays_equal_in_some_rotation.php');
 use function Blueline\Helpers\arrays_equal_in_some_rotation;
 
 /**
  * Blueline\Entity\Method
  */
+#[ORM\Entity(repositoryClass: \Blueline\Repository\MethodRepository::class)]
+#[ORM\Table(name: 'methods')]
 class Method
 {
     // Constructor
@@ -66,156 +69,188 @@ class Method
     /**
      * @var string $title
      */
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 255)]
     private $title;
 
     /**
      * @var string $abbreviation
      */
+    #[ORM\Column(type: 'string', length: 3, nullable: true)]
     private $abbreviation;
 
     /**
      * @var boolean $provisional
      */
+    #[ORM\Column(type: 'boolean', nullable: true)]
     private $provisional;
 
     /**
      * @var integer $stage
      */
+    #[ORM\Column(type: 'smallint')]
     private $stage;
 
     /**
      * @var string $classification
      */
+    #[ORM\Column(type: 'string', length: 31, nullable: true)]
     private $classification;
 
     /**
      * @var string $nameMetaphone
      */
+    #[ORM\Column(name: 'namemetaphone', type: 'string', length: 255, nullable: true)]
     private $nameMetaphone;
 
     /**
      * @var string $notation
      */
+    #[ORM\Column(type: 'string', length: 2047)]
     private $notation;
 
     /**
      * @var string $notationExpanded
      */
+    #[ORM\Column(name: 'notationexpanded', type: 'string', length: 4096)]
     private $notationExpanded;
 
     /**
      * @var string $leadHeadCode
      */
+    #[ORM\Column(name: 'leadheadcode', type: 'string', length: 31, nullable: true)]
     private $leadHeadCode;
 
     /**
      * @var string $leadHead
      */
+    #[ORM\Column(name: 'leadhead', type: 'string', length: 31)]
     private $leadHead;
 
     /**
      * @var string $fchGroups
      */
+    #[ORM\Column(name: 'fchgroups', type: 'string', length: 31, nullable: true)]
     private $fchGroups;
 
     /**
      * @var integer $lengthOfLead
      */
+    #[ORM\Column(name: 'lengthoflead', type: 'integer')]
     private $lengthOfLead;
 
     /**
      * @var integer $lengthOfCourse
      */
+    #[ORM\Column(name: 'lengthofcourse', type: 'integer')]
     private $lengthOfCourse;
 
     /**
      * @var integer $numberOfLeads
      */
+    #[ORM\Column(name: 'numberofleads', type: 'integer', nullable: true)]
     private $numberOfLeads;
 
     /**
      * @var integer $numberOfHunts
      */
+    #[ORM\Column(name: 'numberofhunts', type: 'integer', nullable: true)]
     private $numberOfHunts;
 
     /**
      * @var boolean $jump
      */
+    #[ORM\Column(name: 'jump', type: 'boolean', nullable: true)]
     private $jump;
 
     /**
      * @var boolean $little
      */
+    #[ORM\Column(type: 'boolean', nullable: true)]
     private $little;
 
     /**
      * @var boolean $differential
      */
+    #[ORM\Column(type: 'boolean', nullable: true)]
     private $differential;
 
     /**
      * @var boolean $plain
      */
+    #[ORM\Column(type: 'boolean', nullable: true)]
     private $plain;
 
     /**
      * @var boolean $trebleDodging
      */
+    #[ORM\Column(name: 'trebledodging', type: 'boolean', nullable: true)]
     private $trebleDodging;
 
     /**
      * @var boolean $palindromic
      */
+    #[ORM\Column(type: 'boolean', nullable: true)]
     private $palindromic;
 
     /**
      * @var boolean $doubleSym
      */
+    #[ORM\Column(name: 'doublesym', type: 'boolean', nullable: true)]
     private $doubleSym;
 
     /**
      * @var boolean $rotational
      */
+    #[ORM\Column(name: 'rotational', type: 'boolean', nullable: true)]
     private $rotational;
 
     /**
      * @var array $calls
      */
+    #[ORM\Column(name: 'calls', type: 'json', nullable: true)]
     private $calls;
 
     /**
      * @var array $ruleOffs
      */
+    #[ORM\Column(name: 'ruleoffs', type: 'json', nullable: true)]
     private $ruleOffs;
 
     /**
      * @var array $callingPositions
      */
+    #[ORM\Column(name: 'callingpositions', type: 'json', nullable: true)]
     private $callingPositions;
 
     /**
      * @var integer $magic
      */
+    #[ORM\Column(name: 'magic', type: 'smallint', nullable: true)]
     private $magic;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
      */
+    #[ORM\OneToMany(targetEntity: MethodInCollection::class, mappedBy: 'method', cascade: ['persist', 'remove'])]
     private $collections;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
      */
+    #[ORM\OneToMany(targetEntity: Performance::class, mappedBy: 'method', cascade: ['persist', 'remove'])]
     private $performances;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
      */
+    #[ORM\OneToMany(targetEntity: MethodSimilarity::class, mappedBy: 'method1')]
     private $methodsimilarity1;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
      */
+    #[ORM\OneToMany(targetEntity: MethodSimilarity::class, mappedBy: 'method2')]
     private $methodsimilarity2;
 
     // Getters and setters
@@ -1268,6 +1303,7 @@ class Method
     /**
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
     private $url;
 
     /**

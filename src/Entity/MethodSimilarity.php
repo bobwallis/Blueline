@@ -2,39 +2,53 @@
 
 namespace Blueline\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * MethodSimilarity
  */
+#[ORM\Entity]
+#[ORM\Table(name: 'methods_similar')]
 class MethodSimilarity
 {
     /**
      * @var float
      */
+    #[ORM\Column(type: 'float', nullable: true)]
     private $similarity;
 
     /**
      * @var boolean
      */
+    #[ORM\Column(name: 'onlydifferentoverleadend', type: 'boolean', nullable: true)]
     private $onlyDifferentOverLeadEnd;
 
     /**
      * @var boolean
      */
+    #[ORM\Column(name: 'onlydifferentoverhalflead', type: 'boolean', nullable: true)]
     private $onlyDifferentOverHalfLead;
 
     /**
      * @var boolean
      */
+    #[ORM\Column(name: 'onlydifferentoverleadendandhalflead', type: 'boolean', nullable: true)]
     private $onlyDifferentOverLeadEndAndHalfLead;
 
     /**
      * @var \Blueline\Entity\Method
      */
+    #[ORM\Id]
+    #[ORM\ManyToOne(targetEntity: Method::class, inversedBy: 'methodsimilarity1')]
+    #[ORM\JoinColumn(name: 'method1_title', referencedColumnName: 'title')]
     private $method1;
 
     /**
      * @var \Blueline\Entity\Method
      */
+    #[ORM\Id]
+    #[ORM\ManyToOne(targetEntity: Method::class, inversedBy: 'methodsimilarity2')]
+    #[ORM\JoinColumn(name: 'method2_title', referencedColumnName: 'title')]
     private $method2;
 
 

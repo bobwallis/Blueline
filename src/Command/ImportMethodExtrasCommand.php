@@ -22,7 +22,7 @@ class ImportMethodExtrasCommand extends Command
         parent::__construct();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $time = -microtime(true);
         // Set up styles
@@ -36,7 +36,7 @@ class ImportMethodExtrasCommand extends Command
         $db = pg_connect($this->db_connect);
         if ($db === false) {
             $output->writeln('<error>Failed to connect to database</error>');
-            return;
+            return 0;
         }
 
         // Import the extra call and abbreviation info
@@ -72,7 +72,7 @@ class ImportMethodExtrasCommand extends Command
         $output->writeln('<info>Clear existing renamed/duplicate method performance data...</info>');
         if (pg_query($db, "DELETE FROM performances WHERE type = 'renamedMethod' OR type = 'duplicateMethod'") === false) {
             $output->writeln('<error>Failed to clear existing data: '.pg_last_error($db).'</error>');
-            return;
+            return 0;
         }
 
         if (file_exists(__DIR__.'/../Resources/data/method_renamed.php')) {
