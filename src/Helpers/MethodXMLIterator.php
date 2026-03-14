@@ -237,27 +237,27 @@ class MethodXMLIterator implements \Iterator, \Countable
     }
 
     // Implement the Iterator interface by borrowing it from the underlying array
-    public function rewind()
+    public function rewind(): void
     {
-        return reset($this->data);
+        reset($this->data);
     }
-    public function current()
+    public function current(): mixed
     {
         return current($this->data);
     }
-    public function key()
+    public function key(): mixed
     {
         return key($this->data);
     }
-    public function next()
+    public function next(): void
     {
-        return next($this->data);
+        next($this->data);
     }
-    public function valid()
+    public function valid(): bool
     {
         return key($this->data) !== null;
     }
-    public function count()
+    public function count(): int
     {
         return count($this->data);
     }
