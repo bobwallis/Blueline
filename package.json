@@ -25,7 +25,6 @@
     "gulp-requirejs": "^1.4.0",
     "gulp-sourcemaps": "^3.0.0",
     "gulp-terser": "^2.1.0",
-    "merge-stream": "^2.0.0",
     "postcss": "^8.5.8"
   }
 }

@@ -1,6 +1,5 @@
 import gulp         from 'gulp';
 import imagemin     from 'gulp-imagemin';
-import mergeStream  from 'merge-stream';
 import gzip         from 'gulp-gzip';
 import less         from 'gulp-less';
 import autoprefixer from 'gulp-autoprefixer';
@@ -15,22 +14,24 @@ var DEST = './public/';
 
 // Images
 function gulp_images() {
-	return mergeStream(
-		gulp.src( ['src/Resources/images/*.svg',
-				   'src/Resources/images/*.png'] )
-			.pipe( imagemin() )
-			.pipe( gulp.dest( DEST+'images/' ) ),
-		gulp.src( ['src/Resources/images/favicon.ico',
-		           'src/Resources/images/favicon.svg'] )
-			.pipe( imagemin() )
-			.pipe( gulp.dest( DEST ) )
-	);
-};
+	return gulp.src(['src/Resources/images/*.svg',
+	                  'src/Resources/images/*.png'], { encoding: false } )
+		.pipe( imagemin() )
+		.pipe( gulp.dest( DEST+'images/' ) );
+}
+
+// Favicons (different destination)
+function gulp_images_favicon() {
+	return gulp.src(['src/Resources/images/favicon.ico',
+	                  'src/Resources/images/favicon.svg'], { encoding: false } )
+		.pipe( imagemin() )
+		.pipe( gulp.dest( DEST ) );
+}
 
 
 // Fonts
 function gulp_fonts() {
-	return gulp.src( 'src/Resources/fonts/*' )
+	return gulp.src( 'src/Resources/fonts/*', { encoding: false } )
 		.pipe( gulp.dest( DEST+'fonts/' ) );
 };
 
@@ -110,5 +111,5 @@ function gulp_watch() {
 export default gulp.series( gulp.parallel( [gulp_css, gulp_js, gulp_js_serviceWorker, gulp_fonts] ), gulp_compressGzip );
 export const css    = gulp.series( [gulp_css, gulp_compressGzip] );
 export const js     = gulp.series( gulp.parallel( [gulp_js, gulp_js_serviceWorker] ), gulp_compressGzip );
-export const images = gulp.series( gulp.parallel( [gulp_images] ), gulp_compressGzip );
+export const images = gulp.series( gulp.parallel( [gulp_images, gulp_images_favicon] ), gulp_compressGzip );
 export const watch  = gulp_watch;
