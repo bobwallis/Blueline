@@ -2,6 +2,11 @@
 
 This document contains some notes on how to install, and start developing and using Blueline.
 
+## Documentation index
+
+- [Copilot instructions](.github/copilot-instructions.md): Repository-specific guidance for AI-assisted code changes.
+- [Architecture and workflows](docs/architecture-and-workflows.md): High-level code structure and operational runbooks.
+
 
 ## 0) Environment
 

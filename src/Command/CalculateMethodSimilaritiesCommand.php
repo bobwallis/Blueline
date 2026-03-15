@@ -73,6 +73,8 @@ class CalculateMethodSimilaritiesCommand extends Command
         }
 
         // Prepare a query for searching for methods to compare against
+        // We only compare methods with the same stage and a broadly similar
+        // lead length to avoid O(N^2) work across obviously unrelated methods.
         $comparisonMethod = pg_prepare($db, 'comparisonMethods',
             'SELECT title, notationexpanded, lengthoflead
               FROM methods
@@ -114,6 +116,8 @@ class CalculateMethodSimilaritiesCommand extends Command
             $comparisons = pg_fetch_all($comparisons) ?: array();
 
             // Compare each one and add to the similarity table (if similar enough)
+            // limit is a heuristic threshold: if distance is >= 10% of lead
+            // length we skip storing it to keep the table useful and compact.
             $limit = max(1, floor($method['lengthoflead']/10));
             foreach ($comparisons as $comparison) {
                 $similar = MethodSimilarity::calculate($methodRowArray, $comparison['notationexpanded'], $method['stage'], $limit);
@@ -124,6 +128,7 @@ class CalculateMethodSimilaritiesCommand extends Command
             }
 
             // Insert the obvious similar method so we don't try to recalculate everything the next time the command runs
+            // This self-pair row acts as a marker that the method has been processed by this command.
             pg_insert($db, 'methods_similar', array('method1_title' => $method['title'], 'method2_title' => $method['title'], 'similarity' => 0));
 
             pg_flush($db);
@@ -134,6 +139,8 @@ class CalculateMethodSimilaritiesCommand extends Command
 
 
         // Flag methods which only differ from each other over the lead end
+        // These flags support grouped display in the method view and avoid
+        // treating notation variants as generic "other similar" matches.
         $output->writeln('<title>Checking for methods differing only at the lead end</title>');
         $leadHeadCheck = pg_query($db,
             'SELECT matches.method1_title, matches.method2_title

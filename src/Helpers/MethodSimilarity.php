@@ -42,7 +42,7 @@ class MethodSimilarity
 		// we are treating the rows as strings and calculating how many edits (insertions, deletions,
 		// substitutions) are needed to transform one row into the other.
 
-		// Pre-compute strpos locations for rowArray2, so that we can use lokups instead of strpos() calls
+		// Pre-compute strpos locations for rowArray2, so that we can use lookups instead of strpos() calls
 		// in the inner loop.
 		$row2Positions =[];
 		for ($j = 0; $j < $count2; ++$j) {
