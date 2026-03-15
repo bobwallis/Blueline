@@ -42,9 +42,9 @@ Copy `.env` to `.env.local` (and configure it if you aren't using a devcontainer
 Run `npm install && npm audit fix` to install all the Javascript dependencies into `./node_modules`
 and automatically address any easy-to-resolve security issues in them.
 
-Run `symfony console doctrine:database:create` to create the database.
+Run `symfony console doctrine:database:create` to create the database (if it doesn't already exist).
 
-Run `psql -h db -p 5432 -d blueline -U user -c "CREATE EXTENSION fuzzystrmatch"` to add the
+Run `psql -h db -p 5432 -d blueline -U user -c "CREATE EXTENSION IF NOT EXISTS fuzzystrmatch"` to add the
 fuzzystrmatch extension to the database so the search functionality can work.
 
 Run `symfony console doctrine:schema:create` to create the database schema.
@@ -59,9 +59,9 @@ Run `./bin/buildFrontendAssets` to generate the CSS, JS and image files used by 
 
 ## 3) Run and Develop
 
-Launch a Symfony development server with `symfony server:start -d`. The development container
-exposes port 8000 by default so you will be able to access the development version of the
-site at `http://localhost:8000/` from the host environment.
+Launch a Symfony development server with `symfony server:start -d --allow-all-ip --no-tls`.
+The development container exposes port 8000 by default so you will be able to access the
+development version of the site at `http://localhost:8000/` from the host environment.
 
 The container installs the [SQLTools][6] VSCode extension which you can use to inspect the
 database and run queries direcly against it, or you can use `psql` to connect to it using

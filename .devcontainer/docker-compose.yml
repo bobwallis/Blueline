@@ -1,43 +1,40 @@
-version: "3"
-
 services:
-  # Main container
-  php:
-    # Uncomment the next line to use a non-root user for all processes.
+  blueline:
+    # Use a non-root user for all processes.
     # See https://aka.ms/vscode-remote/containers/non-root for details.
-    # user: vscode
-
+    user: vscode
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        # Update VARIANT to pick a PHP version: 8.1, 8, 7, 7.4, 7.3
         VARIANT: "8.4-trixie"
-        NODE_VERSION: "lts/*"
+        NODE_VERSION: "24"
         USER_UID: 1000
         USER_GID: 1000
-
     volumes:
       - ..:/workspace:cached
-
     ports:
         - 8000:8000
+    command: sleep infinity # Overrides default command so things don't shut down after the process ends.
 
-    # Overrides default command so things don't shut down after the process ends.
-    command: sleep infinity
-
-  # Database image
   db:
-    image: postgres
+    image: postgres:17
     restart: unless-stopped
     volumes:
-      - postgres-data:/var/lib/postgresql/data/ # persist data even if container shuts down
+      - postgres-data:/var/lib/postgresql/data/ # persist data when container shuts down
     expose:
       - 5432
     environment:
       POSTGRES_PASSWORD: pass
       POSTGRES_USER: user
       POSTGRES_DB: blueline
+      TZ: Europe/London
+      PGTZ: Europe/London
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d blueline"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   postgres-data:
