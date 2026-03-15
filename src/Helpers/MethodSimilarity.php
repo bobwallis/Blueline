@@ -1,8 +1,6 @@
 <?php
 namespace Blueline\Helpers;
 
-use \SplFixedArray;
-
 /**
  * Functions to calculate the similarity of two methods
  * @package Helpers
@@ -33,35 +31,73 @@ class MethodSimilarity
 		$count1 = count($rowArray1);
 		$count2 = count($rowArray2);
 
-		// Calculate a matrix of size i=count($rowArray1) x j=count($rowArray2) with each element containing
-		// the distance between the first i rows of 1 and the first j rows of 2.
-		// Basically this: https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm
-		$d = new SplFixedArray($count1);
-		for ($i = 0; $i < $count1; ++$i) {
-			$d[$i] = new SplFixedArray($count2);
-			$d[$i][0] = $i;
-		}
+		// Edge cases
+		if ($count1 === 0) return $count2;
+		if ($count2 === 0) return $count1;
+
+		// This is doing this: https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm
+		// with some optimisations to make it run faster.
+		// The Wagner-Fischer algorithm is a dynamic programming approach to calculate the Levenshtein
+		// distance between two strings, which is a measure of their similarity. In this context,
+		// we are treating the rows as strings and calculating how many edits (insertions, deletions,
+		// substitutions) are needed to transform one row into the other.
+
+		// Pre-compute strpos locations for rowArray2, so that we can use lokups instead of strpos() calls
+		// in the inner loop.
+		$row2Positions =[];
 		for ($j = 0; $j < $count2; ++$j) {
-			$d[0][$j] = $j;
+			$row2Positions[$j] = array_flip(str_split($rowArray2[$j]));
 		}
-		for ($j = 1; $j < $count2; ++$j) {
-			for ($i = 1; $i < $count1; ++$i) {
-				// Compare similarity of row i and j of array1 and array2 against each other
-				$cost = 0;
-				if ($d[$i-1][$j-1] < $limit) {
-					foreach (str_split($rowArray1[$i]) as $k => $c) {
-						$cost += abs($k - strpos($rowArray2[$j], $c));
+
+		// A full N x M Array takes a reasonable amount of memory and allocation time.
+		// Wagner-Fischer only actually needs the "previous" row and "current" row, so just keep those
+		// in memory and swap them on each iteration.
+		$prevD = range(0, $count2 - 1);
+		$currD =[];
+
+		for ($i = 1; $i < $count1; ++$i) {
+			$currD[0] = $i;
+			$row1_i = $rowArray1[$i];
+
+			for ($j = 1; $j < $count2; ++$j) {
+				$prev_j_minus_1 = $prevD[$j-1];
+
+				$min_val = $limit;
+
+				$del1 = $prevD[$j] + 1;
+				if ($del1 < $min_val) $min_val = $del1;
+
+				$del2 = $currD[$j-1] + 1;
+				if ($del2 < $min_val) $min_val = $del2;
+
+				// Only calculate cost if we are under the limit
+				if ($prev_j_minus_1 < $limit) {
+					$cost = 0;
+					$r2pos = $row2Positions[$j];
+
+					for ($k = 0; $k < $stage; ++$k) {
+						// Use array-like string access
+						// $row1_i[$k] grabs the character without needing str_split()
+						// $r2pos[...] gets the precomputed index without needing strpos()
+						$cost += abs($k - $r2pos[$row1_i[$k]]);
 					}
-					$cost /= $stage;
+
+					$sub = $prev_j_minus_1 + ($cost / $stage);
+					if ($sub < $min_val) $min_val = $sub;
+				} else {
+					if ($prev_j_minus_1 < $min_val) $min_val = $prev_j_minus_1;
 				}
 
-				// Set [i][j] to the minimum of 'delete row from array 1', 'delete row from array 2',
-				// and 'change the last row in array1 to the last row in array2' (with added cost for those operations)
-				$d[$i][$j] = min($limit, $d[$i-1][$j]+1, $d[$i][$j-1]+1, $d[$i-1][$j-1]+$cost );
+				$currD[$j] = $min_val;
 			}
+
+			// Swap arrays to move to the next row
+			$temp = $prevD;
+			$prevD = $currD;
+			$currD = $temp;
 		}
 
-		// The answer is then the value in the bottom right.
-		return round($d[$i-1][$j-1], 2);
+		// The answer is then the last calculated value of the final iteration
+		return round($prevD[$count2 - 1], 2);
 	}
 }
