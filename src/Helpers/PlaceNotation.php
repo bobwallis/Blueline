@@ -15,17 +15,57 @@ class PlaceNotation
     private static $_notationOrder = '1234567890ETABCDFGHJKLMNPQRSUVWYZ';
 
     /**
+     * @access private
+     */
+    private static $_notationOrderLength = 33;
+
+    /**
+     * @access private
+     */
+    private static $_intToBellMap = array(
+        1 => '1', 2 => '2', 3 => '3', 4 => '4', 5 => '5', 6 => '6', 7 => '7', 8 => '8',
+        9 => '9', 10 => '0', 11 => 'E', 12 => 'T', 13 => 'A', 14 => 'B', 15 => 'C', 16 => 'D',
+        17 => 'F', 18 => 'G', 19 => 'H', 20 => 'J', 21 => 'K', 22 => 'L', 23 => 'M', 24 => 'N',
+        25 => 'P', 26 => 'Q', 27 => 'R', 28 => 'S', 29 => 'U', 30 => 'V', 31 => 'W', 32 => 'Y',
+        33 => 'Z'
+    );
+
+    /**
+     * @access private
+     */
+    private static $_bellToIntMap = array(
+        '1' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, '8' => 8,
+        '9' => 9, '0' => 10, 'E' => 11, 'T' => 12, 'A' => 13, 'B' => 14, 'C' => 15, 'D' => 16,
+        'F' => 17, 'G' => 18, 'H' => 19, 'J' => 20, 'K' => 21, 'L' => 22, 'M' => 23, 'N' => 24,
+        'P' => 25, 'Q' => 26, 'R' => 27, 'S' => 28, 'U' => 29, 'V' => 30, 'W' => 31, 'Y' => 32,
+        'Z' => 33
+    );
+
+    /**
+     * @access private
+     */
+    private static $_bellIsEvenMap = array(
+        '1' => false, '2' => true, '3' => false, '4' => true, '5' => false, '6' => true,
+        '7' => false, '8' => true, '9' => false, '0' => true, 'E' => false, 'T' => true,
+        'A' => false, 'B' => true, 'C' => false, 'D' => true, 'F' => false, 'G' => true,
+        'H' => false, 'J' => true, 'K' => false, 'L' => true, 'M' => false, 'N' => true,
+        'P' => false, 'Q' => true, 'R' => false, 'S' => true, 'U' => false, 'V' => true,
+        'W' => false, 'Y' => true, 'Z' => false
+    );
+
+    /**
      * Converts an integer into the bell character
      * @param  integer        $int
      * @return string|boolean The character on success, false if out of range
      */
     public static function intToBell($int)
     {
-        if ($int < 1 || $int > strlen(self::$_notationOrder)) {
+        $int = intval($int);
+        if ($int < 1 || $int > self::$_notationOrderLength) {
             return false;
         }
 
-        return substr(self::$_notationOrder, intval($int) - 1, 1);
+        return self::$_intToBellMap[$int];
     }
 
     /**
@@ -35,11 +75,11 @@ class PlaceNotation
      */
     public static function bellToInt($bell)
     {
-        if (strlen($bell) > 1 || !strpbrk(self::$_notationOrder, $bell)) {
+        if (strlen($bell) != 1) {
             return false;
         }
 
-        return strpos(self::$_notationOrder, $bell) + 1;
+        return self::$_bellToIntMap[$bell] ?? false;
     }
 
     /**
@@ -192,6 +232,8 @@ class PlaceNotation
         if (is_null($stage) || $stage < 2) {
             $stage = self::guessStage($notation);
         }
+        $stageIsEven = ($stage % 2 == 0);
+        $stageNotation = self::intToBell($stage);
 
         // Tidy up letter cases
         $notationFull = strtoupper($notation);
@@ -246,19 +288,19 @@ class PlaceNotation
         // Convert 'a &-1-1-1' type notation into '&x1x1x1 2' type
         if (preg_match('/^[A-S][1-9]?\s/', $notationFull) == 1) {
             // For even bell methods
-            if ($stage % 2 == 0) {
+            if ($stageIsEven) {
                 // a to f is 12
                 if (preg_match('/^([A-F][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                     $notationFull = $match[2].' 12';
                 // g to m is 1n
                 } elseif (preg_match('/^([G-M][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
-                    $notationFull = $match[2].' 1'.self::$_notationOrder[$stage-1];
+                    $notationFull = $match[2].' 1'.$stageNotation;
                 // p, q is 3n post lead head (if 3n isn't the start of $match[2] then add it to the start)
                 } elseif (preg_match('/^([P-Q][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
-                    if (strpos($match[2], '3'.self::$_notationOrder[$stage-1]) === 0) {
+                    if (strpos($match[2], '3'.$stageNotation) === 0) {
                         $notationFull = $match[2];
                     } else {
-                        $notationFull = '3'.self::$_notationOrder[$stage-1].' '.$match[2];
+                        $notationFull = '3'.$stageNotation.' '.$match[2];
                     }
                 }
                 // r, s is n post lead head (similar to above)
@@ -282,14 +324,14 @@ class PlaceNotation
                     }
                 // g to m is n post lead head (similar to above)
                 } elseif (preg_match('/^([G-M][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
-                    if (strpos($match[2], self::$_notationOrder[$stage-1]) === 0) {
+                    if (strpos($match[2], $stageNotation) === 0) {
                         $notationFull = $match[2];
                     } else {
-                        $notationFull = self::$_notationOrder[$stage-1].' '.$match[2];
+                        $notationFull = $stageNotation.' '.$match[2];
                     }
                 // p, q is 12n
                 } elseif (preg_match('/^([P-Q][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
-                    $notationFull = $match[2].' 12'.self::$_notationOrder[$stage-1];
+                    $notationFull = $match[2].' 12'.$stageNotation;
                 // r, s is 1
                 } elseif (preg_match('/^([R-S][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                     $notationFull = $match[2].' 1';
@@ -324,9 +366,9 @@ class PlaceNotation
         // Work through each piece of notation individually to do last bits of cleanup
         foreach ($notationExploded as &$split) {
             if ($split == 'x') {
-                if ($stage%2 != 0) {
+                if (!$stageIsEven) {
                     // If stage odd and we have an x, change to an n
-                    $split = self::$_notationOrder[$stage-1];
+                    $split = $stageNotation;
                 }
                 continue;
             }
@@ -534,15 +576,7 @@ class PlaceNotation
         if (is_int($place)) {
             return ($place%2 == 0);
         }
-        $stop = strlen(self::$_notationOrder);
-        for ($i = 0; $i < $stop; $i += 2) {
-            // If odd return false
-            if ($place == self::$_notationOrder[$i]) {
-                return false;
-            }
-        }
-        // If even return true
-        return true;
+        return self::$_bellIsEvenMap[$place] ?? true;
     }
 
     /**
