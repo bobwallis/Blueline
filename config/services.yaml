@@ -59,3 +59,7 @@ services:
             - '%kernel.environment%'
         tags:
             - { name: kernel.event_listener, event: kernel.request }
+
+when@test:
+    parameters:
+        database_connect: 'host=%env(key:host:url:DATABASE_URL)% port=%env(key:port:url:DATABASE_URL)% dbname=%env(key:path:url:DATABASE_URL)%_test%env(default::TEST_TOKEN)% user=%env(key:user:url:DATABASE_URL)% password=%env(key:pass:url:DATABASE_URL)%'

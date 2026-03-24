@@ -6,15 +6,39 @@ while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
 d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 cd "$d/../"
 
+APP_ENVIRONMENT="${APP_ENV:-dev}"
+for arg in "$@"; do
+	case "$arg" in
+		--env=*)
+			APP_ENVIRONMENT="${arg#*=}"
+			;;
+		dev|test|prod)
+			APP_ENVIRONMENT="$arg"
+			;;
+	esac
+done
+
 # Download external data
 echo -e "\n\033[1mDownloading external data\033[0m"
 "./src/Resources/data/fetch"
 echo ""
 
 # Import updated method data
-symfony console blueline:importMethods
-symfony console blueline:importMethodExtras
-symfony console blueline:importCollections
-symfony console blueline:calculateMethodSimilarities
+symfony console blueline:importMethods --env="$APP_ENVIRONMENT"
+symfony console blueline:importMethodExtras --env="$APP_ENVIRONMENT"
+symfony console blueline:importCollections --env="$APP_ENVIRONMENT"
+symfony console blueline:calculateMethodSimilarities --env="$APP_ENVIRONMENT"
 echo ""
-sed -i -e"s/DATABASE_UPDATE=.*/DATABASE_UPDATE=`date "+%s"`/" ".env.local"
+
+if [ "$APP_ENVIRONMENT" = "dev" ]; then
+	DATABASE_UPDATE_FILE=".env.local"
+else
+	DATABASE_UPDATE_FILE=".env.${APP_ENVIRONMENT}.local"
+fi
+
+touch "$DATABASE_UPDATE_FILE"
+if grep -q '^DATABASE_UPDATE=' "$DATABASE_UPDATE_FILE"; then
+	sed -i -e"s/^DATABASE_UPDATE=.*/DATABASE_UPDATE=`date "+%s"`/" "$DATABASE_UPDATE_FILE"
+else
+	echo "DATABASE_UPDATE=`date "+%s"`" >> "$DATABASE_UPDATE_FILE"
+fi

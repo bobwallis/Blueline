@@ -1,0 +1,25 @@
+{
+    "sqltools.connections": [
+        {
+            "name": "Container database",
+            "driver": "PostgreSQL",
+            "previewLimit": 50,
+            "server": "db",
+            "port": 5432,
+            "database": "blueline",
+            "username": "user",
+            "password": "pass"
+        },
+        {
+            "ssh": "Disabled",
+            "name": "Container test database",
+            "driver": "PostgreSQL",
+            "previewLimit": 50,
+            "server": "db",
+            "port": 5432,
+            "database": "blueline_test",
+            "username": "user",
+            "password": "pass"
+        }
+    ]
+}

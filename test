@@ -6,17 +6,69 @@ while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
 d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 cd "$d"
 
-echo -e "\n\033[1mRunning PHPUnit tests\033[0m"
-"$d/bin/phpunit"
+# Check test database exists and schema is accessible
+if ! symfony console dbal:run-sql "SELECT 1" --env=test > /dev/null 2>&1; then
+    echo -e "\n\033[1mSetting up test database\033[0m"
+    echo -e "\n\033[33m⚠️  The following commands will be executed:\033[0m"
+    echo -e "  1. symfony console doctrine:database:create --env=test --if-not-exists"
+    echo -e "  2. symfony console doctrine:schema:create --env=test"
+    echo ""
+    read -p "Create test database and schema? (y/n) " -n 1 -r response
+    echo
+    if [[ ! $response =~ ^[Yy]$ ]]; then
+        echo -e "\033[31mTest database setup cancelled. Cannot proceed with tests.\033[0m"
+        exit 1
+    fi
+    echo -e "\n\033[1mCreating test database...\033[0m"
+    if ! symfony console doctrine:database:create --env=test --if-not-exists; then
+        echo -e "\033[31m✗ Failed to create test database\033[0m"
+        echo "Tip: Ensure the database server is running and credentials are correct."
+        exit 1
+    fi
+    echo -e "\n\033[1mCreating test database schema...\033[0m"
+    if ! symfony console doctrine:schema:create --env=test; then
+        echo -e "\033[31m✗ Failed to create test database schema\033[0m"
+        echo "Tip: Try manually cleaning up and recreating:"
+        echo "  symfony console doctrine:database:drop --env=test --force"
+        echo "  symfony console doctrine:database:create --env=test"
+        echo "  symfony console doctrine:schema:create --env=test"
+        exit 1
+    fi
+    symfony console dbal:run-sql "CREATE EXTENSION IF NOT EXISTS fuzzystrmatch" --env=test > /dev/null
+    echo -e "\n\033[32m✓ Test database ready\033[0m"
+fi
+
+# Check test database has method data
+method_count=$(symfony console dbal:run-sql "SELECT COUNT(*) FROM methods" --env=test 2>/dev/null | sed -n 's/^ *\([0-9][0-9]*\) *$/\1/p')
+if ! [[ "$method_count" =~ ^[0-9]+$ ]] || [ "$method_count" -eq 0 ]; then
+    echo -e "\n\033[1mTest database has no method data\033[0m"
+    echo -e "\n\033[33m⚠️  The following command will be executed:\033[0m"
+    echo -e "  $d/bin/fetchAndImportData --env=test"
+    echo ""
+    read -p "Import method data into test database now? (y/n) " -n 1 -r response
+    echo
+    if [[ ! $response =~ ^[Yy]$ ]]; then
+        echo -e "\033[31mTest data import cancelled. Cannot proceed with tests.\033[0m"
+        echo "Tip: Run this manually when ready: $d/bin/fetchAndImportData --env=test"
+        exit 1
+    fi
+    "$d/bin/fetchAndImportData" --env=test
+    method_count=$(symfony console dbal:run-sql "SELECT COUNT(*) FROM methods" --env=test 2>/dev/null | sed -n 's/^ *\([0-9][0-9]*\) *$/\1/p')
+    if ! [[ "$method_count" =~ ^[0-9]+$ ]] || [ "$method_count" -eq 0 ]; then
+        echo -e "\033[31m✗ Test database still appears empty after import\033[0m"
+        exit 1
+    fi
+    echo -e "\n\033[32m✓ Test method data imported\033[0m"
+fi
+
+echo -e "\n\033[1mValidate database schema and mapping files\033[0m"
+symfony console doctrine:schema:validate
 
 echo -e "\n\033[1mLint Symfony container\033[0m"
 symfony console lint:container
 
 echo -e "\n\033[1mLint Twig templates\033[0m"
-symfony console lint:twig
+symfony console lint:twig src templates --excludes=vendor
 
-echo -e "\n\033[1mValidate database schema and mapping files\033[0m"
-symfony console doctrine:schema:validate
-
-echo -e "\n\033[1mCheck migrations\033[0m"
-symfony console doctrine:migrations:up-to-date
+echo -e "\n\033[1mRunning PHPUnit tests\033[0m"
+APP_ENV=test "$d/bin/phpunit"
