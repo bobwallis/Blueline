@@ -219,7 +219,7 @@ class MethodsController extends AbstractController
         // Collect passed in variables that are permissible
         $vars = array();
         foreach (array('notation', 'title', 'stage') as $key) {
-            $value = trim($request->query->get($key));
+            $value = trim($request->query->get($key) ?? '');
             if (!empty($value)) {
                 $vars[$key] = urldecode($value);
             }
