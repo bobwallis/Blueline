@@ -5,12 +5,45 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class NotationControllerTest extends WebTestCase
 {
+    public function testNotationRequiresNotationParameter()
+    {
+        $client = static::createClient();
+        $client->request('GET', '/services/notation.txt');
+
+        $this->assertSame(400, $client->getResponse()->getStatusCode());
+    }
+
+    public function testNotationJsonReturnsStructuredResponse()
+    {
+        $client = static::createClient();
+        $client->request('GET', '/services/notation.json?notation=x1x1x1x1x1x2&stage=6');
+
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/services/notation.json request unsuccessful');
+
+        $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(6, $payload['stage']);
+        $this->assertSame('x16x16x16x16x16x12', $payload['expanded']);
+        $this->assertSame('&-6-6-6, +2', $payload['siril']);
+    }
+
+    public function testNotationGuessesStageWhenMissing()
+    {
+        $client = static::createClient();
+        $client->request('GET', '/services/notation.json?notation=3,1.5.1.5.1');
+
+        $this->assertTrue($client->getResponse()->isSuccessful(), 'notation stage guess request unsuccessful');
+
+        $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(5, $payload['stage']);
+        $this->assertSame('3.1.5.1.5.1.5.1.5.1', $payload['expanded']);
+    }
+
     public function testNotation()
     {
         $client = static::createClient();
-        $crawler = $client->request('GET', '/services/notation.txt?notation=x1x1x1x1x1x2&stage=6');
+        $client->request('GET', '/services/notation.txt?notation=x1x1x1x1x1x2&stage=6');
         $this->assertTrue($client->getResponse()->isSuccessful(), '/services/notation.txt request unsuccessful');
-        $crawler = $client->request('GET', '/services/notation.json?notation=x1x1x1x1x1x2&stage=6');
+        $client->request('GET', '/services/notation.json?notation=x1x1x1x1x1x2&stage=6');
         $this->assertTrue($client->getResponse()->isSuccessful(), '/services/notation.json request unsuccessful');
 
         $expansionTests = array(
@@ -32,7 +65,7 @@ class NotationControllerTest extends WebTestCase
             array('test' => 'notation=%2B3,%261.5.1.5.1&stage=5',        'result' => "3.1.5.1.5.1.5.1.5.1\n+3, &1.5.1.5.1"),
         );
         foreach ($expansionTests as $test) {
-            $crawler = $client->request('GET', '/services/notation.txt?'.$test['test']);
+            $client->request('GET', '/services/notation.txt?'.$test['test']);
             $this->assertEquals($test['result'], $client->getResponse()->getContent(), '"'.$test['test'].'" expansion unexpected');
         }
     }

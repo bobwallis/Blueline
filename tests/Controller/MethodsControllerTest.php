@@ -2,60 +2,177 @@
 namespace Blueline\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\HttpFoundation\Response;
 
 class MethodsControllerTest extends WebTestCase
 {
-    public function testMethods()
+    public function testWelcomePageShowsSearchAndCustomMethodForm()
     {
         $client = static::createClient();
-        // Test welcome page and some other basic requests
-        foreach (array('/methods/', '/methods/view/Cambridge_Surprise_Minor', '/methods/view/Wee_Willie_Winkie_Maximus', '/methods/view?stage=8&notation=x1x1x45x27') as $page) {
-            $crawler = $client->request('GET', $page);
-            $this->assertTrue($client->getResponse()->isSuccessful(), $page.' request unsuccessful');
-        }
-        foreach (array('/methods/view/Cambridge_Surprise_Minor.json') as $page) {
-            $crawler = $client->request('GET', $page);
-            $this->assertTrue($client->getResponse()->isSuccessful(), $page.' request unsuccessful');
-            $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'application/json'), $page.' Content-Type header wrong');
-        }
-        //foreach (array('/methods/view/Cambridge_Surprise_Minor.png?scale=1&style=numbers', '/methods/view/Cambridge_Surprise_Minor.png?scale=1&style=lines', '/methods/view/Cambridge_Surprise_Minor.png?scale=2&style=grid') as $page) {
-        //    $crawler = $client->request('GET', $page);
-        //    $this->assertTrue($client->getResponse()->isSuccessful(), $page.' request unsuccessful');
-        //    $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'image/png'), $page.' Content-Type header wrong');
-        //}
+        $client->request('GET', '/methods/');
+
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/ request unsuccessful');
+        $this->assertStringContainsString('Custom Method', $client->getResponse()->getContent());
+        $this->assertStringContainsString('Search methods', $client->getResponse()->getContent());
     }
-    public function testMethodsSearch()
+
+    public function testMethodViewHtmlAndJsonResponsesContainExpectedData()
     {
         $client = static::createClient();
-        // HTML searches
-        foreach (array('/methods/search?q=oxford') as $page) {
-            $crawler = $client->request('GET', $page);
-            $this->assertTrue($client->getResponse()->isSuccessful(), $page.' request unsuccessful');
-        }
-        // JSON searches
-        foreach (array('/methods/search.json?q=oxford') as $page) {
-            $crawler = $client->request('GET', $page);
-            $this->assertTrue($client->getResponse()->isSuccessful(), $page.' request unsuccessful');
-            $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'application/json'), $page.' Content-Type header wrong');
-        }
+        $client->request('GET', '/methods/view/Cambridge_Surprise_Minor');
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/view/Cambridge_Surprise_Minor request unsuccessful');
+        $this->assertStringContainsString('Cambridge Surprise Minor', $client->getResponse()->getContent());
+        $this->assertStringContainsString('Place', $client->getResponse()->getContent());
+
+        $client->request('GET', '/methods/view/Cambridge_Surprise_Minor.json');
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/view/Cambridge_Surprise_Minor.json request unsuccessful');
+        $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'application/json'), '/methods/view/Cambridge_Surprise_Minor.json Content-Type header wrong');
+
+        $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('Cambridge Surprise Minor', $payload[0]['title']);
+        $this->assertSame('Cambridge_Surprise_Minor', $payload[0]['url']);
+        $this->assertSame(6, $payload[0]['stage']);
     }
-    public function testMethodsRedirects()
+
+    public function testMethodViewRedirectsCanonicalAndEmptyUrls()
     {
         $client = static::createClient();
-        // Test redirects to top page
-        foreach (array('/methods', '/methods/view/') as $page) {
-            $crawler = $client->request('GET', $page);
-            $this->assertTrue($client->getResponse()->isRedirect(), $page.' isn\'t a redirect');
-        }
+
+        $client->request('GET', '/methods');
+        $this->assertTrue($client->getResponse()->isRedirect(), '/methods is not a redirect');
+
+        $client->request('GET', '/methods/view/');
+        $this->assertTrue($client->getResponse()->isRedirect(), '/methods/view/ is not a redirect');
+        $this->assertStringContainsString('/methods/', (string) $client->getResponse()->headers->get('Location'));
+
+        $client->request('GET', '/methods/view/CambridgeSurpriseMinor');
+        $this->assertSame(301, $client->getResponse()->getStatusCode());
+        $this->assertStringContainsString('/methods/view/Cambridge_Surprise_Minor', (string) $client->getResponse()->headers->get('Location'));
     }
-    public function testMethodsSitemap()
+
+    public function testMethodViewReturnsNotFoundForUnknownMethod()
+    {
+        $client = static::createClient();
+        $client->request('GET', '/methods/view/Definitely_Not_A_Method');
+
+        $this->assertSame(404, $client->getResponse()->getStatusCode());
+    }
+
+    public function testMethodsSearchHtmlAndJsonResponsesContainResults()
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/methods/search?q=oxford');
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/search?q=oxford request unsuccessful');
+        $this->assertStringContainsString('Oxford', $client->getResponse()->getContent());
+
+        $client->request('GET', '/methods/search.json?q=oxford');
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/search.json?q=oxford request unsuccessful');
+        $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'application/json'), '/methods/search.json?q=oxford Content-Type header wrong');
+
+        $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('oxford', $payload['query']['q']);
+        $this->assertGreaterThan(0, $payload['count']);
+        $this->assertNotEmpty($payload['results']);
+        $this->assertTrue((bool) array_filter($payload['results'], function ($method) {
+            return stripos($method['title'], 'Oxford') !== false;
+        }), 'Search results should include an Oxford method');
+    }
+
+    public function testMethodsSearchRejectsInvalidRegularExpressions()
+    {
+        $client = static::createClient();
+        $client->request('GET', '/methods/search?q=/(/');
+
+        $this->assertSame(400, $client->getResponse()->getStatusCode());
+    }
+
+    public function testMethodPngRequestsAreValidatedAndNormalised()
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/methods/view/Cambridge_Surprise_Minor.png');
+        $this->assertSame(301, $client->getResponse()->getStatusCode());
+        $this->assertStringContainsString('scale=1', (string) $client->getResponse()->headers->get('Location'));
+        $this->assertStringContainsString('style=numbers', (string) $client->getResponse()->headers->get('Location'));
+
+        $client->request('GET', '/methods/view/Cambridge_Surprise_Minor.png?scale=5&style=numbers');
+        $this->assertSame(401, $client->getResponse()->getStatusCode());
+
+        $client->request('GET', '/methods/view/Cambridge_Surprise_Minor.png?scale=1&style=invalid');
+        $this->assertSame(401, $client->getResponse()->getStatusCode());
+
+        $client->request('GET', '/methods/view/Cambridge_Surprise_Minor.png?scale=1&style=numbers');
+        $this->assertSame(302, $client->getResponse()->getStatusCode());
+        $this->assertStringContainsString('scale=1&style=numbers', (string) $client->getResponse()->headers->get('Location'));
+    }
+
+    public function testCustomMethodViewHtmlAndJsonResponsesContainExpectedData()
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/methods/view?stage=8&notation=x1x1x45x27');
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/view?stage=8&notation=x1x1x45x27 request unsuccessful');
+        $this->assertStringContainsString('Place', $client->getResponse()->getContent());
+
+        $client->request('GET', '/methods/view.json', array('stage' => 8, 'notation' => 'x1x1x45x27'));
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/view.json?stage=8&notation=x1x1x45x27 request unsuccessful');
+
+        $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(8, $payload[0]['stage']);
+        $this->assertSame('x1x1x45x27', $payload[0]['notation']);
+    }
+
+    public function testCustomMethodViewRequiresNotation()
+    {
+        $client = static::createClient();
+        $client->request('GET', '/methods/view');
+
+        $this->assertSame(400, $client->getResponse()->getStatusCode());
+    }
+
+    public function testCustomMethodViewRedirectsToExistingMethodWhenNotationMatches()
+    {
+        $client = static::createClient();
+        $client->request('GET', '/methods/view/Cambridge_Surprise_Minor.json');
+        $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        $client->request('GET', '/methods/view', array(
+            'stage' => $payload[0]['stage'],
+            'notation' => $payload[0]['notation'],
+        ));
+
+        $this->assertSame(301, $client->getResponse()->getStatusCode());
+        $this->assertStringContainsString('/methods/view/Cambridge_Surprise_Minor', (string) $client->getResponse()->headers->get('Location'));
+    }
+
+    public function testCustomMethodPngRequestsAreValidatedAndNormalised()
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/methods/view.png', array('stage' => 8, 'notation' => 'x1x1x45x27'));
+        $this->assertSame(301, $client->getResponse()->getStatusCode());
+        $this->assertStringContainsString('scale=1', (string) $client->getResponse()->headers->get('Location'));
+        $this->assertStringContainsString('style=numbers', (string) $client->getResponse()->headers->get('Location'));
+
+        $client->request('GET', '/methods/view.png', array('stage' => 8, 'notation' => 'x1x1x45x27', 'scale' => 1, 'style' => 'numbers'));
+        $this->assertSame(302, $client->getResponse()->getStatusCode());
+        $this->assertStringContainsString('scale=1&style=numbers', (string) $client->getResponse()->headers->get('Location'));
+
+        $client->request('GET', '/methods/view.png', array('stage' => 8, 'notation' => 'x1x1x45x27', 'scale' => 5, 'style' => 'numbers'));
+        $this->assertSame(401, $client->getResponse()->getStatusCode());
+
+        $client->request('GET', '/methods/view.png', array('stage' => 8, 'notation' => 'x1x1x45x27', 'scale' => 1, 'style' => 'invalid'));
+        $this->assertSame(401, $client->getResponse()->getStatusCode());
+    }
+
+    public function testMethodsSitemapReturnsXml()
     {
         $client = static::createClient();
         foreach (array('/methods/sitemap_1', '/methods/sitemap_2') as $xml) {
-            $crawler = $client->request('GET', $xml.'.xml');
+            $client->request('GET', $xml.'.xml');
             $this->assertTrue($client->getResponse()->isSuccessful(), $xml.'.xml request unsuccessful');
             $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'text/xml; charset=UTF-8'), $xml.'.xml Content-Type header wrong');
+            $this->assertStringContainsString('<urlset', $client->getResponse()->getContent());
         }
     }
 }

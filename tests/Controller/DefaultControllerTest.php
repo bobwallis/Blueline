@@ -5,45 +5,63 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class DefaultControllerTest extends WebTestCase
 {
-    // Pages
-    public function testPages()
+    public function testPagesRenderExpectedContent()
     {
         $client = static::createClient();
-        foreach (array('', 'about', 'methods/notation') as $html) {
-            $crawler = $client->request('GET', '/'.$html);
-            $this->assertTrue($client->getResponse()->isSuccessful(), $html.' request unsuccessful');
+        $pages = array(
+            '/' => 'Blueline',
+            '/about' => 'methods.notationExpanded',
+            '/methods/notation' => 'Place Notation Guide',
+        );
+
+        foreach ($pages as $path => $expectedContent) {
+            $client->request('GET', $path);
+            $this->assertTrue($client->getResponse()->isSuccessful(), $path.' request unsuccessful');
+            $this->assertStringContainsString($expectedContent, $client->getResponse()->getContent(), $path.' response missing expected content');
+            $this->assertStringContainsString('public', (string) $client->getResponse()->headers->get('Cache-Control'), $path.' missing cache control header');
         }
     }
 
-    // 301 Redirects
     public function testRedirects()
     {
         $client = static::createClient();
         foreach (array('services/siril', 'services/siril/about', 'copyright', 'tutorials', 'methods/tutorials') as $html) {
-            $crawler = $client->request('GET', '/'.$html);
+            $client->request('GET', '/'.$html);
             $this->assertSame(301, $client->getResponse()->getStatusCode());
         }
     }
 
-    // .txt files
-    public function testRobots()
+    public function testTextResources()
     {
         $client = static::createClient();
-        foreach (array('robots', 'humans') as $txt) {
-            $crawler = $client->request('GET', '/'.$txt.'.txt');
-            $this->assertTrue($client->getResponse()->isSuccessful(), $txt.'.txt request unsuccessful');
-            $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'text/plain; charset=UTF-8'), $txt.'.txt Content-Type header wrong');
-        }
+        $client->request('GET', '/robots.txt');
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/robots.txt request unsuccessful');
+        $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'text/plain; charset=UTF-8'), '/robots.txt Content-Type header wrong');
+        $this->assertStringContainsString('Sitemap:', $client->getResponse()->getContent());
+
+        $client->request('GET', '/humans.txt');
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/humans.txt request unsuccessful');
+        $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'text/plain; charset=UTF-8'), '/humans.txt Content-Type header wrong');
     }
 
-    // XML sitemaps
-    public function testSitemaps()
+    public function testXmlAndJsonResources()
     {
         $client = static::createClient();
-        foreach (array('sitemap', 'sitemap_root') as $xml) {
-            $crawler = $client->request('GET', '/'.$xml.'.xml');
-            $this->assertTrue($client->getResponse()->isSuccessful(), $xml.'.xml request unsuccessful');
-            $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'text/xml; charset=UTF-8'), $xml.'.xml Content-Type header wrong');
-        }
+
+        $client->request('GET', '/sitemap.xml');
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/sitemap.xml request unsuccessful');
+        $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'text/xml; charset=UTF-8'), '/sitemap.xml Content-Type header wrong');
+        $this->assertStringContainsString('<sitemapindex', $client->getResponse()->getContent());
+
+        $client->request('GET', '/sitemap_root.xml');
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/sitemap_root.xml request unsuccessful');
+        $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'text/xml; charset=UTF-8'), '/sitemap_root.xml Content-Type header wrong');
+        $this->assertStringContainsString('<urlset', $client->getResponse()->getContent());
+
+        $client->request('GET', '/manifest.json');
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/manifest.json request unsuccessful');
+        $manifest = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('Blueline', $manifest['name']);
+        $this->assertSame('Blueline', $manifest['short_name']);
     }
 }
