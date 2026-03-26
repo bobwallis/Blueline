@@ -72,8 +72,10 @@ to regenerate the assets. Running `gulp watch` in a terminal will watch for chan
 and rebuild on-demand, which is helpful.
 
 Running `./test` will run PHPUnit to execute the tests under `./tests/`. You might want to launch
-XDebug before running. I'm definitely not as diligent at creating unit tests as I should be, a lot
-of things don't have a test.
+XDebug before running.
+
+Some command tests are slow (mainly the blueline:importMethods test), and marked as such. To
+include the full test suite run `BLUELINE_RUN_SLOW_COMMAND_TESTS=1 ./test`.
 
 
 ## 4) Maintain
