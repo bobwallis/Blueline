@@ -129,10 +129,11 @@ class MethodsController extends AbstractController
 
         // Redirect to the canonical URL if we're at a wrong one
         if ($request->attributes->get('url') !== $url) {
+            $style = $request->query->get('style');
             $redirect = $this->generateUrl('Blueline_Methods_view', array(
                 'chromeless' => (($format == 'html') ? (intval($request->query->get('chromeless')) ?: null) : null),
                 'scale'      => intval($request->query->get('scale')) ?: null,
-                'style'      => strtolower($request->query->get('style')) ?: null,
+                'style'      => isset($style) ? strtolower($style) : null,
                 'url'      => $url,
                 '_format'    => $format
             ));
@@ -168,10 +169,11 @@ class MethodsController extends AbstractController
             $peformanceRepository = $em->getRepository(Performance::class);
             $renamedUrl = $peformanceRepository->findURLByRungURL($url);
             if ($renamedUrl !== null) {
+                $style = $request->query->get('style');
                 $redirect = $this->generateUrl('Blueline_Methods_view', array(
                     'chromeless' => (($format == 'html') ? (intval($request->query->get('chromeless')) ?: null) : null),
                     'scale'      => intval($request->query->get('scale')) ?: null,
-                    'style'      => strtolower($request->query->get('style')) ?: null,
+                    'style'      => isset($style) ? strtolower($style) : null,
                     'url'        => $renamedUrl,
                     '_format'    => $format
                 ));
@@ -180,10 +182,11 @@ class MethodsController extends AbstractController
             // Try and find a version with fixed capitalisation
             $capitalisedMethod = $methodRepository->findByURL(preg_replace_callback('/(^|_)(.)/', function($w) { return $w[1].strtoupper($w[2]); }, $url));
             if ($capitalisedMethod !== null) {
+                $style = $request->query->get('style');
                 $redirect = $this->generateUrl('Blueline_Methods_view', array(
                     'chromeless' => (($format == 'html') ? (intval($request->query->get('chromeless')) ?: null) : null),
                     'scale'      => intval($request->query->get('scale')) ?: null,
-                    'style'      => strtolower($request->query->get('style')) ?: null,
+                    'style'      => isset($style) ? strtolower($style) : null,
                     'url'        => $capitalisedMethod->getUrl(),
                     '_format'    => $format
                 ));
@@ -263,7 +266,7 @@ class MethodsController extends AbstractController
                     throw $this->createAccessDeniedException('Maximum scale is 4.');
                 }
                 $section = $request->query->get('style');
-                if (!in_array($section, ['numbers', 'lines', 'diagrams', 'grid'])) {
+                if (isset($section) && !in_array($section, ['numbers', 'lines', 'diagrams', 'grid'])) {
                     throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'lines', 'diagrams' or 'grid'.");
                 }
                 if (!$section || intval($request->query->get('scale')) === 0) {

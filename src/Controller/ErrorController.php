@@ -9,6 +9,6 @@ class ErrorController extends AbstractController
 {
     public function httpError(Request $request, $code, $message = null)
     {
-        throw new HttpException($code, $message);
+        throw new HttpException((int) $code, $message ?? '');
     }
 }
