@@ -45,8 +45,9 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && docker-php-ext-install pdo pdo_pgsql pgsql \
     # Intl
     && docker-php-ext-install intl \
-    # Xdebug
-    && docker-php-ext-enable xdebug \
+    # Disable Xdebug from the base image to avoid step-debug connection warnings.
+    && if command -v phpdismod >/dev/null 2>&1; then phpdismod xdebug || true; fi \
+    && find /usr/local/etc/php/conf.d -maxdepth 1 -type f -name '*xdebug*.ini' -delete \
     && apt-get clean \
     && pecl clear-cache \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* || true
