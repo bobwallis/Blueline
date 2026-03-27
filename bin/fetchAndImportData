@@ -24,10 +24,10 @@ echo -e "\n\033[1mDownloading external data\033[0m"
 echo ""
 
 # Import updated method data
-symfony console blueline:importMethods --env="$APP_ENVIRONMENT"
-symfony console blueline:importMethodExtras --env="$APP_ENVIRONMENT"
-symfony console blueline:importCollections --env="$APP_ENVIRONMENT"
-symfony console blueline:calculateMethodSimilarities --env="$APP_ENVIRONMENT"
+symfony console blueline:importMethods --no-debug --env="$APP_ENVIRONMENT"
+symfony console blueline:importMethodExtras --no-debug --env="$APP_ENVIRONMENT"
+symfony console blueline:importCollections --no-debug --env="$APP_ENVIRONMENT"
+symfony console blueline:calculateMethodSimilarities --no-debug --env="$APP_ENVIRONMENT"
 echo ""
 
 if [ "$APP_ENVIRONMENT" = "dev" ]; then

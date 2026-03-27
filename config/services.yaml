@@ -7,7 +7,6 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    database_connect: 'host=%env(key:host:url:DATABASE_URL)% port=%env(key:port:url:DATABASE_URL)% dbname=%env(key:path:url:DATABASE_URL)% user=%env(key:user:url:DATABASE_URL)% password=%env(key:pass:url:DATABASE_URL)%'
     blueline.endpoint: '%env(ENDPOINT)%'
     blueline.image_endpoint: '%env(IMAGE_ENDPOINT)%'
     blueline.asset_update: '%env(ASSET_UPDATE)%'
@@ -35,18 +34,6 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    # Give certain commands access to a string usable in pg_connect
-    Blueline\Command\CalculateMethodSimilaritiesCommand:
-        arguments: ['%database_connect%']
-    Blueline\Command\ImportCollectionsCommand:
-        arguments: ['%database_connect%']
-    Blueline\Command\ImportMethodsCommand:
-        arguments: ['%database_connect%']
-    Blueline\Command\ImportMethodExtrasCommand:
-        arguments: ['%database_connect%']
-    Blueline\Command\CheckClassificationsCommand:
-        arguments: ['%database_connect%']
-
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
     Blueline\Controller\:
@@ -59,7 +46,3 @@ services:
             - '%kernel.environment%'
         tags:
             - { name: kernel.event_listener, event: kernel.request }
-
-when@test:
-    parameters:
-        database_connect: 'host=%env(key:host:url:DATABASE_URL)% port=%env(key:port:url:DATABASE_URL)% dbname=%env(key:path:url:DATABASE_URL)%_test%env(default::TEST_TOKEN)% user=%env(key:user:url:DATABASE_URL)% password=%env(key:pass:url:DATABASE_URL)%'

@@ -1,28 +1,26 @@
 <?php
 namespace Blueline\Command;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Blueline\Helpers\PgResultIterator;
 use Blueline\Entity\Method;
 
 class CheckClassificationsCommand extends Command
 {
+    public function __construct(private readonly Connection $connection)
+    {
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this->setName('blueline:checkMethodClassifications')
             ->setDescription('Check for mismatches between the method library\'s classification of methods and the software\'s PHP code');
-    }
-
-    private $db_connect;
-
-    public function __construct($db_connect)
-    {
-        $this->db_connect = $db_connect;
-        parent::__construct();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -34,27 +32,21 @@ class CheckClassificationsCommand extends Command
         $targetConsoleWidth = 75;
 
         // Print title
-        $output->writeln('<ti$this->db_connecttle>Checking classifications</title>');
+        $output->writeln('<title>Checking classifications</title>');
 
-        // Get access to the database
-        $db = pg_connect($this->db_connect);
-        if ($db === false) {
-            $output->writeln('<error>Failed to connect to database</error>');
+        try {
+            $methodCount = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM methods');
+            $methods = $this->connection->executeQuery('SELECT title, stage, notationexpanded, classification, little, differential, plain, trebledodging FROM methods')->iterateAssociative();
+        }
+        catch (Exception $exception) {
+            $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
             return 0;
         }
-
-        // Get an iterator over all methods which don't have similarity indexes
-        $result = pg_query($db, 'SELECT title, stage, notationexpanded, classification, little, differential, plain, trebledodging FROM methods');
-        if ($result === false) {
-            $output->writeln('<error>Failed to query methods table: '.pg_last_error($db).'</error>');
-            return 0;
-        }
-        $methods = new PgResultIterator($result);
 
         // Set-up the progress bar
-        $progress = new ProgressBar($output, count($methods));
-        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($methods))*2) - 10);
-        $progress->setRedrawFrequency(max(1, min(20, count($methods)/100)));
+        $progress = new ProgressBar($output, $methodCount);
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) $methodCount)*2) - 10);
+        $progress->setRedrawFrequency(max(1, min(20, max(1, $methodCount/100))));
         $progress->start();
         foreach ($methods as $method) {
             // Create a Method object using only stage and notation
@@ -93,7 +85,7 @@ class CheckClassificationsCommand extends Command
         $output->writeln('');
 
         $time += microtime(true);
-        $output->writeln("\n<info>Finished in ".gmdate("H:i:s", $time).". Peak memory usage: ".number_format(round(memory_get_peak_usage(true)/1048576, 2)).' MiB.</info>');
+        $output->writeln("\n<info>Finished in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(round(memory_get_peak_usage(true)/1048576, 2)).' MiB.</info>');
         return 0;
     }
 }

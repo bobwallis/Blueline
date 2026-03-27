@@ -1,36 +1,36 @@
 <?php
 namespace Blueline\Command;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\ParameterType;
+use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Blueline\Helpers\PgResultIterator;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Blueline\Helpers\MethodSimilarity;
 use Blueline\Helpers\PlaceNotation;
-require_once(__DIR__.'/../Helpers/pg_upsert.php');
-use function Blueline\Helpers\pg_upsert;
 
 class CalculateMethodSimilaritiesCommand extends Command
 {
+    public function __construct(private readonly Connection $connection)
+    {
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this->setName('blueline:calculateMethodSimilarities')
             ->setDescription('Calculates any missing similarity indexes for methods in the database');
     }
 
-    private $db_connect;
-
-    public function __construct($db_connect)
-    {
-        $this->db_connect = $db_connect;
-        parent::__construct();
-    }
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        ini_set('memory_limit', '512M');
         $time = -microtime(true);
         // Set up styles
         $output->getFormatter()
@@ -40,50 +40,33 @@ class CalculateMethodSimilaritiesCommand extends Command
         // Print title
         $output->writeln('<title>Calculating similarities</title>');
 
-        // Get access to the database
-        $db = pg_connect($this->db_connect);
-        if ($db === false) {
-            $output->writeln('<error>Failed to connect to database</error>');
-            return 0;
-        }
-
         // Get an iterator over all methods which don't have similarity indexes
-        $result = pg_query($db,
-            'SELECT title, stage, notationexpanded, lengthoflead
-              FROM methods
-              LEFT OUTER JOIN methods_similar ON (title = method1_title)
-             WHERE (method1_title IS NULL)
-             ORDER BY stage ASC'
-        );
-        if ($result === false) {
-            $output->writeln('<error>Failed to query methods table: '.pg_last_error($db).'</error>');
+        try {
+            $methods = $this->connection->executeQuery(
+                'SELECT title, stage, notationexpanded, lengthoflead
+                  FROM methods
+                  LEFT OUTER JOIN methods_similar ON (title = method1_title)
+                 WHERE (method1_title IS NULL)
+                 ORDER BY stage ASC'
+            )->fetchAllAssociative();
+        }
+        catch (Exception $exception) {
+            $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
             return 0;
         }
-        $methods = new PgResultIterator($result);
 
         // Check there's not hundreds of methods to do
         if (count($methods) > 25) {
             $helper = $this->getHelper('question');
+            if (!$helper instanceof QuestionHelper) {
+                throw new \RuntimeException('Question helper is not available.');
+            }
             $output->writeln('<comment>There\'s '.number_format(count($methods)).' methods without similarity information. Calculating it can take some time (over a day for the whole method library).</comment>');
             $output->writeln('<comment>If you prefer then skip this step and run this command later:</comment> \'./app/console blueline:calculateMethodSimilarities\'');
             $question = new ConfirmationQuestion('Continue calculating similarities? (Y/N) ', false);
             if (!$helper->ask($input, $output, $question)) {
                 return 0;
             }
-        }
-
-        // Prepare a query for searching for methods to compare against
-        // We only compare methods with the same stage and a broadly similar
-        // lead length to avoid O(N^2) work across obviously unrelated methods.
-        $comparisonMethod = pg_prepare($db, 'comparisonMethods',
-            'SELECT title, notationexpanded, lengthoflead
-              FROM methods
-              LEFT OUTER JOIN methods_similar ON (title = method1_title AND method2_title = $2)
-             WHERE (stage = $1 AND title != $2 AND method1_title IS NULL AND (ABS(lengthoflead - $3) < 1 OR ABS(lengthoflead - $3) < FLOOR((CASE WHEN $3 < lengthoflead THEN $3 ELSE lengthoflead END)/10)))'
-        );
-        if ($comparisonMethod === false) {
-            $output->writeln('<error>Failed to create prepared query: '.pg_last_error($db).'</error>');
-            return 0;
         }
 
         // Generate rounds for each stage
@@ -108,12 +91,27 @@ class CalculateMethodSimilaritiesCommand extends Command
             $methodRowArray       = array_map($mapper, PlaceNotation::apply($notationPermutations, $rounds[$method['stage']]));
 
             // Get methods to compare against
-            $comparisons = pg_execute($db, 'comparisonMethods', array($method['stage'], $method['title'], $method['lengthoflead']));
-            if ($comparisons === false) {
-                $output->writeln('<error>Failed to query for methods to compare \''.$method['title'].'\'against: '.pg_last_error($db).'</error>');
+            try {
+                $comparisons = $this->connection->executeQuery(
+                    'SELECT title, notationexpanded, lengthoflead
+                      FROM methods
+                      LEFT OUTER JOIN methods_similar ON (title = method1_title AND method2_title = ?)
+                     WHERE (stage = ? AND title != ? AND method1_title IS NULL AND (ABS(lengthoflead - ?) < 1 OR ABS(lengthoflead - ?) < FLOOR((CASE WHEN ? < lengthoflead THEN ? ELSE lengthoflead END)/10)))',
+                    array(
+                        $method['title'],
+                        $method['stage'],
+                        $method['title'],
+                        $method['lengthoflead'],
+                        $method['lengthoflead'],
+                        $method['lengthoflead'],
+                        $method['lengthoflead'],
+                    )
+                )->fetchAllAssociative();
+            }
+            catch (Exception $exception) {
+                $output->writeln('<error>Failed to query for methods to compare \''.$method['title'].'\' against: '.$exception->getMessage().'</error>');
                 continue;
             }
-            $comparisons = pg_fetch_all($comparisons) ?: array();
 
             // Compare each one and add to the similarity table (if similar enough)
             // limit is a heuristic threshold: if distance is >= 10% of lead
@@ -122,16 +120,15 @@ class CalculateMethodSimilaritiesCommand extends Command
             foreach ($comparisons as $comparison) {
                 $similar = MethodSimilarity::calculate($methodRowArray, $comparison['notationexpanded'], $method['stage'], $limit);
                 if ($similar < $limit) {
-                    pg_insert($db, 'methods_similar', array('method1_title' => $method['title'],     'method2_title' => $comparison['title'], 'similarity' => $similar));
-                    pg_insert($db, 'methods_similar', array('method1_title' => $comparison['title'], 'method2_title' => $method['title'], 'similarity' => $similar));
+                    $this->insertSimilarityRow($method['title'], $comparison['title'], $similar);
+                    $this->insertSimilarityRow($comparison['title'], $method['title'], $similar);
                 }
             }
 
             // Insert the obvious similar method so we don't try to recalculate everything the next time the command runs
             // This self-pair row acts as a marker that the method has been processed by this command.
-            pg_insert($db, 'methods_similar', array('method1_title' => $method['title'], 'method2_title' => $method['title'], 'similarity' => 0));
+            $this->insertSimilarityRow($method['title'], $method['title'], 0.0);
 
-            pg_flush($db);
             $progress->advance();
         }
         $progress->finish();
@@ -142,108 +139,143 @@ class CalculateMethodSimilaritiesCommand extends Command
         // These flags support grouped display in the method view and avoid
         // treating notation variants as generic "other similar" matches.
         $output->writeln('<title>Checking for methods differing only at the lead end</title>');
-        $leadHeadCheck = pg_query($db,
-            'SELECT matches.method1_title, matches.method2_title
-              FROM (
-               SELECT method1.title as method1_title, method2.title as method2_title
-                FROM methods method1, LATERAL (
-                 SELECT title
-                  FROM methods
-                  WHERE replace(notation, substring(notation from \'(,[0-9A-Z]*)$\'), \'\') = replace(method1.notation, substring(method1.notation from \'(,[0-9A-Z]*)$\'), \'\')
-                   AND title != method1.title
-                   AND stage = method1.stage
-                   AND lengthoflead = method1.lengthoflead
-                 ) method2) matches
-               LEFT OUTER JOIN methods_similar ON (matches.method1_title = methods_similar.method1_title AND matches.method2_title = methods_similar.method2_title)
-             WHERE methods_similar.onlydifferentoverleadend IS NULL;'
-        );
-        if ($leadHeadCheck === false) {
-            $output->writeln('<error>Failed to query methods table: '.pg_last_error($db).'</error>');
+        try {
+            $leadHeadMatches = $this->connection->executeQuery(
+                'SELECT matches.method1_title, matches.method2_title
+                  FROM (
+                   SELECT method1.title as method1_title, method2.title as method2_title
+                    FROM methods method1, LATERAL (
+                     SELECT title
+                      FROM methods
+                      WHERE replace(notation, substring(notation from \'(,[0-9A-Z]*)$\'), \'\') = replace(method1.notation, substring(method1.notation from \'(,[0-9A-Z]*)$\'), \'\')
+                       AND title != method1.title
+                       AND stage = method1.stage
+                       AND lengthoflead = method1.lengthoflead
+                     ) method2) matches
+                   LEFT OUTER JOIN methods_similar ON (matches.method1_title = methods_similar.method1_title AND matches.method2_title = methods_similar.method2_title)
+                 WHERE methods_similar.onlydifferentoverleadend IS NULL;'
+            )->fetchAllAssociative();
+        }
+        catch (Exception $exception) {
+            $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
             return 0;
         }
-        $methods = new PgResultIterator($leadHeadCheck);
-        $progress = new ProgressBar($output, count($methods));
-        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($methods))*2) - 10);
-        $progress->setRedrawFrequency(max(1, min(20, count($methods)/100)));
+        $progress = new ProgressBar($output, count($leadHeadMatches));
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($leadHeadMatches))*2) - 10);
+        $progress->setRedrawFrequency(max(1, min(20, max(1, count($leadHeadMatches)/100))));
         $progress->start();
-        foreach ($methods as $method) {
-            pg_upsert($db, 'methods_similar', array('onlydifferentoverleadend' => true), $method);
+        foreach ($leadHeadMatches as $method) {
+            $this->upsertSimilarityFlag('onlydifferentoverleadend', $method['method1_title'], $method['method2_title']);
             $progress->advance();
         }
-        pg_flush($db);
         $progress->finish();
         $output->writeln('');
 
         // Flag methods different only over half-lead
         $output->writeln('<title>Checking for methods differing only at the half lead</title>');
-        $halfLeadCheck = pg_query($db,
-            'SELECT matches.method1_title, matches.method2_title
-              FROM (
-               SELECT method1.title as method1_title, method2.title as method2_title
-                FROM methods method1, LATERAL (
-                 SELECT title
-                  FROM methods
-                  WHERE replace(notation, substring(notation from \'([0-9A-Z]*,)[0-9A-Z]*$\'), \'\') = replace(method1.notation, substring(method1.notation from \'([0-9A-Z]*,)[0-9A-Z]*$\'), \'\')
-                   AND title != method1.title
-                   AND stage = method1.stage
-                   AND lengthoflead = method1.lengthoflead
-                 ) method2) matches
-               LEFT OUTER JOIN methods_similar ON (matches.method1_title = methods_similar.method1_title AND matches.method2_title = methods_similar.method2_title)
-             WHERE methods_similar.onlydifferentoverhalflead IS NULL;'
-        );
-        if ($halfLeadCheck === false) {
-            $output->writeln('<error>Failed to query methods table: '.pg_last_error($db).'</error>');
+        try {
+            $halfLeadMatches = $this->connection->executeQuery(
+                'SELECT matches.method1_title, matches.method2_title
+                  FROM (
+                   SELECT method1.title as method1_title, method2.title as method2_title
+                    FROM methods method1, LATERAL (
+                     SELECT title
+                      FROM methods
+                      WHERE replace(notation, substring(notation from \'([0-9A-Z]*,)[0-9A-Z]*$\'), \'\') = replace(method1.notation, substring(method1.notation from \'([0-9A-Z]*,)[0-9A-Z]*$\'), \'\')
+                       AND title != method1.title
+                       AND stage = method1.stage
+                       AND lengthoflead = method1.lengthoflead
+                     ) method2) matches
+                   LEFT OUTER JOIN methods_similar ON (matches.method1_title = methods_similar.method1_title AND matches.method2_title = methods_similar.method2_title)
+                 WHERE methods_similar.onlydifferentoverhalflead IS NULL;'
+            )->fetchAllAssociative();
+        }
+        catch (Exception $exception) {
+            $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
             return 0;
         }
-        $methods  = new PgResultIterator($halfLeadCheck);
-        $progress = new ProgressBar($output, count($methods));
-        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($methods))*2) - 10);
-        $progress->setRedrawFrequency(max(1, min(20, count($methods)/100)));
+        $progress = new ProgressBar($output, count($halfLeadMatches));
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($halfLeadMatches))*2) - 10);
+        $progress->setRedrawFrequency(max(1, min(20, max(1, count($halfLeadMatches)/100))));
         $progress->start();
-        foreach ($methods as $method) {
-            pg_upsert($db, 'methods_similar', array('onlydifferentoverhalflead' => true), $method);
+        foreach ($halfLeadMatches as $method) {
+            $this->upsertSimilarityFlag('onlydifferentoverhalflead', $method['method1_title'], $method['method2_title']);
             $progress->advance();
         }
-        pg_flush($db);
         $progress->finish();
         $output->writeln('');
 
         // Flag methods different only over half-lead and lead end
         $output->writeln('<title>Checking for methods differing only at the half lead and lead end</title>');
-        $leadEndHalfLeadCheck = pg_query($db,
-            'SELECT matches.method1_title, matches.method2_title
-              FROM (
-               SELECT method1.title as method1_title, method2.title as method2_title
-                FROM methods method1, LATERAL (
-                 SELECT title
-                  FROM methods
-                  WHERE replace(notation, substring(notation from \'([0-9A-Z]*,[0-9A-Z]*)$\'), \'\') = replace(method1.notation, substring(method1.notation from \'([0-9A-Z]*,[0-9A-Z]*)$\'), \'\')
-                   AND title != method1.title
-                   AND stage = method1.stage
-                   AND lengthoflead = method1.lengthoflead
-                 ) method2) matches
-               LEFT OUTER JOIN methods_similar ON (matches.method1_title = methods_similar.method1_title AND matches.method2_title = methods_similar.method2_title)
-             WHERE methods_similar.onlydifferentoverhalflead IS NULL AND methods_similar.onlydifferentoverleadend IS NULL AND methods_similar.onlydifferentoverleadendandhalflead IS NULL;'
-        );
-        if ($leadEndHalfLeadCheck === false) {
-            $output->writeln('<error>Failed to query methods table: '.pg_last_error($db).'</error>');
+        try {
+            $leadEndHalfLeadMatches = $this->connection->executeQuery(
+                'SELECT matches.method1_title, matches.method2_title
+                  FROM (
+                   SELECT method1.title as method1_title, method2.title as method2_title
+                    FROM methods method1, LATERAL (
+                     SELECT title
+                      FROM methods
+                      WHERE replace(notation, substring(notation from \'([0-9A-Z]*,[0-9A-Z]*)$\'), \'\') = replace(method1.notation, substring(method1.notation from \'([0-9A-Z]*,[0-9A-Z]*)$\'), \'\')
+                       AND title != method1.title
+                       AND stage = method1.stage
+                       AND lengthoflead = method1.lengthoflead
+                     ) method2) matches
+                   LEFT OUTER JOIN methods_similar ON (matches.method1_title = methods_similar.method1_title AND matches.method2_title = methods_similar.method2_title)
+                 WHERE methods_similar.onlydifferentoverhalflead IS NULL AND methods_similar.onlydifferentoverleadend IS NULL AND methods_similar.onlydifferentoverleadendandhalflead IS NULL;'
+            )->fetchAllAssociative();
+        }
+        catch (Exception $exception) {
+            $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
             return 0;
         }
-        $methods  = new PgResultIterator($leadEndHalfLeadCheck);
-        $progress = new ProgressBar($output, count($methods));
-        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($methods))*2) - 10);
-        $progress->setRedrawFrequency(max(1, min(20, count($methods)/100)));
+        $progress = new ProgressBar($output, count($leadEndHalfLeadMatches));
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($leadEndHalfLeadMatches))*2) - 10);
+        $progress->setRedrawFrequency(max(1, min(20, max(1, count($leadEndHalfLeadMatches)/100))));
         $progress->start();
-        foreach ($methods as $method) {
-            pg_upsert($db, 'methods_similar', array('onlydifferentoverleadendandhalflead' => true), $method);
+        foreach ($leadEndHalfLeadMatches as $method) {
+            $this->upsertSimilarityFlag('onlydifferentoverleadendandhalflead', $method['method1_title'], $method['method2_title']);
             $progress->advance();
         }
-        pg_flush($db);
         $progress->finish();
         $output->writeln('');
 
         $time += microtime(true);
         $output->writeln("\n<info>Finished updating method similarities in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true)/1048576, 2).' MiB.</info>');
         return 0;
+    }
+
+    private function upsertSimilarityFlag(string $column, string $method1Title, string $method2Title): void
+    {
+        $this->connection->executeStatement(
+            'INSERT INTO methods_similar (method1_title, method2_title, '.$column.')
+             VALUES (:method1_title, :method2_title, true)
+             ON CONFLICT (method1_title, method2_title) DO UPDATE
+             SET '.$column.' = EXCLUDED.'.$column,
+            array(
+                'method1_title' => $method1Title,
+                'method2_title' => $method2Title,
+            ),
+            array(
+                'method1_title' => ParameterType::STRING,
+                'method2_title' => ParameterType::STRING,
+            )
+        );
+    }
+
+    private function insertSimilarityRow(string $method1Title, string $method2Title, float $similarity): void
+    {
+        $this->connection->insert(
+            'methods_similar',
+            array(
+                'method1_title' => $method1Title,
+                'method2_title' => $method2Title,
+                'similarity' => $similarity,
+            ),
+            array(
+                'method1_title' => ParameterType::STRING,
+                'method2_title' => ParameterType::STRING,
+                'similarity' => Types::FLOAT,
+            )
+        );
     }
 }

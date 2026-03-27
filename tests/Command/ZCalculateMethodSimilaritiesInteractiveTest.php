@@ -8,14 +8,14 @@ class ZCalculateMethodSimilaritiesInteractiveTest extends CommandTestCase
 {
     public function testCalculateMethodSimilaritiesCanAbortViaConfirmationPrompt(): void
     {
-        $titlesResult = pg_query($this->getDb(), 'SELECT title FROM methods ORDER BY title ASC LIMIT 30');
-        $this->assertNotFalse($titlesResult, 'Failed to select sample method titles: '.pg_last_error($this->getDb()));
-
-        $titles = array_column(pg_fetch_all($titlesResult) ?: [], 'title');
+        $titles = array_column(
+            $this->connection->executeQuery('SELECT title FROM methods ORDER BY title ASC LIMIT 30')->fetchAllAssociative(),
+            'title'
+        );
         $this->assertCount(30, $titles, 'Expected at least 30 methods in the test database for interactive-branch test');
 
         foreach ($titles as $title) {
-            $this->dbExec('DELETE FROM methods_similar WHERE method1_title = $1 AND method2_title = $1', [$title]);
+            $this->dbExec('DELETE FROM methods_similar WHERE method1_title = ? AND method2_title = ?', [$title, $title]);
         }
 
         $missingBefore = $this->dbCount(
@@ -41,11 +41,11 @@ class ZCalculateMethodSimilaritiesInteractiveTest extends CommandTestCase
         $this->assertSame($missingBefore, $missingAfter, 'Expected no similarity recalculation after answering no to confirmation prompt');
 
         foreach ($titles as $title) {
-            $exists = $this->dbCount('SELECT COUNT(*) FROM methods_similar WHERE method1_title = $1 AND method2_title = $1', [$title]);
+            $exists = $this->dbCount('SELECT COUNT(*) FROM methods_similar WHERE method1_title = ? AND method2_title = ?', [$title, $title]);
             if ($exists === 0) {
                 $this->dbExec(
-                    'INSERT INTO methods_similar (method1_title, method2_title, similarity) VALUES ($1, $1, 0)',
-                    [$title]
+                    'INSERT INTO methods_similar (method1_title, method2_title, similarity) VALUES (?, ?, 0)',
+                    [$title, $title]
                 );
             }
         }

@@ -1,6 +1,8 @@
 <?php
 namespace Blueline\Tests\Command;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;
@@ -10,8 +12,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 abstract class CommandTestCase extends KernelTestCase
 {
-    /** @var resource|false */
-    protected $db;
+    protected Connection $connection;
     private ?string $originalMemoryLimit = null;
     private int $initialObLevel = 0;
 
@@ -23,17 +24,11 @@ abstract class CommandTestCase extends KernelTestCase
         $this->originalMemoryLimit = ini_get('memory_limit') ?: null;
         ini_set('memory_limit', '512M');
 
-        $dbConnect = (string) self::getContainer()->getParameter('database_connect');
-        $this->db = pg_connect($dbConnect);
-        $this->assertNotFalse($this->db, 'Failed to connect to test database in command test setup');
+        $this->connection = self::getContainer()->get('doctrine.dbal.default_connection');
     }
 
     protected function tearDown(): void
     {
-        if (is_resource($this->db)) {
-            pg_close($this->db);
-        }
-
         if ($this->originalMemoryLimit !== null) {
             ini_set('memory_limit', $this->originalMemoryLimit);
         }
@@ -95,42 +90,32 @@ abstract class CommandTestCase extends KernelTestCase
 
     protected function dbScalar(string $sql, array $params = []): ?string
     {
-        if ($params === []) {
-            $result = pg_query($this->db, $sql);
+        try {
+            $result = $this->connection->fetchOne($sql, $params);
         }
-        else {
-            $result = pg_query_params($this->db, $sql, $params);
+        catch (Exception $exception) {
+            $this->fail('DB query failed in test helper: '.$exception->getMessage());
         }
 
-        $this->assertNotFalse($result, 'DB query failed in test helper: '.pg_last_error($this->db));
+        if ($result === false || $result === null) {
+            return null;
+        }
 
-        $row = pg_fetch_row($result);
-
-        return $row[0] ?? null;
+        return (string) $result;
     }
 
     protected function dbExec(string $sql, array $params = []): void
     {
-        if ($params === []) {
-            $result = pg_query($this->db, $sql);
+        try {
+            $this->connection->executeStatement($sql, $params);
         }
-        else {
-            $result = pg_query_params($this->db, $sql, $params);
+        catch (Exception $exception) {
+            $this->fail('DB command failed in test helper: '.$exception->getMessage());
         }
-
-        $this->assertNotFalse($result, 'DB command failed in test helper: '.pg_last_error($this->db));
     }
 
     protected function assertNoConsoleErrors(string $output): void
     {
         $this->assertDoesNotMatchRegularExpression('/Failed to|Fatal error|Uncaught|Exception|\bERROR\b/i', $output);
-    }
-
-    /**
-     * @return resource
-     */
-    protected function getDb()
-    {
-        return $this->db;
     }
 }

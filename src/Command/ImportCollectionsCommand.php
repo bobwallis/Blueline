@@ -1,6 +1,9 @@
 <?php
 namespace Blueline\Command;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\ParameterType;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -9,22 +12,20 @@ use Symfony\Component\Console\Helper\ProgressBar;
 
 class ImportCollectionsCommand extends Command
 {
+    public function __construct(private readonly Connection $connection)
+    {
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this->setName('blueline:importCollections')
             ->setDescription('Imports collection data');
     }
 
-    private $db_connect;
-
-    public function __construct($db_connect)
-    {
-        $this->db_connect = $db_connect;
-        parent::__construct();
-    }
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        ini_set('memory_limit', '512M');
         $time = -microtime(true);
         // Set up styles
         $output->getFormatter()
@@ -34,16 +35,13 @@ class ImportCollectionsCommand extends Command
         // Print title
         $output->writeln('<title>Updating collection data...</title>');
 
-        // Get access to the database and other services
-        $db = pg_connect($this->db_connect);
-        if ($db === false) {
-            $output->writeln('<error>Failed to connect to database</error>');
-            return 0;
-        }
-
         $output->writeln('<info>Clear existing extra collection data...</info>');
-        if( pg_query($db, "DELETE FROM methods_collections WHERE collection_id != 'pmm' AND collection_id != 'tdmm'") === false || pg_query($db, "DELETE FROM collections WHERE id != 'pmm' AND id != 'tdmm'") === false ) {
-            $output->writeln('<error>Failed to clear existing data: '.pg_last_error($db).'</error>');
+        try {
+            $this->connection->executeStatement("DELETE FROM methods_collections WHERE collection_id != 'pmm' AND collection_id != 'tdmm'");
+            $this->connection->executeStatement("DELETE FROM collections WHERE id != 'pmm' AND id != 'tdmm'");
+        }
+        catch (Exception $exception) {
+            $output->writeln('<error>Failed to clear existing data: '.$exception->getMessage().'</error>');
             return 0;
         }
 
@@ -60,12 +58,40 @@ class ImportCollectionsCommand extends Command
         foreach ($txtIterator as $collection) {
             $methods = $collection['methods'];
             unset($collection['methods']);
-            pg_insert($db, 'collections', $collection);
+            try {
+                $this->connection->insert(
+                    'collections',
+                    $collection,
+                    array(
+                        'id' => ParameterType::STRING,
+                        'name' => ParameterType::STRING,
+                        'description' => ParameterType::STRING,
+                    )
+                );
+            }
+            catch (Exception $exception) {
+                $progress->clear();
+                $output->writeln("<error>Failed to add collection '".$collection['id']."': ".$exception->getMessage().'</error>');
+                $progress->display();
+                continue;
+            }
+
             foreach ($methods as $index => $method_title) {
-                if (pg_insert($db, 'methods_collections', array('collection_id' => $collection['id'], 'method_title' => $method_title, 'position' => $index)) === false) {
+                try {
+                    $this->connection->insert(
+                        'methods_collections',
+                        array('collection_id' => $collection['id'], 'method_title' => $method_title, 'position' => $index),
+                        array(
+                            'collection_id' => ParameterType::STRING,
+                            'method_title' => ParameterType::STRING,
+                            'position' => ParameterType::INTEGER,
+                        )
+                    );
+                }
+                catch (Exception $exception) {
                     $progress->clear();
                     $output->writeln("<comment> Failed to add '".$method_title."' to '".$collection['id']."'</comment>");
-                    $output->writeln('<comment> '.pg_last_error($db).'</comment>');
+                    $output->writeln('<comment> '.$exception->getMessage().'</comment>');
                     $progress->display();
                 }
             }

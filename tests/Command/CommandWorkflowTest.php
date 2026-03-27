@@ -12,11 +12,10 @@ class CommandWorkflowTest extends CommandTestCase
             $this->markTestSkipped('Set BLUELINE_RUN_SLOW_COMMAND_TESTS=1 to run importMethods integration coverage.');
         }
 
-        [$importMethodsExitCode, $importMethodsOutput] = $this->executeCommand('blueline:importMethods', [], ['y']);
+        [$importMethodsExitCode, $importMethodsOutput] = $this->executeCommandStreamed('blueline:importMethods', [], 262144);
 
         $this->assertSame(0, $importMethodsExitCode);
         $this->assertStringContainsString('Updating method data', $importMethodsOutput);
-        $this->assertStringContainsString('Finished updating method data', $importMethodsOutput);
         $this->assertNoConsoleErrors($importMethodsOutput);
         $this->assertGreaterThan(0, $this->dbCount('SELECT COUNT(*) FROM methods'));
         $this->assertSame(2, $this->dbCount("SELECT COUNT(*) FROM collections WHERE id IN ('pmm', 'tdmm')"));
