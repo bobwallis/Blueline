@@ -10,6 +10,8 @@ use Blueline\Helpers\Text;
  */
 #[ORM\Entity(repositoryClass: \Blueline\Repository\PerformanceRepository::class)]
 #[ORM\Table(name: 'performances')]
+#[ORM\Index(name: 'idx_performances_type', columns: array('type'))]
+#[ORM\Index(name: 'idx_performances_method_title', columns: array('method_title'))]
 class Performance
 {
     // Constructor

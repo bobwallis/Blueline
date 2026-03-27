@@ -9,6 +9,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'methods_similar')]
+#[ORM\Index(name: 'idx_methods_similar_method1_title', columns: array('method1_title'))]
+#[ORM\Index(name: 'idx_methods_similar_method2_title', columns: array('method2_title'))]
 class MethodSimilarity
 {
     /**

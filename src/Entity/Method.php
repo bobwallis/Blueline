@@ -15,6 +15,8 @@ use function Blueline\Helpers\arrays_equal_in_some_rotation;
  */
 #[ORM\Entity(repositoryClass: \Blueline\Repository\MethodRepository::class)]
 #[ORM\Table(name: 'methods')]
+#[ORM\Index(name: 'idx_methods_stage', columns: array('stage'))]
+#[ORM\Index(name: 'idx_methods_stage_lengthoflead', columns: array('stage', 'lengthoflead'))]
 class Method
 {
     // Constructor

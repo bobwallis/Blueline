@@ -9,6 +9,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 #[ORM\Entity(repositoryClass: \Blueline\Repository\CollectionRepository::class)]
 #[ORM\Table(name: 'methods_collections')]
+#[ORM\Index(name: 'idx_methods_collections_collection_id', columns: array('collection_id'))]
+#[ORM\Index(name: 'idx_methods_collections_method_title', columns: array('method_title'))]
 class MethodInCollection
 {
     /**
