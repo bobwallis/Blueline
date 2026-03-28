@@ -19,7 +19,9 @@
 - `tests/`: PHPUnit tests.
 
 ## Development workflow
-- Run tests and lints via `./test`.
+- Run tests and lints via `./test` for full-suite validation only.
+- Do not pass path/filter arguments to `./test`; it does not support targeted subsets.
+- For targeted testing, call PHPUnit directly, e.g. `APP_ENV=test ./bin/phpunit tests/Controller` or `APP_ENV=test ./bin/phpunit --filter <name> <path>`.
 - Build frontend assets via `./bin/buildFrontendAssets` (or `gulp watch` while iterating).
 - Refresh method data via `./bin/fetchAndImportData` when relevant.
 
@@ -33,6 +35,7 @@
 ## Testing expectations
 - Add or update targeted tests in `tests/` when changing behavior.
 - At minimum, run `./test` for validation before submitting.
+- During iteration, run only relevant tests via direct PHPUnit commands instead of trying to scope `./test`.
 
 ## Safety constraints
 - Do not delete or rewrite large sections of legacy code unless explicitly requested.

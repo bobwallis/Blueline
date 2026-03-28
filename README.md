@@ -71,8 +71,12 @@ After making changes to CSS/JS files or images you will need to re-reun `./bin/b
 to regenerate the assets. Running `gulp watch` in a terminal will watch for changes to these files
 and rebuild on-demand, which is helpful.
 
-Running `./test` will run PHPUnit to execute the tests under `./tests/`. You might want to launch
-XDebug before running.
+Running `./test` runs the full project test pipeline (linting, schema/container checks, and the
+full PHPUnit suite).
+If you want to run targeted tests, call PHPUnit directly instead, for example:
+
+- `APP_ENV=test ./bin/phpunit tests/Controller`
+- `APP_ENV=test ./bin/phpunit --filter testActionName tests/Controller/DefaultControllerTest.php`
 
 Some command tests are slow (mainly the blueline:importMethods test), and marked as such. To
 include the full test suite run `BLUELINE_RUN_SLOW_COMMAND_TESTS=1 ./test`.
