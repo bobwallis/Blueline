@@ -4,6 +4,7 @@ namespace Blueline\Command;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
+use Doctrine\DBAL\Statement;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -11,6 +12,11 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 class ImportMethodExtrasCommand extends Command
 {
+    /** @var array<string, Statement> */
+    private array $updateMethodsStatements = array();
+
+    private ?Statement $renamedMethodPerformanceInsertStatement = null;
+
     public function __construct(private readonly Connection $connection)
     {
         parent::__construct();
@@ -45,7 +51,7 @@ class ImportMethodExtrasCommand extends Command
                 $txtRow['ruleoffs'] = json_encode($txtRow['ruleoffs']);
                 $txtRow = $this->normaliseDatabaseRow(array_change_key_case($txtRow));
                 try {
-                    $this->connection->update('methods', $txtRow, array('title' => $txtRow['title']), $this->getParameterTypes($txtRow));
+                    $this->updateMethodsRow($txtRow);
                 }
                 catch (Exception $exception) {
                     $output->writeln('<comment> Failed to import call information for "'.$txtRow['title'].'"</comment>');
@@ -61,7 +67,7 @@ class ImportMethodExtrasCommand extends Command
             foreach ($extrasIterator as $txtRow) {
                 $txtRow = $this->normaliseDatabaseRow(array_change_key_case($txtRow));
                 try {
-                    $this->connection->update('methods', $txtRow, array('title' => $txtRow['title']), $this->getParameterTypes($txtRow));
+                    $this->updateMethodsRow($txtRow);
                 }
                 catch (Exception $exception) {
                     $output->writeln('<comment> Failed to import abbreviation information for "'.$txtRow['title'].'"</comment>');
@@ -93,7 +99,7 @@ class ImportMethodExtrasCommand extends Command
                     'rung_url'     => str_replace([' ', '$', '&', '+', ',', '/', ':', ';', '=', '?', '@', '"', "'", '<', '>', '#', '%', '{', '}', '|', "\\", '^', '~', '[', ']', '.'], ['_'], iconv('UTF-8', 'ASCII//TRANSLIT', $oldName))
                 );
                 try {
-                    $this->connection->insert('performances', $performance, $this->getParameterTypes($performance));
+                    $this->insertRenamedMethodPerformance($performance);
                 }
                 catch (Exception $exception) {
                     $output->writeln('<comment> Failed to import renamed method information for "'.$oldName.'"</comment>');
@@ -107,6 +113,70 @@ class ImportMethodExtrasCommand extends Command
         return 0;
     }
 
+    private function updateMethodsRow(array $row): void
+    {
+        $title = $row['title'] ?? null;
+        if ($title === null) {
+            throw new \InvalidArgumentException('Method extra row is missing title.');
+        }
+
+        $updateColumns = array();
+        foreach ($row as $column => $value) {
+            if ($column === 'title') {
+                continue;
+            }
+
+            $updateColumns[$column] = $value;
+        }
+
+        if (count($updateColumns) === 0) {
+            return;
+        }
+
+        $statement = $this->getUpdateMethodsStatement(array_keys($updateColumns));
+
+        $position = 1;
+        foreach ($updateColumns as $value) {
+            $statement->bindValue($position, $value, $this->getParameterType($value));
+            ++$position;
+        }
+        $statement->bindValue($position, $title, ParameterType::STRING);
+        $statement->executeStatement();
+    }
+
+    private function getUpdateMethodsStatement(array $columns): Statement
+    {
+        $statementKey = implode('|', $columns);
+        if (!isset($this->updateMethodsStatements[$statementKey])) {
+            $assignments = array_map(
+                static fn (string $column): string => $column.' = ?',
+                $columns
+            );
+
+            $this->updateMethodsStatements[$statementKey] = $this->connection->prepare(
+                'UPDATE methods SET '.implode(', ', $assignments).' WHERE title = ?'
+            );
+        }
+
+        return $this->updateMethodsStatements[$statementKey];
+    }
+
+    private function insertRenamedMethodPerformance(array $performance): void
+    {
+        if ($this->renamedMethodPerformanceInsertStatement === null) {
+            $this->renamedMethodPerformanceInsertStatement = $this->connection->prepare(
+                'INSERT INTO performances (type, method_title, rung_title, rung_url) VALUES (?, ?, ?, ?)'
+            );
+        }
+
+        $statement = $this->renamedMethodPerformanceInsertStatement;
+        $statement->bindValue(1, $performance['type'], ParameterType::STRING);
+        $statement->bindValue(2, $performance['method_title'], ParameterType::STRING);
+        $statement->bindValue(3, $performance['rung_title'], ParameterType::STRING);
+        $statement->bindValue(4, $performance['rung_url'], ParameterType::STRING);
+        $statement->executeStatement();
+    }
+
     private function normaliseDatabaseRow(array $row): array
     {
         foreach ($row as $key => $value) {
@@ -116,17 +186,6 @@ class ImportMethodExtrasCommand extends Command
         }
 
         return $row;
-    }
-
-    private function getParameterTypes(array $row): array
-    {
-        $types = array();
-
-        foreach ($row as $key => $value) {
-            $types[$key] = $this->getParameterType($value);
-        }
-
-        return $types;
     }
 
     private function getParameterType(mixed $value): ParameterType

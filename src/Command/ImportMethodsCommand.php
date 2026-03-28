@@ -13,6 +13,7 @@ namespace Blueline\Command;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
+use Doctrine\DBAL\Statement;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,6 +25,9 @@ use Blueline\Entity\Method;
 
 class ImportMethodsCommand extends Command
 {
+    /** @var array<string, Statement> */
+    private array $performanceInsertStatements = array();
+
     public function __construct(private readonly Connection $connection)
     {
         parent::__construct();
@@ -113,7 +117,7 @@ class ImportMethodsCommand extends Command
                 if (isset($xmlRow['performances'])) {
                     foreach ($xmlRow['performances'] as $performanceRow) {
                         try {
-                            $this->connection->insert('performances', $this->normaliseDatabaseRow($performanceRow));
+                            $this->insertPerformanceRow($this->normaliseDatabaseRow($performanceRow));
                         }
                         catch (Exception $exception) {
                             $progress->clear();
@@ -143,15 +147,20 @@ class ImportMethodsCommand extends Command
         $progress = new ProgressBar($output, $idsInDatabaseCount);
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) $idsInDatabaseCount)*2) - 10);
         $progress->setRedrawFrequency(max(1, max(1, $idsInDatabaseCount/100)));
+        $deleteMethodsSimilarMethod1 = $this->connection->prepare('DELETE FROM methods_similar WHERE method1_title = ?');
+        $deleteMethodsSimilarMethod2 = $this->connection->prepare('DELETE FROM methods_similar WHERE method2_title = ?');
+        $deleteMethodCollections = $this->connection->prepare('DELETE FROM methods_collections WHERE method_title = ?');
+        $deleteMethodPerformances = $this->connection->prepare('DELETE FROM performances WHERE method_title = ?');
+        $deleteMethod = $this->connection->prepare('DELETE FROM methods WHERE title = ?');
         foreach ($idsInDatabase as $m) {
             $m = $m['title'];
             if (!in_array($m, $importedMethods)) {
                 try {
-                    $this->connection->delete('methods_similar', array('method1_title' => $m));
-                    $this->connection->delete('methods_similar', array('method2_title' => $m));
-                    $this->connection->delete('methods_collections', array('method_title' => $m));
-                    $this->connection->delete('performances', array('method_title' => $m));
-                    $this->connection->delete('methods', array('title' => $m));
+                    $this->executeDeleteByTitle($deleteMethodsSimilarMethod1, $m);
+                    $this->executeDeleteByTitle($deleteMethodsSimilarMethod2, $m);
+                    $this->executeDeleteByTitle($deleteMethodCollections, $m);
+                    $this->executeDeleteByTitle($deleteMethodPerformances, $m);
+                    $this->executeDeleteByTitle($deleteMethod, $m);
                 }
                 catch (Exception $exception) {
                     $progress->clear();
@@ -172,6 +181,32 @@ class ImportMethodsCommand extends Command
         $time += microtime(true);
         $output->writeln("\n<info>Finished updating method data in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true)/1048576, 2).' MiB.</info>');
         return 0;
+    }
+
+    private function insertPerformanceRow(array $row): void
+    {
+        $columns = array_keys($row);
+        $statementKey = implode('|', $columns);
+        if (!isset($this->performanceInsertStatements[$statementKey])) {
+            $this->performanceInsertStatements[$statementKey] = $this->connection->prepare(
+                'INSERT INTO performances ('.implode(', ', $columns).') VALUES ('.implode(', ', array_fill(0, count($columns), '?')).')'
+            );
+        }
+
+        $statement = $this->performanceInsertStatements[$statementKey];
+        $position = 1;
+        foreach ($row as $value) {
+            $statement->bindValue($position, $value, $this->getParameterType($value));
+            ++$position;
+        }
+
+        $statement->executeStatement();
+    }
+
+    private function executeDeleteByTitle(Statement $statement, string $title): void
+    {
+        $statement->bindValue(1, $title, ParameterType::STRING);
+        $statement->executeStatement();
     }
 
     private function upsertMethod(array $row): void

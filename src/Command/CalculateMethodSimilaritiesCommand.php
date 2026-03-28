@@ -4,6 +4,7 @@ namespace Blueline\Command;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
+use Doctrine\DBAL\Statement;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,6 +18,11 @@ use Blueline\Helpers\PlaceNotation;
 
 class CalculateMethodSimilaritiesCommand extends Command
 {
+    private ?Statement $insertSimilarityStatement = null;
+
+    /** @var array<string, Statement> */
+    private array $upsertSimilarityFlagStatements = array();
+
     public function __construct(private readonly Connection $connection)
     {
         parent::__construct();
@@ -84,6 +90,12 @@ class CalculateMethodSimilaritiesCommand extends Command
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($methods))*2) - 10);
         $progress->setRedrawFrequency(max(1, min(20, count($methods)/100)));
         $progress->start();
+        $comparisonStatement = $this->connection->prepare(
+            'SELECT title, notationexpanded, lengthoflead
+               FROM methods
+               LEFT OUTER JOIN methods_similar ON (title = method1_title AND method2_title = ?)
+              WHERE (stage = ? AND title != ? AND method1_title IS NULL AND (ABS(lengthoflead - ?) < 1 OR ABS(lengthoflead - ?) < FLOOR((CASE WHEN ? < lengthoflead THEN ? ELSE lengthoflead END)/10)))'
+        );
         foreach ($methods as $method) {
             // Generate the array for the method we're generating indexes for
             $notationExploded     = PlaceNotation::explode($method['notationexpanded']);
@@ -92,21 +104,7 @@ class CalculateMethodSimilaritiesCommand extends Command
 
             // Get methods to compare against
             try {
-                $comparisons = $this->connection->executeQuery(
-                    'SELECT title, notationexpanded, lengthoflead
-                      FROM methods
-                      LEFT OUTER JOIN methods_similar ON (title = method1_title AND method2_title = ?)
-                     WHERE (stage = ? AND title != ? AND method1_title IS NULL AND (ABS(lengthoflead - ?) < 1 OR ABS(lengthoflead - ?) < FLOOR((CASE WHEN ? < lengthoflead THEN ? ELSE lengthoflead END)/10)))',
-                    array(
-                        $method['title'],
-                        $method['stage'],
-                        $method['title'],
-                        $method['lengthoflead'],
-                        $method['lengthoflead'],
-                        $method['lengthoflead'],
-                        $method['lengthoflead'],
-                    )
-                )->fetchAllAssociative();
+                $comparisons = $this->fetchComparisonRows($comparisonStatement, $method);
             }
             catch (Exception $exception) {
                 $output->writeln('<error>Failed to query for methods to compare \''.$method['title'].'\' against: '.$exception->getMessage().'</error>');
@@ -246,36 +244,64 @@ class CalculateMethodSimilaritiesCommand extends Command
 
     private function upsertSimilarityFlag(string $column, string $method1Title, string $method2Title): void
     {
-        $this->connection->executeStatement(
-            'INSERT INTO methods_similar (method1_title, method2_title, '.$column.')
-             VALUES (:method1_title, :method2_title, true)
-             ON CONFLICT (method1_title, method2_title) DO UPDATE
-             SET '.$column.' = EXCLUDED.'.$column,
-            array(
-                'method1_title' => $method1Title,
-                'method2_title' => $method2Title,
-            ),
-            array(
-                'method1_title' => ParameterType::STRING,
-                'method2_title' => ParameterType::STRING,
-            )
-        );
+        $statement = $this->getUpsertSimilarityFlagStatement($column);
+        $statement->bindValue(1, $method1Title, ParameterType::STRING);
+        $statement->bindValue(2, $method2Title, ParameterType::STRING);
+        $statement->executeStatement();
     }
 
     private function insertSimilarityRow(string $method1Title, string $method2Title, float $similarity): void
     {
-        $this->connection->insert(
-            'methods_similar',
-            array(
-                'method1_title' => $method1Title,
-                'method2_title' => $method2Title,
-                'similarity' => $similarity,
-            ),
-            array(
-                'method1_title' => ParameterType::STRING,
-                'method2_title' => ParameterType::STRING,
-                'similarity' => Types::FLOAT,
-            )
-        );
+        if ($this->insertSimilarityStatement === null) {
+            $this->insertSimilarityStatement = $this->connection->prepare(
+                'INSERT INTO methods_similar (method1_title, method2_title, similarity) VALUES (?, ?, ?)'
+            );
+        }
+
+        $statement = $this->insertSimilarityStatement;
+        $statement->bindValue(1, $method1Title, ParameterType::STRING);
+        $statement->bindValue(2, $method2Title, ParameterType::STRING);
+        $statement->bindValue(3, $similarity, Types::FLOAT);
+        $statement->executeStatement();
+    }
+
+    private function fetchComparisonRows(Statement $statement, array $method): array
+    {
+        $title = (string) $method['title'];
+        $stage = (int) $method['stage'];
+        $lengthOfLead = (int) $method['lengthoflead'];
+
+        $statement->bindValue(1, $title, ParameterType::STRING);
+        $statement->bindValue(2, $stage, ParameterType::INTEGER);
+        $statement->bindValue(3, $title, ParameterType::STRING);
+        $statement->bindValue(4, $lengthOfLead, ParameterType::INTEGER);
+        $statement->bindValue(5, $lengthOfLead, ParameterType::INTEGER);
+        $statement->bindValue(6, $lengthOfLead, ParameterType::INTEGER);
+        $statement->bindValue(7, $lengthOfLead, ParameterType::INTEGER);
+
+        return $statement->executeQuery()->fetchAllAssociative();
+    }
+
+    private function getUpsertSimilarityFlagStatement(string $column): Statement
+    {
+        if (!isset($this->upsertSimilarityFlagStatements[$column])) {
+            $allowedColumns = array(
+                'onlydifferentoverleadend',
+                'onlydifferentoverhalflead',
+                'onlydifferentoverleadendandhalflead',
+            );
+            if (!in_array($column, $allowedColumns, true)) {
+                throw new \InvalidArgumentException('Unexpected similarity flag column: '.$column);
+            }
+
+            $this->upsertSimilarityFlagStatements[$column] = $this->connection->prepare(
+                'INSERT INTO methods_similar (method1_title, method2_title, '.$column.')
+                 VALUES (?, ?, true)
+                 ON CONFLICT (method1_title, method2_title) DO UPDATE
+                 SET '.$column.' = EXCLUDED.'.$column
+            );
+        }
+
+        return $this->upsertSimilarityFlagStatements[$column];
     }
 }
