@@ -66,7 +66,10 @@ class ImportCollectionsCommand extends Command
             $methods = $collection['methods'];
             unset($collection['methods']);
             try {
-                $this->executeCollectionInsert($collectionInsertStatement, $collection);
+                $collectionInsertStatement->bindValue(1, $collection['id'], ParameterType::STRING);
+                $collectionInsertStatement->bindValue(2, $collection['name'], ParameterType::STRING);
+                $collectionInsertStatement->bindValue(3, $collection['description'] ?? null, ParameterType::STRING);
+                $collectionInsertStatement->executeStatement();
             }
             catch (Exception $exception) {
                 $progress->clear();
@@ -77,12 +80,10 @@ class ImportCollectionsCommand extends Command
 
             foreach ($methods as $index => $method_title) {
                 try {
-                    $this->executeCollectionMethodInsert(
-                        $collectionMethodInsertStatement,
-                        $collection['id'],
-                        $method_title,
-                        (int) $index
-                    );
+                    $collectionMethodInsertStatement->bindValue(1, $collection['id'], ParameterType::STRING);
+                    $collectionMethodInsertStatement->bindValue(2, $method_title, ParameterType::STRING);
+                    $collectionMethodInsertStatement->bindValue(3, (int) $index, ParameterType::INTEGER);
+                    $collectionMethodInsertStatement->executeStatement();
                 }
                 catch (Exception $exception) {
                     $progress->clear();
@@ -99,21 +100,5 @@ class ImportCollectionsCommand extends Command
         $time += microtime(true);
         $output->writeln("\n<info>Finished updating method collection data in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true)/1048576, 2).' MiB.</info>');
         return 0;
-    }
-
-    private function executeCollectionInsert(Statement $statement, array $collection): void
-    {
-        $statement->bindValue(1, $collection['id'], ParameterType::STRING);
-        $statement->bindValue(2, $collection['name'], ParameterType::STRING);
-        $statement->bindValue(3, $collection['description'] ?? null, ParameterType::STRING);
-        $statement->executeStatement();
-    }
-
-    private function executeCollectionMethodInsert(Statement $statement, string $collectionId, string $methodTitle, int $position): void
-    {
-        $statement->bindValue(1, $collectionId, ParameterType::STRING);
-        $statement->bindValue(2, $methodTitle, ParameterType::STRING);
-        $statement->bindValue(3, $position, ParameterType::INTEGER);
-        $statement->executeStatement();
     }
 }
