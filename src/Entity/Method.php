@@ -232,6 +232,24 @@ class Method
     private $magic;
 
     /**
+     * @var string $cccbrId
+     */
+    #[ORM\Column(name: 'cccbr_id', type: 'string', length: 255, nullable: true)]
+    private $cccbrId;
+
+    /**
+     * @var string $methodReferences
+     */
+    #[ORM\Column(name: 'method_references', type: 'text', nullable: true)]
+    private $methodReferences;
+
+    /**
+     * @var string $extensionconstruction
+     */
+    #[ORM\Column(name: 'extensionconstruction', type: 'text', nullable: true)]
+    private $extensionconstruction;
+
+    /**
      * @var \Doctrine\Common\Collections\Collection
      */
     #[ORM\OneToMany(targetEntity: MethodInCollection::class, mappedBy: 'method', cascade: ['persist', 'remove'])]
@@ -1300,6 +1318,72 @@ class Method
     public function getMagic()
     {
         return $this->magic;
+    }
+
+    /**
+     * Set cccbr_id
+     *
+     * @param  string $cccbr_id
+     * @return Method
+     */
+    public function setCccbrId($cccbr_id)
+    {
+        $this->cccbrId = $cccbr_id;
+        return $this;
+    }
+
+    /**
+     * Get cccbr_id
+     *
+     * @return string
+     */
+    public function getCccbrId()
+    {
+        return $this->cccbrId;
+    }
+
+    /**
+     * Set method_references
+     *
+     * @param  string $method_references
+     * @return Method
+     */
+    public function setMethodReferences($method_references)
+    {
+        $this->methodReferences = $method_references;
+        return $this;
+    }
+
+    /**
+     * Get method_references
+     *
+     * @return string
+     */
+    public function getMethodReferences()
+    {
+        return $this->methodReferences;
+    }
+
+    /**
+     * Set extensionconstruction
+     *
+     * @param  string $extensionconstruction
+     * @return Method
+     */
+    public function setExtensionconstruction($extensionconstruction)
+    {
+        $this->extensionconstruction = $extensionconstruction;
+        return $this;
+    }
+
+    /**
+     * Get extensionconstruction
+     *
+     * @return string
+     */
+    public function getExtensionconstruction()
+    {
+        return $this->extensionconstruction;
     }
 
     /**

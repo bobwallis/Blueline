@@ -94,13 +94,39 @@
 				{% endfor %}
 				</dd>
 {% endif %}
-{% if method.firstTowerbellPeal is not empty %}
-				<dt>First&nbsp;towerbell&nbsp;peal</dt>
-				<dd><time datetime="{{ method.firstTowerbellpeal.date|date('Y-m-d') }}">{{ method.firstTowerbellPeal.date|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time> {% if method.firstTowerbellPeal.location is not empty %}at {{ method.firstTowerbellPeal.location }}{% if method.firstTowerbellPeal.society is not empty %} by the {{ method.firstTowerbellPeal.society }}{% endif %}{% elseif method.firstTowerbellPeal.society is not empty %}by the {{ method.firstTowerbellPeal.society }}{% endif %}</dd>
+{% if method.methodReferences is not empty %}
+				<dt>References</dt>
+				<dd>{{ method.methodReferences }}</dd>
 {% endif %}
-{% if method.firstHandbellPeal is not empty %}
-				<dt>First&nbsp;handbell&nbsp;peal</dt>
-				<dd><time datetime="{{ method.firstHandbellPeal.date|date('Y-m-d') }}">{{ method.firstHandbellPeal.date|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time> {% if method.firstHandbellPeal.location is not empty %}at {{ method.firstHandbellPeal.location }}{% if method.firstHandbellPeal.society is not empty %} by the {{ method.firstHandbellPeal.society }}{% endif %}{% elseif method.firstHandbellPeal.society is not empty %}by the {{ method.firstHandbellPeal.society }}{% endif %}</dd>
+{% if method.extensionconstruction is not empty %}
+				<dt>Extension&nbsp;Construction</dt>
+				<dd>{{ method.extensionconstruction }}</dd>
+{% endif %}
+{% set xmlPerformances = method.performances|filter(p => p.type not in ['renamedMethod', 'duplicateMethod']) %}
+{% if xmlPerformances is not empty %}
+				<dt>Performances</dt>
+				<dd>
+{% set performanceTypeLabels = {
+    'firstTowerbellPeal': 'First towerbell peal',
+    'firstHandbellPeal': 'First handbell peal',
+    'firstTowerbellExtent': 'First towerbell extent',
+    'firstHandbellExtent': 'First handbell extent',
+    'firstHandbellQuarterPeal': 'First handbell quarter peal',
+    'firstInclusionInTowerbellPeal': 'First inclusion in towerbell peal',
+    'firstInclusionInHandbellPeal': 'First inclusion in handbell peal',
+    'firstInclusionInTowerbellQuarterPeal': 'First inclusion in towerbell quarter peal',
+    'firstInclusionInHandbellQuarterPeal': 'First inclusion in handbell quarter peal',
+    'firstInclusionInKeyboardPeal': 'First inclusion in keyboard peal',
+    'firstInclusionInKeyboardQuarterPeal': 'First inclusion in keyboard quarter peal',
+    'firstKeyboardQuarterPeal': 'First keyboard quarter peal',
+    'firstMixedStyleQuarterPeal': 'First mixed-style quarter peal',
+} %}
+				<ul>
+{% for performance in xmlPerformances %}
+					<li><strong>{{ performanceTypeLabels[performance.type] ?? performance.type }}: </strong><time datetime="{{ performance.date|date('Y-m-d') }}">{{ performance.date|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time>{% if performance.location is not empty %} at {{ performance.location }}{% endif %}{% if performance.society is not empty %} by the {{ performance.society }}{% endif %}{% if performance.reference is not empty %} ({{ performance.reference }}){% endif %}</li>
+{% endfor %}
+				</ul>
+				</dd>
 {% endif %}
 				<dt>Download as image</dt>
 {% if custom is not defined or not custom %}

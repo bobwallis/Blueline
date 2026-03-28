@@ -62,6 +62,8 @@ class MethodXMLIterator implements \Iterator, \Countable
                 'leadhead'       => strval($node->leadHead) ?: null,
                 'leadheadcode'   => strval($node->leadHeadCode) ?: null,
                 'fchgroups'      => strval($node->falseness->fchGroups) ?: null,
+                'cccbr_id'       => strval($node->attributes()->id) ?: null,
+                'extensionconstruction' => strval($node->extensionConstruction) ?: null,
             ), function ($e) { return !is_null($e); }));
 
             // Manually fix non-unique URLs
@@ -109,46 +111,47 @@ class MethodXMLIterator implements \Iterator, \Countable
 
             // Get references
             if (isset($node->references)) {
-                $array['journalref'] = strval($node->references->journalRef) ?: null;
-                $array['rwref']      = strval($node->references->rwRef) ?: null;
-                $array['bnref']      = strval($node->references->bnRef) ?: null;
-                $array['cbref']      = strval($node->references->cbRef) ?: null;
-                $array['tdmmref']    = strval($node->references->tdmmRef) ?: null;
-                $array['pmmref']     = strval($node->references->pmmRef) ?: null;
+                $refParts = [];
+                foreach ($node->references->children() as $refChild) {
+                    $val = strval($refChild);
+                    if ($val !== '') {
+                        $refParts[] = $refChild->getName().': '.$val;
+                    }
+                }
+                $array['method_references'] = $refParts ? implode('; ', $refParts) : null;
             }
 
             // Get performance information
             if (isset($node->performances)) {
                 $array['performances'] = array();
-                if (isset($node->performances->firstTowerbellPeal)) {
-                    $array['performances'][] = array_filter(array(
+                foreach ($node->performances->children() as $perfNode) {
+                    $perfType = $perfNode->getName();
+                    $perf = array_filter(array(
                         'method_title' => $array['title'],
-                        'type' => 'firstTowerbellPeal',
-                        'date' => (new \DateTime($node->performances->firstTowerbellPeal->date))->format('Y-m-d'),
-                        'society' => strval($node->performances->firstTowerbellPeal->society) ?: null,
-                        'location_room' => strval($node->performances->firstTowerbellPeal->location->room) ?: null,
-                        'location_building' => strval($node->performances->firstTowerbellPeal->location->building) ?: null,
-                        'location_address' => strval($node->performances->firstTowerbellPeal->location->address) ?: null,
-                        'location_town' => strval($node->performances->firstTowerbellPeal->location->town) ?: null,
-                        'location_county' => strval($node->performances->firstTowerbellPeal->location->county) ?: null,
-                        'location_region' => strval($node->performances->firstTowerbellPeal->location->region) ?: null,
-                        'location_country' => strval($node->performances->firstTowerbellPeal->location->country) ?: null,
+                        'type' => $perfType,
+                        'date' => isset($perfNode->date) ? (new \DateTime(strval($perfNode->date)))->format('Y-m-d') : null,
+                        'society' => strval($perfNode->society) ?: null,
+                        'location_room' => strval($perfNode->location->room) ?: null,
+                        'location_building' => strval($perfNode->location->building) ?: null,
+                        'location_address' => strval($perfNode->location->address) ?: null,
+                        'location_town' => strval($perfNode->location->town) ?: null,
+                        'location_county' => strval($perfNode->location->county) ?: null,
+                        'location_region' => strval($perfNode->location->region) ?: null,
+                        'location_country' => strval($perfNode->location->country) ?: null,
                     ), function ($e) { return !is_null($e); });
-                }
-                if (isset($node->performances->firstHandbellPeal)) {
-                    $array['performances'][] = array_filter(array(
-                        'method_title' => $array['title'],
-                        'type' => 'firstHandbellPeal',
-                        'date' => (new \DateTime($node->performances->firstHandbellPeal->date))->format('Y-m-d'),
-                        'society' => strval($node->performances->firstHandbellPeal->society) ?: null,
-                        'location_room' => strval($node->performances->firstHandbellPeal->location->room) ?: null,
-                        'location_building' => strval($node->performances->firstHandbellPeal->location->building) ?: null,
-                        'location_address' => strval($node->performances->firstHandbellPeal->location->address) ?: null,
-                        'location_town' => strval($node->performances->firstHandbellPeal->location->town) ?: null,
-                        'location_county' => strval($node->performances->firstHandbellPeal->location->county) ?: null,
-                        'location_region' => strval($node->performances->firstHandbellPeal->location->region) ?: null,
-                        'location_country' => strval($node->performances->firstHandbellPeal->location->country) ?: null,
-                    ), function ($e) { return !is_null($e); });
+                    if (isset($perfNode->references)) {
+                        $perfRefParts = [];
+                        foreach ($perfNode->references->children() as $refChild) {
+                            $val = strval($refChild);
+                            if ($val !== '') {
+                                $perfRefParts[] = $refChild->getName().': '.$val;
+                            }
+                        }
+                        if ($perfRefParts) {
+                            $perf['reference'] = implode('; ', $perfRefParts);
+                        }
+                    }
+                    $array['performances'][] = $perf;
                 }
                 // Remove abbreviations in the location data
                 foreach ($array['performances'] as &$p) {

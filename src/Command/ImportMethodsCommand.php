@@ -50,6 +50,9 @@ class ImportMethodsCommand extends Command
         'ruleoffs' => ParameterType::STRING,
         'callingpositions' => ParameterType::STRING,
         'magic' => ParameterType::INTEGER,
+        'cccbr_id' => ParameterType::STRING,
+        'method_references' => ParameterType::STRING,
+        'extensionconstruction' => ParameterType::STRING,
     );
 
     private const PERFORMANCE_PARAMETER_TYPES = array(
@@ -64,6 +67,7 @@ class ImportMethodsCommand extends Command
         'location_county' => ParameterType::STRING,
         'location_region' => ParameterType::STRING,
         'location_country' => ParameterType::STRING,
+        'reference' => ParameterType::STRING,
     );
 
     /** @var array<string, Statement> */
@@ -97,7 +101,7 @@ class ImportMethodsCommand extends Command
 
         try {
             $output->writeln('<info>Clear existing first peal data...</info>');
-            $this->connection->executeStatement("DELETE FROM performances WHERE type = 'firstTowerbellPeal' OR type = 'firstHandbellPeal'");
+            $this->connection->executeStatement("DELETE FROM performances WHERE type NOT IN ('renamedMethod', 'duplicateMethod')");
         }
         catch (Exception $exception) {
             $output->writeln('<error>Failed to initialise import: '.$exception->getMessage().'</error>');
@@ -106,7 +110,7 @@ class ImportMethodsCommand extends Command
 
         // Import data
         $output->writeln("<info>Importing method data...</info>");
-        $validFields = array_flip(array('title', 'provisional', 'url', 'stage', 'classification', 'namemetaphone','notation', 'notationexpanded', 'leadheadcode', 'leadhead', 'fchgroups', 'lengthoflead', 'lengthofcourse', 'numberofhunts', 'little', 'differential', 'plain', 'trebledodging', 'palindromic', 'doublesym', 'rotational', 'calls', 'ruleoffs', 'callingpositions', 'magic'));
+        $validFields = array_flip(array('title', 'provisional', 'url', 'stage', 'classification', 'namemetaphone','notation', 'notationexpanded', 'leadheadcode', 'leadhead', 'fchgroups', 'lengthoflead', 'lengthofcourse', 'numberofhunts', 'little', 'differential', 'plain', 'trebledodging', 'palindromic', 'doublesym', 'rotational', 'calls', 'ruleoffs', 'callingpositions', 'magic', 'cccbr_id', 'method_references', 'extensionconstruction'));
         $importedMethods = array();
         $normaliseRow = static function (array $row): array {
             foreach ($row as $key => $value) {
