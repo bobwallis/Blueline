@@ -4,7 +4,6 @@ namespace Blueline\Command;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
-use Doctrine\DBAL\Statement;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -65,33 +64,34 @@ class ImportCollectionsCommand extends Command
         foreach ($txtIterator as $collection) {
             $methods = $collection['methods'];
             unset($collection['methods']);
+            $failedMethodTitle = null;
+
             try {
-                $collectionInsertStatement->bindValue(1, $collection['id'], ParameterType::STRING);
-                $collectionInsertStatement->bindValue(2, $collection['name'], ParameterType::STRING);
-                $collectionInsertStatement->bindValue(3, $collection['description'] ?? null, ParameterType::STRING);
-                $collectionInsertStatement->executeStatement();
+                $this->connection->transactional(function () use ($collectionInsertStatement, $collectionMethodInsertStatement, $collection, $methods, &$failedMethodTitle): void {
+                    $collectionInsertStatement->bindValue(1, $collection['id'], ParameterType::STRING);
+                    $collectionInsertStatement->bindValue(2, $collection['name'], ParameterType::STRING);
+                    $collectionInsertStatement->bindValue(3, $collection['description'] ?? null, ParameterType::STRING);
+                    $collectionInsertStatement->executeStatement();
+
+                    foreach ($methods as $index => $method_title) {
+                        $failedMethodTitle = $method_title;
+                        $collectionMethodInsertStatement->bindValue(1, $collection['id'], ParameterType::STRING);
+                        $collectionMethodInsertStatement->bindValue(2, $method_title, ParameterType::STRING);
+                        $collectionMethodInsertStatement->bindValue(3, (int) $index, ParameterType::INTEGER);
+                        $collectionMethodInsertStatement->executeStatement();
+                    }
+                });
             }
             catch (Exception $exception) {
                 $progress->clear();
                 $output->writeln("<error>Failed to add collection '".$collection['id']."': ".$exception->getMessage().'</error>');
+                if ($failedMethodTitle !== null) {
+                    $output->writeln("<comment> Rolled back collection after failing to add '".$failedMethodTitle."'</comment>");
+                }
                 $progress->display();
                 continue;
             }
 
-            foreach ($methods as $index => $method_title) {
-                try {
-                    $collectionMethodInsertStatement->bindValue(1, $collection['id'], ParameterType::STRING);
-                    $collectionMethodInsertStatement->bindValue(2, $method_title, ParameterType::STRING);
-                    $collectionMethodInsertStatement->bindValue(3, (int) $index, ParameterType::INTEGER);
-                    $collectionMethodInsertStatement->executeStatement();
-                }
-                catch (Exception $exception) {
-                    $progress->clear();
-                    $output->writeln("<comment> Failed to add '".$method_title."' to '".$collection['id']."'</comment>");
-                    $output->writeln('<comment> '.$exception->getMessage().'</comment>');
-                    $progress->display();
-                }
-            }
             $progress->advance();
         }
         $progress->finish();
