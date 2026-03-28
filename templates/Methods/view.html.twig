@@ -96,11 +96,11 @@
 {% endif %}
 {% if method.firstTowerbellPeal is not empty %}
 				<dt>First&nbsp;towerbell&nbsp;peal</dt>
-				<dd><time datetime="{{ method.firstTowerbellpeal.date|date('Y-m-d') }}">{{ method.firstTowerbellPeal.date|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time>{% if method.firstTowerbellPeal.location is not empty %} at {{ method.firstTowerbellPeal.location }}{% endif %}</dd>
+				<dd><time datetime="{{ method.firstTowerbellpeal.date|date('Y-m-d') }}">{{ method.firstTowerbellPeal.date|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time> {% if method.firstTowerbellPeal.location is not empty %}at {{ method.firstTowerbellPeal.location }}{% if method.firstTowerbellPeal.society is not empty %} by the {{ method.firstTowerbellPeal.society }}{% endif %}{% elseif method.firstTowerbellPeal.society is not empty %}by the {{ method.firstTowerbellPeal.society }}{% endif %}</dd>
 {% endif %}
 {% if method.firstHandbellPeal is not empty %}
 				<dt>First&nbsp;handbell&nbsp;peal</dt>
-				<dd><time datetime="{{ method.firstHandbellPeal.date|date('Y-m-d') }}">{{ method.firstHandbellPeal.date|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time>{% if method.firstHandbellPeal.location is not empty %} at {{ method.firstHandbellPeal.location }}{% endif %}</dd>
+				<dd><time datetime="{{ method.firstHandbellPeal.date|date('Y-m-d') }}">{{ method.firstHandbellPeal.date|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time> {% if method.firstHandbellPeal.location is not empty %}at {{ method.firstHandbellPeal.location }}{% if method.firstHandbellPeal.society is not empty %} by the {{ method.firstHandbellPeal.society }}{% endif %}{% elseif method.firstHandbellPeal.society is not empty %}by the {{ method.firstHandbellPeal.society }}{% endif %}</dd>
 {% endif %}
 				<dt>Download as image</dt>
 {% if custom is not defined or not custom %}

@@ -78,6 +78,20 @@ class MethodXMLIteratorTest extends TestCase
         $this->assertFalse($iterator->valid());
     }
 
+    public function testIteratorParsesPerformanceSocietyWhenProvided(): void
+    {
+        $file = $this->createTempXmlFile('methods.xml', $this->validXmlFixtureWithPerformances());
+        $iterator = new MethodXMLIterator($file);
+
+        $iterator->rewind();
+        $method = $iterator->current();
+
+        $this->assertArrayHasKey('performances', $method);
+        $this->assertCount(2, $method['performances']);
+        $this->assertSame('Australian & New Zealand Association', $method['performances'][0]['society']);
+        $this->assertSame('Salisbury Diocesan Guild', $method['performances'][1]['society']);
+    }
+
     private function createTempXmlFile(string $fileName, string $contents): string
     {
         $path = sys_get_temp_dir().'/'.uniqid('blueline-test-', true).'-'.$fileName;
@@ -109,4 +123,43 @@ class MethodXMLIteratorTest extends TestCase
 </methods>
 XML;
     }
+
+        private function validXmlFixtureWithPerformances(): string
+        {
+                return <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<methods>
+    <methodSet>
+        <properties>
+            <classification>Bob</classification>
+        </properties>
+        <method>
+            <title>Test Bob Minor</title>
+            <name>Test</name>
+            <stage>6</stage>
+            <notation>-16-16-16,12</notation>
+            <lengthOfLead>12</lengthOfLead>
+            <leadHead>142635</leadHead>
+            <numberOfHunts>1</numberOfHunts>
+            <performances>
+                <firstTowerbellPeal>
+                    <date>2026-03-22</date>
+                    <society>Australian &amp; New Zealand Association</society>
+                    <location>
+                        <town>Salisbury</town>
+                    </location>
+                </firstTowerbellPeal>
+                <firstHandbellPeal>
+                    <date>2026-03-23</date>
+                    <society>Salisbury Diocesan Guild</society>
+                    <location>
+                        <town>Salisbury</town>
+                    </location>
+                </firstHandbellPeal>
+            </performances>
+        </method>
+    </methodSet>
+</methods>
+XML;
+        }
 }
