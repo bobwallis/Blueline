@@ -115,7 +115,29 @@ symfony console doctrine:cache:clear-result
 
 # Verify that Doctrine is properly configured for a production environment, and mappings are up to date
 echo -e "\n\033[1mChecking Doctrine configuration\033[0m"
-symfony console doctrine:schema:validate
+SCHEMA_VALIDATE_OUTPUT="$(symfony console doctrine:schema:validate 2>&1)"
+SCHEMA_VALIDATE_EXIT_CODE=$?
+echo "$SCHEMA_VALIDATE_OUTPUT"
+
+if echo "$SCHEMA_VALIDATE_OUTPUT" | grep -q "The database schema is not in sync"; then
+	echo -e "\n\033[1mDatabase schema is out of date\033[0m"
+	echo -e "\n\033[1mPending SQL updates\033[0m"
+	symfony console doctrine:schema:update --dump-sql
+	if [[ -t 0 ]]; then
+		echo
+		read -r -p "Run forced schema update now? [y/N] " RUN_SCHEMA_UPDATE
+		if [[ "$RUN_SCHEMA_UPDATE" =~ ^[Yy]$ ]]; then
+			echo -e "\n\033[1mRunning forced schema update\033[0m"
+			symfony console doctrine:schema:update --force
+		else
+			echo "Skipping forced schema update."
+		fi
+	else
+		echo "Non-interactive session detected. Skipping forced schema update."
+	fi
+elif [[ $SCHEMA_VALIDATE_EXIT_CODE -ne 0 ]]; then
+	exit $SCHEMA_VALIDATE_EXIT_CODE
+fi
 
 
 # Rebuild web assets
