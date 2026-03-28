@@ -47,22 +47,7 @@ class ImportMethodsCommand extends Command
         // Print title
         $output->writeln('<title>Updating method data</title>');
 
-        // There are two 'standard' method collections in the methods.org.uk data that we will add methods to as we go along
         try {
-            $this->upsertCollection(
-                'pmm',
-                'Plain Minor Methods',
-                'All the possible symmetric Bob and Place Minor methods with five leads in the plain course.'
-            );
-            $this->upsertCollection(
-                'tdmm',
-                'Treble Dodging Minor Methods',
-                'All the possible symmetric Treble Bob, Delight and Surprise Minor methods with five leads in the plain course and with no bell making more than two consecutive blows in the same position.'
-            );
-
-            $output->writeln('<info>Clear existing PMM and TDMM collection data...</info>');
-            $this->connection->executeStatement("DELETE FROM methods_collections WHERE collection_id = 'pmm' OR collection_id = 'tdmm'");
-
             $output->writeln('<info>Clear existing first peal data...</info>');
             $this->connection->executeStatement("DELETE FROM performances WHERE type = 'firstTowerbellPeal' OR type = 'firstHandbellPeal'");
         }
@@ -122,19 +107,6 @@ class ImportMethodsCommand extends Command
                         $progress->clear();
                         $output->writeln('<error>Failed to insert '.$xmlRow['title'].': '.$innerException->getMessage().'</error>');
                         $progress->display();
-                    }
-                }
-                // 'Treble Dodging Minor Method' and 'Plain Minor Method' collections
-                foreach (array( 'tdmm', 'pmm' ) as $t) {
-                    if (isset($xmlRow[$t.'ref'])) {
-                        try {
-                            $this->connection->insert('methods_collections', array('collection_id' => $t, 'method_title' => $xmlRow['title'], 'position' => intval($xmlRow[$t.'ref'])));
-                        }
-                        catch (Exception $exception) {
-                            $progress->clear();
-                            $output->writeln('<error>Failed to add '.$xmlRow['title'].' to collection '.$t.': '.$exception->getMessage().'</error>');
-                            $progress->display();
-                        }
                     }
                 }
                 // Performances
@@ -200,22 +172,6 @@ class ImportMethodsCommand extends Command
         $time += microtime(true);
         $output->writeln("\n<info>Finished updating method data in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true)/1048576, 2).' MiB.</info>');
         return 0;
-    }
-
-    private function upsertCollection(string $id, string $name, string $description): void
-    {
-        $this->connection->executeStatement(
-            'INSERT INTO collections (id, name, description)
-             VALUES (:id, :name, :description)
-             ON CONFLICT (id) DO UPDATE
-             SET name = EXCLUDED.name,
-                 description = EXCLUDED.description',
-            array(
-                'id' => $id,
-                'name' => $name,
-                'description' => $description,
-            )
-        );
     }
 
     private function upsertMethod(array $row): void

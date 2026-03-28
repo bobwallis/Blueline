@@ -18,7 +18,6 @@ class CommandWorkflowTest extends CommandTestCase
         $this->assertStringContainsString('Updating method data', $importMethodsOutput);
         $this->assertNoConsoleErrors($importMethodsOutput);
         $this->assertGreaterThan(0, $this->dbCount('SELECT COUNT(*) FROM methods'));
-        $this->assertSame(2, $this->dbCount("SELECT COUNT(*) FROM collections WHERE id IN ('pmm', 'tdmm')"));
     }
 
     public function testImportExtrasAndCollectionsMaintainCoreInvariants(): void
@@ -39,9 +38,8 @@ class CommandWorkflowTest extends CommandTestCase
         $this->assertStringContainsString('Updating collection data', $collectionsOutput);
         $this->assertStringContainsString('Finished updating method collection data', $collectionsOutput);
         $this->assertNoConsoleErrors($collectionsOutput);
-        $this->assertGreaterThan(0, $this->dbCount("SELECT COUNT(*) FROM collections WHERE id NOT IN ('pmm', 'tdmm')"));
-        $this->assertGreaterThan(0, $this->dbCount("SELECT COUNT(*) FROM methods_collections WHERE collection_id NOT IN ('pmm', 'tdmm')"));
-        $this->assertSame(2, $this->dbCount("SELECT COUNT(*) FROM collections WHERE id IN ('pmm', 'tdmm')"));
+        $this->assertGreaterThan(0, $this->dbCount('SELECT COUNT(*) FROM collections'));
+        $this->assertGreaterThan(0, $this->dbCount('SELECT COUNT(*) FROM methods_collections'));
 
         $this->assertGreaterThan(0, $this->dbCount('SELECT COUNT(*) FROM methods_similar'));
     }

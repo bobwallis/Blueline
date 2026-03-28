@@ -25,7 +25,7 @@ class ExportCollectionsCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Get an array of collection data
-        $collections = $this->entityManager->createQuery("SELECT c FROM Blueline\Entity\Collection c WHERE c.id != 'pmm' AND c.id != 'tdmm' ORDER BY c.id ASC")
+        $collections = $this->entityManager->createQuery('SELECT c FROM Blueline\Entity\Collection c ORDER BY c.id ASC')
                                            ->getArrayResult();
 
         foreach ($collections as &$collection) {

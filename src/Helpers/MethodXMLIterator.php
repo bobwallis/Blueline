@@ -109,10 +109,12 @@ class MethodXMLIterator implements \Iterator, \Countable
 
             // Get references
             if (isset($node->references)) {
-                $array['rwref']   = strval($node->references->rwRef) ?: null;
-                $array['bnref']   = strval($node->references->bnRef) ?: null;
-                $array['tdmmref'] = strval($node->references->tdmmRef) ?: null;
-                $array['pmmref']  = strval($node->references->pmmRef) ?: null;
+                $array['journalref'] = strval($node->references->journalRef) ?: null;
+                $array['rwref']      = strval($node->references->rwRef) ?: null;
+                $array['bnref']      = strval($node->references->bnRef) ?: null;
+                $array['cbref']      = strval($node->references->cbRef) ?: null;
+                $array['tdmmref']    = strval($node->references->tdmmRef) ?: null;
+                $array['pmmref']     = strval($node->references->pmmRef) ?: null;
             }
 
             // Get performance information

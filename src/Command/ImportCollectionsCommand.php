@@ -37,8 +37,8 @@ class ImportCollectionsCommand extends Command
 
         $output->writeln('<info>Clear existing extra collection data...</info>');
         try {
-            $this->connection->executeStatement("DELETE FROM methods_collections WHERE collection_id != 'pmm' AND collection_id != 'tdmm'");
-            $this->connection->executeStatement("DELETE FROM collections WHERE id != 'pmm' AND id != 'tdmm'");
+            $this->connection->executeStatement('DELETE FROM methods_collections');
+            $this->connection->executeStatement('DELETE FROM collections');
         }
         catch (Exception $exception) {
             $output->writeln('<error>Failed to clear existing data: '.$exception->getMessage().'</error>');
