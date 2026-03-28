@@ -44,5 +44,3 @@ services:
         arguments:
             - '@parameter_bag'
             - '%kernel.environment%'
-        tags:
-            - { name: kernel.event_listener, event: kernel.request }

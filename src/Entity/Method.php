@@ -7,12 +7,15 @@ use Blueline\Helpers\PlaceNotation;
 use Blueline\Helpers\Stages;
 use Blueline\Helpers\LeadHeadCodes;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 require_once(__DIR__.'/../Helpers/arrays_equal_in_some_rotation.php');
 use function Blueline\Helpers\arrays_equal_in_some_rotation;
 
 /**
  * Blueline\Entity\Method
  */
+#[UniqueEntity('url')]
 #[ORM\Entity(repositoryClass: \Blueline\Repository\MethodRepository::class)]
 #[ORM\Table(name: 'methods')]
 #[ORM\Index(name: 'idx_methods_stage', columns: array('stage'))]
@@ -91,6 +94,7 @@ class Method
      * @var integer $stage
      */
     #[ORM\Column(type: 'smallint')]
+    #[Assert\GreaterThanOrEqual(3)]
     private $stage;
 
     /**
@@ -139,6 +143,7 @@ class Method
      * @var integer $lengthOfLead
      */
     #[ORM\Column(name: 'lengthoflead', type: 'integer')]
+    #[Assert\GreaterThanOrEqual(1)]
     private $lengthOfLead;
 
     /**
@@ -157,6 +162,7 @@ class Method
      * @var integer $numberOfHunts
      */
     #[ORM\Column(name: 'numberofhunts', type: 'integer', nullable: true)]
+    #[Assert\GreaterThanOrEqual(0)]
     private $numberOfHunts;
 
     /**

@@ -3,7 +3,9 @@ namespace Blueline\EventListener;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
+#[AsEventListener(event: 'kernel.request')]
 class RequestListener
 {
     public function __construct(
