@@ -1,7 +1,6 @@
 <?php
 namespace Blueline\Twig;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Twig\Extension\AbstractExtension;
@@ -27,11 +26,6 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
             $this->chromeless = false;
         }
         $this->environment = $params->get('kernel.environment');
-    }
-
-    public function getName()
-    {
-        return 'blueline.twig';
     }
 
     public function getFunctions()
