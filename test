@@ -70,5 +70,31 @@ symfony console lint:container
 echo -e "\n\033[1mLint Twig templates\033[0m"
 symfony console lint:twig src templates --excludes=vendor
 
+echo -e "\n\033[1mLint PHP source (syntax + deprecations)\033[0m"
+php_lint_failed=0
+while IFS= read -r -d '' file; do
+    output=$(php -d error_reporting=E_ALL -d display_errors=1 -l "$file" 2>&1)
+    status=$?
+
+    if [ "$status" -ne 0 ]; then
+        echo "$output"
+        php_lint_failed=1
+        break
+    fi
+
+    if echo "$output" | grep -qi "deprecated"; then
+        echo "$output"
+        php_lint_failed=1
+        break
+    fi
+done < <(find src -type f -name '*.php' -print0)
+
+if [ "$php_lint_failed" -ne 0 ]; then
+    echo -e "\033[31m✗ PHP lint failed in src (syntax error or deprecation detected)\033[0m"
+    exit 1
+fi
+
+echo -e "\033[32m✓ PHP source lint passed\033[0m"
+
 echo -e "\n\033[1mRunning PHPUnit tests\033[0m"
 APP_ENV=test "$d/bin/phpunit"
