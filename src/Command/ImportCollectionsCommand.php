@@ -48,10 +48,7 @@ class ImportCollectionsCommand extends Command
         $output->writeln('<info>Importing collection data...</info>');
         // Load data
         require __DIR__.'/../Resources/data/collections.php';
-        $collections = new \ArrayObject($collections);
-
         // Import
-        $txtIterator = $collections->getIterator();
         $collectionInsertStatement = $this->connection->prepare(
             'INSERT INTO collections (id, name, description) VALUES (?, ?, ?)'
         );
@@ -61,7 +58,7 @@ class ImportCollectionsCommand extends Command
         $progress = new ProgressBar($output, count($collections));
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($collections))*2) - 10);
         $progress->setRedrawFrequency(max(1, count($collections)/100));
-        foreach ($txtIterator as $collection) {
+        foreach ($collections as $collection) {
             $methods = $collection['methods'];
             unset($collection['methods']);
             $failedMethodTitle = null;

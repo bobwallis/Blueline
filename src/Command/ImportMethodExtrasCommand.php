@@ -41,9 +41,7 @@ class ImportMethodExtrasCommand extends Command
         if (file_exists(__DIR__.'/../Resources/data/method_extras_calls.php')) {
             $output->writeln('<info>Adding extra call data...</info>');
             require __DIR__.'/../Resources/data/method_extras_calls.php';
-            $method_extras_calls = new \ArrayObject($method_extras_calls);
-            $extrasIterator   = $method_extras_calls->getIterator();
-            foreach ($extrasIterator as $txtRow) {
+            foreach ($method_extras_calls as $txtRow) {
                 $txtRow['calls'] = json_encode($txtRow['calls']);
                 $txtRow['callingpositions'] = json_encode($txtRow['callingpositions']);
                 $txtRow['ruleoffs'] = json_encode($txtRow['ruleoffs']);
@@ -60,9 +58,7 @@ class ImportMethodExtrasCommand extends Command
         if (file_exists(__DIR__.'/../Resources/data/method_extras_abbreviations.php')) {
             $output->writeln('<info>Adding extra abbreviation data...</info>');
             require __DIR__.'/../Resources/data/method_extras_abbreviations.php';
-            $method_extras_abbreviations = new \ArrayObject($method_extras_abbreviations);
-            $extrasIterator   = $method_extras_abbreviations->getIterator();
-            foreach ($extrasIterator as $txtRow) {
+            foreach ($method_extras_abbreviations as $txtRow) {
                 $txtRow = $this->normaliseDatabaseRow(array_change_key_case($txtRow));
                 try {
                     $this->updateMethodsRow($txtRow);
@@ -93,15 +89,13 @@ class ImportMethodExtrasCommand extends Command
                 }
 
                 require $renamedMethodsPath;
-                $method_renamed = new \ArrayObject($method_renamed);
-                $renamedIterator = $method_renamed->getIterator();
                 $renamedMethodPerformanceInsertStatement = $this->connection->prepare(
                     'INSERT INTO performances (type, method_title, rung_title, rung_url) '
                     .'SELECT ?, ?, ?, ? '
                     .'WHERE EXISTS (SELECT 1 FROM methods WHERE title = ?)'
                 );
 
-                foreach ($renamedIterator as $oldName => $newName) {
+                foreach ($method_renamed as $oldName => $newName) {
                     $failedRenamedMethodTitle = $oldName;
                     $renamedMethodPerformanceInsertStatement->bindValue(1, 'renamedMethod', ParameterType::STRING);
                     $renamedMethodPerformanceInsertStatement->bindValue(2, $newName, ParameterType::STRING);
