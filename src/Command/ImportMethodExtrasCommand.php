@@ -15,8 +15,6 @@ class ImportMethodExtrasCommand extends Command
     /** @var array<string, Statement> */
     private array $updateMethodsStatements = array();
 
-    private ?Statement $renamedMethodPerformanceInsertStatement = null;
-
     public function __construct(private readonly Connection $connection)
     {
         parent::__construct();
@@ -78,34 +76,55 @@ class ImportMethodExtrasCommand extends Command
 
         // Clear existing renamed/duplicate method performance data before we start
         $output->writeln('<info>Clear existing renamed/duplicate method performance data...</info>');
+        $failedRenamedMethodTitle = null;
+        $skippedRenamedMethodCount = 0;
+
+        $renamedMethodsPath = __DIR__.'/../Resources/data/method_renamed.php';
+        if (file_exists($renamedMethodsPath)) {
+            $output->writeln('<info>Adding renamed method data...</info>');
+        }
+
         try {
-            $this->connection->executeStatement("DELETE FROM performances WHERE type = 'renamedMethod' OR type = 'duplicateMethod'");
+            $this->connection->transactional(function () use ($renamedMethodsPath, &$failedRenamedMethodTitle, &$skippedRenamedMethodCount): void {
+                $this->connection->executeStatement("DELETE FROM performances WHERE type = 'renamedMethod' OR type = 'duplicateMethod'");
+
+                if (!file_exists($renamedMethodsPath)) {
+                    return;
+                }
+
+                require $renamedMethodsPath;
+                $method_renamed = new \ArrayObject($method_renamed);
+                $renamedIterator = $method_renamed->getIterator();
+                $renamedMethodPerformanceInsertStatement = $this->connection->prepare(
+                    'INSERT INTO performances (type, method_title, rung_title, rung_url) '
+                    .'SELECT ?, ?, ?, ? '
+                    .'WHERE EXISTS (SELECT 1 FROM methods WHERE title = ?)'
+                );
+
+                foreach ($renamedIterator as $oldName => $newName) {
+                    $failedRenamedMethodTitle = $oldName;
+                    $renamedMethodPerformanceInsertStatement->bindValue(1, 'renamedMethod', ParameterType::STRING);
+                    $renamedMethodPerformanceInsertStatement->bindValue(2, $newName, ParameterType::STRING);
+                    $renamedMethodPerformanceInsertStatement->bindValue(3, $oldName, ParameterType::STRING);
+                    $renamedMethodPerformanceInsertStatement->bindValue(4, str_replace([' ', '$', '&', '+', ',', '/', ':', ';', '=', '?', '@', '"', "'", '<', '>', '#', '%', '{', '}', '|', "\\", '^', '~', '[', ']', '.'], ['_'], iconv('UTF-8', 'ASCII//TRANSLIT', $oldName)), ParameterType::STRING);
+                    $renamedMethodPerformanceInsertStatement->bindValue(5, $newName, ParameterType::STRING);
+
+                    if ($renamedMethodPerformanceInsertStatement->executeStatement() === 0) {
+                        ++$skippedRenamedMethodCount;
+                    }
+                }
+            });
         }
         catch (Exception $exception) {
-            $output->writeln('<error>Failed to clear existing data: '.$exception->getMessage().'</error>');
+            $output->writeln('<error>Failed to refresh renamed/duplicate data: '.$exception->getMessage().'</error>');
+            if ($failedRenamedMethodTitle !== null) {
+                $output->writeln('<comment> Rolled back renamed method import after failing for "'.$failedRenamedMethodTitle.'"</comment>');
+            }
             return 0;
         }
 
-        if (file_exists(__DIR__.'/../Resources/data/method_renamed.php')) {
-            $output->writeln('<info>Adding renamed method data...</info>');
-            require __DIR__.'/../Resources/data/method_renamed.php';
-            $method_renamed = new \ArrayObject($method_renamed);
-            $renamedIterator   = $method_renamed->getIterator();
-            foreach ($renamedIterator as $oldName => $newName) {
-                $performance = array(
-                    'type'         => 'renamedMethod',
-                    'method_title' => $newName,
-                    'rung_title'   => $oldName,
-                    'rung_url'     => str_replace([' ', '$', '&', '+', ',', '/', ':', ';', '=', '?', '@', '"', "'", '<', '>', '#', '%', '{', '}', '|', "\\", '^', '~', '[', ']', '.'], ['_'], iconv('UTF-8', 'ASCII//TRANSLIT', $oldName))
-                );
-                try {
-                    $this->insertRenamedMethodPerformance($performance);
-                }
-                catch (Exception $exception) {
-                    $output->writeln('<comment> Failed to import renamed method information for "'.$oldName.'"</comment>');
-                    $output->writeln('<comment> '.$exception->getMessage().'</comment>');
-                }
-            }
+        if ($skippedRenamedMethodCount > 0) {
+            $output->writeln('<comment> Skipped '.$skippedRenamedMethodCount.' renamed method entr'.($skippedRenamedMethodCount === 1 ? 'y' : 'ies').' because the target method was not present in methods</comment>');
         }
 
         $time += microtime(true);
@@ -160,23 +179,6 @@ class ImportMethodExtrasCommand extends Command
 
         return $this->updateMethodsStatements[$statementKey];
     }
-
-    private function insertRenamedMethodPerformance(array $performance): void
-    {
-        if ($this->renamedMethodPerformanceInsertStatement === null) {
-            $this->renamedMethodPerformanceInsertStatement = $this->connection->prepare(
-                'INSERT INTO performances (type, method_title, rung_title, rung_url) VALUES (?, ?, ?, ?)'
-            );
-        }
-
-        $statement = $this->renamedMethodPerformanceInsertStatement;
-        $statement->bindValue(1, $performance['type'], ParameterType::STRING);
-        $statement->bindValue(2, $performance['method_title'], ParameterType::STRING);
-        $statement->bindValue(3, $performance['rung_title'], ParameterType::STRING);
-        $statement->bindValue(4, $performance['rung_url'], ParameterType::STRING);
-        $statement->executeStatement();
-    }
-
     private function normaliseDatabaseRow(array $row): array
     {
         foreach ($row as $key => $value) {
