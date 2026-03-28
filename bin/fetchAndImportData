@@ -7,10 +7,14 @@ d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 cd "$d/../"
 
 APP_ENVIRONMENT="${APP_ENV:-dev}"
+SKIP_PULL=0
 for arg in "$@"; do
 	case "$arg" in
 		--env=*)
 			APP_ENVIRONMENT="${arg#*=}"
+			;;
+		--nopull)
+			SKIP_PULL=1
 			;;
 		dev|test|prod)
 			APP_ENVIRONMENT="$arg"
@@ -18,10 +22,12 @@ for arg in "$@"; do
 	esac
 done
 
-# Download external data
-echo -e "\n\033[1mDownloading external data\033[0m"
-"./src/Resources/data/fetch"
-echo ""
+if [ "$SKIP_PULL" -eq 0 ]; then
+	# Download external data
+	echo -e "\n\033[1mDownloading external data\033[0m"
+	"./src/Resources/data/fetch"
+	echo ""
+fi
 
 # Import updated method data
 symfony console blueline:importMethods --no-debug --env="$APP_ENVIRONMENT"
