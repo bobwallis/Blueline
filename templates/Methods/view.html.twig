@@ -94,10 +94,6 @@
 				{% endfor %}
 				</dd>
 {% endif %}
-{% if method.methodReferences is not empty %}
-				<dt>References</dt>
-				<dd>{{ method.methodReferences }}</dd>
-{% endif %}
 {% if method.extensionconstruction is not empty %}
 				<dt>Extension&nbsp;Construction</dt>
 				<dd>{{ method.extensionconstruction }}</dd>
@@ -127,6 +123,10 @@
 {% endfor %}
 				</ul>
 				</dd>
+{% endif %}
+{% if method.methodReferences is not empty %}
+				<dt>References</dt>
+				<dd>{{ method.methodReferences }}</dd>
 {% endif %}
 				<dt>Download as image</dt>
 {% if custom is not defined or not custom %}
