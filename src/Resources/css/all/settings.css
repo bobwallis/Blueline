@@ -1,9 +1,9 @@
 #settings_button {
 	float: right;
-	height: @headerHeight;
-	width: @headerHeight;
+	height: var(--header-height);
+	width: var(--header-height);
 	cursor: pointer;
-	background: @headerBackground url(../images/settings.svg) no-repeat center center;
+	background: var(--header-background) url(../images/settings.svg) no-repeat center center;
 	opacity: 0.6;
 	transition-property: opacity;
 	transition-duration: .15s;
@@ -33,9 +33,9 @@
 #settings {
 	display: inline-block;
 	max-width: 600px;
-	margin: (@headerHeight+@contentYPadding) @contentXPadding 0;
-	border: 1px solid @lightGrey;
-	padding: @contentYPadding @contentXPadding*2;
+	margin: calc(var(--header-height) + var(--content-y-padding)) var(--content-x-padding) 0;
+	border: 1px solid var(--light-grey);
+	padding: var(--content-y-padding) calc(var(--content-x-padding) * 2);
 	background: #FFF;
 	text-align: left;
 }

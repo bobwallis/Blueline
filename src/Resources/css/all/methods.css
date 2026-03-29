@@ -1,10 +1,10 @@
 #custom_method {
-	margin-left: @contentXPadding;
+	margin-left: var(--content-x-padding);
 	h3 {
 		font-size: 14px;
 		font-weight: normal;
 		color: #002856;
-		margin: @contentYPadding 0 @contentYPadding*0.5;
+		margin: var(--content-y-padding) 0 calc(var(--content-y-padding) * 0.5);
 		text-transform: uppercase;
 		text-rendering: optimizeLegibility;
 	}
@@ -18,7 +18,7 @@
 
 #m_title_acomp {
 	box-sizing: border-box;
-	border: 1px solid @lightGrey;
+	border: 1px solid var(--light-grey);
 	background-color: #F6F6F6;
 	border-top: 0;
 	border-radius: 1px;
@@ -30,8 +30,8 @@
 	li {
 		box-sizing: border-box;
 		line-height: 13px;
-		padding: 7.5px @contentYPadding*0.75;
-		border-bottom: 1px solid @lightGrey;
+		padding: 7.5px calc(var(--content-y-padding) * 0.75);
+		border-bottom: 1px solid var(--light-grey);
 		cursor: pointer;
 		transition: background-color 0.1s ease;
 		&:hover {
@@ -44,14 +44,14 @@
 }
 
 section.method {
-	// Grids
+	/* Grids */
 	canvas {
 		display: block;
 		float: left;
-		margin: @contentYPadding @contentXPadding;
+		margin: var(--content-y-padding) var(--content-x-padding);
 	}
 
-	// Default tab shows/hides
+	/* Default tab shows/hides */
 	.details, .grid {
 		display: none;
 	}
@@ -62,12 +62,12 @@ section.method {
 
 #lineOverlay_tooltip {
 	position: absolute;
-	font: 10px @sans-stack;
+	font: 10px var(--sans-stack);
 	padding: 5px 8px;
 	max-width: 120px;
 	display: none;
 	background-color: #FFF;
-	border: 1px solid @headerBackground;
+	border: 1px solid var(--header-background);
 	box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.2), 0 1px 5px 0 rgba(0,0,0,0.12);
 	opacity: 0;
 	transition: opacity 200ms, top 10ms, left 10ms;
@@ -90,7 +90,7 @@ section.method {
 	}
 	&:before {
 		border-color: rgba(0,40,86,0);
-		border-right-color: @headerBackground;
+		border-right-color: var(--header-background);
 		border-width: 6px;
 		margin-top: -6px;
 	}

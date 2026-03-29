@@ -1,8 +1,10 @@
 import gulp         from 'gulp';
 import imagemin     from 'gulp-imagemin';
 import gzip         from 'gulp-gzip';
-import less         from 'gulp-less';
-import autoprefixer from 'gulp-autoprefixer';
+import postcss      from 'gulp-postcss';
+import postcssImport from 'postcss-import';
+import postcssNested from 'postcss-nested';
+import autoprefixer from 'autoprefixer';
 import cleanCSS     from 'gulp-clean-css';
 import requirejs    from 'gulp-requirejs';
 import amdclean     from 'gulp-amdclean';
@@ -81,10 +83,15 @@ function gulp_js_serviceWorker() {
 
 // CSS
 function gulp_css() {
-	return gulp.src( ['src/Resources/css/all.less', 'src/Resources/css/print.less'] )
+	const plugins = [
+		postcssImport(),
+		postcssNested(),
+		autoprefixer()
+	];
+
+	return gulp.src( ['src/Resources/css/all.css', 'src/Resources/css/print.css'] )
 		.pipe( sourcemaps.init() )
-		.pipe( less() )
-		.pipe( autoprefixer() )
+		.pipe( postcss( plugins ) )
 		.pipe( cleanCSS( { keepSpecialComments: 0 } ) )
 		.pipe( sourcemaps.write('../maps') )
 		.pipe( gulp.dest( DEST+'css/' ) );

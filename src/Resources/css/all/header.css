@@ -3,16 +3,16 @@
 	top: 0;
 	left: 0;
 	width: 100%;
-	height: @headerHeight;
-	background-color: @headerBackground;
-	color: @lightGrey;
-	line-height: @headerHeight;
+	height: var(--header-height);
+	background-color: var(--header-background);
+	color: var(--light-grey);
+	line-height: var(--header-height);
 	user-select: none;
 }
 #top {
 	z-index: 43;
 	a {
-		color: @lightGrey;
+		color: var(--light-grey);
 		border: 0;
 		outline: 0;
 		text-decoration: none;
@@ -26,40 +26,38 @@
 		text-transform: uppercase;
 		font-weight: normal;
 		float: left;
-		margin: 0 0 0 @headerHeight*0.25;
-		font-size: @headerHeight*0.55;
+		margin: 0 0 0 calc(var(--header-height) * 0.25);
+		font-size: calc(var(--header-height) * 0.55);
 	}
 	h2 {
 		font-weight: normal;
 		text-transform: none;
-		margin: 0 0 0 @headerHeight*0.25;
+		margin: 0 0 0 calc(var(--header-height) * 0.25);
 	}
 }
 
 
 /* Search */
-@searchWidth: 600px;
-@searchWidth_smallScreen: 304px;
 #search {
 	display: block;
 	position: fixed;
-	top: @headerHeight;
+	top: var(--header-height);
 	left: 0;
 	z-index: 40;
 	width: 100%;
 	clear: both;
-	border-bottom: 1px solid @lightGrey;
-	background-color: @titleBackground;
-	background-color: rgba(red(@titleBackground),green(@titleBackground),blue(@titleBackground),0.95);
+	border-bottom: 1px solid var(--light-grey);
+	background-color: var(--title-background);
+	background-color: var(--title-background-overlay);
 	box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
 #search {
 	div {
-		width: @searchWidth;
-		margin: @contentYPadding @contentXPadding;
+		width: var(--search-width);
+		margin: var(--content-y-padding) var(--content-x-padding);
 		overflow: hidden;
 		border-radius: 2px;
-		border: 1px solid @lightGrey;
+		border: 1px solid var(--light-grey);
 		height: 32px;
 		background: #FFF url(../images/search.svg) no-repeat right center;
 		background-size: contain;
@@ -88,11 +86,11 @@
 	}
 }
 
-@media screen and (max-width: @smallScreenSize) {
+@media screen and (max-width: 850px) {
 	#search {
 		div {
 			width: 95%;
-			min-width: @searchWidth_smallScreen;
+			min-width: var(--search-width-small-screen);
 			margin-left: auto;
 			margin-right: auto;
 		}

@@ -1,11 +1,11 @@
 .search {
 	p.nothing {
-		margin: @contentYPadding @contentXPadding;
+		margin: var(--content-y-padding) var(--content-x-padding);
 	}
 }
 
 div.paging {
-	margin: @contentYPadding @contentXPadding*2;
+	margin: var(--content-y-padding) calc(var(--content-x-padding) * 2);
 	.extra {
 	color: #666;
 	}
@@ -22,7 +22,7 @@ div.pagingLinks {
 	}
 }
 
-@media screen and (max-width: @smallScreenSize) {
+@media screen and (max-width: 850px) {
 	div.paging {
 		text-align: center;
 	}

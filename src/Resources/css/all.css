@@ -1,24 +1,36 @@
-// Normalize
-@import './lib/normalize.less';
+/* Normalize */
+@import './lib/normalize.css';
+@import 'all/scrollbars.css';
+@import 'all/overlays.css';
+@import 'all/header.css';
+@import 'all/settings.css';
+@import 'all/content.css';
+@import 'all/standalone.css';
+@import 'all/forms.css';
+@import 'all/welcome.css';
+@import 'all/methods.css';
 
-// Layout
-@standaloneStatusBarHeight: 18px;
-@headerHeight: 35px;
-@searchBoxHeight: 56px;
-@contentXPadding: 14px;
-@contentYPadding: 12px;
-@smallScreenSize: 850px;
-@tinyScreenSize: 500px;
+:root {
+	--standalone-status-bar-height: 18px;
+	--header-height: 35px;
+	--search-box-height: 56px;
+	--content-x-padding: 14px;
+	--content-y-padding: 12px;
+	--small-screen-size: 850px;
+	--tiny-screen-size: 500px;
+	--search-width: 600px;
+	--search-width-small-screen: 304px;
 
-// Colors
-@background: #FFF;
-@headerBackground: #002856;
-@titleBackground: #F3F3F3;
-@lightGrey: #E0DED9;
+	--background: #fff;
+	--header-background: #002856;
+	--title-background: #f3f3f3;
+	--light-grey: #e0ded9;
+	--title-background-overlay: rgba(243, 243, 243, 0.95);
+	--light-grey-lightened: #ebeae7;
 
-// Fonts
-@sans-stack: -apple-system, "Helvetica Neue", "Roboto", "Segoe UI", "Lucida Grande", sans-serif;
-@serif-stack: Palatino, "Palatino Linotype", "Palatino LT STD", "URW Palladio L", "Book Antiqua", Constantia, serif;
+	--sans-stack: -apple-system, "Helvetica Neue", "Roboto", "Segoe UI", "Lucida Grande", sans-serif;
+	--serif-stack: Palatino, "Palatino Linotype", "Palatino LT STD", "URW Palladio L", "Book Antiqua", Constantia, serif;
+}
 @font-face {
 	font-family: Blueline;
 	font-style: normal;
@@ -36,24 +48,24 @@
 	font-variant: normal;
 }
 
-// Basic color and font definitions
+/* Basic color and font definitions */
 html, body {
 	color: #000;
-	background: @background;
+	background: var(--background);
 	font-size: 14px;
 	line-height: 1.25em;
 	-webkit-font-smoothing: antialiased;
 	-webkit-overflow-scrolling: touch;
 	min-width: 320px;
-	font-family: @sans-stack;
+	font-family: var(--sans-stack);
 	font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "pnum" 0, "tnum" 0, "onum" 0, "lnum" 0, "dlig" 0;
 }
 h1, h2, fieldset legend {
-	font-family: @serif-stack;
+	font-family: var(--serif-stack);
 	text-rendering: optimizeLegibility;
 }
 
-// Links
+/* Links */
 a {
 	text-decoration: underline;
 	text-decoration-color: #A1C4D0;
@@ -77,16 +89,16 @@ a {
 	}
 }
 
-// Selection styles
+/* Selection styles */
 ::selection {
-    background: @headerBackground;
+	background: var(--header-background);
     color: #FFF;
 }
 
-// Placeholder text
+/* Placeholder text */
 ::placeholder, .placeholder { color: #999; }
 
-// Abbr
+/* Abbr */
 abbr[title] {
   border-bottom: 1px dotted;
   text-decoration: none;
@@ -95,14 +107,3 @@ abbr[title] {
 .hide { display: none; }
 .center { text-align: center; }
 .normalweight { font-weight: normal; }
-
-// Import general CSS styles
-@import 'all/scrollbars.less';
-@import 'all/overlays.less';
-@import 'all/header.less';
-@import 'all/settings.less';
-@import 'all/content.less';
-@import 'all/standalone.less';
-@import 'all/forms.less';
-@import 'all/welcome.less';
-@import 'all/methods.less';

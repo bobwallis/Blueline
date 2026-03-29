@@ -4,9 +4,9 @@ ol, ul {
 	list-style: none;
 	li {
 		padding: 0;
-		border-bottom: 1px solid lighten(@lightGrey,5%);
+		border-bottom: 1px solid var(--light-grey-lightened);
 		&.none {
-			padding: (@contentYPadding - 2) (@contentXPadding*3/2);
+			padding: calc(var(--content-y-padding) - 2px) calc(var(--content-x-padding) * 3 / 2);
 		}
 		&:first-child {
 			padding-top: 0;
@@ -17,7 +17,7 @@ ol, ul {
 		}
 		a {
 			display: block;
-			padding: (@contentYPadding - 2) (@contentXPadding*3/2);
+			padding: calc(var(--content-y-padding) - 2px) calc(var(--content-x-padding) * 3 / 2);
 			border: 0 !important;
 			background-image: none;
 		}
@@ -39,10 +39,10 @@ section.text {
 		list-style: decimal outside none;
 	}
 	ol, ul {
-		padding: 0 0 0 @contentXPadding*2;
+		padding: 0 0 0 calc(var(--content-x-padding) * 2);
 		li {
 			border: 0;
-			padding: 0 0 0 @contentXPadding;
+			padding: 0 0 0 var(--content-x-padding);
 		}
 	}
 }
@@ -51,24 +51,24 @@ dl {
 	margin: 0;
 	padding: 0;
 	dt {
-		padding: (@contentYPadding - 2) 0 0 @contentXPadding;
+		padding: calc(var(--content-y-padding) - 2px) 0 0 var(--content-x-padding);
 		margin: 0;
 		font-weight: bold;
-		border-top: 1px solid @lightGrey;
+		border-top: 1px solid var(--light-grey);
 		&:first-child {
 			border: 0;
-			padding-top: @contentYPadding;
+			padding-top: var(--content-y-padding);
 		}
 		&.alone {
-			padding-bottom: @contentYPadding;
+			padding-bottom: var(--content-y-padding);
 		}
 	}
 	dd {
-		padding: 0 @contentXPadding (@contentYPadding - 2) (@contentXPadding * 2);
+		padding: 0 var(--content-x-padding) calc(var(--content-y-padding) - 2px) calc(var(--content-x-padding) * 2);
 		margin: 0;
 		text-align: left;
 		&:last-child {
-			padding-bottom: @contentYPadding;
+			padding-bottom: var(--content-y-padding);
 		}
 		li {
 			list-style-type: square;

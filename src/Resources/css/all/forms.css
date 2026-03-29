@@ -1,7 +1,7 @@
 fieldset {
-	margin-top: @contentYPadding;
-	padding: 0 @contentXPadding;
-	border: 1px dashed @lightGrey;
+	margin-top: var(--content-y-padding);
+	padding: 0 var(--content-x-padding);
+	border: 1px dashed var(--light-grey);
 	legend {
 		margin: 0;
 		padding: 0;
@@ -12,8 +12,8 @@ fieldset {
 input[type="submit"], input[type="reset"] {
 	border-radius: 2px;
 	border: 0;
-	margin: 0 @contentYPadding 0 0;
-	padding: @contentYPadding*0.75 @contentXPadding*0.75;
+	margin: 0 var(--content-y-padding) 0 0;
+	padding: calc(var(--content-y-padding) * 0.75) calc(var(--content-x-padding) * 0.75);
 	font-size: 11px;
 	text-transform: uppercase;
 	text-align: center;
@@ -25,7 +25,7 @@ input[type="submit"], input[type="reset"] {
 	}
 }
 input[type="submit"] {
-	background-color: @headerBackground;
+	background-color: var(--header-background);
 	color: white;
 }
 input[type="reset"] {
@@ -36,7 +36,7 @@ input[type="reset"] {
 .select-wrapper, .input-wrapper {
 	display: inline-block;
 	vertical-align: middle;
-	border: 1px solid @lightGrey;
+	border: 1px solid var(--light-grey);
 	border-radius: 1px;
 	background-color: #F3F3F3;
 	height: 28px;
@@ -86,15 +86,15 @@ input.center {
 	text-align: center;
 }
 
-// Checkboxes
+/* Checkboxes */
 input[type="checkbox"] {
 	display: inline-block;
 	vertical-align: middle;
-	margin: 0 @contentXPadding*0.5;
+	margin: 0 calc(var(--content-x-padding) * 0.5);
 	line-height: 28px;
 }
 
-// Radio Buttons
+/* Radio Buttons */
 label.radio_image {
 	& > input {
 		visibility: hidden;
@@ -103,16 +103,16 @@ label.radio_image {
 		& + img {
 			display: inline-block;
 			vertical-align: middle;
-			margin: 0 @contentXPadding*0.5;
+			margin: 0 calc(var(--content-x-padding) * 0.5);
 			cursor: pointer;
-			border: 1px solid @lightGrey;
+			border: 1px solid var(--light-grey);
 			border-radius: 2px;
 			box-shadow: 0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.24);
 			transition-property: border-color;
 			transition-duration: .2s;
 		}
 		&:checked + img {
-			border-color: @headerBackground;
+			border-color: var(--header-background);
 		}
 	}
 	img {
@@ -121,7 +121,7 @@ label.radio_image {
 	}
 }
 
-@media screen and (max-width: @tinyScreenSize) {
+@media screen and (max-width: 500px) {
 	label.radio_image img {
 		width: 53px;
 		height: 17px;

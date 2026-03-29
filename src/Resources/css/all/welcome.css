@@ -6,8 +6,8 @@ section.welcome  {
 	}
 	li {
 		position: relative;
-		margin: 0 @contentXPadding;
-		font: bold 26px @serif-stack;
+		margin: 0 var(--content-x-padding);
+		font: bold 26px var(--serif-stack);
 		text-rendering: optimizeLegibility;
 		border: 0;
 		background-position: left center;
@@ -19,9 +19,9 @@ section.welcome  {
 			text-shadow: none;
 			background-image: none;
 			text-decoration: none;
-			color: @headerBackground;
+			color: var(--header-background);
 			&:visited {
-				color: @headerBackground;
+				color: var(--header-background);
 			}
 		}
 	}

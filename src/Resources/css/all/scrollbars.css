@@ -1,4 +1,4 @@
-// Webkit scrollbars
+/* Webkit scrollbars */
 ::-webkit-scrollbar {
     width: 12px;
     height: 12px;
@@ -7,12 +7,12 @@
     display: none;
 }
 ::-webkit-scrollbar-track:vertical {
-    background: @titleBackground url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAABCAIAAABlidhuAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAEklEQVQI12N8cO+msKgUA14AAGMvAtt9ZH3bAAAAAElFTkSuQmCC') top left repeat-y;
-    border-top: @headerHeight solid @headerBackground;
+    background: var(--title-background) url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAABCAIAAABlidhuAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAEklEQVQI12N8cO+msKgUA14AAGMvAtt9ZH3bAAAAAElFTkSuQmCC') top left repeat-y;
+    border-top: var(--header-height) solid var(--header-background);
 }
 ::-webkit-scrollbar-track:horizontal {
-    background: @titleBackground;
-    border-top: 1px solid @lightGrey;
+    background: var(--title-background);
+    border-top: 1px solid var(--light-grey);
 }
 ::-webkit-scrollbar-thumb {
     border: 1px solid #b2b2b2;

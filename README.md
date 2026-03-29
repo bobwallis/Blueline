@@ -70,6 +70,8 @@ the settings in `.env`.
 After making changes to CSS/JS files or images you will need to re-reun `./bin/buildFrontendAssets`
 to regenerate the assets. Running `gulp watch` in a terminal will watch for changes to these files
 and rebuild on-demand, which is helpful.
+Stylesheets are authored as `.css` files in `src/Resources/css/` and processed through PostCSS
+in `gulpfile.js` before being written to `public/css/`.
 
 Running `./test` runs the full project test pipeline (linting, schema/container checks, and the
 full PHPUnit suite).

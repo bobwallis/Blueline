@@ -1,8 +1,12 @@
+@import 'searchResults.css';
+@import 'lists.css';
+@import 'tabBar.css';
+
 #content {
-	padding-top: @headerHeight;
+	padding-top: var(--header-height);
 }
 #content.searchable {
-	padding-top: @headerHeight + @searchBoxHeight;
+	padding-top: calc(var(--header-height) + var(--search-box-height));
 }
 
 section {
@@ -12,10 +16,10 @@ section {
 	}
 	header {
 		clear: both;
-		border-color: @lightGrey;
+		border-color: var(--light-grey);
 		border-width: 1px 0;
 		border-style: solid;
-		background-color: @titleBackground;
+		background-color: var(--title-background);
 		padding: 10px;
 		h1 {
 			font-size: 25px;
@@ -31,34 +35,34 @@ section {
 			margin: 0;
 		}
 		#settings {
-			margin: 0 0 @contentYPadding;
-			padding: 0 @contentXPadding;
-			border: 1px solid @lightGrey;
+			margin: 0 0 var(--content-y-padding);
+			padding: 0 var(--content-x-padding);
+			border: 1px solid var(--light-grey);
 			background-color: #FFF;
 			h3 {
-				margin: @contentYPadding 0;
+				margin: var(--content-y-padding) 0;
 			}
 			h4 {
-				margin: @contentYPadding 0 @contentYPadding/-2;
+				margin: var(--content-y-padding) 0 calc(var(--content-y-padding) / -2);
 			}
 		}
 	}
 	h2 {
 		font-size: 16px;
-		margin: @contentYPadding*1.5 0 0 0;
+		margin: calc(var(--content-y-padding) * 1.5) 0 0 0;
 	}
 	h3 {
 		font-size: 12px;
-		margin: @contentYPadding 0 0 0;
+		margin: var(--content-y-padding) 0 0 0;
 	}
 	p {
-		margin: @contentYPadding 0;
+		margin: var(--content-y-padding) 0;
 	}
 	h2+p, h3+p {
 		margin-top: 4px;
 	}
 	.wrap {
-		margin: @contentYPadding @contentXPadding;
+		margin: var(--content-y-padding) var(--content-x-padding);
 		text-align: justify;
 		hyphens: auto;
 		max-width: 800px;
@@ -71,7 +75,7 @@ section {
 	table td, table th {
 		vertical-align: top;
 		padding: 4px;
-		border: 1px solid @lightGrey;
+		border: 1px solid var(--light-grey);
 	}
 }
 
@@ -84,14 +88,7 @@ span.code {
 	font-family: monospace;
 }
 
-// Error messages
+/* Error messages */
 .appError {
 	color: #666;
 }
-
-// Search results and paging
-@import 'searchResults.less';
-// Lists
-@import 'lists.less';
-// Tab bars
-@import 'tabBar.less';

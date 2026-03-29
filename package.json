@@ -13,18 +13,20 @@
     "last 3 versions"
   ],
   "devDependencies": {
+    "autoprefixer": "^10.4.21",
     "esm": "^3.2.25",
     "gulp": "^5.0.0",
     "gulp-amdclean": "^1.1.1",
-    "gulp-autoprefixer": "^10.0.0",
     "gulp-clean-css": "^4.3.0",
     "gulp-footer": "^2.1.0",
     "gulp-gzip": "^1.4.2",
     "gulp-imagemin": "^9.2.0",
-    "gulp-less": "^5.0.0",
+    "gulp-postcss": "^10.0.0",
     "gulp-requirejs": "^1.4.0",
     "gulp-sourcemaps": "^3.0.0",
     "gulp-terser": "^2.1.0",
-    "postcss": "^8.5.8"
+    "postcss": "^8.5.8",
+    "postcss-import": "^16.1.1",
+    "postcss-nested": "^7.0.2"
   }
 }
