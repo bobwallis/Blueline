@@ -10,21 +10,16 @@ namespace Blueline\Helpers;
 class MethodSimilarity
 {
 	public static function calculate($rowArray1, $rowArray2, $stage, $limit = INF) {
-		// Function which reduces output of PlaceNotation::apply to string
-		$mapper = function($a) {
-			return implode( array_map( array('Blueline\Helpers\PlaceNotation', 'intToBell'), $a ) );
-		};
-
 		// Generate the rounds row for this stage
 		$rounds = PlaceNotation::rounds($stage);
 
 		// Convert arrays to the right format if needed
 		if (!is_array($rowArray1)) {
-			$rowArray1 = array_map($mapper, PlaceNotation::apply(PlaceNotation::explodedToPermutations($stage, PlaceNotation::explode($rowArray1)), $rounds));
+			$rowArray1 = array_map('implode', PlaceNotation::apply(PlaceNotation::explodedToPermutations($stage, PlaceNotation::explode($rowArray1)), $rounds));
 		}
 
 		if (!is_array($rowArray2)) {
-			$rowArray2 = array_map($mapper, PlaceNotation::apply(PlaceNotation::explodedToPermutations($stage, PlaceNotation::explode($rowArray2)), $rounds));
+			$rowArray2 = array_map('implode', PlaceNotation::apply(PlaceNotation::explodedToPermutations($stage, PlaceNotation::explode($rowArray2)), $rounds));
 		}
 
 		// Get the lengths

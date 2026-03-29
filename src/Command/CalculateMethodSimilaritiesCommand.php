@@ -80,10 +80,6 @@ class CalculateMethodSimilaritiesCommand extends Command
         for ($i = 2; $i < 23; ++$i) {
             $rounds[$i] = PlaceNotation::rounds($i);
         }
-        // And a function that converts row arrays into string arrays
-        $mapper = function ($a) {
-            return implode(array_map(array('Blueline\Helpers\PlaceNotation', 'intToBell'), $a));
-        };
 
         // Set-up the progress bar
         $progress = new ProgressBar($output, count($methods));
@@ -100,7 +96,7 @@ class CalculateMethodSimilaritiesCommand extends Command
             // Generate the array for the method we're generating indexes for
             $notationExploded     = PlaceNotation::explode($method['notationexpanded']);
             $notationPermutations = PlaceNotation::explodedToPermutations($method['stage'], $notationExploded);
-            $methodRowArray       = array_map($mapper, PlaceNotation::apply($notationPermutations, $rounds[$method['stage']]));
+            $methodRowArray       = array_map('implode', PlaceNotation::apply($notationPermutations, $rounds[$method['stage']]));
 
             // Get methods to compare against
             try {
