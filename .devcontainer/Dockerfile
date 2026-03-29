@@ -40,7 +40,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends wget curl ca-certificates unzip bash git \
         libpq-dev postgresql-client \
         libicu-dev \
-        ripgrep \
+        ripgrep silversearcher-ag shellcheck \
     # Postgres
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install pdo pdo_pgsql pgsql \
