@@ -21,6 +21,7 @@ class DataController extends AbstractController
 
         // Set content
         $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment; filename="'.$table.'.csv"');
         $response->setCallback(function () use ($table) {
             switch ($table) {
                 case 'collections':
