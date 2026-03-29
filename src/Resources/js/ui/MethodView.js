@@ -92,22 +92,16 @@ import Music from '../helpers/Music.js';
             }
 
             // Analyze music if needed
-            if (newHighlightMusic && music === null) {
-                var parsedNotation = [];
-                var parsedNotationArr = PlaceNotation.parse(options.notation, options.stage);
-                for (var lead = 0; lead < method.numberOfLeads; lead++) {
-                   parsedNotation.push(parsedNotationArr);
-                }
-                var allRows = [].concat.apply([], parsedNotation); // Flatten array
-                allRows = allRows.concat(PlaceNotation.rounds(options.stage)); // Add rounds
-
-                music = Music(allRows).map(function(e) {
-                    return e.score.map(function(s) {
-                        var s2 = 0.35 * Math.min(Math.pow(s / (100 - (method.stage * 3)), 1 / 1.4), 1);
-                        return 'rgba(0,255,0,' + (s2 < 0.1 ? 0 : s2) + ')';
-                    });
-                });
-            }
+			if( newHighlightMusic && music === null ) {
+				music = Music( PlaceNotation.allRows( [].concat.apply( [], Array( method.numberOfLeads ).fill( PlaceNotation.parse( options.notation, options.stage ) ) ), PlaceNotation.rounds( options.stage ) ) )
+					.map( function( e ) {
+						// Having this logic here isn't ideal. It should probably be in the scoring code instead...
+						return e.score.map( function( s ) {
+							var s2 = 0.35*Math.min(Math.pow(s/(100-(method.stage*3)),1/1.4), 1);
+							return 'rgba(0,255,0,'+(s2<0.1?0:s2)+')';
+						} );
+					} );
+			}
 
             // Re-create line views if style or music highlighting changed
             if (newHighlightMusic !== lastHighlightMusic || newFollow !== lastFollow || newStyle !== lastStyle) {
