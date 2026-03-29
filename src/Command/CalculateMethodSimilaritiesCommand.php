@@ -92,7 +92,7 @@ class CalculateMethodSimilaritiesCommand extends Command
             if (!$helper instanceof QuestionHelper) {
                 throw new \RuntimeException('Question helper is not available.');
             }
-            $output->writeln('<comment>There\'s '.number_format(count($methods)).' methods without similarity information. Calculating it can take some time (over a day for the whole method library).</comment>');
+            $output->writeln('<comment>There\'s '.number_format(count($methods)).' methods without similarity information. Calculating it can take some time (a few hours for the whole method library).</comment>');
             $output->writeln('<comment>If you prefer then skip this step and run this command later:</comment> \'./app/console blueline:calculateMethodSimilarities\'');
             $question = new ConfirmationQuestion('Continue calculating similarities? (Y/N) ', false);
             if (!$helper->ask($input, $output, $question)) {
