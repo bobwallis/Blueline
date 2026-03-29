@@ -7,18 +7,26 @@ use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Statement;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\QuestionHelper;
+use Doctrine\DBAL\ArrayParameterType;
 use Blueline\Helpers\MethodSimilarity;
 use Blueline\Helpers\PlaceNotation;
 
 class CalculateMethodSimilaritiesCommand extends Command
 {
-    private ?Statement $insertSimilarityStatement = null;
+    private const SIMILARITY_INSERT_BATCH_SIZE = 500;
+
+    /** @var array<int, array{method1_title: string, method2_title: string, similarity: float}> */
+    private array $similarityInsertBuffer = array();
+
+    /** @var array<int, Statement> */
+    private array $insertSimilarityBatchStatements = array();
 
     /** @var array<string, Statement> */
     private array $upsertSimilarityFlagStatements = array();
@@ -31,6 +39,7 @@ class CalculateMethodSimilaritiesCommand extends Command
     protected function configure(): void
     {
         $this->setName('blueline:calculateMethodSimilarities')
+            ->addArgument('methods', InputArgument::IS_ARRAY | InputArgument::OPTIONAL, 'Only recalculate similarities for the provided method titles')
             ->setDescription('Calculates any missing similarity indexes for methods in the database');
     }
 
@@ -46,15 +55,33 @@ class CalculateMethodSimilaritiesCommand extends Command
         // Print title
         $output->writeln('<title>Calculating similarities</title>');
 
-        // Get an iterator over all methods which don't have similarity indexes
+        $requestedMethods = array_values(array_unique(array_filter(array_map('trim', $input->getArgument('methods')), static function (string $methodTitle): bool {
+            return $methodTitle !== '';
+        })));
+
+        // Fetch methods which don't have similarity indexes (optionally filtered by title)
         try {
-            $methods = $this->connection->executeQuery(
-                'SELECT title, stage, notationexpanded, lengthoflead
-                  FROM methods
-                  LEFT OUTER JOIN methods_similar ON (title = method1_title)
-                 WHERE (method1_title IS NULL)
-                 ORDER BY stage ASC'
-            )->fetchAllAssociative();
+            if ($requestedMethods === array()) {
+                $methods = $this->connection->executeQuery(
+                    'SELECT title, stage, notationexpanded, lengthoflead
+                      FROM methods
+                      LEFT OUTER JOIN methods_similar ON (title = method1_title)
+                     WHERE (method1_title IS NULL)
+                     ORDER BY stage ASC'
+                )->fetchAllAssociative();
+            }
+            else {
+                $methods = $this->connection->executeQuery(
+                    'SELECT title, stage, notationexpanded, lengthoflead
+                      FROM methods
+                      LEFT OUTER JOIN methods_similar ON (title = method1_title)
+                     WHERE (method1_title IS NULL)
+                       AND (title IN (?))
+                     ORDER BY stage ASC',
+                    array($requestedMethods),
+                    array(ArrayParameterType::STRING)
+                )->fetchAllAssociative();
+            }
         }
         catch (Exception $exception) {
             $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
@@ -100,7 +127,19 @@ class CalculateMethodSimilaritiesCommand extends Command
 
             // Get methods to compare against
             try {
-                $comparisons = $this->fetchComparisonRows($comparisonStatement, $method);
+                $methodTitle = (string) $method['title'];
+                $methodStage = (int) $method['stage'];
+                $methodLengthOfLead = (int) $method['lengthoflead'];
+
+                $comparisonStatement->bindValue(1, $methodTitle, ParameterType::STRING);
+                $comparisonStatement->bindValue(2, $methodStage, ParameterType::INTEGER);
+                $comparisonStatement->bindValue(3, $methodTitle, ParameterType::STRING);
+                $comparisonStatement->bindValue(4, $methodLengthOfLead, ParameterType::INTEGER);
+                $comparisonStatement->bindValue(5, $methodLengthOfLead, ParameterType::INTEGER);
+                $comparisonStatement->bindValue(6, $methodLengthOfLead, ParameterType::INTEGER);
+                $comparisonStatement->bindValue(7, $methodLengthOfLead, ParameterType::INTEGER);
+
+                $comparisons = $comparisonStatement->executeQuery()->fetchAllAssociative();
             }
             catch (Exception $exception) {
                 $output->writeln('<error>Failed to query for methods to compare \''.$method['title'].'\' against: '.$exception->getMessage().'</error>');
@@ -125,6 +164,7 @@ class CalculateMethodSimilaritiesCommand extends Command
 
             $progress->advance();
         }
+        $this->flushSimilarityInsertBuffer();
         $progress->finish();
         $output->writeln('');
 
@@ -158,9 +198,21 @@ class CalculateMethodSimilaritiesCommand extends Command
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($leadHeadMatches))*2) - 10);
         $progress->setRedrawFrequency(max(1, min(20, max(1, count($leadHeadMatches)/100))));
         $progress->start();
-        foreach ($leadHeadMatches as $method) {
-            $this->upsertSimilarityFlag('onlydifferentoverleadend', $method['method1_title'], $method['method2_title']);
-            $progress->advance();
+        $leadEndFlagStatement = $this->getUpsertSimilarityFlagStatement('onlydifferentoverleadend');
+        try {
+            $this->connection->transactional(function () use ($leadHeadMatches, $leadEndFlagStatement, $progress): void {
+                foreach ($leadHeadMatches as $method) {
+                    $leadEndFlagStatement->bindValue(1, $method['method1_title'], ParameterType::STRING);
+                    $leadEndFlagStatement->bindValue(2, $method['method2_title'], ParameterType::STRING);
+                    $leadEndFlagStatement->executeStatement();
+                    $progress->advance();
+                }
+            });
+        }
+        catch (\Throwable $exception) {
+            $progress->clear();
+            $output->writeln('<error>Failed to flag methods differing only at the lead end: '.$exception->getMessage().'</error>');
+            return 0;
         }
         $progress->finish();
         $output->writeln('');
@@ -192,9 +244,21 @@ class CalculateMethodSimilaritiesCommand extends Command
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($halfLeadMatches))*2) - 10);
         $progress->setRedrawFrequency(max(1, min(20, max(1, count($halfLeadMatches)/100))));
         $progress->start();
-        foreach ($halfLeadMatches as $method) {
-            $this->upsertSimilarityFlag('onlydifferentoverhalflead', $method['method1_title'], $method['method2_title']);
-            $progress->advance();
+        $halfLeadFlagStatement = $this->getUpsertSimilarityFlagStatement('onlydifferentoverhalflead');
+        try {
+            $this->connection->transactional(function () use ($halfLeadMatches, $halfLeadFlagStatement, $progress): void {
+                foreach ($halfLeadMatches as $method) {
+                    $halfLeadFlagStatement->bindValue(1, $method['method1_title'], ParameterType::STRING);
+                    $halfLeadFlagStatement->bindValue(2, $method['method2_title'], ParameterType::STRING);
+                    $halfLeadFlagStatement->executeStatement();
+                    $progress->advance();
+                }
+            });
+        }
+        catch (\Throwable $exception) {
+            $progress->clear();
+            $output->writeln('<error>Failed to flag methods differing only at the half lead: '.$exception->getMessage().'</error>');
+            return 0;
         }
         $progress->finish();
         $output->writeln('');
@@ -226,9 +290,21 @@ class CalculateMethodSimilaritiesCommand extends Command
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($leadEndHalfLeadMatches))*2) - 10);
         $progress->setRedrawFrequency(max(1, min(20, max(1, count($leadEndHalfLeadMatches)/100))));
         $progress->start();
-        foreach ($leadEndHalfLeadMatches as $method) {
-            $this->upsertSimilarityFlag('onlydifferentoverleadendandhalflead', $method['method1_title'], $method['method2_title']);
-            $progress->advance();
+        $leadEndAndHalfLeadFlagStatement = $this->getUpsertSimilarityFlagStatement('onlydifferentoverleadendandhalflead');
+        try {
+            $this->connection->transactional(function () use ($leadEndHalfLeadMatches, $leadEndAndHalfLeadFlagStatement, $progress): void {
+                foreach ($leadEndHalfLeadMatches as $method) {
+                    $leadEndAndHalfLeadFlagStatement->bindValue(1, $method['method1_title'], ParameterType::STRING);
+                    $leadEndAndHalfLeadFlagStatement->bindValue(2, $method['method2_title'], ParameterType::STRING);
+                    $leadEndAndHalfLeadFlagStatement->executeStatement();
+                    $progress->advance();
+                }
+            });
+        }
+        catch (\Throwable $exception) {
+            $progress->clear();
+            $output->writeln('<error>Failed to flag methods differing only at the half lead and lead end: '.$exception->getMessage().'</error>');
+            return 0;
         }
         $progress->finish();
         $output->writeln('');
@@ -238,44 +314,47 @@ class CalculateMethodSimilaritiesCommand extends Command
         return 0;
     }
 
-    private function upsertSimilarityFlag(string $column, string $method1Title, string $method2Title): void
-    {
-        $statement = $this->getUpsertSimilarityFlagStatement($column);
-        $statement->bindValue(1, $method1Title, ParameterType::STRING);
-        $statement->bindValue(2, $method2Title, ParameterType::STRING);
-        $statement->executeStatement();
-    }
-
     private function insertSimilarityRow(string $method1Title, string $method2Title, float $similarity): void
     {
-        if ($this->insertSimilarityStatement === null) {
-            $this->insertSimilarityStatement = $this->connection->prepare(
-                'INSERT INTO methods_similar (method1_title, method2_title, similarity) VALUES (?, ?, ?)'
+        $this->similarityInsertBuffer[] = array(
+            'method1_title' => $method1Title,
+            'method2_title' => $method2Title,
+            'similarity' => $similarity,
+        );
+
+        if (count($this->similarityInsertBuffer) >= self::SIMILARITY_INSERT_BATCH_SIZE) {
+            $this->flushSimilarityInsertBuffer();
+        }
+    }
+
+    private function flushSimilarityInsertBuffer(): void
+    {
+        $rowCount = count($this->similarityInsertBuffer);
+        if ($rowCount === 0) {
+            return;
+        }
+
+        if (!isset($this->insertSimilarityBatchStatements[$rowCount])) {
+            $rowPlaceholder = '(?, ?, ?)';
+            $this->insertSimilarityBatchStatements[$rowCount] = $this->connection->prepare(
+                'INSERT INTO methods_similar (method1_title, method2_title, similarity) VALUES '
+                .implode(', ', array_fill(0, $rowCount, $rowPlaceholder))
             );
         }
 
-        $statement = $this->insertSimilarityStatement;
-        $statement->bindValue(1, $method1Title, ParameterType::STRING);
-        $statement->bindValue(2, $method2Title, ParameterType::STRING);
-        $statement->bindValue(3, $similarity, Types::FLOAT);
+        $statement = $this->insertSimilarityBatchStatements[$rowCount];
+        $position = 1;
+        foreach ($this->similarityInsertBuffer as $row) {
+            $statement->bindValue($position, $row['method1_title'], ParameterType::STRING);
+            ++$position;
+            $statement->bindValue($position, $row['method2_title'], ParameterType::STRING);
+            ++$position;
+            $statement->bindValue($position, $row['similarity'], Types::FLOAT);
+            ++$position;
+        }
+
         $statement->executeStatement();
-    }
-
-    private function fetchComparisonRows(Statement $statement, array $method): array
-    {
-        $title = (string) $method['title'];
-        $stage = (int) $method['stage'];
-        $lengthOfLead = (int) $method['lengthoflead'];
-
-        $statement->bindValue(1, $title, ParameterType::STRING);
-        $statement->bindValue(2, $stage, ParameterType::INTEGER);
-        $statement->bindValue(3, $title, ParameterType::STRING);
-        $statement->bindValue(4, $lengthOfLead, ParameterType::INTEGER);
-        $statement->bindValue(5, $lengthOfLead, ParameterType::INTEGER);
-        $statement->bindValue(6, $lengthOfLead, ParameterType::INTEGER);
-        $statement->bindValue(7, $lengthOfLead, ParameterType::INTEGER);
-
-        return $statement->executeQuery()->fetchAllAssociative();
+        $this->similarityInsertBuffer = array();
     }
 
     private function getUpsertSimilarityFlagStatement(string $column): Statement
