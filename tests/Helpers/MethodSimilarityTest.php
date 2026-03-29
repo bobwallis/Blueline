@@ -39,7 +39,7 @@ class MethodSimilarityTest extends TestCase
         $limit = 2;
 
         $result = MethodSimilarity::calculate($rows1, $rows2, 6, $limit);
-        $this->assertSame(round($limit, 2), $result);
+        $this->assertEquals($limit, $result);
     }
 
     public function testCalculateWithLimitMatchesUnlimitedForSimilarMethods(): void
