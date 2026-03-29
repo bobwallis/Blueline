@@ -104,7 +104,7 @@ class MethodSimilarity
 			// Once every value in a row has hit $limit the distance can never
 			// drop below $limit again, so we can return immediately.
 			if ($hasFiniteLimit && $rowMin >= $limit) {
-				return round($limit, 2);
+				return $limit;
 			}
 
 			// Swap arrays to move to the next row
