@@ -150,3 +150,6 @@ fi
 
 # Dump environment
 symfony composer dump-env prod
+
+# Cache error pages
+APP_ENV=prod symfony console error:dump -f var/cache/prod/error_pages/

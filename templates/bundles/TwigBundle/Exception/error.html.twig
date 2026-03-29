@@ -1,10 +1,10 @@
-{% extends chromeless ? 'BluelineBundle::base.chromeless.html.twig': 'BluelineBundle::base.html.twig' %}
+{% extends chromeless ? 'base.chromeless.html.twig': 'base.html.twig' %}
 
 {% block title %}{{ status_text }} | {{ parent() }}{% endblock %}
 {% set search = false %}
 
 {% block body %}
-	{% from 'BluelineBundle:Macros:header.html.twig' import header %}
+	{% from 'Macros/header.html.twig' import header %}
 	<section class="text">
 		{{ header(status_text) }}
 		<div class="wrap">
