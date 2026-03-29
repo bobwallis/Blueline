@@ -5,6 +5,10 @@
   "author": "Robert Wallis",
   "homepage": "https://rsw.me.uk/blueline/",
   "type": "module",
+  "scripts": {
+    "lint:js": "eslint src/Resources/js/**/*.js",
+    "lint:js:strict": "eslint src/Resources/js/**/*.js --max-warnings=0"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/bobwallis/Blueline.git"
@@ -13,16 +17,17 @@
     "last 3 versions"
   ],
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "autoprefixer": "^10.4.21",
+    "esbuild": "^0.25.3",
+    "eslint": "^10.1.0",
     "esm": "^3.2.25",
     "gulp": "^5.0.0",
-    "gulp-amdclean": "^1.1.1",
     "gulp-clean-css": "^4.3.0",
     "gulp-footer": "^2.1.0",
     "gulp-gzip": "^1.4.2",
     "gulp-imagemin": "^9.2.0",
     "gulp-postcss": "^10.0.0",
-    "gulp-requirejs": "^1.4.0",
     "gulp-sourcemaps": "^3.0.0",
     "gulp-terser": "^2.1.0",
     "postcss": "^8.5.8",

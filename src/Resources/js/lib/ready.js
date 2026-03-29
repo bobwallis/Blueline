@@ -1,11 +1,7 @@
-define( function() {
-    var ready = function( fn ) {
-        if( document.readyState != 'loading' ) {
-            fn();
-        }
-        else {
-            document.addEventListener( 'DOMContentLoaded', fn );
-        }
-    };
-    return ready;
-} );
+export default function ready(fn) {
+	if (document.readyState !== 'loading') {
+		fn();
+		return;
+	}
+	document.addEventListener('DOMContentLoaded', fn);
+}

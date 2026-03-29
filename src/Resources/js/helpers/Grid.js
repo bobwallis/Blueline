@@ -1,4 +1,9 @@
-define( ['deepmerge', './Grid/Options', './PlaceNotation', '../ui/Canvas', './MeasureCanvasTextOffset'], function( deepmerge, GridOptions, PlaceNotation, Canvas, MeasureCanvasTextOffset ) {
+import deepmerge from '../lib/deepmerge.js';
+import GridOptions from './Grid/Options.js';
+import PlaceNotation from './PlaceNotation.js';
+import Canvas from '../ui/Canvas.js';
+import MeasureCanvasTextOffset from './MeasureCanvasTextOffset.js';
+
 
 	var MethodGrid = function( passedOptions ) {
 		var options = {};
@@ -25,7 +30,7 @@ define( ['deepmerge', './Grid/Options', './PlaceNotation', '../ui/Canvas', './Me
 			}] ) );
 
 			// Create some shortcut variables for later use
-			var i, j, k, l, m, h, w, x, y,
+			var i, j, k, l, m, h, x, y,
 				context = canvas.context,
 
 				numberOfLeads = options.layout.numberOfLeads,
@@ -286,7 +291,7 @@ define( ['deepmerge', './Grid/Options', './PlaceNotation', '../ui/Canvas', './Me
 				context.setLineDash( [] );
 				options.placeStarts.bells.forEach( function( i, pos ) {
 					var j = (typeof options.startRow === 'object')? options.startRow[i] : i,
-						k, l, m;
+						k, l;
 					for( k = 0; k < numberOfColumns; ++k ) {
 						for( l = 0; l < leadsPerColumn && (k*leadsPerColumn)+l < numberOfLeads; ++l ) {
 							var positionInLeadHead = leadHeads[(k*leadsPerColumn)+l].indexOf( j ),
@@ -363,5 +368,4 @@ define( ['deepmerge', './Grid/Options', './PlaceNotation', '../ui/Canvas', './Me
 		return this;
 	};
 
-	return MethodGrid;
-} );
+	export default MethodGrid;

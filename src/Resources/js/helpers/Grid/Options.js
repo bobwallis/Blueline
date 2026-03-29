@@ -1,4 +1,7 @@
-define( ['deepmerge', '../PlaceNotation', '../MeasureCanvasText'], function( deepmerge, PlaceNotation, MeasureCanvasText ) {
+import deepmerge from '../../lib/deepmerge.js';
+import PlaceNotation from '../PlaceNotation.js';
+import MeasureCanvasText from '../MeasureCanvasText.js';
+
 
 	// Default options (note runtime defaults are set later)
 	var defaultOptions = {
@@ -81,7 +84,7 @@ define( ['deepmerge', '../PlaceNotation', '../MeasureCanvasText'], function( dee
 
 	var counter = 1;
 
-	return function( passedOptions ) {
+	export default function( passedOptions ) {
 		var options = {};
 		passedOptions = passedOptions || {};
 
@@ -220,4 +223,3 @@ define( ['deepmerge', '../PlaceNotation', '../MeasureCanvasText'], function( dee
 		return options;
 	};
 
-} );

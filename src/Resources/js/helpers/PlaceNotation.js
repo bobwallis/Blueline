@@ -1,4 +1,3 @@
-define( function() {
 	var PlaceNotation = {
 		bellToCharMap: ['1','2','3','4','5','6','7','8','9','0','E','T','A','B','C','D','F','G','H','J','K','L','M','N','P','Q','R','S','U','V','W','Y','Z'],
 		bellToChar: function( bell ) {
@@ -414,6 +413,5 @@ define( function() {
 		}
 	};
 
-	return PlaceNotation;
+	export default PlaceNotation;
 
-} );

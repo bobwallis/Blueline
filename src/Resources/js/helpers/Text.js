@@ -1,4 +1,5 @@
-define( ['./PlaceNotation'], function( PlaceNotation ) {
+import PlaceNotation from './PlaceNotation.js';
+
 
 	var trimtrailingcommaregex = /,\s*$/,
 		trimlastlistitemregex =/,[^,]+$/ ,
@@ -178,5 +179,4 @@ define( ['./PlaceNotation'], function( PlaceNotation ) {
 		}
 	};
 
-	return Text;
-} );
+	export default Text;

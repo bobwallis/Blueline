@@ -1,4 +1,6 @@
-define( ['../ui/Canvas', './LocalStorage'], function( Canvas, LocalStorage ) {
+import Canvas from '../ui/Canvas.js';
+import LocalStorage from './LocalStorage.js';
+
 	var measureText = function( text, font ) {
 		var width = LocalStorage.getCache( 'Width.'+font+text );
 		if( width === null ) {
@@ -10,5 +12,4 @@ define( ['../ui/Canvas', './LocalStorage'], function( Canvas, LocalStorage ) {
 		return width;
 	};
 
-	return measureText;
-} );
+	export default measureText;

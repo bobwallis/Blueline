@@ -1,75 +1,89 @@
-define( function() {
-	var prefix = 'blueline_',
-		dataAge = document.getElementsByTagName('html')[0].getAttribute( 'data-age' ),
-		now = (new Date()).toISOString().substr(0,19).replace(/[-:T]/g,''),
-		LocalStorage = {
-			age: parseInt( (dataAge === 'dev')? now : dataAge )
-		};
-	LocalStorage.getItem = function( key ) {
-		return JSON.parse( localStorage.getItem( prefix+key ) );
-	};
-	LocalStorage.setItem = function( key, value ) {
-		localStorage.setItem( prefix+key, JSON.stringify(value) );
-	};
-	LocalStorage.removeItem = function( key ) {
-		localStorage.removeItem( prefix+key );
-	};
-	LocalStorage.clear = function() {
-		localStorage.clear();
-	};
-	LocalStorage.getCache = function( key ) {
-		return LocalStorage.getItem( 'cache_'+key );
-	};
-	LocalStorage.setCache = function( key, value ) {
-		LocalStorage.setItem( 'cache_'+key, value );
-	};
-	LocalStorage.removeCache = function( key ) {
-		LocalStorage.removeItem( 'cache_'+key );
-	};
-	var cacheKey = new RegExp( '(^'+prefix+'cache_.*|^'+prefix+'Offset.*|^'+prefix+'Width.*)' );
-	LocalStorage.clearCache = function() {
-		var key, keys = [];
-		for( var i = 0; i < localStorage.length; ++i ) {
-			key = localStorage.key( i );
-			if( key.match( cacheKey ) !== null ) {
-				keys.push( key );
-			}
-		}
-		keys.forEach( function( key ) {
-			localStorage.removeItem( key )
-		} );
-	};
-	LocalStorage.getSetting = function( key, defaultSetting ) {
-		var value = LocalStorage.getItem( 'setting_'+key );
-		return (value === null)? defaultSetting : value;
-	};
-	LocalStorage.setSetting = function( key, value ) {
-		LocalStorage.setItem( 'setting_'+key, value );
-	};
-	LocalStorage.removeSetting = function( key ) {
-		LocalStorage.removeItem( 'setting_'+key );
-	};
-	var settingsKey = new RegExp( '^'+prefix+'setting_.*' );
-	LocalStorage.clearSettings = function() {
-		var key, keys = [];
-		for( var i = 0; i < localStorage.length; ++i ) {
-			key = localStorage.key( i );
-			if( key.match( settingsKey ) !== null ) {
-				keys.push( key );
-			}
-		}
-		keys.forEach( function( key ) {
-			localStorage.removeItem( key )
-		} );
-	};
+const prefix = 'blueline_';
+const dataAge = document.getElementsByTagName('html')[0].getAttribute('data-age');
+const now = (new Date()).toISOString().substr(0, 19).replace(/[-:T]/g, '');
 
-	// Clear out the cache if the app's age has changed
-	var cacheAge = LocalStorage.getItem( 'cacheAge' );
-	if( cacheAge === null ) { cacheAge = 0; }
-	if( cacheAge < LocalStorage.age ) {
-		LocalStorage.clearCache();
-		LocalStorage.setItem( 'cacheAge', LocalStorage.age );
+const LocalStorage = {
+	age: parseInt((dataAge === 'dev') ? now : dataAge, 10)
+};
+
+LocalStorage.getItem = function getItem(key) {
+	return JSON.parse(localStorage.getItem(prefix + key));
+};
+
+LocalStorage.setItem = function setItem(key, value) {
+	localStorage.setItem(prefix + key, JSON.stringify(value));
+};
+
+LocalStorage.removeItem = function removeItem(key) {
+	localStorage.removeItem(prefix + key);
+};
+
+LocalStorage.clear = function clear() {
+	localStorage.clear();
+};
+
+LocalStorage.getCache = function getCache(key) {
+	return LocalStorage.getItem('cache_' + key);
+};
+
+LocalStorage.setCache = function setCache(key, value) {
+	LocalStorage.setItem('cache_' + key, value);
+};
+
+LocalStorage.removeCache = function removeCache(key) {
+	LocalStorage.removeItem('cache_' + key);
+};
+
+const cacheKey = new RegExp('(^' + prefix + 'cache_.*|^' + prefix + 'Offset.*|^' + prefix + 'Width.*)');
+
+LocalStorage.clearCache = function clearCache() {
+	const keys = [];
+	for (let i = 0; i < localStorage.length; ++i) {
+		const key = localStorage.key(i);
+		if (key.match(cacheKey) !== null) {
+			keys.push(key);
+		}
 	}
+	keys.forEach((key) => {
+		localStorage.removeItem(key);
+	});
+};
 
-	return LocalStorage;
-} );
+LocalStorage.getSetting = function getSetting(key, defaultSetting) {
+	const value = LocalStorage.getItem('setting_' + key);
+	return (value === null) ? defaultSetting : value;
+};
+
+LocalStorage.setSetting = function setSetting(key, value) {
+	LocalStorage.setItem('setting_' + key, value);
+};
+
+LocalStorage.removeSetting = function removeSetting(key) {
+	LocalStorage.removeItem('setting_' + key);
+};
+
+const settingsKey = new RegExp('^' + prefix + 'setting_.*');
+
+LocalStorage.clearSettings = function clearSettings() {
+	const keys = [];
+	for (let i = 0; i < localStorage.length; ++i) {
+		const key = localStorage.key(i);
+		if (key.match(settingsKey) !== null) {
+			keys.push(key);
+		}
+	}
+	keys.forEach((key) => {
+		localStorage.removeItem(key);
+	});
+};
+
+let cacheAge = LocalStorage.getItem('cacheAge');
+if (cacheAge === null) {
+	cacheAge = 0;
+}
+if (cacheAge < LocalStorage.age) {
+	LocalStorage.clearCache();
+	LocalStorage.setItem('cacheAge', LocalStorage.age);
+}
+
+export default LocalStorage;

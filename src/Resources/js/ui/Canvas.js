@@ -1,7 +1,6 @@
 /**
  * Manages creation of canvas elements to cope with different pixel ratios
  */
-define( function() {
 	var Canvas = function( options ) {
 		// Create canvas element
 		var queryString = location.href.replace( /^.*?(\?|$)/, '' ),
@@ -38,5 +37,4 @@ define( function() {
 		type: 'canvas'
 	};
 
-	return Canvas;
-} );
+	export default Canvas;

@@ -1,4 +1,6 @@
-define( ['../ui/Canvas', './LocalStorage'], function( Canvas, LocalStorage ) {
+import Canvas from '../ui/Canvas.js';
+import LocalStorage from './LocalStorage.js';
+
 	/*
 	 * Text positioning on a <canvas> is inconsistent across browsers and platforms.
 	 * This is a problem when trying to get pixel perfect alignments of text and lines.
@@ -79,6 +81,7 @@ define( ['../ui/Canvas', './LocalStorage'], function( Canvas, LocalStorage ) {
 
 					LocalStorage.setCache( 'Offset.'+font+text, padding );
 				}
+				/* eslint-disable-next-line no-unused-vars */
 				catch( e ) {
 					padding.x = padding.y = 0;
 				}
@@ -88,5 +91,4 @@ define( ['../ui/Canvas', './LocalStorage'], function( Canvas, LocalStorage ) {
 		return padding;
 	};
 
-	return measureXAndYTextPadding;
-} );
+	export default measureXAndYTextPadding;

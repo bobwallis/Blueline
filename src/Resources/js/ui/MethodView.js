@@ -1,28 +1,14 @@
-define([
-    'deepmerge',
-    'eve',
-    './MethodView/InteractiveGridOverlay',
-    '../lib/webfont',
-    '../helpers/URL',
-    '../helpers/LocalStorage',
-    '../helpers/GridOptionsBuilder',
-    '../helpers/Grid',
-    '../helpers/PlaceNotation',
-    '../helpers/Text',
-    '../helpers/Music'
-], function(
-    deepmerge,
-    eve,
-    InteractiveGridOverlay,
-    webfont,
-    URL,
-    LocalStorage,
-    GridOptionsBuilder,
-    MethodGrid,
-    PlaceNotation,
-    Text,
-    Music
-) {
+import deepmerge from '../lib/deepmerge.js';
+import eve from '../lib/eve.js';
+import InteractiveGridOverlay from './MethodView/InteractiveGridOverlay.js';
+import webfont from '../lib/webfont.js';
+import URL from '../helpers/URL.js';
+import LocalStorage from '../helpers/LocalStorage.js';
+import GridOptionsBuilder from '../helpers/GridOptionsBuilder.js';
+import MethodGrid from '../helpers/Grid.js';
+import PlaceNotation from '../helpers/PlaceNotation.js';
+import Text from '../helpers/Text.js';
+import Music from '../helpers/Music.js';
 
     var newMethodView;
 
@@ -321,5 +307,4 @@ define([
 
     eve.on('setting.changed.*', redrawMethodView);
 
-    return newMethodView;
-});
+    export default newMethodView;

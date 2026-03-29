@@ -1,5 +1,4 @@
-define( function() {
-	return function(stringToTest) {
+	export default function(stringToTest) {
 		if( stringToTest === '' )            { return false; }
 		if( stringToTest === 'inherit' )     { return false; }
 		if( stringToTest === 'transparent' ) { return false; }
@@ -12,4 +11,3 @@ define( function() {
 		image.style.color = stringToTest;
 		return image.style.color !== 'rgb(255, 255, 255)';
 	};
-} );

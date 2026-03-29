@@ -96,5 +96,8 @@ fi
 
 echo -e "\033[32m✓ PHP source lint passed\033[0m"
 
+echo -e "\n\033[1mLint JavaScript\033[0m"
+npm run lint:js
+
 echo -e "\n\033[1mRunning PHPUnit tests\033[0m"
 APP_ENV=test "$d/bin/phpunit"

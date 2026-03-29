@@ -86,7 +86,7 @@
 		<div id="content" role="main"{{ search|default(false) ? ' class="searchable"' : '' }}>
 			{% block body %}{% endblock %}
 		</div>
-		<script src="{{ app.request.basepath }}/js/main.js?v={{ html_age }}" async></script>
+		<script type="module" src="{{ app.request.basepath }}/js/main.js?v={{ html_age }}"></script>
 	</body>
 </html>
 {% endapply %}

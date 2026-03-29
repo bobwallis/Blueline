@@ -1,4 +1,6 @@
-define( ['eve'], function( eve ) {
+/* eslint-disable-next-line no-unused-vars */
+import eve from '../../lib/eve.js';
+
 	// Create tooltip
 	var tooltipElement = document.createElement( 'div' );
 	tooltipElement.id = 'lineOverlay_tooltip';
@@ -9,7 +11,7 @@ define( ['eve'], function( eve ) {
 		tooltipElement.style.display = 'none';
 	} );
 
-	return function( grid, method, methodTexts ) {
+	export default function( grid, method, methodTexts ) {
 		// Don't do tooltips for hunt bells, filter them off
 		methodTexts = methodTexts.filter( function( m ) { return !m.hunt; } );
 		// For now just fail for differentials
@@ -27,6 +29,7 @@ define( ['eve'], function( eve ) {
 			// Use this to tell if the text is for places or points (we'll display the tooltip for those across a bigger area then they actually take up)
 			placePointRegex = /^(Make|Lead|Lie|Point)/,
 			// Format the text for display: Don't bother to show anything for hunting, and <sup> ordinal abbreviations
+			/* eslint-disable-next-line no-unused-vars */
 			textToDisplay = methodTexts[0].text.coreRows.map( function( e ) {
 				if( e === 'Hunt up' || e === 'Hunt down') {
 					return null;
@@ -36,6 +39,7 @@ define( ['eve'], function( eve ) {
 				}
 			} );
 
+		/* eslint-disable-next-line no-unused-vars */
 		gridElement.addEventListener( 'mousemove', function( e ) {
 			// Work out which row we're in
 			var row = Math.round( (e.pageY - topPadding) / rowHeight ) + (gridOptions.layout.changesPerColumn * Math.floor( (e.pageX - leftPadding) / columnWidth )) - 1;
@@ -64,13 +68,14 @@ define( ['eve'], function( eve ) {
 			tooltipElement.style.top = (e.pageY - 10)+'px';
 			tooltipElement.style.left = (e.pageX + 15)+'px';
 		} );
+		/* eslint-disable-next-line no-unused-vars */
 		gridElement.addEventListener( 'mouseout', function( e ) {
 			lastRow = -1;
 			tooltipElement.style.opacity = 0;
 		} );
+		/* eslint-disable-next-line no-unused-vars */
 		gridElement.addEventListener( 'mouseover', function( e ) {
 			tooltipElement.style.display = 'block';
 		} );
 	};
 
-} );

@@ -1,8 +1,11 @@
-define( ['deepmerge', './PlaceNotation', './MeasureCanvasText'], function( deepmerge, PlaceNotation, MeasureCanvasText ) {
+import deepmerge from '../lib/deepmerge.js';
+import PlaceNotation from './PlaceNotation.js';
+import MeasureCanvasText from './MeasureCanvasText.js';
 
 	// Helps generate options for Grid.js to display full plain courses and calls for a particular method
 
 	var GridOptionsBuilder = function( options ) {
+		/* eslint-disable-next-line no-unused-vars */
 		var i, j, k, l;
 
 		// Calculate various attributes of the method
@@ -203,6 +206,7 @@ define( ['deepmerge', './PlaceNotation', './MeasureCanvasText'], function( deepm
 				}
 			}] );
 			// Set the colors and stroke widths of the lines in the plain course
+			/* eslint-disable-next-line no-unused-vars */
 			var isHuntBell, isWorkingBell, isAffected;
 			for( var i = 0, j = 0; i < that.stage; ++i ) {
 				isHuntBell = that.huntBells.indexOf( i ) !== -1;
@@ -223,6 +227,7 @@ define( ['deepmerge', './PlaceNotation', './MeasureCanvasText'], function( deepm
 			thisgridOptionscallsnumbers = deepmerge( [], sharedCallsGridOptions );
 			// Set the colors and stroke widths of the lines in the calls
 			sharedCallsGridOptions.forEach( function( call, callIndex ) {
+				/* eslint-disable-next-line no-unused-vars */
 				var isHuntBell, isWorkingBell, isAffected;
 				// Set IDs and other options
 				thisgridOptionscallsnumbers[callIndex].id += '_numbers';
@@ -252,6 +257,7 @@ define( ['deepmerge', './PlaceNotation', './MeasureCanvasText'], function( deepm
 				numbers: {
 					show: true,
 					font: (fontSize*0.9)+'px '+fontFace,
+					/* eslint-disable-next-line no-unused-vars */
 					bells: rounds.map( function( b ) { return { color: '#002856' }; } )
 				},
 				sideNotation: false,
@@ -269,7 +275,9 @@ define( ['deepmerge', './PlaceNotation', './MeasureCanvasText'], function( deepm
 				}
 			}] );
 			// Set the colors and stroke widths of the lines in the plain course
+			/* eslint-disable-next-line no-unused-vars */
 			var isHuntBell, isWorkingBell, isAffected;
+			/* eslint-disable-next-line no-unused-vars */
 			for( var i = 0, j = 0; i < that.stage; ++i ) {
 				isHuntBell = that.huntBells.indexOf( i ) !== -1;
 				isWorkingBell = toFollow.indexOf( i ) !== -1;
@@ -289,6 +297,7 @@ define( ['deepmerge', './PlaceNotation', './MeasureCanvasText'], function( deepm
 			thisgridOptionscallsdiagrams = deepmerge( [], sharedCallsGridOptions );
 			// Set the colors and stroke widths of the lines in the calls
 			sharedCallsGridOptions.forEach( function( call, callIndex ) {
+				/* eslint-disable-next-line no-unused-vars */
 				var isHuntBell, isWorkingBell, isAffected;
 				// Set IDs and other options
 				thisgridOptionscallsdiagrams[callIndex].id += '_diagrams';
@@ -296,6 +305,7 @@ define( ['deepmerge', './PlaceNotation', './MeasureCanvasText'], function( deepm
 				thisgridOptionscallsdiagrams[callIndex].ruleOffs.stroke = '#002856';
 				thisgridOptionscallsdiagrams[callIndex].ruleOffs.width = fontSize/20;
 				thisgridOptionscallsdiagrams[callIndex].ruleOffs.dash = [0,0];
+				/* eslint-disable-next-line no-unused-vars */
 				thisgridOptionscallsdiagrams[callIndex].numbers = { show: true, font: (fontSize*0.9)+'px '+fontFace, bells: rounds.map( function( b ) { return { color: '#002856' }; } ) };
 				// Set line colors
 				for( i = 0, j = 0; i < that.stage; ++i ) {
@@ -327,6 +337,7 @@ define( ['deepmerge', './PlaceNotation', './MeasureCanvasText'], function( deepm
 				}
 			}] );
 			// Set the colors and stroke widths of the lines in the plain course
+			/* eslint-disable-next-line no-unused-vars */
 			var isHuntBell, isWorkingBell, isAffected;
 			for( i = 0, j = 0; i < that.stage; ++i ) {
 				isHuntBell = that.huntBells.indexOf( i ) !== -1;
@@ -347,6 +358,7 @@ define( ['deepmerge', './PlaceNotation', './MeasureCanvasText'], function( deepm
 			thisgridOptionscallslines = deepmerge( [], sharedCallsGridOptions );
 			// Set the colors and stroke widths of the lines in the calls
 			sharedCallsGridOptions.forEach( function( call, callIndex ) {
+				/* eslint-disable-next-line no-unused-vars */
 				var isHuntBell, isWorkingBell, isAffected;
 				// Set IDs and other options
 				thisgridOptionscallslines[callIndex].id += '_lines';
@@ -388,6 +400,7 @@ define( ['deepmerge', './PlaceNotation', './MeasureCanvasText'], function( deepm
 			var isHuntBell, isWorkingBell, i, j;
 			for( i = 0, j = 0; i < that.stage; ++i ) {
 				isHuntBell = that.huntBells.indexOf( i ) !== -1;
+				/* eslint-disable-next-line no-unused-vars */
 				isWorkingBell = toFollow.indexOf( i ) !== -1;
 				thisgridOptionsplainCoursegrid.lines.bells.push( {
 					width: isHuntBell? huntBellWidth : workingBellWidth,
@@ -412,6 +425,7 @@ define( ['deepmerge', './PlaceNotation', './MeasureCanvasText'], function( deepm
 				// Set line colors
 				for( i = 0, j = 0; i < that.stage; ++i ) {
 					isHuntBell = that.huntBells.indexOf( i ) !== -1;
+					/* eslint-disable-next-line no-unused-vars */
 					isAffected = call.affected.indexOf( i ) !== -1;
 					thisgridOptionscallsgrid[callIndex].lines.bells.push( {
 						width: isHuntBell? huntBellWidth : workingBellWidth,
@@ -424,5 +438,5 @@ define( ['deepmerge', './PlaceNotation', './MeasureCanvasText'], function( deepm
 
 		return this;
 	};
-	return GridOptionsBuilder;
-} );
+
+export default GridOptionsBuilder;

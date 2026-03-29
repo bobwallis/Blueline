@@ -6,11 +6,10 @@ import postcssImport from 'postcss-import';
 import postcssNested from 'postcss-nested';
 import autoprefixer from 'autoprefixer';
 import cleanCSS     from 'gulp-clean-css';
-import requirejs    from 'gulp-requirejs';
-import amdclean     from 'gulp-amdclean';
 import terser       from 'gulp-terser';
 import sourcemaps   from 'gulp-sourcemaps';
 import footer       from 'gulp-footer';
+import { build as esbuild } from 'esbuild';
 
 var DEST = './public/';
 
@@ -39,37 +38,16 @@ function gulp_fonts() {
 
 
 // Javascript
-var require_paths = {
-	eve:            'lib/eve',
-	ready:          'lib/ready',
-	deepmerge:      'lib/deepmerge',
-	matches:        'lib/matches',
-	'$document_on': 'lib/$document_on',
-	'Array.fill':   'lib/Array.fill'
-};
-var require_shim = {
-	'Modernizr': {
-		exports: 'Modernizr'
-	},
-	'Array.fill': {
-		exports: 'Array.prototype.fill'
-	}
-};
 function gulp_js() {
-	return requirejs( {
-		baseUrl: 'src/Resources/js/',
-		include: 'main',
-		paths: require_paths,
-		generateSourceMaps: true,
-		shim: require_shim,
-		optimize: 'none',
-		out: 'main.js'
-	} ).on('error', function( error ) { console.log( error ); } )
-		.pipe( sourcemaps.init( { loadMaps: true } ) )
-		.pipe( amdclean.gulp() )
-		.pipe( terser( { format: { comments: false } } ) )
-		.pipe( sourcemaps.write('../maps') )
-		.pipe( gulp.dest( DEST+'js/' ) );
+	return esbuild( {
+		entryPoints: ['src/Resources/js/main.js'],
+		bundle: true,
+		format: 'esm',
+		sourcemap: true,
+		minify: true,
+		target: ['es2020'],
+		outfile: DEST+'js/main.js'
+	} );
 };
 function gulp_js_serviceWorker() {
 	return gulp.src( 'src/Resources/js/service_worker.js' )

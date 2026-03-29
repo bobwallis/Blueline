@@ -1,4 +1,5 @@
-define( ['./PlaceNotation', 'Array.fill'], function( PlaceNotation, ArrayFill ) {
+import PlaceNotation from './PlaceNotation.js';
+
 
 	// These functions operate on objects that look like:
 	//  { row: [0,1,2,3,4,5], score: [0.1,0.1,0.1,0,0,0], namedRows: [] }
@@ -115,7 +116,7 @@ define( ['./PlaceNotation', 'Array.fill'], function( PlaceNotation, ArrayFill ) 
 		return scoredRow;
 	};
 
-	return function( rows, options ) {
+	export default function( rows, options ) {
 		if( typeof options === 'undefined' ) { options = {}; }
 		if( typeof options.stage === 'undefined' ) { options.stage = rows[0].length; }
 		options.wrap = options.wrap && rows.length > 1;
@@ -124,7 +125,12 @@ define( ['./PlaceNotation', 'Array.fill'], function( PlaceNotation, ArrayFill ) 
 		if( typeof options.wrap === 'undefined' || options.wrap ) {
 			rows = rows.reduce( function( prev, cur, i ) {
 				if( i%2 === 1 ) { prev.push([]); }
-				Array.prototype.push.apply( prev[prev.length-1], cur );
+				if( Array.isArray( cur ) ) {
+					Array.prototype.push.apply( prev[prev.length-1], cur );
+				}
+				else {
+					prev[prev.length-1].push( cur );
+				}
 				return prev;
 			}, [[]] );
 		}
@@ -137,7 +143,7 @@ define( ['./PlaceNotation', 'Array.fill'], function( PlaceNotation, ArrayFill ) 
 		// If wrapping, pull consecutive rows apart again.
 		if( typeof options.wrap === 'undefined' || options.wrap ) {
 			var offset = rows[1].row.length/2;
-			rows = rows.slice( 1 ).reduce( function( prev, cur, i ) {
+			rows = rows.slice( 1 ).reduce( function( prev, cur ) {
 				prev.push( { row: cur.row.slice(0, offset), score: cur.score.slice(0, offset), namedRows: cur.namedRows[0] } );
 				if( cur.row.length > offset ) {
 					prev.push( { row: cur.row.slice(offset), score: cur.score.slice(offset), namedRows: cur.namedRows[1] } );
@@ -147,4 +153,3 @@ define( ['./PlaceNotation', 'Array.fill'], function( PlaceNotation, ArrayFill ) 
 		}
 		return rows;
 	}
-} );

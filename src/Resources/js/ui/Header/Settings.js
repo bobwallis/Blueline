@@ -1,56 +1,54 @@
-define( ['eve', '$document_on', '../../helpers/LocalStorage'], function( eve, $document_on, LocalStorage ) {
-	var settings = ['method_follow', 'method_style', 'method_tooltips', 'method_music'];
+import eve from '../../lib/eve.js';
+import $document_on from '../../lib/$document_on.js';
+import LocalStorage from '../../helpers/LocalStorage.js';
 
-	// Set initial settings when the page is loaded
-	var initialSet = function() {
-		settings.forEach( function( setting ) {
-			var elements = document.querySelectorAll( '#'+setting+', input[name='+setting+']' );
-			// Checkboxes and selector boxes
-			if( elements.length === 1 ) {
-				var element = elements[0];
-				if( element.type === 'checkbox' ) {
-					element.checked = !!LocalStorage.getSetting( setting, element.checked );
-				}
-				else {
-					element.value = LocalStorage.getSetting( setting, element.value );
-				}
+const settings = ['method_follow', 'method_style', 'method_tooltips', 'method_music'];
+
+function initialSet() {
+	settings.forEach(function (setting) {
+		const elements = document.querySelectorAll('#' + setting + ', input[name=' + setting + ']');
+		if (elements.length === 1) {
+			const element = elements[0];
+			if (element.type === 'checkbox') {
+				element.checked = !!LocalStorage.getSetting(setting, element.checked);
+			} else {
+				element.value = LocalStorage.getSetting(setting, element.value);
 			}
-			// Radios
-			else {
-				var radioToCheck = LocalStorage.getSetting( setting, 'numbers' );
-				elements.forEach( function( element ) {
-					element.checked = (element.value === radioToCheck);
-				} );
-			}
-		} );
-	};
-	eve.on( 'page.finished', function() {
-		initialSet();
-	} );
+			return;
+		}
+
+		const radioToCheck = LocalStorage.getSetting(setting, 'numbers');
+		elements.forEach(function (element) {
+			element.checked = (element.value === radioToCheck);
+		});
+	});
+}
+
+eve.on('page.finished', function () {
 	initialSet();
+});
+initialSet();
 
-	// Update stored settings when form is changed
-	settings.forEach( function( setting ) {
-		$document_on( 'change', '#'+setting+', input[name='+setting+']', function( e ) {
-			if( e.target.type === 'checkbox' ) {
-				LocalStorage.setSetting( setting, e.target.checked );
-			}
-			else {
-				LocalStorage.setSetting( setting, e.target.value );
-			}
-			eve( 'setting.changed.'+setting );
-		} );
-	} );
+settings.forEach(function (setting) {
+	$document_on('change', '#' + setting + ', input[name=' + setting + ']', function (e) {
+		if (e.target.type === 'checkbox') {
+			LocalStorage.setSetting(setting, e.target.checked);
+		} else {
+			LocalStorage.setSetting(setting, e.target.value);
+		}
+		eve('setting.changed.' + setting);
+	});
+});
 
-	// Open/close settings
-	var settingsEl = document.getElementById( 'settings_wrap' );
-	document.getElementById( 'settings_button' ).addEventListener( 'click', function() {
-		settingsEl.className = (settingsEl.className == 'active') ? '' : 'active';
-	} );
-	var closeSettings = function( e ) {
-		e.preventDefault();
-		settingsEl.className = '';
-	};
-	document.getElementById( 'settings_submit' ).addEventListener( 'click', closeSettings );
-	document.getElementById( 'settings_form' ).addEventListener( 'submit', closeSettings );
-} );
+const settingsEl = document.getElementById('settings_wrap');
+document.getElementById('settings_button').addEventListener('click', function () {
+	settingsEl.className = (settingsEl.className === 'active') ? '' : 'active';
+});
+
+function closeSettings(e) {
+	e.preventDefault();
+	settingsEl.className = '';
+}
+
+document.getElementById('settings_submit').addEventListener('click', closeSettings);
+document.getElementById('settings_form').addEventListener('submit', closeSettings);
