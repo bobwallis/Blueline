@@ -15,7 +15,7 @@
 
 {% block body %}
 {% from 'Macros/header.html.twig' import header %}
-	<section class="method">
+	<section class="method" data-cccbr-id="{{ method.cccbrId|default('') }}">
 		{{ header( { 'title': method.title }, null, { 'id': 'method_tabBar', 'active': 1, 'tabs': [
 			{ 'title': 'Details', 'content': 'method_details' },
 			{ 'title': 'Line', 'content': 'method_line' },

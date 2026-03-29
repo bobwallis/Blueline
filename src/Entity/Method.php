@@ -62,6 +62,10 @@ class Method
             }
         }
 
+        if (array_key_exists('cccbrId', $objectVars)) {
+            $objectVars['cccbr_id'] = $objectVars['cccbrId'];
+        }
+
         return array_filter($objectVars);
     }
 

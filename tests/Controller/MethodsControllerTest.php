@@ -22,6 +22,7 @@ class MethodsControllerTest extends WebTestCase
         $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/view/Cambridge_Surprise_Minor request unsuccessful');
         $this->assertStringContainsString('Cambridge Surprise Minor', $client->getResponse()->getContent());
         $this->assertStringContainsString('Place', $client->getResponse()->getContent());
+        $this->assertStringContainsString('section class="method" data-cccbr-id="', $client->getResponse()->getContent());
 
         $client->request('GET', '/methods/view/Cambridge_Surprise_Minor.json');
         $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/view/Cambridge_Surprise_Minor.json request unsuccessful');
@@ -31,6 +32,10 @@ class MethodsControllerTest extends WebTestCase
         $this->assertSame('Cambridge Surprise Minor', $payload[0]['title']);
         $this->assertSame('Cambridge_Surprise_Minor', $payload[0]['url']);
         $this->assertSame(6, $payload[0]['stage']);
+        if (array_key_exists('cccbrId', $payload[0])) {
+            $this->assertArrayHasKey('cccbr_id', $payload[0]);
+            $this->assertSame($payload[0]['cccbrId'], $payload[0]['cccbr_id']);
+        }
     }
 
     public function testMethodViewRedirectsCanonicalAndEmptyUrls()
@@ -76,6 +81,15 @@ class MethodsControllerTest extends WebTestCase
         $this->assertTrue((bool) array_filter($payload['results'], function ($method) {
             return stripos($method['title'], 'Oxford') !== false;
         }), 'Search results should include an Oxford method');
+
+        $this->assertStringContainsString('cccbrId', $payload['query']['fields']);
+
+        foreach ($payload['results'] as $method) {
+            if (array_key_exists('cccbrId', $method)) {
+                $this->assertArrayHasKey('cccbr_id', $method);
+                $this->assertSame($method['cccbrId'], $method['cccbr_id']);
+            }
+        }
     }
 
     public function testMethodsSearchJsonReturnsOnlyRequestedFields()

@@ -476,8 +476,10 @@ class MethodTest extends TestCase
 
         $array = $method->__toArray();
 
-        $this->assertArrayHasKey('collections', $array);
-        $this->assertArrayHasKey('performances', $array);
+        $this->assertArrayNotHasKey('collections', $array);
+        $this->assertArrayNotHasKey('performances', $array);
+        $this->assertArrayNotHasKey('methodsimilarity1', $array);
+        $this->assertArrayNotHasKey('methodsimilarity2', $array);
         $this->assertArrayHasKey('classification', $array);
         $this->assertArrayHasKey('notationExpanded', $array);
         $this->assertArrayHasKey('leadHead', $array);
