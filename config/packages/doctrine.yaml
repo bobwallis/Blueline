@@ -28,8 +28,6 @@ doctrine:
                     Blueline\Doctrine\Levenshtein
                 levenshtein_ratio:
                     Blueline\Doctrine\LevenshteinRatio
-        controller_resolver:
-            auto_mapping: false
 
 when@test:
     doctrine:
