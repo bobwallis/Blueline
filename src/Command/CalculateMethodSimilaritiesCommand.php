@@ -20,8 +20,6 @@ use Blueline\Helpers\PlaceNotation;
 
 class CalculateMethodSimilaritiesCommand extends Command
 {
-    private const SIMILARITY_INSERT_BATCH_SIZE = 500;
-
     /** @var array<int, array{method1_title: string, method2_title: string, similarity: float}> */
     private array $similarityInsertBuffer = array();
 
@@ -120,51 +118,91 @@ class CalculateMethodSimilaritiesCommand extends Command
               WHERE (stage = ? AND title != ? AND method1_title IS NULL AND (ABS(lengthoflead - ?) < 1 OR ABS(lengthoflead - ?) < FLOOR((CASE WHEN ? < lengthoflead THEN ? ELSE lengthoflead END)/10)))'
         );
         foreach ($methods as $method) {
-            // Generate the array for the method we're generating indexes for
-            $notationExploded     = PlaceNotation::explode($method['notationexpanded']);
-            $notationPermutations = PlaceNotation::explodedToPermutations($method['stage'], $notationExploded);
-            $methodRowArray       = array_map('implode', PlaceNotation::apply($notationPermutations, $rounds[$method['stage']]));
-
-            // Get methods to compare against
             try {
-                $methodTitle = (string) $method['title'];
-                $methodStage = (int) $method['stage'];
-                $methodLengthOfLead = (int) $method['lengthoflead'];
+                $this->connection->transactional(function () use ($method, $rounds, $comparisonStatement): void {
+                    // Generate the array for the method we're generating indexes for
+                    $notationExploded     = PlaceNotation::explode($method['notationexpanded']);
+                    $notationPermutations = PlaceNotation::explodedToPermutations($method['stage'], $notationExploded);
+                    $methodRowArray       = array_map('implode', PlaceNotation::apply($notationPermutations, $rounds[$method['stage']]));
 
-                $comparisonStatement->bindValue(1, $methodTitle, ParameterType::STRING);
-                $comparisonStatement->bindValue(2, $methodStage, ParameterType::INTEGER);
-                $comparisonStatement->bindValue(3, $methodTitle, ParameterType::STRING);
-                $comparisonStatement->bindValue(4, $methodLengthOfLead, ParameterType::INTEGER);
-                $comparisonStatement->bindValue(5, $methodLengthOfLead, ParameterType::INTEGER);
-                $comparisonStatement->bindValue(6, $methodLengthOfLead, ParameterType::INTEGER);
-                $comparisonStatement->bindValue(7, $methodLengthOfLead, ParameterType::INTEGER);
+                    // Get methods to compare against
+                    $methodTitle = (string) $method['title'];
+                    $methodStage = (int) $method['stage'];
+                    $methodLengthOfLead = (int) $method['lengthoflead'];
 
-                $comparisons = $comparisonStatement->executeQuery()->fetchAllAssociative();
+                    $comparisonStatement->bindValue(1, $methodTitle, ParameterType::STRING);
+                    $comparisonStatement->bindValue(2, $methodStage, ParameterType::INTEGER);
+                    $comparisonStatement->bindValue(3, $methodTitle, ParameterType::STRING);
+                    $comparisonStatement->bindValue(4, $methodLengthOfLead, ParameterType::INTEGER);
+                    $comparisonStatement->bindValue(5, $methodLengthOfLead, ParameterType::INTEGER);
+                    $comparisonStatement->bindValue(6, $methodLengthOfLead, ParameterType::INTEGER);
+                    $comparisonStatement->bindValue(7, $methodLengthOfLead, ParameterType::INTEGER);
+
+                    $comparisons = $comparisonStatement->executeQuery()->fetchAllAssociative();
+
+                    // Compare each one and add to the similarity table (if similar enough)
+                    // limit is a heuristic threshold: if distance is >= 10% of lead
+                    // length we skip storing it to keep the table useful and compact.
+                    $limit = max(1, floor($method['lengthoflead']/10));
+                    foreach ($comparisons as $comparison) {
+                        $similar = MethodSimilarity::calculate($methodRowArray, $comparison['notationexpanded'], $method['stage'], $limit);
+                        if ($similar < $limit) {
+                            $this->similarityInsertBuffer[] = array(
+                                'method1_title' => $method['title'],
+                                'method2_title' => $comparison['title'],
+                                'similarity' => $similar,
+                            );
+                            $this->similarityInsertBuffer[] = array(
+                                'method1_title' => $comparison['title'],
+                                'method2_title' => $method['title'],
+                                'similarity' => $similar,
+                            );
+                        }
+                    }
+
+                    // Insert the obvious similar method so we don't try to recalculate everything the next time the command runs
+                    // This self-pair row acts as a marker that the method has been processed by this command.
+                    $this->similarityInsertBuffer[] = array(
+                        'method1_title' => $method['title'],
+                        'method2_title' => $method['title'],
+                        'similarity' => 0.0,
+                    );
+
+                    // Flush this method's buffered writes before commit so the next
+                    // method sees committed similarity rows and avoids duplicate pairs.
+                    $rowCount = count($this->similarityInsertBuffer);
+                    if ($rowCount > 0) {
+                        if (!isset($this->insertSimilarityBatchStatements[$rowCount])) {
+                            $rowPlaceholder = '(?, ?, ?)';
+                            $this->insertSimilarityBatchStatements[$rowCount] = $this->connection->prepare(
+                                'INSERT INTO methods_similar (method1_title, method2_title, similarity) VALUES '
+                                .implode(', ', array_fill(0, $rowCount, $rowPlaceholder))
+                            );
+                        }
+
+                        $statement = $this->insertSimilarityBatchStatements[$rowCount];
+                        $position = 1;
+                        foreach ($this->similarityInsertBuffer as $row) {
+                            $statement->bindValue($position, $row['method1_title'], ParameterType::STRING);
+                            ++$position;
+                            $statement->bindValue($position, $row['method2_title'], ParameterType::STRING);
+                            ++$position;
+                            $statement->bindValue($position, $row['similarity'], Types::FLOAT);
+                            ++$position;
+                        }
+
+                        $statement->executeStatement();
+                        $this->similarityInsertBuffer = array();
+                    }
+                });
             }
-            catch (Exception $exception) {
+            catch (\Throwable $exception) {
                 $output->writeln('<error>Failed to query for methods to compare \''.$method['title'].'\' against: '.$exception->getMessage().'</error>');
                 continue;
             }
 
-            // Compare each one and add to the similarity table (if similar enough)
-            // limit is a heuristic threshold: if distance is >= 10% of lead
-            // length we skip storing it to keep the table useful and compact.
-            $limit = max(1, floor($method['lengthoflead']/10));
-            foreach ($comparisons as $comparison) {
-                $similar = MethodSimilarity::calculate($methodRowArray, $comparison['notationexpanded'], $method['stage'], $limit);
-                if ($similar < $limit) {
-                    $this->insertSimilarityRow($method['title'], $comparison['title'], $similar);
-                    $this->insertSimilarityRow($comparison['title'], $method['title'], $similar);
-                }
-            }
-
-            // Insert the obvious similar method so we don't try to recalculate everything the next time the command runs
-            // This self-pair row acts as a marker that the method has been processed by this command.
-            $this->insertSimilarityRow($method['title'], $method['title'], 0.0);
-
             $progress->advance();
         }
-        $this->flushSimilarityInsertBuffer();
         $progress->finish();
         $output->writeln('');
 
@@ -312,49 +350,6 @@ class CalculateMethodSimilaritiesCommand extends Command
         $time += microtime(true);
         $output->writeln("\n<info>Finished updating method similarities in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true)/1048576, 2).' MiB.</info>');
         return 0;
-    }
-
-    private function insertSimilarityRow(string $method1Title, string $method2Title, float $similarity): void
-    {
-        $this->similarityInsertBuffer[] = array(
-            'method1_title' => $method1Title,
-            'method2_title' => $method2Title,
-            'similarity' => $similarity,
-        );
-
-        if (count($this->similarityInsertBuffer) >= self::SIMILARITY_INSERT_BATCH_SIZE) {
-            $this->flushSimilarityInsertBuffer();
-        }
-    }
-
-    private function flushSimilarityInsertBuffer(): void
-    {
-        $rowCount = count($this->similarityInsertBuffer);
-        if ($rowCount === 0) {
-            return;
-        }
-
-        if (!isset($this->insertSimilarityBatchStatements[$rowCount])) {
-            $rowPlaceholder = '(?, ?, ?)';
-            $this->insertSimilarityBatchStatements[$rowCount] = $this->connection->prepare(
-                'INSERT INTO methods_similar (method1_title, method2_title, similarity) VALUES '
-                .implode(', ', array_fill(0, $rowCount, $rowPlaceholder))
-            );
-        }
-
-        $statement = $this->insertSimilarityBatchStatements[$rowCount];
-        $position = 1;
-        foreach ($this->similarityInsertBuffer as $row) {
-            $statement->bindValue($position, $row['method1_title'], ParameterType::STRING);
-            ++$position;
-            $statement->bindValue($position, $row['method2_title'], ParameterType::STRING);
-            ++$position;
-            $statement->bindValue($position, $row['similarity'], Types::FLOAT);
-            ++$position;
-        }
-
-        $statement->executeStatement();
-        $this->similarityInsertBuffer = array();
     }
 
     private function getUpsertSimilarityFlagStatement(string $column): Statement
