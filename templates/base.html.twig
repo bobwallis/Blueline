@@ -11,7 +11,7 @@
 
 		{# Preload tags #}
 		<link rel="preload" href="{{ preload(app.request.basepath ~ '/css/all.css?v=' ~ html_age, {as: 'style'}) }}" as="style" />
-		<link rel="preload" href="{{ preload(app.request.basepath ~ '/js/main.js?v=' ~ html_age, {as: 'script'}) }}" as="script" />
+		<link rel="modulepreload" href="{{ link(app.request.basepath ~ '/js/main.js?v=' ~ html_age, 'modulepreload', {crossorigin: 'anonymous'}) }}" />
 		{% block preload %}{% endblock %}
 
 		{# Web app manifest #}
