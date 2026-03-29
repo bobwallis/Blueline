@@ -45,3 +45,7 @@ services:
         arguments:
             - '@parameter_bag'
             - '%kernel.environment%'
+
+    Blueline\EventListener\ResponseListener:
+        arguments:
+            - '%kernel.environment%'
