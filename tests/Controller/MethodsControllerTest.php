@@ -78,6 +78,38 @@ class MethodsControllerTest extends WebTestCase
         }), 'Search results should include an Oxford method');
     }
 
+    public function testMethodsSearchJsonReturnsOnlyRequestedFields()
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/methods/search.json?q=oxford&fields=title,url');
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/search.json?q=oxford&fields=title,url request unsuccessful');
+
+        $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('title,url', $payload['query']['fields']);
+        $this->assertNotEmpty($payload['results']);
+
+        $firstResult = $payload['results'][0];
+        $this->assertSame(array('title', 'url'), array_keys($firstResult));
+        $this->assertArrayNotHasKey('collections', $firstResult);
+        $this->assertArrayNotHasKey('performances', $firstResult);
+        $this->assertArrayNotHasKey('methodsimilarity1', $firstResult);
+        $this->assertArrayNotHasKey('methodsimilarity2', $firstResult);
+    }
+
+    public function testMethodsSearchJsonUnknownFieldsAreIgnored()
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/methods/search.json?q=oxford&fields=title,notAField');
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/search.json?q=oxford&fields=title,notAField request unsuccessful');
+
+        $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('title', $payload['query']['fields']);
+        $this->assertNotEmpty($payload['results']);
+        $this->assertSame(array('title'), array_keys($payload['results'][0]));
+    }
+
     public function testMethodsSearchRejectsInvalidRegularExpressions()
     {
         $client = static::createClient();

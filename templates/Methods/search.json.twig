@@ -1,5 +1,5 @@
 {{ {
 	'query': searchVariables,
-	'results': (methods|default([]))|toArray,
+	'results': (methods|default([]))|toArray(searchVariables.fields|split(',')),
 	'count': count
 }|json_encode|raw }}

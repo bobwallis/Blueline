@@ -75,12 +75,14 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
         return self::$days[intval($day)];
     }
 
-    public function toArray($obj)
+    public function toArray($obj, $fields = null)
     {
         if (is_callable(array( $obj, '__toArray' ))) {
-            return $obj->__toArray();
+            return $obj->__toArray($fields);
         } elseif (is_array($obj)) {
-            return array_map(array( $this, 'toArray' ), $obj);
+            return array_map(function ($item) use ($fields) {
+                return $this->toArray($item, $fields);
+            }, $obj);
         } elseif (is_callable(array( $obj, "toArray" ))) {
             return array_map(array( $this, 'toArray' ), $obj->toArray());
         } else {

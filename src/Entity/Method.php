@@ -36,9 +36,17 @@ class Method
         return 'Method:'.$this->getTitle();
     }
 
-    public function __toArray()
+    public function __toArray($fields = null)
     {
         $objectVars = get_object_vars($this);
+
+        if (is_string($fields)) {
+            $fields = array_filter(array_map('trim', explode(',', $fields)));
+        }
+        if (is_array($fields) && !empty($fields)) {
+            $objectVars = array_intersect_key($objectVars, array_flip($fields));
+        }
+
         foreach ($objectVars as $k => $v) {
             switch ($k) {
                 // Don't try to drill down into sub-entities or show stuff only used internally
@@ -47,7 +55,7 @@ class Method
                 case 'performances':
                 case 'methodsimilarity1':
                 case 'methodsimilarity2':
-                    $v = null;
+                    unset($objectVars[$k]);
                     break;
                 default:
                     $objectVars[$k] = $this->{'get'.ucwords($k)}();
