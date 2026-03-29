@@ -16,7 +16,7 @@ self.addEventListener( 'install', function( event ) {
                 base+'favicon.ico',
                 base+'favicon.svg',
                 base+'images/external.svg',
-                base+'images/loading.gif',
+                base+'images/loading.svg',
                 base+'images/search.svg',
                 base+'images/select.svg',
                 base+'images/welcome_methods.svg',
