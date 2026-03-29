@@ -11,6 +11,7 @@ parameters:
     blueline.image_endpoint: '%env(IMAGE_ENDPOINT)%'
     blueline.asset_update: '%env(ASSET_UPDATE)%'
     blueline.database_update: '%env(DATABASE_UPDATE)%'
+    .container.dumper.inline_factories: true
 
 services:
     # default configuration for services in *this* file

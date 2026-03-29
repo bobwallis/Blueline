@@ -4,6 +4,8 @@ framework:
         paths:
             - assets/
         missing_import_mode: strict
+        precompress:
+            format: ['brotli', 'zstandard', 'gzip']
 
 when@prod:
     framework:
