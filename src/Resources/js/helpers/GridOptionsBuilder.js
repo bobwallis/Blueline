@@ -53,7 +53,7 @@ import MeasureCanvasText from './MeasureCanvasText.js';
 
 		// Calculate some sizing to help with creating default grid options objects
 		var fontSize = (typeof options.fontSize == 'number')? options.fontSize : 12,
-			fontFace = ((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : 'Blueline, "Andale Mono", Consolas, ')+'monospace',
+			fontFace = 'Blueline, "Andale Mono", Consolas, monospace',
 			font = fontSize+'px '+fontFace,
 			columnPadding = fontSize,
 			rowHeight = Math.floor( fontSize*(fontSize < 15? 1.1 : 1.05) ),

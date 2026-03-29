@@ -71,7 +71,7 @@ import MeasureCanvasText from '../MeasureCanvasText.js';
 		},
 		numbers: {
 			show: true,
-			font: '12px '+((navigator.userAgent.toLowerCase().indexOf('android') > -1)? '' : 'Blueline, "Andale Mono", Consolas, ')+'monospace'
+			font: '12px Blueline, "Andale Mono", Consolas, monospace'
 		},
 		lines: {
 			show: true
@@ -222,4 +222,3 @@ import MeasureCanvasText from '../MeasureCanvasText.js';
 
 		return options;
 	};
-
