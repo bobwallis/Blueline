@@ -48,12 +48,24 @@ class MethodSimilarity
 		// Wagner-Fischer only actually needs the "previous" row and "current" row, so just keep those
 		// in memory and swap them on each iteration.
 		$prevD = range(0, $count2 - 1);
-		$currD =[];
+		$currD = [];
 		$hasFiniteLimit = is_finite($limit);
 
+		// Cap initialization row at $limit — values beyond the limit can never
+		// contribute to a below-limit path, and capping them lets the row-level
+		// early-out below kick in sooner.
+		if ($hasFiniteLimit) {
+			for ($j = 0; $j < $count2; ++$j) {
+				if ($prevD[$j] > $limit) {
+					$prevD[$j] = $limit;
+				}
+			}
+		}
+
 		for ($i = 1; $i < $count1; ++$i) {
-			$currD[0] = $i;
+			$currD[0] = min($i, $limit);
 			$row1_i = $rowArray1[$i];
+			$rowMin = $currD[0];
 
 			for ($j = 1; $j < $count2; ++$j) {
 				$prev_j_minus_1 = $prevD[$j-1];
@@ -66,20 +78,15 @@ class MethodSimilarity
 				$del2 = $currD[$j-1] + 1;
 				if ($del2 < $min_val) $min_val = $del2;
 
-				// Only calculate cost if we are under the limit
+				// Only calculate cost if the diagonal is under the limit
 				if ($prev_j_minus_1 < $limit) {
 					$cost = 0;
 					$r2pos = $row2Positions[$j];
 					$maxCostBeforeLimit = ($limit - $prev_j_minus_1) * $stage;
 
 					for ($k = 0; $k < $stage; ++$k) {
-						// Use array-like string access
-						// $row1_i[$k] grabs the character without needing str_split()
-						// $r2pos[...] gets the precomputed index without needing strpos()
 						$cost += abs($k - $r2pos[$row1_i[$k]]);
 
-						// With a finite limit we only care whether this branch can still beat
-						// the threshold; once it cannot, cap it at the limit and stop work.
 						if ($hasFiniteLimit && $cost >= $maxCostBeforeLimit) {
 							$cost = $maxCostBeforeLimit;
 							break;
@@ -88,11 +95,16 @@ class MethodSimilarity
 
 					$sub = $prev_j_minus_1 + ($cost / $stage);
 					if ($sub < $min_val) $min_val = $sub;
-				} else {
-					if ($prev_j_minus_1 < $min_val) $min_val = $prev_j_minus_1;
 				}
 
 				$currD[$j] = $min_val;
+				if ($min_val < $rowMin) $rowMin = $min_val;
+			}
+
+			// Once every value in a row has hit $limit the distance can never
+			// drop below $limit again, so we can return immediately.
+			if ($hasFiniteLimit && $rowMin >= $limit) {
+				return round($limit, 2);
 			}
 
 			// Swap arrays to move to the next row

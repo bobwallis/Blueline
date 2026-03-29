@@ -30,4 +30,22 @@ class MethodSimilarityTest extends TestCase
         $this->assertSame(2, MethodSimilarity::calculate([], ['123456', '214365'], 6));
         $this->assertSame(3, MethodSimilarity::calculate(['123456', '214365', '241635'], [], 6));
     }
+
+    public function testCalculateReturnsLimitForDissimilarMethodsWithLimit(): void
+    {
+        // Two very different row sequences — distance should exceed the limit.
+        $rows1 = ['123456', '214365', '241635', '426153', '462513', '645231'];
+        $rows2 = ['654321', '563412', '536142', '351624', '315264', '132546'];
+        $limit = 2;
+
+        $result = MethodSimilarity::calculate($rows1, $rows2, 6, $limit);
+        $this->assertSame(round($limit, 2), $result);
+    }
+
+    public function testCalculateWithLimitMatchesUnlimitedForSimilarMethods(): void
+    {
+        // Same rows — distance is 0 regardless of limit.
+        $rows = ['123456', '214365', '241635'];
+        $this->assertSame(0.0, MethodSimilarity::calculate($rows, $rows, 6, 5));
+    }
 }
