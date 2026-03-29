@@ -81,7 +81,7 @@ class ImportMethodsCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('blueline:importMethods')
             ->setDescription('Imports method data with the most recent data which has been fetched');

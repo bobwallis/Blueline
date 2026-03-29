@@ -8,7 +8,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ExportCollectionsCommand extends Command
 {
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('blueline:exportCollections')
              ->setDescription('Exports collection data in the databse to PHP source code');

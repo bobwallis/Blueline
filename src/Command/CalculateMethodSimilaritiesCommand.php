@@ -28,7 +28,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('blueline:calculateMethodSimilarities')
             ->setDescription('Calculates any missing similarity indexes for methods in the database');

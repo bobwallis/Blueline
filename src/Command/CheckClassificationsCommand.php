@@ -17,7 +17,7 @@ class CheckClassificationsCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('blueline:checkMethodClassifications')
             ->setDescription('Check for mismatches between the method library\'s classification of methods and the software\'s PHP code');

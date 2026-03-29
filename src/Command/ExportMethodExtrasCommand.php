@@ -8,7 +8,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ExportMethodExtrasCommand extends Command
 {
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('blueline:exportMethodExtras')
              ->setDescription('Exports the extra method data in the databse to PHP source code');
