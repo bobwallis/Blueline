@@ -49,6 +49,7 @@ class MethodSimilarity
 		// in memory and swap them on each iteration.
 		$prevD = range(0, $count2 - 1);
 		$currD =[];
+		$hasFiniteLimit = is_finite($limit);
 
 		for ($i = 1; $i < $count1; ++$i) {
 			$currD[0] = $i;
@@ -69,12 +70,20 @@ class MethodSimilarity
 				if ($prev_j_minus_1 < $limit) {
 					$cost = 0;
 					$r2pos = $row2Positions[$j];
+					$maxCostBeforeLimit = ($limit - $prev_j_minus_1) * $stage;
 
 					for ($k = 0; $k < $stage; ++$k) {
 						// Use array-like string access
 						// $row1_i[$k] grabs the character without needing str_split()
 						// $r2pos[...] gets the precomputed index without needing strpos()
 						$cost += abs($k - $r2pos[$row1_i[$k]]);
+
+						// With a finite limit we only care whether this branch can still beat
+						// the threshold; once it cannot, cap it at the limit and stop work.
+						if ($hasFiniteLimit && $cost >= $maxCostBeforeLimit) {
+							$cost = $maxCostBeforeLimit;
+							break;
+						}
 					}
 
 					$sub = $prev_j_minus_1 + ($cost / $stage);
