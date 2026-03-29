@@ -28,7 +28,7 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
         $this->environment = $params->get('kernel.environment');
     }
 
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return array(
             new \Twig\TwigFunction('count', 'count'),
@@ -38,7 +38,7 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
         );
     }
 
-    public function getFilters()
+    public function getFilters(): array
     {
         return array(
             new \Twig\TwigFilter('count', 'count'),

@@ -20,7 +20,7 @@ class ImportMethodExtrasCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('blueline:importMethodExtras')
             ->setDescription('Imports extra method data (calls, rule offs, duplicates, original names) with the most recent data which has been fetched');

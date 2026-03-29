@@ -17,7 +17,7 @@ class ImportCollectionsCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('blueline:importCollections')
             ->setDescription('Imports collection data');
