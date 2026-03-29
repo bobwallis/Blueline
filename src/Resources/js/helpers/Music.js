@@ -125,12 +125,7 @@ import PlaceNotation from './PlaceNotation.js';
 		if( typeof options.wrap === 'undefined' || options.wrap ) {
 			rows = rows.reduce( function( prev, cur, i ) {
 				if( i%2 === 1 ) { prev.push([]); }
-				if( Array.isArray( cur ) ) {
-					Array.prototype.push.apply( prev[prev.length-1], cur );
-				}
-				else {
-					prev[prev.length-1].push( cur );
-				}
+				Array.prototype.push.apply( prev[prev.length-1], cur );
 				return prev;
 			}, [[]] );
 		}
