@@ -18,8 +18,12 @@
   ],
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@hotwired/stimulus": "^3.0.0",
+    "@hotwired/turbo": "^7.1.0 || ^8.0",
+    "@symfony/stimulus-bridge": "^3.2.0 || ^4.0.0",
+    "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets",
     "autoprefixer": "^10.4.21",
-    "esbuild": "^0.25.3",
+    "esbuild": "^0.27.4",
     "eslint": "^10.1.0",
     "esm": "^3.2.25",
     "gulp": "^5.0.0",
