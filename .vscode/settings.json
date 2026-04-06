@@ -21,5 +21,8 @@
             "username": "user",
             "password": "pass"
         }
-    ]
+    ],
+    "chat.tools.terminal.autoApprove": {
+        "./bin/test": true
+    }
 }

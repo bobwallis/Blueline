@@ -73,7 +73,7 @@ and rebuild on-demand, which is helpful.
 Stylesheets are authored as `.css` files in `src/Resources/css/` and processed through PostCSS
 in `gulpfile.js` before being written to `public/css/`.
 
-Running `./test` runs the full project test pipeline (linting, schema/container checks, and the
+Running `./bin/test` runs the full project test pipeline (linting, schema/container checks, and the
 full PHPUnit suite).
 If you want to run targeted tests, call PHPUnit directly instead, for example:
 
@@ -81,7 +81,7 @@ If you want to run targeted tests, call PHPUnit directly instead, for example:
 - `APP_ENV=test ./bin/phpunit --filter testActionName tests/Controller/DefaultControllerTest.php`
 
 Some command tests are slow (mainly the blueline:importMethods test), and marked as such. To
-include the full test suite run `BLUELINE_RUN_SLOW_COMMAND_TESTS=1 ./test`.
+include the full test suite run `BLUELINE_RUN_SLOW_COMMAND_TESTS=1 ./bin/test`.
 
 
 ## 4) Maintain

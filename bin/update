@@ -1,10 +1,11 @@
 #!/bin/bash
 
-# Get script directory, and cd to it
+# Get script directory, and cd to repo root
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
 d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-cd "$d"
+repo_root="$( cd "$d/.." && pwd )"
+cd "$repo_root"
 
 # Parse options
 usage()
@@ -75,9 +76,9 @@ if [[ $GITPULL = true && $DEV = false ]]
 	# Restart update script (to allow it to update itself)
 	if [[ $CCCBRDATA = true ]]
 	then
-		"$d/update" --nopull
+		"$repo_root/bin/update" --nopull
 	else
-		"$d/update" --nopull --nodata
+		"$repo_root/bin/update" --nopull --nodata
 	fi
 	exit
 fi
@@ -141,11 +142,11 @@ fi
 
 
 # Rebuild web assets
-"$d/bin/buildFrontendAssets"
+"$repo_root/bin/buildFrontendAssets"
 
 if [[ $CCCBRDATA = true ]]
 	then
-	"$d/bin/fetchAndImportData"
+	"$repo_root/bin/fetchAndImportData"
 fi
 
 # Dump environment

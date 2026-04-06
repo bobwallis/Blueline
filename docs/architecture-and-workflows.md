@@ -41,7 +41,7 @@ This script updates cache-busting values, rebuilds CSS/JS bundles, and regenerat
 
 ### 4) Quality checks
 Use:
-- `./test`
+- `./bin/test`
 
 This runs:
 - PHPUnit

@@ -1,10 +1,11 @@
 #!/bin/bash
 
-# Get script directory, and cd to it
+# Get script directory, and cd to repo root
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
 d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-cd "$d"
+repo_root="$( cd "$d/.." && pwd )"
+cd "$repo_root"
 
 # Check test database exists and schema is accessible
 if ! symfony console dbal:run-sql "SELECT 1" --env=test > /dev/null 2>&1; then
@@ -43,16 +44,16 @@ method_count=$(symfony console dbal:run-sql "SELECT COUNT(*) FROM methods" --env
 if ! [[ "$method_count" =~ ^[0-9]+$ ]] || [ "$method_count" -eq 0 ]; then
     echo -e "\n\033[1mTest database has no method data\033[0m"
     echo -e "\n\033[33m⚠️  The following command will be executed:\033[0m"
-    echo -e "  $d/bin/fetchAndImportData --env=test"
+    echo -e "  $repo_root/bin/fetchAndImportData --env=test"
     echo ""
     read -p "Import method data into test database now? (y/n) " -n 1 -r response
     echo
     if [[ ! $response =~ ^[Yy]$ ]]; then
         echo -e "\033[31mTest data import cancelled. Cannot proceed with tests.\033[0m"
-        echo "Tip: Run this manually when ready: $d/bin/fetchAndImportData --env=test"
+        echo "Tip: Run this manually when ready: $repo_root/bin/fetchAndImportData --env=test"
         exit 1
     fi
-    "$d/bin/fetchAndImportData" --env=test
+    "$repo_root/bin/fetchAndImportData" --env=test
     method_count=$(symfony console dbal:run-sql "SELECT COUNT(*) FROM methods" --env=test 2>/dev/null | sed -n 's/^ *\([0-9][0-9]*\) *$/\1/p')
     if ! [[ "$method_count" =~ ^[0-9]+$ ]] || [ "$method_count" -eq 0 ]; then
         echo -e "\033[31m✗ Test database still appears empty after import\033[0m"
@@ -74,9 +75,9 @@ echo -e "\n\033[1mLint PHP source (syntax + deprecations)\033[0m"
 php_lint_failed=0
 while IFS= read -r -d '' file; do
     output=$(php -d error_reporting=E_ALL -d display_errors=1 -l "$file" 2>&1)
-    status=$?
+    rc=$?
 
-    if [ "$status" -ne 0 ]; then
+    if [ "$rc" -ne 0 ]; then
         echo "$output"
         php_lint_failed=1
         break
@@ -100,4 +101,4 @@ echo -e "\n\033[1mLint JavaScript\033[0m"
 npm run lint:js
 
 echo -e "\n\033[1mRunning PHPUnit tests\033[0m"
-APP_ENV=test "$d/bin/phpunit"
+APP_ENV=test "$repo_root/bin/phpunit"
