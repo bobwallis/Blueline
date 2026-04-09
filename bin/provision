@@ -283,7 +283,10 @@ if ! grep -q "^DATABASE_URL=" "$REPO_ROOT/.env.local"; then
 			echo "DATABASE_URL=\"postgresql://blueline:${DB_PASS}@127.0.0.1:5432/blueline?serverVersion=17&charset=utf8\"" >> "$REPO_ROOT/.env.local"
 			echo "  Written DATABASE_URL for VM environment."
 		else
-			echo "  WARNING: DB_PASS is empty (role already existed). DATABASE_URL not written — assumed to be present from a prior run."
+			DB_PASS="$(openssl rand -hex 16)"
+			sudo -u postgres psql -c "ALTER ROLE blueline WITH PASSWORD '${DB_PASS}';"
+			echo "DATABASE_URL=\"postgresql://blueline:${DB_PASS}@127.0.0.1:5432/blueline?serverVersion=17&charset=utf8\"" >> "$REPO_ROOT/.env.local"
+			echo "  DATABASE_URL was missing and PostgreSQL passwords cannot be recovered; rotated password for role 'blueline' and wrote a fresh DATABASE_URL."
 		fi
 	else
 		echo "DATABASE_URL=\"postgresql://user:pass@db:5432/blueline?serverVersion=17&charset=utf8\"" >> "$REPO_ROOT/.env.local"
