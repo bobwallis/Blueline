@@ -525,7 +525,7 @@ CFCONFIG
 		echo "  cloudflared config written to $_cf_config_dir/config.yml."
 
 		# Install and start cloudflared as a system service
-		sudo cloudflared service install
+		sudo cloudflared --config "$_cf_config_dir/config.yml" service install
 		sudo systemctl enable --now cloudflared
 		echo "  cloudflared service installed and started."
 
