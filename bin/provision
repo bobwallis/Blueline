@@ -455,7 +455,22 @@ if [ "$IS_DOCKER" = false ]; then
 		echo
 
 		# Authenticate with Cloudflare (opens browser)
-		cloudflared tunnel login
+		# cloudflared tunnel login refuses to overwrite an existing cert.pem; offer explicit re-login flow.
+		_cf_cert_path="$HOME/.cloudflared/cert.pem"
+		if [ -s "$_cf_cert_path" ]; then
+			echo "  Found existing Cloudflare certificate at $_cf_cert_path."
+			read -r -p "  Re-login and replace it? [y/N] " _replace_cf_cert
+			if [[ "$_replace_cf_cert" =~ ^[Yy]$ ]]; then
+				_cf_cert_backup="${_cf_cert_path}.bak.$(date +%Y%m%d%H%M%S)"
+				mv "$_cf_cert_path" "$_cf_cert_backup"
+				echo "  Backed up existing certificate to $_cf_cert_backup."
+				cloudflared tunnel login
+			else
+				echo "  Keeping existing certificate; skipping cloudflared tunnel login."
+			fi
+		else
+			cloudflared tunnel login
+		fi
 
 		# Prompt for tunnel name
 		read -r -p "  Tunnel name [blueline]: " _tunnel_name
