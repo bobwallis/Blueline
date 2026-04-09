@@ -62,11 +62,25 @@ class ZCalculateMethodSimilaritiesInteractiveTest extends CommandTestCase
 
     public function testCalculateMethodSimilaritiesCanAbortViaConfirmationPrompt(): void
     {
+        // Select methods that have ONLY a self-pair entry (no cross-pair entries).
+        // After we delete the self-pair, those methods will have no entries at all, so
+        // the command will count them as "unprocessed" and show the confirmation prompt.
         $titles = array_column(
-            $this->connection->executeQuery('SELECT title FROM methods ORDER BY title ASC LIMIT 30')->fetchAllAssociative(),
+            $this->connection->executeQuery(
+                'SELECT m.title FROM methods m
+                  WHERE EXISTS (
+                    SELECT 1 FROM methods_similar
+                     WHERE method1_title = m.title AND method2_title = m.title
+                  )
+                    AND NOT EXISTS (
+                    SELECT 1 FROM methods_similar
+                     WHERE method1_title = m.title AND method2_title != m.title
+                  )
+                  ORDER BY m.title ASC LIMIT 26'
+            )->fetchAllAssociative(),
             'title'
         );
-        $this->assertCount(30, $titles, 'Expected at least 30 methods in the test database for interactive-branch test');
+        $this->assertCount(26, $titles, 'Expected at least 26 methods with only a self-pair entry in the test database for interactive-branch test');
 
         foreach ($titles as $title) {
             $this->dbExec('DELETE FROM methods_similar WHERE method1_title = ? AND method2_title = ?', [$title, $title]);
