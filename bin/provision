@@ -552,4 +552,7 @@ if [ "$IS_DOCKER" = false ]; then
 fi
 
 
-echo -e "\n\033[1mSetup complete.\033[0m\n"
+echo -e "\n\033[1mSetup complete.\033[0m"
+echo -e "\n  Next steps:"
+echo    "    1. Build frontend assets:  ./bin/buildFrontendAssets"
+echo -e "    2. Import data:            ./bin/fetchAndImportData\n"
