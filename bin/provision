@@ -148,7 +148,7 @@ fi
 sudo apt-get install -y symfony-cli
 
 # Node.js 24 LTS — add NodeSource apt source if not already present
-if [ ! -f /etc/apt/sources.list.d/nodesource.list ]; then
+if [ ! -f /etc/apt/sources.list.d/nodesource.sources ]; then
 	echo "  Adding NodeSource apt source (Node.js 24)..."
 	curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 fi
@@ -342,8 +342,7 @@ fi
 symfony console doctrine:database:create --if-not-exists
 symfony console dbal:run-sql "CREATE EXTENSION IF NOT EXISTS fuzzystrmatch" --no-interaction 2>/dev/null || true
 
-SCHEMA_VALIDATE_OUTPUT="$(symfony console doctrine:schema:validate 2>&1)"
-SCHEMA_VALIDATE_EXIT_CODE=$?
+SCHEMA_VALIDATE_OUTPUT="$(symfony console doctrine:schema:validate 2>&1)" || true
 echo "$SCHEMA_VALIDATE_OUTPUT"
 
 if echo "$SCHEMA_VALIDATE_OUTPUT" | grep -q "The database schema is not in sync"; then
@@ -354,7 +353,7 @@ if echo "$SCHEMA_VALIDATE_OUTPUT" | grep -q "The database schema is not in sync"
 		echo "  Non-interactive: running forced schema update..."
 		symfony console doctrine:schema:update --force
 	else
-		echo
+		echo ""
 		read -r -p "  Run forced schema update now? [y/N] " RUN_SCHEMA_UPDATE
 		if [[ "$RUN_SCHEMA_UPDATE" =~ ^[Yy]$ ]]; then
 			echo -e "\n\033[1mRunning forced schema update\033[0m"
@@ -363,8 +362,6 @@ if echo "$SCHEMA_VALIDATE_OUTPUT" | grep -q "The database schema is not in sync"
 			echo "  Skipping forced schema update."
 		fi
 	fi
-elif [ "$SCHEMA_VALIDATE_EXIT_CODE" -ne 0 ]; then
-	exit "$SCHEMA_VALIDATE_EXIT_CODE"
 fi
 
 
@@ -462,9 +459,13 @@ if [ "$IS_DOCKER" = false ]; then
 		_tunnel_name="${_tunnel_name:-blueline}"
 
 		# Create the tunnel and extract its ID
-		_tunnel_output="$(cloudflared tunnel create "$_tunnel_name" 2>&1)"
+		_tunnel_output="$(cloudflared tunnel create "$_tunnel_name" 2>&1)" || {
+			echo "ERROR: Failed to create cloudflared tunnel." >&2
+			echo "$_tunnel_output" >&2
+			exit 1
+		}
 		echo "$_tunnel_output"
-		TUNNEL_ID="$(echo "$_tunnel_output" | grep -oP '(?<=Created tunnel [^ ]+ with id )[a-f0-9-]+')"
+		TUNNEL_ID="$(printf '%s\n' "$_tunnel_output" | awk '/Created tunnel .* with id / {print $NF; exit}' | tr -d '\r')"
 		if [ -z "$TUNNEL_ID" ]; then
 			echo "ERROR: Could not extract tunnel ID from cloudflared output." >&2
 			exit 1
