@@ -444,7 +444,7 @@ if [ "$IS_DOCKER" = false ]; then
 		echo -e "\n\033[1mCloudflared tunnel already configured — skipping.\033[0m"
 	elif [ "$NONINTERACTIVE" = true ]; then
 		echo -e "\n\033[1mSkipping cloudflared tunnel setup (non-interactive mode).\033[0m"
-		echo "  Re-run ./bin/setup interactively to complete the tunnel setup."
+		echo "  Re-run ./bin/provision interactively to complete the tunnel setup."
 	else
 		echo -e "\n\033[1mSetting up Cloudflared tunnel\033[0m"
 		echo "  This will open a browser to authenticate with your Cloudflare account."
@@ -480,7 +480,18 @@ if [ "$IS_DOCKER" = false ]; then
 		fi
 
 		# Route DNS
-		cloudflared tunnel route dns "$TUNNEL_ID" "$_public_hostname"
+		_route_dns_output="$(cloudflared tunnel route dns "$TUNNEL_ID" "$_public_hostname" 2>&1)" || {
+			_route_dns_status=$?
+			echo "ERROR: Failed to route DNS for tunnel $TUNNEL_ID to $_public_hostname." >&2
+			echo "$_route_dns_output" >&2
+			if ! cloudflared tunnel delete "$TUNNEL_ID" > /dev/null 2>&1; then
+				echo "WARNING: Failed to delete tunnel $TUNNEL_ID after DNS routing failure. Remove it manually." >&2
+			else
+				echo "  Deleted tunnel $TUNNEL_ID after DNS routing failure." >&2
+			fi
+			exit "$_route_dns_status"
+		}
+		echo "$_route_dns_output"
 
 		# Write cloudflared config
 		_cf_config_dir="$HOME/.cloudflared"
