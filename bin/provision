@@ -137,7 +137,7 @@ sudo apt-get upgrade -y --no-install-recommends
 
 # Core tools
 sudo apt-get install -y --no-install-recommends \
-	apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less zsh \
+	apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less gpg lsb-release zsh \
 	postgresql-client-17
 
 # Symfony CLI — add Cloudsmith apt source if not already present
@@ -187,11 +187,11 @@ if [ "$IS_DOCKER" = false ]; then
 		echo "  FrankenPHP already installed: $(frankenphp version 2>/dev/null || frankenphp --version 2>/dev/null || echo 'version unknown')"
 	fi
 
-	# cloudflared — add Cloudflare apt repo if not already present
+	# Add cloudflare gpg key and repository
 	if [ ! -f /etc/apt/sources.list.d/cloudflared.list ]; then
-		echo "  Adding Cloudflare apt source (cloudflared)..."
-		curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/cloudflare.gpg
-		echo "deb https://pkg.cloudflare.com/cloudflared $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflared.list > /dev/null
+		sudo mkdir -p --mode=0755 /usr/share/keyrings
+		curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+		echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
 		sudo apt-get update -qq
 	fi
 	sudo apt-get install -y cloudflared
