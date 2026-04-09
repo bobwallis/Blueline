@@ -1,0 +1,525 @@
+#!/bin/bash
+set -euo pipefail
+
+# ##############################################################################
+# PREAMBLE — resolve repo root, parse args, detect environment
+# ##############################################################################
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do SOURCE="$(readlink "$SOURCE")"; done
+d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+REPO_ROOT="$( cd "$d/.." && pwd )"
+cd "$REPO_ROOT"
+
+usage() {
+cat << EOF
+
+Usage: $0 [options]
+This script sets up or re-runs setup for Blueline. It is idempotent and safe to run multiple times.
+
+Options:
+ --yes, -y  Non-interactive: answer yes to all prompts (also set automatically when running in Docker)
+ --help      Shows this message
+EOF
+}
+
+NONINTERACTIVE=false
+AFTER_DOUBLE_DASH=false
+for arg in "$@"; do
+	if [ "$AFTER_DOUBLE_DASH" = true ]; then
+		printf >&2 '%s: unexpected positional argument: %s\n' "${0##*/}" "$arg"
+		usage
+		exit 1
+	fi
+	case "$arg" in
+		--)
+			AFTER_DOUBLE_DASH=true
+			;;
+		--yes|-y)
+			NONINTERACTIVE=true
+			;;
+		--help)
+			usage
+			exit 0
+			;;
+		--*)
+			printf >&2 '%s: unknown option: %s\n' "${0##*/}" "$arg"
+			usage
+			exit 1
+			;;
+		-*)
+			printf >&2 '%s: unknown option: %s\n' "${0##*/}" "$arg"
+			usage
+			exit 1
+			;;
+		*)
+			printf >&2 '%s: unexpected positional argument: %s\n' "${0##*/}" "$arg"
+			usage
+			exit 1
+			;;
+	esac
+done
+
+# Detect Docker — force non-interactive in containers
+IS_DOCKER=false
+if [ -f /.dockerenv ]; then
+	IS_DOCKER=true
+	NONINTERACTIVE=true
+fi
+
+# confirm_step "Warning message" — asks user to confirm or exits. Auto-yes when NONINTERACTIVE.
+# Usage: confirm_step "Some warning text" || exit 1
+confirm_step() {
+	local message="$1"
+	if [ "$NONINTERACTIVE" = true ]; then
+		echo "  [auto-yes] $message"
+		return 0
+	fi
+	echo
+	echo "  WARNING: $message"
+	read -r -p "  Continue? [y/N] " _confirm
+	if [[ "$_confirm" =~ ^[Yy]$ ]]; then
+		return 0
+	else
+		echo "Aborted."
+		exit 1
+	fi
+}
+
+echo -e "\n\033[1mBlueline setup\033[0m"
+echo "  REPO_ROOT:      $REPO_ROOT"
+echo "  IS_DOCKER:      $IS_DOCKER"
+echo "  NONINTERACTIVE: $NONINTERACTIVE"
+
+
+# ##############################################################################
+# SECTION 1: OS check (VM only — skipped inside Docker)
+# ##############################################################################
+
+if [ "$IS_DOCKER" = false ]; then
+	echo -e "\n\033[1mChecking OS\033[0m"
+
+	if [ ! -f /etc/os-release ]; then
+		echo "ERROR: /etc/os-release not found. Cannot determine OS." >&2
+		exit 1
+	fi
+
+	# shellcheck source=/dev/null
+	. /etc/os-release
+
+	if [ "${ID:-}" != "debian" ]; then
+		echo "ERROR: This script requires Debian. Detected: ${ID:-unknown} ${VERSION_CODENAME:-}" >&2
+		exit 1
+	fi
+
+	VERSION_NUM="${VERSION_ID%%.*}"
+	if [ "$VERSION_NUM" -lt 13 ]; then
+		echo "ERROR: Debian 13 (Trixie) or later is required. Detected: Debian $VERSION_ID (${VERSION_CODENAME:-})" >&2
+		exit 1
+	fi
+
+	if [ "$VERSION_NUM" -gt 13 ]; then
+		confirm_step "Detected Debian $VERSION_ID (${VERSION_CODENAME:-}), which is newer than Trixie (13). This script has not been tested on this version."
+	fi
+
+	echo "  OS: Debian $VERSION_ID (${VERSION_CODENAME:-}) — OK"
+fi
+
+
+# ##############################################################################
+# SECTION 2: System package installation
+# ##############################################################################
+
+echo -e "\n\033[1mInstalling system packages\033[0m"
+
+sudo apt-get update -qq
+sudo apt-get upgrade -y --no-install-recommends
+
+# Core tools
+sudo apt-get install -y --no-install-recommends \
+	apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less zsh \
+	postgresql-client-17
+
+# Symfony CLI — add Cloudsmith apt source if not already present
+if [ ! -f /etc/apt/sources.list.d/symfony-stable.list ]; then
+	echo "  Adding Symfony CLI apt source..."
+	curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | sudo -E bash -
+fi
+sudo apt-get install -y symfony-cli
+
+# Node.js 24 LTS — add NodeSource apt source if not already present
+if [ ! -f /etc/apt/sources.list.d/nodesource.list ]; then
+	echo "  Adding NodeSource apt source (Node.js 24)..."
+	curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+fi
+sudo apt-get install -y nodejs
+sudo npm install -g gulp
+
+# PHP 8.4 and extensions (Debian Trixie default — no extra apt source needed)
+sudo apt-get install -y --no-install-recommends \
+	php8.4-cli php8.4-opcache php8.4-pgsql php8.4-intl php8.4-mbstring php8.4-xml php8.4-zip php8.4-curl
+
+if [ "$IS_DOCKER" = true ]; then
+	# Install some CLI tools used by VS Code
+	sudo apt-get install -y --no-install-recommends \
+		ripgrep silversearcher-ag shellcheck
+fi
+
+if [ "$IS_DOCKER" = false ]; then
+	# PostgreSQL 17 (Debian Trixie default — no extra apt source needed)
+	sudo apt-get install -y postgresql-17 postgresql-client-17
+
+	# FrankenPHP — download latest binary from GitHub releases if not already installed
+	if ! command -v frankenphp > /dev/null 2>&1; then
+		echo "  Installing FrankenPHP..."
+		_frankenphp_tag="$(curl -fsSL https://api.github.com/repos/dunglas/frankenphp/releases/latest | grep '"tag_name"' | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/')"
+		_frankenphp_arch="$(dpkg --print-architecture)"
+		case "$_frankenphp_arch" in
+			amd64) _frankenphp_binary="frankenphp-linux-x86_64" ;;
+			arm64) _frankenphp_binary="frankenphp-linux-aarch64" ;;
+			*) echo "ERROR: Unsupported architecture: $_frankenphp_arch" >&2; exit 1 ;;
+		esac
+		curl -fsSL "https://github.com/dunglas/frankenphp/releases/download/${_frankenphp_tag}/${_frankenphp_binary}" -o /tmp/frankenphp
+		sudo install -m 755 /tmp/frankenphp /usr/local/bin/frankenphp
+		rm /tmp/frankenphp
+		echo "  FrankenPHP ${_frankenphp_tag} installed."
+	else
+		echo "  FrankenPHP already installed: $(frankenphp version 2>/dev/null || frankenphp --version 2>/dev/null || echo 'version unknown')"
+	fi
+
+	# cloudflared — add Cloudflare apt repo if not already present
+	if [ ! -f /etc/apt/sources.list.d/cloudflared.list ]; then
+		echo "  Adding Cloudflare apt source (cloudflared)..."
+		curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/cloudflare.gpg
+		echo "deb https://pkg.cloudflare.com/cloudflared $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflared.list > /dev/null
+		sudo apt-get update -qq
+	fi
+	sudo apt-get install -y cloudflared
+
+fi
+
+# Clean up apt caches
+sudo apt-get autoremove -y
+sudo apt-get clean
+sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* || true
+
+echo "  System packages: done."
+
+# ##############################################################################
+# SECTION 3: PostgreSQL setup (VM only)
+# ##############################################################################
+
+if [ "$IS_DOCKER" = false ]; then
+	echo -e "\n\033[1mConfiguring PostgreSQL\033[0m"
+
+	sudo systemctl enable --now postgresql
+
+	# Create role if it doesn't already exist
+	_role_exists="$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='blueline'" 2>/dev/null || true)"
+	DB_PASS=""
+	if [ "$_role_exists" != "1" ]; then
+		DB_PASS="$(openssl rand -hex 16)"
+		sudo -u postgres psql -c "CREATE ROLE blueline LOGIN PASSWORD '${DB_PASS}';"
+		echo "  Created PostgreSQL role 'blueline'."
+	else
+		echo "  PostgreSQL role 'blueline' already exists — skipping creation."
+	fi
+
+	# Create database if it doesn't already exist
+	_db_exists="$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='blueline'" 2>/dev/null || true)"
+	if [ "$_db_exists" != "1" ]; then
+		sudo -u postgres psql -c "CREATE DATABASE blueline OWNER blueline;"
+		echo "  Created PostgreSQL database 'blueline'."
+	else
+		echo "  PostgreSQL database 'blueline' already exists — skipping creation."
+	fi
+
+	# Write tuning config if not already present
+	_pg_conf_dir="/etc/postgresql/17/main/conf.d"
+	_pg_tuning_conf="$_pg_conf_dir/blueline.conf"
+	if [ ! -f "$_pg_tuning_conf" ]; then
+		echo "  Writing PostgreSQL tuning config to $_pg_tuning_conf..."
+		sudo tee "$_pg_tuning_conf" > /dev/null << 'PGCONF'
+# Blueline tuning — small (~70 MB) DB expected to fit fully in shared_buffers
+shared_buffers = 256MB # Enough to hold the whole DB in memory, but not so much that it would cause swapping on a machine with 1-2 GB RAM (e.g. small VM)
+effective_cache_size = 512MB # Assume enough RAM to cache the whole DB and more, to encourage index use
+work_mem = 64MB
+maintenance_work_mem = 64MB
+checkpoint_completion_target = 0.9 # Likely won't have enough WAL to fully utilise this, but good to have it set for safety
+random_page_cost = 1.1 # Assume fast storage to encourage index use
+effective_io_concurrency = 200 # Assume fast storage (e.g. NVMe) to encourage more aggressive use of indexes
+synchronous_commit = off # Buffer writes, fine as updates will be rare and data loss on crash is acceptable
+checkpoint_timeout = 5min # Only flush to disk every 5 mins, which should batch everything
+max_wal_size = 1GB # Will never reach this in 5min with the expected workload
+PGCONF
+		sudo systemctl reload postgresql
+		echo "  PostgreSQL tuning applied and service reloaded."
+	else
+		echo "  PostgreSQL tuning config already present — skipping."
+	fi
+fi
+
+
+# ##############################################################################
+# SECTION 4: Configure .env.local
+# ##############################################################################
+
+echo -e "\n\033[1mConfiguring .env.local\033[0m"
+
+touch "$REPO_ROOT/.env.local"
+
+# APP_SECRET — generate once, never overwrite
+if ! grep -q "^APP_SECRET=" "$REPO_ROOT/.env.local"; then
+	echo "APP_SECRET=$(openssl rand -hex 32)" >> "$REPO_ROOT/.env.local"
+	echo "  Generated APP_SECRET."
+else
+	echo "  APP_SECRET already set — skipping."
+fi
+
+# DATABASE_URL — set if not already set, but don't overwrite if present
+if ! grep -q "^DATABASE_URL=" "$REPO_ROOT/.env.local"; then
+	if [ "$IS_DOCKER" = false ]; then
+		if [ -n "$DB_PASS" ]; then
+			echo "DATABASE_URL=\"postgresql://blueline:${DB_PASS}@127.0.0.1:5432/blueline?serverVersion=17&charset=utf8\"" >> "$REPO_ROOT/.env.local"
+			echo "  Written DATABASE_URL for VM environment."
+		else
+			echo "  WARNING: DB_PASS is empty (role already existed). DATABASE_URL not written — assumed to be present from a prior run."
+		fi
+	else
+		echo "DATABASE_URL=\"postgresql://user:pass@db:5432/blueline?serverVersion=17&charset=utf8\"" >> "$REPO_ROOT/.env.local"
+		echo "  Written DATABASE_URL for Docker environment."
+	fi
+else
+	echo "  DATABASE_URL already set — skipping."
+fi
+
+# APP_ENV — VM is prod, Docker is dev; set only if not already set to avoid overwriting existing config
+if ! grep -q "^APP_ENV=" "$REPO_ROOT/.env.local"; then
+	if [ "$IS_DOCKER" = false ]; then
+		echo "APP_ENV=prod" >> "$REPO_ROOT/.env.local"
+		echo "  Set APP_ENV=prod."
+	else
+		echo "APP_ENV=dev" >> "$REPO_ROOT/.env.local"
+		echo "  Set APP_ENV=dev."
+	fi
+else
+	echo "  APP_ENV already set — skipping."
+fi
+
+
+# ##############################################################################
+# SECTION 5: PHP application dependencies
+# ##############################################################################
+
+echo -e "\n\033[1mInstalling PHP dependencies\033[0m"
+cd "$REPO_ROOT"
+symfony composer install --optimize-autoloader
+
+
+# ##############################################################################
+# SECTION 6: Database schema
+# ##############################################################################
+
+echo -e "\n\033[1mSetting up database schema\033[0m"
+cd "$REPO_ROOT"
+
+# In Docker the db service starts alongside the app container; wait until it is ready
+if [ "$IS_DOCKER" = true ]; then
+	echo "  Waiting for database to become available..."
+	_db_wait_attempts=0
+	until pg_isready -h db -U user -d blueline > /dev/null 2>&1; do
+		_db_wait_attempts=$((_db_wait_attempts + 1))
+		if [ "$_db_wait_attempts" -ge 30 ]; then
+			echo "ERROR: Database did not become available after 30 attempts." >&2
+			exit 1
+		fi
+		sleep 2
+	done
+	echo "  Database is ready."
+fi
+
+# Create database if it doesn't exist, and run schema updates
+symfony console doctrine:database:create --if-not-exists
+symfony console dbal:run-sql "CREATE EXTENSION IF NOT EXISTS fuzzystrmatch" --no-interaction 2>/dev/null || true
+
+SCHEMA_VALIDATE_OUTPUT="$(symfony console doctrine:schema:validate 2>&1)"
+SCHEMA_VALIDATE_EXIT_CODE=$?
+echo "$SCHEMA_VALIDATE_OUTPUT"
+
+if echo "$SCHEMA_VALIDATE_OUTPUT" | grep -q "The database schema is not in sync"; then
+	echo -e "\n\033[1mDatabase schema is out of date\033[0m"
+	echo -e "\n\033[1mPending SQL updates\033[0m"
+	symfony console doctrine:schema:update --dump-sql
+	if [ "$NONINTERACTIVE" = true ]; then
+		echo "  Non-interactive: running forced schema update..."
+		symfony console doctrine:schema:update --force
+	else
+		echo
+		read -r -p "  Run forced schema update now? [y/N] " RUN_SCHEMA_UPDATE
+		if [[ "$RUN_SCHEMA_UPDATE" =~ ^[Yy]$ ]]; then
+			echo -e "\n\033[1mRunning forced schema update\033[0m"
+			symfony console doctrine:schema:update --force
+		else
+			echo "  Skipping forced schema update."
+		fi
+	fi
+elif [ "$SCHEMA_VALIDATE_EXIT_CODE" -ne 0 ]; then
+	exit "$SCHEMA_VALIDATE_EXIT_CODE"
+fi
+
+
+# ##############################################################################
+# SECTION 7: Node.js dependencies
+# ##############################################################################
+
+echo -e "\n\033[1mInstalling Node.js dependencies\033[0m"
+cd "$REPO_ROOT"
+npm install
+npm audit fix || true
+npx update-browserslist-db@latest
+
+
+# ##############################################################################
+# SECTION 8: FrankenPHP systemd service (VM only)
+# ##############################################################################
+
+if [ "$IS_DOCKER" = false ]; then
+	echo -e "\n\033[1mConfiguring FrankenPHP systemd service\033[0m"
+
+	# Always regenerate Caddyfile (absolute path substituted in; file is .gitignored)
+	cat > "$REPO_ROOT/Caddyfile" << CADDYFILE
+{
+	frankenphp
+	order php_server before file_server
+}
+
+:8000 {
+	root * ${REPO_ROOT}/public
+	php_server {
+		worker ./public/index.php
+	}
+	encode zstd gzip
+}
+CADDYFILE
+	echo "  Caddyfile written to $REPO_ROOT/Caddyfile."
+
+	# Build desired service unit content
+	_current_user="$(whoami)"
+	_current_group="$(id -gn)"
+	_desired_unit="[Unit]
+Description=Blueline (FrankenPHP)
+After=network.target postgresql.service
+
+[Service]
+Type=notify
+WorkingDirectory=${REPO_ROOT}
+ExecStart=/usr/local/bin/frankenphp run --config ${REPO_ROOT}/Caddyfile
+User=${_current_user}
+Group=${_current_group}
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target"
+
+	_unit_file="/etc/systemd/system/blueline.service"
+
+	# Write unit file only if absent or content has changed
+	if [ ! -f "$_unit_file" ] || ! diff -q <(echo "$_desired_unit") "$_unit_file" > /dev/null 2>&1; then
+		echo "$_desired_unit" | sudo tee "$_unit_file" > /dev/null
+		echo "  Written $_unit_file."
+		sudo systemctl daemon-reload
+	else
+		echo "  systemd unit file unchanged — skipping reload."
+	fi
+
+	sudo systemctl enable --now blueline
+	echo "  blueline.service enabled and started."
+fi
+
+
+# ##############################################################################
+# SECTION 9: Cloudflared tunnel (VM only, interactive only)
+# ##############################################################################
+
+if [ "$IS_DOCKER" = false ]; then
+	if grep -q "^CLOUDFLARE_TUNNEL_ID=" "$REPO_ROOT/.env.local" 2>/dev/null; then
+		echo -e "\n\033[1mCloudflared tunnel already configured — skipping.\033[0m"
+	elif [ "$NONINTERACTIVE" = true ]; then
+		echo -e "\n\033[1mSkipping cloudflared tunnel setup (non-interactive mode).\033[0m"
+		echo "  Re-run ./bin/setup interactively to complete the tunnel setup."
+	else
+		echo -e "\n\033[1mSetting up Cloudflared tunnel\033[0m"
+		echo "  This will open a browser to authenticate with your Cloudflare account."
+		echo "  You will need an existing Cloudflare account and Zero Trust team."
+		echo
+
+		# Authenticate with Cloudflare (opens browser)
+		cloudflared tunnel login
+
+		# Prompt for tunnel name
+		read -r -p "  Tunnel name [blueline]: " _tunnel_name
+		_tunnel_name="${_tunnel_name:-blueline}"
+
+		# Create the tunnel and extract its ID
+		_tunnel_output="$(cloudflared tunnel create "$_tunnel_name" 2>&1)"
+		echo "$_tunnel_output"
+		TUNNEL_ID="$(echo "$_tunnel_output" | grep -oP '(?<=Created tunnel [^ ]+ with id )[a-f0-9-]+')"
+		if [ -z "$TUNNEL_ID" ]; then
+			echo "ERROR: Could not extract tunnel ID from cloudflared output." >&2
+			exit 1
+		fi
+		echo "  Tunnel ID: $TUNNEL_ID"
+
+		# Prompt for public hostname
+		read -r -p "  Public hostname (e.g. blueline.example.com): " _public_hostname
+		if [ -z "$_public_hostname" ]; then
+			echo "ERROR: Public hostname is required." >&2
+			exit 1
+		fi
+
+		# Route DNS
+		cloudflared tunnel route dns "$TUNNEL_ID" "$_public_hostname"
+
+		# Write cloudflared config
+		_cf_config_dir="$HOME/.cloudflared"
+		mkdir -p "$_cf_config_dir"
+		cat > "$_cf_config_dir/config.yml" << CFCONFIG
+tunnel: ${TUNNEL_ID}
+credentials-file: ${_cf_config_dir}/${TUNNEL_ID}.json
+ingress:
+  - hostname: ${_public_hostname}
+    service: http://localhost:8000
+  - service: http_status:404
+CFCONFIG
+		echo "  cloudflared config written to $_cf_config_dir/config.yml."
+
+		# Install and start cloudflared as a system service
+		sudo cloudflared service install
+		sudo systemctl enable --now cloudflared
+		echo "  cloudflared service installed and started."
+
+		# Persist tunnel ID and endpoint in .env.local
+		echo "CLOUDFLARE_TUNNEL_ID=${TUNNEL_ID}" >> "$REPO_ROOT/.env.local"
+		echo "ENDPOINT=https://${_public_hostname}" >> "$REPO_ROOT/.env.local"
+		echo "  CLOUDFLARE_TUNNEL_ID and ENDPOINT written to .env.local."
+	fi
+fi
+
+
+# ##############################################################################
+# SECTION 10: Production finalisation (VM only)
+# ##############################################################################
+
+if [ "$IS_DOCKER" = false ]; then
+	echo -e "\n\033[1mFinalising production environment\033[0m"
+	cd "$REPO_ROOT"
+	symfony console cache:clear --env=prod
+	symfony console cache:warm --env=prod
+	symfony composer dump-env prod
+	APP_ENV=prod symfony console error:dump -f var/cache/prod/error_pages/
+	echo "  Production finalisation complete."
+fi
+
+
+echo -e "\n\033[1mSetup complete.\033[0m\n"

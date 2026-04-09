@@ -1,60 +1,25 @@
-# [Choice] PHP version (use -bookworm variants on local arm64/Apple Silicon): 8, 8.5, 8.4, 8.3, 8.2, 8-bookworm, 8.5-bookworm, 8.4-bookworm, 8.3-bookworm, 8.2-bookworm, 8-trixie, 8.5-trixie, 8.4-trixie, 8.3-trixie, 8.2-trixie
-ARG VARIANT=8.4-trixie
-FROM mcr.microsoft.com/devcontainers/php:${VARIANT}
+FROM mcr.microsoft.com/devcontainers/base:trixie
 
-# Update args in docker-compose.yaml to set the UID/GID of the "vscode" user.
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
-RUN if [ "$USER_GID" != "1000" ] || [ "$USER_UID" != "1000" ]; then \
-        groupmod --gid $USER_GID vscode \
-        && usermod --uid $USER_UID --gid $USER_GID vscode \
-        && chmod -R $USER_UID:$USER_GID /home/vscode; \
-    fi
+# Set the locale
+ENV LANG=en_GB.UTF-8 LC_ALL=en_GB.UTF-8
+RUN echo "en_GB.UTF-8 UTF-8" >> /etc/locale.gen
 
-# Node.js version from official tarballs (set to "none" to skip).
-# - Exact pin example: NODE_VERSION="24.10.0"
-# - Latest patch in major line: NODE_VERSION="24"
-ARG NODE_VERSION="24"
-RUN if [ "${NODE_VERSION}" != "none" ]; then \
-        set -eux; \
-        node_version="${NODE_VERSION}"; \
-        if echo "${node_version}" | grep -Eq '^[0-9]+$'; then \
-            node_version="$(curl -fsSL https://nodejs.org/dist/index.json | grep -o '"version":"v'"${NODE_VERSION}"'\.[0-9]\+\.[0-9]\+"' | head -n1 | sed -E 's/"version":"v([^\"]+)"/\1/')"; \
-            if [ -z "${node_version}" ]; then echo "Could not resolve latest Node.js ${NODE_VERSION}.x"; exit 1; fi; \
-        fi; \
-        arch="$(dpkg --print-architecture)"; \
-        case "$arch" in \
-            amd64) node_arch='x64' ;; \
-            arm64) node_arch='arm64' ;; \
-            *) echo "Unsupported architecture: $arch"; exit 1 ;; \
-        esac; \
-        curl -fsSL "https://nodejs.org/dist/v${node_version}/node-v${node_version}-linux-${node_arch}.tar.gz" -o /tmp/node.tar.gz; \
-        tar -xzf /tmp/node.tar.gz -C /usr/local --strip-components=1 --no-same-owner; \
-        rm /tmp/node.tar.gz; \
-        node --version; \
-        npm --version; \
-    fi
+# The bin/provision script does the below steps too, but we may as well do it here so it's cached in the Docker image
 
-# Install additional OS packages and PHP extensions
+# Install OS packages and PHP extensions
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends wget curl ca-certificates unzip bash git \
-        libpq-dev postgresql-client \
-        libicu-dev \
+    && apt-get -y upgrade --no-install-recommends \
+    && apt-get -y install --no-install-recommends \
+        apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less zsh \
         ripgrep silversearcher-ag shellcheck \
-    # Postgres
-    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-    && docker-php-ext-install pdo pdo_pgsql pgsql \
-    # Intl
-    && docker-php-ext-install intl \
-    # Disable Xdebug from the base image to avoid step-debug connection warnings.
-    && if command -v phpdismod >/dev/null 2>&1; then phpdismod xdebug || true; fi \
-    && find /usr/local/etc/php/conf.d -maxdepth 1 -type f -name '*xdebug*.ini' -delete \
-    && apt-get clean \
-    && pecl clear-cache \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* || true
+        composer php8.4-cli php8.4-opcache php8.4-pgsql php8.4-intl php8.4-mbstring php8.4-xml php8.4-zip php8.4-curl \
+        postgresql-client-17
 
-# Install global node packages
-RUN npm install -g gulp
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && apt-get install -y nodejs
 
 # Install Symfony
-RUN apt-get update && curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | bash && apt-get install -y symfony-cli
+RUN curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | bash && apt-get install -y symfony-cli
+
+# Clean up
+RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* || true

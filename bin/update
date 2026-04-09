@@ -18,13 +18,11 @@ This script updates Blueline.
 Options:
  --nopull  Prevents the pulling of new application code.
  --nodata  Prevents the update of association/method/tower data
- --dev     Updates a development version
  --help    Shows this message
 EOF
 }
 CCCBRDATA=true
 GITPULL=true
-DEV=false
 AFTER_DOUBLE_DASH=false
 for arg in "$@"; do
 	if [ "$AFTER_DOUBLE_DASH" = true ]; then
@@ -42,9 +40,6 @@ for arg in "$@"; do
 			;;
 		--nopull)
 			GITPULL=false
-			;;
-		--dev)
-			DEV=true
 			;;
 		--help)
 			usage
@@ -68,10 +63,16 @@ for arg in "$@"; do
 	esac
 done
 
+
 # Pull latest version
-if [[ $GITPULL = true && $DEV = false ]]
+if [[ $GITPULL = true ]]
 	then
 	echo -e "\n\033[1mPulling latest version of Blueline\033[0m"
+	# Discard any local changes to lockfiles (which may be updated by setup script) before pulling, to avoid merge conflicts
+	git checkout -- package-lock.json
+	git checkout -- composer.lock
+	git checkout -- symfony.lock
+	# Then pull latest code
 	git pull
 	# Restart update script (to allow it to update itself)
 	if [[ $CCCBRDATA = true ]]
@@ -83,74 +84,10 @@ if [[ $GITPULL = true && $DEV = false ]]
 	exit
 fi
 
-# Update vendors
-echo -e "\n\033[1mUpdating /vendors\033[0m"
-if [[ $DEV = true ]]
-	then
-	symfony composer update
-	else
-	symfony composer install
-fi
-symfony composer dump-autoload --optimize
+# Run setup (idempotent — safe to re-run; handles vendors, assets, schema, services)
+"$repo_root/bin/provision"
 
-# Update node_modules
-echo -e "\n\033[1mUpdating /node_modules\033[0m"
-if [[ $DEV = true ]]
-	then
-	npm update --save-dev
-	else
-	npm install
-fi
-npx update-browserslist-db@latest
-npm audit fix
-
-# Clear cache
-echo -e "\n\033[1mClearing Symfony cache\033[0m"
-symfony console cache:clear
-symfony console cache:clear --env=prod
-symfony console cache:warm --env=prod
-symfony console doctrine:cache:clear-metadata
-symfony console doctrine:cache:clear-query
-symfony console doctrine:cache:clear-result
-
-
-# Verify that Doctrine is properly configured for a production environment, and mappings are up to date
-echo -e "\n\033[1mChecking Doctrine configuration\033[0m"
-SCHEMA_VALIDATE_OUTPUT="$(symfony console doctrine:schema:validate 2>&1)"
-SCHEMA_VALIDATE_EXIT_CODE=$?
-echo "$SCHEMA_VALIDATE_OUTPUT"
-
-if echo "$SCHEMA_VALIDATE_OUTPUT" | grep -q "The database schema is not in sync"; then
-	echo -e "\n\033[1mDatabase schema is out of date\033[0m"
-	echo -e "\n\033[1mPending SQL updates\033[0m"
-	symfony console doctrine:schema:update --dump-sql
-	if [[ -t 0 ]]; then
-		echo
-		read -r -p "Run forced schema update now? [y/N] " RUN_SCHEMA_UPDATE
-		if [[ "$RUN_SCHEMA_UPDATE" =~ ^[Yy]$ ]]; then
-			echo -e "\n\033[1mRunning forced schema update\033[0m"
-			symfony console doctrine:schema:update --force
-		else
-			echo "Skipping forced schema update."
-		fi
-	else
-		echo "Non-interactive session detected. Skipping forced schema update."
-	fi
-elif [[ $SCHEMA_VALIDATE_EXIT_CODE -ne 0 ]]; then
-	exit $SCHEMA_VALIDATE_EXIT_CODE
-fi
-
-
-# Rebuild web assets
-"$repo_root/bin/buildFrontendAssets"
-
-if [[ $CCCBRDATA = true ]]
-	then
+# Fetch and import data unless suppressed
+if [[ $CCCBRDATA = true ]]; then
 	"$repo_root/bin/fetchAndImportData"
 fi
-
-# Dump environment
-symfony composer dump-env prod
-
-# Cache error pages
-APP_ENV=prod symfony console error:dump -f var/cache/prod/error_pages/
