@@ -3,6 +3,9 @@
         "bash -n": true,
         "php -l": true,
         "APP_ENV=test ./bin/phpunit": true,
-        "./bin/test": true
+        "./bin/test": true,
+        "symfony console doctrine:schema:validate": true,
+        "symfony console lint:": true,
+        "eslint": true
     }
 }
