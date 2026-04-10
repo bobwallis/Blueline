@@ -301,7 +301,25 @@ class Method
     {
         if (!isset($this->title)) {
             $classification = $this->getClassification();
-            $this->setTitle('Unnamed '.($this->getDifferential()?'Differential ':'').($this->getLittle()?'Little ':'').($classification?$classification.' ':'').$this->getStageText());
+            $classificationTerms = ['Place', 'Bob', 'Treble Bob', 'Surprise', 'Delight', 'Treble Place', 'Alliance'];
+            $hasClassificationTerm = in_array($classification, $classificationTerms, true);
+            $descriptor = [];
+
+            if ($this->getJump()) {
+                $descriptor[] = 'Jump';
+            }
+            if ($this->getDifferential()) {
+                $descriptor[] = 'Differential';
+            }
+            if ($this->getLittle() && $hasClassificationTerm) {
+                $descriptor[] = 'Little';
+            }
+            if ($hasClassificationTerm) {
+                $descriptor[] = $classification;
+            }
+
+            $descriptorText = trim(implode(' ', $descriptor));
+            $this->setTitle(trim('Unnamed '.$descriptorText.' '.$this->getStageText()));
         }
         return $this->title;
     }
@@ -1049,7 +1067,7 @@ class Method
                     for ($i = 0; $i < count($eExplode); ++$i) {
                         $eExplode[$i] = PlaceNotation::intToBell($stage + 1 - PlaceNotation::bellToInt($eExplode[$i]));
                     }
-                    return implode(array_reverse($eExplode));
+                    return implode('', array_reverse($eExplode));
                 }
             }, $notationExploded);
             $same = $notationExploded == $notationExplodedReversed;

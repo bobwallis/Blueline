@@ -309,6 +309,32 @@ class MethodTest extends TestCase
         $this->assertSame('Unnamed '.$expected['classification'].' '.$method->getStageText(), $method->getTitle());
     }
 
+    public function testUnnamedTitleUsesClassDescriptorOrdering()
+    {
+        $method = new Method([
+            'stage' => 6,
+            'jump' => true,
+            'differential' => true,
+            'little' => true,
+            'classification' => 'Surprise',
+        ]);
+
+        $this->assertSame('Unnamed Jump Differential Little Surprise Minor', $method->getTitle());
+    }
+
+    public function testUnnamedTitleExcludesLittleWithoutRuleDClassification()
+    {
+        $method = new Method([
+            'stage' => 6,
+            'jump' => true,
+            'classification' => 'Jump',
+            'differential' => true,
+            'little' => true,
+        ]);
+
+        $this->assertSame('Unnamed Jump Differential Minor', $method->getTitle());
+    }
+
     #[DataProvider('canonicalMethodProvider')]
     public function testNotationSirilIsInferredFromNotationForCanonicalMethods(array $expected)
     {
