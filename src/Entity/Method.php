@@ -300,26 +300,8 @@ class Method
     public function getTitle()
     {
         if (!isset($this->title)) {
-            $classification = $this->getClassification();
-            $classificationTerms = ['Place', 'Bob', 'Treble Bob', 'Surprise', 'Delight', 'Treble Place', 'Alliance'];
-            $hasClassificationTerm = in_array($classification, $classificationTerms, true);
-            $descriptor = [];
-
-            if ($this->getJump()) {
-                $descriptor[] = 'Jump';
-            }
-            if ($this->getDifferential()) {
-                $descriptor[] = 'Differential';
-            }
-            if ($this->getLittle() && $hasClassificationTerm) {
-                $descriptor[] = 'Little';
-            }
-            if ($hasClassificationTerm) {
-                $descriptor[] = $classification;
-            }
-
-            $descriptorText = trim(implode(' ', $descriptor));
-            $this->setTitle(trim('Unnamed '.$descriptorText.' '.$this->getStageText()));
+            $descriptorText = $this->getClassDescriptor();
+            $this->setTitle(implode(' ', array_filter(['Unnamed', $descriptorText, $this->getStageText()])));
         }
         return $this->title;
     }
@@ -1559,6 +1541,33 @@ class Method
     }
 
     // Non-database methods
+
+    public function getClassDescriptor()
+    {
+        $classification = isset($this->classification) ? $this->classification : $this->getClassification();
+        $classificationTerms = ['Place', 'Bob', 'Treble Bob', 'Surprise', 'Delight', 'Treble Place', 'Alliance'];
+        $hasClassificationTerm = in_array($classification, $classificationTerms, true);
+        $canInferFlags = isset($this->notation) || isset($this->notationExpanded);
+        $jump = isset($this->jump) ? $this->jump : ($canInferFlags ? $this->getJump() : false);
+        $differential = isset($this->differential) ? $this->differential : ($canInferFlags ? $this->getDifferential() : false);
+        $little = isset($this->little) ? $this->little : ($canInferFlags ? $this->getLittle() : false);
+
+        $descriptor = [];
+        if ($jump) {
+            $descriptor[] = 'Jump';
+        }
+        if ($differential) {
+            $descriptor[] = 'Differential';
+        }
+        if ($little && $hasClassificationTerm) {
+            $descriptor[] = 'Little';
+        }
+        if ($hasClassificationTerm) {
+            $descriptor[] = $classification;
+        }
+
+        return trim(implode(' ', $descriptor));
+    }
 
     private $leadHeads;
     public function getLeadHeads()

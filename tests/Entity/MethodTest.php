@@ -322,6 +322,55 @@ class MethodTest extends TestCase
         $this->assertSame('Unnamed Jump Differential Little Surprise Minor', $method->getTitle());
     }
 
+    public static function classDescriptorProvider(): array
+    {
+        return [
+            'rule-d classification only' => [
+                [
+                    'classification' => 'Surprise',
+                    'stage' => 6,
+                ],
+                'Surprise',
+            ],
+            'full descriptor ordering' => [
+                [
+                    'stage' => 6,
+                    'jump' => true,
+                    'differential' => true,
+                    'little' => true,
+                    'classification' => 'Surprise',
+                ],
+                'Jump Differential Little Surprise',
+            ],
+            'little excluded without rule-d classification' => [
+                [
+                    'stage' => 6,
+                    'jump' => true,
+                    'differential' => true,
+                    'little' => true,
+                    'classification' => 'Jump',
+                ],
+                'Jump Differential',
+            ],
+            'blank when only non-rule-d class applies' => [
+                [
+                    'stage' => 8,
+                    'little' => true,
+                    'classification' => 'Hybrid',
+                ],
+                '',
+            ],
+        ];
+    }
+
+    #[DataProvider('classDescriptorProvider')]
+    public function testClassDescriptorExamples(array $set, string $expected): void
+    {
+        $method = new Method($set);
+
+        $this->assertSame($expected, $method->getClassDescriptor());
+    }
+
     public function testUnnamedTitleExcludesLittleWithoutRuleDClassification()
     {
         $method = new Method([
@@ -333,6 +382,18 @@ class MethodTest extends TestCase
         ]);
 
         $this->assertSame('Unnamed Jump Differential Minor', $method->getTitle());
+    }
+
+    public function testUnnamedTitleDoesNotContainDoubleSpacesWhenClassDescriptorIsBlank(): void
+    {
+        $method = new Method([
+            'stage' => 6,
+            'classification' => 'Hybrid',
+            'little' => true,
+        ]);
+
+        $this->assertSame('', $method->getClassDescriptor());
+        $this->assertSame('Unnamed Minor', $method->getTitle());
     }
 
     #[DataProvider('canonicalMethodProvider')]
