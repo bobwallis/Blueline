@@ -1,6 +1,7 @@
 {
     "chat.tools.terminal.autoApprove": {
         "bash -n": true,
+        "php -l": true,
         "./bin/test": true
     }
 }
