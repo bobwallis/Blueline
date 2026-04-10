@@ -2,6 +2,7 @@
     "chat.tools.terminal.autoApprove": {
         "bash -n": true,
         "php -l": true,
+        "APP_ENV=test ./bin/phpunit": true,
         "./bin/test": true
     }
 }
