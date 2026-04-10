@@ -250,25 +250,64 @@ var PlaceNotation = {
 	 * @param {string} notation Symmetrical block (with or without `&`).
 	 * @returns {string} Expanded full block.
 	 */
-	expandHalf: function( notation ) {
-		// Expands a symmetrical block of place notation
-		notation = notation.replace( /^&/, '' );
-		var notationReversed = notation.split( '' ).reverse().join( '' )
-				.replace( /\)(.+?)\(/g, function( m, p1 ) { return '('+p1+')'; } )
-				.replace( /\](.+?)\[/g, function( m, p1 ) { return '['+p1.split( '' ).reverse().join( '' )+']'; } ),
-			firstDot = (notationReversed.indexOf( '.' ) === -1)? 9999 : notationReversed.indexOf( '.' ),
-			firstX = (notationReversed.indexOf( 'x' ) === -1)? 9999 : notationReversed.indexOf( 'x' ),
-			trim;
-		if( firstDot < 0 && firstX < 0 ) {
-			return notation;
+	expandHalf: function(notation) {
+		// 1. Trim leading '&'
+		notation = notation.replace(/^&/, '');
+
+		// 2. Initial reversal of the whole string
+		let notationReversed = notation.split('').reverse().join('');
+
+		// 3. Jump notation type 1: Fix ( )
+		// After string reverse, "(14)" became ")41(".
+		// Restore brackets to () but keep the reversed order.
+		notationReversed = notationReversed.replace(/\)(.+?)\(/g, function(m, p1) {
+			return '(' + p1 + ')';
+		});
+
+		// 4. Jump notation type 2: Fix [ ]
+		// After string reverse, "[2413]" became "]3142[".
+		// Swap brackets and un-reverse the interior back to "[2413]"
+		notationReversed = notationReversed.replace(/\](.+?)\[/g, function(m, p1) {
+			return '[' + p1.split('').reverse().join('') + ']';
+		});
+
+		// 5. Apply the proper permutation inversion logic to [ ] blocks
+		notationReversed = notationReversed.replace(/\[(.+?)\]/g, (m, p1) => {
+			let input = p1.split('');
+			let inverse = [];
+			input.forEach((char, zeroIndex) => {
+				// Logic: The bell at position (zeroIndex + 1) moves TO charToBell(char)
+				// In the inverse, that bell (char) moves TO (zeroIndex + 1)
+				let targetIndex = PlaceNotation.charToBell(char) - 1;
+				inverse[targetIndex] = PlaceNotation.bellToChar(zeroIndex + 1);
+			});
+
+			return '[' + inverse.join('') + ']';
+		});
+
+		// 6. Calculate trim point
+		let firstDot = notationReversed.indexOf('.');
+		let firstX = notationReversed.indexOf('x');
+		let firstDash = notationReversed.indexOf('-');
+		let dotPos = (firstDot === -1) ? 99999 : firstDot;
+		let xPos = (firstX === -1) ? 99999 : firstX;
+		let dashPos = (firstDash === -1) ? 99999 : firstDash;
+
+		// Get the earliest occurrence of any non-digit/non-bracket character
+		let firstSymbol = Math.min(xPos, dashPos);
+
+		let trim = 0;
+		if (dotPos < firstSymbol) {
+			trim = dotPos + 1;
+		} else {
+			trim = (firstSymbol === 0) ? 1 : firstSymbol;
 		}
-		else if( firstDot < 0 || firstX < firstDot ) {
-			trim = (firstX === 0) ? 1 : firstX;
-		}
-		else {
-			trim = firstDot;
-		}
-		return (notation + notationReversed.substring( trim )).replace( /\.?(x|-)\.?/g, 'x' ).trim();
+
+		// 7. Concatenate and clean up symbols
+		// Uses $1 backreference to keep the 'x' or '-' found by the regex
+		return (notation + '.' + notationReversed.substring(trim))
+			.replace(/\.?(x|-)\.?/g, '$1')
+			.replace(/^\.|\.$/g, '');
 	},
 	/**
 	 * Parse normalised notation into per-change permutation arrays.

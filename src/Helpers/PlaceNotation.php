@@ -588,8 +588,38 @@ class PlaceNotation
     private static function expandHalf($notation)
     {
         $notation = trim($notation, '&');
-        $notationReversed = preg_replace_callback('/\)(.+?)\(/', function ($m) { return '('.$m[1].')'; }, strrev($notation) );
+        // First attempt is just to reverse the string
+        $notationReversed = strrev($notation);
+        // Jump notation type 1:
+        // (14) indicates that the bell in 1st's Place jumps to 4th's Place in the next Row. The bells currently in 2nd's, 3rd's and 4th's Places each move down a Place in the next Row
+        // (14) would take Row 1234 to 2341.
+        // (41) would take Row 2341 to 1234.
+        // The reverse of (14) is (41).
+        // We need to reverse the order of the bells in the brackets, but not the brackets themselves.
+        // Given we have already reversed the bells using strrev above, we just need to swap the brackets back to their original positions.
+        $notationReversed = preg_replace_callback('/\)(.+?)\(/', function ($m) { return '('.$m[1].')'; }, $notationReversed );
+        // Jump notation type 2:
+        // [3412] indicates that the bells in the current Row are "read" in the order 3rd's Place, 4th's Place, 1st's Place, 2nd's Place in order to generate the next Row.
+        // [3412] would take Row 2143 to 4321.
+        // [3412] would also take Row 4321 to 2143.
+        // It self-inverts. But this is not the case for all jump changes, so we can't just assume that the reverse of [ABCD] is [ABCD] again.
+        // [2413] would take Row 2143 to 1324.
+        // [3142] would take Row 1324 to 2143.
+        // Initialy... let's just revert the reversal done by strrev above
         $notationReversed = preg_replace_callback('/\](.+?)\[/', function ($m) { return '['.strrev($m[1]).']'; }, $notationReversed );
+        // And now let's reverse properly...
+        $notationReversed = preg_replace_callback('/\[(.+?)\]/', function ($m) {
+            $input = str_split($m[1]); // Split into characters
+            $inverse = []; // This will hold the inverse mapping of the jump change
+            foreach ($input as $zeroIndex => $char) {
+                // If the bell at position ($zeroIndex + 1) moves TO self::bellToInt($char),
+                // then in the inverse, t$char moves TO self::intToBell($zeroIndex + 1).
+                $inverse[self::bellToInt($char) - 1] = self::intToBell($zeroIndex + 1);
+            }
+            ksort($inverse); // Sort by keys to ensure the string is built in the order 1, 2, 3, 4...
+            // And then build the string
+            return '[' . implode('', $inverse) . ']';
+            }, $notationReversed );
         $firstDot = (strpos($notationReversed, '.') !== false) ? strpos($notationReversed, '.') : 99999;
         $firstX = (strpos($notationReversed, 'x') !== false) ? strpos($notationReversed, 'x') : 99999;
         $trim = 0;
@@ -598,8 +628,8 @@ class PlaceNotation
         } else {
             $trim = ($firstX == 0) ? 1 : $firstX;
         }
-
-        return trim(str_replace(array( '.x.', 'x.', '.x'), 'x', $notation.'.'.substr($notationReversed, $trim)), '.');
+        $combined = $notation . '.' . substr($notationReversed, $trim);
+        return trim(preg_replace('/\.?(x|-)\.?/', '$1', $combined), '.');
     }
 
     /**
