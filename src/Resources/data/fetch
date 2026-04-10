@@ -7,6 +7,17 @@ cd "$d"
 
 # Download data
 echo "Downloading method data..."
+max_age_seconds=$((24 * 60 * 60))
+last_download_file="$d/LAST_DOWNLOAD"
+
+if [ -f "$last_download_file" ]; then
+      age_seconds=$(( $(date +%s) - $(stat -c %Y "$last_download_file") ))
+      if [ "$age_seconds" -lt "$max_age_seconds" ]; then
+            echo "Skipping download: LAST_DOWNLOAD is less than 24 hours old."
+            exit 0
+      fi
+fi
+
 urls=( "https://methods.cccbr.org.uk/xml/CCCBR_Plain.xml.zip"
        "https://methods.cccbr.org.uk/xml/CCCBR_Surprise.xml.zip"
        "https://methods.cccbr.org.uk/xml/CCCBR_Delight.xml.zip"
@@ -17,14 +28,30 @@ urls=( "https://methods.cccbr.org.uk/xml/CCCBR_Plain.xml.zip"
        "https://methods.cccbr.org.uk/xml/CCCBR_Principle.xml.zip"
        "https://methods.cccbr.org.uk/xml/CCCBR_Jump.xml.zip"
      )
+
+downloads=()
+download_failed=0
 for url in "${urls[@]}"; do
-      curl --progress-bar --referer "http://www.methods.org.uk" --user-agent "Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.224 Safari/534.10" -o "$d/`basename "$url"`" "$url"
+      zip_file="$d/$(basename "$url")"
+
+      echo "Downloading $(basename "$zip_file")..."
+      if curl --progress-bar --referer "http://www.methods.org.uk" --user-agent "Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.224 Safari/534.10" -o "$zip_file" "$url"; then
+            downloads+=("$zip_file")
+      else
+            download_failed=1
+      fi
 done
 
 # Unzip all zip files
-rm -f "CCCBR_*.xml"
-unzip -qq -u -d "$d" -o "$d/*.zip"
-find . -name "*.zip" -exec rm -rf "{}" \;
+for zip_file in "${downloads[@]}"; do
+      unzip -qq -u -d "$d" -o "$zip_file"
+      rm -f "$zip_file"
+done
+
+if [ "$download_failed" -eq 0 ]; then
+      touch "$last_download_file"
+fi
+
 chmod +r *.xml
 
 echo "Done"
