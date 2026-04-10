@@ -4,23 +4,55 @@
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
 d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-cd "$d/../"
+REPO_ROOT="$( cd "$d/.." && pwd )"
+cd "$REPO_ROOT"
 
-APP_ENVIRONMENT="${APP_ENV:-dev}"
+ENV_LOCAL_FILE="$REPO_ROOT/.env.local"
+
+usage() {
+cat << EOF
+
+Usage: $0 [options] [dev|test|prod]
+Fetches external data and imports it into Blueline.
+
+Options:
+ --env=<env>   Set APP_ENV (dev, test, or prod)
+ --nopull      Skip downloading external data before import
+ --help, -h    Show this message
+EOF
+}
+
+ENV_ARG=""
 SKIP_PULL=0
 for arg in "$@"; do
 	case "$arg" in
+		--help|-h)
+			usage
+			exit 0
+			;;
 		--env=*)
-			APP_ENVIRONMENT="${arg#*=}"
+			ENV_ARG="${arg#*=}"
 			;;
 		--nopull)
 			SKIP_PULL=1
 			;;
 		dev|test|prod)
-			APP_ENVIRONMENT="$arg"
+			ENV_ARG="$arg"
 			;;
 	esac
 done
+
+if [ -n "$ENV_ARG" ]; then
+	APP_ENV="$ENV_ARG"
+else
+	APP_ENV=""
+	if [ -f "$ENV_LOCAL_FILE" ]; then
+		APP_ENV="$(sed -nE 's/^[[:space:]]*APP_ENV[[:space:]]*=[[:space:]]*//p' "$ENV_LOCAL_FILE" | tail -n 1 | sed -E 's/[[:space:]]*$//' | sed -E 's/^"(.*)"$/\1/; s/^\x27(.*)\x27$/\1/')"
+	fi
+	if [ -z "$APP_ENV" ]; then
+		APP_ENV="dev"
+	fi
+fi
 
 if [ "$SKIP_PULL" -eq 0 ]; then
 	# Download external data
@@ -30,19 +62,19 @@ if [ "$SKIP_PULL" -eq 0 ]; then
 fi
 
 # Import updated method data
-symfony console blueline:importMethods --no-debug --env="$APP_ENVIRONMENT"
-symfony console blueline:importMethodExtras --no-debug --env="$APP_ENVIRONMENT"
-symfony console blueline:importCollections --no-debug --env="$APP_ENVIRONMENT"
-symfony console blueline:calculateMethodSimilarities --no-debug --env="$APP_ENVIRONMENT"
-symfony console dbal:run-sql "VACUUM" --env="$APP_ENVIRONMENT"
+symfony console blueline:importMethods --no-debug --env="$APP_ENV"
+symfony console blueline:importMethodExtras --no-debug --env="$APP_ENV"
+symfony console blueline:importCollections --no-debug --env="$APP_ENV"
+symfony console blueline:calculateMethodSimilarities --no-debug --env="$APP_ENV"
+symfony console dbal:run-sql "VACUUM" --env="$APP_ENV"
 echo ""
 
-if [ "$APP_ENVIRONMENT" = "dev" ]; then
-	DATABASE_UPDATE_FILE=".env.local"
+# Update the database update timestamp in the .env file
+if [ "$APP_ENV" = "dev" ]; then
+	DATABASE_UPDATE_FILE="$ENV_LOCAL_FILE"
 else
-	DATABASE_UPDATE_FILE=".env.${APP_ENVIRONMENT}.local"
+	DATABASE_UPDATE_FILE="$REPO_ROOT/.env.${APP_ENV}.local"
 fi
-
 touch "$DATABASE_UPDATE_FILE"
 if grep -q '^DATABASE_UPDATE=' "$DATABASE_UPDATE_FILE"; then
 	sed -i -e"s/^DATABASE_UPDATE=.*/DATABASE_UPDATE=`date "+%s"`/" "$DATABASE_UPDATE_FILE"

@@ -22,10 +22,10 @@ This guide is intended for both human contributors and AI coding assistants.
 
 ### 1) Environment setup
 Follow `README.md` for full setup. In short:
-1. Install PHP/Composer/Node/PostgreSQL prerequisites.
+1. Install PHP/Composer/Node/PostgreSQL prerequisites, plus locale/timezone configuration.
 2. `symfony composer install`
 3. `npm install && npm audit fix`
-4. Create DB and schema.
+4. Ensure PostgreSQL is running locally, then create DB and schema.
 
 ### 2) Data import/update
 Use:

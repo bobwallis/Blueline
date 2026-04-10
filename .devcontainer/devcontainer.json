@@ -1,7 +1,12 @@
 {
 	"name": "Blueline",
-	"dockerComposeFile": "docker-compose.yml",
-	"service": "blueline",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": "."
+	},
+	"mounts": [
+		"source=blueline-postgres-data,target=/var/lib/postgresql,type=volume"
+	],
 
 	// Set *default* container specific settings.json values on container create.
 	"customizations": {
@@ -12,16 +17,16 @@
 					"name": "Container database",
 					"driver": "PostgreSQL",
 					"previewLimit": 50,
-					"server": "db",
+					"server": "localhost",
 					"port": 5432,
 					"database": "blueline",
-					"username": "user",
-					"password": "pass"
+					"username": "blueline",
+					"password": "blueline"
 				}],
 				"php.validate.executablePath": "/usr/bin/php",
 				"php.executablePath": "/usr/bin/php"
 			},
-			// Add the IDs of extensions you want installed when the container is created.
+			// IDs of extensions to install when the container is created.
 			"extensions": [
 				"github.vscode-pull-request-github",
 				"felixfbecker.php-intellisense",
@@ -33,8 +38,9 @@
 			]
 		}
 	},
-	"workspaceFolder": "/workspace",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 	// Connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
-	"postCreateCommand": "chmod +x bin/provision && ./bin/provision"
+	"postCreateCommand": "chmod +x bin/provision && ./bin/provision",
+	"postStartCommand": "if command -v pg_ctlcluster >/dev/null 2>&1; then pg_isready -h localhost -p 5432 >/dev/null 2>&1 || sudo pg_ctlcluster 17 main start; fi"
 }

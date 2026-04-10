@@ -24,7 +24,7 @@ software where possible. This includes:
 ### Development
 
 The easiest way to develop is using [Visual Studio Code][6] and the [Remote Containers][5] extension.
-This creates a Docker container with the required configuration to launch and develop the application.
+This creates a single Docker development container with the required configuration to launch and develop the application.
 
 #### Requirements
 
@@ -33,7 +33,7 @@ Just open the project folder in Visual Studio Code. The configuration is under `
 #### Running setup
 
 When creating the container, `./bin/provision` is executed within it automatically. If this fails,
-then re-run it.
+then re-run it. It needs to run to ensure the database is set-up.
 
 ### Production
 
@@ -51,28 +51,35 @@ connections.
 
 #### Running setup
 
-From the repository root on the VM, run `./bin/provision`.
+From the repository root on the VM, run `./bin/provision --help` and observe the usage instructions.
+
+If you want to set-up only some of the software (e.g. because you run an external database server, or
+you want to hook up a different webserver, or not use a Cloudflare tunnel), then add the relevant
+command-line arguments when running the script.
 
 ### Other environments
 
-Note that the site uses iconv to transliterate UTF-8 characters in method names into ASCII for the purposes
-of generating URLs. (e.g. 'E=mc² Surprise Major' is found at 'methods/view/Emc2_Surprise_Major'). If you do
-try and use an OS other than Debian, then it should have an iconv that supports transliteration. i.e. not
-Alpine, or any other distro that ships with [musl][11] rather than glibc.
+Anything that can run the required software should be able to run Blueline. Note, though, that the site uses iconv
+to transliterate UTF-8 characters in method names into ASCII for the purposes of generating URLs.
+(e.g. 'E=mc² Surprise Major' is found at 'methods/view/Emc2_Surprise_Major'). If you do try and use an
+OS other than Debian, then it should have an iconv that supports transliteration. i.e. not Alpine, or any other
+distro that ships with [musl][11] rather than glibc.
 
 ### Setup Script
 
 The script `./bin/provision` will:
 
-1. Install PHP, Composer, Symfony CLI, Node.js, PostgreSQL.
+1. Install PHP, Composer, Symfony CLI, Node.js, PostgreSQL, locale and timezone packages.
    via their respective apt sources if not included in Debian.
-2. Create a `blueline` PostgreSQL role and database with a generated password.
-3. Apply a PostgreSQL tuning config optimised for a small database.
-4. Generate `APP_SECRET` and write `DATABASE_URL` and `APP_ENV` to `.env.local`.
-5. Install PHP and Node.js dependencies into `./vendor/` and `./node_modules/`.
-6. Create the database schema and install the `fuzzystrmatch` PostgreSQL extension.
-7. On the VM:
-  * Install FrankenPHP, and cloudflared.
+2. Configure locale (`en_GB.UTF-8`) and timezone (`Europe/London`).
+3. Create a `blueline` PostgreSQL role and database.
+4. Apply a PostgreSQL tuning config optimised for a small database.
+5. Generate `APP_SECRET` and write `DATABASE_URL` and `APP_ENV` to `.env.local`.
+6. Install PHP and Node.js dependencies into `./vendor/` and `./node_modules/`.
+7. Create the database schema and install the `fuzzystrmatch` PostgreSQL extension.
+8. If being run as a "prod" environment, then (optionally):
+  * Install FrankenPHP, cloudflared.
+  * Enable the PostgreSQL systemd unit.
   * Install and enable a `blueline.service` systemd unit running FrankenPHP on port 8000.
   * Walk through creating a Cloudflare tunnel to expose the app publicly (interactive).
   * Warm the production cache, dump the compiled `.env`, and pre-generate error pages.
@@ -92,8 +99,9 @@ Run `./bin/fetchAndImportData` to download method data and import it into the da
 
 ## 3) Maintain
 
-Run `./bin/update` to pull new application code, re-run the provisioning scripts and update the
-database with the latest CCCBR data.
+Run `./bin/update` to pull new application code, re-run the `./bin/provision` scripts and update the
+database with the latest CCCBR data. run `./bin/update --help` first and make sure to add the relevant
+command-line arguments if you are running a seperate database or webserver.
 
 
 ## 4) Develop
@@ -105,7 +113,8 @@ Forward port 8000 from the container to the host so you can access the developme
 the site at `http://localhost:8000/` from the host and see changes made to PHP code.
 
 The container installs the [SQLTools][4] VSCode extension which you can use to inspect the
-database and run queries direcly against it if needed.
+database and run queries direcly against it if needed. The default development connection uses
+`localhost:5432` with database/user/password `blueline`.
 
 After making changes to CSS/JS files or images you will need to re-reun `./bin/buildFrontendAssets`
 to regenerate the assets. Running `gulp watch` in a terminal will watch for changes to these files
@@ -124,7 +133,9 @@ include the full test suite run `BLUELINE_RUN_SLOW_COMMAND_TESTS=1 ./bin/test`.
 
 `npm audit` will [check for critical security vulnerabilities in dependencies][9]. `npm audit fix`
 should be run to automatically fix easy ones. Some cannot be automatically fixed, and this should be
-looked into by reading the links that are provided by `npm audit`.
+looked into by reading the links that are provided by `npm audit`. Running `npm audit fix --force` will
+upgrade to new versions of software that may have breaking changes, so the resulting `package-lock.json`
+should only be committed after testing that `./bin/buildFrontendAssets` still works.
 
 Running `npm update --save-dev` will update NPM packages to new minor versions, and should be safe
 to do periodically to bring in bug fixes and non-breaking new features.
@@ -142,8 +153,8 @@ Once dependencies are updated and tested `package.json` and `package-lock.json` 
 to do periodically to bring in bug fixes and non-breaking new features.
 
 `symfony composer outdated` shows a list of installed packages that have updates available. Those
-which are highlighted red are semver-compatible with the currently installed version and can be
-upgraded to safely.
+which are highlighted red are (confusingly!) patch/minor releases that should be semver-compatible
+with the currently installed version, and can be upgraded to safely.
 
 No PHP dependencies are used other than what is used by Symfony standard edition. Upgrades
 highlighted yellow by `symfony composer outdated` should probably be left alone until you are

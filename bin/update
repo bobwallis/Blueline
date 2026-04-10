@@ -7,6 +7,8 @@ d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 repo_root="$( cd "$d/.." && pwd )"
 cd "$repo_root"
 
+ENV_LOCAL_FILE="$repo_root/.env.local"
+
 # Parse options
 usage()
 {
@@ -16,13 +18,21 @@ Usage: $0 [options]
 This script updates Blueline.
 
 Options:
- --nopull  Prevents the pulling of new application code.
- --nodata  Prevents the update of association/method/tower data
- --help    Shows this message
+ --nopull         Prevents the pulling of new application code.
+ --nodata         Prevents the update of method data
+ --nodatabase     Skip local PostgreSQL setup
+ --nocloudflared  Skip cloudflared setup (prod only)
+ --noserver       Skip FrankenPHP/server setup (prod only)
+ --env=dev|prod   Set APP_ENV directly
+ --help           Shows this message
 EOF
 }
-CCCBRDATA=true
-GITPULL=true
+NODATA_ARG=false
+NOPULL=false
+NODATABASE_ARG=false
+NOCLOUDFLARED_ARG=false
+NOSERVER_ARG=false
+ENV_ARG=""
 AFTER_DOUBLE_DASH=false
 for arg in "$@"; do
 	if [ "$AFTER_DOUBLE_DASH" = true ]; then
@@ -36,10 +46,27 @@ for arg in "$@"; do
 			AFTER_DOUBLE_DASH=true
 			;;
 		--nodata)
-			CCCBRDATA=false
+			NODATA_ARG=true
 			;;
 		--nopull)
-			GITPULL=false
+			NOPULL=true
+			;;
+		--nodatabase)
+			NODATABASE_ARG=true
+			;;
+		--nocloudflared)
+			NOCLOUDFLARED_ARG=true
+			;;
+		--noserver)
+			NOSERVER_ARG=true
+			;;
+		--env=dev|--env=prod)
+			ENV_ARG="${arg#--env=}"
+			;;
+		--env=*)
+			printf >&2 '%s: invalid value for --env (must be dev or prod): %s\n' "${0##*/}" "${arg#--env=}"
+			usage
+			exit 1
 			;;
 		--help)
 			usage
@@ -63,9 +90,21 @@ for arg in "$@"; do
 	esac
 done
 
+if [ -n "$ENV_ARG" ]; then
+	APP_ENV="$ENV_ARG"
+else
+	APP_ENV=""
+	if [ -f "$ENV_LOCAL_FILE" ]; then
+		APP_ENV="$(sed -nE 's/^[[:space:]]*APP_ENV[[:space:]]*=[[:space:]]*//p' "$ENV_LOCAL_FILE" | tail -n 1 | sed -E 's/[[:space:]]*$//' | sed -E 's/^"(.*)"$/\1/; s/^\x27(.*)\x27$/\1/')"
+	fi
+	if [ -z "$APP_ENV" ]; then
+		APP_ENV="dev"
+	fi
+fi
+
 
 # Pull latest version
-if [[ $GITPULL = true ]]
+if [[ $NOPULL = false ]]
 	then
 	echo -e "\n\033[1mPulling latest version of Blueline\033[0m"
 	# Discard any local changes to lockfiles (which may be updated by setup script) before pulling, to avoid merge conflicts
@@ -75,19 +114,37 @@ if [[ $GITPULL = true ]]
 	# Then pull latest code
 	git pull
 	# Restart update script (to allow it to update itself)
-	if [[ $CCCBRDATA = true ]]
-	then
-		"$repo_root/bin/update" --nopull
-	else
-		"$repo_root/bin/update" --nopull --nodata
+	_UPDATE_ARGS=(--nopull --env="$APP_ENV")
+	if [[ $NODATABASE_ARG = true ]]; then
+		_UPDATE_ARGS+=(--nodatabase)
 	fi
+	if [[ $NOCLOUDFLARED_ARG = true ]]; then
+		_UPDATE_ARGS+=(--nocloudflared)
+	fi
+	if [[ $NOSERVER_ARG = true ]]; then
+		_UPDATE_ARGS+=(--noserver)
+	fi
+	if [[ $NODATA_ARG = true ]]; then
+		_UPDATE_ARGS+=(--nodata)
+	fi
+	"$repo_root/bin/update" "${_UPDATE_ARGS[@]}"
 	exit
 fi
 
 # Run setup (idempotent — safe to re-run; handles vendors, assets, schema, services)
-"$repo_root/bin/provision"
+_PROVISION_ARGS=(--env="$APP_ENV")
+if [[ $NODATABASE_ARG = true ]]; then
+	_PROVISION_ARGS+=(--nodatabase)
+fi
+if [[ $NOCLOUDFLARED_ARG = true ]]; then
+	_PROVISION_ARGS+=(--nocloudflared)
+fi
+if [[ $NOSERVER_ARG = true ]]; then
+	_PROVISION_ARGS+=(--noserver)
+fi
+"$repo_root/bin/provision" "${_PROVISION_ARGS[@]}"
 
 # Fetch and import data unless suppressed
-if [[ $CCCBRDATA = true ]]; then
-	"$repo_root/bin/fetchAndImportData"
+if [[ $NODATA_ARG = false ]]; then
+	"$repo_root/bin/fetchAndImportData" --env="$APP_ENV"
 fi
