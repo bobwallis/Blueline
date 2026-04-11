@@ -109,7 +109,7 @@ command-line arguments if you are running a seperate database or webserver.
 
 ### General workflow
 
-Launch a Symfony development server with `symfony server:start -d --allow-all-ip --no-tls`.
+Launch a Symfony development server with `symfony serve`.
 Forward port 8000 from the container to the host so you can access the development version of
 the site at `http://localhost:8000/` from the host and see changes made to PHP code.
 
