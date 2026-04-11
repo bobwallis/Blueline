@@ -1,4 +1,4 @@
-var version = (new Date()).toISOString().substr(0,10); // Cache version based on date
+var version = '{$DATABASE_UPDATE}';
 
 self.addEventListener( 'install', function( event ) {
     var swScriptUrl = new URL( self.location ),
