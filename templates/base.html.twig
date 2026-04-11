@@ -10,6 +10,7 @@
 		<link rel="icon" href="{{ app.request.basepath }}/favicon.ico" />
 
 		{# Preload tags #}
+		<link rel="preload" href="{{ preload(asset('styles/all.css'), {as: 'style'}) }}" as="style" />
 		{% block preload %}{% endblock %}
 
 		{# Web app manifest #}
