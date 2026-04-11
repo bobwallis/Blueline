@@ -10,16 +10,14 @@ RUN echo "en_GB.UTF-8 UTF-8" >> /etc/locale.gen && locale-gen en_GB.UTF-8 && upd
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y upgrade --no-install-recommends \
     && apt-get -y install --no-install-recommends \
-        apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less tzdata zsh \
+        zsh \
+        apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less gpg lsb-release zsh brotli zstd zopfli tzdata \
         ripgrep silversearcher-ag shellcheck \
         composer php8.4-cli php8.4-opcache php8.4-pgsql php8.4-intl php8.4-mbstring php8.4-xml php8.4-zip php8.4-curl \
         postgresql-17 postgresql-client-17
 
 # Allow vscode user to sudo without password
 RUN echo "vscode ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/vscode-nopasswd && chmod 0440 /etc/sudoers.d/vscode-nopasswd
-
-# Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && apt-get install -y nodejs
 
 # Install Symfony
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | bash && apt-get install -y symfony-cli

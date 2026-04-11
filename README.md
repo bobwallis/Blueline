@@ -18,7 +18,6 @@ software where possible. This includes:
 * [Symfony][1] 7.4 for the main application framework, the current LTS version
 * [PHP][8] 8.4, currently supported and included in Debian Trixie
 * [PostgreSQL][7] 17, currently supported and included in Debian Trixie
-* [NodeJS][3] 24, the current LTS release
 * Bash scripts using basic command line tools
 
 ### Development
@@ -69,13 +68,13 @@ distro that ships with [musl][11] rather than glibc.
 
 The script `./bin/provision` will:
 
-1. Install PHP, Composer, Symfony CLI, Node.js, PostgreSQL, locale and timezone packages.
+1. Install PHP, Composer, Symfony CLI, PostgreSQL, locale and timezone packages.
    via their respective apt sources if not included in Debian.
 2. Configure locale (`en_GB.UTF-8`) and timezone (`Europe/London`).
 3. Create a `blueline` PostgreSQL role and database.
 4. Apply a PostgreSQL tuning config optimised for a small database.
 5. Generate `APP_SECRET` and write `DATABASE_URL` and `APP_ENV` to `.env.local`.
-6. Install PHP and Node.js dependencies into `./vendor/` and `./node_modules/`.
+6. Install PHP dependencies into `./vendor/`.
 7. Create the database schema and install the `fuzzystrmatch` PostgreSQL extension.
 8. If being run as a "prod" environment, then (optionally):
   * Install FrankenPHP, cloudflared.
@@ -87,9 +86,11 @@ The script `./bin/provision` will:
 On subsequent runs it skips steps that are already done, so the script is safe to re-run.
 
 
-## 1) Build frontend assets
+## 1) Manage frontend assets
 
-Run `./bin/buildFrontendAssets` to create JS, CSS and image assets in `./public`.
+**Development**: Edit `assets/` files and refresh your browser. Asset compilation happens automatically in development (no build step needed).
+
+**Production**: Run `php bin/console asset-map:compile --env=prod` to compile and minify assets. This generates versioned assets in `./public/assets/` before deploying.
 
 
 ## 2) Import data
@@ -116,11 +117,10 @@ The container installs the [SQLTools][4] VSCode extension which you can use to i
 database and run queries direcly against it if needed. The default development connection uses
 `localhost:5432` with database/user/password `blueline`.
 
-After making changes to CSS/JS files or images you will need to re-reun `./bin/buildFrontendAssets`
-to regenerate the assets. Running `gulp watch` in a terminal will watch for changes to these files
-and rebuild on-demand, which is helpful.
+For frontend development, edit CSS/JS files in the `assets/` directory and simply refresh your browser.
+There is no build step in development—Symfony's AssetMapper handles asset mapping automatically.
 
-Running `./bin/test` runs the full project test pipeline (linting, schema/container checks, and the
+Running `./bin/test` runs the full project test pipeline (linting, schema/container checks, asset compilation validation, and the
 full PHPUnit suite). If you want to run targeted tests, call PHPUnit directly instead, for example:
 
 - `APP_ENV=test ./bin/phpunit tests/Controller`
@@ -128,25 +128,6 @@ full PHPUnit suite). If you want to run targeted tests, call PHPUnit directly in
 
 Some command tests are slow (mainly the blueline:importMethods test), and marked as such. To
 include the full test suite run `BLUELINE_RUN_SLOW_COMMAND_TESTS=1 ./bin/test`.
-
-### Updating Node dependencies
-
-`npm audit` will [check for critical security vulnerabilities in dependencies][9]. `npm audit fix`
-should be run to automatically fix easy ones. Some cannot be automatically fixed, and this should be
-looked into by reading the links that are provided by `npm audit`. Running `npm audit fix --force` will
-upgrade to new versions of software that may have breaking changes, so the resulting `package-lock.json`
-should only be committed after testing that `./bin/buildFrontendAssets` still works.
-
-Running `npm update --save-dev` will update NPM packages to new minor versions, and should be safe
-to do periodically to bring in bug fixes and non-breaking new features.
-
-`npm outdated` will check for new major versions of packages. These can be ignored for a while,
-but things move quickly and eventually old versions will stop getting security updates. Move to a
-new major version by: (a) reading the changelog of the package for changes; (b) running
-`npm install --save-dev package-name@latest`; (c) making the changes needed to migrate to the
-new version; (d) testing the build pipeline.
-
-Once dependencies are updated and tested `package.json` and `package-lock.json` should be committed.
 
 ### Updating PHP dependencies
 `symfony composer update` will update PHP packages to new minor versions, and should be safe
@@ -165,13 +146,11 @@ Once dependencies are updated `composer.json`, `composer.lock` and `symfony.lock
 
 [1]:  https://symfony.com/releases/7.4
 [2]:  https://www.debian.org/releases/trixie/
-[3]:  http://nodejs.org/
 [4]:  https://vscode-sqltools.mteixeira.dev/
 [5]:  https://code.visualstudio.com/docs/remote/containers
 [6]:  https://code.visualstudio.com/
 [7]:  https://www.postgresql.org/
 [8]:  https://www.php.net/
-[9]:  https://docs.npmjs.com/auditing-package-dependencies-for-security-vulnerabilities
 [10]: https://symfony.com/doc/current/setup/upgrade_major.html
 [11]: https://wiki.musl-libc.org/functional-differences-from-glibc.html#iconv
 [12]: https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/

@@ -3,11 +3,11 @@ framework:
         # The paths to make available to the asset mapper.
         paths:
             - assets/
+        public_prefix: /assets/
         missing_import_mode: strict
-        precompress:
-            format: ['brotli', 'zstandard', 'gzip']
 
 when@prod:
     framework:
         asset_mapper:
             missing_import_mode: warn
+            precompress: true

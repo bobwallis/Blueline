@@ -18,10 +18,8 @@ class RequestListener
         // Set global parameters that can be used in @Cache annotations and other places
         $event->getRequest()->attributes->set('endpoint', $this->params->get('blueline.endpoint'));
         if ($this->kernelEnvironment == 'prod') {
-            $event->getRequest()->attributes->set('asset_update', new \DateTime('@'.$this->params->get('blueline.asset_update')));
             $event->getRequest()->attributes->set('database_update', new \DateTime('@'.$this->params->get('blueline.database_update')));
         } else {
-            $event->getRequest()->attributes->set('asset_update', new \DateTime());
             $event->getRequest()->attributes->set('database_update', new \DateTime());
         }
     }

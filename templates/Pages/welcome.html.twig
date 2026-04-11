@@ -2,6 +2,13 @@
 
 {% set search = false %}
 
+{% block preload %}
+	<link rel="preload" href="{{ preload(asset('images/external.svg'), {as: 'image', type: 'image/svg+xml'}) }}" as="image" type="image/svg+xml" />
+	<link rel="preload" href="{{ preload(asset('images/welcome_methods.svg'), {as: 'image', type: 'image/svg+xml'}) }}" as="image" type="image/svg+xml" />
+	<link rel="preload" href="{{ preload(asset('images/welcome_prover.svg'), {as: 'image', type: 'image/svg+xml'}) }}" as="image" type="image/svg+xml" />
+	<link rel="preload" href="{{ preload(asset('images/welcome_tutorials.svg'), {as: 'image', type: 'image/svg+xml'}) }}" as="image" type="image/svg+xml" />
+{% endblock %}
+
 {% block body %}
 	<section class="welcome">
 		<div class="wrap">

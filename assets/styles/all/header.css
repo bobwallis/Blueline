@@ -1,0 +1,94 @@
+/* Header bar */
+#top {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: var(--header-height);
+	background-color: var(--header-background);
+	color: var(--light-grey);
+	line-height: var(--header-height);
+	user-select: none;
+	z-index: 43;
+	a {
+		color: var(--light-grey);
+		border: 0;
+		outline: 0;
+		text-decoration: none;
+		text-shadow: none;
+		background-image: none;
+		&:hover {
+			color: #FFF;
+		}
+	}
+	h1, h2 {
+		text-transform: uppercase;
+		font-weight: normal;
+		float: left;
+		margin: 0 0 0 calc(var(--header-height) * 0.25);
+		font-size: calc(var(--header-height) * 0.55);
+	}
+	h2 {
+		font-weight: normal;
+		text-transform: none;
+		margin: 0 0 0 calc(var(--header-height) * 0.25);
+	}
+}
+
+
+/* Search */
+#search {
+	display: block;
+	position: fixed;
+	top: var(--header-height);
+	left: 0;
+	z-index: 40;
+	width: 100%;
+	clear: both;
+	border-bottom: 1px solid var(--light-grey);
+	background-color: var(--title-background);
+	background-color: var(--title-background-overlay);
+	box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+	div {
+		width: var(--search-width);
+		margin: var(--content-y-padding) var(--content-x-padding);
+		overflow: hidden;
+		border-radius: 2px;
+		border: 1px solid var(--light-grey);
+		height: 32px;
+		background: #FFF url(../../images/search.svg) no-repeat right center;
+		background-size: contain;
+	}
+	input {
+		display: block;
+		float: left;
+		background-color: transparent;
+		border: 0;
+		font-size: 14px;
+		width: 95%;
+		height: 28px;
+		line-height: 24px;
+		padding: 2px 5px;
+		&:focus {
+			border: 0;
+			outline-width: 0;
+		}
+	}
+	button {
+		float: left;
+		border: 0;
+		width: 28px;
+		height: 28px;
+		background-color: transparent;
+	}
+}
+@media screen and (max-width: 850px) {
+	#search {
+		div {
+			width: 95%;
+			min-width: var(--search-width-small-screen);
+			margin-left: auto;
+			margin-right: auto;
+		}
+	}
+}

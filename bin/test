@@ -97,8 +97,18 @@ fi
 
 echo -e "\033[32m✓ PHP source lint passed\033[0m"
 
-echo -e "\n\033[1mLint JavaScript\033[0m"
-npm run lint:js
+echo -e "\n\033[1mCompile production assets\033[0m"
+"$repo_root/bin/buildFrontendAssets" --env=prod > /dev/null
+if [ ! -f public/assets/manifest.json ]; then
+    echo -e "\033[31m✗ Asset compilation failed - manifest.json not generated\033[0m"
+    exit 1
+fi
+if [ ! -f public/favicon.ico ] || [ ! -f public/favicon.svg ] || [ ! -f public/service_worker.js ]; then
+    echo -e "\033[31m✗ Root public assets missing (favicon or service worker)\033[0m"
+    exit 1
+fi
+echo -e "\033[32m✓ Production assets compiled successfully\033[0m"
+"$repo_root/bin/buildFrontendAssets" > /dev/null # Re-run without setting --env so that in dev the compiled assets are deleted again
 
 echo -e "\n\033[1mRunning PHPUnit tests\033[0m"
 APP_ENV=test "$repo_root/bin/phpunit"

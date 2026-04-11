@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-age="{{ html_age }}">
+<html lang="en">
 	<head>
 		<meta charset="utf-8">
 		<title>{% block title %}Blueline{% endblock %}</title>
@@ -10,8 +10,6 @@
 		<link rel="icon" href="{{ app.request.basepath }}/favicon.ico" />
 
 		{# Preload tags #}
-		<link rel="preload" href="{{ preload(app.request.basepath ~ '/css/all.css?v=' ~ html_age, {as: 'style'}) }}" as="style" />
-		<link rel="modulepreload" href="{{ link(app.request.basepath ~ '/js/main.js?v=' ~ html_age, 'modulepreload', {crossorigin: 'anonymous'}) }}" />
 		{% block preload %}{% endblock %}
 
 		{# Web app manifest #}
@@ -26,7 +24,7 @@
 		<meta name="apple-mobile-web-app-title" content="Blueline" />
 		<meta name="format-detection" content="telephone=no" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="apple-touch-icon" href="{{ app.request.basepath }}/images/appicon-180x180.png" />
+		<link rel="apple-touch-icon" href="{{ asset('images/appicon-180x180.png') }}" />
 
 		{# Color browser address bars #}
 		<meta name="theme-color" content="#002856" />
@@ -42,21 +40,18 @@
 		<meta property="og:description" content="{% block og_description %}Information for bellringers{% endblock %}" />
 		{% if status_code is not defined %}<meta property="og:url" content="{{ url( app.request.attributes.get( '_route' ), app.request.attributes.get( '_route_params' ) ) }}" />{% endif %}
 		<meta property="og:type" content="{% block og_type %}website{% endblock %}" />
-		<meta property="og:image" content="{% block og_image %}{{ app.request.basepath }}/images/appicon-180x180.png{% endblock %}" />
+		<meta property="og:image" content="{% block og_image %}{{ asset('images/appicon-180x180.png') }}{% endblock %}" />
 		<meta property="og:site_name" content="Blueline" />
 
 		{# oEmbed tags #}
 		{% block oembed %}{% endblock %}
 
 		{# Stylesheets #}
-		<link rel="stylesheet" media="all" href="{{ app.request.basepath }}/css/all.css?v={{ html_age }}" />
-		<link rel="stylesheet" media="print" href="{{ app.request.basepath }}/css/print.css?v={{ html_age }}" />
+		<link rel="stylesheet" media="all" href="{{ asset('styles/all.css') }}" />
+		<link rel="stylesheet" media="print" href="{{ asset('styles/print.css') }}" />
 
 	</head>
 	<body>
-		{% if isAppStartPage %}
-			<script>if(('standalone' in navigator)&&navigator.standalone){document.body.className="standalone";}</script>
-		{% endif %}
 		<header id="top" role="banner">
 			<h1><a href="{{ path('Blueline_welcome') }}">Blueline</a></h1>
 			{% if breadcrumb is defined %}
@@ -76,7 +71,7 @@
 				<h2>Settings</h2>
 				<form id="settings_form" method="get">
 					<p>Draw lines through the&nbsp;&nbsp;<span class="select-wrapper"><select id="method_follow" name="method_follow"><option value="heaviest" selected="selected">heaviest</option><option value="lightest">lightest</option></select></span>&nbsp;&nbsp;bell.</p>
-					<p>Use the following style: <label class="radio_image"><input type="radio" name="method_style" value="numbers" checked="checked"><img src="{{ app.request.basepath }}/images/preview_numbers.png" loading="lazy"></label><label class="radio_image"><input type="radio" name="method_style" value="lines"><img src="{{ app.request.basepath }}/images/preview_lines.png" loading="lazy"></label><label class="radio_image"><input type="radio" name="method_style" value="diagrams"><img src="{{ app.request.basepath }}/images/preview_diagrams.png" loading="lazy"></label></p>
+					<p>Use the following style: <label class="radio_image"><input type="radio" name="method_style" value="numbers" checked="checked"><img src="{{ asset('images/preview_numbers.png') }}" loading="lazy"></label><label class="radio_image"><input type="radio" name="method_style" value="lines"><img src="{{ asset('images/preview_lines.png') }}" loading="lazy"></label><label class="radio_image"><input type="radio" name="method_style" value="diagrams"><img src="{{ asset('images/preview_diagrams.png') }}" loading="lazy"></label></p>
 					<p><label for="method_tooltips">Show descriptive tooltips?</label><input type="checkbox" id="method_tooltips" name="method_tooltips" checked="checked"></p>
 					<p><label for="method_music">Highlight music?</label><input type="checkbox" id="method_music" name="method_music"></p>
 					<p>Increase/decrease size using pinch-to-zoom or by pressing Ctrl + or Ctrl -.</p>
@@ -87,6 +82,6 @@
 		<div id="content" role="main"{{ search|default(false) ? ' class="searchable"' : '' }}>
 			{% block body %}{% endblock %}
 		</div>
-		<script type="module" src="{{ app.request.basepath }}/js/main.js?v={{ html_age }}"></script>
+		{{ importmap('app') }}
 	</body>
 </html>

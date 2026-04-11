@@ -1,0 +1,10 @@
+/* Hide anything we don't want to print at all */
+#top, #search, #loading, .tabBar {
+	display: none;
+}
+
+/* Remove any backgrounds or borders that we don't want */
+section header {
+	background: none;
+	border: 0;
+}

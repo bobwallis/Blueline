@@ -238,7 +238,7 @@ sudo apt-get update -qq && sudo apt-get upgrade -q -y --no-install-recommends
 
 # Core tools
 sudo apt-get install -q -y --no-install-recommends \
-	apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less gpg lsb-release zsh
+	apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less gpg lsb-release zsh brotli zstd zopfli tzdata
 
 # Symfony CLI — add Cloudsmith apt source if not already present
 if [ ! -f /etc/apt/sources.list.d/symfony-stable.list ]; then
@@ -246,14 +246,6 @@ if [ ! -f /etc/apt/sources.list.d/symfony-stable.list ]; then
 	curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | sudo -E bash -
 fi
 sudo apt-get install -q -y symfony-cli
-
-# Node.js 24 LTS, plus Gulp — add NodeSource apt source if not already present
-if [ ! -f /etc/apt/sources.list.d/nodesource.sources ]; then
-	echo "  Adding NodeSource apt source (Node.js 24)..."
-	curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
-fi
-sudo apt-get install -y -q nodejs
-sudo npm install -g gulp --loglevel=warn --no-progress --no-fund
 
 # Postgres client, plus PHP 8.4 and extensions (Debian Trixie default — no extra apt source needed)
 sudo apt-get install -y -q --no-install-recommends \
@@ -313,7 +305,7 @@ if [ "$NODATABASE_ARG" = true ]; then
 	echo "  Reminder: configure a reachable PostgreSQL server and credentials yourself."
 else
 	# Install PostgreSQL 17 (Debian Trixie default — no extra apt source needed)
-	sudo apt-get install -y -q --no-install-recommends tzdata postgresql-17
+	sudo apt-get install -y -q --no-install-recommends postgresql-17
 
 	DB_PASS=""
 	if [ "$IS_DOCKER" = false ]; then
@@ -507,18 +499,7 @@ fi
 
 
 # ##############################################################################
-# SECTION 7: Node.js dependencies
-# ##############################################################################
-
-echo -e "\n\033[1mInstalling Node.js dependencies\033[0m"
-cd "$REPO_ROOT"
-npm install --loglevel=warn --no-progress --no-fund
-npm audit fix --loglevel=warn --no-progress --no-fund || true
-npx --loglevel=warn update-browserslist-db@latest
-
-
-# ##############################################################################
-# SECTION 8: FrankenPHP systemd service (VM only)
+# SECTION 7: FrankenPHP systemd service (VM only)
 # ##############################################################################
 
 if [ "$APP_ENV" = "prod" ]; then
@@ -725,6 +706,7 @@ if [ "$APP_ENV" = "prod" ]; then
 	cd "$REPO_ROOT"
 	symfony console cache:clear --env=prod
 	symfony console cache:warm --env=prod
+	"$REPO_ROOT/bin/buildFrontendAssets"
 	symfony composer dump-env prod
 	APP_ENV=prod symfony console error:dump -f var/cache/prod/error_pages/
 	echo "  Production finalisation complete."
@@ -733,8 +715,10 @@ fi
 
 echo -e "\n\033[1mSetup complete.\033[0m"
 echo -e "\n  Next steps:"
-echo    "    - Build frontend assets:  ./bin/buildFrontendAssets"
 echo    "    - Import data:            ./bin/fetchAndImportData"
+if [ "$APP_ENV" = "dev" ]; then
+	echo    "    - Start development:      symfony serve"
+fi
 
 if [ "$APP_ENV" = "prod" ]; then
 	if [ "$NODATABASE_ARG" = true ] || [ "$NOSERVER_ARG" = true ] || [ "$NOCLOUDFLARED_ARG" = true ]; then

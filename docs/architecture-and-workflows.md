@@ -5,7 +5,7 @@ This guide is intended for both human contributors and AI coding assistants.
 ## High-level architecture
 - **Framework**: Symfony 7.4 application with Doctrine ORM and Twig.
 - **Backend**: PHP domain logic in `src/`.
-- **Frontend**: Source assets under `src/Resources/`, built output in `public/` via Gulp.
+- **Frontend**: Source assets under `assets/`, managed by Symfony's AssetMapper with automatic versioning. Production builds use SensioLabs Minify Bundle for minification.
 - **Data store**: PostgreSQL (with `fuzzystrmatch` extension for search similarity features).
 
 ## Code structure
@@ -22,10 +22,9 @@ This guide is intended for both human contributors and AI coding assistants.
 
 ### 1) Environment setup
 Follow `README.md` for full setup. In short:
-1. Install PHP/Composer/Node/PostgreSQL prerequisites, plus locale/timezone configuration.
+1. Install PHP/Composer/PostgreSQL prerequisites, plus locale/timezone configuration.
 2. `symfony composer install`
-3. `npm install && npm audit fix`
-4. Ensure PostgreSQL is running locally, then create DB and schema.
+3. Ensure PostgreSQL is running locally, then create DB and schema.
 
 ### 2) Data import/update
 Use:
@@ -33,11 +32,13 @@ Use:
 
 This script downloads external method data, runs import commands, recalculates similarities, and bumps `DATABASE_UPDATE`.
 
-### 3) Frontend asset build
-Use:
-- `./bin/buildFrontendAssets`
+### 3) Frontend asset management
 
-This script updates cache-busting values, rebuilds CSS/JS bundles, and regenerates images.
+**Development**: Edit CSS/JS/image files in `assets/` and refresh your browser. Symfony's AssetMapper handles mapping and versioning automatically on each request—no build step required.
+
+**Production**: Run `php bin/console asset-map:compile --env=prod` to compile assets and generate versioned files in `public/assets/` with minification applied via SensioLabs Minify Bundle. This is executed as part of `./bin/provision` and in the deployment pipeline.
+
+**Asset Versioning**: AssetMapper generates content-hash-based filenames (e.g., `all-abc123.css`, `main-xyz789.js`) automatically, providing cache busting without additional configuration.
 
 ### 4) Quality checks
 Use:

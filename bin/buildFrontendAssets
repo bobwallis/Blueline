@@ -1,27 +1,106 @@
 #!/bin/bash
+set -euo pipefail
 
-# Get script directory, and cd to the parent folder
+# Build frontend assets for production and sync stable root URLs.
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
 d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-cd "$d/../"
+repo_root="$( cd "$d/.." && pwd )"
+cd "$repo_root"
 
-# Update source timestamp to refresh caching headers etc
-cachebuster=`date "+%s"`
-sed -i -e"s/ASSET_UPDATE=.*/ASSET_UPDATE=$cachebuster/" ".env.local"
-sed -i -e"s/var version = .*/var version = \"`date --date="@$cachebuster" "+%Y%m%d%H%I%S"`\";/" "src/Resources/js/service_worker.js"
+# Parse options and resolve APP_ENV.
+ENV_LOCAL_FILE="$repo_root/.env.local"
+usage() {
+cat << EOF
 
-echo -e "\n\033[1mRebuilding CSS and JS assets\033[0m"
-rm -rf "./public/components"
-rm -rf "./public/bundles"
-rm -rf "./public/assetic"
-rm -rf "./public/css"
-rm -rf "./public/js"
-rm -rf "./public/fonts"
-gulp
+Usage: $0 [options]
+Build frontend assets and sync root public assets.
 
-# Revert cache buster in service worker
-sed -i -e"s/var version = .*/var version = (new Date()).toISOString().substr(0,19).replace(\/[-:T]\/g,'');/" "src/Resources/js/service_worker.js"
+Options:
+ --env=dev|prod  Set APP_ENV directly
+ --env-dev       Shortcut for --env=dev
+ --env-prod      Shortcut for --env=prod
+ --help          Shows this message
+EOF
+}
 
-echo -e "\n\033[1mRebuilding image assets\033[0m"
-gulp images
+ENV_ARG=""
+AFTER_DOUBLE_DASH=false
+for arg in "$@"; do
+	if [ "$AFTER_DOUBLE_DASH" = true ]; then
+		printf >&2 '%s: unexpected positional argument: %s\n' "${0##*/}" "$arg"
+		usage
+		exit 1
+	fi
+
+	case "$arg" in
+		--)
+			AFTER_DOUBLE_DASH=true
+			;;
+		--env=dev|--env=prod)
+			ENV_ARG="${arg#--env=}"
+			;;
+		--env-dev)
+			ENV_ARG="dev"
+			;;
+		--env-prod)
+			ENV_ARG="prod"
+			;;
+		--env=*)
+			printf >&2 '%s: invalid value for --env (must be dev or prod): %s\n' "${0##*/}" "${arg#--env=}"
+			usage
+			exit 1
+			;;
+		--help)
+			usage
+			exit 0
+			;;
+		--*)
+			printf >&2 '%s: unknown option: %s\n' "${0##*/}" "$arg"
+			usage
+			exit 1
+			;;
+		-*)
+			printf >&2 '%s: unknown option: %s\n' "${0##*/}" "$arg"
+			usage
+			exit 1
+			;;
+		*)
+			printf >&2 '%s: unexpected positional argument: %s\n' "${0##*/}" "$arg"
+			usage
+			exit 1
+			;;
+	esac
+done
+
+if [ -n "$ENV_ARG" ]; then
+	APP_ENV="$ENV_ARG"
+else
+	APP_ENV=""
+	if [ -f "$ENV_LOCAL_FILE" ]; then
+		APP_ENV="$(sed -nE 's/^[[:space:]]*APP_ENV[[:space:]]*=[[:space:]]*//p' "$ENV_LOCAL_FILE" | tail -n 1 | sed -E 's/[[:space:]]*$//' | sed -E 's/^"(.*)"$/\1/; s/^\x27(.*)\x27$/\1/')"
+	fi
+	if [ -z "$APP_ENV" ]; then
+		APP_ENV="dev"
+	fi
+fi
+
+mkdir -p public
+
+# Clean generated frontend outputs to avoid stale hashed imports.
+rm -rf public/assets
+rm -f public/manifest.json public/importmap.json
+
+# Rebuild mapped assets for production.
+if [ "$APP_ENV" = "prod" ]; then
+	php bin/console asset-map:compile --env=prod
+    # Ensure files that are expected at fixed root paths exist.
+    cp assets/images/favicon.ico public/favicon.ico
+    cp assets/images/favicon.svg public/favicon.svg
+    cp assets/js/service_worker.js public/service_worker.js
+else
+	echo "APP_ENV=$APP_ENV: skipping precompile in non-prod so asset changes reload automatically."
+	echo "To force precompile, run with --env=prod."
+fi
+
+echo "Frontend assets ready."

@@ -50,7 +50,6 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
     {
         return array(
             'chromeless'     => $this->chromeless,
-            'html_age'       => ($this->environment == 'prod') ? date('YmdHis', $this->params->get('blueline.asset_update')) : 'dev',
             'db_age'         => $this->params->get('blueline.database_update'),
             'isAppStartPage' => ($this->path == '/') && ($this->environment == 'prod'),
         );

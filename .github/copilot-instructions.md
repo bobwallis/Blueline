@@ -1,7 +1,7 @@
 # Copilot instructions for Blueline
 
 ## Project baseline
-- Stack: Symfony 7.4 (PHP 8.2+), Doctrine ORM, Twig templates, PostgreSQL, Gulp-built frontend assets.
+- Stack: Symfony 7.4 (PHP 8.2+), Doctrine ORM, Twig templates, PostgreSQL, AssetMapper-managed frontend assets.
 - App namespace is `Blueline\\` under `src/`.
 - Use existing coding style and naming conventions in neighboring files.
 - Keep changes small and focused; do not refactor unrelated code.
@@ -22,7 +22,7 @@
 - Run tests and lints via `./bin/test` for full-suite validation only.
 - Do not pass path/filter arguments to `./bin/test`; it does not support targeted subsets.
 - For targeted testing, call PHPUnit directly, e.g. `APP_ENV=test ./bin/phpunit tests/Controller` or `APP_ENV=test ./bin/phpunit --filter <name> <path>`.
-- Build frontend assets via `./bin/buildFrontendAssets` (or `gulp watch` while iterating).
+- Build frontend assets via `./bin/buildFrontendAssets`.
 - Refresh method data via `./bin/fetchAndImportData` when relevant.
 
 ## Coding expectations for generated changes

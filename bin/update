@@ -108,7 +108,6 @@ if [[ $NOPULL = false ]]
 	then
 	echo -e "\n\033[1mPulling latest version of Blueline\033[0m"
 	# Discard any local changes to lockfiles (which may be updated by setup script) before pulling, to avoid merge conflicts
-	git checkout -- package-lock.json
 	git checkout -- composer.lock
 	git checkout -- symfony.lock
 	# Then pull latest code

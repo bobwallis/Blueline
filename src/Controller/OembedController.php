@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class OembedController extends AbstractController
 {
-    #[Cache(maxage: 129600, public: true, lastModified: 'request.attributes.get("asset_update")')]
+    #[Cache(maxage: 129600, public: true)]
     public function index(Request $request, ParameterBagInterface $params)
     {
         $url = $request->query->get('url');

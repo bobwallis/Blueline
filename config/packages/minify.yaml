@@ -1,0 +1,5 @@
+sensiolabs_minify:
+    asset_mapper:
+        types:
+            css: true
+            js: true
