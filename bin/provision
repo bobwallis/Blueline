@@ -721,6 +721,7 @@ if [ "$APP_ENV" = "dev" ]; then
 fi
 
 if [ "$APP_ENV" = "prod" ]; then
+	echo    "    - Rebuild frontend assets:      ./bin/buildFrontendAssets --env=prod"
 	if [ "$NODATABASE_ARG" = true ] || [ "$NOSERVER_ARG" = true ] || [ "$NOCLOUDFLARED_ARG" = true ]; then
 		echo "    - Production manual checks:"
 		if [ "$NODATABASE_ARG" = true ]; then
