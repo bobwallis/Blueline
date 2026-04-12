@@ -65,6 +65,7 @@ fi
 symfony console blueline:importMethods --no-debug --env="$APP_ENV"
 symfony console blueline:importMethodExtras --no-debug --env="$APP_ENV"
 symfony console blueline:importCollections --no-debug --env="$APP_ENV"
+symfony console dbal:run-sql "VACUUM" --env="$APP_ENV"
 symfony console blueline:calculateMethodSimilarities --no-debug --env="$APP_ENV"
 symfony console dbal:run-sql "VACUUM" --env="$APP_ENV"
 echo ""
