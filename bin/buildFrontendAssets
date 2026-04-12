@@ -95,6 +95,7 @@ mkdir -p public
 # Clean generated frontend outputs to avoid stale hashed imports.
 rm -rf public/assets
 rm -f public/manifest.json public/importmap.json
+rm -f public/favicon.ico public/favicon.svg public/favicon.svg.br public/favicon.svg.gz public/favicon.svg.zst
 
 # Rebuild mapped assets for production.
 if [ "$APP_ENV" = "prod" ]; then
@@ -102,6 +103,7 @@ if [ "$APP_ENV" = "prod" ]; then
 	# Ensure files that are expected at fixed root paths exist.
 	cp assets/images/favicon.ico public/favicon.ico
 	cp assets/images/favicon.svg public/favicon.svg
+	php bin/console assets:compress public/favicon.svg --env=prod
 	if [ -z "$DATABASE_UPDATE" ]; then
 		DATABASE_UPDATE="$(date +%s)"
 		echo "DATABASE_UPDATE not found in .env.local; defaulting service worker version to current UNIX timestamp ($DATABASE_UPDATE)."
