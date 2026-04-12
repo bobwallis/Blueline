@@ -61,7 +61,30 @@ if [ "$SKIP_PULL" -eq 0 ]; then
 	echo ""
 fi
 
+# Check database schema exists and is accessible, and create if not
+echo -e "\n\033[1mChecking database schema\033[0m"
+symfony console doctrine:database:create --if-not-exists
+symfony console dbal:run-sql "CREATE EXTENSION IF NOT EXISTS fuzzystrmatch" --no-interaction 2>/dev/null || true
+
+SCHEMA_VALIDATE_OUTPUT="$(symfony console doctrine:schema:validate 2>&1)" || true
+echo "$SCHEMA_VALIDATE_OUTPUT"
+
+if echo "$SCHEMA_VALIDATE_OUTPUT" | grep -q "The database schema is not in sync"; then
+	echo -e "\n\033[1mDatabase schema is out of date\033[0m"
+	echo -e "\n\033[1mPending SQL updates\033[0m"
+	symfony console doctrine:schema:update --dump-sql
+	echo ""
+	read -r -p "  Run forced schema update now? [y/N] " RUN_SCHEMA_UPDATE
+	if [[ "$RUN_SCHEMA_UPDATE" =~ ^[Yy]$ ]]; then
+		echo -e "\n\033[1mRunning forced schema update\033[0m"
+		symfony console doctrine:schema:update --force
+	else
+		echo "  Skipping forced schema update."
+	fi
+fi
+
 # Import updated method data
+echo -e "\n\033[1mImporting method data\033[0m"
 symfony console blueline:importMethods --no-debug --env="$APP_ENV"
 symfony console blueline:importMethodExtras --no-debug --env="$APP_ENV"
 symfony console blueline:importCollections --no-debug --env="$APP_ENV"
