@@ -10,6 +10,16 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Blueline\Entity\Method;
 
+/**
+ * Symfony console command that validates method classifications.
+ *
+ * Compares the method_library's stored classifications (from imported data)
+ * against the classifications calculated by PHP logic (based on notation properties).
+ * Flags mismatches that may indicate import errors or logic bugs.
+ *
+ * Run via: bin/console blueline:checkMethodClassifications
+ */
+
 class CheckClassificationsCommand extends Command
 {
     public function __construct(private readonly Connection $connection)
@@ -36,7 +46,7 @@ class CheckClassificationsCommand extends Command
 
         try {
             $methodCount = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM methods');
-            $methods = $this->connection->executeQuery('SELECT title, stage, notationexpanded, classification, little, differential, plain, trebledodging FROM methods')->iterateAssociative();
+            $methods = $this->connection->executeQuery('SELECT title, stage, notationexpanded AS "notationExpanded", classification, little, differential, plain, trebledodging AS "trebleDodging" FROM methods')->iterateAssociative();
         }
         catch (Exception $exception) {
             $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
@@ -52,7 +62,7 @@ class CheckClassificationsCommand extends Command
             // Create a Method object using only stage and notation
             $methodObject = new Method();
             $methodObject->setStage($method['stage'])
-                         ->setNotation($method['notationexpanded']);
+                         ->setNotation($method['notationExpanded']);
             // Compare it to the raw data
             if ($methodObject->getClassification() != $method['classification']) {
                 $progress->clear();
@@ -74,9 +84,9 @@ class CheckClassificationsCommand extends Command
                 $output->writeln('<error>'.$method['title'].': Mismatched plain - '.$method['plain'].' vs '.($methodObject->getPlain()?'t':null).'</error>');
                 $progress->display();
             }
-            if (($methodObject->getTrebleDodging()?'t':null) != $method['trebledodging']) {
+            if (($methodObject->getTrebleDodging()?'t':null) != $method['trebleDodging']) {
                 $progress->clear();
-                $output->writeln('<error>'.$method['title'].': Mismatched treble dodging - '.$method['trebledodging'].' vs '.($methodObject->getTrebleDodging()?'t':null).'</error>');
+                $output->writeln('<error>'.$method['title'].': Mismatched treble dodging - '.$method['trebleDodging'].' vs '.($methodObject->getTrebleDodging()?'t':null).'</error>');
                 $progress->display();
             }
             $progress->advance();

@@ -32,10 +32,6 @@ class MethodsControllerTest extends WebTestCase
         $this->assertSame('Cambridge Surprise Minor', $payload[0]['title']);
         $this->assertSame('Cambridge_Surprise_Minor', $payload[0]['url']);
         $this->assertSame(6, $payload[0]['stage']);
-        if (array_key_exists('cccbrId', $payload[0])) {
-            $this->assertArrayHasKey('cccbr_id', $payload[0]);
-            $this->assertSame($payload[0]['cccbrId'], $payload[0]['cccbr_id']);
-        }
     }
 
     public function testMethodViewRedirectsCanonicalAndEmptyUrls()
@@ -83,13 +79,6 @@ class MethodsControllerTest extends WebTestCase
         }), 'Search results should include an Oxford method');
 
         $this->assertStringContainsString('cccbrId', $payload['query']['fields']);
-
-        foreach ($payload['results'] as $method) {
-            if (array_key_exists('cccbrId', $method)) {
-                $this->assertArrayHasKey('cccbr_id', $method);
-                $this->assertSame($method['cccbrId'], $method['cccbr_id']);
-            }
-        }
     }
 
     public function testMethodsSearchJsonReturnsOnlyRequestedFields()
@@ -107,8 +96,8 @@ class MethodsControllerTest extends WebTestCase
         $this->assertSame(array('title', 'url'), array_keys($firstResult));
         $this->assertArrayNotHasKey('collections', $firstResult);
         $this->assertArrayNotHasKey('performances', $firstResult);
-        $this->assertArrayNotHasKey('methodsimilarity1', $firstResult);
-        $this->assertArrayNotHasKey('methodsimilarity2', $firstResult);
+        $this->assertArrayNotHasKey('methodSimilarity1', $firstResult);
+        $this->assertArrayNotHasKey('methodSimilarity2', $firstResult);
     }
 
     public function testMethodsSearchJsonUnknownFieldsAreIgnored()

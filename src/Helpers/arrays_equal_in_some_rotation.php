@@ -2,12 +2,18 @@
 namespace Blueline\Helpers;
 
 /**
- * Compare two indexed arrays for equality under cyclic rotation.
+ * Check if two arrays are equal under some cyclic rotation.
  *
- * This is used where representations can have different start points but the
- * same relative ordering (e.g. rotations of a cycle).
+ * Useful for comparing sequences that may have different start points but identical
+ * cyclic structure (e.g., rotations of a lead head pattern).
+ *
+ * Example: [1,2,3] == [2,3,1] under rotation
+ *
+ * @param array $array1 First array
+ * @param array $array2 Second array
+ * @return bool True if arrays are identical under some rotation, false otherwise
  */
-function arrays_equal_in_some_rotation($array1, $array2)
+function arrays_equal_in_some_rotation(array $array1, array $array2): bool
 {
     if (count($array1) != count($array2)) {
         return false;

@@ -5,6 +5,16 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
+/**
+ * Symfony event listener for kernel.request events.
+ *
+ * Populates request attributes with global application parameters:
+ * - endpoint: Application base URL for links and oEmbed generation
+ * - database_update: Timestamp of last database update.
+ *                    Set to current time in non-prod environments
+ *                    to disable caching during development.
+ *
+ */
 #[AsEventListener(event: 'kernel.request')]
 class RequestListener
 {

@@ -2,12 +2,12 @@
 namespace Blueline\Helpers;
 
 /**
- * A helper for working with method stages
- * @package Blueline
- * @author Robert Wallis <bob.wallis@gmail.com>
- * @license http://opensource.org/licenses/gpl-3.0.html GNU Public License
+ * Utilities for bell-ringing stages (number of bells) in different formats.
+ *
+ * Stages are numbered descriptions of bell counts: 4 bells = "Minimus", 6 bells = "Minor", etc.
+ * Supports bell counts from 2 to 22.
+ * Provides conversion between numeric and named stage representations.
  */
-
 class Stages
 {
     /**

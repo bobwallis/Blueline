@@ -1,22 +1,34 @@
 <?php
-/*
- * This file is part of Blueline.
- * It parses the method XML files from http://methods.org.uk into Method entities and implements
- * the Iterator interface. Refer to ../Command/ImportMethodsCommand for usage.
- *
- * (c) Bob Wallis <bob.wallis@gmail.com>
- *
- */
-
 namespace Blueline\Helpers;
 
 use Blueline\Helpers\Country;
 use Blueline\Helpers\LongCounty;
 
+/**
+ * Parses method XML files into Method entities and implements the Iterator
+ * interface for streaming parsing.
+ *
+ * Converts XML elements to Method entity data with automatic:
+ * - Classification and abbreviation lookup
+ * - Lead head code resolution
+ * - Collection assignment via method ID matching
+ * - Provisional method flag for naming variants
+ *
+ * Used by ImportMethodsCommand for bulk method import.
+ *
+ * @see ImportMethodsCommand for usage
+ * @TODO: Consider switching from SimpleXML to XMLReader for better memory efficiency on large files
+ *
+ */
 class MethodXMLIterator implements \Iterator, \Countable
 {
     private $data;
 
+    /**
+     * Parse a methods XML file and prepare iterable rows for import.
+     *
+     * @param string $file Absolute path to methods XML file
+     */
     public function __construct($file)
     {
         // Prepare methodCollections data for easier method sorting
@@ -52,18 +64,18 @@ class MethodXMLIterator implements \Iterator, \Countable
                 'provisional'    => $provisional,
                 'url'            => strval($node->title) ? str_replace([' ', '$', '&', '+', ',', '/', ':', ';', '=', '?', '@', '"', "'", '<', '>', '#', '%', '{', '}', '|', "\\", '^', '~', '[', ']', '.'], ['_'], iconv('UTF-8', 'ASCII//TRANSLIT', strval($node->title))) : null,
                 'title'          => strval($node->title) ?: null,
-                'namemetaphone'  => metaphone($node->name ?: '') ?: null,
+                'nameMetaphone'  => metaphone($node->name ?: '') ?: null,
                 'notation'       => str_replace(['-','.,'], ['x',','], strval($node->notation)) ?: null,
                 ), array_filter(array(
                 'stage'          => intval($node->stage) ?: null,
                 'classification' => strval($node->classification) ?: null,
-                'numberofhunts'  => $node->numberOfHunts ? intval($node->numberOfHunts) : null,
-                'lengthoflead'   => intval($node->lengthOfLead) ?: null,
-                'leadhead'       => strval($node->leadHead) ?: null,
-                'leadheadcode'   => strval($node->leadHeadCode) ?: null,
-                'fchgroups'      => strval($node->falseness->fchGroups) ?: null,
-                'cccbr_id'       => strval($node->attributes()->id) ?: null,
-                'extensionconstruction' => strval($node->extensionConstruction) ?: null,
+                'numberOfHunts'  => $node->numberOfHunts ? intval($node->numberOfHunts) : null,
+                'lengthOfLead'   => intval($node->lengthOfLead) ?: null,
+                'leadHead'       => strval($node->leadHead) ?: null,
+                'leadHeadCode'   => strval($node->leadHeadCode) ?: null,
+                'fchGroups'      => strval($node->falseness->fchGroups) ?: null,
+                'cccbrId'        => strval($node->attributes()->id) ?: null,
+                'extensionConstruction' => strval($node->extensionConstruction) ?: null,
             ), function ($e) { return !is_null($e); }));
 
             // Manually fix non-unique URLs
@@ -82,16 +94,16 @@ class MethodXMLIterator implements \Iterator, \Countable
 
             // Parse place notation
             if (isset($array['notation'])) {
-                $array['notationexpanded'] = PlaceNotation::expand($array['notation'], $array['stage']);
+                $array['notationExpanded'] = PlaceNotation::expand($array['notation'], $array['stage']);
             }
 
             // If needed, work out the lead head/lead head code
-            if (!isset($array['leadhead']) && isset($array['stage'], $array['leadheadcode'])) {
-                $array['leadhead'] = LeadHeadCodes::fromCode($array['leadheadcode'], $array['stage']);
+            if (!isset($array['leadHead']) && isset($array['stage'], $array['leadHeadCode'])) {
+                $array['leadHead'] = LeadHeadCodes::fromCode($array['leadHeadCode'], $array['stage']);
             }
-            if (isset($array['leadhead'], $array['stage'], $array['numberofhunts'], $array['notation']) && !isset($array['leadheadcode'])) {
-                $explodedNotation = PlaceNotation::explode($array['notationexpanded']);
-                $array['leadheadcode'] = LeadHeadCodes::toCode($array['leadhead'], $array['stage'], $array['numberofhunts'], array_pop($explodedNotation), array_shift($explodedNotation));
+            if (isset($array['leadHead'], $array['stage'], $array['numberOfHunts'], $array['notation']) && !isset($array['leadHeadCode'])) {
+                $explodedNotation = PlaceNotation::explode($array['notationExpanded']);
+                $array['leadHeadCode'] = LeadHeadCodes::toCode($array['leadHead'], $array['stage'], $array['numberOfHunts'], array_pop($explodedNotation), array_shift($explodedNotation));
             }
 
             // Get additional classification attributes
@@ -99,13 +111,13 @@ class MethodXMLIterator implements \Iterator, \Countable
                 $array['little']        = ($node->classification->attributes()->little) ? true : null;
                 $array['differential']  = ($node->classification->attributes()->differential) ? true : null;
                 $array['plain']         = ($node->classification->attributes()->plain) ? true : null;
-                $array['trebledodging'] = ($node->classification->attributes()->trebleDodging) ? true : null;
+                $array['trebleDodging'] = ($node->classification->attributes()->trebleDodging) ? true : null;
             }
 
             // Get symmetry
             if (isset($node->symmetry)) {
                 $array['palindromic'] = (strpos(strval($node->symmetry), 'palindromic') !== false) ? true : null;
-                $array['doublesym']   = (strpos(strval($node->symmetry), 'double') !== false) ? true : null;
+                $array['doubleSym']   = (strpos(strval($node->symmetry), 'double') !== false) ? true : null;
                 $array['rotational']  = (strpos(strval($node->symmetry), 'rotational') !== false) ? true : null;
             }
 
@@ -118,7 +130,7 @@ class MethodXMLIterator implements \Iterator, \Countable
                         $refParts[] = $refChild->getName().': '.$val;
                     }
                 }
-                $array['method_references'] = $refParts ? implode('; ', $refParts) : null;
+                $array['methodReferences'] = $refParts ? implode('; ', $refParts) : null;
             }
 
             // Get performance information

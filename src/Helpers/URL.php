@@ -1,6 +1,14 @@
 <?php
 namespace Blueline\Helpers;
 
+/**
+ * Utilities for method URL slug generation and canonicalisation.
+ *
+ * Converts method titles to URL-safe slugs and normalises URLs for consistency.
+ * Handles classification abbreviations, encoding, and manual corrections for legacy issues.
+ * Used for method detail page URLs and for search engine redirection.
+ *
+ */
 class URL
 {
     private static $corrections = array(

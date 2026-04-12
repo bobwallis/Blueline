@@ -2,12 +2,11 @@
 namespace Blueline\Helpers;
 
 /**
- * A helper for working with text
- * @package Blueline
- * @author Robert Wallis <bob.wallis@gmail.com>
- * @license http://opensource.org/licenses/gpl-3.0.html GNU Public License
+ * Text formatting and manipulation utilities.
+ *
+ * Provides helpers for formatting lists, pluralisation, and other text operations
+ * commonly needed in templates and output.
  */
-
 class Text
 {
     /**

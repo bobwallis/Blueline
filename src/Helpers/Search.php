@@ -1,6 +1,17 @@
 <?php
 namespace Blueline\Helpers;
 
+/**
+ * Search query parsing and DQL query building utilities.
+ *
+ * Converts HTTP search request parameters into structured search variables (fields, conditions, sorting, pagination).
+ * Builds Doctrine DQL WHERE clauses with LIKE matching, regex matching, and range queries for numeric fields.
+ * Supports pagination via offset/count parameters.
+ *
+ * Used by MethodsController and data export endpoints for flexible search and filtering.
+ *
+ * Typical flow: HTTP request -> requestToSearchVariables() -> searchVariablesToBasicQuery() -> DQL query
+ */
 class Search
 {
     public static function prepareStringForLike($string)

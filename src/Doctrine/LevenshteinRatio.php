@@ -5,8 +5,26 @@ use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 use Doctrine\ORM\Query\TokenType;
 
 /**
- * Usage: LEVENSHTEIN_RATIO(STR1, STR2)
+ * Custom Doctrine DQL function: LEVENSHTEIN_RATIO(str1, str2)
  *
+ * Calculates normalized similarity score (0-100%) between two strings.
+ * Formula: (1 - (Levenshtein_distance / max_string_length)) * 100
+ *
+ * Returns a percentage where:
+ * - 100 = identical strings
+ * - 0 = completely different
+ *
+ * Platform support:
+ * - PostgreSQL: Uses LEVENSHTEIN() with CHAR_LENGTH() and GREATEST()
+ * - SQLite: Uses editdist3() with LENGTH() and MAX()
+ * - MySQL: NOT SUPPORTED
+ *
+ * Used by search for fuzzy matching method names via metaphone comparison.
+ *
+ * Usage in DQL:
+ * SELECT m FROM Blueline\\Entity\\Method m WHERE LEVENSHTEIN_RATIO(m.nameMetaphone, :metaphone) > 90
+ *
+ * @throws \RuntimeException If called on unsupported database platform
  */
 class LevenshteinRatio extends FunctionNode
 {

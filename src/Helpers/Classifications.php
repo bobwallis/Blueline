@@ -2,10 +2,11 @@
 namespace Blueline\Helpers;
 
 /**
- * Functions to assist working with method classifications
- * @package Helpers
- * @author Robert Wallis <bob.wallis@gmail.com>
- * @license http://opensource.org/licenses/gpl-3.0.html GNU Public License
+ * Utilities for bell-ringing method classifications.
+ *
+ * Classifications categorise methods by their distinctive structure and properties.
+ * Standard classifications include: Place, Treble Bob, Surprise, Treble Place, Delight, etc.
+ * Each method has exactly one classification.
  */
 class Classifications
 {

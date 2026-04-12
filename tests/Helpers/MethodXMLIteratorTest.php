@@ -31,7 +31,7 @@ class MethodXMLIteratorTest extends TestCase
         $this->assertSame('Test Bob Minor', $method['title']);
         $this->assertSame('Test_Bob_Minor', $method['url']);
         $this->assertSame(6, $method['stage']);
-        $this->assertSame('x16x16x16x16x16x12', $method['notationexpanded']);
+        $this->assertSame('x16x16x16x16x16x12', $method['notationExpanded']);
         $this->assertArrayHasKey('magic', $method);
     }
 
@@ -100,7 +100,7 @@ class MethodXMLIteratorTest extends TestCase
         $iterator->rewind();
         $method = $iterator->current();
 
-        $this->assertSame('m12345', $method['cccbr_id']);
+        $this->assertSame('m12345', $method['cccbrId']);
     }
 
     public function testIteratorParsesMethodReferencesAsTypedToken(): void
@@ -111,7 +111,7 @@ class MethodXMLIteratorTest extends TestCase
         $iterator->rewind();
         $method = $iterator->current();
 
-        $this->assertSame('rwRef: 2005/235; bnRef: V13', $method['method_references']);
+        $this->assertSame('rwRef: 2005/235; bnRef: V13', $method['methodReferences']);
     }
 
     public function testIteratorParsesExtensionConstruction(): void
@@ -122,7 +122,7 @@ class MethodXMLIteratorTest extends TestCase
         $iterator->rewind();
         $method = $iterator->current();
 
-        $this->assertSame('EP1-4', $method['extensionconstruction']);
+        $this->assertSame('EP1-4', $method['extensionConstruction']);
     }
 
     public function testIteratorParsesGenericPerformanceTypes(): void
@@ -160,9 +160,9 @@ class MethodXMLIteratorTest extends TestCase
         $iterator->rewind();
         $method = $iterator->current();
 
-        $this->assertArrayNotHasKey('method_references', $method);
-        $this->assertArrayNotHasKey('extensionconstruction', $method);
-        $this->assertArrayNotHasKey('cccbr_id', $method);
+        $this->assertArrayNotHasKey('methodReferences', $method);
+        $this->assertArrayNotHasKey('extensionConstruction', $method);
+        $this->assertArrayNotHasKey('cccbrId', $method);
     }
 
     private function createTempXmlFile(string $fileName, string $contents): string

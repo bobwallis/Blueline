@@ -10,6 +10,19 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
+/**
+ * Symfony console command that imports supplemental method data (calls, rule-offs).
+ *
+ * These fields are not part of the core method definitions, but are important for
+ * displaying methods in the way that users expect. In some instances these fields
+ * are not obvious from the method's notation and require manual override.
+ *
+ * Imports from ./Resources/data/method_extras_*.php and updates existing method records.
+ *
+ * Run via: bin/console blueline:importMethodExtras
+ * Or as part of: bin/fetchAndImportData
+ */
+
 class ImportMethodExtrasCommand extends Command
 {
     /** @var array<string, Statement> */
@@ -43,9 +56,10 @@ class ImportMethodExtrasCommand extends Command
             require __DIR__.'/../Resources/data/method_extras_calls.php';
             foreach ($method_extras_calls as $txtRow) {
                 $txtRow['calls'] = json_encode($txtRow['calls']);
-                $txtRow['callingpositions'] = json_encode($txtRow['callingpositions']);
-                $txtRow['ruleoffs'] = json_encode($txtRow['ruleoffs']);
-                $txtRow = $this->normaliseDatabaseRow(array_change_key_case($txtRow));
+                $txtRow['callingPositions'] = json_encode($txtRow['callingPositions'] ?? $txtRow['callingpositions'] ?? array());
+                $txtRow['ruleOffs'] = json_encode($txtRow['ruleOffs'] ?? $txtRow['ruleoffs'] ?? array());
+                unset($txtRow['callingpositions'], $txtRow['ruleoffs']);
+                $txtRow = $this->normaliseDatabaseRow($txtRow);
                 try {
                     $this->updateMethodsRow($txtRow);
                 }
@@ -59,7 +73,7 @@ class ImportMethodExtrasCommand extends Command
             $output->writeln('<info>Adding extra abbreviation data...</info>');
             require __DIR__.'/../Resources/data/method_extras_abbreviations.php';
             foreach ($method_extras_abbreviations as $txtRow) {
-                $txtRow = $this->normaliseDatabaseRow(array_change_key_case($txtRow));
+                $txtRow = $this->normaliseDatabaseRow($txtRow);
                 try {
                     $this->updateMethodsRow($txtRow);
                 }
@@ -175,13 +189,16 @@ class ImportMethodExtrasCommand extends Command
     }
     private function normaliseDatabaseRow(array $row): array
     {
+        $normalised = array();
         foreach ($row as $key => $value) {
+            $databaseKey = strtolower($key);
             if ($value === '') {
-                $row[$key] = null;
+                $value = null;
             }
+            $normalised[$databaseKey] = $value;
         }
 
-        return $row;
+        return $normalised;
     }
 
     private function getParameterType(mixed $value): ParameterType

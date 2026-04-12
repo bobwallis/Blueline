@@ -6,6 +6,17 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Symfony console command that exports collection data to PHP source code.
+ *
+ * Reads collections and method memberships from the database and exports them
+ * as a PHP array suitable for including in ./Resources/data/collections.php.
+ * Used to regenerate source data after database changes.
+ *
+ * Output is sent to stdout.
+ * Run via: bin/console blueline:exportCollections > src/Resources/data/collections.php
+ */
+
 class ExportCollectionsCommand extends Command
 {
     protected function configure(): void

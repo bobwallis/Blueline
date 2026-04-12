@@ -97,9 +97,9 @@
 				{% endfor %}
 				</dd>
 {% endif %}
-{% if method.extensionconstruction is not empty %}
+{% if method.extensionConstruction is not empty %}
 				<dt>Extension&nbsp;Construction</dt>
-				<dd>{{ method.extensionconstruction }}</dd>
+				<dd>{{ method.extensionConstruction }}</dd>
 {% endif %}
 {% set xmlPerformances = method.performances|filter(p => p.type not in ['renamedMethod', 'duplicateMethod']) %}
 {% if xmlPerformances is not empty %}

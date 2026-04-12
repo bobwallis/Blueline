@@ -7,27 +7,50 @@ use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
 use Twig\Error\RuntimeError;
 
+/**
+ * Twig extension providing custom functions, filters, and global variables for Blueline templates.
+ *
+ * Custom functions:
+ * - count(): Count array/collection elements
+ * - round(): Round numbers
+ * - list(array, glue, last): Format array as human-readable list (e.g., "a, b, and c")
+ * - dayToString(date): Format date as day name (e.g., "Monday")
+ *
+ * Custom filters:
+ * - count: Count elements (alias to function)
+ * - toArray: Convert entity to array representation (calls __toArray() method)
+ *
+ * Global template variables:
+ * - chromeless: Whether UI chrome should be hidden (API mode)
+ * - db_age: Last imported database update timestamp
+ */
 class BluelineExtension extends AbstractExtension implements GlobalsInterface
 {
     protected $params;
-    protected $path;
     protected $chromeless;
-    protected $environment;
 
+    /**
+     * Initialise request-dependent Twig globals.
+     *
+     * @param RequestStack $requestStack
+     * @param ParameterBagInterface $params
+     */
     public function __construct(RequestStack $requestStack, ParameterBagInterface $params)
     {
         $this->params = $params;
         try {
             $request = $requestStack->getCurrentRequest();
-            $this->path       = is_null($request)? '/' : $request->getPathInfo();
             $this->chromeless = is_null($request)? false : ($request->getRequestFormat() == 'html' && intval($request->query->get('chromeless')) == 1);
         } catch (\Exception $e) {
-            $this->path       = '/';
             $this->chromeless = false;
         }
-        $this->environment = $params->get('kernel.environment');
     }
 
+    /**
+     * Register custom Twig functions.
+     *
+     * @return array<int, \Twig\TwigFunction>
+     */
     public function getFunctions(): array
     {
         return array(
@@ -38,6 +61,11 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
         );
     }
 
+    /**
+     * Register custom Twig filters.
+     *
+     * @return array<int, \Twig\TwigFilter>
+     */
     public function getFilters(): array
     {
         return array(
@@ -46,15 +74,27 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
         );
     }
 
+    /**
+     * Provide global Twig variables.
+     *
+     * @return array{chromeless: bool, db_age: mixed}
+     */
     public function getGlobals(): array
     {
         return array(
-            'chromeless'     => $this->chromeless,
-            'db_age'         => $this->params->get('blueline.database_update'),
-            'isAppStartPage' => ($this->path == '/') && ($this->environment == 'prod'),
+            'chromeless' => $this->chromeless,
+            'db_age' => $this->params->get('blueline.database_update'),
         );
     }
 
+    /**
+     * Join list items with a configurable separator.
+     *
+     * @param array<int, mixed> $list
+     * @param string $glue
+     * @param string $last
+     * @return string
+     */
     public function toList(array $list, $glue = ', ', $last = ' and ')
     {
         $list = array_filter($list);
@@ -69,11 +109,26 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
     }
 
     private static $days = array( '', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' );
+
+    /**
+     * Convert a numeric day-of-week value to its name.
+     *
+     * @param int|string $day Numeric day index (1-7)
+     * @return string
+     */
     public function dayToString($day)
     {
         return self::$days[intval($day)];
     }
 
+    /**
+     * Convert supported objects/arrays to plain arrays for Twig rendering.
+     *
+     * @param mixed $obj
+     * @param string|array<int, string>|null $fields
+     * @return array<mixed>|mixed
+     * @throws RuntimeError When conversion is requested for unsupported objects
+     */
     public function toArray($obj, $fields = null)
     {
         if (is_callable(array( $obj, '__toArray' ))) {

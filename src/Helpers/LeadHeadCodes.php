@@ -1,12 +1,14 @@
 <?php
 namespace Blueline\Helpers;
 
-
 /**
- * Functions to assist working with lead head codes
- * @package Helpers
- * @author Robert Wallis <bob.wallis@gmail.com>
- * @license http://opensource.org/licenses/gpl-3.0.html GNU Public License
+ * Utilities for bell-ringing lead head codes.
+ *
+ * Lead head codes are standard abbreviations (a, b, c, c1, c2, c3, c4, d, d1, d2, etc.)
+ * that represent common lead head patterns across different stages.
+ * Maps codes to their bell string representations (e.g., 'a' at Major = '13527486').
+ *
+ * Used during method import and for method classification/lookup.
  */
 class LeadHeadCodes
 {

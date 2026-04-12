@@ -2,10 +2,19 @@
 namespace Blueline\Helpers;
 
 /**
- * Functions to calculate the similarity of two methods
- * @package Helpers
- * @author Robert Wallis <bob.wallis@gmail.com>
- * @license http://opensource.org/licenses/gpl-3.0.html GNU Public License
+ * Calculate similarity scores between bell-ringing methods using Wagner-Fischer algorithm.
+ *
+ * Uses an optimised Levenshtein distance variant applied to method rows.
+ * Similarity is measured as the minimum number of edits needed to transform
+ * one method into another.
+ *
+ * The algorithm uses dynamic programming with row caching and early termination
+ * for performance.
+ *
+ * It also supports setting a similarity limit for early termination when a threshold
+ * is exceeded.
+ *
+ * @see https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm
  */
 class MethodSimilarity
 {

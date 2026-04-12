@@ -56,3 +56,14 @@ This runs:
 - Preserve existing architecture and naming unless intentionally changing it.
 - Prefer adding tests close to changed behavior.
 - If adding a feature that affects setup or runbook steps, update `README.md` and this document.
+
+## Naming policy: PHP vs PostgreSQL
+- **PHP code uses camelCase** for properties, array keys, and DTO-style payloads.
+- **PostgreSQL identifiers remain lowercase** (unquoted behavior and existing schema conventions).
+- **Doctrine is the mapping boundary** between camelCase PHP and lowercase database identifiers.
+
+### Practical rules
+- In Doctrine ORM/DQL, use entity property names (camelCase).
+- In raw SQL (DBAL), use real database identifiers (lowercase).
+- If DBAL results are consumed as associative arrays and camelCase keys are needed in PHP, alias explicitly at the fetch boundary, for example: `notationexpanded AS "notationExpanded"`.
+- Do not rely on unquoted mixed-case SQL identifiers; PostgreSQL folds them to lowercase.

@@ -4,10 +4,25 @@ namespace Blueline\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Attribute\Cache;
 use Blueline\Helpers\PlaceNotation;
 
+/**
+ * Controller for place notation parsing and conversion.
+ *
+ * Routes:
+ * - GET /services/notation.{_format}: Parse and expand notation (_format: txt|json)
+ *
+ * Query parameters:
+ * - notation (required): Place notation string (e.g., 'x16x16')
+ * - stage (optional): Number of bells; auto-detected if not provided
+ *
+ * Output formats (via request.format):
+ * - .txt: Space-separated expanded notation and SIRIL notation
+ * - .json: JSON object with stage, expanded, siril fields
+ *
+ * Used by API tools.
+ */
 class NotationController extends AbstractController
 {
     #[Cache(maxage: 129600, public: true)]

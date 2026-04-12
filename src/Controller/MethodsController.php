@@ -16,6 +16,20 @@ use Blueline\Helpers\Stages;
 use Blueline\Helpers\Classifications;
 use Blueline\Helpers\PlaceNotation;
 
+/**
+ * Controller for bell-ringing method browsing and search.
+ *
+ * Routes:
+ * - GET /methods/: Welcome page and custom method form
+ * - GET /methods/view/{url}.{_format}: Method detail view (_format: html|json|png)
+ * - GET /methods/view.{_format}: Method detail for ad-hoc/custom notation (_format: html|json|png)
+ * - GET /methods/search.{_format}?stage=X&notation=YYYYYY: Search endpoint (_format: html|json)
+ * - GET /methods/sitemap_{page}.{_format}: Methods sitemap pages (_format: xml)
+ *
+ * Supports HTML, JSON, PNG, and XML outputs depending on the endpoint and request format.
+ * Implements client-side caching via Cache attributes for public, cacheable routes.
+ *
+ */
 class MethodsController extends AbstractController
 {
     public function welcome(Request $request)

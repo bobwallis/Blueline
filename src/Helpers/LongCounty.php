@@ -1,14 +1,12 @@
 <?php
-/*
- * This file is part of Blueline.
- * It contains long versions of coutry abbreviations used by Dove
- *
- * (c) Bob Wallis <bob.wallis@gmail.com>
- *
- */
-
 namespace Blueline\Helpers;
 
+/**
+ * UK county name normalisation and lookup table.
+ *
+ * Maps common county abbreviations and variants to canonical long county names.
+ * Used during performance data import and location normalisation.
+ */
 class LongCounty
 {
     private static $countries = array(

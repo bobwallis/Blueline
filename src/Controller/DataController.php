@@ -8,6 +8,22 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Attribute\Cache;
 
+/**
+ * Controller for database table exports.
+ *
+ * Routes:
+ * - GET /data/{table}.csv: Stream database table as CSV
+ *
+ * Supports bulk export of core data tables for downloads/analysis:
+ * - collections: Bell-ringing method collections
+ * - methods: Method library with all properties
+ * - methods_collections: Method-to-collection membership mapping
+ * - methods_similar: Method similarity scores and trivial-difference flags
+ * - performances: Documented bell-ringing performances
+ *
+ * Uses streaming responses for memory efficiency on large result sets.
+ * Caching is controlled by database_update request attribute (updated via data import commands).
+ */
 class DataController extends AbstractController
 {
     public function __construct(private readonly Connection $connection)
@@ -40,7 +56,7 @@ class DataController extends AbstractController
                              ORDER BY id, position ASC';
                     break;
                 case 'methods_similar':
-                    $sql = 'SELECT method1_title, method2_title, stage, similarity, onlydifferentoverleadend as onlyDifferentOverLeadEnd
+                    $sql = 'SELECT method1_title, method2_title, stage, similarity, onlydifferentoverleadend
                               FROM methods_similar
                               JOIN methods ON (title = method1_title)
                              ORDER BY stage, method1_title ASC';

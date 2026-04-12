@@ -2,10 +2,19 @@
 namespace Blueline\Helpers;
 
 /**
- * Functions to assist working with place notation
- * @package Helpers
- * @author Robert Wallis <bob.wallis@gmail.com>
- * @license http://opensource.org/licenses/gpl-3.0.html GNU Public License
+ * Utilities for parsing, validating, and manipulating bell-ringing place notation.
+ *
+ * Place notation is a concise representation of bell-ringing changes as sequences of places made.
+ * This class provides methods to:
+ * - Convert between bell numbers (1-33) and bell characters ('1'-'Z')
+ * - Validate and expand notation into full change sequences
+ * - Permute rows according to place notation
+ * - Calculate lead head codes, rounds rows, and notation equivalences
+ *
+ * All methods are static. Most operations assume Place Notation is in a standard format.
+ *
+ * @see Stages for bell number validation
+ * @see LeadHeadCodes for lead head code lookups
  */
 class PlaceNotation
 {
@@ -54,11 +63,15 @@ class PlaceNotation
     );
 
     /**
-     * Converts an integer into the bell character
-     * @param  integer        $int
-     * @return string|boolean The character on success, false if out of range
+     * Convert an integer bell number to its character notation.
+     *
+     * Maps 1->1, 2->2, ..., 10->0, 11->E, 12->T, ..., 33->Z.
+     * Up to 33 bells are supported.
+     *
+     * @param int $int The bell number (1-33)
+     * @return string|false The bell character on success, false if out of range
      */
-    public static function intToBell($int)
+    public static function intToBell(int $int): string|false
     {
         $int = intval($int);
         if ($int < 1 || $int > self::$_notationOrderLength) {
@@ -69,11 +82,14 @@ class PlaceNotation
     }
 
     /**
-     * Converts a bell character into an integer
-     * @param  string          $bell
-     * @return integer|boolean The integer on success, false if out of range
+     * Convert a bell character to its numeric position.
+     *
+     * Reverse of intToBell().
+     *
+     * @param string $bell A single bell character ('1'-'Z')
+     * @return int|false The bell number (1-33) on success, false if invalid character or multi-char string
      */
-    public static function bellToInt($bell)
+    public static function bellToInt(string $bell): int|false
     {
         if (strlen($bell) != 1) {
             return false;
@@ -83,22 +99,28 @@ class PlaceNotation
     }
 
     /**
-     * Returns a row containing rounds of a given stage
-     * @param  integer $stage
-     * @return array
+     * Generate a round row (all bells in order) for a given stage.
+     *
+     * Example: rounds(4) returns ['1', '2', '3', '4']
+     *
+     * @param int $stage Number of bells (typically 4-12)
+     * @return array Rounds row as array of bell characters
      */
-    public static function rounds($stage)
+    public static function rounds(int $stage): array
     {
         return array_map(array( 'Blueline\Helpers\PlaceNotation', 'intToBell' ), range(1, $stage));
     }
 
     /**
-     * Tests whether two rows are equal
-     * @param  array   $a
-     * @param  array   $b
-     * @return boolean
+     * Test whether two rows are equal.
+     *
+     * Arrays of unequal length are considered not equal.
+     *
+     * @param array $a First row
+     * @param array $b Second row
+     * @return bool True if arrays are identical
      */
-    public static function rowsEqual($a, $b)
+    public static function rowsEqual(array $a, array $b): bool
     {
         $i = count($a);
         if ($i != count($b)) {
@@ -114,12 +136,15 @@ class PlaceNotation
     }
 
     /**
-     * Trims external places from a piece of notation
-     * @param  string  $piece The piece of notation
-     * @param  integer $stage The stage that the notation will be applied on
-     * @return string  The trimmed notation
+     *
+     * Place notation can implicitly include places at bells 1 (start) and the stage (end).
+     * This method removes explicit notation of those when they're redundant.
+     *
+     * @param string $piece A single piece of notation (e.g., '16' or 'x')
+     * @param int $stage Number of bells
+     * @return string Trimmed notation
      */
-    public static function trimExternalPlaces($piece, $stage)
+    public static function trimExternalPlaces(string $piece, int $stage): string
     {
         $stageIsEven = ($stage%2 == 0);
         $stageNotation = self::intToBell($stage);
@@ -135,12 +160,16 @@ class PlaceNotation
     }
 
     /**
-     * Applies permutations successively to a start array
-     * @param  array $permutations
-     * @param  array $start
-     * @return array All of the permutations of $start
+     * Apply a sequence of permutations to a starting array.
+     *
+     * Applies permutations iteratively: permutation[0] to start, permutation[1] to result[0], etc.
+     * Returns array of all intermediate and final results.
+     *
+     * @param array $permutations Array of permutation arrays, or a single permutation
+     * @param array $start Initial row/array
+     * @return array Results of applying each permutation (size = number of permutations + 1)
      */
-    public static function apply(array $permutations, array $start)
+    public static function apply(array $permutations, array $start): array
     {
         if (!is_array($permutations[0])) {
             return self::permute($start, $permutations);
@@ -204,11 +233,15 @@ class PlaceNotation
     }
 
     /**
-     * Guesses stage using place notation
-     * @param  string         $notation
-     * @return integer        The stage
+     * Guess the stage from a place notation string.
+     *
+     * Checks for the highest bell character in the notation to infer stage.
+     * Ignores brackets, FCH codes, and other markup.
+     *
+     * @param string $notation Place notation (may contain notation variants, brackets, FCH codes)
+     * @return int The inferred stage (minimum 2)
      */
-    public static function guessStage($notation)
+    public static function guessStage(string $notation): int
     {
         // Remove anything inside brackets, or appended fch details (arise when people copy notation from somewhere with extra information at the start or end)
         $notationFull = preg_replace(array( '/[\[{\<].*[\]}\>]/', '/ FCH.*$/' ), '', $notation);

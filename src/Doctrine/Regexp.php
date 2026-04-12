@@ -5,13 +5,26 @@ use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 use Doctrine\ORM\Query\TokenType;
 
 /**
- * Usage: REGEXP(STR, REG)
+ * Custom Doctrine DQL function: REGEXP(str, regex)
  *
- * This is a bodge to get around the inability to add custom comparison
- * operators to Doctrine.
- * Use as: "REGEXP(STR, REG) = TRUE" in a WHERE clause
- * This converts to: "(STR REGEXP REG) = TRUE"
- * Which is equivalent to "STR REGEXP REG"
+ * Performs database-native regex matching within DQL queries.
+ * Returns boolean (use as "REGEXP(str, regex)= TRUE" in a WHERE clause).
+ *
+ * Platform support:
+ * - PostgreSQL: Uses ~* operator (case-insensitive regex)
+ * - MySQL: Uses REGEXP operator
+ * - SQLite: Uses REGEXP operator
+ *
+ * Regular expression syntax varies by platform;
+ * PostgreSQL uses POSIX extended regex, MySQL/SQLite use POSIX basic regex.
+ *
+ * Usage in DQL:
+ * SELECT m FROM Blueline\\Entity\\Method m WHERE REGEXP(m.title, :pattern) = TRUE
+ *
+ * Note: This is a workaround for Doctrine's lack of custom comparison operators.
+ * i.e. its inability to do "str REGEXP regex".
+ *
+ * @throws \RuntimeException If called on unsupported database platform
  */
 class Regexp extends FunctionNode
 {

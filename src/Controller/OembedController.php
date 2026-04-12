@@ -7,10 +7,25 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints\Regex as RegexConstraint;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\HttpKernel\Attribute\Cache;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
+/**
+ * Controller for oEmbed protocol support.
+ *
+ * Routes:
+ * - GET /services/oembed.{_format}: oEmbed discovery endpoint (_format route allows json|xml)
+ *
+ * Query parameters:
+ * - url (required): URL to embed (validated against allowlist)
+ * - format (optional): Response format (implementation currently supports JSON responses only)
+ *
+ * Implements oEmbed 1.0 specification for embedding method detail pages
+ * in third-party sites. Validates requested URLs against allowlist and
+ * returns metadata including image URL and dimensions.
+ *
+ * Reference: https://oembed.com/
+ */
 class OembedController extends AbstractController
 {
     #[Cache(maxage: 129600, public: true)]

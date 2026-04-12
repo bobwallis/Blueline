@@ -7,10 +7,28 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Blueline\Helpers\Search;
 use Blueline\Helpers\Stages;
 use Blueline\Helpers\Classifications;
+use Blueline\Entity\Method;
 
+/**
+ * Repository for querying Method entities.
+ *
+ * Handles complex DQL queries with partial selects, related entity eager-loading,
+ * and similarity-based method finding. Used for method detail pages, similarity matching,
+ * and related method recommendations.
+ *
+ */
 class MethodRepository extends EntityRepository
 {
-    public function findByURLJoiningPerformancesAndCollections($url)
+    /**
+     * Find a method by URL with related performances and collection memberships eagerly loaded.
+     *
+     * Optimises single method detail page queries by loading performances and
+     * collection memberships in a single DQL query (avoids N+1 lazy loading).
+     *
+     * @param string $url The method URL identifier (slug)
+     * @return Method|null The method with relationships loaded, or null if not found
+     */
+    public function findByURLJoiningPerformancesAndCollections($url): ?Method
     {
         $query = $this->getEntityManager()->createQuery(
             'SELECT m, p, c FROM Blueline\Entity\Method m
@@ -26,7 +44,16 @@ class MethodRepository extends EntityRepository
         }
     }
 
-    public function findByURL($url)
+    /**
+     * Find a method by URL (simple lookup without eager loading).
+     *
+     * Used for quick lookups when related entities are not needed.
+     * Prefer findByURLJoiningPerformancesAndCollections() for detail pages.
+     *
+     * @param string $url The method URL identifier
+     * @return Method|null The method, or null if not found
+     */
+    public function findByURL($url): ?Method
     {
         $query = $this->getEntityManager()->createQuery(
             'SELECT m FROM Blueline\Entity\Method m
@@ -40,11 +67,20 @@ class MethodRepository extends EntityRepository
         }
     }
 
-    public function similarMethodsDifferentOnlyAtTheLeadEnd($url)
+    /**
+     * Find similar methods that differ only in the lead end (final change of the lead) using the
+     * flag set for that purpose.
+     *
+     * Ordered by similarity score (ascending, i.e., most similar first).
+     *
+     * @param string $url The reference method URL
+     * @return array|null Array of similar methods with lead end notation, or null if none found
+     */
+    public function similarMethodsDifferentOnlyAtTheLeadEnd($url): ?array
     {
         $query = $this->getEntityManager()->createQuery(
             'SELECT partial m.{url,title,notation} FROM Blueline\Entity\Method m
-             LEFT JOIN m.methodsimilarity2 s
+             LEFT JOIN m.methodSimilarity2 s
              LEFT JOIN s.method1 m2
              WHERE m2.url = :url AND m.url != :url AND s.onlyDifferentOverLeadEnd = TRUE
             ORDER BY s.similarity ASC'
@@ -62,11 +98,20 @@ class MethodRepository extends EntityRepository
         }
     }
 
-    public function similarMethodsDifferentOnlyAtTheHalfLead($url)
+    /**
+     * Find similar methods that differ only in the half-lead (first half of lead) using the
+     * flag set for that purpose.
+     *
+     * Ordered by similarity score (ascending).
+     *
+     * @param string $url The reference method URL
+     * @return array|null Array of similar methods with half-lead notation, or null if none found
+     */
+    public function similarMethodsDifferentOnlyAtTheHalfLead($url): ?array
     {
         $query = $this->getEntityManager()->createQuery(
             'SELECT partial m.{url,title,notation} FROM Blueline\Entity\Method m
-             LEFT JOIN m.methodsimilarity2 s
+             LEFT JOIN m.methodSimilarity2 s
              LEFT JOIN s.method1 m2
              WHERE m2.url = :url AND m.url != :url AND s.onlyDifferentOverHalfLead = TRUE
             ORDER BY s.similarity ASC'
@@ -85,11 +130,20 @@ class MethodRepository extends EntityRepository
         }
     }
 
-    public function similarMethodsDifferentOnlyAtTheHalfLeadAndLeadEnd($url)
+    /**
+     * Find similar methods that differ only in both half-lead and lead end using the flags set
+     * for that purpose.
+     *
+     * Ordered by similarity score (ascending).
+     *
+     * @param string $url The reference method URL
+     * @return array|null Array of similar methods with both notations, or null if none found
+     */
+    public function similarMethodsDifferentOnlyAtTheHalfLeadAndLeadEnd($url): ?array
     {
         $query = $this->getEntityManager()->createQuery(
             'SELECT partial m.{url,title,notation} FROM Blueline\Entity\Method m
-             LEFT JOIN m.methodsimilarity2 s
+             LEFT JOIN m.methodSimilarity2 s
              LEFT JOIN s.method1 m2
              WHERE m2.url = :url AND m.url != :url AND s.onlyDifferentOverLeadEndAndHalfLead = TRUE
             ORDER BY s.similarity ASC'
@@ -109,11 +163,20 @@ class MethodRepository extends EntityRepository
         }
     }
 
-    public function similarMethodsExcludingThoseOnlyDifferentAtTheLeadEndOrHalfLead($url)
+    /**
+     * Find methods that are significantly similar (differ in non-trivial ways).
+     *
+     * Excludes methods that differ only at lead end or half-lead (considered trivial variants).
+     * Limited to 8 results for UI display. Ordered by similarity score (ascending).
+     *
+     * @param string $url The reference method URL
+     * @return array|null Array of up to 8 similar methods, or null if none found
+     */
+    public function similarMethodsExcludingThoseOnlyDifferentAtTheLeadEndOrHalfLead($url): ?array
     {
         $query = $this->getEntityManager()->createQuery(
             'SELECT partial m.{url,title} FROM Blueline\Entity\Method m
-             LEFT JOIN m.methodsimilarity2 s
+             LEFT JOIN m.methodSimilarity2 s
              LEFT JOIN s.method1 m2
              WHERE m2.url = :url AND m.url != :url AND s.onlyDifferentOverLeadEnd IS NULL AND s.onlyDifferentOverHalfLead IS NULL AND s.onlyDifferentOverLeadEndAndHalfLead IS NULL
             ORDER BY s.similarity ASC'

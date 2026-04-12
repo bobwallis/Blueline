@@ -1,11 +1,18 @@
 <?php
 /*
  * This file is part of Blueline.
- * It implements a Symfony command which parses the files in ./Resources/data and imports them
- * into the database.
+ *
+ * Symfony console command that imports bell-ringing method data from XML files.
+ *
+ * Parses method XML from ./Resources/data/
+ * and updates the methods table with upsert operations. Also processes associated
+ * performance data.
+ *
+ * Performs bulk inserts with batching for performance and memory efficiency.
+ * Run via: bin/console blueline:importMethods
+ * Or as part of: bin/fetchAndImportData
  *
  * (c) Bob Wallis <bob.wallis@gmail.com>
- *
  */
 
 namespace Blueline\Command;
@@ -30,29 +37,29 @@ class ImportMethodsCommand extends Command
         'url' => ParameterType::STRING,
         'stage' => ParameterType::INTEGER,
         'classification' => ParameterType::STRING,
-        'namemetaphone' => ParameterType::STRING,
+        'nameMetaphone' => ParameterType::STRING,
         'notation' => ParameterType::STRING,
-        'notationexpanded' => ParameterType::STRING,
-        'leadheadcode' => ParameterType::STRING,
-        'leadhead' => ParameterType::STRING,
-        'fchgroups' => ParameterType::STRING,
-        'lengthoflead' => ParameterType::INTEGER,
-        'lengthofcourse' => ParameterType::INTEGER,
-        'numberofhunts' => ParameterType::INTEGER,
+        'notationExpanded' => ParameterType::STRING,
+        'leadHeadCode' => ParameterType::STRING,
+        'leadHead' => ParameterType::STRING,
+        'fchGroups' => ParameterType::STRING,
+        'lengthOfLead' => ParameterType::INTEGER,
+        'lengthOfCourse' => ParameterType::INTEGER,
+        'numberOfHunts' => ParameterType::INTEGER,
         'little' => ParameterType::BOOLEAN,
         'differential' => ParameterType::BOOLEAN,
         'plain' => ParameterType::BOOLEAN,
-        'trebledodging' => ParameterType::BOOLEAN,
+        'trebleDodging' => ParameterType::BOOLEAN,
         'palindromic' => ParameterType::BOOLEAN,
-        'doublesym' => ParameterType::BOOLEAN,
+        'doubleSym' => ParameterType::BOOLEAN,
         'rotational' => ParameterType::BOOLEAN,
         'calls' => ParameterType::STRING,
-        'ruleoffs' => ParameterType::STRING,
-        'callingpositions' => ParameterType::STRING,
+        'ruleOffs' => ParameterType::STRING,
+        'callingPositions' => ParameterType::STRING,
         'magic' => ParameterType::INTEGER,
-        'cccbr_id' => ParameterType::STRING,
-        'method_references' => ParameterType::STRING,
-        'extensionconstruction' => ParameterType::STRING,
+        'cccbrId' => ParameterType::STRING,
+        'methodReferences' => ParameterType::STRING,
+        'extensionConstruction' => ParameterType::STRING,
     );
 
     private const PERFORMANCE_PARAMETER_TYPES = array(
@@ -110,7 +117,7 @@ class ImportMethodsCommand extends Command
 
         // Import data
         $output->writeln("<info>Importing method data...</info>");
-        $validFields = array_flip(array('title', 'provisional', 'url', 'stage', 'classification', 'namemetaphone','notation', 'notationexpanded', 'leadheadcode', 'leadhead', 'fchgroups', 'lengthoflead', 'lengthofcourse', 'numberofhunts', 'little', 'differential', 'plain', 'trebledodging', 'palindromic', 'doublesym', 'rotational', 'calls', 'ruleoffs', 'callingpositions', 'magic', 'cccbr_id', 'method_references', 'extensionconstruction'));
+        $validFields = array_flip(array('title', 'provisional', 'url', 'stage', 'classification', 'nameMetaphone','notation', 'notationExpanded', 'leadHeadCode', 'leadHead', 'fchGroups', 'lengthOfLead', 'lengthOfCourse', 'numberOfHunts', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational', 'calls', 'ruleOffs', 'callingPositions', 'magic', 'cccbrId', 'methodReferences', 'extensionConstruction'));
         $importedMethods = array();
         $normaliseRow = static function (array $row): array {
             foreach ($row as $key => $value) {
@@ -140,10 +147,10 @@ class ImportMethodsCommand extends Command
                         // Generate details not in the XML.
                         $method = new Method($xmlRow);
                         $xmlRow['abbreviation'] = $method->getAbbreviation();
-                        $xmlRow['lengthofcourse'] = $method->getLengthOfCourse();
+                        $xmlRow['lengthOfCourse'] = $method->getLengthOfCourse();
                         $xmlRow['calls'] = json_encode($method->getCalls());
-                        $xmlRow['callingpositions'] = json_encode($method->getCallingPositions());
-                        $xmlRow['ruleoffs'] = json_encode($method->getRuleOffs());
+                        $xmlRow['callingPositions'] = json_encode($method->getCallingPositions());
+                        $xmlRow['ruleOffs'] = json_encode($method->getRuleOffs());
 
                         $methodRow = $normaliseRow(array_intersect_key($xmlRow, $validFields));
 
@@ -298,12 +305,13 @@ class ImportMethodsCommand extends Command
 
         $firstRow = reset($rows);
         $columns = array_keys($firstRow);
+        $sqlColumns = array_map('strtolower', $columns);
         $rowCount = count($rows);
-        $statementKey = implode('|', $columns).'|'.$rowCount;
+        $statementKey = implode('|', $sqlColumns).'|'.$rowCount;
         if (!isset($this->performanceInsertStatements[$statementKey])) {
-            $rowPlaceholders = '('.implode(', ', array_fill(0, count($columns), '?')).')';
+            $rowPlaceholders = '('.implode(', ', array_fill(0, count($sqlColumns), '?')).')';
             $this->performanceInsertStatements[$statementKey] = $this->connection->prepare(
-                'INSERT INTO performances ('.implode(', ', $columns).') VALUES '.implode(', ', array_fill(0, $rowCount, $rowPlaceholders))
+                'INSERT INTO performances ('.implode(', ', $sqlColumns).') VALUES '.implode(', ', array_fill(0, $rowCount, $rowPlaceholders))
             );
         }
 
@@ -321,7 +329,12 @@ class ImportMethodsCommand extends Command
 
     private function upsertMethod(array $row): void
     {
-        $statement = $this->getMethodUpsertStatement(array_keys($row));
+        $sqlRow = array();
+        foreach ($row as $column => $value) {
+            $sqlRow[strtolower($column)] = $value;
+        }
+
+        $statement = $this->getMethodUpsertStatement(array_keys($sqlRow));
         $position = 1;
         foreach ($row as $column => $value) {
             $statement->bindValue($position, $value, self::METHOD_PARAMETER_TYPES[$column] ?? ParameterType::STRING);

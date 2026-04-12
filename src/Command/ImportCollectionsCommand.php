@@ -10,6 +10,17 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
 
+/**
+ * Symfony console command that imports bell-ringing method collections.
+ *
+ * Collections are curated groupings of related methods.
+ * Imports collection definitions and method membership from ./Resources/data/collections.php.
+ * Clears existing collection data and reimports from scratch (idempotent).
+ *
+ * Run via: bin/console blueline:importCollections
+ * Or as part of: bin/fetchAndImportData
+ */
+
 class ImportCollectionsCommand extends Command
 {
     public function __construct(private readonly Connection $connection)

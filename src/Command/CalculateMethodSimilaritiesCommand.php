@@ -18,6 +18,21 @@ use Doctrine\DBAL\ArrayParameterType;
 use Blueline\Helpers\MethodSimilarity;
 use Blueline\Helpers\PlaceNotation;
 
+/**
+ * Symfony console command that calculates similarity scores between bell-ringing methods.
+ *
+ * Uses the Wagner-Fischer algorithm (Levenshtein distance variant) to compare methods
+ * and identify similar-looking methods. Results are stored in methods_similar table
+ * with flags for trivial differences (differing only at lead end or half-lead).
+ *
+ * Can be run for all methods or selectively for specific method titles.
+ * Stores results in batches for efficient database inserts.
+ *
+ * Run via: bin/console blueline:calculateMethodSimilarities [method titles...]
+ * Or as part of: bin/fetchAndImportData
+ *
+ */
+
 class CalculateMethodSimilaritiesCommand extends Command
 {
     /** @var array<int, array{method1_title: string, method2_title: string, similarity: float}> */
@@ -61,7 +76,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         try {
             if ($requestedMethods === array()) {
                 $methods = $this->connection->executeQuery(
-                    'SELECT title, stage, notationexpanded, lengthoflead
+                    'SELECT title, stage, notationexpanded AS "notationExpanded", lengthoflead AS "lengthOfLead"
                       FROM methods
                       LEFT OUTER JOIN methods_similar ON (title = method1_title)
                      WHERE (method1_title IS NULL)
@@ -69,8 +84,8 @@ class CalculateMethodSimilaritiesCommand extends Command
                 )->fetchAllAssociative();
             }
             else {
-                $methods = $this->connection->executeQuery(
-                    'SELECT title, stage, notationexpanded, lengthoflead
+                                $methods = $this->connection->executeQuery(
+                                        'SELECT title, stage, notationexpanded AS "notationExpanded", lengthoflead AS "lengthOfLead"
                       FROM methods
                       LEFT OUTER JOIN methods_similar ON (title = method1_title)
                      WHERE (method1_title IS NULL)
@@ -112,7 +127,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         $progress->setRedrawFrequency(max(1, min(20, count($methods)/100)));
         $progress->start();
         $comparisonStatement = $this->connection->prepare(
-            'SELECT title, notationexpanded, lengthoflead
+            'SELECT title, notationexpanded AS "notationExpanded", lengthoflead AS "lengthOfLead"
                FROM methods
                LEFT OUTER JOIN methods_similar ON (title = method1_title AND method2_title = ?)
               WHERE (stage = ? AND title != ? AND method1_title IS NULL AND (ABS(lengthoflead - ?) < 1 OR ABS(lengthoflead - ?) < FLOOR((CASE WHEN ? < lengthoflead THEN ? ELSE lengthoflead END)/10)))'
@@ -121,14 +136,14 @@ class CalculateMethodSimilaritiesCommand extends Command
             try {
                 $this->connection->transactional(function () use ($method, $rounds, $comparisonStatement): void {
                     // Generate the array for the method we're generating indexes for
-                    $notationExploded     = PlaceNotation::explode($method['notationexpanded']);
+                    $notationExploded     = PlaceNotation::explode($method['notationExpanded']);
                     $notationPermutations = PlaceNotation::explodedToPermutations($method['stage'], $notationExploded);
                     $methodRowArray       = array_map('implode', PlaceNotation::apply($notationPermutations, $rounds[$method['stage']]));
 
                     // Get methods to compare against
                     $methodTitle = (string) $method['title'];
                     $methodStage = (int) $method['stage'];
-                    $methodLengthOfLead = (int) $method['lengthoflead'];
+                    $methodLengthOfLead = (int) $method['lengthOfLead'];
 
                     $comparisonStatement->bindValue(1, $methodTitle, ParameterType::STRING);
                     $comparisonStatement->bindValue(2, $methodStage, ParameterType::INTEGER);
@@ -143,9 +158,9 @@ class CalculateMethodSimilaritiesCommand extends Command
                     // Compare each one and add to the similarity table (if similar enough)
                     // limit is a heuristic threshold: if distance is >= 10% of lead
                     // length we skip storing it to keep the table useful and compact.
-                    $limit = max(1, floor($method['lengthoflead']/10));
+                    $limit = max(1, floor($method['lengthOfLead']/10));
                     foreach ($comparisons as $comparison) {
-                        $similar = MethodSimilarity::calculate($methodRowArray, $comparison['notationexpanded'], $method['stage'], $limit);
+                        $similar = MethodSimilarity::calculate($methodRowArray, $comparison['notationExpanded'], $method['stage'], $limit);
                         if ($similar < $limit) {
                             $this->similarityInsertBuffer[] = array(
                                 'method1_title' => $method['title'],
@@ -225,7 +240,7 @@ class CalculateMethodSimilaritiesCommand extends Command
                        AND lengthoflead = method1.lengthoflead
                      ) method2) matches
                    LEFT OUTER JOIN methods_similar ON (matches.method1_title = methods_similar.method1_title AND matches.method2_title = methods_similar.method2_title)
-                 WHERE methods_similar.onlydifferentoverleadend IS NULL;'
+                    WHERE methods_similar.onlydifferentoverleadend IS NULL;'
             )->fetchAllAssociative();
         }
         catch (Exception $exception) {
@@ -271,7 +286,7 @@ class CalculateMethodSimilaritiesCommand extends Command
                        AND lengthoflead = method1.lengthoflead
                      ) method2) matches
                    LEFT OUTER JOIN methods_similar ON (matches.method1_title = methods_similar.method1_title AND matches.method2_title = methods_similar.method2_title)
-                 WHERE methods_similar.onlydifferentoverhalflead IS NULL;'
+                    WHERE methods_similar.onlydifferentoverhalflead IS NULL;'
             )->fetchAllAssociative();
         }
         catch (Exception $exception) {
@@ -317,7 +332,7 @@ class CalculateMethodSimilaritiesCommand extends Command
                        AND lengthoflead = method1.lengthoflead
                      ) method2) matches
                    LEFT OUTER JOIN methods_similar ON (matches.method1_title = methods_similar.method1_title AND matches.method2_title = methods_similar.method2_title)
-                 WHERE methods_similar.onlydifferentoverhalflead IS NULL AND methods_similar.onlydifferentoverleadend IS NULL AND methods_similar.onlydifferentoverleadendandhalflead IS NULL;'
+                  WHERE methods_similar.onlydifferentoverhalflead IS NULL AND methods_similar.onlydifferentoverleadend IS NULL AND methods_similar.onlydifferentoverleadendandhalflead IS NULL;'
             )->fetchAllAssociative();
         }
         catch (Exception $exception) {

@@ -6,6 +6,17 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Symfony console command that exports supplemental method data to PHP source code.
+ *
+ * Reads calls and rule-offs from the database and exports them as a PHP array
+ * suitable for including in ./Resources/data/method_extras_calls.php.
+ * Used to regenerate source data after database changes.
+ *
+ * Output is sent to stdout.
+ * Run via: bin/console blueline:exportMethodExtras > src/Resources/data/method_extras.php
+ */
+
 class ExportMethodExtrasCommand extends Command
 {
     protected function configure(): void

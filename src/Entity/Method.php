@@ -13,7 +13,7 @@ require_once(__DIR__.'/../Helpers/arrays_equal_in_some_rotation.php');
 use function Blueline\Helpers\arrays_equal_in_some_rotation;
 
 /**
- * Blueline\Entity\Method
+ * Method entity
  */
 #[UniqueEntity('url')]
 #[ORM\Entity(repositoryClass: \Blueline\Repository\MethodRepository::class)]
@@ -22,7 +22,120 @@ use function Blueline\Helpers\arrays_equal_in_some_rotation;
 #[ORM\Index(name: 'idx_methods_stage_lengthoflead', columns: array('stage', 'lengthoflead'))]
 class Method
 {
-    // Constructor
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $title;
+
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    private $url;
+
+    #[ORM\Column(type: 'string', length: 3, nullable: true)]
+    private ?string $abbreviation = null;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private ?bool $provisional = null;
+
+    #[ORM\Column(type: 'smallint')]
+    #[Assert\GreaterThanOrEqual(3)]
+    private int $stage;
+
+    #[ORM\Column(type: 'string', length: 31, nullable: true)]
+    private ?string $classification = null;
+
+    #[ORM\Column(name: 'nameMetaphone', type: 'string', length: 255, nullable: true)]
+    private ?string $nameMetaphone = null;
+
+    #[ORM\Column(type: 'string', length: 2047)]
+    private string $notation;
+
+    #[ORM\Column(name: 'notationExpanded', type: 'string', length: 4096)]
+    private string $notationExpanded;
+
+    #[ORM\Column(name: 'leadHeadCode', type: 'string', length: 31, nullable: true)]
+    private ?string $leadHeadCode = null;
+
+    #[ORM\Column(name: 'leadHead', type: 'string', length: 31)]
+    private string $leadHead;
+
+    #[ORM\Column(name: 'fchGroups', type: 'string', length: 31, nullable: true)]
+    private ?string $fchGroups = null;
+
+    #[ORM\Column(name: 'lengthOfLead', type: 'integer')]
+    #[Assert\GreaterThanOrEqual(1)]
+    private int $lengthOfLead;
+
+    #[ORM\Column(name: 'lengthOfCourse', type: 'integer')]
+    private int $lengthOfCourse;
+
+    #[ORM\Column(name: 'numberOfLeads', type: 'integer', nullable: true)]
+    private ?int $numberOfLeads = null;
+
+    #[ORM\Column(name: 'numberOfHunts', type: 'integer', nullable: true)]
+    #[Assert\GreaterThanOrEqual(0)]
+    private ?int $numberOfHunts = null;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private ?bool $jump = null;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private ?bool $little = null;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private ?bool $differential = null;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private ?bool $plain = null;
+
+    #[ORM\Column(name: 'trebleDodging', type: 'boolean', nullable: true)]
+    private ?bool $trebleDodging = null;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private ?bool $palindromic = null;
+
+    #[ORM\Column(name: 'doubleSym', type: 'boolean', nullable: true)]
+    private ?bool $doubleSym = null;
+
+    #[ORM\Column(name: 'rotational', type: 'boolean', nullable: true)]
+    private ?bool $rotational = null;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $calls = null;
+
+    #[ORM\Column(name: 'ruleOffs', type: 'json', nullable: true)]
+    private ?array $ruleOffs = null;
+
+    #[ORM\Column(name: 'callingPositions', type: 'json', nullable: true)]
+    private ?array $callingPositions = null;
+
+    #[ORM\Column(type: 'smallint', nullable: true)]
+    private ?int $magic = null;
+
+    #[ORM\Column(name: 'cccbrId', type: 'string', length: 255, nullable: true)]
+    private ?string $cccbrId = null;
+
+    #[ORM\Column(name: 'methodReferences', type: 'text', nullable: true)]
+    private ?string $methodReferences = null;
+
+    #[ORM\Column(name: 'extensionConstruction', type: 'text', nullable: true)]
+    private ?string $extensionConstruction = null;
+
+    #[ORM\OneToMany(targetEntity: MethodInCollection::class, mappedBy: 'method', cascade: ['persist', 'remove'])]
+    private \Doctrine\Common\Collections\Collection $collections;
+
+    #[ORM\OneToMany(targetEntity: Performance::class, mappedBy: 'method', cascade: ['persist', 'remove'])]
+    private \Doctrine\Common\Collections\Collection $performances;
+
+    #[ORM\OneToMany(targetEntity: MethodSimilarity::class, mappedBy: 'method1')]
+    private \Doctrine\Common\Collections\Collection $methodSimilarity1;
+
+    #[ORM\OneToMany(targetEntity: MethodSimilarity::class, mappedBy: 'method2')]
+    private \Doctrine\Common\Collections\Collection $methodSimilarity2;
+
+    /**
+     * Create a method entity and optionally hydrate it from an associative array.
+     *
+     * @param array<string, mixed> $firstSet Initial property values keyed by setter-compatible names
+     */
     public function __construct($firstSet = array())
     {
         $this->collections  = new \Doctrine\Common\Collections\ArrayCollection();
@@ -30,46 +143,92 @@ class Method
         $this->setAll($firstSet);
     }
 
-    // Casting helpers
+    /**
+     * Convert the entity to a short debug string.
+     *
+     * @return string
+     */
     public function __toString()
     {
         return 'Method:'.$this->getTitle();
     }
 
+    /**
+     * Convert the entity to an array for template/API serialisation.
+     *
+        * Optionally filters to a subset of fields.
+     *
+     * @param string|array<int, string>|null $fields
+     * @return array<string, mixed>
+     */
     public function __toArray($fields = null)
     {
-        $objectVars = get_object_vars($this);
-
         if (is_string($fields)) {
             $fields = array_filter(array_map('trim', explode(',', $fields)));
         }
+
+        $fieldSerialisers = array(
+            'title' => fn() => $this->getTitle(),
+            'abbreviation' => fn() => $this->getAbbreviation(),
+            'provisional' => fn() => $this->getProvisional(),
+            'stage' => fn() => $this->getStage(),
+            'classification' => fn() => $this->getClassification(),
+            'nameMetaphone' => fn() => $this->getNameMetaphone(),
+            'notation' => fn() => $this->getNotation(),
+            'notationExpanded' => fn() => $this->getNotationExpanded(),
+            'leadHeadCode' => fn() => $this->getLeadHeadCode(),
+            'leadHead' => fn() => $this->getLeadHead(),
+            'fchGroups' => fn() => $this->getFchGroups(),
+            'lengthOfLead' => fn() => $this->getLengthOfLead(),
+            'lengthOfCourse' => fn() => $this->getLengthOfCourse(),
+            'numberOfLeads' => fn() => $this->getNumberOfLeads(),
+            'numberOfHunts' => fn() => $this->getNumberOfHunts(),
+            'jump' => fn() => $this->getJump(),
+            'little' => fn() => $this->getLittle(),
+            'differential' => fn() => $this->getDifferential(),
+            'plain' => fn() => $this->getPlain(),
+            'trebleDodging' => fn() => $this->getTrebleDodging(),
+            'palindromic' => fn() => $this->getPalindromic(),
+            'doubleSym' => fn() => $this->getDoubleSym(),
+            'rotational' => fn() => $this->getRotational(),
+            'calls' => fn() => $this->getCalls(),
+            'ruleOffs' => fn() => $this->getRuleOffs(),
+            'callingPositions' => fn() => $this->getCallingPositions(),
+            'magic' => fn() => $this->getMagic(),
+            'cccbrId' => fn() => $this->getCccbrId(),
+            'methodReferences' => fn() => $this->getMethodReferences(),
+            'extensionConstruction' => fn() => $this->getExtensionConstruction(),
+            'url' => fn() => $this->getUrl(),
+        );
+
         if (is_array($fields) && !empty($fields)) {
-            $objectVars = array_intersect_key($objectVars, array_flip($fields));
-        }
+            $requestedFields = array_values(array_intersect($fields, array_keys($fieldSerialisers)));
 
-        foreach ($objectVars as $k => $v) {
-            switch ($k) {
-                // Don't try to drill down into sub-entities or show stuff only used internally
-                case 'leadHeads':
-                case 'collections':
-                case 'performances':
-                case 'methodsimilarity1':
-                case 'methodsimilarity2':
-                    unset($objectVars[$k]);
-                    break;
-                default:
-                    $objectVars[$k] = $this->{'get'.ucwords($k)}();
+            $objectVars = array();
+            foreach ($requestedFields as $field) {
+                $objectVars[$field] = $fieldSerialisers[$field]();
             }
+
+            return $objectVars;
         }
 
-        if (array_key_exists('cccbrId', $objectVars)) {
-            $objectVars['cccbr_id'] = $objectVars['cccbrId'];
+        $objectVars = array();
+        foreach ($fieldSerialisers as $field => $serialiser) {
+            $objectVars[$field] = $serialiser();
         }
 
         return array_filter($objectVars);
     }
 
-    // setAll helper
+    /**
+     * Bulk-set properties from an associative array.
+     *
+     * Keys are mapped to setter names using snake_case to StudlyCase conversion.
+     * Unknown keys are ignored.
+     *
+     * @param array<string, mixed> $map
+     * @return Method
+     */
     public function setAll($map)
     {
         foreach ($map as $key => $value) {
@@ -78,225 +237,10 @@ class Method
                 $this->$method($value);
             }
         }
-
         return $this;
     }
 
-    // Variables
-    /**
-     * @var string $title
-     */
-    #[ORM\Id]
-    #[ORM\Column(type: 'string', length: 255)]
-    private $title;
-
-    /**
-     * @var string $abbreviation
-     */
-    #[ORM\Column(type: 'string', length: 3, nullable: true)]
-    private $abbreviation;
-
-    /**
-     * @var boolean $provisional
-     */
-    #[ORM\Column(type: 'boolean', nullable: true)]
-    private $provisional;
-
-    /**
-     * @var integer $stage
-     */
-    #[ORM\Column(type: 'smallint')]
-    #[Assert\GreaterThanOrEqual(3)]
-    private $stage;
-
-    /**
-     * @var string $classification
-     */
-    #[ORM\Column(type: 'string', length: 31, nullable: true)]
-    private $classification;
-
-    /**
-     * @var string $nameMetaphone
-     */
-    #[ORM\Column(name: 'namemetaphone', type: 'string', length: 255, nullable: true)]
-    private $nameMetaphone;
-
-    /**
-     * @var string $notation
-     */
-    #[ORM\Column(type: 'string', length: 2047)]
-    private $notation;
-
-    /**
-     * @var string $notationExpanded
-     */
-    #[ORM\Column(name: 'notationexpanded', type: 'string', length: 4096)]
-    private $notationExpanded;
-
-    /**
-     * @var string $leadHeadCode
-     */
-    #[ORM\Column(name: 'leadheadcode', type: 'string', length: 31, nullable: true)]
-    private $leadHeadCode;
-
-    /**
-     * @var string $leadHead
-     */
-    #[ORM\Column(name: 'leadhead', type: 'string', length: 31)]
-    private $leadHead;
-
-    /**
-     * @var string $fchGroups
-     */
-    #[ORM\Column(name: 'fchgroups', type: 'string', length: 31, nullable: true)]
-    private $fchGroups;
-
-    /**
-     * @var integer $lengthOfLead
-     */
-    #[ORM\Column(name: 'lengthoflead', type: 'integer')]
-    #[Assert\GreaterThanOrEqual(1)]
-    private $lengthOfLead;
-
-    /**
-     * @var integer $lengthOfCourse
-     */
-    #[ORM\Column(name: 'lengthofcourse', type: 'integer')]
-    private $lengthOfCourse;
-
-    /**
-     * @var integer $numberOfLeads
-     */
-    #[ORM\Column(name: 'numberofleads', type: 'integer', nullable: true)]
-    private $numberOfLeads;
-
-    /**
-     * @var integer $numberOfHunts
-     */
-    #[ORM\Column(name: 'numberofhunts', type: 'integer', nullable: true)]
-    #[Assert\GreaterThanOrEqual(0)]
-    private $numberOfHunts;
-
-    /**
-     * @var boolean $jump
-     */
-    #[ORM\Column(name: 'jump', type: 'boolean', nullable: true)]
-    private $jump;
-
-    /**
-     * @var boolean $little
-     */
-    #[ORM\Column(type: 'boolean', nullable: true)]
-    private $little;
-
-    /**
-     * @var boolean $differential
-     */
-    #[ORM\Column(type: 'boolean', nullable: true)]
-    private $differential;
-
-    /**
-     * @var boolean $plain
-     */
-    #[ORM\Column(type: 'boolean', nullable: true)]
-    private $plain;
-
-    /**
-     * @var boolean $trebleDodging
-     */
-    #[ORM\Column(name: 'trebledodging', type: 'boolean', nullable: true)]
-    private $trebleDodging;
-
-    /**
-     * @var boolean $palindromic
-     */
-    #[ORM\Column(type: 'boolean', nullable: true)]
-    private $palindromic;
-
-    /**
-     * @var boolean $doubleSym
-     */
-    #[ORM\Column(name: 'doublesym', type: 'boolean', nullable: true)]
-    private $doubleSym;
-
-    /**
-     * @var boolean $rotational
-     */
-    #[ORM\Column(name: 'rotational', type: 'boolean', nullable: true)]
-    private $rotational;
-
-    /**
-     * @var array $calls
-     */
-    #[ORM\Column(name: 'calls', type: 'json', nullable: true)]
-    private $calls;
-
-    /**
-     * @var array $ruleOffs
-     */
-    #[ORM\Column(name: 'ruleoffs', type: 'json', nullable: true)]
-    private $ruleOffs;
-
-    /**
-     * @var array $callingPositions
-     */
-    #[ORM\Column(name: 'callingpositions', type: 'json', nullable: true)]
-    private $callingPositions;
-
-    /**
-     * @var integer $magic
-     */
-    #[ORM\Column(name: 'magic', type: 'smallint', nullable: true)]
-    private $magic;
-
-    /**
-     * @var string $cccbrId
-     */
-    #[ORM\Column(name: 'cccbr_id', type: 'string', length: 255, nullable: true)]
-    private $cccbrId;
-
-    /**
-     * @var string $methodReferences
-     */
-    #[ORM\Column(name: 'method_references', type: 'text', nullable: true)]
-    private $methodReferences;
-
-    /**
-     * @var string $extensionconstruction
-     */
-    #[ORM\Column(name: 'extensionconstruction', type: 'text', nullable: true)]
-    private $extensionconstruction;
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     */
-    #[ORM\OneToMany(targetEntity: MethodInCollection::class, mappedBy: 'method', cascade: ['persist', 'remove'])]
-    private $collections;
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     */
-    #[ORM\OneToMany(targetEntity: Performance::class, mappedBy: 'method', cascade: ['persist', 'remove'])]
-    private $performances;
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     */
-    #[ORM\OneToMany(targetEntity: MethodSimilarity::class, mappedBy: 'method1')]
-    private $methodsimilarity1;
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     */
-    #[ORM\OneToMany(targetEntity: MethodSimilarity::class, mappedBy: 'method2')]
-    private $methodsimilarity2;
-
     // Getters and setters
-    /**
-     * Get title
-     *
-     * @return string
-     */
     public function getTitle()
     {
         if (!isset($this->title)) {
@@ -306,23 +250,12 @@ class Method
         return $this->title;
     }
 
-    /**
-     * Set title
-     *
-     * @param  string $title
-     * @return Method
-     */
     public function setTitle($title)
     {
         $this->title = $title;
         return $this;
     }
 
-    /**
-     * Get abbreviation
-     *
-     * @return string
-     */
     public function getAbbreviation()
     {
         if (!isset($this->abbreviation)) {
@@ -331,57 +264,29 @@ class Method
         return $this->abbreviation;
     }
 
-    /**
-     * Set abbreviation
-     *
-     * @param  string $abbreviation
-     * @return Method
-     */
     public function setAbbreviation($abbreviation)
     {
         $this->abbreviation = $abbreviation;
         return $this;
     }
 
-    /**
-     * Set provisional
-     *
-     * @param  boolean $provisional
-     * @return Method
-     */
     public function setProvisional($provisional)
     {
         $this->provisional = $provisional;
         return $this;
     }
 
-    /**
-     * Get provisional
-     *
-     * @return boolean
-     */
     public function getProvisional()
     {
         return $this->provisional;
     }
 
-    /**
-     * Set stage
-     *
-     * @param  integer $stage
-     * @return Method
-     */
     public function setStage($stage)
     {
         $this->stage = intval($stage);
         return $this;
     }
 
-    /**
-     * Get stage
-     *
-     * @return integer
-     */
     public function getStage()
     {
         if (!isset($this->stage)) {
@@ -394,12 +299,6 @@ class Method
         return Stages::toString($this->getStage());
     }
 
-    /**
-     * Set classification
-     *
-     * @param  string $classification
-     * @return Method
-     */
     public function setClassification($classification)
     {
         $this->classification = $classification;
@@ -497,23 +396,12 @@ class Method
         return $this->classification;
     }
 
-    /**
-     * Set nameMetaphone
-     *
-     * @param  string $nameMetaphone
-     * @return Method
-     */
     public function setNameMetaphone($nameMetaphone)
     {
         $this->nameMetaphone = $nameMetaphone;
         return $this;
     }
 
-    /**
-     * Get nameMetaphone
-     *
-     * @return string
-     */
     public function getNameMetaphone()
     {
         if (!isset($this->nameMetaphone)) {
@@ -522,45 +410,23 @@ class Method
         return $this->nameMetaphone;
     }
 
-    /**
-     * Set notation
-     *
-     * @param  string $notation
-     * @return Method
-     */
     public function setNotation($notation)
     {
         $this->notation = $notation;
         return $this;
     }
 
-    /**
-     * Get notation
-     *
-     * @return string
-     */
     public function getNotation()
     {
         return $this->notation;
     }
 
-    /**
-     * Set notationExpanded
-     *
-     * @param  string $notationExpanded
-     * @return Method
-     */
     public function setNotationExpanded($notationExpanded)
     {
         $this->notationExpanded = $notationExpanded;
         return $this;
     }
 
-    /**
-     * Get notationExpanded
-     *
-     * @return string
-     */
     public function getNotationExpanded()
     {
         if (!isset($this->notationExpanded)) {
@@ -569,33 +435,17 @@ class Method
         return $this->notationExpanded;
     }
 
-    /**
-     * Get notationSiril
-     *
-     * @return string
-     */
     public function getNotationSiril()
     {
         return PlaceNotation::siril($this->getNotationExpanded(), $this->getStage());
     }
 
-    /**
-     * Set leadHeadCode
-     *
-     * @param  string $leadHeadCode
-     * @return Method
-     */
     public function setLeadHeadCode($leadHeadCode)
     {
         $this->leadHeadCode = $leadHeadCode;
         return $this;
     }
 
-    /**
-     * Get leadHeadCode
-     *
-     * @return string
-     */
     public function getLeadHeadCode()
     {
         if (!isset($this->leadHeadCode)) {
@@ -607,23 +457,12 @@ class Method
         return $this->leadHeadCode;
     }
 
-    /**
-     * Set leadHead
-     *
-     * @param  string $leadHead
-     * @return Method
-     */
     public function setLeadHead($leadHead)
     {
         $this->leadHead = $leadHead;
         return $this;
     }
 
-    /**
-     * Get leadHead
-     *
-     * @return string
-     */
     public function getLeadHead()
     {
         if (!isset($this->leadHead)) {
@@ -633,45 +472,23 @@ class Method
         return $this->leadHead;
     }
 
-    /**
-     * Set fchGroups
-     *
-     * @param  string $fchGroups
-     * @return Method
-     */
     public function setFchGroups($fchGroups)
     {
         $this->fchGroups = $fchGroups;
         return $this;
     }
 
-    /**
-     * Get fchGroups
-     *
-     * @return string
-     */
     public function getFchGroups()
     {
         return $this->fchGroups;
     }
 
-    /**
-     * Set lengthOfLead
-     *
-     * @param  integer $lengthOfLead
-     * @return Method
-     */
     public function setLengthOfLead($lengthOfLead)
     {
         $this->lengthOfLead = $lengthOfLead;
         return $this;
     }
 
-    /**
-     * Get lengthOfLead
-     *
-     * @return integer
-     */
     public function getLengthOfLead()
     {
         if (!isset($this->lengthOfLead)) {
@@ -680,23 +497,12 @@ class Method
         return $this->lengthOfLead;
     }
 
-    /**
-     * Set lengthOfCourse
-     *
-     * @param  integer $lengthOfCourse
-     * @return Method
-     */
     public function setLengthOfCourse($lengthOfCourse)
     {
         $this->lengthOfCourse = $lengthOfCourse;
         return $this;
     }
 
-    /**
-     * Get lengthOfCourse
-     *
-     * @return integer
-     */
     public function getLengthOfCourse()
     {
         if (!isset($this->lengthOfCourse)) {
@@ -705,23 +511,12 @@ class Method
         return $this->lengthOfCourse;
     }
 
-    /**
-     * Set numberOfLeads
-     *
-     * @param  integer $numberOfLeads
-     * @return Method
-     */
     public function setNumberOfLeads($numberOfLeads)
     {
         $this->numberOfLeads = $numberOfLeads;
         return $this;
     }
 
-    /**
-     * Get numberOfLeads
-     *
-     * @return integer
-     */
     public function getNumberOfLeads()
     {
         if (!isset($this->numberOfLeads)) {
@@ -736,23 +531,12 @@ class Method
         return $this->numberOfLeads;
     }
 
-    /**
-     * Set numberOfHunts
-     *
-     * @param  integer $numberOfHunts
-     * @return Method
-     */
     public function setNumberOfHunts($numberOfHunts)
     {
         $this->numberOfHunts = $numberOfHunts;
         return $this;
     }
 
-    /**
-     * Get numberOfHunts
-     *
-     * @return integer
-     */
     public function getNumberOfHunts()
     {
         if (!isset($this->numberOfHunts)) {
@@ -762,6 +546,11 @@ class Method
     }
 
     private $hunts;
+    /**
+     * Get hunt bells (bells fixed in lead-head permutation).
+     *
+     * @return array<int, int> Bell numbers that are hunt bells
+     */
     public function getHunts()
     {
         if (!isset($this->hunts)) {
@@ -778,6 +567,15 @@ class Method
     }
 
     private $huntDetails;
+
+    /**
+     * Get detailed hunt-bell path analysis for classification logic.
+     *
+     * Each entry contains the bell number, path, and derived properties such as
+     * wellFormedPath, little, and hunt type.
+     *
+     * @return array<int, array<string, mixed>>
+     */
     public function getHuntDetails()
     {
         if (!isset($this->huntDetails)) {
@@ -868,23 +666,12 @@ class Method
         return $this->huntDetails;
     }
 
-    /**
-     * Set jump
-     *
-     * @param  boolean $jump
-     * @return Method
-     */
     public function setJump($jump)
     {
         $this->jump = $jump;
         return $this;
     }
 
-    /**
-     * Get jump
-     *
-     * @return boolean
-     */
     public function getJump()
     {
         if (!isset($this->jump)) {
@@ -893,23 +680,12 @@ class Method
         return $this->jump;
     }
 
-    /**
-     * Set little
-     *
-     * @param  boolean $little
-     * @return Method
-     */
     public function setLittle($little)
     {
         $this->little = $little;
         return $this;
     }
 
-    /**
-     * Get little
-     *
-     * @return boolean
-     */
     public function getLittle()
     {
         if (!isset($this->little)) {
@@ -918,23 +694,12 @@ class Method
         return $this->little;
     }
 
-    /**
-     * Set differential
-     *
-     * @param  boolean $differential
-     * @return Method
-     */
     public function setDifferential($differential)
     {
         $this->differential = $differential;
         return $this;
     }
 
-    /**
-     * Get differential
-     *
-     * @return boolean
-     */
     public function getDifferential()
     {
         if (!isset($this->differential)) {
@@ -943,23 +708,12 @@ class Method
         return $this->differential;
     }
 
-    /**
-     * Set plain
-     *
-     * @param  boolean $plain
-     * @return Method
-     */
     public function setPlain($plain)
     {
         $this->plain = $plain;
         return $this;
     }
 
-    /**
-     * Get plain
-     *
-     * @return boolean
-     */
     public function getPlain()
     {
         if (!isset($this->plain)) {
@@ -968,23 +722,12 @@ class Method
         return $this->plain;
     }
 
-    /**
-     * Set trebleDodging
-     *
-     * @param  boolean $trebleDodging
-     * @return Method
-     */
     public function setTrebleDodging($trebleDodging)
     {
         $this->trebleDodging = $trebleDodging;
         return $this;
     }
 
-    /**
-     * Get trebleDodging
-     *
-     * @return boolean
-     */
     public function getTrebleDodging()
     {
         if (!isset($this->trebleDodging)) {
@@ -993,23 +736,12 @@ class Method
         return $this->trebleDodging;
     }
 
-    /**
-     * Set palindromic
-     *
-     * @param  boolean $palindromic
-     * @return Method
-     */
     public function setPalindromic($palindromic)
     {
         $this->palindromic = $palindromic;
         return $this;
     }
 
-    /**
-     * Get palindromic
-     *
-     * @return boolean
-     */
     public function getPalindromic()
     {
         if (!isset($this->palindromic)) {
@@ -1019,23 +751,12 @@ class Method
         return $this->palindromic;
     }
 
-    /**
-     * Set doubleSym
-     *
-     * @param  boolean $doubleSym
-     * @return Method
-     */
     public function setDoubleSym($doubleSym)
     {
         $this->doubleSym = $doubleSym;
         return $this;
     }
 
-    /**
-     * Get doubleSym
-     *
-     * @return boolean
-     */
     public function getDoubleSym()
     {
         if (!isset($this->doubleSym)) {
@@ -1062,23 +783,12 @@ class Method
         return $this->doubleSym;
     }
 
-    /**
-     * Set rotational
-     *
-     * @param  boolean $rotational
-     * @return Method
-     */
     public function setRotational($rotational)
     {
         $this->rotational = $rotational;
         return $this;
     }
 
-    /**
-     * Get rotational
-     *
-     * @return boolean
-     */
     public function getRotational()
     {
         if (!isset($this->rotational)) {
@@ -1091,12 +801,6 @@ class Method
         return ucfirst(Text::toList(array_filter(array( ($this->getPalindromic() ? 'palindromic' : ''), ($this->getDoubleSym() ? 'double' : ''), ($this->getRotational() ? 'rotational' : '') ))));
     }
 
-    /**
-     * Set calls
-     *
-     * @param  array  $calls
-     * @return Method
-     */
     public function setCalls($calls)
     {
         $this->calls = $calls;
@@ -1200,12 +904,6 @@ class Method
         return $this->calls ?: array();
     }
 
-    /**
-     * Set ruleOffs
-     *
-     * @param  array $ruleOffs
-     * @return Method
-     */
     public function setRuleOffs($ruleOffs)
     {
         $this->ruleOffs = $ruleOffs;
@@ -1237,12 +935,6 @@ class Method
         return $this->ruleOffs;
     }
 
-    /**
-     * Set callingPositions
-     *
-     * @param  array $callingPositions
-     * @return Method
-     */
     public function setCallingPositions($callingPositions)
     {
         $this->callingPositions = $callingPositions;
@@ -1316,117 +1008,56 @@ class Method
         return $this->callingPositions ?: array();
     }
 
-    /**
-     * Set magic
-     *
-     * @param  integer $magic
-     * @return Method
-     */
     public function setMagic($magic)
     {
         $this->magic = $magic;
         return $this;
     }
 
-    /**
-     * Get magic
-     *
-     * @return integer
-     */
     public function getMagic()
     {
         return $this->magic;
     }
 
-    /**
-     * Set cccbr_id
-     *
-     * @param  string $cccbr_id
-     * @return Method
-     */
-    public function setCccbrId($cccbr_id)
+    public function setCccbrId($cccbrId)
     {
-        $this->cccbrId = $cccbr_id;
+        $this->cccbrId = $cccbrId;
         return $this;
     }
 
-    /**
-     * Get cccbr_id
-     *
-     * @return string
-     */
     public function getCccbrId()
     {
         return $this->cccbrId;
     }
 
-    /**
-     * Set method_references
-     *
-     * @param  string $method_references
-     * @return Method
-     */
-    public function setMethodReferences($method_references)
+    public function setMethodReferences($methodReferences)
     {
-        $this->methodReferences = $method_references;
+        $this->methodReferences = $methodReferences;
         return $this;
     }
 
-    /**
-     * Get method_references
-     *
-     * @return string
-     */
     public function getMethodReferences()
     {
         return $this->methodReferences;
     }
 
-    /**
-     * Set extensionconstruction
-     *
-     * @param  string $extensionconstruction
-     * @return Method
-     */
-    public function setExtensionconstruction($extensionconstruction)
+    public function setExtensionConstruction($extensionConstruction)
     {
-        $this->extensionconstruction = $extensionconstruction;
+        $this->extensionConstruction = $extensionConstruction;
         return $this;
     }
 
-    /**
-     * Get extensionconstruction
-     *
-     * @return string
-     */
-    public function getExtensionconstruction()
+    public function getExtensionConstruction()
     {
-        return $this->extensionconstruction;
+        return $this->extensionConstruction;
     }
 
-    /**
-     * @var string
-     */
-    #[ORM\Column(type: 'string', length: 255, unique: true)]
-    private $url;
-
-    /**
-     * Set url
-     *
-     * @param  string $url
-     * @return Method
-     */
     public function setUrl($url)
     {
         $this->url = $url;
         return $this;
     }
 
-    /**
-     * Get url
-     *
-     * @return string
-     */
     public function getUrl()
     {
         if (!isset($this->url)) {
@@ -1435,12 +1066,6 @@ class Method
         return $this->url;
     }
 
-    /**
-     * Add collections
-     *
-     * @param  \Blueline\Entity\MethodInCollection $collection
-     * @return Method
-     */
     public function addCollection(\Blueline\Entity\MethodInCollection $collection)
     {
         $this->collections[] = $collection;
@@ -1448,93 +1073,47 @@ class Method
         return $this;
     }
 
-    /**
-     * Remove collections
-     *
-     * @param \Blueline\Entity\MethodInCollection $collection
-     */
     public function removeCollection(\Blueline\Entity\MethodInCollection $collection)
     {
         $this->collections->removeElement($collection);
     }
 
-    /**
-     * Get collections
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
     public function getCollections()
     {
         return $this->collections;
     }
 
-    /**
-     * Add performances
-     *
-     * @param  \Blueline\Entity\Performance $performance
-     * @return Method
-     */
     public function addPerformance(\Blueline\Entity\Performance $performance)
     {
         $this->performances[] = $performance;
         return $this;
     }
 
-    /**
-     * Remove performances
-     *
-     * @param \Blueline\Entity\Performance $performance
-     */
     public function removePerformance(\Blueline\Entity\Performance $performance)
     {
         $this->performances->removeElement($performance);
     }
 
-    /**
-     * Get performances
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
     public function getPerformances()
     {
         return $this->performances;
     }
 
-    /**
-     * Get performances where the method was originally named something else
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
     public function getRenamed()
     {
         return $this->getPerformances()->filter(function ($p) { return $p->getType() == 'renamedMethod'; });
     }
 
-    /**
-     * Get performances where the method was duplicate named
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
     public function getDuplicates()
     {
         return $this->getPerformances()->filter(function ($p) { return $p->getType() == 'duplicateMethod'; });
     }
 
-    /**
-     * Get the first towerbell peal
-     *
-     * @return \Blueline\Entity\Performance
-     */
     public function getFirstTowerbellPeal()
     {
         return $this->getPerformances()->filter(function ($p) { return $p->getType() == 'firstTowerbellPeal'; })->get(0);
     }
 
-    /**
-     * Get the first handbell peal
-     *
-     * @return \Blueline\Entity\Performance
-     */
     public function getFirstHandbellPeal()
     {
         return $this->getPerformances()->filter(function ($p) { return $p->getType() == 'firstHandbellPeal'; })->get(0);
@@ -1542,6 +1121,11 @@ class Method
 
     // Non-database methods
 
+    /**
+     * Build the method Class Descriptor as per the CCCBR Method Framework.
+     *
+     * @return string
+     */
     public function getClassDescriptor()
     {
         $classification = isset($this->classification) ? $this->classification : $this->getClassification();
@@ -1570,6 +1154,12 @@ class Method
     }
 
     private $leadHeads;
+
+    /**
+     * Get all lead heads in the plain course.
+     *
+     * @return array<int, array<int, string>> Sequence of lead-head rows
+     */
     public function getLeadHeads()
     {
         if (!$this->leadHeads) {
@@ -1586,69 +1176,35 @@ class Method
         return $this->leadHeads;
     }
 
-    /**
-     * Add methodsimilarity1
-     *
-     * @param \Blueline\Entity\MethodSimilarity $methodsimilarity1
-     *
-     * @return Method
-     */
-    public function addMethodsimilarity1(\Blueline\Entity\MethodSimilarity $methodsimilarity1)
+    public function addMethodSimilarity1(\Blueline\Entity\MethodSimilarity $methodSimilarity1)
     {
-        $this->methodsimilarity1[] = $methodsimilarity1;
+        $this->methodSimilarity1[] = $methodSimilarity1;
         return $this;
     }
 
-    /**
-     * Remove methodsimilarity1
-     *
-     * @param \Blueline\Entity\MethodSimilarity $methodsimilarity1
-     */
-    public function removeMethodsimilarity1(\Blueline\Entity\MethodSimilarity $methodsimilarity1)
+    public function removeMethodSimilarity1(\Blueline\Entity\MethodSimilarity $methodSimilarity1)
     {
-        $this->methodsimilarity1->removeElement($methodsimilarity1);
+        $this->methodSimilarity1->removeElement($methodSimilarity1);
     }
 
-    /**
-     * Get methodsimilarity1
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getMethodsimilarity1()
+    public function getMethodSimilarity1()
     {
-        return $this->methodsimilarity1;
+        return $this->methodSimilarity1;
     }
 
-    /**
-     * Add methodsimilarity2
-     *
-     * @param \Blueline\Entity\MethodSimilarity $methodsimilarity2
-     *
-     * @return Method
-     */
-    public function addMethodsimilarity2(\Blueline\Entity\MethodSimilarity $methodsimilarity2)
+    public function addMethodSimilarity2(\Blueline\Entity\MethodSimilarity $methodSimilarity2)
     {
-        $this->methodsimilarity2[] = $methodsimilarity2;
+        $this->methodSimilarity2[] = $methodSimilarity2;
         return $this;
     }
 
-    /**
-     * Remove methodsimilarity2
-     *
-     * @param \Blueline\Entity\MethodSimilarity $methodsimilarity2
-     */
-    public function removeMethodsimilarity2(\Blueline\Entity\MethodSimilarity $methodsimilarity2)
+    public function removeMethodSimilarity2(\Blueline\Entity\MethodSimilarity $methodSimilarity2)
     {
-        $this->methodsimilarity2->removeElement($methodsimilarity2);
+        $this->methodSimilarity2->removeElement($methodSimilarity2);
     }
 
-    /**
-     * Get methodsimilarity2
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getMethodsimilarity2()
+    public function getMethodSimilarity2()
     {
-        return $this->methodsimilarity2;
+        return $this->methodSimilarity2;
     }
 }

@@ -1,7 +1,12 @@
 <?php
-
 namespace Blueline\Helpers;
 
+/**
+ * ISO 3166-2 country code and name lookup table.
+ *
+ * Maps ISO 3166-1 alpha-2 country codes (e.g., 'GB', 'US') to country names.
+ * Used for performance location display and geographic filtering.
+ */
 class Country
 {
     static $iso3166_2 = array(
