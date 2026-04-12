@@ -321,60 +321,70 @@ class Method
 
                 // For Plain if all bells only make places and hunt then it's 'Place', otherwise 'Bob'
                 if ($principalHuntType == 'Plain') {
-                    // Generate a lead, and a "lead+1 change" (we'll need the latter to check if all bells only hunt and make places since we'll need to check for dodges/points over the lead end)
-                    $lead = PlaceNotation::apply(PlaceNotation::explodedToPermutations($this->getStage(), PlaceNotation::explode($this->getNotationExpanded())), PlaceNotation::rounds($this->getStage()));
+                    $lead = $this->getLead();
                     array_unshift($lead, PlaceNotation::rounds($this->getStage()));
                     $leadPlusOneChangeFromNextLead = $lead;
-                    array_push($leadPlusOneChangeFromNextLead, PlaceNotation::apply(PlaceNotation::explodedToPermutations($this->getStage(), PlaceNotation::explode($this->getNotationExpanded()))[0], end($leadPlusOneChangeFromNextLead)));
+                    // Include one extra change from the next lead to detect direction changes over the lead end.
+                    array_push(
+                        $leadPlusOneChangeFromNextLead,
+                        PlaceNotation::apply(
+                            PlaceNotation::explodedToPermutations($this->getStage(), PlaceNotation::explode($this->getNotationExpanded()))[0],
+                            end($leadPlusOneChangeFromNextLead)
+                        )
+                    );
 
-                    // Work out if every bell only ever hunts or makes places
-                    $placesOnly = array_reduce(array_map(function ($bell) use ($leadPlusOneChangeFromNextLead) {
-                        // Extract the path of each bell
-                        $positions = array_map(function ($row) use ($bell) { return array_search($bell, $row); }, $leadPlusOneChangeFromNextLead);
-                        // Then iterate through and check that the line only ever contains hunts or places
+                    $allBellPathsArePlaceNotationOnly = array_reduce(array_map(function ($bell) use ($leadPlusOneChangeFromNextLead) {
+                        $positions = array_map(function ($row) use ($bell) {
+                            return array_search($bell, $row);
+                        }, $leadPlusOneChangeFromNextLead);
+
                         $bellPlacesOnly = true;
                         for ($i = 2; $bellPlacesOnly && $i < count($positions); ++$i) {
-                            $bellPlacesOnly = abs(($positions[$i] - $positions[$i-1]) - ($positions[$i-1] - $positions[$i-2])) <= 1;
+                            // Allow only hunts and place-making: acceleration in place index must remain in {-1,0,1}.
+                            $bellPlacesOnly = abs(($positions[$i] - $positions[$i - 1]) - ($positions[$i - 1] - $positions[$i - 2])) <= 1;
                         }
-                        return $bellPlacesOnly;
-                    }, PlaceNotation::rounds($this->getStage())), function ($carry, $val) { return $carry && $val; }, true);
 
-                    // If all bells only make places and hunt then it's 'Place', otherwise 'Bob'
-                    $this->setClassification($placesOnly? 'Place' : 'Bob');
+                        return $bellPlacesOnly;
+                    }, PlaceNotation::rounds($this->getStage())), function ($carry, $val) {
+                        return $carry && $val;
+                    }, true);
+
+                    $this->setClassification($allBellPathsArePlaceNotationOnly ? 'Place' : 'Bob');
 
                 // For Treble Dodging see if internal places are made at each cross section. All => 'Surprise', None => 'Treble Bob', Some => 'Delight'
                 } elseif ($principalHuntType == 'Treble Dodging') {
-                    // Generate a lead
-                    $lead = PlaceNotation::apply(PlaceNotation::explodedToPermutations($this->getStage(), PlaceNotation::explode($this->getNotationExpanded())), PlaceNotation::rounds($this->getStage()));
-                    array_unshift($lead, PlaceNotation::rounds($this->getStage()));
                     // If the hunt bell dodges in only one position it's Treble Bob (since there are no cross sections, and that edge case is defined Treble Bob)
                     if (array_reduce($principalHunts, function ($carry, $val) { return $carry && max($val['path']) - min($val['path']) == 1; }, true)) {
                         $this->setClassification('Treble Bob');
                     // Otherwise inspect cross sections
                     } else {
-                        // A cross section is a change at which a principal hunt bell passes from one dodging position to another i.e. hunts for three changes. Find all examples.
-                        $crossSectionChanges = array_map(function ($hunt) use ($lead) {
-                            // Extract the path of each bell
-                            $positions = array_map(function ($row) use ($hunt) { return array_search($hunt, $row); }, $lead);
-                            // Then build an array of all the changes which are cross sections (assuming changes are indexed from zero)
+                        $lead = $this->getLead();
+                        // Prefix rounds to the lead to detect cross sections at the start of the lead as well as the end.
+                        array_unshift($lead, PlaceNotation::rounds($this->getStage()));
+
+                        $crossSectionChangesByHunt = array_map(function ($hunt) use ($lead) {
+                            $positions = array_map(function ($row) use ($hunt) {
+                                return array_search($hunt['bell'], $row);
+                            }, $lead);
+
                             $bellCrossSections = array();
-                            for ($i = 1; $i+2 < count($positions); ++$i) {
-                                $lastChange = $positions[$i] - $positions[$i-1];
-                                $thisChange = $positions[$i+1] - $positions[$i];
-                                $nextChange = $positions[$i+2] - $positions[$i+1];
+                            for ($i = 1; $i + 2 < count($positions); ++$i) {
+                                $lastChange = $positions[$i] - $positions[$i - 1];
+                                $thisChange = $positions[$i + 1] - $positions[$i];
+                                $nextChange = $positions[$i + 2] - $positions[$i + 1];
+                                // A cross section is a three-change hunt in one direction between dodging positions.
                                 if (abs($thisChange) == 1 && $lastChange == $thisChange && $thisChange == $nextChange) {
                                     $bellCrossSections[] = $i;
                                 }
                             }
+
                             return $bellCrossSections;
-                        }, array_map(function ($h) { return $h['bell']; }, $principalHunts));
-                        // Merge the by-hunt-bell cross sections into one list
-                        $crossSectionChanges = array_unique(array_reduce($crossSectionChanges, 'array_merge', array()));
-                        // Test if there are internal places made at each cross section
+                        }, $principalHunts);
+                        $crossSectionChanges = array_values(array_unique(array_reduce($crossSectionChangesByHunt, 'array_merge', array())));
+
                         $notationExploded = PlaceNotation::explode($this->getNotationExpanded());
-                        $n = PlaceNotation::intToBell($this->getStage());
-                        $internalPlacesAtCrossSectionChanges = array_map(function ($change) use ($notationExploded, $n) {
-                            return !($notationExploded[$change] == 'x' || strlen(preg_replace('/[1'.$n.']?/', '', $notationExploded[$change])) == 0);
+                        $internalPlacesAtCrossSectionChanges = array_map(function ($change) use ($notationExploded) {
+                            return PlaceNotation::changeHasInternalPlaces($notationExploded[$change], $this->getStage());
                         }, $crossSectionChanges);
                         // If an internal place is made at every cross section it's 'Surprise'
                         if (array_reduce($internalPlacesAtCrossSectionChanges, function($c, $v) { return $c && $v; }, true )) {
@@ -451,8 +461,28 @@ class Method
         if (!isset($this->leadHeadCode)) {
             $notationExploded = PlaceNotation::explode($this->getNotationExpanded());
             $leadHeadNotation = end($notationExploded);
-            $postLeadEndNotation = ($this->getNumberOfHunts() == 2) ? $notationExploded[0] : '';
-            $this->setLeadHeadCode(LeadHeadCodes::toCode($this->getLeadHead(), $this->getStage(), $this->getNumberOfHunts(), $leadHeadNotation, $postLeadEndNotation));
+            $postLeadEndNotation = reset($notationExploded);
+
+            // Grandsire lead head codes (p/q families) are only valid when all hunt bells share the same path.
+            // Check this before applying the code mapping.
+            $huntDetails = $this->getHuntDetails();
+            $allHuntPathsSame = true;
+            if (count($huntDetails) > 1) {
+                // Compare all hunt paths to the first hunt's path up to rotation,
+                // since equivalent hunt loops can start at different positions.
+                $firstHuntPath = $huntDetails[0]['path'];
+                for ($i = 1; $i < count($huntDetails); ++$i) {
+                    if (!arrays_equal_in_some_rotation($huntDetails[$i]['path'], $firstHuntPath)) {
+                        $allHuntPathsSame = false;
+                        break;
+                    }
+                }
+            }
+            if (!$allHuntPathsSame) {
+                $this->setLeadHeadCode(PlaceNotation::trimExternalPlaces($leadHeadNotation, $this->getStage()).'z');
+            } else {
+                $this->setLeadHeadCode(LeadHeadCodes::toCode($this->getLeadHead(), $this->getStage(), $leadHeadNotation, $postLeadEndNotation));
+            }
         }
         return $this->leadHeadCode;
     }
@@ -466,7 +496,7 @@ class Method
     public function getLeadHead()
     {
         if (!isset($this->leadHead)) {
-            $lead = PlaceNotation::apply(PlaceNotation::explodedToPermutations($this->getStage(), PlaceNotation::explode($this->getNotationExpanded())), PlaceNotation::rounds($this->getStage()));
+            $lead = $this->getLead();
             $this->setLeadHead(implode('', end($lead)));
         }
         return $this->leadHead;
@@ -545,6 +575,23 @@ class Method
         return $this->numberOfHunts;
     }
 
+    private $lead;
+    /**
+     * Get the rows of a plain lead.
+     *
+     * @return array<int, array<int, string>>
+     */
+    private function getLead()
+    {
+        if (!isset($this->lead)) {
+            $this->lead = PlaceNotation::apply(
+                PlaceNotation::explodedToPermutations($this->getStage(), PlaceNotation::explode($this->getNotationExpanded())),
+                PlaceNotation::rounds($this->getStage())
+            );
+        }
+        return $this->lead;
+    }
+
     private $hunts;
     /**
      * Get hunt bells (bells fixed in lead-head permutation).
@@ -581,21 +628,25 @@ class Method
         if (!isset($this->huntDetails)) {
             $huntDetails = array();
             if ($this->getNumberOfHunts() > 0) {
-                // Generate a lead of the method
-                $lead = PlaceNotation::apply(PlaceNotation::explodedToPermutations($this->getStage(), PlaceNotation::explode($this->getNotationExpanded())), PlaceNotation::rounds($this->getStage()));
                 // Classify each of the hunt bells
                 foreach ($this->getHunts() as $i => $hunt) {
-                    $huntText = PlaceNotation::intToBell($hunt);
                     $huntDetails[$i]['bell'] = $hunt;
 
-                    // Generate the hunt bell's path
-                    $huntDetails[$i]['path'] = array_map(function ($row) use ($huntText) {
-                        return array_search($huntText, $row) + 1;
-                    }, $lead);
-                    array_unshift($huntDetails[$i]['path'], array_pop($huntDetails[$i]['path']));
+                    // Build path metrics for this hunt bell over one lead.
+                    $bellText = PlaceNotation::intToBell($hunt);
+                    // Convert each row into the 1-based place occupied by this bell.
+                    $path = array_map(function ($row) use ($bellText) {
+                        return array_search($bellText, $row) + 1;
+                    }, $this->getLead());
+                    // Rotate into a closed loop representation for easier backwards-path comparisons.
+                    array_unshift($path, array_pop($path));
+                    $huntDetails[$i]['path'] = $path;
 
-                    // Well-formed paths are the same when rung backwards
-                    $huntDetails[$i]['wellFormedPath'] = count($huntDetails[$i]['path'])%2 == 0 && arrays_equal_in_some_rotation($huntDetails[$i]['path'], array_reverse($huntDetails[$i]['path']));
+                    // Stationary hunts are treated as Treble Place under Framework v2.
+                    $huntDetails[$i]['stationary'] = count(array_unique($huntDetails[$i]['path'])) === 1;
+
+                    // Framework v2 uses loop equality when rung backwards.
+                    $huntDetails[$i]['wellFormedPath'] = arrays_equal_in_some_rotation($huntDetails[$i]['path'], array_reverse($huntDetails[$i]['path']));
 
                     // A path is little if it doesn't reach the front or back
                     $huntDetails[$i]['little'] = min($huntDetails[$i]['path']) > 1 || max($huntDetails[$i]['path']) < $this->getStage();
@@ -620,31 +671,29 @@ class Method
 
                     // Check if the hunt bell makes the same number of blows in each position
                     $sameNumberOfBlowsInEachPosition = count(array_unique($blowsInEachPosition)) == 1;
+                    // When uniform, this is the repeated blow count per position (e.g. 2 for Plain).
+                    $blowsPerPosition = $sameNumberOfBlowsInEachPosition ? reset($blowsInEachPosition) : null;
 
-                    // Well-formed paths are then classified into a few different types using the 3 things we just calculated
+                    // Framework v2 classifies hunt paths by loop symmetry, place counts, and stationarity.
                     if ($huntDetails[$i]['wellFormedPath']) {
-                        // If the hunt makes two blows in every place - it's Plain
-                        if (array_sum($blowsInEachPosition)/2 == count($blowsInEachPosition)) {
+                        if (!$huntDetails[$i]['stationary'] && $sameNumberOfBlowsInEachPosition && $blowsPerPosition === 2) {
                             $huntDetails[$i]['type'] = 'Plain';
-                        // If the same number of blows in each position and no more than two places in the lead then 'Treble Dodging'
-                        } elseif ($sameNumberOfBlowsInEachPosition && $numberOfPlacesInPath == 2) {
+                        } elseif (!$huntDetails[$i]['stationary'] && $sameNumberOfBlowsInEachPosition && $blowsPerPosition > 2 && $numberOfPlacesInPath == 2) {
                             $huntDetails[$i]['type'] = 'Treble Dodging';
-                        // If the same number of blows in each position and more than 2 places then 'Treble Place'
-                        } elseif ($sameNumberOfBlowsInEachPosition && $numberOfPlacesInPath > 2 ) {
+                        } elseif (($sameNumberOfBlowsInEachPosition && $numberOfPlacesInPath > 2) || $huntDetails[$i]['stationary']) {
                             $huntDetails[$i]['type'] = 'Treble Place';
-                        // If a different number of blows in each position then 'Alliance'
-                        } else {
+                        } elseif (!$huntDetails[$i]['stationary'] && !$sameNumberOfBlowsInEachPosition) {
                             $huntDetails[$i]['type'] = 'Alliance';
+                        } else {
+                            $huntDetails[$i]['type'] = 'Hybrid';
                         }
-
                     // Non-well-formed paths are Hybrid
                     } else {
                         $huntDetails[$i]['type'] = 'Hybrid';
                     }
                 }
 
-                // Determine which are the principal hunts
-                // If there's only one it is the principal hunt
+                // Determine which are the principal hunts. If there's only one it is the principal hunt
                 if (count($huntDetails) == 1) {
                     $huntDetails[0]['principal'] = true;
                 // Otherwise there is a hierachy of hunt types defined in the rules (and just the non-little hunts of that type if there are both little and non-little examples)
@@ -703,7 +752,25 @@ class Method
     public function getDifferential()
     {
         if (!isset($this->differential)) {
-            $this->setDifferential($this->getNumberOfLeads() != ($this->getStage() - $this->getNumberOfHunts()));
+            $leadHead = array_map(function ($n) { return PlaceNotation::bellToInt($n); }, str_split($this->getLeadHead()));
+            $visited = array();
+            $workingBellCycleLengths = array();
+
+            for ($bell = 1; $bell <= $this->getStage(); ++$bell) {
+                if (isset($visited[$bell])) { continue; }
+                $current = $bell;
+                $cycleLength = 0;
+                // Walk the lead-head permutation to find this bell's cycle length in leads.
+                do {
+                    $visited[$current] = true;
+                    $current = $leadHead[$current - 1];
+                    ++$cycleLength;
+                } while (!isset($visited[$current]));
+                // Single-bell cycles are hunt bells; only working-bell cycle lengths matter for this test.
+                if ($cycleLength > 1) { $workingBellCycleLengths[] = $cycleLength; }
+            }
+            // If there are working bells with different cycle lengths, the method is differential.
+            $this->setDifferential(!$this->getJump() && count(array_unique($workingBellCycleLengths)) > 1);
         }
         return $this->differential;
     }
@@ -717,7 +784,7 @@ class Method
     public function getPlain()
     {
         if (!isset($this->plain)) {
-            $this->setPlain(count(array_filter($this->getHuntDetails(), function ($h) { return $h['principal'] && $h['type'] == 'Plain'; })) > 0);
+            $this->setPlain(!$this->getJump() && count(array_filter($this->getHuntDetails(), function ($h) { return $h['principal'] && $h['type'] == 'Plain'; })) > 0);
         }
         return $this->plain;
     }
@@ -731,7 +798,7 @@ class Method
     public function getTrebleDodging()
     {
         if (!isset($this->trebleDodging)) {
-            $this->setTrebleDodging(count(array_filter($this->getHuntDetails(), function ($h) { return $h['principal'] && $h['type'] == 'Treble Dodging'; })) > 0);
+            $this->setTrebleDodging(!$this->getJump() && count(array_filter($this->getHuntDetails(), function ($h) { return $h['principal'] && $h['type'] == 'Treble Dodging'; })) > 0);
         }
         return $this->trebleDodging;
     }

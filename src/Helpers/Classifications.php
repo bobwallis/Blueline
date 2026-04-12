@@ -20,7 +20,6 @@ class Classifications
         'Hybrid',
         'Place',
         'Surprise',
-        'Slow Course',
         'Treble Bob',
         'Treble Place',
     );

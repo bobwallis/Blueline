@@ -46,6 +46,7 @@ class ImportMethodsCommand extends Command
         'lengthOfLead' => ParameterType::INTEGER,
         'lengthOfCourse' => ParameterType::INTEGER,
         'numberOfHunts' => ParameterType::INTEGER,
+        'jump' => ParameterType::BOOLEAN,
         'little' => ParameterType::BOOLEAN,
         'differential' => ParameterType::BOOLEAN,
         'plain' => ParameterType::BOOLEAN,
@@ -117,7 +118,7 @@ class ImportMethodsCommand extends Command
 
         // Import data
         $output->writeln("<info>Importing method data...</info>");
-        $validFields = array_flip(array('title', 'provisional', 'url', 'stage', 'classification', 'nameMetaphone','notation', 'notationExpanded', 'leadHeadCode', 'leadHead', 'fchGroups', 'lengthOfLead', 'lengthOfCourse', 'numberOfHunts', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational', 'calls', 'ruleOffs', 'callingPositions', 'magic', 'cccbrId', 'methodReferences', 'extensionConstruction'));
+        $validFields = array_flip(array('title', 'provisional', 'url', 'stage', 'classification', 'nameMetaphone','notation', 'notationExpanded', 'leadHeadCode', 'leadHead', 'fchGroups', 'lengthOfLead', 'lengthOfCourse', 'numberOfHunts', 'jump', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational', 'calls', 'ruleOffs', 'callingPositions', 'magic', 'cccbrId', 'methodReferences', 'extensionConstruction'));
         $importedMethods = array();
         $normaliseRow = static function (array $row): array {
             foreach ($row as $key => $value) {

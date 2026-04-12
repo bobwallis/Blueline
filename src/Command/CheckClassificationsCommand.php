@@ -46,7 +46,7 @@ class CheckClassificationsCommand extends Command
 
         try {
             $methodCount = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM methods');
-            $methods = $this->connection->executeQuery('SELECT title, stage, notationexpanded AS "notationExpanded", classification, little, differential, plain, trebledodging AS "trebleDodging" FROM methods')->iterateAssociative();
+            $methods = $this->connection->executeQuery('SELECT title, stage, notationexpanded AS "notationExpanded", classification, jump, little, differential, plain, trebledodging AS "trebleDodging" FROM methods')->iterateAssociative();
         }
         catch (Exception $exception) {
             $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
@@ -72,6 +72,11 @@ class CheckClassificationsCommand extends Command
             if (($methodObject->getLittle()?'t':null) != $method['little']) {
                 $progress->clear();
                 $output->writeln('<error>'.$method['title'].': Mismatched little - '.$method['little'].' vs '.($methodObject->getLittle()?'t':null).'</error>');
+                $progress->display();
+            }
+            if (($methodObject->getJump()?'t':null) != $method['jump']) {
+                $progress->clear();
+                $output->writeln('<error>'.$method['title'].': Mismatched jump - '.$method['jump'].' vs '.($methodObject->getJump()?'t':null).'</error>');
                 $progress->display();
             }
             if (($methodObject->getDifferential()?'t':null) != $method['differential']) {

@@ -101,17 +101,20 @@ class MethodXMLIterator implements \Iterator, \Countable
             if (!isset($array['leadHead']) && isset($array['stage'], $array['leadHeadCode'])) {
                 $array['leadHead'] = LeadHeadCodes::fromCode($array['leadHeadCode'], $array['stage']);
             }
-            if (isset($array['leadHead'], $array['stage'], $array['numberOfHunts'], $array['notation']) && !isset($array['leadHeadCode'])) {
+            if (isset($array['leadHead'], $array['stage'], $array['notation']) && !isset($array['leadHeadCode'])) {
                 $explodedNotation = PlaceNotation::explode($array['notationExpanded']);
-                $array['leadHeadCode'] = LeadHeadCodes::toCode($array['leadHead'], $array['stage'], $array['numberOfHunts'], array_pop($explodedNotation), array_shift($explodedNotation));
+                $array['leadHeadCode'] = LeadHeadCodes::toCode($array['leadHead'], $array['stage'], array_pop($explodedNotation), array_shift($explodedNotation));
             }
 
             // Get additional classification attributes
             if (isset($node->classification)) {
+                $classificationText     = trim(strval($node->classification));
                 $array['little']        = ($node->classification->attributes()->little) ? true : null;
                 $array['differential']  = ($node->classification->attributes()->differential) ? true : null;
                 $array['plain']         = ($node->classification->attributes()->plain) ? true : null;
                 $array['trebleDodging'] = ($node->classification->attributes()->trebleDodging) ? true : null;
+                // Jump methods don't have an attribute, so take from the text
+                $array['jump']          = (preg_match('/^Jump\b/', $classificationText) === 1) ? true : null;
             }
 
             // Get symmetry

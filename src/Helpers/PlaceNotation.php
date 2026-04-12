@@ -160,6 +160,22 @@ class PlaceNotation
     }
 
     /**
+     * Test whether a change contains an internal place.
+     *
+     * Internal places are places other than 1st's or nth's place.
+     *
+     * @param string $piece A single piece of notation (e.g., "12", "x", "78", etc)
+     * @param int $stage The stage (number of bells)
+     * @return bool True if the notation contains internal places
+     */
+    public static function changeHasInternalPlaces(string $piece, int $stage): bool
+    {
+        $n = self::intToBell($stage);
+        // Strip first's and nth's places; any remainder indicates one or more internal places.
+        return !($piece == 'x' || strlen(preg_replace('/[1'.$n.']?/', '', $piece)) == 0);
+    }
+
+    /**
      * Apply a sequence of permutations to a starting array.
      *
      * Applies permutations iteratively: permutation[0] to start, permutation[1] to result[0], etc.
