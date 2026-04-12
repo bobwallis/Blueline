@@ -47,8 +47,8 @@
 		{# oEmbed tags #}
 		{% block oembed %}{% endblock %}
 
-		{# Stylesheets #}
-		<link rel="stylesheet" media="all" href="{{ asset('styles/all.css') }}" />
+		{# Add all relevant JS and CSS code #}
+		{{ importmap('app') }}
 		<link rel="stylesheet" media="print" href="{{ asset('styles/print.css') }}" />
 
 	</head>
@@ -83,6 +83,5 @@
 		<div id="content" role="main"{{ search|default(false) ? ' class="searchable"' : '' }}>
 			{% block body %}{% endblock %}
 		</div>
-		{{ importmap('app') }}
 	</body>
 </html>

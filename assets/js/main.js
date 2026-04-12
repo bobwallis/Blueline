@@ -1,3 +1,4 @@
+import '../styles/all.css';
 import eve from './lib/eve.js';
 import './ui.js';
 import webfont from './lib/webfont.js';
