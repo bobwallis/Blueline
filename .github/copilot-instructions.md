@@ -12,9 +12,9 @@
 - `src/Repository/`: Doctrine query/repository logic.
 - `src/Command/`: Symfony console commands used for import/export and maintenance.
 - `src/Helpers/`: domain-specific helpers and lookup logic.
+- `assets/`: JS and CSS used by the frontend.
 - `templates/`: Twig views.
 - `config/`: Symfony config and routes.
-- `migrations/`: Doctrine migrations.
 - `public/`: built frontend assets and entry points.
 - `tests/`: PHPUnit tests.
 

@@ -1,6 +1,4 @@
-# Blueline architecture and workflows
-
-This guide is intended for both human contributors and AI coding assistants.
+# Architecture and workflows
 
 ## High-level architecture
 - **Framework**: Symfony 7.4 application with Doctrine ORM and Twig.
@@ -9,30 +7,29 @@ This guide is intended for both human contributors and AI coding assistants.
 - **Data store**: PostgreSQL (with `fuzzystrmatch` extension for search similarity features).
 
 ## Code structure
-- `src/Controller/`: Web endpoints and request handling.
-- `src/Entity/`: Core persisted domain models (`Method`, `Collection`, `MethodSimilarity`, etc.).
-- `src/Repository/`: Query logic and persistence access patterns.
-- `src/Command/`: CLI flows for import/export/check tasks.
-- `src/Helpers/`: Domain helper functions and classification/lookup utilities.
-- `templates/`: Twig templates by feature area.
-- `config/`: Symfony framework, routing, and package config.
-- `tests/`: PHPUnit tests (controller/entity coverage, plus bootstrap).
+- `src/Controller/`: HTTP controllers.
+- `src/Entity/`: Doctrine entities.
+- `src/Repository/`: Doctrine query/repository logic.
+- `src/Command/`: Symfony console commands used for import/export and maintenance.
+- `src/Helpers/`: domain-specific helpers and lookup logic.
+- `assets/`: JS and CSS used by the frontend.
+- `templates/`: Twig views.
+- `config/`: Symfony config and routes.
+- `public/`: built frontend assets and entry points.
+- `tests/`: PHPUnit tests.
 
 ## Core operational workflows
 
-### 1) Environment setup
-Follow `README.md` for full setup. In short:
-1. Install PHP/Composer/PostgreSQL prerequisites, plus locale/timezone configuration.
-2. `symfony composer install`
-3. Ensure PostgreSQL is running locally, then create DB and schema.
+### Environment setup
+Follow [development-deployment.md](development-deployment.md) or [production-deploymeny.md](production-deployment.md) for setup.
 
-### 2) Data import/update
+### Data import/update
 Use:
 - `./bin/fetchAndImportData`
 
 This script downloads external method data, runs import commands, recalculates similarities, and bumps `DATABASE_UPDATE`.
 
-### 3) Frontend asset management
+### Frontend asset management
 
 **Development**: Edit CSS/JS/image files in `assets/` and refresh your browser. Symfony's AssetMapper handles mapping and versioning automatically on each request—no build step required.
 
@@ -40,22 +37,28 @@ This script downloads external method data, runs import commands, recalculates s
 
 **Asset Versioning**: AssetMapper generates content-hash-based filenames (e.g., `all-abc123.css`, `main-xyz789.js`) automatically, providing cache busting without additional configuration.
 
-### 4) Quality checks
+### Quality checks
 Use:
 - `./bin/test`
 
 This runs:
-- PHPUnit
-- Symfony container lint
-- Twig lint
+- A check that the test database exists and  has data
 - Doctrine schema validation
-- Doctrine migrations up-to-date check
+- Symfony container lint
+- Twig template lint
+- PHP code lint
+- Frontend asset complication
+- PHPUnit
+
+Or run targeted tests directly with PHPUnit:
+- `APP_ENV=test ./bin/phpunit tests/Controller`
+- `APP_ENV=test ./bin/phpunit --filter testActionName tests/Controller/DefaultControllerTest.php`
 
 ## Change guidelines
 - Keep changes minimal and localised.
 - Preserve existing architecture and naming unless intentionally changing it.
 - Prefer adding tests close to changed behavior.
-- If adding a feature that affects setup or runbook steps, update `README.md` and this document.
+- If adding a feature that affects setup or runbook steps, update `README.md` and other files in `./docs`.
 
 ## Naming policy: PHP vs PostgreSQL
 - **PHP code uses camelCase** for properties, array keys, and DTO-style payloads.
