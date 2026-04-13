@@ -17,9 +17,7 @@ Usage: $0 [options]
 Build frontend assets and sync root public assets.
 
 Options:
- --env=dev|prod  Set APP_ENV directly
- --env-dev       Shortcut for --env=dev
- --env-prod      Shortcut for --env=prod
+ --env=dev|prod  Set APP_ENV directly (overrides .env.local or default)
  --help          Shows this message
 EOF
 }
@@ -39,12 +37,6 @@ for arg in "$@"; do
 			;;
 		--env=dev|--env=prod)
 			ENV_ARG="${arg#--env=}"
-			;;
-		--env-dev)
-			ENV_ARG="dev"
-			;;
-		--env-prod)
-			ENV_ARG="prod"
 			;;
 		--env=*)
 			printf >&2 '%s: invalid value for --env (must be dev or prod): %s\n' "${0##*/}" "${arg#--env=}"
