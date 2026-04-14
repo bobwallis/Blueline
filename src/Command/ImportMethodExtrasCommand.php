@@ -84,8 +84,8 @@ class ImportMethodExtrasCommand extends Command
             }
         }
 
-        // Clear existing renamed/duplicate method performance data before we start
-        $output->writeln('<info>Clear existing renamed/duplicate method performance data...</info>');
+        // Clear existing renamed method data before we start
+        $output->writeln('<info>Clear existing renamed method performance data...</info>');
         $failedRenamedMethodTitle = null;
         $skippedRenamedMethodCount = 0;
 
@@ -124,7 +124,7 @@ class ImportMethodExtrasCommand extends Command
             });
         }
         catch (Exception $exception) {
-            $output->writeln('<error>Failed to refresh renamed/duplicate data: '.$exception->getMessage().'</error>');
+            $output->writeln('<error>Failed to refresh renamed method data: '.$exception->getMessage().'</error>');
             if ($failedRenamedMethodTitle !== null) {
                 $output->writeln('<comment> Rolled back renamed method import after failing for "'.$failedRenamedMethodTitle.'"</comment>');
             }

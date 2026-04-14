@@ -34,6 +34,8 @@ digraph "largeRelationshipsDiagram" {
       <TR><TD COLSPAN="3" BGCOLOR="#002856" ALIGN="CENTER"><FONT COLOR="#E0DED9"><B>methods</B></FONT></TD></TR>
       <TR><TD PORT="title" COLSPAN="3" BGCOLOR="#F3F3F3" ALIGN="LEFT">title</TD></TR>
       <TR><TD PORT="url" COLSPAN="3" ALIGN="LEFT">url</TD></TR>
+      <TR><TD PORT="abbreviation" COLSPAN="3" ALIGN="LEFT">abbreviation</TD></TR>
+      <TR><TD PORT="provisional" COLSPAN="3" ALIGN="LEFT">provisional</TD></TR>
       <TR><TD PORT="stage" COLSPAN="3" ALIGN="LEFT">stage</TD></TR>
       <TR><TD PORT="classification" COLSPAN="3" ALIGN="LEFT">classification</TD></TR>
       <TR><TD PORT="namemetaphone" COLSPAN="3" ALIGN="LEFT">namemetaphone</TD></TR>
@@ -43,7 +45,10 @@ digraph "largeRelationshipsDiagram" {
       <TR><TD PORT="leadhead" COLSPAN="3" ALIGN="LEFT">leadhead</TD></TR>
       <TR><TD PORT="fchgroups" COLSPAN="3" ALIGN="LEFT">fchgroups</TD></TR>
       <TR><TD PORT="lengthoflead" COLSPAN="3" ALIGN="LEFT">lengthoflead</TD></TR>
+      <TR><TD PORT="lengthofcourse" COLSPAN="3" ALIGN="LEFT">lengthofcourse</TD></TR>
+      <TR><TD PORT="numberofleads" COLSPAN="3" ALIGN="LEFT">numberofleads</TD></TR>
       <TR><TD PORT="numberofhunts" COLSPAN="3" ALIGN="LEFT">numberofhunts</TD></TR>
+      <TR><TD PORT="jump" COLSPAN="3" ALIGN="LEFT">jump</TD></TR>
       <TR><TD PORT="little" COLSPAN="3" ALIGN="LEFT">little</TD></TR>
       <TR><TD PORT="differential" COLSPAN="3" ALIGN="LEFT">differential</TD></TR>
       <TR><TD PORT="plain" COLSPAN="3" ALIGN="LEFT">plain</TD></TR>
@@ -53,6 +58,11 @@ digraph "largeRelationshipsDiagram" {
       <TR><TD PORT="rotational" COLSPAN="3" ALIGN="LEFT">rotational</TD></TR>
       <TR><TD PORT="calls" COLSPAN="3" ALIGN="LEFT">calls</TD></TR>
       <TR><TD PORT="ruleoffs" COLSPAN="3" ALIGN="LEFT">ruleoffs</TD></TR>
+      <TR><TD PORT="callingpositions" COLSPAN="3" ALIGN="LEFT">callingpositions</TD></TR>
+      <TR><TD PORT="magic" COLSPAN="3" ALIGN="LEFT">magic</TD></TR>
+      <TR><TD PORT="cccbrid" COLSPAN="3" ALIGN="LEFT">cccbrid</TD></TR>
+      <TR><TD PORT="methodreferences" COLSPAN="3" ALIGN="LEFT">methodreferences</TD></TR>
+      <TR><TD PORT="extensionconstruction" COLSPAN="3" ALIGN="LEFT">extensionconstruction</TD></TR>
     </TABLE>>
     URL="tables/methods.html"
     tooltip="methods"
@@ -79,6 +89,7 @@ digraph "largeRelationshipsDiagram" {
       <TR><TD PORT="date" COLSPAN="3" ALIGN="LEFT">date</TD></TR>
       <TR><TD PORT="society" COLSPAN="3" ALIGN="LEFT">society</TD></TR>
       <TR><TD PORT="rung_title" COLSPAN="3" ALIGN="LEFT">rung_title</TD></TR>
+      <TR><TD PORT="rung_url" COLSPAN="3" ALIGN="LEFT">rung_url</TD></TR>
       <TR><TD PORT="reference" COLSPAN="3" ALIGN="LEFT">reference</TD></TR>
       <TR><TD PORT="location_room" COLSPAN="3" ALIGN="LEFT">location_room</TD></TR>
       <TR><TD PORT="location_building" COLSPAN="3" ALIGN="LEFT">location_building</TD></TR>
