@@ -93,6 +93,8 @@ rm -f public/favicon.ico public/favicon.svg public/favicon.svg.br public/favicon
 cp assets/images/favicon.ico public/favicon.ico
 cp assets/images/favicon.svg public/favicon.svg
 
+symfony console importmap:install
+
 # Rebuild mapped assets for production.
 if [ "$APP_ENV" = "prod" ]; then
 	php bin/console asset-map:compile --env=prod
