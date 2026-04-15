@@ -7,7 +7,7 @@ import './Document/Title.js';
 if ('serviceWorker' in navigator) {
 	documentOn('click', 'a', function (e) {
 		const href = e.target.href;
-		if (href && URLHelper.isInternal(href) && !(!!e.target.dataset.forcerefresh === true)) {
+		if (href && URLHelper.isInternal(href) && !(!!e.target.dataset.forcerefresh === true) && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
 			e.preventDefault();
 			Page.request(href, 'click');
 		}
