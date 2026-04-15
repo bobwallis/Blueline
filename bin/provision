@@ -562,18 +562,9 @@ if [ "$APP_ENV" = "prod" ] && [ "$NOSERVER_ARG" = false ]; then
 
 	# FrankenPHP — download latest binary from GitHub releases if not already installed
 	if ! command -v frankenphp > /dev/null 2>&1; then
-		echo "  Installing FrankenPHP..."
-		_frankenphp_tag="$(curl -fsSL https://api.github.com/repos/dunglas/frankenphp/releases/latest | grep '"tag_name"' | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/')"
-		_frankenphp_arch="$(dpkg --print-architecture)"
-		case "$_frankenphp_arch" in
-			amd64) _frankenphp_binary="frankenphp-linux-x86_64" ;;
-			arm64) _frankenphp_binary="frankenphp-linux-aarch64" ;;
-			*) echo "ERROR: Unsupported architecture: $_frankenphp_arch" >&2; exit 1 ;;
-		esac
-		curl -fsSL "https://github.com/dunglas/frankenphp/releases/download/${_frankenphp_tag}/${_frankenphp_binary}" -o /tmp/frankenphp
-		sudo install -m 755 /tmp/frankenphp /usr/local/bin/frankenphp
-		rm /tmp/frankenphp
-		echo "  FrankenPHP ${_frankenphp_tag} installed."
+		sudo curl https://pkg.henderkes.com/api/packages/84/debian/repository.key -o /etc/apt/keyrings/static-php84.asc
+		echo "deb [signed-by=/etc/apt/keyrings/static-php84.asc] https://pkg.henderkes.com/api/packages/84/debian php-zts main" | sudo tee -a /etc/apt/sources.list.d/static-php84.list
+		sudo apt-get update -qq && sudo apt-get install -y -q frankenphp
 	else
 		echo "  FrankenPHP already installed: $(frankenphp version 2>/dev/null || frankenphp --version 2>/dev/null || echo 'version unknown')"
 	fi
