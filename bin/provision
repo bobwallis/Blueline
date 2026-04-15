@@ -558,7 +558,7 @@ if [ "$APP_ENV" = "prod" ]; then
 fi
 
 if [ "$APP_ENV" = "prod" ] && [ "$NOSERVER_ARG" = false ]; then
-	echo -e "\n\033[1mConfiguring FrankenPHP systemd service\033[0m"
+	echo -e "\n\033[1mConfiguring FrankenPHP service\033[0m"
 
 	# FrankenPHP — download latest binary from GitHub releases if not already installed
 	if ! command -v frankenphp > /dev/null 2>&1; then
@@ -596,7 +596,7 @@ After=network.target postgresql.service
 [Service]
 Type=notify
 WorkingDirectory=${REPO_ROOT}
-ExecStart=/usr/local/bin/frankenphp run --config ${REPO_ROOT}/Caddyfile
+ExecStart=/usr/bin/frankenphp run --config ${REPO_ROOT}/Caddyfile
 User=${_current_user}
 Group=${_current_group}
 Restart=on-failure
