@@ -258,11 +258,6 @@ if [ "$APP_ENV" = "dev" ]; then
 		ripgrep silversearcher-ag shellcheck
 fi
 
-# Clean up apt caches
-sudo apt-get autoremove -y -q
-sudo apt-get clean
-sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* || true
-
 echo "  System packages: done."
 
 
@@ -760,6 +755,12 @@ fi
 # ##############################################################################
 # SECTION 10: Finalisation
 # ##############################################################################
+# Clean up apt caches
+sudo apt-get autoremove -y -q
+sudo apt-get clean
+sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* || true
+
+# And finalise Symfon environment
 echo -e "\n\033[1mResetting dev environment\033[0m"
 symfony console cache:clear --env=test
 symfony console cache:clear --env=dev
