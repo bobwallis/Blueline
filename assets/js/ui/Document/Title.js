@@ -22,4 +22,4 @@ eve.on('page.finished', function (url) {
 		}
 	}
 	document.title = windowTitle + 'Blueline';
-})(-1);
+});
