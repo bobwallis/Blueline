@@ -93,15 +93,15 @@ for arg in "$@"; do
 	esac
 done
 
-# Detect Docker for environment-specific behavior, but keep interactive prompting when stdin is a TTY.
+# Detect Docker for environment-specific behavior.
 IS_DOCKER=false
 if [ -f /.dockerenv ]; then
 	IS_DOCKER=true
 fi
 
-# Force non-interactive mode only when input is not a TTY (for CI/piped runs),
+# Force non-interactive mode in Docker or when input is not a TTY (for CI/piped runs),
 # unless it was already explicitly enabled via --yes.
-if [ "$NONINTERACTIVE" = false ] && [ ! -t 0 ]; then
+if [ "$NONINTERACTIVE" = false ] && { [ "$IS_DOCKER" = true ] || [ ! -t 0 ]; }; then
 	NONINTERACTIVE=true
 fi
 
