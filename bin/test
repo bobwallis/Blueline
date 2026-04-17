@@ -97,6 +97,13 @@ fi
 
 echo -e "\033[32m✓ PHP source lint passed\033[0m"
 
+echo -e "\n\033[1mLint frontend assets (JS, CSS, SVG)\033[0m"
+if ! npm run lint; then
+    echo -e "\033[31m✗ Frontend asset lint failed\033[0m"
+    exit 1
+fi
+echo -e "\033[32m✓ Frontend asset lint passed\033[0m"
+
 echo -e "\n\033[1mCompile production assets\033[0m"
 "$repo_root/bin/buildFrontendAssets" --env=prod > /dev/null
 if [ ! -f public/assets/manifest.json ]; then

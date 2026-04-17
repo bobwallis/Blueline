@@ -120,11 +120,9 @@
     'firstKeyboardQuarterPeal': 'First keyboard quarter peal',
     'firstMixedStyleQuarterPeal': 'First mixed-style quarter peal',
 } %}
-				<ul>
 {% for performance in xmlPerformances %}
-					<li><strong>{{ performanceTypeLabels[performance.type] ?? performance.type }}: </strong><time datetime="{{ performance.date|date('Y-m-d') }}">{{ performance.date|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time>{% if performance.location is not empty %} at {{ performance.location }}{% endif %}{% if performance.society is not empty %} by the {{ performance.society }}{% endif %}{% if performance.reference is not empty %} ({{ performance.reference }}){% endif %}</li>
+					<strong>{{ performanceTypeLabels[performance.type] ?? performance.type }}: </strong><time datetime="{{ performance.date|date('Y-m-d') }}">{{ performance.date|date('j<\\s\\up>S</\\s\\up> M Y')|raw }}</time>{% if performance.location is not empty %} at {{ performance.location }}{% endif %}{% if performance.society is not empty %} by the {{ performance.society }}{% endif %}{% if performance.reference is not empty %} ({{ performance.reference }}){% endif %}<br />
 {% endfor %}
-				</ul>
 				</dd>
 {% endif %}
 {% if method.methodReferences is not empty %}

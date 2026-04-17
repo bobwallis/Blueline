@@ -20,7 +20,7 @@ Usage: $0 [options]
 This script sets up or re-runs setup for Blueline. It is idempotent and safe to run multiple times.
 
 Options:
- --yes, -y      Non-interactive: answer yes to all prompts (also set automatically when running in Docker)
+ --yes, -y       Non-interactive: answer yes to all prompts
  --env=dev|prod  Set APP_ENV directly
  --nodatabase    Skip local PostgreSQL install and configuration
  --nocloudflared Skip cloudflared install and tunnel setup (prod only)
@@ -93,10 +93,15 @@ for arg in "$@"; do
 	esac
 done
 
-# Detect Docker, and assume set-up is happening in a .devcontainer in that case, so force non-interactive
+# Detect Docker for environment-specific behavior, but keep interactive prompting when stdin is a TTY.
 IS_DOCKER=false
 if [ -f /.dockerenv ]; then
 	IS_DOCKER=true
+fi
+
+# Force non-interactive mode only when input is not a TTY (for CI/piped runs),
+# unless it was already explicitly enabled via --yes.
+if [ "$NONINTERACTIVE" = false ] && [ ! -t 0 ]; then
 	NONINTERACTIVE=true
 fi
 
@@ -108,7 +113,7 @@ else
 		APP_ENV="$(sed -nE 's/^[[:space:]]*APP_ENV[[:space:]]*=[[:space:]]*//p' "$ENV_LOCAL_FILE" | tail -n 1 | sed -E 's/[[:space:]]*$//' | sed -E 's/^"(.*)"$/\1/; s/^\x27(.*)\x27$/\1/')"
 	fi
 	if [ -z "$APP_ENV" ]; then
-		if [ "$IS_DOCKER" = true ] || [ "$NONINTERACTIVE" = true ]; then
+		if [ "$NONINTERACTIVE" = true ]; then
 			APP_ENV="dev"
 		else
 			while true; do
@@ -151,16 +156,6 @@ ask_yes_no() {
 	return 1
 }
 
-decision_for_display() {
-	local value="$1"
-	local is_set="$2"
-	if [ "$is_set" = true ]; then
-		echo "$value"
-	else
-		echo "to check"
-	fi
-}
-
 # Resolve a skip decision only when needed by a section.
 # Usage: resolve_skip_decision <value_var> <set_var> <prompt>
 resolve_skip_decision() {
@@ -180,52 +175,73 @@ resolve_skip_decision() {
 	fi
 }
 
+# ##############################################################################
+# DECISION PHASE: gather all high-level choices before any provisioning work
+# ##############################################################################
+
+resolve_skip_decision NODATABASE_ARG NODATABASE_ARG_SET "Skip PostgreSQL install and configuration?"
+
+if [ "$APP_ENV" = "prod" ]; then
+	resolve_skip_decision NOSERVER_ARG NOSERVER_ARG_SET "Skip FrankenPHP web server setup?"
+	resolve_skip_decision NOCLOUDFLARED_ARG NOCLOUDFLARED_ARG_SET "Skip cloudflared install and tunnel setup?"
+fi
+
 echo -e "\n\033[1mBlueline setup\033[0m"
 echo "  REPO_ROOT:      $REPO_ROOT"
+echo "  APP_ENV:        $APP_ENV"
 echo "  IS_DOCKER:      $IS_DOCKER"
 echo "  NONINTERACTIVE: $NONINTERACTIVE"
-echo "  APP_ENV:        $APP_ENV"
-echo "  NODATABASE_ARG: $(decision_for_display \"$NODATABASE_ARG\" \"$NODATABASE_ARG_SET\")"
-echo "  NOSERVER_ARG:   $(decision_for_display \"$NOSERVER_ARG\" \"$NOSERVER_ARG_SET\")"
-echo "  NOCLOUDFLARED_ARG: $(decision_for_display \"$NOCLOUDFLARED_ARG\" \"$NOCLOUDFLARED_ARG_SET\")"
-
-# ##############################################################################
-# SECTION 1: OS check (VM only — skipped inside Docker)
-# ##############################################################################
-
-if [ "$IS_DOCKER" = false ]; then
-	echo -e "\n\033[1mChecking OS\033[0m"
-
-	if [ ! -f /etc/os-release ]; then
-		echo "ERROR: /etc/os-release not found. Cannot determine OS." >&2
-		exit 1
-	fi
-
-	# shellcheck source=/dev/null
-	. /etc/os-release
-
-	if [ "${ID:-}" != "debian" ]; then
-		echo "ERROR: This script requires Debian. Detected: ${ID:-unknown} ${VERSION_CODENAME:-}" >&2
-		exit 1
-	fi
-
-	VERSION_NUM="${VERSION_ID%%.*}"
-	if [ "$VERSION_NUM" -lt 13 ]; then
-		echo "ERROR: Debian 13 (Trixie) or later is required. Detected: Debian $VERSION_ID (${VERSION_CODENAME:-})" >&2
-		exit 1
-	fi
-
-	if [ "$VERSION_NUM" -gt 13 ]; then
-		echo
-		echo "  WARNING: Detected Debian $VERSION_ID (${VERSION_CODENAME:-}), which is newer than Trixie (13). This script has not been tested on this version."
-		if ! ask_yes_no "  Continue? [y/N] " yes; then
-			echo "Aborted."
-			exit 1
-		fi
-	fi
-
-	echo "  OS: Debian $VERSION_ID (${VERSION_CODENAME:-}) — OK"
+echo "  NODATABASE:     $NODATABASE_ARG"
+if [ "$APP_ENV" = "prod" ]; then
+	echo "  NOSERVER:       $NOSERVER_ARG"
+	echo "  NOCLOUDFLARED:  $NOCLOUDFLARED_ARG"
+else
+	echo "  NOSERVER:       true (prod only)"
+	echo "  NOCLOUDFLARED:  true (prod only)"
 fi
+
+if [ "$NONINTERACTIVE" = false ]; then
+	echo
+	if ! ask_yes_no "Continue with this plan? [y/N] "; then
+		echo "Aborted."
+		exit 0
+	fi
+fi
+
+# ##############################################################################
+# SECTION 1: OS check
+# ##############################################################################
+
+echo -e "\n\033[1mChecking OS\033[0m"
+
+if [ ! -f /etc/os-release ]; then
+	echo "ERROR: /etc/os-release not found. Cannot determine OS." >&2
+	exit 1
+fi
+
+# shellcheck source=/dev/null
+. /etc/os-release
+
+if [ "${ID:-}" != "debian" ]; then
+	echo "ERROR: This script requires Debian. Detected: ${ID:-unknown} ${VERSION_CODENAME:-}" >&2
+	exit 1
+fi
+
+VERSION_NUM="${VERSION_ID%%.*}"
+if [ "$VERSION_NUM" -lt 13 ]; then
+	echo "ERROR: Debian 13 (Trixie) or later is required. Detected: Debian $VERSION_ID (${VERSION_CODENAME:-})" >&2
+	exit 1
+fi
+if [ "$VERSION_NUM" -gt 13 ]; then
+	echo
+	echo "  WARNING: Detected Debian $VERSION_ID (${VERSION_CODENAME:-}), which is newer than Trixie (13). This script has not been tested on this version."
+	if ! ask_yes_no "  Continue? [y/N] " yes; then
+		echo "Aborted."
+		exit 1
+	fi
+fi
+
+echo "  OS: Debian $VERSION_ID (${VERSION_CODENAME:-}) — OK"
 
 
 # ##############################################################################
@@ -239,6 +255,13 @@ sudo apt-get update -qq && sudo apt-get upgrade -q -y --no-install-recommends
 # Core tools
 sudo apt-get install -q -y --no-install-recommends \
 	apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less gpg lsb-release zsh brotli zstd zopfli tzdata
+
+# Node.js 24 LTS, plus Gulp — add NodeSource apt source if not already present
+if [ ! -f /etc/apt/sources.list.d/nodesource.sources ]; then
+	echo "  Adding NodeSource apt source (Node.js 24)..."
+	curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+fi
+sudo apt-get install -q -y nodejs
 
 # Symfony CLI — add Cloudsmith apt source if not already present
 if [ ! -f /etc/apt/sources.list.d/symfony-stable.list ]; then
@@ -350,7 +373,6 @@ fi
 
 echo -e "\n\033[1mConfiguring PostgreSQL\033[0m"
 
-resolve_skip_decision NODATABASE_ARG NODATABASE_ARG_SET "Skip PostgreSQL install and configuration?"
 if [ "$NODATABASE_ARG" = true ]; then
 	echo "  Skipping PostgreSQL setup (--nodatabase)."
 	echo "  Reminder: configure a reachable PostgreSQL server and credentials yourself."
@@ -386,7 +408,7 @@ else
 	else
 		if [ "$IS_DOCKER" = true ]; then
 			sudo -u postgres psql -c "ALTER ROLE blueline WITH PASSWORD '${DB_PASS}';"
-			echo "  PostgreSQL role 'blueline' already exists — password reset to default Docker value."
+			echo "  PostgreSQL role 'blueline' already exists — password reset to default dev value."
 		else
 			echo "  PostgreSQL role 'blueline' already exists — skipping creation."
 		fi
@@ -550,12 +572,18 @@ fi
 
 
 # ##############################################################################
-# SECTION 7: FrankenPHP systemd service (VM only)
+# SECTION 7: Node.js dependencies
 # ##############################################################################
 
-if [ "$APP_ENV" = "prod" ]; then
-	resolve_skip_decision NOSERVER_ARG NOSERVER_ARG_SET "Skip FrankenPHP web server setup?"
-fi
+echo -e "\n\033[1mInstalling Node.js dependencies\033[0m"
+cd "$REPO_ROOT"
+npm install --loglevel=warn --no-progress --no-fund
+npm audit fix --loglevel=warn --no-progress --no-fund || true
+
+
+# ##############################################################################
+# SECTION 8: FrankenPHP systemd service
+# ##############################################################################
 
 if [ "$APP_ENV" = "prod" ] && [ "$NOSERVER_ARG" = false ]; then
 	echo -e "\n\033[1mConfiguring FrankenPHP service\033[0m"
@@ -569,8 +597,9 @@ if [ "$APP_ENV" = "prod" ] && [ "$NOSERVER_ARG" = false ]; then
 		echo "  FrankenPHP already installed: $(frankenphp version 2>/dev/null || frankenphp --version 2>/dev/null || echo 'version unknown')"
 	fi
 
-	# Always regenerate Caddyfile (absolute path substituted in; file is .gitignored)
-	cat > "$REPO_ROOT/Caddyfile" << CADDYFILE
+	# Create Caddyfile only when it does not already exist (absolute path substituted in; file is .gitignored).
+	if [ ! -f "$REPO_ROOT/Caddyfile" ]; then
+		cat > "$REPO_ROOT/Caddyfile" << CADDYFILE
 {
 	frankenphp
 	order php_server before file_server
@@ -584,7 +613,10 @@ if [ "$APP_ENV" = "prod" ] && [ "$NOSERVER_ARG" = false ]; then
 	encode zstd gzip
 }
 CADDYFILE
-	echo "  Caddyfile written to $REPO_ROOT/Caddyfile."
+		echo "  Caddyfile did not exist; created $REPO_ROOT/Caddyfile."
+	else
+		echo "  Caddyfile already exists at $REPO_ROOT/Caddyfile — leaving unchanged."
+	fi
 
 	# Build desired service unit content
 	_current_user="$(whoami)"
@@ -624,32 +656,28 @@ WantedBy=multi-user.target"
 	echo "  blueline.service enabled and started."
 elif [ "$APP_ENV" = "prod" ]; then
 	echo -e "\n\033[1mSkipping FrankenPHP systemd service setup (--noserver).\033[0m"
-	echo "  Reminder: configure and start your production web server manually."
+	echo "  Reminder: configure and start your web server manually."
 fi
 
 
 # ##############################################################################
-# SECTION 9: Cloudflared tunnel (VM only, interactive only)
+# SECTION 9: Cloudflared tunnel (interactive only)
 # ##############################################################################
 
-if [ "$APP_ENV" = "prod" ]; then
-	resolve_skip_decision NOCLOUDFLARED_ARG NOCLOUDFLARED_ARG_SET "Skip cloudflared install and tunnel setup?"
-
-	if [ "$NOCLOUDFLARED_ARG" = true ]; then
-		echo -e "\n\033[1mSkipping cloudflared setup (--nocloudflared).\033[0m"
-		echo "  Reminder: install/configure cloudflared and your public ingress/tunnel manually."
-	elif grep -q "^CLOUDFLARE_TUNNEL_ID=" "$REPO_ROOT/.env.local" 2>/dev/null; then
-		echo -e "\n\033[1mCloudflared tunnel already configured — skipping.\033[0m"
-	else
-		# Add Cloudflare repository and install cloudflared when tunnel setup is enabled.
-		if [ ! -f /etc/apt/sources.list.d/cloudflared.list ]; then
-			sudo mkdir -p --mode=0755 /usr/share/keyrings
-			curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
-			echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
-		fi
-		sudo apt-get update -q
-		sudo apt-get install -y -q cloudflared
+if [ "$APP_ENV" = "prod" ] && [ "$NOCLOUDFLARED_ARG" = true ]; then
+	echo -e "\n\033[1mSkipping cloudflared setup (--nocloudflared).\033[0m"
+	echo "  Reminder: install/configure cloudflared and your public ingress/tunnel manually."
+elif [ "$APP_ENV" = "prod" ] && grep -q "^CLOUDFLARE_TUNNEL_ID=" "$REPO_ROOT/.env.local" 2>/dev/null; then
+	echo -e "\n\033[1mCloudflared tunnel already configured — skipping.\033[0m"
+elif [ "$APP_ENV" = "prod" ]; then
+	# Add Cloudflare repository and install cloudflared when tunnel setup is enabled.
+	if [ ! -f /etc/apt/sources.list.d/cloudflared.list ]; then
+		sudo mkdir -p --mode=0755 /usr/share/keyrings
+		curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+		echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
 	fi
+	sudo apt-get update -q
+	sudo apt-get install -y -q cloudflared
 
 	if [ "$NOCLOUDFLARED_ARG" = false ] && [ "$NONINTERACTIVE" = true ] && ! grep -q "^CLOUDFLARE_TUNNEL_ID=" "$REPO_ROOT/.env.local" 2>/dev/null; then
 		echo -e "\n\033[1mSkipping cloudflared tunnel setup (non-interactive mode).\033[0m"
@@ -751,7 +779,7 @@ sudo apt-get autoremove -y -q
 sudo apt-get clean
 sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* || true
 
-# And finalise Symfon environment
+# And finalise Symfony environment
 echo -e "\n\033[1mResetting dev environment\033[0m"
 symfony console cache:clear --env=test
 symfony console cache:clear --env=dev
@@ -764,7 +792,7 @@ if [ "$APP_ENV" = "prod" ]; then
 	cd "$REPO_ROOT"
 	symfony console cache:clear --env=prod
 	symfony console cache:warm --env=prod
-	"$REPO_ROOT/bin/buildFrontendAssets"
+	"$REPO_ROOT/bin/buildFrontendAssets" --env=prod
 	symfony composer dump-env prod
 	symfony composer dump-autoload --no-dev --classmap-authoritative
 	APP_ENV=prod symfony console error:dump -f var/cache/prod/error_pages/

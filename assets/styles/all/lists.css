@@ -70,9 +70,5 @@ dl {
 		&:last-child {
 			padding-bottom: var(--content-y-padding);
 		}
-		li {
-			list-style-type: square;
-			border: 0;
-		}
 	}
 }

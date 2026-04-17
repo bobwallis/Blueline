@@ -1,0 +1,26 @@
+{
+  "name": "blueline",
+  "version": "0.5.0",
+  "license": "GPL-2.0+",
+  "author": "Robert Wallis",
+  "homepage": "https://rsw.me.uk/blueline/",
+  "type": "module",
+  "scripts": {
+    "lint": "npm-run-all --serial lint:*",
+    "lint:js": "eslint --max-warnings=0 --no-warn-ignored --config assets/eslint.config.mjs assets/js/**/*.js",
+    "lint:css": "stylelint --max-warnings=0 --config stylelint-config-recommended assets/styles/**/*.css",
+    "lint:svg": "tmpdir=\"$(mktemp -d)\" && svgo --folder assets/images --recursive --output \"$tmpdir\" --quiet && rm -rf \"$tmpdir\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bobwallis/Blueline.git"
+  },
+  "devDependencies": {
+    "eslint": "^9.25.1",
+    "globals": "^16.0.0",
+    "npm-run-all": "^4.1.5",
+    "stylelint": "^16.18.0",
+    "stylelint-config-recommended": "^17.0.0",
+    "svgo": "^4.0.0"
+  }
+}

@@ -9,6 +9,15 @@ fieldset {
 	}
 }
 
+input[type="submit"] {
+	background-color: var(--header-background);
+	color: white;
+}
+input[type="reset"] {
+	background-color: #DDD;
+	color: black;
+}
+
 input[type="submit"], input[type="reset"] {
 	border-radius: 2px;
 	border: 0;
@@ -24,13 +33,24 @@ input[type="submit"], input[type="reset"] {
 		color: #AAA;
 	}
 }
-input[type="submit"] {
-	background-color: var(--header-background);
-	color: white;
+
+input[type="number"] {
+	padding: 0 0 0 5px;
 }
-input[type="reset"] {
-	background-color: #DDD;
-	color: black;
+
+input[type="text"], input[type="number"], select {
+	display: inline-block;
+	vertical-align: middle;
+	background-color: #F3F3F3;
+	width: 100%;
+	height: 100%;
+	padding: 0 5px;
+	line-height: 28px;
+	border: 0;
+	&:focus {
+		outline: 0;
+		border: 0;
+	}
 }
 
 .select-wrapper, .input-wrapper {
@@ -50,24 +70,6 @@ span.select-wrapper, span.input-wrapper {
 }
 .input-wrapper input {
 	box-sizing: border-box;
-}
-
-input[type="text"], input[type="number"], select {
-	display: inline-block;
-	vertical-align: middle;
-	background-color: #F3F3F3;
-	width: 100%;
-	height: 100%;
-	padding: 0 5px;
-	line-height: 28px;
-	border: 0;
-	&:focus {
-		outline: 0;
-		border: 0;
-	}
-}
-input[type="number"] {
-	padding: 0 0 0 5px;
 }
 
 input.tiny {
@@ -96,6 +98,10 @@ input[type="checkbox"] {
 
 /* Radio Buttons */
 label.radio_image {
+	img {
+		width: 79px;
+		height: 25px;
+	}
 	& > input {
 		visibility: hidden;
 		position: absolute;
@@ -114,10 +120,6 @@ label.radio_image {
 		&:checked + img {
 			border-color: var(--header-background);
 		}
-	}
-	img {
-		width: 79px;
-		height: 25px;
 	}
 }
 

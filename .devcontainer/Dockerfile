@@ -19,6 +19,9 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 # Allow vscode user to sudo without password
 RUN echo "vscode ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/vscode-nopasswd && chmod 0440 /etc/sudoers.d/vscode-nopasswd
 
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && apt-get install -y nodejs
+
 # Install Symfony
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | bash && apt-get install -y symfony-cli
 

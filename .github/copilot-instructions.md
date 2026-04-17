@@ -22,6 +22,7 @@
 - Run tests and lints via `./bin/test` for full-suite validation only.
 - Do not pass path/filter arguments to `./bin/test`; it does not support targeted subsets.
 - For targeted testing, call PHPUnit directly, e.g. `APP_ENV=test ./bin/phpunit tests/Controller` or `APP_ENV=test ./bin/phpunit --filter <name> <path>`.
+- For frontend-only iteration, run `npm run lint` (or `lint:js`, `lint:css`, `lint:svg`) when changing files under `assets/`.
 - Build frontend assets via `./bin/buildFrontendAssets`.
 - Refresh method data via `./bin/fetchAndImportData` when relevant.
 
@@ -36,6 +37,7 @@
 - Add or update targeted tests in `tests/` when changing behavior.
 - At minimum, run `./bin/test` for validation before submitting.
 - During iteration, run only relevant tests via direct PHPUnit commands instead of trying to scope `./bin/test`.
+- When changing frontend assets, ensure CSS/JS/SVG linting passes (`npm run lint`) before final validation.
 
 ## Safety constraints
 - Do not delete or rewrite large sections of legacy code unless explicitly requested.

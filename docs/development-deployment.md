@@ -86,6 +86,15 @@ Run targeted tests directly with PHPUnit:
 - `APP_ENV=test ./bin/phpunit tests/Controller`
 - `APP_ENV=test ./bin/phpunit --filter testActionName tests/Controller/DefaultControllerTest.php`
 
+Run frontend linting directly during iteration:
+
+- `npm run lint` to run all frontend lint checks together
+- `npm run lint:js` for JavaScript in `assets/js/`
+- `npm run lint:css` for CSS in `assets/styles/`
+- `npm run lint:svg` for SVG files in `assets/images/`
+
+The full `./bin/test` pipeline includes frontend linting and will fail if any asset lint check fails.
+
 Some command tests are very slow (primarily method import tests). Include them with:
 
 - `BLUELINE_RUN_SLOW_COMMAND_TESTS=1 ./bin/test`
