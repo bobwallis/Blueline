@@ -4,7 +4,7 @@ Blueline is an application for searching and exploring bell-ringing methods and 
 
 ## Documentation index
 
-- [Development and installation](docs/develmpment-deployment.md): Local setup, development workflow, testing, and dependency updates.
+- [Development and installation](docs/development-deployment.md): Local setup, development workflow, testing, and dependency updates.
 - [Production deployment](docs/production-deployment.md): VM deployment, provisioning, production assets, and update operations.
 - [API documentation](docs/api.md): Public JSON API endpoints, parameters, response formats, and examples.
 - [Architecture and workflows](docs/architecture-and-workflows.md): High-level code structure and operational runbooks.

@@ -1,0 +1,98 @@
+#!/bin/bash
+set -euo pipefail
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do SOURCE="$(readlink "$SOURCE")"; done
+d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+REPO_ROOT="$( cd "$d/.." && pwd )"
+cd "$REPO_ROOT"
+
+ENV_LOCAL_FILE="$REPO_ROOT/.env.local"
+CADDYFILE_PATH="$REPO_ROOT/Caddyfile"
+LOG_FILE="$REPO_ROOT/var/log/frankenphp-dev.log"
+PID_FILE="$REPO_ROOT/var/run/frankenphp-dev.pid"
+
+get_env_value() {
+	local key="$1"
+	local file="$2"
+	if [ ! -f "$file" ]; then
+		return 0
+	fi
+	sed -nE "s/^[[:space:]]*${key}[[:space:]]*=[[:space:]]*//p" "$file" \
+		| tail -n 1 \
+		| sed -E 's/[[:space:]]*$//' \
+		| sed -E 's/^"(.*)"$/\1/; s/^\x27(.*)\x27$/\1/'
+}
+
+if ! command -v frankenphp > /dev/null 2>&1; then
+	echo "FrankenPHP is not installed; skipping dev auto-start."
+	exit 0
+fi
+
+if [ ! -f "$CADDYFILE_PATH" ]; then
+	echo "Caddyfile not found at $CADDYFILE_PATH; run ./bin/provision first."
+	exit 0
+fi
+
+APP_ENV_VALUE="$(get_env_value APP_ENV "$ENV_LOCAL_FILE")"
+if [ -z "$APP_ENV_VALUE" ]; then
+	APP_ENV_VALUE="dev"
+fi
+
+if [ "$APP_ENV_VALUE" != "dev" ]; then
+	echo "APP_ENV=$APP_ENV_VALUE; skipping dev FrankenPHP auto-start."
+	exit 0
+fi
+
+FRANKENPHP_PORT="$(get_env_value FRANKENPHP_PORT "$ENV_LOCAL_FILE")"
+if [ -z "$FRANKENPHP_PORT" ]; then
+	FRANKENPHP_PORT="8000"
+fi
+
+stop_pid_gracefully() {
+	local pid="$1"
+	if ! ps -p "$pid" > /dev/null 2>&1; then
+		return 0
+	fi
+	kill "$pid" > /dev/null 2>&1 || true
+	for _ in 1 2 3 4 5; do
+		if ! ps -p "$pid" > /dev/null 2>&1; then
+			return 0
+		fi
+		sleep 1
+	done
+	kill -9 "$pid" > /dev/null 2>&1 || true
+}
+
+mkdir -p "$REPO_ROOT/var/log" "$REPO_ROOT/var/run"
+
+if [ -f "$PID_FILE" ]; then
+	_EXISTING_PID="$(cat "$PID_FILE" 2>/dev/null || true)"
+	if [ -n "$_EXISTING_PID" ] && ps -p "$_EXISTING_PID" > /dev/null 2>&1; then
+		echo "Restarting existing FrankenPHP process $_EXISTING_PID from PID file..."
+		stop_pid_gracefully "$_EXISTING_PID"
+	fi
+	rm -f "$PID_FILE"
+fi
+
+_PORT_PIDS="$(lsof -iTCP:"$FRANKENPHP_PORT" -sTCP:LISTEN -t 2>/dev/null || true)"
+if [ -n "$_PORT_PIDS" ]; then
+	for _PID in $_PORT_PIDS; do
+		_CMD="$(ps -p "$_PID" -o args= 2>/dev/null || true)"
+		if echo "$_CMD" | grep -qi "frankenphp"; then
+			echo "Restarting existing FrankenPHP process $_PID on port $FRANKENPHP_PORT..."
+			stop_pid_gracefully "$_PID"
+		else
+			echo "Port $FRANKENPHP_PORT is in use by a non-FrankenPHP process ($_PID: $_CMD)."
+			echo "Stop that process or change FRANKENPHP_PORT before starting FrankenPHP."
+			exit 1
+		fi
+	done
+fi
+
+nohup frankenphp run --config "$CADDYFILE_PATH" >> "$LOG_FILE" 2>&1 < /dev/null &
+NEW_PID=$!
+printf '%s\n' "$NEW_PID" > "$PID_FILE"
+
+echo "Started FrankenPHP for development on http://localhost:${FRANKENPHP_PORT} (pid: $NEW_PID)."
+echo "Logs: $LOG_FILE"

@@ -10,6 +10,7 @@ To minimise breakage from ecosystem churn, Blueline targets stable LTS tooling w
 - [Symfony](https://symfony.com/releases/7.4) 7.4
 - [PHP](https://www.php.net/) 8.4 (version provided by Trixie)
 - [PostgreSQL](https://www.postgresql.org/) 17 (version provided by Trixie)
+- [Node.js](https://nodejs.org) 24 (current LTS)
 - Bash scripts using basic command-line tools
 
 ## Preferred development setup
@@ -29,12 +30,13 @@ When creating the container, `./bin/provision` runs automatically. If it fails, 
 The script `./bin/provision` will:
 
 - Update Debian packages to the latest versions
-- Install PHP, Composer, Symfony CLI, PostgreSQL, locale, and timezone packages (via apt sources where needed).
+- Install PHP, Composer, Symfony CLI, PostgreSQL, FrankenPHP, locale, and timezone packages (via apt sources where needed).
 - Set locale and timezone to the UK
 - Install all of Blueline's PHP and NPM dependencies
 - Configure PHP's OPcache according to Symfony's reccomended settings
 - Configure PostgreSQL with suitable settings for the expected database workload
-- Generate `APP_SECRET` and write `DATABASE_URL` and `APP_ENV=dev` to `.env.local`
+- Generate `APP_SECRET` and write `DATABASE_URL`, `APP_ENV=dev`, `FRANKENPHP_PORT`, and `ENDPOINT` to `.env.local`
+- Generate a managed `Caddyfile` configured for local HTTPS and FrankenPHP worker mode
 - Create the database, set-up the schema and install the `fuzzystrmatch` extension
 - Clear caches
 
@@ -57,9 +59,21 @@ Before running, check:
 
 ### Run the app
 
-Launch a Symfony development server with `symfony serve`.
+Blueline runs on FrankenPHP in development.
 
-Forward port 8000 from the container to your host to access the app at http://localhost:8000/. This forwarding will likely happen automatically.
+`./bin/provision` asks for a FrankenPHP HTTP port (default `8000`) and stores it in `.env.local` as `FRANKENPHP_PORT`.
+
+In the dev container, FrankenPHP is started automatically on container start.
+
+To start or restart it manually:
+
+- `bash ./bin/start-dev-frankenphp`
+
+Access the app at `http://localhost:<FRANKENPHP_PORT>/`.
+
+To inspect logs:
+
+- `tail -f var/log/frankenphp-dev.log`
 
 ## Frontend assets
 

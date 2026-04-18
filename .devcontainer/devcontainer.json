@@ -13,6 +13,8 @@
 		"vscode": {
 			"settings": {
 				"terminal.integrated.defaultProfile.linux": "zsh",
+				"remote.autoForwardPorts": true,
+				"remote.restoreForwardedPorts": true,
 				"sqltools.connections": [{
 					"name": "Container database",
 					"driver": "PostgreSQL",
@@ -39,8 +41,18 @@
 		}
 	},
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"portsAttributes": {
+		"8000": {
+			"label": "Blueline (Dev Server)",
+			"onAutoForward": "openBrowserOnce",
+			"protocol": "http"
+		}
+	},
+	"otherPortsAttributes": {
+		"onAutoForward": "notify"
+	},
 	// Connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
 	"postCreateCommand": "chmod +x bin/provision && ./bin/provision",
-	"postStartCommand": "if command -v pg_ctlcluster >/dev/null 2>&1; then pg_isready -h localhost -p 5432 >/dev/null 2>&1 || sudo pg_ctlcluster 17 main start; fi"
+	"postStartCommand": "if command -v pg_ctlcluster >/dev/null 2>&1; then pg_isready -h localhost -p 5432 >/dev/null 2>&1 || sudo pg_ctlcluster 17 main start; fi; bash ./bin/start-dev-frankenphp"
 }

@@ -93,6 +93,46 @@ for arg in "$@"; do
 	esac
 done
 
+# get_env_value KEY [FILE]
+# Reads the last occurrence of KEY from an env file and strips optional surrounding quotes.
+get_env_value() {
+	local key="$1"
+	local file="${2:-$ENV_LOCAL_FILE}"
+	if [ ! -f "$file" ]; then
+		return 0
+	fi
+	sed -nE "s/^[[:space:]]*${key}[[:space:]]*=[[:space:]]*//p" "$file" \
+		| tail -n 1 \
+		| sed -E 's/[[:space:]]*$//' \
+		| sed -E 's/^"(.*)"$/\1/; s/^\x27(.*)\x27$/\1/'
+}
+
+# upsert_env_value KEY VALUE [FILE]
+# Rewrites KEY in-place to avoid duplicates and appends it when absent.
+upsert_env_value() {
+	local key="$1"
+	local value="$2"
+	local file="${3:-$ENV_LOCAL_FILE}"
+	local tmp_file
+	tmp_file="$(mktemp)"
+
+	touch "$file"
+	grep -vE "^[[:space:]]*${key}[[:space:]]*=" "$file" > "$tmp_file" || true
+	printf '%s=%s\n' "$key" "$value" >> "$tmp_file"
+	mv "$tmp_file" "$file"
+}
+
+is_valid_port() {
+	local port="$1"
+	if ! [[ "$port" =~ ^[0-9]+$ ]]; then
+		return 1
+	fi
+	if [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
+		return 1
+	fi
+	return 0
+}
+
 # Detect Docker for environment-specific behavior.
 IS_DOCKER=false
 if [ -f /.dockerenv ]; then
@@ -110,7 +150,7 @@ if [ -n "$ENV_ARG" ]; then
 else
 	APP_ENV=""
 	if [ -f "$ENV_LOCAL_FILE" ]; then
-		APP_ENV="$(sed -nE 's/^[[:space:]]*APP_ENV[[:space:]]*=[[:space:]]*//p' "$ENV_LOCAL_FILE" | tail -n 1 | sed -E 's/[[:space:]]*$//' | sed -E 's/^"(.*)"$/\1/; s/^\x27(.*)\x27$/\1/')"
+		APP_ENV="$(get_env_value APP_ENV)"
 	fi
 	if [ -z "$APP_ENV" ]; then
 		if [ "$NONINTERACTIVE" = true ]; then
@@ -134,6 +174,43 @@ else
 						;;
 				esac
 			done
+		fi
+	fi
+fi
+
+FRANKENPHP_PORT="$(get_env_value FRANKENPHP_PORT)"
+if [ -z "$FRANKENPHP_PORT" ]; then
+	if [ "$APP_ENV" = "dev" ]; then
+		FRANKENPHP_PORT="8000"
+	else
+		FRANKENPHP_PORT="8443"
+	fi
+fi
+
+if [ "$APP_ENV" = "dev" ]; then
+	FRANKENPHP_SCHEME="http"
+else
+	FRANKENPHP_SCHEME="https"
+fi
+
+if [ "$NONINTERACTIVE" = false ]; then
+	while true; do
+		read -r -p "FrankenPHP ${FRANKENPHP_SCHEME^^} port? [${FRANKENPHP_PORT}]: " _frankenphp_port_choice
+		_frankenphp_port_choice="${_frankenphp_port_choice:-$FRANKENPHP_PORT}"
+		if is_valid_port "$_frankenphp_port_choice"; then
+			FRANKENPHP_PORT="$_frankenphp_port_choice"
+			break
+		fi
+		echo "Please enter a valid port number between 1 and 65535."
+	done
+else
+	if ! is_valid_port "$FRANKENPHP_PORT"; then
+		if [ "$APP_ENV" = "dev" ]; then
+			echo "  WARNING: Invalid FRANKENPHP_PORT '$FRANKENPHP_PORT' found, defaulting to 8000." >&2
+			FRANKENPHP_PORT="8000"
+		else
+			echo "  WARNING: Invalid FRANKENPHP_PORT '$FRANKENPHP_PORT' found, defaulting to 8443." >&2
+			FRANKENPHP_PORT="8443"
 		fi
 	fi
 fi
@@ -192,12 +269,12 @@ echo "  APP_ENV:        $APP_ENV"
 echo "  IS_DOCKER:      $IS_DOCKER"
 echo "  NONINTERACTIVE: $NONINTERACTIVE"
 echo "  NODATABASE:     $NODATABASE_ARG"
+echo "  NOSERVER:       $NOSERVER_ARG"
+echo "  FRANKENPHP_PORT:$FRANKENPHP_PORT"
 if [ "$APP_ENV" = "prod" ]; then
-	echo "  NOSERVER:       $NOSERVER_ARG"
 	echo "  NOCLOUDFLARED:  $NOCLOUDFLARED_ARG"
 else
-	echo "  NOSERVER:       true (prod only)"
-	echo "  NOCLOUDFLARED:  true (prod only)"
+	echo "  NOCLOUDFLARED:  true (prod only option)"
 fi
 
 if [ "$NONINTERACTIVE" = false ]; then
@@ -256,7 +333,7 @@ sudo apt-get update -qq && sudo apt-get upgrade -q -y --no-install-recommends
 sudo apt-get install -q -y --no-install-recommends \
 	apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less gpg lsb-release zsh brotli zstd zopfli tzdata
 
-# Node.js 24 LTS, plus Gulp — add NodeSource apt source if not already present
+# Node.js 24 LTS — add NodeSource apt source if not already present
 if [ ! -f /etc/apt/sources.list.d/nodesource.sources ]; then
 	echo "  Adding NodeSource apt source (Node.js 24)..."
 	curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
@@ -270,10 +347,19 @@ if [ ! -f /etc/apt/sources.list.d/symfony-stable.list ]; then
 fi
 sudo apt-get install -q -y symfony-cli
 
+# FrankenPHP — install using install script.
+if ! command -v frankenphp > /dev/null 2>&1; then
+	echo "  Installing FrankenPHP via install script..."
+	curl -fsSL https://files.henderkes.com/install.sh | sudo sh -s 8.4
+	sudo apt-get install -q -y frankenphp
+else
+	echo "  FrankenPHP already installed — skipping."
+fi
 # Postgres client, plus PHP 8.4 and extensions (Debian Trixie default — no extra apt source needed)
 sudo apt-get install -y -q --no-install-recommends \
 	postgresql-client-17 \
-	composer php8.4-cli php8.4-opcache php8.4-pgsql php8.4-intl php8.4-mbstring php8.4-xml php8.4-zip php8.4-curl
+	composer php8.4-cli php8.4-opcache php8.4-pgsql php8.4-intl php8.4-mbstring php8.4-xml php8.4-zip php8.4-curl \
+	php-zts-cli php-zts-intl php-zts-pdo php-zts-pdo-pgsql php-zts-pgsql php-zts-zip
 
 if [ "$APP_ENV" = "dev" ]; then
 	# Install some CLI tools used by VS Code
@@ -467,7 +553,7 @@ touch "$REPO_ROOT/.env.local"
 
 # APP_SECRET — set if not already set, but don't overwrite if present
 if ! grep -q "^APP_SECRET=" "$REPO_ROOT/.env.local"; then
-	echo "APP_SECRET=$(openssl rand -hex 32)" >> "$REPO_ROOT/.env.local"
+	upsert_env_value APP_SECRET "$(openssl rand -hex 32)" "$REPO_ROOT/.env.local"
 	echo "  Generated APP_SECRET."
 else
 	echo "  APP_SECRET already set — skipping."
@@ -476,19 +562,19 @@ fi
 # DATABASE_URL — set if not already set, but don't overwrite if present
 if ! grep -q "^DATABASE_URL=" "$REPO_ROOT/.env.local"; then
 	if [ "$NODATABASE_ARG" = true ]; then
-		echo "DATABASE_URL=\"postgresql://db_user:db_password@db_host:5432/db_name?serverVersion=17&charset=utf8\"" >> "$REPO_ROOT/.env.local"
+		upsert_env_value DATABASE_URL '"postgresql://db_user:db_password@db_host:5432/db_name?serverVersion=17&charset=utf8"' "$REPO_ROOT/.env.local"
 		echo "  Written placeholder DATABASE_URL because local PostgreSQL setup was skipped."
 	elif [ "$IS_DOCKER" = true ]; then
-		echo "DATABASE_URL=\"postgresql://blueline:${DB_PASS}@localhost:5432/blueline?serverVersion=17&charset=utf8\"" >> "$REPO_ROOT/.env.local"
+		upsert_env_value DATABASE_URL "\"postgresql://blueline:${DB_PASS}@localhost:5432/blueline?serverVersion=17&charset=utf8\"" "$REPO_ROOT/.env.local"
 		echo "  Written DATABASE_URL for Docker environment."
 	else
 		if [ -n "$DB_PASS" ]; then
-			echo "DATABASE_URL=\"postgresql://blueline:${DB_PASS}@localhost:5432/blueline?serverVersion=17&charset=utf8\"" >> "$REPO_ROOT/.env.local"
+			upsert_env_value DATABASE_URL "\"postgresql://blueline:${DB_PASS}@localhost:5432/blueline?serverVersion=17&charset=utf8\"" "$REPO_ROOT/.env.local"
 			echo "  Written DATABASE_URL for VM environment."
 		else
 			DB_PASS="$(openssl rand -hex 16)"
 			sudo -u postgres psql -c "ALTER ROLE blueline WITH PASSWORD '${DB_PASS}';"
-			echo "DATABASE_URL=\"postgresql://blueline:${DB_PASS}@localhost:5432/blueline?serverVersion=17&charset=utf8\"" >> "$REPO_ROOT/.env.local"
+			upsert_env_value DATABASE_URL "\"postgresql://blueline:${DB_PASS}@localhost:5432/blueline?serverVersion=17&charset=utf8\"" "$REPO_ROOT/.env.local"
 			echo "  DATABASE_URL was missing and PostgreSQL passwords cannot be recovered; rotated password for role 'blueline' and wrote a fresh DATABASE_URL."
 		fi
 	fi
@@ -500,11 +586,12 @@ else
 	fi
 fi
 
-# APP_ENV — set if not already set, but don't overwrite if present
-if ! grep -q "^APP_ENV=" "$REPO_ROOT/.env.local"; then
-	echo "APP_ENV=${APP_ENV}" >> "$REPO_ROOT/.env.local"
-else
-	echo "  APP_ENV already set — skipping."
+# APP_ENV, FRANKENPHP_PORT and local endpoint are always kept in sync with provisioning choices.
+upsert_env_value APP_ENV "$APP_ENV" "$REPO_ROOT/.env.local"
+upsert_env_value FRANKENPHP_PORT "$FRANKENPHP_PORT" "$REPO_ROOT/.env.local"
+_tunnel_id_in_env="$(get_env_value CLOUDFLARE_TUNNEL_ID "$REPO_ROOT/.env.local")"
+if [ "$APP_ENV" = "dev" ] || { [ "$APP_ENV" = "prod" ] && [ -z "$_tunnel_id_in_env" ]; }; then
+	upsert_env_value ENDPOINT "\"${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT}\"" "$REPO_ROOT/.env.local"
 fi
 
 
@@ -582,46 +669,58 @@ npm audit fix --loglevel=warn --no-progress --no-fund || true
 
 
 # ##############################################################################
-# SECTION 8: FrankenPHP systemd service
+# SECTION 8: FrankenPHP setup
 # ##############################################################################
 
-if [ "$APP_ENV" = "prod" ] && [ "$NOSERVER_ARG" = false ]; then
-	echo -e "\n\033[1mConfiguring FrankenPHP service\033[0m"
+if [ "$APP_ENV" = "prod" ] && [ "$NOSERVER_ARG" = true ]; then
+	echo -e "\n\033[1mSkipping FrankenPHP setup (--noserver).\033[0m"
+	echo "  Reminder: configure and start your web server manually."
+else
+	echo -e "\n\033[1mConfiguring FrankenPHP\033[0m"
+	echo "  FrankenPHP version: $(frankenphp version 2>/dev/null || frankenphp --version 2>/dev/null || echo 'version unknown')"
 
-	# FrankenPHP — download latest binary from GitHub releases if not already installed
-	if ! command -v frankenphp > /dev/null 2>&1; then
-		sudo curl https://pkg.henderkes.com/api/packages/84/debian/repository.key -o /etc/apt/keyrings/static-php84.asc
-		echo "deb [signed-by=/etc/apt/keyrings/static-php84.asc] https://pkg.henderkes.com/api/packages/84/debian php-zts main" | sudo tee -a /etc/apt/sources.list.d/static-php84.list
-		sudo apt-get update -qq && sudo apt-get install -y -q frankenphp
-	else
-		echo "  FrankenPHP already installed: $(frankenphp version 2>/dev/null || frankenphp --version 2>/dev/null || echo 'version unknown')"
+	# Build a managed Caddyfile for both dev and prod.
+	_caddy_watch_block=""
+	if [ "$APP_ENV" = "dev" ]; then
+		_caddy_watch_block="
+			watch ${REPO_ROOT}/src/**/*.php
+			watch ${REPO_ROOT}/templates/**/*.twig
+			watch ${REPO_ROOT}/config/**/*.yaml
+			watch ${REPO_ROOT}/config/**/*.yml
+			watch ${REPO_ROOT}/.env*"
 	fi
 
-	# Create Caddyfile only when it does not already exist (absolute path substituted in; file is .gitignored).
-	if [ ! -f "$REPO_ROOT/Caddyfile" ]; then
-		cat > "$REPO_ROOT/Caddyfile" << CADDYFILE
+	_desired_caddyfile="$(cat << CADDYFILE
+# Managed by ./bin/provision
 {
 	frankenphp
 	order php_server before file_server
 }
 
-:8000 {
+	${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT} {
 	root * ${REPO_ROOT}/public
 	php_server {
-		worker ./public/index.php
+		worker {
+				file ${REPO_ROOT}/public/index.php${_caddy_watch_block}
+		}
 	}
 	encode zstd gzip
 }
 CADDYFILE
-		echo "  Caddyfile did not exist; created $REPO_ROOT/Caddyfile."
+	)"
+
+	if [ ! -f "$REPO_ROOT/Caddyfile" ] || ! diff -q <(echo "$_desired_caddyfile") "$REPO_ROOT/Caddyfile" > /dev/null 2>&1; then
+		echo "$_desired_caddyfile" > "$REPO_ROOT/Caddyfile"
+		echo "  Caddyfile updated at $REPO_ROOT/Caddyfile."
 	else
-		echo "  Caddyfile already exists at $REPO_ROOT/Caddyfile — leaving unchanged."
+		echo "  Caddyfile already up to date — skipping."
 	fi
 
-	# Build desired service unit content
-	_current_user="$(whoami)"
-	_current_group="$(id -gn)"
-	_desired_unit="[Unit]
+	if [ "$APP_ENV" = "prod" ]; then
+		# Build desired service unit content
+		_current_user="$(whoami)"
+		_current_group="$(id -gn)"
+		_desired_unit="[Unit]
 Description=Blueline (FrankenPHP)
 After=network.target postgresql.service
 
@@ -637,26 +736,26 @@ RestartSec=5s
 [Install]
 WantedBy=multi-user.target"
 
-	_unit_file="/etc/systemd/system/blueline.service"
+		_unit_file="/etc/systemd/system/blueline.service"
 
-	# Write unit file only if absent or content has changed
-	if [ ! -f "$_unit_file" ] || ! diff -q <(echo "$_desired_unit") "$_unit_file" > /dev/null 2>&1; then
-		echo "$_desired_unit" | sudo tee "$_unit_file" > /dev/null
-		echo "  Written $_unit_file."
-		sudo systemctl daemon-reload
+		# Write unit file only if absent or content has changed
+		if [ ! -f "$_unit_file" ] || ! diff -q <(echo "$_desired_unit") "$_unit_file" > /dev/null 2>&1; then
+			echo "$_desired_unit" | sudo tee "$_unit_file" > /dev/null
+			echo "  Written $_unit_file."
+			sudo systemctl daemon-reload
+		else
+			echo "  systemd unit file unchanged — skipping reload."
+		fi
+
+		sudo systemctl enable --now blueline
+		if [ "$PHP_OPCACHE_CHANGED" = true ]; then
+			echo "  Restarting blueline.service to apply OPcache changes..."
+			sudo systemctl restart blueline
+		fi
+		echo "  blueline.service enabled and started."
 	else
-		echo "  systemd unit file unchanged — skipping reload."
+		echo "  FrankenPHP is installed and configured for development."
 	fi
-
-	sudo systemctl enable --now blueline
-	if [ "$PHP_OPCACHE_CHANGED" = true ]; then
-		echo "  Restarting blueline.service to apply OPcache changes..."
-		sudo systemctl restart blueline
-	fi
-	echo "  blueline.service enabled and started."
-elif [ "$APP_ENV" = "prod" ]; then
-	echo -e "\n\033[1mSkipping FrankenPHP systemd service setup (--noserver).\033[0m"
-	echo "  Reminder: configure and start your web server manually."
 fi
 
 
@@ -748,14 +847,16 @@ elif [ "$APP_ENV" = "prod" ]; then
 		# Write cloudflared config
 		_cf_config_dir="$HOME/.cloudflared"
 		mkdir -p "$_cf_config_dir"
-		cat > "$_cf_config_dir/config.yml" << CFCONFIG
-tunnel: ${TUNNEL_ID}
-credentials-file: ${_cf_config_dir}/${TUNNEL_ID}.json
-ingress:
-  - hostname: ${_public_hostname}
-    service: http://localhost:8000
-  - service: http_status:404
-CFCONFIG
+		{
+			printf 'tunnel: %s\n' "$TUNNEL_ID"
+			printf 'credentials-file: %s/%s.json\n' "$_cf_config_dir" "$TUNNEL_ID"
+			printf 'ingress:\n'
+			printf '  - hostname: %s\n' "$_public_hostname"
+			printf '    service: https://localhost:%s\n' "$FRANKENPHP_PORT"
+			printf '    originRequest:\n'
+			printf '      noTLSVerify: true\n'
+			printf '  - service: http_status:404\n'
+		} > "$_cf_config_dir/config.yml"
 		echo "  cloudflared config written to $_cf_config_dir/config.yml."
 
 		# Install and start cloudflared as a system service
@@ -764,8 +865,8 @@ CFCONFIG
 		echo "  cloudflared service installed and started."
 
 		# Persist tunnel ID and endpoint in .env.local
-		echo "CLOUDFLARE_TUNNEL_ID=${TUNNEL_ID}" >> "$REPO_ROOT/.env.local"
-		echo "ENDPOINT=https://${_public_hostname}" >> "$REPO_ROOT/.env.local"
+		upsert_env_value CLOUDFLARE_TUNNEL_ID "${TUNNEL_ID}" "$REPO_ROOT/.env.local"
+		upsert_env_value ENDPOINT "\"https://${_public_hostname}\"" "$REPO_ROOT/.env.local"
 		echo "  CLOUDFLARE_TUNNEL_ID and ENDPOINT written to .env.local."
 	fi
 fi
@@ -804,7 +905,8 @@ echo -e "\n\033[1mSetup complete.\033[0m"
 echo -e "\n  Next steps:"
 echo     "    - Import data:             ./bin/fetchAndImportData"
 if [ "$APP_ENV" = "dev" ]; then
-	echo "    - Start development:       symfony serve"
+	echo "    - Start/restart web app:   ./bin/start-dev-frankenphp"
+	echo "    - App endpoint:            ${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT}"
 fi
 
 if [ "$APP_ENV" = "prod" ]; then
@@ -820,6 +922,7 @@ if [ "$APP_ENV" = "prod" ]; then
 		fi
 		if [ "$NOCLOUDFLARED_ARG" = true ]; then
 			echo "    - If you want to, configure a Cloudflare tunnel for public access."
+			echo "    - Local endpoint remains:  ${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT}"
 		fi
 	fi
 fi

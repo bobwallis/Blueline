@@ -37,14 +37,15 @@ If only part of the stack should be managed by Blueline provisioning (for exampl
 The script `./bin/provision` will:
 
 - Update Debian packages to the latest versions
-- Install PHP, Composer, Symfony CLI, PostgreSQL, locale, and timezone packages (via apt sources where needed).
+- Install PHP, Composer, Symfony CLI, PostgreSQL, FrankenPHP, locale, and timezone packages (via apt sources where needed).
 - Set locale and timezone to the UK
 - Install all of Blueline's PHP and NPM dependencies
 - Configure PHP's OPcache according to Symfony's reccomended production settings
 - Configure PostgreSQL with suitable settings for the expected database workload, and enable the systemd service
-- Generate `APP_SECRET` and write `DATABASE_URL` and `APP_ENV` to `.env.local`
+- Generate `APP_SECRET` and write `DATABASE_URL`, `APP_ENV`, `FRANKENPHP_PORT`, and local `ENDPOINT` to `.env.local`
 - Create the database, set-up the schema and install the `fuzzystrmatch` extension
-- Install and enable `blueline.service` to run FrankenPHP on port 8000
+- Generate a managed `Caddyfile` for FrankenPHP worker mode
+- Install and enable `blueline.service` to run FrankenPHP on configurable HTTPS localhost port
 - Install cloudflared and walk through Cloudflare tunnel creation (interactive)
 - Clear caches
 - Warm production cache
@@ -72,8 +73,14 @@ Before running in production, review:
 
 If only part of the stack should be managed by Blueline provisioning (for example, if you are using an external database, alternate web server, or no Cloudflare tunnel), use the relevant command-line options.
 
+## Port and endpoint behavior
+
+- `./bin/provision` asks for a FrankenPHP HTTPS port and stores it in `.env.local` as `FRANKENPHP_PORT`.
+- Without a Cloudflare tunnel, `ENDPOINT` is set to `https://localhost:<FRANKENPHP_PORT>`.
+- With a Cloudflare tunnel, the tunnel origin points at `https://localhost:<FRANKENPHP_PORT>` and `ENDPOINT` is updated to your public hostname.
+
 ## References
 
-- [Development and installation guide](develmpment-deployment.md)
+- [Development and installation guide](development-deployment.md)
 - [Architecture and workflows](architecture-and-workflows.md)
 - [Cloudflare Tunnel docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)

@@ -6,6 +6,7 @@
         "./bin/test": true,
         "symfony console doctrine:schema:validate": true,
         "symfony console lint:": true,
-        "eslint": true
+        "npm run lint": true,
+        "jq": true
     }
 }
