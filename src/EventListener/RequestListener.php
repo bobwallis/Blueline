@@ -1,6 +1,7 @@
 <?php
 namespace Blueline\EventListener;
 
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -20,6 +21,7 @@ class RequestListener
 {
     public function __construct(
         private ParameterBagInterface $params,
+        #[Autowire('%kernel.environment%')]
         private string $kernelEnvironment,
     ) {}
 

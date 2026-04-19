@@ -1,8 +1,8 @@
 <?php
 namespace Blueline\EventListener;
 
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 /**
  * Symfony event listener for kernel.response events.
@@ -12,7 +12,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
  *
  * Equivalent to Twig's spaceless filter applied globally.
  */
-#[AsEventListener(event: 'kernel.response')]
+#[AsEventListener(event: 'kernel.response', method: 'onKernelResponse', priority: -1)]
 class ResponseListener
 {
     public function onKernelResponse(ResponseEvent $event): void
@@ -22,8 +22,8 @@ class ResponseListener
         }
 
         $response = $event->getResponse();
-        $contentType = $response->headers->get('Content-Type', '');
-        if (!str_contains($contentType, 'text/html')) {
+        $contentType = strtolower((string) $response->headers->get('Content-Type', ''));
+        if (!str_contains($contentType, 'text/html') && !str_contains($contentType, 'application/xhtml+xml')) {
             return;
         }
 

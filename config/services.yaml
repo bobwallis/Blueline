@@ -24,7 +24,6 @@ services:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
-            - '../src/EventListener/'
             - '../src/Entity/'
             - '../src/Helpers/'
             - '../src/Kernel.php'
@@ -40,9 +39,3 @@ services:
         resource: '../src/Controller/'
         tags: ['controller.service_arguments']
 
-    Blueline\EventListener\RequestListener:
-        arguments:
-            - '@parameter_bag'
-            - '%kernel.environment%'
-
-    Blueline\EventListener\ResponseListener:
