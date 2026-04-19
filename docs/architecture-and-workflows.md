@@ -60,12 +60,20 @@ Or run targeted tests directly with PHPUnit:
 - Prefer adding tests close to changed behavior.
 - If adding a feature that affects setup or runbook steps, update `README.md` and other files in `./docs`.
 
-## Naming policy: PHP vs PostgreSQL
+### FrankenPHP worker safety
+- `src/Command/` commands are run using `symfony console ...` commands, but HTTP requests may be run using FrankenPHP's worker mode, and so should be architected to work well in that scenario.
+- Treat service instances as long-lived when running in worker mode.
+- Do not cache request-derived values in service constructors or mutable service properties.
+- Resolve request-dependent values at request/render time (for example via `RequestStack` in the method that needs the current request).
+- Treat Doctrine query/result caches as app-level caches; do not clear them per request unless metrics show they are causing unacceptable pressure.
+- Add request-end cleanup for stateful subsystems (for example clearing Doctrine's EntityManager on `kernel.terminate`) to avoid cross-request state reuse.
+
+### Naming policy: PHP vs PostgreSQL
 - **PHP code uses camelCase** for properties, array keys, and DTO-style payloads.
 - **PostgreSQL identifiers remain lowercase** (unquoted behavior and existing schema conventions).
 - **Doctrine is the mapping boundary** between camelCase PHP and lowercase database identifiers.
 
-### Practical rules
+#### Practical rules
 - In Doctrine ORM/DQL, use entity property names (camelCase).
 - In raw SQL (DBAL), use real database identifiers (lowercase).
 - If DBAL results are consumed as associative arrays and camelCase keys are needed in PHP, alias explicitly at the fetch boundary, for example: `notationexpanded AS "notationExpanded"`.

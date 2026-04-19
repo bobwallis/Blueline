@@ -5,6 +5,19 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class MethodsControllerTest extends WebTestCase
 {
+    public function testMethodViewChromelessLayoutIsResolvedPerRequest()
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/methods/view/Cambridge_Surprise_Minor?chromeless=1');
+        $this->assertTrue($client->getResponse()->isSuccessful(), 'Chromeless request unsuccessful');
+        $this->assertStringNotContainsString('<header id="top"', $client->getResponse()->getContent());
+
+        $client->request('GET', '/methods/view/Cambridge_Surprise_Minor');
+        $this->assertTrue($client->getResponse()->isSuccessful(), 'Standard request unsuccessful');
+        $this->assertStringContainsString('<header id="top"', $client->getResponse()->getContent());
+    }
+
     public function testWelcomePageShowsSearchAndCustomMethodForm()
     {
         $client = static::createClient();

@@ -27,7 +27,7 @@ use Twig\Error\RuntimeError;
 class BluelineExtension extends AbstractExtension implements GlobalsInterface
 {
     protected $params;
-    protected $chromeless;
+    protected $requestStack;
 
     /**
      * Initialise request-dependent Twig globals.
@@ -38,12 +38,7 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
     public function __construct(RequestStack $requestStack, ParameterBagInterface $params)
     {
         $this->params = $params;
-        try {
-            $request = $requestStack->getCurrentRequest();
-            $this->chromeless = is_null($request)? false : ($request->getRequestFormat() == 'html' && intval($request->query->get('chromeless')) == 1);
-        } catch (\Exception $e) {
-            $this->chromeless = false;
-        }
+        $this->requestStack = $requestStack;
     }
 
     /**
@@ -81,8 +76,16 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
      */
     public function getGlobals(): array
     {
+        $chromeless = false;
+        try {
+            $request = $this->requestStack->getCurrentRequest();
+            $chromeless = is_null($request)? false : ($request->getRequestFormat() == 'html' && intval($request->query->get('chromeless')) == 1);
+        } catch (\Exception $e) {
+            $chromeless = false;
+        }
+
         return array(
-            'chromeless' => $this->chromeless,
+            'chromeless' => $chromeless,
             'db_age' => $this->params->get('blueline.database_update'),
         );
     }
