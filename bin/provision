@@ -704,6 +704,10 @@ else
 				file ${REPO_ROOT}/public/index.php${_caddy_watch_block}
 		}
 	}
+	header {
+		-Server
+		-X-Powered-By
+	}
 	encode zstd gzip
 }
 CADDYFILE
