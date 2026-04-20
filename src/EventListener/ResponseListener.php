@@ -22,12 +22,21 @@ class ResponseListener
         }
 
         $response = $event->getResponse();
+
+        // Add Cache-Control headers for error responses to prevent caching of error pages, but allow short CDN caching for 404/410 errors
+        if ($response->isClientError() || $response->isServerError()) {
+            if (in_array($response->getStatusCode(), [404, 410], true)) {
+                $response->headers->set('Cache-Control', 'public, s-maxage=60, max-age=0');
+            } else {
+                $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+            }
+        }
+
+        // Strip whitespace between HTML tags (same as Twig's spaceless filter)
         $contentType = strtolower((string) $response->headers->get('Content-Type', ''));
         if (!str_contains($contentType, 'text/html') && !str_contains($contentType, 'application/xhtml+xml')) {
             return;
         }
-
-        // Strip whitespace between HTML tags (same as Twig's spaceless filter)
         $content = $response->getContent();
         if ($content !== false) {
             $minifiedContent = preg_replace('/>\s+</', '><', $content);

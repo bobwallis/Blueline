@@ -32,11 +32,13 @@ use Blueline\Helpers\PlaceNotation;
  */
 class MethodsController extends AbstractController
 {
+    #[Cache(maxage: 129600, public: true)]
     public function welcome(Request $request)
     {
         return $this->render('Methods/welcome.'.$request->getRequestFormat().'.twig');
     }
 
+    #[Cache(maxage: 21600, public: true, lastModified: 'database_update')]
     public function search(Request $request, EntityManagerInterface $em)
     {
         $methodRepository = $em->getRepository(Method::class);
@@ -126,6 +128,7 @@ class MethodsController extends AbstractController
         return $this->render('Methods/search.'.$request->getRequestFormat().'.twig', compact('searchVariables', 'count', 'pageActive', 'pageCount', 'methods'));
     }
 
+    #[Cache(maxage: 129600, public: true, lastModified: 'database_update')]
     public function view($url, Request $request, EntityManagerInterface $em)
     {
         $format = $request->getRequestFormat();
@@ -306,6 +309,7 @@ class MethodsController extends AbstractController
         }
     }
 
+    #[Cache(maxage: 129600, public: true, lastModified: 'database_update')]
     public function sitemap($page, EntityManagerInterface $em)
     {
         $methods = $em->createQuery('SELECT partial m.{title,url} FROM Blueline\Entity\Method m ORDER BY m.url')
