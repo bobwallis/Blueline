@@ -2,6 +2,9 @@ import eve from '../../lib/eve.js';
 import URLHelper from '../../helpers/URL.js';
 import Page from '../../data/Page.js';
 
+/**
+ * Manage search form visibility and interactive in-app search requests.
+ */
 const contentEl = document.getElementById('content');
 const searchEl = document.getElementById('search');
 const qEl = document.getElementById('q');
@@ -15,6 +18,11 @@ const Search = {
 };
 
 if (contentEl && searchEl && qEl) {
+	/**
+	 * Hide the search form and clear searchable layout state.
+	 *
+	 * @returns {void}
+	 */
 	Search.hide = function hide() {
 		if (Search.visible === true) {
 			qEl.blur();
@@ -24,6 +32,12 @@ if (contentEl && searchEl && qEl) {
 		}
 	};
 
+	/**
+	 * Show the search form and target it to the current section.
+	 *
+	 * @param {?string} section Current section key.
+	 * @returns {void}
+	 */
 	Search.show = function show(section) {
 		if (typeof section !== 'string' || section === '') {
 			searchEl.setAttribute('action', '');

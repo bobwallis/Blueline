@@ -4,6 +4,9 @@ import URLHelper from '../helpers/URL.js';
 import Page from '../data/Page.js';
 import './Document/Title.js';
 
+/**
+ * Wire document-level navigation, prefetch, and history handling.
+ */
 if ('serviceWorker' in navigator) {
 	documentOn('click', 'a', function (e) {
 		const href = e.target.href;

@@ -2,8 +2,16 @@ import eve from '../../lib/eve.js';
 import documentOn from '../../lib/document_on.js';
 import LocalStorage from '../../helpers/LocalStorage.js';
 
+/**
+ * Synchronise settings UI controls with persisted local settings.
+ */
 const settings = ['method_follow', 'method_style', 'method_tooltips', 'method_music'];
 
+/**
+ * Apply persisted settings to matching form controls.
+ *
+ * @returns {void}
+ */
 function initialSet() {
 	settings.forEach(function (setting) {
 		const elements = document.querySelectorAll('#' + setting + ', input[name=' + setting + ']');
@@ -40,6 +48,8 @@ settings.forEach(function (setting) {
 	});
 });
 
+
+// Show and hide the settings panel when the button is clicked, and hide it after submitting or pressing enter in the form.
 const settingsEl = document.getElementById('settings_wrap');
 document.getElementById('settings_button').addEventListener('click', function () {
 	settingsEl.className = (settingsEl.className === 'active') ? '' : 'active';

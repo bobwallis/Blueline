@@ -4,22 +4,58 @@ import PlaceNotation from './PlaceNotation.js';
 import Canvas from '../ui/Canvas.js';
 import MeasureCanvasTextOffset from './MeasureCanvasTextOffset.js';
 
+/**
+ * Render method grids to canvas using parsed place notation and display options.
+ *
+ * The constructor stores normalised options and exposes helper methods to update
+ * options, inspect calculated dimensions, and draw either a canvas element or an
+ * image snapshot.
+ */
+
+	/**
+	 * Create a method-grid renderer instance.
+	 *
+	 * @param {Object} [passedOptions] Initial grid options object.
+	 * @returns {Object} Grid renderer API.
+	 */
 
 	var MethodGrid = function( passedOptions ) {
 		var options = {};
 
+		/**
+		 * Merge incoming options with existing state and normalise with GridOptions.
+		 *
+		 * @param {Object} passedOptions Partial grid options.
+		 * @returns {void}
+		 */
 		this.setOptions = function( passedOptions ) {
 			options = GridOptions( deepmerge( options, passedOptions ) );
 		};
 
+		/**
+		 * Get the current normalized options.
+		 *
+		 * @returns {Object} Normalised grid options.
+		 */
 		this.getOptions = function() {
 			return options;
 		};
 
+		/**
+		 * Return the currently calculated dimensions.
+		 *
+		 * @returns {Object} Dimension values calculated by GridOptions.
+		 */
 		this.measure = function() {
 			return options.dimensions;
 		};
 
+		/**
+		 * Draw the method grid to a canvas and return canvas or image output.
+		 *
+		 * @param {boolean} [returnImage=false] When true, return an image snapshot.
+		 * @returns {HTMLCanvasElement|HTMLImageElement} Drawn output.
+		 */
 		this.draw = function( returnImage ) {
 			returnImage = (typeof returnImage !== 'boolean')? false : returnImage;
 			// Set up canvas

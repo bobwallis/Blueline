@@ -2,8 +2,35 @@ import deepmerge from '../lib/deepmerge.js';
 import PlaceNotation from './PlaceNotation.js';
 import MeasureCanvasText from './MeasureCanvasText.js';
 
+	/**
+	 * Build lazily-evaluated Grid option objects for plain-course and call views.
+	 *
+	 * The builder precomputes method metadata (lead heads, hunt bells, working-bell
+	 * groups) and exposes style-specific factories under `gridOptions` for numbers,
+	 * diagrams, lines, and full-grid rendering modes.
+	 */
+
+	/**
+	 * @typedef {Object} GridBuilderInput
+	 * @property {string|number} id Unique suffix used to build deterministic grid IDs.
+	 * @property {number|string} stage Number of bells in the method.
+	 * @property {string} notation Place notation for the method.
+	 * @property {Object<string, {notation: string, from: number, every: number, cover: number}>} [calls] Optional call definitions keyed by call title.
+	 * @property {'lightest'} [workingBell] Optional working bell selection mode.
+	 * @property {number} [fontSize] Base font size used to derive dimensions.
+	 * @property {{from: number, every: number, show?: boolean, stroke?: string, width?: number, cap?: string, dash?: number[]}} [ruleOffs] Rule-off positioning and style.
+	 * @property {{show?: boolean, font?: string}} [callingPositions] Calling-position display settings.
+	 */
+
 	// Helps generate options for Grid.js to display full plain courses and calls for a particular method
 
+	/**
+	 * Create a Grid options builder for one method and optional calls.
+	 *
+	 * @param {GridBuilderInput} options Method and rendering options.
+	 * @returns {Object} Builder instance with `gridOptions.plainCourse` and
+	 * `gridOptions.calls` lazy factories for each visual style.
+	 */
 	var GridOptionsBuilder = function( options ) {
 		var i, j, k, l;
 

@@ -1,3 +1,9 @@
+/**
+ * UI entry point.
+ *
+ * Imports all UI sub-modules so that their side-effects (event listeners,
+ * DOM setup) are registered before the application starts.
+ */
 import './ui/Document.js';
 import './ui/Header/Breadcrumb.js';
 import './ui/Header/Search.js';

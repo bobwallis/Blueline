@@ -1,11 +1,20 @@
 import eve from '../../lib/eve.js';
 import URLHelper from '../../helpers/URL.js';
 
+/**
+ * Manage breadcrumb display for the current top-level section.
+ */
 let breadcrumbEl = document.getElementById('breadcrumb');
 let breadcrumbSepEl = document.getElementById('breadcrumb_sep');
 
 const Breadcrumb = {
 	section: null,
+	/**
+	 * Show or hide the breadcrumb for a section.
+	 *
+	 * @param {?string} section Section key or null to hide.
+	 * @returns {void}
+	 */
 	set(section) {
 		if (typeof section === 'string') {
 			breadcrumbSepEl.style.display = 'block';

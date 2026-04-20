@@ -2,6 +2,9 @@ import deepmerge from '../../lib/deepmerge.js';
 import PlaceNotation from '../PlaceNotation.js';
 import MeasureCanvasText from '../MeasureCanvasText.js';
 
+/**
+ * Normalize and enrich raw grid options into a complete render-ready structure.
+ */
 
 	// Default options (note runtime defaults are set later)
 	var defaultOptions = {
@@ -84,6 +87,15 @@ import MeasureCanvasText from '../MeasureCanvasText.js';
 
 	var counter = 1;
 
+	/**
+	 * Build the full options object required by the grid renderer.
+	 *
+	 * This function parses shorthand inputs (notation/start row), merges defaults,
+	 * computes runtime-derived values, and calculates final layout dimensions.
+	 *
+	 * @param {Object} [passedOptions] Partial options object.
+	 * @returns {Object} Fully normalized grid options.
+	 */
 	export default function( passedOptions ) {
 		var options = {};
 		passedOptions = passedOptions || {};

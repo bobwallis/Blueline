@@ -1,5 +1,9 @@
 import eve from '../../lib/eve.js';
 
+	/**
+	 * Display contextual tooltips over the main method line canvas.
+	 */
+
 	// Create tooltip
 	var tooltipElement = document.createElement( 'div' );
 	tooltipElement.id = 'lineOverlay_tooltip';
@@ -10,6 +14,14 @@ import eve from '../../lib/eve.js';
 		tooltipElement.style.display = 'none';
 	} );
 
+	/**
+	 * Attach mouse listeners that map cursor position to bell-work tooltip text.
+	 *
+	 * @param {Object} grid Rendered line grid instance.
+	 * @param {Object} method Method metadata from GridOptionsBuilder.
+	 * @param {Array<{hunt: boolean, text: {coreRows: string[]}}>} methodTexts Tooltip source entries.
+	 * @returns {void}
+	 */
 	export default function( grid, method, methodTexts ) {
 		// Don't do tooltips for hunt bells, filter them off
 		methodTexts = methodTexts.filter( function( m ) { return !m.hunt; } );

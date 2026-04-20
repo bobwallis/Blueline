@@ -1,15 +1,31 @@
 import PlaceNotation from './PlaceNotation.js';
 
+/**
+ * Score rows for common musical patterns used in change ringing.
+ *
+ * The exported function annotates each row with per-position scores and any
+ * matching named rows (for example Rounds, Queens, and Tittums).
+ *
+ * Runs:     Sequences of consecutive bells. e.g. 1234, 7654
+ * Thirds:   Sequences of musical thirds. e.g. 246, 753
+ * Tittums:  Consecutive bells with a 1 place gap. e.g. _6_7_8, 1_2_3_
+ * Any of these that are at the start or end of the row are given a bonus multiplier.
+ */
 
-	// These functions operate on objects that look like:
-	//  { row: [0,1,2,3,4,5], score: [0.1,0.1,0.1,0,0,0], namedRows: [] }
-	// and adds in scoring for the requested music type on top of what is already there
+/**
+ * @typedef {Object} ScoredRow
+ * @property {number[]} row Bell sequence for one row (or wrapped half-lead span).
+ * @property {number[]} score Per-position music score values.
+ * @property {string[]|string[][]} namedRows Matched named rows for the row span.
+ */
 
-	// Runs:     Sequences of consecutive bells. e.g. 1234, 7654
-	// Thirds:   Sequences of musical thirds. e.g. 246, 753
-	// Tittums:  Consecutive bells with a 1 place gap. e.g. _6_7_8, 1_2_3_
-	// For any of these that are at the start or end of the row give the score a bonus multiplier
-	// We can capture all of these with one pass of the row
+	/**
+	 * Score runs, thirds, and tittums patterns within a single row span.
+	 *
+	 * @param {ScoredRow} scoredRow Row structure being scored in place.
+	 * @param {number} stage Number of bells in the method.
+	 * @returns {ScoredRow} The same row object with updated score values.
+	 */
 	var scoreRunsThirdsTittums = function( scoredRow, stage ) {
 		var score, multiplier, i = 1, iLim = scoredRow.row.length, j;
 
@@ -88,6 +104,13 @@ import PlaceNotation from './PlaceNotation.js';
 		return e;
 	} );
 
+	/**
+	 * Detect and score named rows (for example Rounds, Back Rounds, Queens).
+	 *
+	 * @param {ScoredRow} scoredRow Row structure being scored in place.
+	 * @param {number} stage Number of bells in the method.
+	 * @returns {ScoredRow} The same row object with named-row metadata updated.
+	 */
 	var scoreNamedRows = function( scoredRow, stage ) {
 		var i, iLim = scoredRow.row.length, j;
 		if( scoredRow.row.length > stage ) { scoredRow.namedRows = [[],[]]; }
@@ -116,6 +139,16 @@ import PlaceNotation from './PlaceNotation.js';
 		return scoredRow;
 	};
 
+	/**
+	 * Score an array of rows for musicality and attach named-row matches.
+	 *
+	 * If `options.wrap` is enabled (default for multi-row input), consecutive rows
+	 * are temporarily merged so patterns crossing hand/back boundaries are scored.
+	 *
+	 * @param {number[][]} rows Rows to score.
+	 * @param {{stage?: number, wrap?: boolean}} [options] Scoring options.
+	 * @returns {ScoredRow[]} Scored rows in the original row segmentation.
+	 */
 	export default function( rows, options ) {
 		if( typeof options === 'undefined' ) { options = {}; }
 		if( typeof options.stage === 'undefined' ) { options.stage = rows[0].length; }

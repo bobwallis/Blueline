@@ -1,8 +1,29 @@
 import PlaceNotation from './PlaceNotation.js';
 
+/**
+ * Build human-readable work descriptions from rows or place notation.
+ *
+ * The module converts bell movement into an intermediate token stream, then
+ * rewrites that stream into ringing terminology (dodges, points, hunting,
+ * fishtails, places, etc).
+ */
+
+/**
+ * @typedef {Object} WorkDescription
+ * @property {string[]} coreRows Per-change textual work instructions.
+ * @property {string} coreHuman Human-readable summary sentence.
+ */
+
 
 	var trimtrailingcommaregex = /,\s*$/,
 		trimlastlistitemregex =/,[^,]+$/ ,
+		/**
+		 * Repeat a comma-delimited token string a fixed number of times.
+		 *
+		 * @param {string} string Base token text.
+		 * @param {number} n Number of repetitions.
+		 * @returns {string} Repeated comma-delimited text with trailing comma removed.
+		 */
 		repeatString = function( string, n ) {
 			var newString = '';
 			while( n-- ) {
@@ -63,6 +84,15 @@ import PlaceNotation from './PlaceNotation.js';
 		};
 
 	var Text = {
+		/**
+		 * Describe one bell's work across a series of rows.
+		 *
+		 * @param {number[][]} rows Sequence of rows in bell-index form.
+		 * @param {number|string} bell Bell index or bell character to describe.
+		 * @param {boolean} [wrap=false] Whether to append a short wrapped tail so
+		 * transitions over the lead end are described correctly.
+		 * @returns {WorkDescription} Structured and human-readable work descriptions.
+		 */
 		fromRows: function( rows, bell, wrap ) {
 			var wrapRows;
 			if( typeof wrap === 'undefined' ) { wrap = false; }
@@ -173,6 +203,15 @@ import PlaceNotation from './PlaceNotation.js';
 			};
 		},
 
+		/**
+		 * Describe one bell's work directly from place notation.
+		 *
+		 * @param {string} notation Raw or shorthand place notation.
+		 * @param {number} stage Number of bells in the method.
+		 * @param {number|string} bell Bell index or bell character to describe.
+		 * @param {boolean} [wrap=false] Whether to include lead-end wrap context.
+		 * @returns {WorkDescription} Structured and human-readable work descriptions.
+		 */
 		fromNotation: function( notation, stage, bell, wrap ) {
 			if( typeof wrap === 'undefined' ) { wrap = false; }
 			return Text.fromRows( PlaceNotation.allRows( PlaceNotation.parse( PlaceNotation.expand( notation, stage ), stage ), PlaceNotation.rounds( stage ) ), bell, wrap );

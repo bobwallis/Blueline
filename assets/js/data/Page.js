@@ -1,9 +1,25 @@
 import eve from '../lib/eve.js';
 import URLHelper from '../helpers/URL.js';
 
+/**
+ * Coordinate browser history updates and chromeless page fetches.
+ *
+ * The module emits lifecycle events through `eve` so UI components can react
+ * to navigation requests (`page.request`) and completed loads (`page.loaded`).
+ */
 let mostRecentRequest = URLHelper.currentURL;
 
 const Page = {
+	/**
+	 * Request a new page, update browser history state, and emit page events.
+	 *
+	 * Uses a `mostRecentRequest` guard so stale responses are ignored when users
+	 * navigate rapidly.
+	 *
+	 * @param {string} url Target URL to request.
+	 * @param {string} type Navigation origin (for example `click`, `keyup`, `popstate`).
+	 * @returns {void}
+	 */
 	request(url, type) {
 		url = URLHelper.absolutise(url);
 

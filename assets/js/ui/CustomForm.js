@@ -2,8 +2,18 @@ import eve from '../lib/eve.js';
 import documentOn from '../lib/document_on.js';
 import PlaceNotation from '../helpers/PlaceNotation.js';
 
+/**
+ * Keep the custom method form in sync with URL state and expanded notation text.
+ */
+
 let prevURL = location.href;
 
+/**
+ * Refresh form values from the latest finished page URL.
+ *
+ * @param {string} url Current URL after navigation.
+ * @returns {void}
+ */
 eve.on('page.finished', function (url) {
 	const customMethodNotation = document.getElementById('custom_method_notation');
 	if (customMethodNotation !== null) {
@@ -19,6 +29,11 @@ eve.on('page.finished', function (url) {
 	prevURL = url;
 });
 
+/**
+ * Expand entered notation and display a formatted parsed preview.
+ *
+ * @returns {void}
+ */
 function updateExpansion() {
 	const customMethodNotation = document.getElementById('custom_method_notation');
 	const customMethodStage = document.getElementById('custom_method_stage');

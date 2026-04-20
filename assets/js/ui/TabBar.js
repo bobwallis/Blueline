@@ -1,5 +1,15 @@
 import eve from '../lib/eve.js';
 
+/**
+ * Build and manage tab bars backed by existing content panels.
+ */
+
+/**
+ * Handle tab click interactions and toggle active panel visibility.
+ *
+ * @param {MouseEvent} e Click event.
+ * @returns {void}
+ */
 function tabClick(e) {
 	const target = e.target.closest('li');
 	if (!target || !target.matches || !target.matches('li')) {
@@ -36,6 +46,12 @@ function tabClick(e) {
 	}
 }
 
+/**
+ * Initialise one tab bar instance from parsed settings.
+ *
+ * @param {{landmark: string, tabs: Array<Object>, active?: number}} options Tab-bar settings.
+ * @returns {void}
+ */
 function TabBar(options) {
 	const containerId = options.landmark + '_';
 	let containerEl = document.getElementById(containerId);
@@ -103,6 +119,11 @@ function TabBar(options) {
 	containerEl.addEventListener('click', tabClick);
 }
 
+/**
+ * Discover uninitialised tab placeholders and activate them.
+ *
+ * @returns {void}
+ */
 function checkForNewSettings() {
 	const tabBarPlaceholders = document.querySelectorAll('.TabBar[data-set]');
 

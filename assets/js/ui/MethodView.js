@@ -10,6 +10,9 @@ import PlaceNotation from '../helpers/PlaceNotation.js';
 import Text from '../helpers/Text.js';
 import Music from '../helpers/Music.js';
 
+    /**
+     * Orchestrate method-line and grid rendering, overlays, and settings-driven redraws.
+     */
     var newMethodView;
 
     // Module scope variables
@@ -21,6 +24,12 @@ import Music from '../helpers/Music.js';
         options_plainCourse, line_plainCourse, line_calls;
 
     // Main function to initialize or update the view
+    /**
+     * Initialise a method view instance from JSON options embedded in the page.
+     *
+     * @param {Object} o Method view settings from data-set.
+     * @returns {void}
+     */
     newMethodView = function(o) {
         options = o;
         active = true;
@@ -44,7 +53,11 @@ import Music from '../helpers/Music.js';
         redrawMethodView();
     };
 
-    // Core function to update the display based on settings and options
+    /**
+     * Recompute and redraw the method view when display settings change.
+     *
+     * @returns {void}
+     */
     var redrawMethodView = function() {
         if (!active || !lineContainerEl || !gridContainerEl) {
             return;
@@ -256,6 +269,11 @@ import Music from '../helpers/Music.js';
 
     // --- Initialization and Event Listeners ---
 
+    /**
+     * Scan the DOM for uninitialised method view placeholders and bootstrap them.
+     *
+     * @returns {void}
+     */
     var checkForNewSettings = function() {
         active = false; // Deactivate any existing view
 

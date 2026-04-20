@@ -1,6 +1,12 @@
 /**
  * Manages creation of canvas elements to cope with different pixel ratios
  */
+	/**
+	 * Create a canvas wrapper with device-pixel-ratio-aware sizing.
+	 *
+	 * @param {{id: string, width: number, height: number, scale?: number}} options Canvas options.
+	 * @returns {Object} Canvas wrapper with element, context, and scale.
+	 */
 	var Canvas = function( options ) {
 		// Create canvas element
 		var queryString = location.href.replace( /^.*?(\?|$)/, '' ),
