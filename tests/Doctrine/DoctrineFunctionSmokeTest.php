@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Tests\Doctrine;
 
 use Doctrine\ORM\EntityManagerInterface;

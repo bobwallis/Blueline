@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Tests\Command;
 
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -41,7 +42,7 @@ class ZCalculateMethodSimilaritiesInteractiveTest extends CommandTestCase
                 AND ms.method1_title IS NULL',
             $targetMethods
         );
-                $this->assertSame(5, $missingBefore);
+        $this->assertSame(5, $missingBefore);
 
         [$exitCode, $output] = $this->executeCommand('blueline:calculateMethodSimilarities', array('methods' => $targetMethods));
 

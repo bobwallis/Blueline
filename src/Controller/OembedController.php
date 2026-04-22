@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -40,7 +41,7 @@ class OembedController extends AbstractController
 
         // Check it's a valid URL
         $allowedURLs = array(
-            'methods_view' => '^'.str_replace( array('/','.','TITLE'), array('\/','\.','.+'), $params->get('blueline.endpoint') . $this->generateUrl('Blueline_Methods_view', array('url' => 'TITLE')))
+            'methods_view' => '^'.str_replace(array('/','.','TITLE'), array('\/','\.','.+'), $params->get('blueline.endpoint') . $this->generateUrl('Blueline_Methods_view', array('url' => 'TITLE')))
         );
         $urlConstraint = new RegexConstraint(pattern: '/'.implode('|', array_values($allowedURLs)).'/', message: 'Invalid URL');
         $validator = Validation::createValidator();
@@ -71,8 +72,7 @@ class OembedController extends AbstractController
                 'width' => $imageSize[0] ?? 0,
                 'height' => $imageSize[1] ?? 0
             ));
-        }
-        else {
+        } else {
             throw $this->createNotFoundException('URL not supported');
         }
         return $response;

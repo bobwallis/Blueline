@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Helpers;
 
 /**
@@ -361,7 +362,7 @@ class LeadHeadCodes
     {
         $leadHead = (is_array($leadHead)) ? implode('', $leadHead) : $leadHead;
         $stage = Stages::toInt($stage);
-        $stageIsEven = ($stage%2 == 0);
+        $stageIsEven = ($stage % 2 == 0);
         $stageNotation = PlaceNotation::intToBell($stage);
 
         $code = false;

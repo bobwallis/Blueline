@@ -111,6 +111,13 @@ Run targeted tests directly with PHPUnit:
 - `APP_ENV=test ./bin/phpunit tests/Controller`
 - `APP_ENV=test ./bin/phpunit --filter testActionName tests/Controller/DefaultControllerTest.php`
 
+Run PHP style checks/fixes for `src/` and `tests/`:
+
+- `symfony composer lint:php-style`
+- `symfony composer fix:php-style`
+
+The project targets PSR-12 via PHP-CS-Fixer. `./bin/test` reports style violations without failing the run.
+
 Run frontend linting directly during iteration:
 
 - `npm run lint` to run all frontend lint checks together

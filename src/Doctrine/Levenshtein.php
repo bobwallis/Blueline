@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Doctrine;
 
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;

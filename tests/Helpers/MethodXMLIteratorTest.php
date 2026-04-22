@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Tests\Helpers;
 
 use Blueline\Helpers\MethodXMLIterator;
@@ -197,9 +198,9 @@ class MethodXMLIteratorTest extends TestCase
 XML;
     }
 
-        private function validXmlFixtureWithPerformances(): string
-        {
-                return <<<'XML'
+    private function validXmlFixtureWithPerformances(): string
+    {
+        return <<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <methods>
     <methodSet>
@@ -234,7 +235,7 @@ XML;
     </methodSet>
 </methods>
 XML;
-        }
+    }
 
     private function xmlFixtureWithNewFields(): string
     {

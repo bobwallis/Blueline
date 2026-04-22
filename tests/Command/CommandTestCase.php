@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Tests\Command;
 
 use Doctrine\DBAL\Connection;
@@ -92,8 +93,7 @@ abstract class CommandTestCase extends KernelTestCase
     {
         try {
             $result = $this->connection->fetchOne($sql, $params);
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             $this->fail('DB query failed in test helper: '.$exception->getMessage());
         }
 
@@ -108,8 +108,7 @@ abstract class CommandTestCase extends KernelTestCase
     {
         try {
             $this->connection->executeStatement($sql, $params);
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             $this->fail('DB command failed in test helper: '.$exception->getMessage());
         }
     }

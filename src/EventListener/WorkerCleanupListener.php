@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\EventListener;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,7 +18,8 @@ class WorkerCleanupListener
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-    ) {}
+    ) {
+    }
 
     public function onKernelTerminate(TerminateEvent $event): void
     {

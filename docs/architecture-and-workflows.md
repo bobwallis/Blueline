@@ -50,12 +50,17 @@ This script downloads external method data, runs import commands, recalculates s
 Use:
 - `./bin/test`
 
+For PHP style checks/fixes in `src/` and `tests/`:
+- `symfony composer lint:php-style`
+- `symfony composer fix:php-style`
+
 This runs:
 - A check that the test database exists and  has data
 - Doctrine schema validation
 - Symfony container lint
 - Twig template lint
 - PHP code lint
+- PHP-CS-Fixer PSR-12 style check for `src/` and `tests/` (non-blocking)
 - Frontend asset complication
 - PHPUnit
 

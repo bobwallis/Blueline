@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -40,7 +41,11 @@ class ExportCollectionsCommand extends Command
                                            ->getArrayResult();
 
         foreach ($collections as &$collection) {
-            $collection['methods'] = array_map( function($e) { return $e['title']; }, $this->entityManager
+            $collection['methods'] = array_map(
+                function ($e) {
+                    return $e['title'];
+                },
+                $this->entityManager
                 ->createQuery("SELECT partial m.{title} FROM Blueline\Entity\Method m JOIN m.collections mc JOIN mc.collection c WHERE c.id = :collection ORDER BY mc.position ASC")
                 ->setParameter('collection', $collection['id'])
                 ->getArrayResult()

@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -44,12 +45,16 @@ class NotationController extends AbstractController
         }
 
         // Convert
-        $vars['stage'] = isset($vars['stage'])? intval($vars['stage']) : max(array_map(function ($c) { return PlaceNotation::bellToInt($c); }, array_filter(str_split($vars['notation']), function ($c) { return preg_match('/[0-9A-Z]/', $c); })));
+        $vars['stage'] = isset($vars['stage']) ? intval($vars['stage']) : max(array_map(function ($c) {
+            return PlaceNotation::bellToInt($c);
+        }, array_filter(str_split($vars['notation']), function ($c) {
+            return preg_match('/[0-9A-Z]/', $c);
+        })));
         $vars['expanded'] = PlaceNotation::expand($vars['notation'], $vars['stage']);
         $vars['siril'] = PlaceNotation::siril($vars['notation'], $vars['stage']);
 
         $response = new Response();
-        switch($request->getRequestFormat()) {
+        switch ($request->getRequestFormat()) {
             case 'txt':
                 $response->setContent($vars['expanded']."\n".$vars['siril']);
                 break;

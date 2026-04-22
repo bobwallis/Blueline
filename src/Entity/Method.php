@@ -9,6 +9,7 @@ use Blueline\Helpers\LeadHeadCodes;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
+
 require_once(__DIR__.'/../Helpers/arrays_equal_in_some_rotation.php');
 use function Blueline\Helpers\arrays_equal_in_some_rotation;
 
@@ -168,37 +169,37 @@ class Method
         }
 
         $fieldSerialisers = array(
-            'title' => fn() => $this->getTitle(),
-            'abbreviation' => fn() => $this->getAbbreviation(),
-            'provisional' => fn() => $this->getProvisional(),
-            'stage' => fn() => $this->getStage(),
-            'classification' => fn() => $this->getClassification(),
-            'nameMetaphone' => fn() => $this->getNameMetaphone(),
-            'notation' => fn() => $this->getNotation(),
-            'notationExpanded' => fn() => $this->getNotationExpanded(),
-            'leadHeadCode' => fn() => $this->getLeadHeadCode(),
-            'leadHead' => fn() => $this->getLeadHead(),
-            'fchGroups' => fn() => $this->getFchGroups(),
-            'lengthOfLead' => fn() => $this->getLengthOfLead(),
-            'lengthOfCourse' => fn() => $this->getLengthOfCourse(),
-            'numberOfLeads' => fn() => $this->getNumberOfLeads(),
-            'numberOfHunts' => fn() => $this->getNumberOfHunts(),
-            'jump' => fn() => $this->getJump(),
-            'little' => fn() => $this->getLittle(),
-            'differential' => fn() => $this->getDifferential(),
-            'plain' => fn() => $this->getPlain(),
-            'trebleDodging' => fn() => $this->getTrebleDodging(),
-            'palindromic' => fn() => $this->getPalindromic(),
-            'doubleSym' => fn() => $this->getDoubleSym(),
-            'rotational' => fn() => $this->getRotational(),
-            'calls' => fn() => $this->getCalls(),
-            'ruleOffs' => fn() => $this->getRuleOffs(),
-            'callingPositions' => fn() => $this->getCallingPositions(),
-            'magic' => fn() => $this->getMagic(),
-            'cccbrId' => fn() => $this->getCccbrId(),
-            'methodReferences' => fn() => $this->getMethodReferences(),
-            'extensionConstruction' => fn() => $this->getExtensionConstruction(),
-            'url' => fn() => $this->getUrl(),
+            'title' => fn () => $this->getTitle(),
+            'abbreviation' => fn () => $this->getAbbreviation(),
+            'provisional' => fn () => $this->getProvisional(),
+            'stage' => fn () => $this->getStage(),
+            'classification' => fn () => $this->getClassification(),
+            'nameMetaphone' => fn () => $this->getNameMetaphone(),
+            'notation' => fn () => $this->getNotation(),
+            'notationExpanded' => fn () => $this->getNotationExpanded(),
+            'leadHeadCode' => fn () => $this->getLeadHeadCode(),
+            'leadHead' => fn () => $this->getLeadHead(),
+            'fchGroups' => fn () => $this->getFchGroups(),
+            'lengthOfLead' => fn () => $this->getLengthOfLead(),
+            'lengthOfCourse' => fn () => $this->getLengthOfCourse(),
+            'numberOfLeads' => fn () => $this->getNumberOfLeads(),
+            'numberOfHunts' => fn () => $this->getNumberOfHunts(),
+            'jump' => fn () => $this->getJump(),
+            'little' => fn () => $this->getLittle(),
+            'differential' => fn () => $this->getDifferential(),
+            'plain' => fn () => $this->getPlain(),
+            'trebleDodging' => fn () => $this->getTrebleDodging(),
+            'palindromic' => fn () => $this->getPalindromic(),
+            'doubleSym' => fn () => $this->getDoubleSym(),
+            'rotational' => fn () => $this->getRotational(),
+            'calls' => fn () => $this->getCalls(),
+            'ruleOffs' => fn () => $this->getRuleOffs(),
+            'callingPositions' => fn () => $this->getCallingPositions(),
+            'magic' => fn () => $this->getMagic(),
+            'cccbrId' => fn () => $this->getCccbrId(),
+            'methodReferences' => fn () => $this->getMethodReferences(),
+            'extensionConstruction' => fn () => $this->getExtensionConstruction(),
+            'url' => fn () => $this->getUrl(),
         );
 
         if (is_array($fields) && !empty($fields)) {
@@ -316,7 +317,9 @@ class Method
             if ($this->getJump()) {
                 $this->setClassification('Jump');
             } elseif ($this->getNumberOfHunts() > 0) {
-                $principalHunts = array_values(array_filter($this->getHuntDetails(), function ($h) { return $h['principal']; } ));
+                $principalHunts = array_values(array_filter($this->getHuntDetails(), function ($h) {
+                    return $h['principal'];
+                }));
                 $principalHuntType = $principalHunts[0]['type'];
 
                 // For Plain if all bells only make places and hunt then it's 'Place', otherwise 'Bob'
@@ -351,12 +354,14 @@ class Method
 
                     $this->setClassification($allBellPathsArePlaceNotationOnly ? 'Place' : 'Bob');
 
-                // For Treble Dodging see if internal places are made at each cross section. All => 'Surprise', None => 'Treble Bob', Some => 'Delight'
+                    // For Treble Dodging see if internal places are made at each cross section. All => 'Surprise', None => 'Treble Bob', Some => 'Delight'
                 } elseif ($principalHuntType == 'Treble Dodging') {
                     // If the hunt bell dodges in only one position it's Treble Bob (since there are no cross sections, and that edge case is defined Treble Bob)
-                    if (array_reduce($principalHunts, function ($carry, $val) { return $carry && max($val['path']) - min($val['path']) == 1; }, true)) {
+                    if (array_reduce($principalHunts, function ($carry, $val) {
+                        return $carry && max($val['path']) - min($val['path']) == 1;
+                    }, true)) {
                         $this->setClassification('Treble Bob');
-                    // Otherwise inspect cross sections
+                        // Otherwise inspect cross sections
                     } else {
                         $lead = $this->getLead();
                         // Prefix rounds to the lead to detect cross sections at the start of the lead as well as the end.
@@ -387,17 +392,21 @@ class Method
                             return PlaceNotation::changeHasInternalPlaces($notationExploded[$change], $this->getStage());
                         }, $crossSectionChanges);
                         // If an internal place is made at every cross section it's 'Surprise'
-                        if (array_reduce($internalPlacesAtCrossSectionChanges, function($c, $v) { return $c && $v; }, true )) {
+                        if (array_reduce($internalPlacesAtCrossSectionChanges, function ($c, $v) {
+                            return $c && $v;
+                        }, true)) {
                             $this->setClassification('Surprise');
-                        // If none then it's 'Treble Bob'
-                        } elseif (array_reduce($internalPlacesAtCrossSectionChanges, function($c, $v) { return $c && !$v; }, true )) {
+                            // If none then it's 'Treble Bob'
+                        } elseif (array_reduce($internalPlacesAtCrossSectionChanges, function ($c, $v) {
+                            return $c && !$v;
+                        }, true)) {
                             $this->setClassification('Treble Bob');
-                        // Otherwise it's 'Delight'
+                            // Otherwise it's 'Delight'
                         } else {
                             $this->setClassification('Delight');
                         }
                     }
-                // Only 'Plain' and 'Treble Dodging' hunt types have multiple options - so in any other cases we can just use the hunt type as the method classification
+                    // Only 'Plain' and 'Treble Dodging' hunt types have multiple options - so in any other cases we can just use the hunt type as the method classification
                 } else {
                     $this->setClassification($principalHuntType);
                 }
@@ -550,7 +559,9 @@ class Method
     public function getNumberOfLeads()
     {
         if (!isset($this->numberOfLeads)) {
-            $permutation = array_map(function ($b) { return PlaceNotation::bellToInt($b) - 1; }, str_split($this->getLeadHead()));
+            $permutation = array_map(function ($b) {
+                return PlaceNotation::bellToInt($b) - 1;
+            }, str_split($this->getLeadHead()));
             $rounds = PlaceNotation::rounds($this->getStage());
             $test = PlaceNotation::permute($rounds, $permutation);
             for ($numberOfLeads = 1; !PlaceNotation::rowsEqual($test, $rounds); ++$numberOfLeads) {
@@ -602,9 +613,11 @@ class Method
     {
         if (!isset($this->hunts)) {
             $hunts = array();
-            $leadHead = array_map(function ($n) { return PlaceNotation::bellToInt($n); }, str_split($this->getLeadHead()));
+            $leadHead = array_map(function ($n) {
+                return PlaceNotation::bellToInt($n);
+            }, str_split($this->getLeadHead()));
             for ($i = 0, $iLim = count($leadHead); $i < $iLim; ++$i) {
-                if (($i+1) == $leadHead[$i]) {
+                if (($i + 1) == $leadHead[$i]) {
                     array_push($hunts, $leadHead[$i]);
                 }
             }
@@ -653,7 +666,7 @@ class Method
 
                     // Count the number of places in the hunt bell's path
                     $numberOfPlacesInPath = array_reduce($huntDetails[$i]['path'], function ($carry, $pos) {
-                        $carry['places'] = ($carry['lastPos'] == $pos)? $carry['places'] + 1 : $carry['places'];
+                        $carry['places'] = ($carry['lastPos'] == $pos) ? $carry['places'] + 1 : $carry['places'];
                         $carry['lastPos'] = $pos;
                         return $carry;
                     }, array('lastPos' => end($huntDetails[$i]['path']), 'places' => 0))['places'];
@@ -687,7 +700,7 @@ class Method
                         } else {
                             $huntDetails[$i]['type'] = 'Hybrid';
                         }
-                    // Non-well-formed paths are Hybrid
+                        // Non-well-formed paths are Hybrid
                     } else {
                         $huntDetails[$i]['type'] = 'Hybrid';
                     }
@@ -696,11 +709,15 @@ class Method
                 // Determine which are the principal hunts. If there's only one it is the principal hunt
                 if (count($huntDetails) == 1) {
                     $huntDetails[0]['principal'] = true;
-                // Otherwise there is a hierachy of hunt types defined in the rules (and just the non-little hunts of that type if there are both little and non-little examples)
+                    // Otherwise there is a hierachy of hunt types defined in the rules (and just the non-little hunts of that type if there are both little and non-little examples)
                 } else {
                     foreach (array('Plain', 'Treble Dodging', 'Treble Place', 'Alliance', 'Hybrid') as $type) {
-                        $numberOfHuntsOfType = count(array_filter($huntDetails, function ($h) use ($type) { return $h['type'] == $type; }));
-                        $numberOfHuntsOfTypeWhichAreLittle = count(array_filter($huntDetails, function ($h) use ($type) { return $h['type'] == $type && $h['little']; }));
+                        $numberOfHuntsOfType = count(array_filter($huntDetails, function ($h) use ($type) {
+                            return $h['type'] == $type;
+                        }));
+                        $numberOfHuntsOfTypeWhichAreLittle = count(array_filter($huntDetails, function ($h) use ($type) {
+                            return $h['type'] == $type && $h['little'];
+                        }));
                         if ($numberOfHuntsOfType > 0) {
                             for ($i = 0; $i < count($huntDetails); ++$i) {
                                 $huntDetails[$i]['principal'] = ($huntDetails[$i]['type'] == $type && ($numberOfHuntsOfType == $numberOfHuntsOfTypeWhichAreLittle || !$huntDetails[$i]['little']));
@@ -724,7 +741,7 @@ class Method
     public function getJump()
     {
         if (!isset($this->jump)) {
-            $this->setJump(strpos($this->getNotationExpanded(),'(') !== false || strpos($this->getNotationExpanded(),'[') !== false);
+            $this->setJump(strpos($this->getNotationExpanded(), '(') !== false || strpos($this->getNotationExpanded(), '[') !== false);
         }
         return $this->jump;
     }
@@ -738,7 +755,9 @@ class Method
     public function getLittle()
     {
         if (!isset($this->little)) {
-            $this->setLittle(count(array_filter($this->getHuntDetails(), function ($h) { return $h['principal'] && $h['little']; })) > 0);
+            $this->setLittle(count(array_filter($this->getHuntDetails(), function ($h) {
+                return $h['principal'] && $h['little'];
+            })) > 0);
         }
         return $this->little;
     }
@@ -752,12 +771,16 @@ class Method
     public function getDifferential()
     {
         if (!isset($this->differential)) {
-            $leadHead = array_map(function ($n) { return PlaceNotation::bellToInt($n); }, str_split($this->getLeadHead()));
+            $leadHead = array_map(function ($n) {
+                return PlaceNotation::bellToInt($n);
+            }, str_split($this->getLeadHead()));
             $visited = array();
             $workingBellCycleLengths = array();
 
             for ($bell = 1; $bell <= $this->getStage(); ++$bell) {
-                if (isset($visited[$bell])) { continue; }
+                if (isset($visited[$bell])) {
+                    continue;
+                }
                 $current = $bell;
                 $cycleLength = 0;
                 // Walk the lead-head permutation to find this bell's cycle length in leads.
@@ -767,7 +790,9 @@ class Method
                     ++$cycleLength;
                 } while (!isset($visited[$current]));
                 // Single-bell cycles are hunt bells; only working-bell cycle lengths matter for this test.
-                if ($cycleLength > 1) { $workingBellCycleLengths[] = $cycleLength; }
+                if ($cycleLength > 1) {
+                    $workingBellCycleLengths[] = $cycleLength;
+                }
             }
             // If there are working bells with different cycle lengths, the method is differential.
             $this->setDifferential(!$this->getJump() && count(array_unique($workingBellCycleLengths)) > 1);
@@ -784,7 +809,9 @@ class Method
     public function getPlain()
     {
         if (!isset($this->plain)) {
-            $this->setPlain(!$this->getJump() && count(array_filter($this->getHuntDetails(), function ($h) { return $h['principal'] && $h['type'] == 'Plain'; })) > 0);
+            $this->setPlain(!$this->getJump() && count(array_filter($this->getHuntDetails(), function ($h) {
+                return $h['principal'] && $h['type'] == 'Plain';
+            })) > 0);
         }
         return $this->plain;
     }
@@ -798,7 +825,9 @@ class Method
     public function getTrebleDodging()
     {
         if (!isset($this->trebleDodging)) {
-            $this->setTrebleDodging(!$this->getJump() && count(array_filter($this->getHuntDetails(), function ($h) { return $h['principal'] && $h['type'] == 'Treble Dodging'; })) > 0);
+            $this->setTrebleDodging(!$this->getJump() && count(array_filter($this->getHuntDetails(), function ($h) {
+                return $h['principal'] && $h['type'] == 'Treble Dodging';
+            })) > 0);
         }
         return $this->trebleDodging;
     }
@@ -934,7 +963,7 @@ class Method
                             if ($leadEndChange == '12'.$n || $leadEndChange == '1') {
                                 $calls = array(
                                     'Bob' => array('symbol' => '-', 'notation' => '14'.$n, 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1),
-                                    'Single' => array('symbol' => 's', 'notation' => (($stage<6) ? '123' : '1234'.$n), 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1)
+                                    'Single' => array('symbol' => 's', 'notation' => (($stage < 6) ? '123' : '1234'.$n), 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1)
                                 );
                             } elseif ($leadEndChange == '123') {
                                 $calls = array(
@@ -985,7 +1014,7 @@ class Method
     public function getRuleOffs()
     {
         if (empty($this->ruleOffs)) {
-        // Check for methods similar to Grandsire and offset the rule off by one. TODO: Check that the hunt bells are actually hunting as well as leading one after the other near the lead end. (Hereford D G Bob Doubles is an example false positive)
+            // Check for methods similar to Grandsire and offset the rule off by one. TODO: Check that the hunt bells are actually hunting as well as leading one after the other near the lead end. (Hereford D G Bob Doubles is an example false positive)
             if ($this->getNumberOfHunts() == 2) {
                 $hunts = $this->getHunts();
                 $notationExploded = PlaceNotation::explode($this->getNotationExpanded());
@@ -1025,22 +1054,24 @@ class Method
                 $leadHeads = $this->getLeadHeads();
                 // Work out what the lead end of a bobbed lead looks like
                 $notation = PlaceNotation::explodedToPermutations($stage, PlaceNotation::explode($this->getNotationExpanded()));
-                $notation[$lengthOfLead-1] = $bobNotation[0];
+                $notation[$lengthOfLead - 1] = $bobNotation[0];
                 $bobbedLead = PlaceNotation::apply($notation, PlaceNotation::rounds($stage));
-                $bobbedLeadHeadPermutation = array_map(function ($b) { return PlaceNotation::bellToInt($b) - 1; }, array_pop($bobbedLead));
+                $bobbedLeadHeadPermutation = array_map(function ($b) {
+                    return PlaceNotation::bellToInt($b) - 1;
+                }, array_pop($bobbedLead));
                 // Collect an array of what happens at each lead if a bob is called
                 $bobbedLeadHeads = array( PlaceNotation::permute(PlaceNotation::rounds($stage), $bobbedLeadHeadPermutation) );
                 for ($i = 1; $i < count($leadHeads); $i++) {
-                    array_push($bobbedLeadHeads, PlaceNotation::permute($leadHeads[$i-1], $bobbedLeadHeadPermutation));
+                    array_push($bobbedLeadHeads, PlaceNotation::permute($leadHeads[$i - 1], $bobbedLeadHeadPermutation));
                 }
                 // Convert the array of lead heads into calling position names
                 $this->callingPositions = array( 'from' => 0, 'every' => $lengthOfLead, 'titles' => array_map(function ($leadEnd) use ($stage) {
                     $position = array_search(PlaceNotation::intToBell($stage), $leadEnd);
-                    switch ($position+1) {
+                    switch ($position + 1) {
                         case $stage:
                             return 'H';
-                        case $stage-1:
-                            if ($stage%2 == 0) {
+                        case $stage - 1:
+                            if ($stage % 2 == 0) {
                                 return 'W';
                             }
                             return 'M';
@@ -1050,8 +1081,8 @@ class Method
                             return 'B';
                         case 4:
                             return 'F';
-                        case $stage-2:
-                            if ($stage%2 == 0) {
+                        case $stage - 2:
+                            if ($stage % 2 == 0) {
                                 return 'M';
                             }
                             return 'W';
@@ -1168,22 +1199,30 @@ class Method
 
     public function getRenamed()
     {
-        return $this->getPerformances()->filter(function ($p) { return $p->getType() == 'renamedMethod'; });
+        return $this->getPerformances()->filter(function ($p) {
+            return $p->getType() == 'renamedMethod';
+        });
     }
 
     public function getDuplicates()
     {
-        return $this->getPerformances()->filter(function ($p) { return $p->getType() == 'duplicateMethod'; });
+        return $this->getPerformances()->filter(function ($p) {
+            return $p->getType() == 'duplicateMethod';
+        });
     }
 
     public function getFirstTowerbellPeal()
     {
-        return $this->getPerformances()->filter(function ($p) { return $p->getType() == 'firstTowerbellPeal'; })->get(0);
+        return $this->getPerformances()->filter(function ($p) {
+            return $p->getType() == 'firstTowerbellPeal';
+        })->get(0);
     }
 
     public function getFirstHandbellPeal()
     {
-        return $this->getPerformances()->filter(function ($p) { return $p->getType() == 'firstHandbellPeal'; })->get(0);
+        return $this->getPerformances()->filter(function ($p) {
+            return $p->getType() == 'firstHandbellPeal';
+        })->get(0);
     }
 
     // Non-database methods
@@ -1232,7 +1271,9 @@ class Method
         if (!$this->leadHeads) {
             $rounds = PlaceNotation::rounds($this->getStage());
             $tmp = str_split($this->getLeadHead());
-            $leadHeadPermutation = array_map(function ($b) { return PlaceNotation::bellToInt($b) - 1; }, $tmp);
+            $leadHeadPermutation = array_map(function ($b) {
+                return PlaceNotation::bellToInt($b) - 1;
+            }, $tmp);
             $leadHeads = array( $tmp );
             while (!PlaceNotation::rowsEqual($rounds, $tmp)) {
                 $tmp = PlaceNotation::permute($tmp, $leadHeadPermutation);

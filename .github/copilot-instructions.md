@@ -25,6 +25,7 @@
 - Use `./bin/test` only for full-suite validation.
 - Do not pass path/filter arguments to `./bin/test`; it does not support targeted subsets.
 - For targeted tests, call PHPUnit directly, e.g. `APP_ENV=test ./bin/phpunit tests/Controller` or `APP_ENV=test ./bin/phpunit --filter <name> <path>`.
+- For PHP changes in `src/` or `tests/`, run `symfony composer lint:php-style` (or `symfony composer fix:php-style`) to enforce PSR-12 via PHP-CS-Fixer.
 - Include very slow command tests only when needed with `BLUELINE_RUN_SLOW_COMMAND_TESTS=1 ./bin/test`.
 - For frontend iteration, run `npm run lint` (or `lint:js`, `lint:css`, `lint:svg`) when changing files under `assets/`.
 - In normal dev loops, edit `assets/` and refresh the browser (no manual compile step).
@@ -59,6 +60,7 @@
 - Add or update targeted tests in `tests/` when changing behavior.
 - At minimum, run `./bin/test` for validation before submitting.
 - During iteration, run only relevant tests via direct PHPUnit commands instead of trying to scope `./bin/test`.
+- For style-only PHP changes, run `symfony composer lint:php-style` at minimum before final validation.
 - When changing frontend assets, ensure CSS/JS/SVG linting passes (`npm run lint`) before final validation.
 - `./bin/test` may prompt to create/populate the test database when missing.
 

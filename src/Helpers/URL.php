@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Helpers;
 
 /**
@@ -31,7 +32,9 @@ class URL
 
         // Replace S with Surprise, etc...
         $classificationsInitials = array_map(function ($c) {
-            return implode('', array_map(function ($w) { return $w[0]; }, explode(' ', $c)));
+            return implode('', array_map(function ($w) {
+                return $w[0];
+            }, explode(' ', $c)));
         }, Classifications::toArray());
         $matches = array();
         if (preg_match('/_('.implode('|', $classificationsInitials).')_('.implode('|', Stages::toArray()).')$/', $url, $matches)) {
@@ -41,7 +44,7 @@ class URL
         }
 
         // Replace "No." with "No. "
-        $url = preg_replace( '/No([0-9]+)/', 'No_\1', $url );
+        $url = preg_replace('/No([0-9]+)/', 'No_\1', $url);
 
         // If the title contains no spaces, then add them in (messed up a sitemap import in the distant past and still get crawler errors from it)
         if (strpos($url, '_') === false) {

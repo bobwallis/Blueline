@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -73,8 +74,8 @@ class MethodsController extends AbstractController
 
         // Parse search variables
         $searchVariables = Search::requestToSearchVariables($request, array_values($methodMetadata->fieldNames));
-        $searchVariables['fields'] = implode(',', array_values(array_unique(empty($searchVariables['fields'])? array('title', 'abbreviation', 'url', 'classification', 'stage', 'notation', 'ruleOffs', 'calls', 'callingPositions', 'cccbrId') : array_merge($searchVariables['fields'], ($request->getRequestFormat()=='html')?array('title', 'url'):array()))));
-        $searchVariables['sort']   = empty($searchVariables['sort'])? 'magic' : $searchVariables['sort'];
+        $searchVariables['fields'] = implode(',', array_values(array_unique(empty($searchVariables['fields']) ? array('title', 'abbreviation', 'url', 'classification', 'stage', 'notation', 'ruleOffs', 'calls', 'callingPositions', 'cccbrId') : array_merge($searchVariables['fields'], ($request->getRequestFormat() == 'html') ? array('title', 'url') : array()))));
+        $searchVariables['sort']   = empty($searchVariables['sort']) ? 'magic' : $searchVariables['sort'];
 
         // Create query
         $query = Search::searchVariablesToBasicQuery($searchVariables, $methodRepository, $methodMetadata);
@@ -148,8 +149,8 @@ class MethodsController extends AbstractController
 
         // Execute
         $methods = $query->getQuery()->getResult();
-        $count = (count($methods)+$searchVariables['offset'] < $searchVariables['count'])? count($methods) : Search::queryToCountQuery($query, $methodMetadata)->getQuery()->getSingleScalarResult();
-        $pageActive = max(1, ceil(($searchVariables['offset']+1)/$searchVariables['count']));
+        $count = (count($methods) + $searchVariables['offset'] < $searchVariables['count']) ? count($methods) : Search::queryToCountQuery($query, $methodMetadata)->getQuery()->getSingleScalarResult();
+        $pageActive = max(1, ceil(($searchVariables['offset'] + 1) / $searchVariables['count']));
         $pageCount =  max(1, ceil($count / $searchVariables['count']));
 
         return $this->render('Methods/search.'.$request->getRequestFormat().'.twig', compact('searchVariables', 'count', 'pageActive', 'pageCount', 'methods'));
@@ -198,7 +199,7 @@ class MethodsController extends AbstractController
             if (!isset($section) || intval($request->query->get('scale')) === 0) {
                 $url = $this->generateUrl('Blueline_Methods_view', array(
                     'scale'   => (intval($request->query->get('scale')) ?: 1),
-                    'style'   => (!$section)? 'numbers' : $section,
+                    'style'   => (!$section) ? 'numbers' : $section,
                     'url'     => $url,
                     '_format' => 'png'
                 ));
@@ -224,7 +225,9 @@ class MethodsController extends AbstractController
                 return $this->redirect($redirect, 301);
             }
             // Try and find a version with fixed capitalisation
-            $capitalisedMethod = $methodRepository->findByURL(preg_replace_callback('/(^|_)(.)/', function($w) { return $w[1].strtoupper($w[2]); }, $url));
+            $capitalisedMethod = $methodRepository->findByURL(preg_replace_callback('/(^|_)(.)/', function ($w) {
+                return $w[1].strtoupper($w[2]);
+            }, $url));
             if ($capitalisedMethod !== null) {
                 $style = $request->query->get('style');
                 $redirect = $this->generateUrl('Blueline_Methods_view', array(
@@ -276,7 +279,7 @@ class MethodsController extends AbstractController
         }
 
         // Do some basic conversion
-        $vars['stage'] = isset($vars['stage'])? intval($vars['stage']) : PlaceNotation::guessStage($vars['notation']);
+        $vars['stage'] = isset($vars['stage']) ? intval($vars['stage']) : PlaceNotation::guessStage($vars['notation']);
         $vars['notationExpanded'] = PlaceNotation::expand($vars['notation'], $vars['stage']);
 
         // Check whether the method already exists and redirect to it if so
@@ -316,7 +319,7 @@ class MethodsController extends AbstractController
                         'stage'    => $vars['stage'],
                         'notation' => $vars['notation'],
                         'scale'    => (intval($request->query->get('scale')) ?: 1),
-                        'style'    => (!$section)? 'numbers' : $section,
+                        'style'    => (!$section) ? 'numbers' : $section,
                         '_format'  => 'png'
                     ));
                     return $this->redirect($url, 301);
@@ -335,7 +338,7 @@ class MethodsController extends AbstractController
     {
         $methods = $em->createQuery('SELECT partial m.{title,url} FROM Blueline\Entity\Method m ORDER BY m.url')
                     ->setMaxResults(12500)
-                    ->setFirstResult(($page-1)*12500)
+                    ->setFirstResult(($page - 1) * 12500)
                     ->getArrayResult();
         return $this->render('Methods/sitemap.xml.twig', compact('methods'));
     }

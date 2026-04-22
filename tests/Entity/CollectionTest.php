@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Tests\Entity;
 
 use Blueline\Entity\Collection;

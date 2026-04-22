@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\EventListener;
 
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;

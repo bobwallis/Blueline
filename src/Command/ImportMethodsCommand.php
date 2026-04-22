@@ -1,19 +1,4 @@
 <?php
-/*
- * This file is part of Blueline.
- *
- * Symfony console command that imports bell-ringing method data from XML files.
- *
- * Parses method XML from ./Resources/data/
- * and updates the methods table with upsert operations. Also processes associated
- * performance data.
- *
- * Performs bulk inserts with batching for performance and memory efficiency.
- * Run via: bin/console blueline:importMethods
- * Or as part of: bin/fetchAndImportData
- *
- * (c) Bob Wallis <bob.wallis@gmail.com>
- */
 
 namespace Blueline\Command;
 
@@ -28,6 +13,20 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Blueline\Helpers\MethodXMLIterator;
 use Blueline\Entity\Method;
+
+/*
+ * Symfony console command that imports bell-ringing method data from XML files.
+ *
+ * Parses method XML from ./Resources/data/
+ * and updates the methods table with upsert operations. Also processes associated
+ * performance data.
+ *
+ * Performs bulk inserts with batching for performance and memory efficiency.
+ * Run via: bin/console blueline:importMethods
+ * Or as part of: bin/fetchAndImportData
+ *
+ * (c) Bob Wallis <bob.wallis@gmail.com>
+ */
 
 class ImportMethodsCommand extends Command
 {
@@ -110,8 +109,7 @@ class ImportMethodsCommand extends Command
         try {
             $output->writeln('<info>Clear existing first peal data...</info>');
             $this->connection->executeStatement("DELETE FROM performances WHERE type NOT IN ('renamedMethod', 'duplicateMethod')");
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             $output->writeln('<error>Failed to initialise import: '.$exception->getMessage().'</error>');
             return 0;
         }
@@ -140,8 +138,8 @@ class ImportMethodsCommand extends Command
             $xmlIterator = new MethodXMLIterator(__DIR__.'/../Resources/data/'.$file->getFilename());
             $methodCount = count($xmlIterator);
             $progress = new ProgressBar($output, $methodCount);
-            $progress->setBarWidth($targetConsoleWidth - (strlen((string) $methodCount)*2) - 10);
-            $progress->setRedrawFrequency(max(1, $methodCount/100));
+            $progress->setBarWidth($targetConsoleWidth - (strlen((string) $methodCount) * 2) - 10);
+            $progress->setRedrawFrequency(max(1, $methodCount / 100));
             try {
                 $this->connection->transactional(function () use ($xmlIterator, $validFields, &$importedMethods, $progress, $output, $normaliseRow): void {
                     foreach ($xmlIterator as $index => $xmlRow) {
@@ -160,8 +158,7 @@ class ImportMethodsCommand extends Command
                         try {
                             $this->upsertMethod($methodRow);
                             $this->connection->releaseSavepoint($upsertSavepoint);
-                        }
-                        catch (Exception $exception) {
+                        } catch (Exception $exception) {
                             $this->connection->rollbackSavepoint($upsertSavepoint);
 
                             $retrySavepoint = $upsertSavepoint.'_retry';
@@ -182,8 +179,7 @@ class ImportMethodsCommand extends Command
                                 $progress->clear();
                                 $output->writeln('<comment>Removed provisionally-named '.$xmlRow['title'].' as name conflicts with a real method.</comment>');
                                 $progress->display();
-                            }
-                            catch (Exception $innerException) {
+                            } catch (Exception $innerException) {
                                 $this->connection->rollbackSavepoint($retrySavepoint);
                                 $progress->clear();
                                 $output->writeln('<error>Failed to insert '.$xmlRow['title'].': '.$innerException->getMessage().'</error>');
@@ -205,23 +201,20 @@ class ImportMethodsCommand extends Command
                                 try {
                                     $this->insertPerformanceRows($performanceRows);
                                     $this->connection->releaseSavepoint($performanceSavepoint);
-                                }
-                                catch (Exception $exception) {
+                                } catch (Exception $exception) {
                                     $this->connection->rollbackSavepoint($performanceSavepoint);
                                     $progress->clear();
                                     $output->writeln('<error>Failed to add performance for '.$xmlRow['title'].': '.$exception->getMessage().'</error>');
                                     $progress->display();
                                 }
-                            }
-                            else {
+                            } else {
                                 foreach ($performanceRows as $performanceIndex => $performanceRow) {
                                     $performanceSavepoint = 'import_performance_'.(string) $index.'_'.(string) $performanceIndex;
                                     $this->connection->createSavepoint($performanceSavepoint);
                                     try {
                                         $this->insertPerformanceRows(array($performanceRow));
                                         $this->connection->releaseSavepoint($performanceSavepoint);
-                                    }
-                                    catch (Exception $exception) {
+                                    } catch (Exception $exception) {
                                         $this->connection->rollbackSavepoint($performanceSavepoint);
                                         $progress->clear();
                                         $output->writeln('<error>Failed to add performance for '.$xmlRow['title'].': '.$exception->getMessage().'</error>');
@@ -235,8 +228,7 @@ class ImportMethodsCommand extends Command
                         $progress->advance();
                     }
                 });
-            }
-            catch (Exception $exception) {
+            } catch (Exception $exception) {
                 $progress->clear();
                 $output->writeln('<error>Failed to import '.$file->getFilename().': '.$exception->getMessage().'</error>');
                 $progress->display();
@@ -250,15 +242,14 @@ class ImportMethodsCommand extends Command
         try {
             $idsInDatabaseCount = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM methods');
             $idsInDatabase = $this->connection->executeQuery('SELECT title FROM methods')->iterateAssociative();
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             $output->writeln('<error>Failed to fetch methods for deletion check: '.$exception->getMessage().'</error>');
             return 0;
         }
 
         $progress = new ProgressBar($output, $idsInDatabaseCount);
-        $progress->setBarWidth($targetConsoleWidth - (strlen((string) $idsInDatabaseCount)*2) - 10);
-        $progress->setRedrawFrequency(max(1, max(1, $idsInDatabaseCount/100)));
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) $idsInDatabaseCount) * 2) - 10);
+        $progress->setRedrawFrequency(max(1, max(1, $idsInDatabaseCount / 100)));
         $deleteStatements = array(
             $this->connection->prepare('DELETE FROM methods_similar WHERE method1_title = ? OR method2_title = ?'),
             $this->connection->prepare('DELETE FROM methods_collections WHERE method_title = ?'),
@@ -276,8 +267,7 @@ class ImportMethodsCommand extends Command
                         }
                         $statement->executeStatement();
                     }
-                }
-                catch (Exception $exception) {
+                } catch (Exception $exception) {
                     $progress->clear();
                     $output->writeln('<error>Failed to delete '.$methodTitle.': '.$exception->getMessage().'</error>');
                     $progress->display();
@@ -294,7 +284,7 @@ class ImportMethodsCommand extends Command
 
         // Finish
         $time += microtime(true);
-        $output->writeln("\n<info>Finished updating method data in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true)/1048576, 2).' MiB.</info>');
+        $output->writeln("\n<info>Finished updating method data in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true) / 1048576, 2).' MiB.</info>');
         return 0;
     }
 

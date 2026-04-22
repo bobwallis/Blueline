@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Tests\Helpers;
 
 use Blueline\Helpers\LeadHeadCodes;

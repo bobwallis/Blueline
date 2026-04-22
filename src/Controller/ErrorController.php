@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

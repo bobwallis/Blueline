@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Command;
 
 use Doctrine\DBAL\Connection;
@@ -62,8 +63,7 @@ class ImportMethodExtrasCommand extends Command
                 $txtRow = $this->normaliseDatabaseRow($txtRow);
                 try {
                     $this->updateMethodsRow($txtRow);
-                }
-                catch (Exception $exception) {
+                } catch (Exception $exception) {
                     $output->writeln('<comment> Failed to import call information for "'.$txtRow['title'].'"</comment>');
                     $output->writeln('<comment> '.$exception->getMessage().'</comment>');
                 }
@@ -76,8 +76,7 @@ class ImportMethodExtrasCommand extends Command
                 $txtRow = $this->normaliseDatabaseRow($txtRow);
                 try {
                     $this->updateMethodsRow($txtRow);
-                }
-                catch (Exception $exception) {
+                } catch (Exception $exception) {
                     $output->writeln('<comment> Failed to import abbreviation information for "'.$txtRow['title'].'"</comment>');
                     $output->writeln('<comment> '.$exception->getMessage().'</comment>');
                 }
@@ -122,8 +121,7 @@ class ImportMethodExtrasCommand extends Command
                     }
                 }
             });
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             $output->writeln('<error>Failed to refresh renamed method data: '.$exception->getMessage().'</error>');
             if ($failedRenamedMethodTitle !== null) {
                 $output->writeln('<comment> Rolled back renamed method import after failing for "'.$failedRenamedMethodTitle.'"</comment>');
@@ -136,7 +134,7 @@ class ImportMethodExtrasCommand extends Command
         }
 
         $time += microtime(true);
-        $output->writeln("\n<info>Finished updating extra method data in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true)/1048576, 2).' MiB.</info>');
+        $output->writeln("\n<info>Finished updating extra method data in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true) / 1048576, 2).' MiB.</info>');
         return 0;
     }
 

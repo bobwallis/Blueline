@@ -6,6 +6,7 @@
         "./bin/test": true,
         "symfony console doctrine:schema:validate": true,
         "symfony console lint:": true,
+        "symfony composer lint:": true,
         "npm run lint": true,
         "node --check": true,
         "jq": true

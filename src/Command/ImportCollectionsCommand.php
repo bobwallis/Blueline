@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Command;
 
 use Doctrine\DBAL\Connection;
@@ -50,8 +51,7 @@ class ImportCollectionsCommand extends Command
         try {
             $this->connection->executeStatement('DELETE FROM methods_collections');
             $this->connection->executeStatement('DELETE FROM collections');
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             $output->writeln('<error>Failed to clear existing data: '.$exception->getMessage().'</error>');
             return 0;
         }
@@ -67,8 +67,8 @@ class ImportCollectionsCommand extends Command
             'INSERT INTO methods_collections (collection_id, method_title, position) VALUES (?, ?, ?)'
         );
         $progress = new ProgressBar($output, count($collections));
-        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($collections))*2) - 10);
-        $progress->setRedrawFrequency(max(1, count($collections)/100));
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($collections)) * 2) - 10);
+        $progress->setRedrawFrequency(max(1, count($collections) / 100));
         foreach ($collections as $collection) {
             $methods = $collection['methods'];
             unset($collection['methods']);
@@ -89,8 +89,7 @@ class ImportCollectionsCommand extends Command
                         $collectionMethodInsertStatement->executeStatement();
                     }
                 });
-            }
-            catch (Exception $exception) {
+            } catch (Exception $exception) {
                 $progress->clear();
                 $output->writeln("<error>Failed to add collection '".$collection['id']."': ".$exception->getMessage().'</error>');
                 if ($failedMethodTitle !== null) {
@@ -106,7 +105,7 @@ class ImportCollectionsCommand extends Command
         $output->writeln('');
 
         $time += microtime(true);
-        $output->writeln("\n<info>Finished updating method collection data in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true)/1048576, 2).' MiB.</info>');
+        $output->writeln("\n<info>Finished updating method collection data in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true) / 1048576, 2).' MiB.</info>');
         return 0;
     }
 }

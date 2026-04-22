@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Helpers;
 
 use Blueline\Helpers\Country;
@@ -76,7 +77,9 @@ class MethodXMLIterator implements \Iterator, \Countable
                 'fchGroups'      => strval($node->falseness->fchGroups) ?: null,
                 'cccbrId'        => strval($node->attributes()->id) ?: null,
                 'extensionConstruction' => strval($node->extensionConstruction) ?: null,
-            ), function ($e) { return !is_null($e); }));
+            ), function ($e) {
+                return !is_null($e);
+            }));
 
             // Manually fix non-unique URLs
             if ($array['title'] == '"Northumberland" Surprise Major') {
@@ -153,7 +156,9 @@ class MethodXMLIterator implements \Iterator, \Countable
                         'location_county' => strval($perfNode->location->county) ?: null,
                         'location_region' => strval($perfNode->location->region) ?: null,
                         'location_country' => strval($perfNode->location->country) ?: null,
-                    ), function ($e) { return !is_null($e); });
+                    ), function ($e) {
+                        return !is_null($e);
+                    });
                     if (isset($perfNode->references)) {
                         $perfRefParts = [];
                         foreach ($perfNode->references->children() as $refChild) {
@@ -177,11 +182,11 @@ class MethodXMLIterator implements \Iterator, \Countable
                     // Fix regions
                     $regionSearchArray = array();
                     if (isset($p['location_region'])) {
-                        $p['location_region'] = LongCounty::get($p['location_region'], isset($p['location_country'])?$p['location_country']:'England');
+                        $p['location_region'] = LongCounty::get($p['location_region'], isset($p['location_country']) ? $p['location_country'] : 'England');
                     }
                     // Fix counties
                     if (isset($p['location_county'])) {
-                        $p['location_county'] = LongCounty::get($p['location_county'], isset($p['location_country'])?$p['location_country']:'England');
+                        $p['location_county'] = LongCounty::get($p['location_county'], isset($p['location_country']) ? $p['location_country'] : 'England');
                     }
                 }
             }
@@ -191,7 +196,7 @@ class MethodXMLIterator implements \Iterator, \Countable
                 $sort = 32000;
                 // Favour certain classifications
                 if (isset($array['classification'])) {
-                    switch($array['classification']) {
+                    switch ($array['classification']) {
                         case "Surprise":
                             $sort *= 0.91;
                             break;
@@ -217,15 +222,15 @@ class MethodXMLIterator implements \Iterator, \Countable
                 // Favour certain stages
                 if ($array['stage'] <= 4) {
                     $sort *= 0.96;
-                } else if ($array['stage'] <= 6) {
+                } elseif ($array['stage'] <= 6) {
                     $sort *= 0.92;
-                } else if ($array['stage'] <= 8) {
+                } elseif ($array['stage'] <= 8) {
                     $sort *= 0.90;
-                } else if ($array['stage'] <= 10) {
+                } elseif ($array['stage'] <= 10) {
                     $sort *= 0.92;
-                } else if ($array['stage'] <= 12) {
+                } elseif ($array['stage'] <= 12) {
                     $sort *= 0.94;
-                } else if ($array['stage'] <= 16) {
+                } elseif ($array['stage'] <= 16) {
                     $sort *= 0.96;
                 }
                 // Push methods in certain collections up the list

@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\EventListener;
 
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -23,7 +24,8 @@ class RequestListener
         private ParameterBagInterface $params,
         #[Autowire('%kernel.environment%')]
         private string $kernelEnvironment,
-    ) {}
+    ) {
+    }
 
     public function onKernelRequest(RequestEvent $event)
     {

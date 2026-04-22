@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Twig;
 
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -79,7 +80,7 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
         $chromeless = false;
         try {
             $request = $this->requestStack->getCurrentRequest();
-            $chromeless = is_null($request)? false : ($request->getRequestFormat() == 'html' && intval($request->query->get('chromeless')) == 1);
+            $chromeless = is_null($request) ? false : ($request->getRequestFormat() == 'html' && intval($request->query->get('chromeless')) == 1);
         } catch (\Exception $e) {
             $chromeless = false;
         }

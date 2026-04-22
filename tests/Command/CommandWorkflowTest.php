@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Tests\Command;
 
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;

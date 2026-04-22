@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Command;
 
 use Doctrine\DBAL\Connection;
@@ -47,16 +48,15 @@ class CheckClassificationsCommand extends Command
         try {
             $methodCount = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM methods');
             $methods = $this->connection->executeQuery('SELECT title, stage, notationexpanded AS "notationExpanded", classification, jump, little, differential, plain, trebledodging AS "trebleDodging" FROM methods')->iterateAssociative();
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
             return 0;
         }
 
         // Set-up the progress bar
         $progress = new ProgressBar($output, $methodCount);
-        $progress->setBarWidth($targetConsoleWidth - (strlen((string) $methodCount)*2) - 10);
-        $progress->setRedrawFrequency(max(1, min(20, max(1, $methodCount/100))));
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) $methodCount) * 2) - 10);
+        $progress->setRedrawFrequency(max(1, min(20, max(1, $methodCount / 100))));
         $progress->start();
         foreach ($methods as $method) {
             // Create a Method object using only stage and notation
@@ -69,29 +69,29 @@ class CheckClassificationsCommand extends Command
                 $output->writeln('<error>'.$method['title'].': Mismatched classification - '.$method['classification'].' vs '.$methodObject->getClassification().'</error>');
                 $progress->display();
             }
-            if (($methodObject->getLittle()?'t':null) != $method['little']) {
+            if (($methodObject->getLittle() ? 't' : null) != $method['little']) {
                 $progress->clear();
-                $output->writeln('<error>'.$method['title'].': Mismatched little - '.$method['little'].' vs '.($methodObject->getLittle()?'t':null).'</error>');
+                $output->writeln('<error>'.$method['title'].': Mismatched little - '.$method['little'].' vs '.($methodObject->getLittle() ? 't' : null).'</error>');
                 $progress->display();
             }
-            if (($methodObject->getJump()?'t':null) != $method['jump']) {
+            if (($methodObject->getJump() ? 't' : null) != $method['jump']) {
                 $progress->clear();
-                $output->writeln('<error>'.$method['title'].': Mismatched jump - '.$method['jump'].' vs '.($methodObject->getJump()?'t':null).'</error>');
+                $output->writeln('<error>'.$method['title'].': Mismatched jump - '.$method['jump'].' vs '.($methodObject->getJump() ? 't' : null).'</error>');
                 $progress->display();
             }
-            if (($methodObject->getDifferential()?'t':null) != $method['differential']) {
+            if (($methodObject->getDifferential() ? 't' : null) != $method['differential']) {
                 $progress->clear();
-                $output->writeln('<error>'.$method['title'].': Mismatched differential - '.$method['differential'].' vs '.($methodObject->getDifferential()?'t':null).'</error>');
+                $output->writeln('<error>'.$method['title'].': Mismatched differential - '.$method['differential'].' vs '.($methodObject->getDifferential() ? 't' : null).'</error>');
                 $progress->display();
             }
-            if (($methodObject->getPlain()?'t':null) != $method['plain']) {
+            if (($methodObject->getPlain() ? 't' : null) != $method['plain']) {
                 $progress->clear();
-                $output->writeln('<error>'.$method['title'].': Mismatched plain - '.$method['plain'].' vs '.($methodObject->getPlain()?'t':null).'</error>');
+                $output->writeln('<error>'.$method['title'].': Mismatched plain - '.$method['plain'].' vs '.($methodObject->getPlain() ? 't' : null).'</error>');
                 $progress->display();
             }
-            if (($methodObject->getTrebleDodging()?'t':null) != $method['trebleDodging']) {
+            if (($methodObject->getTrebleDodging() ? 't' : null) != $method['trebleDodging']) {
                 $progress->clear();
-                $output->writeln('<error>'.$method['title'].': Mismatched treble dodging - '.$method['trebleDodging'].' vs '.($methodObject->getTrebleDodging()?'t':null).'</error>');
+                $output->writeln('<error>'.$method['title'].': Mismatched treble dodging - '.$method['trebleDodging'].' vs '.($methodObject->getTrebleDodging() ? 't' : null).'</error>');
                 $progress->display();
             }
             $progress->advance();
@@ -100,7 +100,7 @@ class CheckClassificationsCommand extends Command
         $output->writeln('');
 
         $time += microtime(true);
-        $output->writeln("\n<info>Finished in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(round(memory_get_peak_usage(true)/1048576, 2)).' MiB.</info>');
+        $output->writeln("\n<info>Finished in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(round(memory_get_peak_usage(true) / 1048576, 2)).' MiB.</info>');
         return 0;
     }
 }

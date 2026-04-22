@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Tests\EventListener;
 
 use Blueline\EventListener\ResponseListener;

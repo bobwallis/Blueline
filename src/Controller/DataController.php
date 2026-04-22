@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Controller;
 
 use Doctrine\DBAL\Connection;
@@ -72,8 +73,7 @@ class DataController extends AbstractController
 
             try {
                 $result = $this->connection->executeQuery($sql);
-            }
-            catch (Exception $exception) {
+            } catch (Exception $exception) {
                 throw new \RuntimeException('Failed to query table: '.$table, 0, $exception);
             }
 

@@ -1,6 +1,7 @@
 <?php
+
 // https://framework.cccbr.org.uk/version1/amendedmethodtitles.html
-$method_renamed = array (
+$method_renamed = array(
   'Acton Town Slow Course Minor' => 'Acton Town Bob Minor',
   'Adrian Parry Slow Course Minor' => 'Adrian Parry Bob Minor',
   'Adzor Slow Course Minor' => 'Adzor Bob Minor',

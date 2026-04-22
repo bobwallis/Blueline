@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Command;
 
 use Doctrine\DBAL\Connection;
@@ -82,10 +83,9 @@ class CalculateMethodSimilaritiesCommand extends Command
                      WHERE (method1_title IS NULL)
                      ORDER BY stage ASC'
                 )->fetchAllAssociative();
-            }
-            else {
-                                $methods = $this->connection->executeQuery(
-                                        'SELECT title, stage, notationexpanded AS "notationExpanded", lengthoflead AS "lengthOfLead"
+            } else {
+                $methods = $this->connection->executeQuery(
+                    'SELECT title, stage, notationexpanded AS "notationExpanded", lengthoflead AS "lengthOfLead"
                       FROM methods
                       LEFT OUTER JOIN methods_similar ON (title = method1_title)
                      WHERE (method1_title IS NULL)
@@ -95,8 +95,7 @@ class CalculateMethodSimilaritiesCommand extends Command
                     array(ArrayParameterType::STRING)
                 )->fetchAllAssociative();
             }
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
             return 0;
         }
@@ -123,8 +122,8 @@ class CalculateMethodSimilaritiesCommand extends Command
 
         // Set-up the progress bar
         $progress = new ProgressBar($output, count($methods));
-        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($methods))*2) - 10);
-        $progress->setRedrawFrequency(max(1, min(20, count($methods)/100)));
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($methods)) * 2) - 10);
+        $progress->setRedrawFrequency(max(1, min(20, count($methods) / 100)));
         $progress->start();
         $comparisonStatement = $this->connection->prepare(
             'SELECT title, notationexpanded AS "notationExpanded", lengthoflead AS "lengthOfLead"
@@ -158,7 +157,7 @@ class CalculateMethodSimilaritiesCommand extends Command
                     // Compare each one and add to the similarity table (if similar enough)
                     // limit is a heuristic threshold: if distance is >= 10% of lead
                     // length we skip storing it to keep the table useful and compact.
-                    $limit = max(1, floor($method['lengthOfLead']/10));
+                    $limit = max(1, floor($method['lengthOfLead'] / 10));
                     foreach ($comparisons as $comparison) {
                         $similar = MethodSimilarity::calculate($methodRowArray, $comparison['notationExpanded'], $method['stage'], $limit);
                         if ($similar < $limit) {
@@ -210,8 +209,7 @@ class CalculateMethodSimilaritiesCommand extends Command
                         $this->similarityInsertBuffer = array();
                     }
                 });
-            }
-            catch (\Throwable $exception) {
+            } catch (\Throwable $exception) {
                 $output->writeln('<error>Failed to query for methods to compare \''.$method['title'].'\' against: '.$exception->getMessage().'</error>');
                 continue;
             }
@@ -242,14 +240,13 @@ class CalculateMethodSimilaritiesCommand extends Command
                    LEFT OUTER JOIN methods_similar ON (matches.method1_title = methods_similar.method1_title AND matches.method2_title = methods_similar.method2_title)
                     WHERE methods_similar.onlydifferentoverleadend IS NULL;'
             )->fetchAllAssociative();
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
             return 0;
         }
         $progress = new ProgressBar($output, count($leadHeadMatches));
-        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($leadHeadMatches))*2) - 10);
-        $progress->setRedrawFrequency(max(1, min(20, max(1, count($leadHeadMatches)/100))));
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($leadHeadMatches)) * 2) - 10);
+        $progress->setRedrawFrequency(max(1, min(20, max(1, count($leadHeadMatches) / 100))));
         $progress->start();
         $leadEndFlagStatement = $this->getUpsertSimilarityFlagStatement('onlydifferentoverleadend');
         try {
@@ -261,8 +258,7 @@ class CalculateMethodSimilaritiesCommand extends Command
                     $progress->advance();
                 }
             });
-        }
-        catch (\Throwable $exception) {
+        } catch (\Throwable $exception) {
             $progress->clear();
             $output->writeln('<error>Failed to flag methods differing only at the lead end: '.$exception->getMessage().'</error>');
             return 0;
@@ -288,14 +284,13 @@ class CalculateMethodSimilaritiesCommand extends Command
                    LEFT OUTER JOIN methods_similar ON (matches.method1_title = methods_similar.method1_title AND matches.method2_title = methods_similar.method2_title)
                     WHERE methods_similar.onlydifferentoverhalflead IS NULL;'
             )->fetchAllAssociative();
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
             return 0;
         }
         $progress = new ProgressBar($output, count($halfLeadMatches));
-        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($halfLeadMatches))*2) - 10);
-        $progress->setRedrawFrequency(max(1, min(20, max(1, count($halfLeadMatches)/100))));
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($halfLeadMatches)) * 2) - 10);
+        $progress->setRedrawFrequency(max(1, min(20, max(1, count($halfLeadMatches) / 100))));
         $progress->start();
         $halfLeadFlagStatement = $this->getUpsertSimilarityFlagStatement('onlydifferentoverhalflead');
         try {
@@ -307,8 +302,7 @@ class CalculateMethodSimilaritiesCommand extends Command
                     $progress->advance();
                 }
             });
-        }
-        catch (\Throwable $exception) {
+        } catch (\Throwable $exception) {
             $progress->clear();
             $output->writeln('<error>Failed to flag methods differing only at the half lead: '.$exception->getMessage().'</error>');
             return 0;
@@ -334,14 +328,13 @@ class CalculateMethodSimilaritiesCommand extends Command
                    LEFT OUTER JOIN methods_similar ON (matches.method1_title = methods_similar.method1_title AND matches.method2_title = methods_similar.method2_title)
                   WHERE methods_similar.onlydifferentoverhalflead IS NULL AND methods_similar.onlydifferentoverleadend IS NULL AND methods_similar.onlydifferentoverleadendandhalflead IS NULL;'
             )->fetchAllAssociative();
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
             return 0;
         }
         $progress = new ProgressBar($output, count($leadEndHalfLeadMatches));
-        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($leadEndHalfLeadMatches))*2) - 10);
-        $progress->setRedrawFrequency(max(1, min(20, max(1, count($leadEndHalfLeadMatches)/100))));
+        $progress->setBarWidth($targetConsoleWidth - (strlen((string) count($leadEndHalfLeadMatches)) * 2) - 10);
+        $progress->setRedrawFrequency(max(1, min(20, max(1, count($leadEndHalfLeadMatches) / 100))));
         $progress->start();
         $leadEndAndHalfLeadFlagStatement = $this->getUpsertSimilarityFlagStatement('onlydifferentoverleadendandhalflead');
         try {
@@ -353,8 +346,7 @@ class CalculateMethodSimilaritiesCommand extends Command
                     $progress->advance();
                 }
             });
-        }
-        catch (\Throwable $exception) {
+        } catch (\Throwable $exception) {
             $progress->clear();
             $output->writeln('<error>Failed to flag methods differing only at the half lead and lead end: '.$exception->getMessage().'</error>');
             return 0;
@@ -363,7 +355,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         $output->writeln('');
 
         $time += microtime(true);
-        $output->writeln("\n<info>Finished updating method similarities in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true)/1048576, 2).' MiB.</info>');
+        $output->writeln("\n<info>Finished updating method similarities in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true) / 1048576, 2).' MiB.</info>');
         return 0;
     }
 

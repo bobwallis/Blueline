@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Helpers;
 
 /**
@@ -9,7 +10,7 @@ namespace Blueline\Helpers;
  */
 class Country
 {
-    static $iso3166_2 = array(
+    public static $iso3166_2 = array(
         'AF' => 'Afghanistan',
         'AX' => 'Aland Islands',
         'AL' => 'Albania',

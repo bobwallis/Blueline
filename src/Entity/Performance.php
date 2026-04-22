@@ -99,7 +99,7 @@ class Performance
                 case 'method':
                     $v = null;
                     break;
-                // Convert date object
+                    // Convert date object
                 case 'date':
                     $v = $v->format('Y-m-d');
                     break;

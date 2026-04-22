@@ -1,13 +1,14 @@
 <?php
+
 // Collections data exported 2015/04/19, 19:00
-$collections = array (
+$collections = array(
   0 =>
-  array (
+  array(
     'id' => 'CroslandsAlphabet',
     'name' => 'Crosland Alphabet Series',
     'description' => 'Richard Crosland\'s alphabet series of Surprise Major methods.',
     'methods' =>
-    array (
+    array(
       0 => 'Adelaide Surprise Major',
       1 => 'Bordesley Surprise Major',
       2 => 'Chesterfield Surprise Major',
@@ -37,12 +38,12 @@ $collections = array (
     ),
   ),
   1 =>
-  array (
+  array(
     'id' => 'Diagrams',
     'name' => 'Diagrams',
     'description' => 'Methods in the 1991 reprint of Jasper Snowden\'s Diagrams.',
     'methods' =>
-    array (
+    array(
       0 => 'Plain Bob Minimus',
       1 => 'Reverse Bob Minimus',
       2 => 'Double Bob Minimus',
@@ -162,12 +163,12 @@ $collections = array (
     ),
   ),
   2 =>
-  array (
+  array(
     'id' => 'LBFG8',
     'name' => '"LBFG" Surprise Major',
     'description' => 'London, Bristol, Belfast and Glasow Surprise Major.',
     'methods' =>
-    array (
+    array(
       0 => 'London Surprise Major',
       1 => 'Bristol Surprise Major',
       2 => 'Belfast Surprise Major',
@@ -175,12 +176,12 @@ $collections = array (
     ),
   ),
   3 =>
-  array (
+  array(
     'id' => 'mostViewed200',
     'name' => '200 Most Viewed Methods',
     'description' => 'The 200 most viewed methods on https://rsw.me.uk/blueline/ in Feb 2014.',
     'methods' =>
-    array (
+    array(
       0 => 'Superlative Surprise Major',
       1 => 'London Surprise Minor',
       2 => 'Kent Treble Bob Major',
@@ -384,12 +385,12 @@ $collections = array (
     ),
   ),
   4 =>
-  array (
+  array(
     'id' => 'Nottingham8',
     'name' => '"Nottingham 8" Surprise Major',
     'description' => 'An alternative to the "Standard 8".',
     'methods' =>
-    array (
+    array(
       0 => 'Bristol Surprise Major',
       1 => 'Cambridge Surprise Major',
       2 => 'Cassiobury Surprise Major',
@@ -401,12 +402,12 @@ $collections = array (
     ),
   ),
   5 =>
-  array (
+  array(
     'id' => 'Pitmans9',
     'name' => 'Pitman Series',
     'description' => 'The Pitman series of Surprise Major methods.',
     'methods' =>
-    array (
+    array(
       0 => 'Bristol Surprise Major',
       1 => 'Cambridge Surprise Major',
       2 => 'Cassiobury Surprise Major',
@@ -419,12 +420,12 @@ $collections = array (
     ),
   ),
   6 =>
-  array (
+  array(
     'id' => 'Smiths23',
     'name' => 'Norman Smith\'s 23 Spliced Surprise Major',
     'description' => 'The 23 Surprise Major methods making up Norman Smith\'s famous peal composition.',
     'methods' =>
-    array (
+    array(
       0 => 'Ashtead Surprise Major',
       1 => 'Bristol Surprise Major',
       2 => 'Cambridge Surprise Major',
@@ -451,12 +452,12 @@ $collections = array (
     ),
   ),
   7 =>
-  array (
+  array(
     'id' => 'Standard41',
     'name' => 'The "Standard 41" Surprise Minor',
     'description' => '',
     'methods' =>
-    array (
+    array(
       0 => 'York Surprise Minor',
       1 => 'Durham Surprise Minor',
       2 => 'Beverley Surprise Minor',
@@ -501,12 +502,12 @@ $collections = array (
     ),
   ),
   8 =>
-  array (
+  array(
     'id' => 'Standard8',
     'name' => 'The "Standard 8" Surprise Major',
     'description' => '',
     'methods' =>
-    array (
+    array(
       0 => 'Cambridge Surprise Major',
       1 => 'Yorkshire Surprise Major',
       2 => 'Lincolnshire Surprise Major',
@@ -518,12 +519,12 @@ $collections = array (
     ),
   ),
   9 =>
-  array (
+  array(
     'id' => 'ProjectPickledEgg',
     'name' => 'Project Pickled Egg',
     'description' => 'Methods included in a series of articles by Simon Linford. Aiming to develop a new set of Core Surprise Major methods to replace the Standard 8.',
     'methods' =>
-    array (
+    array(
       0 => 'Cambridge Surprise Major',
       1 => 'Yorkshire Surprise Major',
       2 => 'Superlative Surprise Major',
@@ -543,12 +544,12 @@ $collections = array (
     ),
   ),
   10 =>
-  array (
+  array(
     'id' => 'HigherRank',
     'name' => 'Higher Rank',
     'description' => 'Methods that I want to force higher up the search rankings which aren\'t featured elsewhere.',
     'methods' =>
-    array (
+    array(
       0 => 'Double Bob Major',
       1 => 'Double Bob Royal',
       2 => 'Double Bob Minor',

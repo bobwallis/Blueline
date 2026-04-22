@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Helpers;
 
 /**
@@ -146,7 +147,7 @@ class PlaceNotation
      */
     public static function trimExternalPlaces(string $piece, int $stage): string
     {
-        $stageIsEven = ($stage%2 == 0);
+        $stageIsEven = ($stage % 2 == 0);
         $stageNotation = self::intToBell($stage);
 
         if (substr($piece, 0, 1) == '1' && self::isEven(substr($piece, 1, 1))) {
@@ -195,10 +196,10 @@ class PlaceNotation
         }
         $result = array( self::permute($start, $permutations[0]) );
         for ($i = 1, $iLim = count($permutations); $i < $iLim; ++$i) {
-            if (count($permutations[$i]) != count($result[$i-1])) {
+            if (count($permutations[$i]) != count($result[$i - 1])) {
                 return array();
             }
-            $result[$i] = self::permute($result[$i-1], $permutations[$i]);
+            $result[$i] = self::permute($result[$i - 1], $permutations[$i]);
         }
 
         return $result;
@@ -319,7 +320,7 @@ class PlaceNotation
                 return ($carry && ($item[0] == '+' || $item[0] == '&'));
             }, true)) {
                 $notationFull = array_reduce($splitOnComma, function ($carry, $item) {
-                    return $carry . '.' . ($item[0] == '&'? self::expandHalf($item) : trim($item, '+'));
+                    return $carry . '.' . ($item[0] == '&' ? self::expandHalf($item) : trim($item, '+'));
                 }, '');
             }
         }
@@ -341,10 +342,10 @@ class PlaceNotation
                 // a to f is 12
                 if (preg_match('/^([A-F][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                     $notationFull = $match[2].' 12';
-                // g to m is 1n
+                    // g to m is 1n
                 } elseif (preg_match('/^([G-M][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                     $notationFull = $match[2].' 1'.$stageNotation;
-                // p, q is 3n post lead head (if 3n isn't the start of $match[2] then add it to the start)
+                    // p, q is 3n post lead head (if 3n isn't the start of $match[2] then add it to the start)
                 } elseif (preg_match('/^([P-Q][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                     if (strpos($match[2], '3'.$stageNotation) === 0) {
                         $notationFull = $match[2];
@@ -362,7 +363,7 @@ class PlaceNotation
                 //        $notationFull = self::$_notationOrder[$stage-1].' '.$match[2];
                 //    }
                 //}
-            // For odd bell methods
+                // For odd bell methods
             } else {
                 // a to f is 3 post lead head (if 3 isn't the start of $match[2] then add it to the start)
                 if (preg_match('/^([A-F][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
@@ -371,22 +372,22 @@ class PlaceNotation
                     } else {
                         $notationFull = '3 '.$match[2];
                     }
-                // g to m is n post lead head (similar to above)
+                    // g to m is n post lead head (similar to above)
                 } elseif (preg_match('/^([G-M][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                     if (strpos($match[2], $stageNotation) === 0) {
                         $notationFull = $match[2];
                     } else {
                         $notationFull = $stageNotation.' '.$match[2];
                     }
-                // p, q is 12n
+                    // p, q is 12n
                 } elseif (preg_match('/^([P-Q][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                     $notationFull = $match[2].' 12'.$stageNotation;
-                // r, s is 1
+                    // r, s is 1
                 } elseif (preg_match('/^([R-S][1-9]?)\s+(.*)$/', $notationFull, $match) == 1) {
                     $notationFull = $match[2].' 1';
                 }
             }
-        // z is an irregular lead head
+            // z is an irregular lead head
         } elseif (preg_match('/^(.*)Z\s+(.*)$/', $notationFull, $match) == 1) {
             $notationFull = $match[2].' '.$match[1];
         }
@@ -426,7 +427,9 @@ class PlaceNotation
             $pregOutput = array_map('str_split', $pregOutput[0]);
 
             $affected = array();
-            array_walk_recursive($pregOutput, function ($a) use (&$affected) { $affected[] = $a; });
+            array_walk_recursive($pregOutput, function ($a) use (&$affected) {
+                $affected[] = $a;
+            });
             usort($affected, array( __CLASS__, 'bellOrder' ));
             // Then add missing external places
             // If the first bell is even, prepend a 1
@@ -434,7 +437,7 @@ class PlaceNotation
                 $split = '1'.$split;
             }
             // If stage odd and last bell even, or stage even and last bell odd, append an n
-            if (($stage%2 != 0 && self::isEven(end($affected))) || ($stage%2 == 0 && !self::isEven(end($affected)))) {
+            if (($stage % 2 != 0 && self::isEven(end($affected))) || ($stage % 2 == 0 && !self::isEven(end($affected)))) {
                 $split = $split.self::intToBell($stage);
             }
         }
@@ -460,15 +463,15 @@ class PlaceNotation
         $expandedAndExploded = array_map(function ($pn) use ($stage) {
             if ($pn != 'x') {
                 if (strlen($pn) > 1 &&
-                    $pn[0] == '1' && PlaceNotation::bellToInt($pn[1])%2 ==0
-                   ) {
+                    $pn[0] == '1' && PlaceNotation::bellToInt($pn[1]) % 2 == 0
+                ) {
                     $pn = substr($pn, 1);
                 }
                 if (strlen($pn) > 1 &&
-                    $pn[strlen($pn)-1] == PlaceNotation::intToBell($stage) &&
-                    PlaceNotation::bellToInt($pn[strlen($pn)-2])%2 != $stage%2
-                   ) {
-                    $pn = substr($pn, 0, strlen($pn)-1);
+                    $pn[strlen($pn) - 1] == PlaceNotation::intToBell($stage) &&
+                    PlaceNotation::bellToInt($pn[strlen($pn) - 2]) % 2 != $stage % 2
+                ) {
+                    $pn = substr($pn, 0, strlen($pn) - 1);
                 }
 
             }
@@ -482,8 +485,8 @@ class PlaceNotation
                 return '+'.PlaceNotation::implode($notation);
             }
             // Otherwise hunt for palindrome
-            for ($palindromeLength = (count($notation)%2 == 0)? count($notation)-1 : count($notation); $palindromeLength >= 3; $palindromeLength -= 2) {
-                for ($palindromeOffset = 0; $palindromeLength+$palindromeOffset <= count($notation); ++$palindromeOffset) {
+            for ($palindromeLength = (count($notation) % 2 == 0) ? count($notation) - 1 : count($notation); $palindromeLength >= 3; $palindromeLength -= 2) {
+                for ($palindromeOffset = 0; $palindromeLength + $palindromeOffset <= count($notation); ++$palindromeOffset) {
                     $word = array_slice($notation, $palindromeOffset, $palindromeLength);
                     $reversedWord = array_reverse($word);
                     if ($word == $reversedWord) {
@@ -491,9 +494,9 @@ class PlaceNotation
                         if ($palindromeOffset > 0) {
                             $result .= $sirilise(array_slice($notation, 0, $palindromeOffset)).', ';
                         }
-                        $result .= '&'.PlaceNotation::implode(array_slice($word, 0, (count($word)+1)/2));
+                        $result .= '&'.PlaceNotation::implode(array_slice($word, 0, (count($word) + 1) / 2));
                         if ($palindromeOffset + $palindromeLength < count($notation)) {
-                            $result .= ', '.$sirilise(array_slice($notation, $palindromeOffset+$palindromeLength));
+                            $result .= ', '.$sirilise(array_slice($notation, $palindromeOffset + $palindromeLength));
                         }
                         return $result;
                     }
@@ -501,7 +504,7 @@ class PlaceNotation
             }
             return '+'.PlaceNotation::implode($notation);
         };
-        return str_replace('x', '-', $sirilise( $expandedAndExploded ));
+        return str_replace('x', '-', $sirilise($expandedAndExploded));
     }
 
     /**
@@ -537,7 +540,7 @@ class PlaceNotation
         $i = 0;
         foreach ($notationExploded as $piece) {
             // Work through the notation piece
-            for ($j = 0; $j < strlen( $piece ); ++$j) {
+            for ($j = 0; $j < strlen($piece); ++$j) {
                 if ($piece[$j] == 'x') {
                     break;
                 }
@@ -547,17 +550,16 @@ class PlaceNotation
                 // (31) takes 1234 to 3124,
                 // (41) takes 1234 to 4123 and so on
                 elseif ($piece[$j] == '(') {
-                    $from = self::bellToInt($piece[$j+1]) - 1;
-                    $to   = self::bellToInt($piece[$j+2]) - 1;
+                    $from = self::bellToInt($piece[$j + 1]) - 1;
+                    $to   = self::bellToInt($piece[$j + 2]) - 1;
                     $permutations[$i][$to] = $from;
-                    if( $from < $to ) {
-                        for( $k = $from; $k < $to; $k++ ) {
-                            $permutations[$i][$k] = $k+1;
+                    if ($from < $to) {
+                        for ($k = $from; $k < $to; $k++) {
+                            $permutations[$i][$k] = $k + 1;
                         }
-                    }
-                    else {
-                        for( $k = $from; $k > $to; $k-- ) {
-                            $permutations[$i][$k] = $k-1;
+                    } else {
+                        for ($k = $from; $k > $to; $k--) {
+                            $permutations[$i][$k] = $k - 1;
                         }
                     }
                     $j += 3;
@@ -567,10 +569,10 @@ class PlaceNotation
                 elseif ($piece[$j] == '[') {
                     $k = strpos($piece, ']', $j);
                     $l = 0;
-                    $lowestBell = min(array_map(self::class.'::bellToInt', str_split(substr($piece, $j+1, $k-$j-1)))) - 1;
+                    $lowestBell = min(array_map(self::class.'::bellToInt', str_split(substr($piece, $j + 1, $k - $j - 1)))) - 1;
                     ++$j;
-                    while( $j < $k ) {
-                        $permutations[$i][$lowestBell+$l] = self::bellToInt($piece[$j]) - 1;
+                    while ($j < $k) {
+                        $permutations[$i][$lowestBell + $l] = self::bellToInt($piece[$j]) - 1;
                         ++$j;
                         ++$l;
                     }
@@ -586,8 +588,8 @@ class PlaceNotation
                 if (isset($permutations[$i][$j])) {
                     continue;
                 }
-                $permutations[$i][$j] = $j+1;
-                $permutations[$i][$j+1] = $j;
+                $permutations[$i][$j] = $j + 1;
+                $permutations[$i][$j + 1] = $j;
             }
             ksort($permutations[$i]);
             ++$i;
@@ -623,7 +625,7 @@ class PlaceNotation
     public static function isEven($place)
     {
         if (is_int($place)) {
-            return ($place%2 == 0);
+            return ($place % 2 == 0);
         }
         return self::$_bellIsEvenMap[$place] ?? true;
     }
@@ -646,7 +648,9 @@ class PlaceNotation
         // The reverse of (14) is (41).
         // We need to reverse the order of the bells in the brackets, but not the brackets themselves.
         // Given we have already reversed the bells using strrev above, we just need to swap the brackets back to their original positions.
-        $notationReversed = preg_replace_callback('/\)(.+?)\(/', function ($m) { return '('.$m[1].')'; }, $notationReversed );
+        $notationReversed = preg_replace_callback('/\)(.+?)\(/', function ($m) {
+            return '('.$m[1].')';
+        }, $notationReversed);
         // Jump notation type 2:
         // [3412] indicates that the bells in the current Row are "read" in the order 3rd's Place, 4th's Place, 1st's Place, 2nd's Place in order to generate the next Row.
         // [3412] would take Row 2143 to 4321.
@@ -655,7 +659,9 @@ class PlaceNotation
         // [2413] would take Row 2143 to 1324.
         // [3142] would take Row 1324 to 2143.
         // Initialy... let's just revert the reversal done by strrev above
-        $notationReversed = preg_replace_callback('/\](.+?)\[/', function ($m) { return '['.strrev($m[1]).']'; }, $notationReversed );
+        $notationReversed = preg_replace_callback('/\](.+?)\[/', function ($m) {
+            return '['.strrev($m[1]).']';
+        }, $notationReversed);
         // And now let's reverse properly...
         $notationReversed = preg_replace_callback('/\[(.+?)\]/', function ($m) {
             $input = str_split($m[1]); // Split into characters
@@ -668,7 +674,7 @@ class PlaceNotation
             ksort($inverse); // Sort by keys to ensure the string is built in the order 1, 2, 3, 4...
             // And then build the string
             return '[' . implode('', $inverse) . ']';
-            }, $notationReversed );
+        }, $notationReversed);
         $firstDot = (strpos($notationReversed, '.') !== false) ? strpos($notationReversed, '.') : 99999;
         $firstX = (strpos($notationReversed, 'x') !== false) ? strpos($notationReversed, 'x') : 99999;
         $trim = 0;
@@ -700,14 +706,18 @@ class PlaceNotation
                     if ($e[0] == '(' || $e[0] == '[') {
                         return array( array('sort' => max(array_filter(array_map(self::class.'::bellToInt', str_split($e)))), 'value' => $e) );
                     } else {
-                        return array_map(function ($e) { return array('sort' => self::bellToInt($e), 'value' => $e); }, str_split($e));
+                        return array_map(function ($e) {
+                            return array('sort' => self::bellToInt($e), 'value' => $e);
+                        }, str_split($e));
                     }
                 }, array_filter(explode('~', $section), 'strlen'));
                 $sectionSplit = call_user_func_array('array_merge', $sectionSplitArrays);
                 usort($sectionSplit, function ($a, $b) {
                     return $a['sort'] - $b['sort'];
                 });
-                $section = array_reduce($sectionSplit, function ($c, $i) { return $c.$i['value']; }, '');
+                $section = array_reduce($sectionSplit, function ($c, $i) {
+                    return $c.$i['value'];
+                }, '');
             }
         }
 

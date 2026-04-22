@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;

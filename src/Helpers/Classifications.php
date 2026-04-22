@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Helpers;
 
 /**

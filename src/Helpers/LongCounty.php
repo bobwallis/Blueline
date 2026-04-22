@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Helpers;
 
 /**
@@ -255,25 +256,25 @@ class LongCounty
         switch (strtoupper($country)) {
             case 'ENGLAND':
                 return isset(self::$counties[$short]) ? self::$counties[$short] : $short;
-            case 'SCOTLAND' :
+            case 'SCOTLAND':
                 return isset(self::$scottishAreas[$short]) ? self::$scottishAreas[$short] : $short;
-            case 'WALES' :
+            case 'WALES':
                 return isset(self::$welshAreas[$short]) ? self::$welshAreas[$short] : $short;
-            case 'IRELAND' :
+            case 'IRELAND':
                 return isset(self::$irishAreas[$short]) ? self::$irishAreas[$short] : $short;
-            case 'USA' :
+            case 'USA':
                 return isset(self::$states[$short]) ? self::$states[$short] : $short;
-            case 'CANADA' :
+            case 'CANADA':
                 return isset(self::$canadianStates[$short]) ? self::$canadianStates[$short] : $short;
-            case 'AUSTRALIA' :
+            case 'AUSTRALIA':
                 return isset(self::$australianAreas[$short]) ? self::$australianAreas[$short] : $short;
-            case 'NEW ZEALAND' :
+            case 'NEW ZEALAND':
                 return isset(self::$newZealandAreas[$short]) ? self::$newZealandAreas[$short] : $short;
-            case 'SOUTH AFRICA' :
+            case 'SOUTH AFRICA':
                 return isset(self::$southAfricanAreas[$short]) ? self::$southAfricanAreas[$short] : $short;
-            case 'NETHERLANDS' :
+            case 'NETHERLANDS':
                 return isset(self::$netherlandsAreas[$short]) ? self::$netherlandsAreas[$short] : $short;
-            default :
+            default:
                 return $short;
         }
     }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Blueline\Helpers;
 
 /**
@@ -28,7 +29,9 @@ class Search
         $searchVariables = array();
 
         // Fields
-        $searchVariables['fields'] = $request->query->get('fields')? array_filter(array_map('trim', explode(',', $request->query->get('fields'))), function($f) use ($searchable) { return in_array($f, $searchable); }) : array();
+        $searchVariables['fields'] = $request->query->get('fields') ? array_filter(array_map('trim', explode(',', $request->query->get('fields'))), function ($f) use ($searchable) {
+            return in_array($f, $searchable);
+        }) : array();
 
         // Conditions
         foreach (array_merge(array( 'q', 'sort', 'order' ), $searchable) as $key) {
@@ -39,7 +42,7 @@ class Search
         }
 
         // Order
-        $searchVariables['order'] = strtoupper(empty($searchVariables['order'])? 'asc' : $searchVariables['order']);
+        $searchVariables['order'] = strtoupper(empty($searchVariables['order']) ? 'asc' : $searchVariables['order']);
         if ($searchVariables['order'] != 'DESC') {
             $searchVariables['order'] = 'ASC';
         }
@@ -79,7 +82,9 @@ class Search
         }
 
         // String variables
-        foreach (array_keys(array_filter($entityMetadata->fieldMappings, function($f) { return in_array($f->type, array('string', 'text')); })) as $key) {
+        foreach (array_keys(array_filter($entityMetadata->fieldMappings, function ($f) {
+            return in_array($f->type, array('string', 'text'));
+        })) as $key) {
             if (isset($searchVariables[$key])) {
                 if (strpos($searchVariables[$key], '/') === 0 && strlen($searchVariables[$key]) > 1) {
                     $query->andWhere('REGEXP(e.'.$key.', :'.$key.'Regexp) = TRUE')
@@ -92,7 +97,9 @@ class Search
         }
 
         // Number variables
-        foreach (array_keys(array_filter($entityMetadata->fieldMappings, function($f) { return in_array($f->type, array('smallint','integer','bigint','decimal','float')); })) as $key) {
+        foreach (array_keys(array_filter($entityMetadata->fieldMappings, function ($f) {
+            return in_array($f->type, array('smallint','integer','bigint','decimal','float'));
+        })) as $key) {
             if (isset($searchVariables[$key])) {
                 $splitValues = preg_split('/,(?![^(\[]*[)\]])/', $searchVariables[$key]);
                 $splitValuesDQL = array();
@@ -100,13 +107,13 @@ class Search
                 foreach ($splitValues as $i => $v) {
                     // Interval notation (for ranges), e.g. [0,2), [3,4]
                     if ($v[0] == '[' || $v[0] == '(') {
-                        $c1 = $v[0] == '['? ' >= ' : ' > ';
-                        $c2 = substr($v, -1) == ']'? ' <=' : ' < ';
-                        $vs = explode(',', substr($v, 1, strlen($v)-2));
+                        $c1 = $v[0] == '[' ? ' >= ' : ' > ';
+                        $c2 = substr($v, -1) == ']' ? ' <=' : ' < ';
+                        $vs = explode(',', substr($v, 1, strlen($v) - 2));
                         $splitValuesDQL[] = $query->expr()->andx('e.'.$key.$c1.':'.$key.$i.'lower', 'e.'.$key.$c2.':'.$key.$i.'upper');
                         $splitValuesParams[$key.$i.'lower'] = intval($vs[0]);
                         $splitValuesParams[$key.$i.'upper'] = intval($vs[1]);
-                    // Or just single numbers
+                        // Or just single numbers
                     } else {
                         $splitValuesDQL[] = 'e.'.$key.' = :'.$key.$i;
                         $splitValuesParams[$key.$i] = intval($v);
@@ -122,9 +129,11 @@ class Search
         }
 
         // Boolean variables
-        foreach (array_keys(array_filter($entityMetadata->fieldMappings, function($f) { return in_array($f->type, array('boolean')); })) as $key) {
+        foreach (array_keys(array_filter($entityMetadata->fieldMappings, function ($f) {
+            return in_array($f->type, array('boolean'));
+        })) as $key) {
             if (isset($searchVariables[$key])) {
-                $query->andWhere('e.'.$key.(filter_var($searchVariables[$key], FILTER_VALIDATE_BOOLEAN)?' = TRUE':' = FALSE'));
+                $query->andWhere('e.'.$key.(filter_var($searchVariables[$key], FILTER_VALIDATE_BOOLEAN) ? ' = TRUE' : ' = FALSE'));
             }
         }
 
