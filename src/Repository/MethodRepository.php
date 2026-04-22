@@ -2,12 +2,8 @@
 
 namespace Blueline\Repository;
 
-use Doctrine\ORM\EntityRepository;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Blueline\Helpers\Search;
-use Blueline\Helpers\Stages;
-use Blueline\Helpers\Classifications;
 use Blueline\Entity\Method;
+use Doctrine\ORM\EntityRepository;
 
 /**
  * Repository for querying Method entities.
@@ -15,7 +11,6 @@ use Blueline\Entity\Method;
  * Handles complex DQL queries with partial selects, related entity eager-loading,
  * and similarity-based method finding. Used for method detail pages, similarity matching,
  * and related method recommendations.
- *
  */
 class MethodRepository extends EntityRepository
 {
@@ -26,6 +21,7 @@ class MethodRepository extends EntityRepository
      * collection memberships in a single DQL query (avoids N+1 lazy loading).
      *
      * @param string $url The method URL identifier (slug)
+     *
      * @return Method|null The method with relationships loaded, or null if not found
      */
     public function findByURLJoiningPerformancesAndCollections($url): ?Method
@@ -51,6 +47,7 @@ class MethodRepository extends EntityRepository
      * Prefer findByURLJoiningPerformancesAndCollections() for detail pages.
      *
      * @param string $url The method URL identifier
+     *
      * @return Method|null The method, or null if not found
      */
     public function findByURL($url): ?Method
@@ -74,6 +71,7 @@ class MethodRepository extends EntityRepository
      * Ordered by similarity score (ascending, i.e., most similar first).
      *
      * @param string $url The reference method URL
+     *
      * @return array|null Array of similar methods with lead end notation, or null if none found
      */
     public function similarMethodsDifferentOnlyAtTheLeadEnd($url): ?array
@@ -89,8 +87,9 @@ class MethodRepository extends EntityRepository
 
         try {
             return array_map(function ($m) {
-                $m['leadEndNotation'] =  trim(strrchr($m['notation'], ','), ',');
+                $m['leadEndNotation'] = trim(strrchr($m['notation'], ','), ',');
                 unset($m['notation']);
+
                 return $m;
             }, $query->getArrayResult());
         } catch (\Doctrine\ORM\NoResultException $e) {
@@ -105,6 +104,7 @@ class MethodRepository extends EntityRepository
      * Ordered by similarity score (ascending).
      *
      * @param string $url The reference method URL
+     *
      * @return array|null Array of similar methods with half-lead notation, or null if none found
      */
     public function similarMethodsDifferentOnlyAtTheHalfLead($url): ?array
@@ -121,8 +121,9 @@ class MethodRepository extends EntityRepository
         try {
             return array_map(function ($m) {
                 preg_match('/([0-9A-Z]*),[0-9A-Z]*$/', $m['notation'], $matches);
-                $m['halfLeadNotation'] =  $matches[1];
+                $m['halfLeadNotation'] = $matches[1];
                 unset($m['notation']);
+
                 return $m;
             }, $query->getArrayResult());
         } catch (\Doctrine\ORM\NoResultException $e) {
@@ -137,6 +138,7 @@ class MethodRepository extends EntityRepository
      * Ordered by similarity score (ascending).
      *
      * @param string $url The reference method URL
+     *
      * @return array|null Array of similar methods with both notations, or null if none found
      */
     public function similarMethodsDifferentOnlyAtTheHalfLeadAndLeadEnd($url): ?array
@@ -153,9 +155,10 @@ class MethodRepository extends EntityRepository
         try {
             return array_map(function ($m) {
                 preg_match('/([0-9A-Z]*),([0-9A-Z]*)$/', $m['notation'], $matches);
-                $m['halfLeadNotation'] =  $matches[1];
-                $m['leadEndNotation'] =  $matches[2];
+                $m['halfLeadNotation'] = $matches[1];
+                $m['leadEndNotation'] = $matches[2];
                 unset($m['notation']);
+
                 return $m;
             }, $query->getArrayResult());
         } catch (\Doctrine\ORM\NoResultException $e) {
@@ -170,6 +173,7 @@ class MethodRepository extends EntityRepository
      * Limited to 8 results for UI display. Ordered by similarity score (ascending).
      *
      * @param string $url The reference method URL
+     *
      * @return array|null Array of up to 8 similar methods, or null if none found
      */
     public function similarMethodsExcludingThoseOnlyDifferentAtTheLeadEndOrHalfLead($url): ?array

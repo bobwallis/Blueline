@@ -10,7 +10,7 @@ namespace Blueline\Helpers;
  */
 class Country
 {
-    public static $iso3166_2 = array(
+    public static $iso3166_2 = [
         'AF' => 'Afghanistan',
         'AX' => 'Aland Islands',
         'AL' => 'Albania',
@@ -256,5 +256,5 @@ class Country
         'YE' => 'Yemen',
         'ZM' => 'Zambia',
         'ZW' => 'Zimbabwe',
-    );
+    ];
 }

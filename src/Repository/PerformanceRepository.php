@@ -2,8 +2,8 @@
 
 namespace Blueline\Repository;
 
-use Doctrine\ORM\EntityRepository;
 use Blueline\Entity\Performance;
+use Doctrine\ORM\EntityRepository;
 
 /**
  * Repository for querying Performance entities.
@@ -19,6 +19,7 @@ class PerformanceRepository extends EntityRepository
      * performance references to current method records.
      *
      * @param string $url The historical rung method URL
+     *
      * @return string|null The current method URL identifier, or null if not found
      */
     public function findURLByRungURL($url): ?string
@@ -31,6 +32,7 @@ class PerformanceRepository extends EntityRepository
 
         try {
             $result = $query->getSingleResult();
+
             return $result->getMethod()->getUrl();
         } catch (\Doctrine\ORM\NoResultException $e) {
             return null;

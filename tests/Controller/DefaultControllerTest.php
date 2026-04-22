@@ -9,11 +9,11 @@ class DefaultControllerTest extends WebTestCase
     public function testPagesRenderExpectedContent()
     {
         $client = static::createClient();
-        $pages = array(
+        $pages = [
             '/' => 'Blueline',
             '/about' => 'methods.notationExpanded',
             '/methods/notation' => 'Place Notation Guide',
-        );
+        ];
 
         foreach ($pages as $path => $expectedContent) {
             $client->request('GET', $path);
@@ -26,7 +26,7 @@ class DefaultControllerTest extends WebTestCase
     public function testRedirects()
     {
         $client = static::createClient();
-        foreach (array('services/siril', 'services/siril/about', 'copyright', 'tutorials', 'methods/tutorials') as $html) {
+        foreach (['services/siril', 'services/siril/about', 'copyright', 'tutorials', 'methods/tutorials'] as $html) {
             $client->request('GET', '/'.$html);
             $this->assertSame(301, $client->getResponse()->getStatusCode());
         }

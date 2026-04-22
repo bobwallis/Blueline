@@ -11,35 +11,33 @@ namespace Blueline\Helpers;
  */
 class Stages
 {
-    /**
-     * @access private
-     */
-    private static $_numberToStage = array(
-        2  =>    'Two',
-        3  =>    'Singles',
-        4  =>    'Minimus',
-        5  =>    'Doubles',
-        6  =>    'Minor',
-        7  =>    'Triples',
-        8  =>    'Major',
-        9  =>    'Caters',
-        10 =>    'Royal',
-        11 =>    'Cinques',
-        12 =>    'Maximus',
-        13 =>    'Sextuples',
-        14 =>    'Fourteen',
-        15 =>    'Septuples',
-        16 =>    'Sixteen',
-        17 =>    'Octuples',
-        18 =>    'Eighteen',
-        19 =>    'Nineteen',
-        20 =>    'Twenty',
-        21 =>    'Twenty-one',
-        22 =>    'Twenty-two',
-    );
+    private static $_numberToStage = [
+        2 => 'Two',
+        3 => 'Singles',
+        4 => 'Minimus',
+        5 => 'Doubles',
+        6 => 'Minor',
+        7 => 'Triples',
+        8 => 'Major',
+        9 => 'Caters',
+        10 => 'Royal',
+        11 => 'Cinques',
+        12 => 'Maximus',
+        13 => 'Sextuples',
+        14 => 'Fourteen',
+        15 => 'Septuples',
+        16 => 'Sixteen',
+        17 => 'Octuples',
+        18 => 'Eighteen',
+        19 => 'Nineteen',
+        20 => 'Twenty',
+        21 => 'Twenty-one',
+        22 => 'Twenty-two',
+    ];
 
     /**
-     * Return array of all stages
+     * Return array of all stages.
+     *
      * @return array
      */
     public static function toArray()
@@ -48,13 +46,15 @@ class Stages
     }
 
     /**
-     * Converts an integer (or a valid string representation) into a string representation
-     * @param  integer|string $i
-     * @return string|boolean
+     * Converts an integer (or a valid string representation) into a string representation.
+     *
+     * @param int|string $i
+     *
+     * @return string|bool
      */
     public static function toString($i)
     {
-        if (is_int($i) || intval($i) != 0) {
+        if (is_int($i) || 0 != intval($i)) {
             $i = intval($i);
             if (isset(self::$_numberToStage[$i])) {
                 return self::$_numberToStage[$i];
@@ -67,9 +67,11 @@ class Stages
     }
 
     /**
-     * Converts a string representation (or an integer) into an integer
-     * @param  string|integer  $s
-     * @return integer|boolean
+     * Converts a string representation (or an integer) into an integer.
+     *
+     * @param string|int $s
+     *
+     * @return int|bool
      */
     public static function toInt($s)
     {
@@ -84,4 +86,4 @@ class Stages
 
         return false;
     }
-};
+}

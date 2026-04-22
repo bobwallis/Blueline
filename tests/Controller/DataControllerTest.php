@@ -10,13 +10,13 @@ class DataControllerTest extends WebTestCase
     public function testCsvExportsHaveExpectedHeaders()
     {
         $client = static::createClient();
-        $expectedHeaders = array(
-            'collections' => array('id', 'name', 'description'),
-            'methods' => array('title', 'stage', 'notation'),
-            'methods_collections' => array('id', 'position', 'method_title'),
-            'methods_similar' => array('method1_title', 'method2_title', 'stage'),
-            'performances' => array('method_title', 'date'),
-        );
+        $expectedHeaders = [
+            'collections' => ['id', 'name', 'description'],
+            'methods' => ['title', 'stage', 'notation'],
+            'methods_collections' => ['id', 'position', 'method_title'],
+            'methods_similar' => ['method1_title', 'method2_title', 'stage'],
+            'performances' => ['method_title', 'date'],
+        ];
 
         foreach ($expectedHeaders as $table => $expectedColumns) {
             $client->request('GET', '/data/'.$table.'.csv');

@@ -54,5 +54,4 @@ class MethodSimilarityTest extends TestCase
         $this->assertSame($method1, $this->methodSimilarity->getMethod1());
         $this->assertSame($method2, $this->methodSimilarity->getMethod2());
     }
-
 }

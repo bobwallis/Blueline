@@ -5,12 +5,12 @@ namespace Blueline\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * MethodSimilarity entity
+ * MethodSimilarity entity.
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'methods_similar')]
-#[ORM\Index(name: 'idx_methods_similar_method1_title', columns: array('method1_title'))]
-#[ORM\Index(name: 'idx_methods_similar_method2_title', columns: array('method2_title'))]
+#[ORM\Index(name: 'idx_methods_similar_method1_title', columns: ['method1_title'])]
+#[ORM\Index(name: 'idx_methods_similar_method2_title', columns: ['method2_title'])]
 class MethodSimilarity
 {
     #[ORM\Column(type: 'float', nullable: true)]
@@ -39,6 +39,7 @@ class MethodSimilarity
     public function setSimilarity($similarity)
     {
         $this->similarity = $similarity;
+
         return $this;
     }
 
@@ -50,6 +51,7 @@ class MethodSimilarity
     public function setOnlyDifferentOverHalfLead($onlyDifferentOverHalfLead)
     {
         $this->onlyDifferentOverHalfLead = $onlyDifferentOverHalfLead;
+
         return $this;
     }
 
@@ -61,6 +63,7 @@ class MethodSimilarity
     public function setOnlyDifferentOverLeadEndAndHalfLead($onlyDifferentOverLeadEndAndHalfLead)
     {
         $this->onlyDifferentOverLeadEndAndHalfLead = $onlyDifferentOverLeadEndAndHalfLead;
+
         return $this;
     }
 
@@ -72,6 +75,7 @@ class MethodSimilarity
     public function setOnlyDifferentOverLeadEnd($onlyDifferentOverLeadEnd)
     {
         $this->onlyDifferentOverLeadEnd = $onlyDifferentOverLeadEnd;
+
         return $this;
     }
 
@@ -80,9 +84,10 @@ class MethodSimilarity
         return $this->onlyDifferentOverLeadEnd;
     }
 
-    public function setMethod1(\Blueline\Entity\Method $method1)
+    public function setMethod1(Method $method1)
     {
         $this->method1 = $method1;
+
         return $this;
     }
 
@@ -91,9 +96,10 @@ class MethodSimilarity
         return $this->method1;
     }
 
-    public function setMethod2(\Blueline\Entity\Method $method2)
+    public function setMethod2(Method $method2)
     {
         $this->method2 = $method2;
+
         return $this;
     }
 

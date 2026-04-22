@@ -2,22 +2,22 @@
 
 namespace Blueline\Command;
 
+use Blueline\Helpers\MethodSimilarity;
+use Blueline\Helpers\PlaceNotation;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Statement;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Helper\QuestionHelper;
-use Doctrine\DBAL\ArrayParameterType;
-use Blueline\Helpers\MethodSimilarity;
-use Blueline\Helpers\PlaceNotation;
 
 /**
  * Symfony console command that calculates similarity scores between bell-ringing methods.
@@ -31,19 +31,17 @@ use Blueline\Helpers\PlaceNotation;
  *
  * Run via: bin/console blueline:calculateMethodSimilarities [method titles...]
  * Or as part of: bin/fetchAndImportData
- *
  */
-
 class CalculateMethodSimilaritiesCommand extends Command
 {
     /** @var array<int, array{method1_title: string, method2_title: string, similarity: float}> */
-    private array $similarityInsertBuffer = array();
+    private array $similarityInsertBuffer = [];
 
     /** @var array<int, Statement> */
-    private array $insertSimilarityBatchStatements = array();
+    private array $insertSimilarityBatchStatements = [];
 
     /** @var array<string, Statement> */
-    private array $upsertSimilarityFlagStatements = array();
+    private array $upsertSimilarityFlagStatements = [];
 
     public function __construct(private readonly Connection $connection)
     {
@@ -63,19 +61,19 @@ class CalculateMethodSimilaritiesCommand extends Command
         $time = -microtime(true);
         // Set up styles
         $output->getFormatter()
-               ->setStyle('title', new OutputFormatterStyle('white', null, array( 'bold' )));
+               ->setStyle('title', new OutputFormatterStyle('white', null, ['bold']));
         $targetConsoleWidth = 75;
 
         // Print title
         $output->writeln('<title>Calculating similarities</title>');
 
         $requestedMethods = array_values(array_unique(array_filter(array_map('trim', $input->getArgument('methods')), static function (string $methodTitle): bool {
-            return $methodTitle !== '';
+            return '' !== $methodTitle;
         })));
 
         // Fetch methods which don't have similarity indexes (optionally filtered by title)
         try {
-            if ($requestedMethods === array()) {
+            if ([] === $requestedMethods) {
                 $methods = $this->connection->executeQuery(
                     'SELECT title, stage, notationexpanded AS "notationExpanded", lengthoflead AS "lengthOfLead"
                       FROM methods
@@ -91,12 +89,13 @@ class CalculateMethodSimilaritiesCommand extends Command
                      WHERE (method1_title IS NULL)
                        AND (title IN (?))
                      ORDER BY stage ASC',
-                    array($requestedMethods),
-                    array(ArrayParameterType::STRING)
+                    [$requestedMethods],
+                    [ArrayParameterType::STRING]
                 )->fetchAllAssociative();
             }
         } catch (Exception $exception) {
             $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
+
             return 0;
         }
 
@@ -115,7 +114,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         }
 
         // Generate rounds for each stage
-        $rounds = array();
+        $rounds = [];
         for ($i = 2; $i < 23; ++$i) {
             $rounds[$i] = PlaceNotation::rounds($i);
         }
@@ -135,9 +134,9 @@ class CalculateMethodSimilaritiesCommand extends Command
             try {
                 $this->connection->transactional(function () use ($method, $rounds, $comparisonStatement): void {
                     // Generate the array for the method we're generating indexes for
-                    $notationExploded     = PlaceNotation::explode($method['notationExpanded']);
+                    $notationExploded = PlaceNotation::explode($method['notationExpanded']);
                     $notationPermutations = PlaceNotation::explodedToPermutations($method['stage'], $notationExploded);
-                    $methodRowArray       = array_map('implode', PlaceNotation::apply($notationPermutations, $rounds[$method['stage']]));
+                    $methodRowArray = array_map('implode', PlaceNotation::apply($notationPermutations, $rounds[$method['stage']]));
 
                     // Get methods to compare against
                     $methodTitle = (string) $method['title'];
@@ -161,26 +160,26 @@ class CalculateMethodSimilaritiesCommand extends Command
                     foreach ($comparisons as $comparison) {
                         $similar = MethodSimilarity::calculate($methodRowArray, $comparison['notationExpanded'], $method['stage'], $limit);
                         if ($similar < $limit) {
-                            $this->similarityInsertBuffer[] = array(
+                            $this->similarityInsertBuffer[] = [
                                 'method1_title' => $method['title'],
                                 'method2_title' => $comparison['title'],
                                 'similarity' => $similar,
-                            );
-                            $this->similarityInsertBuffer[] = array(
+                            ];
+                            $this->similarityInsertBuffer[] = [
                                 'method1_title' => $comparison['title'],
                                 'method2_title' => $method['title'],
                                 'similarity' => $similar,
-                            );
+                            ];
                         }
                     }
 
                     // Insert the obvious similar method so we don't try to recalculate everything the next time the command runs
                     // This self-pair row acts as a marker that the method has been processed by this command.
-                    $this->similarityInsertBuffer[] = array(
+                    $this->similarityInsertBuffer[] = [
                         'method1_title' => $method['title'],
                         'method2_title' => $method['title'],
                         'similarity' => 0.0,
-                    );
+                    ];
 
                     // Flush this method's buffered writes before commit so the next
                     // method sees committed similarity rows and avoids duplicate pairs.
@@ -206,7 +205,7 @@ class CalculateMethodSimilaritiesCommand extends Command
                         }
 
                         $statement->executeStatement();
-                        $this->similarityInsertBuffer = array();
+                        $this->similarityInsertBuffer = [];
                     }
                 });
             } catch (\Throwable $exception) {
@@ -218,7 +217,6 @@ class CalculateMethodSimilaritiesCommand extends Command
         }
         $progress->finish();
         $output->writeln('');
-
 
         // Flag methods which only differ from each other over the lead end
         // These flags support grouped display in the method view and avoid
@@ -242,6 +240,7 @@ class CalculateMethodSimilaritiesCommand extends Command
             )->fetchAllAssociative();
         } catch (Exception $exception) {
             $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
+
             return 0;
         }
         $progress = new ProgressBar($output, count($leadHeadMatches));
@@ -261,6 +260,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         } catch (\Throwable $exception) {
             $progress->clear();
             $output->writeln('<error>Failed to flag methods differing only at the lead end: '.$exception->getMessage().'</error>');
+
             return 0;
         }
         $progress->finish();
@@ -286,6 +286,7 @@ class CalculateMethodSimilaritiesCommand extends Command
             )->fetchAllAssociative();
         } catch (Exception $exception) {
             $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
+
             return 0;
         }
         $progress = new ProgressBar($output, count($halfLeadMatches));
@@ -305,6 +306,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         } catch (\Throwable $exception) {
             $progress->clear();
             $output->writeln('<error>Failed to flag methods differing only at the half lead: '.$exception->getMessage().'</error>');
+
             return 0;
         }
         $progress->finish();
@@ -330,6 +332,7 @@ class CalculateMethodSimilaritiesCommand extends Command
             )->fetchAllAssociative();
         } catch (Exception $exception) {
             $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
+
             return 0;
         }
         $progress = new ProgressBar($output, count($leadEndHalfLeadMatches));
@@ -349,24 +352,26 @@ class CalculateMethodSimilaritiesCommand extends Command
         } catch (\Throwable $exception) {
             $progress->clear();
             $output->writeln('<error>Failed to flag methods differing only at the half lead and lead end: '.$exception->getMessage().'</error>');
+
             return 0;
         }
         $progress->finish();
         $output->writeln('');
 
         $time += microtime(true);
-        $output->writeln("\n<info>Finished updating method similarities in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true) / 1048576, 2).' MiB.</info>');
+        $output->writeln("\n<info>Finished updating method similarities in ".gmdate('H:i:s', (int) $time).'. Peak memory usage: '.number_format(memory_get_peak_usage(true) / 1048576, 2).' MiB.</info>');
+
         return 0;
     }
 
     private function getUpsertSimilarityFlagStatement(string $column): Statement
     {
         if (!isset($this->upsertSimilarityFlagStatements[$column])) {
-            $allowedColumns = array(
+            $allowedColumns = [
                 'onlydifferentoverleadend',
                 'onlydifferentoverhalflead',
                 'onlydifferentoverleadendandhalflead',
-            );
+            ];
             if (!in_array($column, $allowedColumns, true)) {
                 throw new \InvalidArgumentException('Unexpected similarity flag column: '.$column);
             }

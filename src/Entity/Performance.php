@@ -2,16 +2,16 @@
 
 namespace Blueline\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use Blueline\Helpers\Text;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Performance entity
+ * Performance entity.
  */
 #[ORM\Entity(repositoryClass: \Blueline\Repository\PerformanceRepository::class)]
 #[ORM\Table(name: 'performances')]
-#[ORM\Index(name: 'idx_performances_type', columns: array('type'))]
-#[ORM\Index(name: 'idx_performances_method_title', columns: array('method_title'))]
+#[ORM\Index(name: 'idx_performances_type', columns: ['type'])]
+#[ORM\Index(name: 'idx_performances_method_title', columns: ['method_title'])]
 class Performance
 {
     #[ORM\Id]
@@ -67,7 +67,7 @@ class Performance
      *
      * @param array<string, mixed> $firstSet Initial property values keyed by setter-compatible names
      */
-    public function __construct($firstSet = array())
+    public function __construct($firstSet = [])
     {
         $this->setAll($firstSet);
     }
@@ -105,6 +105,7 @@ class Performance
                     break;
             }
         });
+
         return array_filter($objectVars);
     }
 
@@ -115,13 +116,14 @@ class Performance
      * Unknown keys are ignored.
      *
      * @param array<string, mixed> $map
+     *
      * @return Performance
      */
     public function setAll($map)
     {
         foreach ($map as $key => $value) {
             $method = 'set'.str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
-            if (is_callable(array( $this, $method ))) {
+            if (is_callable([$this, $method])) {
                 $this->$method($value);
             }
         }
@@ -138,6 +140,7 @@ class Performance
     public function setType($type)
     {
         $this->type = $type;
+
         return $this;
     }
 
@@ -149,6 +152,7 @@ class Performance
     public function setDate($date)
     {
         $this->date = $date;
+
         return $this;
     }
 
@@ -160,6 +164,7 @@ class Performance
     public function setSociety($society)
     {
         $this->society = $society;
+
         return $this;
     }
 
@@ -171,6 +176,7 @@ class Performance
     public function setRungTitle($rungTitle)
     {
         $this->rung_title = $rungTitle;
+
         return $this;
     }
 
@@ -182,6 +188,7 @@ class Performance
     public function setRungUrl($rungUrl)
     {
         $this->rung_url = $rungUrl;
+
         return $this;
     }
 
@@ -193,6 +200,7 @@ class Performance
     public function setReference($reference)
     {
         $this->reference = $reference;
+
         return $this;
     }
 
@@ -204,6 +212,7 @@ class Performance
     public function setLocationRoom($locationRoom)
     {
         $this->location_room = $locationRoom;
+
         return $this;
     }
 
@@ -215,6 +224,7 @@ class Performance
     public function setLocationBuilding($locationBuilding)
     {
         $this->location_building = $locationBuilding;
+
         return $this;
     }
 
@@ -226,6 +236,7 @@ class Performance
     public function setLocationAddress($locationAddress)
     {
         $this->location_address = $locationAddress;
+
         return $this;
     }
 
@@ -237,6 +248,7 @@ class Performance
     public function setLocationTown($locationTown)
     {
         $this->location_town = $locationTown;
+
         return $this;
     }
 
@@ -248,6 +260,7 @@ class Performance
     public function setLocationCounty($locationCounty)
     {
         $this->location_county = $locationCounty;
+
         return $this;
     }
 
@@ -259,6 +272,7 @@ class Performance
     public function setLocationRegion($locationRegion)
     {
         $this->location_region = $locationRegion;
+
         return $this;
     }
 
@@ -270,6 +284,7 @@ class Performance
     public function setLocationCountry($locationCountry)
     {
         $this->location_country = $locationCountry;
+
         return $this;
     }
 
@@ -278,9 +293,10 @@ class Performance
         return $this->location_country;
     }
 
-    public function setMethod(?\Blueline\Entity\Method $method)
+    public function setMethod(?Method $method)
     {
         $this->method = $method;
+
         return $this;
     }
 
@@ -296,7 +312,7 @@ class Performance
      */
     public function getLocation()
     {
-        return Text::toList(array_filter(array(
+        return Text::toList(array_filter([
             $this->getLocationRoom(),
             $this->getLocationBuilding(),
             $this->getLocationAddress(),
@@ -304,6 +320,6 @@ class Performance
             $this->getLocationCounty(),
             $this->getLocationRegion(),
             $this->getLocationCountry(),
-        )), ', ', ', ');
+        ]), ', ', ', ');
     }
 }

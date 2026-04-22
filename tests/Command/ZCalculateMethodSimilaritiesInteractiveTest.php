@@ -9,13 +9,13 @@ class ZCalculateMethodSimilaritiesInteractiveTest extends CommandTestCase
 {
     public function testCalculateMethodSimilaritiesCanTargetSpecificMethods(): void
     {
-        $targetMethods = array(
+        $targetMethods = [
             'Bristol Surprise Maximus',
             'Cambridge Surprise Minor',
             'Plain Bob Doubles',
             'Little Bob Royal',
             'Stedman Cinques',
-        );
+        ];
 
         $targetPlaceholders = implode(', ', array_fill(0, count($targetMethods), '?'));
         $availableTargetMethods = array_column(
@@ -44,7 +44,7 @@ class ZCalculateMethodSimilaritiesInteractiveTest extends CommandTestCase
         );
         $this->assertSame(5, $missingBefore);
 
-        [$exitCode, $output] = $this->executeCommand('blueline:calculateMethodSimilarities', array('methods' => $targetMethods));
+        [$exitCode, $output] = $this->executeCommand('blueline:calculateMethodSimilarities', ['methods' => $targetMethods]);
 
         $this->assertSame(0, $exitCode);
         $this->assertStringContainsString('Calculating similarities', $output);
@@ -111,7 +111,7 @@ class ZCalculateMethodSimilaritiesInteractiveTest extends CommandTestCase
 
         foreach ($titles as $title) {
             $exists = $this->dbCount('SELECT COUNT(*) FROM methods_similar WHERE method1_title = ? AND method2_title = ?', [$title, $title]);
-            if ($exists === 0) {
+            if (0 === $exists) {
                 $this->dbExec(
                     'INSERT INTO methods_similar (method1_title, method2_title, similarity) VALUES (?, ?, 0)',
                     [$title, $title]
@@ -119,5 +119,4 @@ class ZCalculateMethodSimilaritiesInteractiveTest extends CommandTestCase
             }
         }
     }
-
 }

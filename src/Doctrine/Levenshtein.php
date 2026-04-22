@@ -6,7 +6,7 @@ use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 use Doctrine\ORM\Query\TokenType;
 
 /**
- * Custom Doctrine DQL function: LEVENSHTEIN(str1, str2)
+ * Custom Doctrine DQL function: LEVENSHTEIN(str1, str2).
  *
  * Calculates Levenshtein distance (edit distance) between two strings.
  * Returns the minimum number of single-character edits (insertions, deletions, substitutions)
@@ -21,12 +21,13 @@ use Doctrine\ORM\Query\TokenType;
  * SELECT m FROM Blueline\\Entity\\Method m WHERE LEVENSHTEIN(m.title, :searchTerm) < 3
  *
  * @throws \RuntimeException If called on unsupported database platform
+ *
  * @see https://www.postgresql.org/docs/current/fuzzystrmatch.html
  */
 class Levenshtein extends FunctionNode
 {
-    private $firstString = null;
-    private $secondString = null;
+    private $firstString;
+    private $secondString;
 
     public function parse(\Doctrine\ORM\Query\Parser $parser): void
     {

@@ -11,7 +11,7 @@ class OembedControllerTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', '/services/oembed.xml?url=https://rsw.me.uk/blueline/methods/view/Cambridge_Surprise_Minor');
         $this->assertFalse($client->getResponse()->isSuccessful(), '/services/oembed.xml request successful');
-        $this->assertTrue($client->getResponse()->getStatusCode() == 501, '/services/oembed.xml request not 501');
+        $this->assertTrue(501 == $client->getResponse()->getStatusCode(), '/services/oembed.xml request not 501');
     }
 
     public function testOembedJsonReturnsExpectedMetadata()

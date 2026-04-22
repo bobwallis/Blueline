@@ -2,9 +2,6 @@
 
 namespace Blueline\Helpers;
 
-use Blueline\Helpers\Country;
-use Blueline\Helpers\LongCounty;
-
 /**
  * Parses method XML files into Method entities and implements the Iterator
  * interface for streaming parsing.
@@ -18,8 +15,8 @@ use Blueline\Helpers\LongCounty;
  * Used by ImportMethodsCommand for bulk method import.
  *
  * @see ImportMethodsCommand for usage
- * @TODO: Consider switching from SimpleXML to XMLReader for better memory efficiency on large files
  *
+ * @TODO: Consider switching from SimpleXML to XMLReader for better memory efficiency on large files
  */
 class MethodXMLIterator implements \Iterator, \Countable
 {
@@ -34,13 +31,13 @@ class MethodXMLIterator implements \Iterator, \Countable
     {
         // Prepare methodCollections data for easier method sorting
         require __DIR__.'/../Resources/data/collections.php';
-        $methodCollections = array();
+        $methodCollections = [];
         foreach ($collections as $collection) {
             $methodCollections[$collection['id']] = $collection['methods'];
         }
 
         // Flag for if we're iterating over the "provisionally named" methods collection
-        $provisional = (preg_match('/provisional\.xml$/', $file) === 1);
+        $provisional = (1 === preg_match('/provisional\.xml$/', $file));
 
         // Parse the XML data
         // TODO: Investigate a switch to XMLReader <http://www.php.net/manual/en/book.xmlreader.php> over SimpleXML.
@@ -51,7 +48,7 @@ class MethodXMLIterator implements \Iterator, \Countable
         if (!$XMLData) {
             foreach (libxml_get_errors() as $error) {
                 trigger_error('Error in '.basename($file).': Line '.$error->line.', column '.$error->column.'. '.$error->message.'.');
-                $this->data = array();
+                $this->data = [];
 
                 return false;
             }
@@ -59,39 +56,39 @@ class MethodXMLIterator implements \Iterator, \Countable
         }
 
         // Function to parse the SimpleXMLElements we'll encounter into an array of data
-        $xmlToArray = function (\SimpleXMLElement $node, $array = array()) use ($methodCollections, $provisional) {
+        $xmlToArray = function (\SimpleXMLElement $node, $array = []) use ($methodCollections, $provisional) {
             // Pull out the easy ones
-            $array = array_merge($array, array(
-                'provisional'    => $provisional,
-                'url'            => strval($node->title) ? str_replace([' ', '$', '&', '+', ',', '/', ':', ';', '=', '?', '@', '"', "'", '<', '>', '#', '%', '{', '}', '|', "\\", '^', '~', '[', ']', '.'], ['_'], iconv('UTF-8', 'ASCII//TRANSLIT', strval($node->title))) : null,
-                'title'          => strval($node->title) ?: null,
-                'nameMetaphone'  => metaphone($node->name ?: '') ?: null,
-                'notation'       => str_replace(['-','.,'], ['x',','], strval($node->notation)) ?: null,
-                ), array_filter(array(
-                'stage'          => intval($node->stage) ?: null,
+            $array = array_merge($array, [
+                'provisional' => $provisional,
+                'url' => strval($node->title) ? str_replace([' ', '$', '&', '+', ',', '/', ':', ';', '=', '?', '@', '"', "'", '<', '>', '#', '%', '{', '}', '|', '\\', '^', '~', '[', ']', '.'], ['_'], iconv('UTF-8', 'ASCII//TRANSLIT', strval($node->title))) : null,
+                'title' => strval($node->title) ?: null,
+                'nameMetaphone' => metaphone($node->name ?: '') ?: null,
+                'notation' => str_replace(['-', '.,'], ['x', ','], strval($node->notation)) ?: null,
+            ], array_filter([
+                'stage' => intval($node->stage) ?: null,
                 'classification' => strval($node->classification) ?: null,
-                'numberOfHunts'  => $node->numberOfHunts ? intval($node->numberOfHunts) : null,
-                'lengthOfLead'   => intval($node->lengthOfLead) ?: null,
-                'leadHead'       => strval($node->leadHead) ?: null,
-                'leadHeadCode'   => strval($node->leadHeadCode) ?: null,
-                'fchGroups'      => strval($node->falseness->fchGroups) ?: null,
-                'cccbrId'        => strval($node->attributes()->id) ?: null,
+                'numberOfHunts' => $node->numberOfHunts ? intval($node->numberOfHunts) : null,
+                'lengthOfLead' => intval($node->lengthOfLead) ?: null,
+                'leadHead' => strval($node->leadHead) ?: null,
+                'leadHeadCode' => strval($node->leadHeadCode) ?: null,
+                'fchGroups' => strval($node->falseness->fchGroups) ?: null,
+                'cccbrId' => strval($node->attributes()->id) ?: null,
                 'extensionConstruction' => strval($node->extensionConstruction) ?: null,
-            ), function ($e) {
+            ], function ($e) {
                 return !is_null($e);
             }));
 
             // Manually fix non-unique URLs
-            if ($array['title'] == '"Northumberland" Surprise Major') {
+            if ('"Northumberland" Surprise Major' == $array['title']) {
                 $array['url'] = '_Northumberland__Surprise_Major';
             }
-            if ($array['title'] == '"Weybridge" Surprise Major') {
+            if ('"Weybridge" Surprise Major' == $array['title']) {
                 $array['url'] = '_Weybridge__Surprise_Major';
             }
-            if ($array['title'] == '"Red Kite" Surprise Major') {
+            if ('"Red Kite" Surprise Major' == $array['title']) {
                 $array['url'] = '_Red Kite__Surprise_Major';
             }
-            if ($array['title'] == '"Easter" Delight Major') {
+            if ('"Easter" Delight Major' == $array['title']) {
                 $array['url'] = '_Easter__Surprise_Major';
             }
 
@@ -111,20 +108,20 @@ class MethodXMLIterator implements \Iterator, \Countable
 
             // Get additional classification attributes
             if (isset($node->classification)) {
-                $classificationText     = trim(strval($node->classification));
-                $array['little']        = ($node->classification->attributes()->little) ? true : null;
-                $array['differential']  = ($node->classification->attributes()->differential) ? true : null;
-                $array['plain']         = ($node->classification->attributes()->plain) ? true : null;
+                $classificationText = trim(strval($node->classification));
+                $array['little'] = ($node->classification->attributes()->little) ? true : null;
+                $array['differential'] = ($node->classification->attributes()->differential) ? true : null;
+                $array['plain'] = ($node->classification->attributes()->plain) ? true : null;
                 $array['trebleDodging'] = ($node->classification->attributes()->trebleDodging) ? true : null;
                 // Jump methods don't have an attribute, so take from the text
-                $array['jump']          = (preg_match('/^Jump\b/', $classificationText) === 1) ? true : null;
+                $array['jump'] = (1 === preg_match('/^Jump\b/', $classificationText)) ? true : null;
             }
 
             // Get symmetry
             if (isset($node->symmetry)) {
-                $array['palindromic'] = (strpos(strval($node->symmetry), 'palindromic') !== false) ? true : null;
-                $array['doubleSym']   = (strpos(strval($node->symmetry), 'double') !== false) ? true : null;
-                $array['rotational']  = (strpos(strval($node->symmetry), 'rotational') !== false) ? true : null;
+                $array['palindromic'] = (false !== strpos(strval($node->symmetry), 'palindromic')) ? true : null;
+                $array['doubleSym'] = (false !== strpos(strval($node->symmetry), 'double')) ? true : null;
+                $array['rotational'] = (false !== strpos(strval($node->symmetry), 'rotational')) ? true : null;
             }
 
             // Get references
@@ -132,7 +129,7 @@ class MethodXMLIterator implements \Iterator, \Countable
                 $refParts = [];
                 foreach ($node->references->children() as $refChild) {
                     $val = strval($refChild);
-                    if ($val !== '') {
+                    if ('' !== $val) {
                         $refParts[] = $refChild->getName().': '.$val;
                     }
                 }
@@ -141,10 +138,10 @@ class MethodXMLIterator implements \Iterator, \Countable
 
             // Get performance information
             if (isset($node->performances)) {
-                $array['performances'] = array();
+                $array['performances'] = [];
                 foreach ($node->performances->children() as $perfNode) {
                     $perfType = $perfNode->getName();
-                    $perf = array_filter(array(
+                    $perf = array_filter([
                         'method_title' => $array['title'],
                         'type' => $perfType,
                         'date' => isset($perfNode->date) ? (new \DateTime(strval($perfNode->date)))->format('Y-m-d') : null,
@@ -156,14 +153,14 @@ class MethodXMLIterator implements \Iterator, \Countable
                         'location_county' => strval($perfNode->location->county) ?: null,
                         'location_region' => strval($perfNode->location->region) ?: null,
                         'location_country' => strval($perfNode->location->country) ?: null,
-                    ), function ($e) {
+                    ], function ($e) {
                         return !is_null($e);
                     });
                     if (isset($perfNode->references)) {
                         $perfRefParts = [];
                         foreach ($perfNode->references->children() as $refChild) {
                             $val = strval($refChild);
-                            if ($val !== '') {
+                            if ('' !== $val) {
                                 $perfRefParts[] = $refChild->getName().': '.$val;
                             }
                         }
@@ -180,7 +177,7 @@ class MethodXMLIterator implements \Iterator, \Countable
                         $p['location_country'] = Country::$iso3166_2[$p['location_country']];
                     }
                     // Fix regions
-                    $regionSearchArray = array();
+                    $regionSearchArray = [];
                     if (isset($p['location_region'])) {
                         $p['location_region'] = LongCounty::get($p['location_region'], isset($p['location_country']) ? $p['location_country'] : 'England');
                     }
@@ -197,25 +194,25 @@ class MethodXMLIterator implements \Iterator, \Countable
                 // Favour certain classifications
                 if (isset($array['classification'])) {
                     switch ($array['classification']) {
-                        case "Surprise":
+                        case 'Surprise':
                             $sort *= 0.91;
                             break;
-                        case "Bob":
+                        case 'Bob':
                             $sort *= 0.92;
                             break;
-                        case "Delight":
+                        case 'Delight':
                             $sort *= 0.93;
                             break;
-                        case "Treble Bob":
-                        case "Alliance":
+                        case 'Treble Bob':
+                        case 'Alliance':
                             $sort *= 0.95;
                             break;
-                        case "Treble Place":
-                        case "Place":
-                        case "Slow Course":
+                        case 'Treble Place':
+                        case 'Place':
+                        case 'Slow Course':
                             $sort *= 0.97;
                             break;
-                        case "Hybrid":
+                        case 'Hybrid':
                             $sort *= 0.99;
                     }
                 }
@@ -268,22 +265,27 @@ class MethodXMLIterator implements \Iterator, \Countable
     {
         reset($this->data);
     }
+
     public function current(): mixed
     {
         return current($this->data);
     }
+
     public function key(): mixed
     {
         return key($this->data);
     }
+
     public function next(): void
     {
         next($this->data);
     }
+
     public function valid(): bool
     {
-        return key($this->data) !== null;
+        return null !== key($this->data);
     }
+
     public function count(): int
     {
         return count($this->data);

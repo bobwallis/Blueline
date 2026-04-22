@@ -17,7 +17,7 @@ class CollectionTest extends TestCase
     }
 
     /**
-     * Test collection can be created with ID
+     * Test collection can be created with ID.
      */
     public function testCreateWithId()
     {
@@ -26,7 +26,7 @@ class CollectionTest extends TestCase
     }
 
     /**
-     * Test collection can set and get name
+     * Test collection can set and get name.
      */
     public function testSetAndGetName()
     {
@@ -36,7 +36,7 @@ class CollectionTest extends TestCase
     }
 
     /**
-     * Test collection can set and get description
+     * Test collection can set and get description.
      */
     public function testSetAndGetDescription()
     {
@@ -46,7 +46,7 @@ class CollectionTest extends TestCase
     }
 
     /**
-     * Test setAll with multiple properties
+     * Test setAll with multiple properties.
      */
     public function testSetAll()
     {
@@ -64,7 +64,7 @@ class CollectionTest extends TestCase
     }
 
     /**
-     * Test methods collection is initialized
+     * Test methods collection is initialized.
      */
     public function testMethodsInitialized()
     {
@@ -75,7 +75,7 @@ class CollectionTest extends TestCase
     }
 
     /**
-     * Test adding method to collection
+     * Test adding method to collection.
      */
     public function testAddMethod()
     {
@@ -98,7 +98,7 @@ class CollectionTest extends TestCase
     }
 
     /**
-     * Test removing method from collection
+     * Test removing method from collection.
      */
     public function testRemoveMethod()
     {
@@ -118,16 +118,16 @@ class CollectionTest extends TestCase
     }
 
     /**
-     * Test string representation
+     * Test string representation.
      */
     public function testToString()
     {
         $this->collection->setId('test-id');
-        $this->assertEquals('Collection:test-id', (string)$this->collection);
+        $this->assertEquals('Collection:test-id', (string) $this->collection);
     }
 
     /**
-     * Test toArray filters out internal properties
+     * Test toArray filters out internal properties.
      */
     public function testToArray()
     {

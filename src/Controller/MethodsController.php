@@ -2,22 +2,21 @@
 
 namespace Blueline\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\HttpKernel\Attribute\Cache;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Doctrine\ORM\EntityManagerInterface;
-use Blueline\Helpers\Search;
 use Blueline\Entity\Method;
 use Blueline\Entity\Performance;
-use Blueline\Helpers\URL;
-use Blueline\Helpers\Stages;
 use Blueline\Helpers\Classifications;
 use Blueline\Helpers\PlaceNotation;
+use Blueline\Helpers\Search;
+use Blueline\Helpers\Stages;
+use Blueline\Helpers\URL;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\Cache;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * Controller for bell-ringing method browsing and search.
@@ -31,7 +30,6 @@ use Blueline\Helpers\PlaceNotation;
  *
  * Supports HTML, JSON, PNG, and XML outputs depending on the endpoint and request format.
  * Implements client-side caching via Cache attributes for public, cacheable routes.
- *
  */
 class MethodsController extends AbstractController
 {
@@ -46,7 +44,7 @@ class MethodsController extends AbstractController
                 ],
             ]);
 
-            if ($imageResponse->getStatusCode() !== 200) {
+            if (200 !== $imageResponse->getStatusCode()) {
                 throw new \RuntimeException('Image server returned a non-success status.');
             }
 
@@ -70,18 +68,18 @@ class MethodsController extends AbstractController
     public function search(Request $request, EntityManagerInterface $em)
     {
         $methodRepository = $em->getRepository(Method::class);
-        $methodMetadata   = $em->getClassMetadata(Method::class);
+        $methodMetadata = $em->getClassMetadata(Method::class);
 
         // Parse search variables
         $searchVariables = Search::requestToSearchVariables($request, array_values($methodMetadata->fieldNames));
-        $searchVariables['fields'] = implode(',', array_values(array_unique(empty($searchVariables['fields']) ? array('title', 'abbreviation', 'url', 'classification', 'stage', 'notation', 'ruleOffs', 'calls', 'callingPositions', 'cccbrId') : array_merge($searchVariables['fields'], ($request->getRequestFormat() == 'html') ? array('title', 'url') : array()))));
-        $searchVariables['sort']   = empty($searchVariables['sort']) ? 'magic' : $searchVariables['sort'];
+        $searchVariables['fields'] = implode(',', array_values(array_unique(empty($searchVariables['fields']) ? ['title', 'abbreviation', 'url', 'classification', 'stage', 'notation', 'ruleOffs', 'calls', 'callingPositions', 'cccbrId'] : array_merge($searchVariables['fields'], ('html' == $request->getRequestFormat()) ? ['title', 'url'] : []))));
+        $searchVariables['sort'] = empty($searchVariables['sort']) ? 'magic' : $searchVariables['sort'];
 
         // Create query
         $query = Search::searchVariablesToBasicQuery($searchVariables, $methodRepository, $methodMetadata);
         if (isset($searchVariables['q'])) {
-            if (strpos($searchVariables['q'], '/') === 0 && strlen($searchVariables['q']) > 1) {
-                if (@preg_match($searchVariables['q'].'/', ' ') === false) {
+            if (0 === strpos($searchVariables['q'], '/') && strlen($searchVariables['q']) > 1) {
+                if (false === @preg_match($searchVariables['q'].'/', ' ')) {
                     throw new BadRequestHttpException('Invalid regular expression');
                 }
                 $query->andWhere('REGEXP(e.title, :qRegexp) = TRUE')
@@ -142,7 +140,7 @@ class MethodsController extends AbstractController
                 // This is commented out as it breaks the ability to filter searches by stage, classification, etc (using &stage=6&classification=Surprise and similar)
                 // TODO: Remember why I added this in the first place
                 // Never exclude a basic match
-                //$query->orWhere('LOWER(e.title) LIKE :qLike')
+                // $query->orWhere('LOWER(e.title) LIKE :qLike')
                 //    ->setParameter('qLike', Search::prepareStringForLike($searchVariables['q']));
             }
         }
@@ -151,7 +149,7 @@ class MethodsController extends AbstractController
         $methods = $query->getQuery()->getResult();
         $count = (count($methods) + $searchVariables['offset'] < $searchVariables['count']) ? count($methods) : Search::queryToCountQuery($query, $methodMetadata)->getQuery()->getSingleScalarResult();
         $pageActive = max(1, ceil(($searchVariables['offset'] + 1) / $searchVariables['count']));
-        $pageCount =  max(1, ceil($count / $searchVariables['count']));
+        $pageCount = max(1, ceil($count / $searchVariables['count']));
 
         return $this->render('Methods/search.'.$request->getRequestFormat().'.twig', compact('searchVariables', 'count', 'pageActive', 'pageCount', 'methods'));
     }
@@ -164,9 +162,9 @@ class MethodsController extends AbstractController
 
         // If the title is empty redirect to version without slash
         if (empty($url)) {
-            return $this->redirect($this->generateUrl('Blueline_Methods_welcome', array(
-                'chromeless' => (($format == 'html') ? (intval($request->query->get('chromeless')) ?: null) : null)
-            ), 301));
+            return $this->redirect($this->generateUrl('Blueline_Methods_welcome', [
+                'chromeless' => (('html' == $format) ? (intval($request->query->get('chromeless')) ?: null) : null),
+            ], 301));
         }
 
         // Decode and canonicalise the requested URLs
@@ -175,17 +173,18 @@ class MethodsController extends AbstractController
         // Redirect to the canonical URL if we're at a wrong one
         if ($request->attributes->get('url') !== $url) {
             $style = $request->query->get('style');
-            $redirect = $this->generateUrl('Blueline_Methods_view', array(
-                'chromeless' => (($format == 'html') ? (intval($request->query->get('chromeless')) ?: null) : null),
-                'scale'      => intval($request->query->get('scale')) ?: null,
-                'style'      => isset($style) ? strtolower($style) : null,
-                'url'      => $url,
-                '_format'    => $format
-            ));
+            $redirect = $this->generateUrl('Blueline_Methods_view', [
+                'chromeless' => (('html' == $format) ? (intval($request->query->get('chromeless')) ?: null) : null),
+                'scale' => intval($request->query->get('scale')) ?: null,
+                'style' => isset($style) ? strtolower($style) : null,
+                'url' => $url,
+                '_format' => $format,
+            ]);
+
             return $this->redirect($redirect, 301);
         }
         // Perform extra checks for PNG format requests
-        if ($format == 'png') {
+        if ('png' == $format) {
             // Validate scale parameter
             if ((intval($request->query->get('scale')) ?: 1) > 4) {
                 throw $this->createAccessDeniedException('Maximum scale is 4.');
@@ -196,13 +195,14 @@ class MethodsController extends AbstractController
                 throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'lines', 'diagrams' or 'grid'.");
             }
             // Normalise
-            if (!isset($section) || intval($request->query->get('scale')) === 0) {
-                $url = $this->generateUrl('Blueline_Methods_view', array(
-                    'scale'   => (intval($request->query->get('scale')) ?: 1),
-                    'style'   => (!$section) ? 'numbers' : $section,
-                    'url'     => $url,
-                    '_format' => 'png'
-                ));
+            if (!isset($section) || 0 === intval($request->query->get('scale'))) {
+                $url = $this->generateUrl('Blueline_Methods_view', [
+                    'scale' => (intval($request->query->get('scale')) ?: 1),
+                    'style' => (!$section) ? 'numbers' : $section,
+                    'url' => $url,
+                    '_format' => 'png',
+                ]);
+
                 return $this->redirect($url, 301);
             }
         }
@@ -213,47 +213,49 @@ class MethodsController extends AbstractController
             // Try and find a renamed method
             $peformanceRepository = $em->getRepository(Performance::class);
             $renamedUrl = $peformanceRepository->findURLByRungURL($url);
-            if ($renamedUrl !== null) {
+            if (null !== $renamedUrl) {
                 $style = $request->query->get('style');
-                $redirect = $this->generateUrl('Blueline_Methods_view', array(
-                    'chromeless' => (($format == 'html') ? (intval($request->query->get('chromeless')) ?: null) : null),
-                    'scale'      => intval($request->query->get('scale')) ?: null,
-                    'style'      => isset($style) ? strtolower($style) : null,
-                    'url'        => $renamedUrl,
-                    '_format'    => $format
-                ));
+                $redirect = $this->generateUrl('Blueline_Methods_view', [
+                    'chromeless' => (('html' == $format) ? (intval($request->query->get('chromeless')) ?: null) : null),
+                    'scale' => intval($request->query->get('scale')) ?: null,
+                    'style' => isset($style) ? strtolower($style) : null,
+                    'url' => $renamedUrl,
+                    '_format' => $format,
+                ]);
+
                 return $this->redirect($redirect, 301);
             }
             // Try and find a version with fixed capitalisation
             $capitalisedMethod = $methodRepository->findByURL(preg_replace_callback('/(^|_)(.)/', function ($w) {
                 return $w[1].strtoupper($w[2]);
             }, $url));
-            if ($capitalisedMethod !== null) {
+            if (null !== $capitalisedMethod) {
                 $style = $request->query->get('style');
-                $redirect = $this->generateUrl('Blueline_Methods_view', array(
-                    'chromeless' => (($format == 'html') ? (intval($request->query->get('chromeless')) ?: null) : null),
-                    'scale'      => intval($request->query->get('scale')) ?: null,
-                    'style'      => isset($style) ? strtolower($style) : null,
-                    'url'        => $capitalisedMethod->getUrl(),
-                    '_format'    => $format
-                ));
+                $redirect = $this->generateUrl('Blueline_Methods_view', [
+                    'chromeless' => (('html' == $format) ? (intval($request->query->get('chromeless')) ?: null) : null),
+                    'scale' => intval($request->query->get('scale')) ?: null,
+                    'style' => isset($style) ? strtolower($style) : null,
+                    'url' => $capitalisedMethod->getUrl(),
+                    '_format' => $format,
+                ]);
+
                 return $this->redirect($redirect, 301);
             }
             // Otherwise fail
             throw $this->createNotFoundException('The method does not exist');
         }
 
-        $similarMethods = array(
+        $similarMethods = [
             'differentOnlyAtLeadEnd' => $methodRepository->similarMethodsDifferentOnlyAtTheLeadEnd($method->getUrl()),
             'differentOnlyAtHalfLead' => $methodRepository->similarMethodsDifferentOnlyAtTheHalfLead($method->getUrl()),
             'differentOnlyAtHalfLeadAndLeadEnd' => $methodRepository->similarMethodsDifferentOnlyAtTheHalfLeadAndLeadEnd($method->getUrl()),
-            'other' => $methodRepository->similarMethodsExcludingThoseOnlyDifferentAtTheLeadEndOrHalfLead($method->getUrl())
-        );
+            'other' => $methodRepository->similarMethodsExcludingThoseOnlyDifferentAtTheLeadEndOrHalfLead($method->getUrl()),
+        ];
 
         // Create response
         switch ($format) {
             case 'png':
-                return $this->proxyPngResponse($this->generateUrl('Blueline_Methods_view', array('url' => $url)), $request, $httpClient);
+                return $this->proxyPngResponse($this->generateUrl('Blueline_Methods_view', ['url' => $url]), $request, $httpClient);
             default:
                 return $this->render('Methods/view.'.$format.'.twig', compact('method', 'similarMethods'));
         }
@@ -265,8 +267,8 @@ class MethodsController extends AbstractController
         $format = $request->getRequestFormat();
 
         // Collect passed in variables that are permissible
-        $vars = array();
-        foreach (array('notation', 'title', 'stage') as $key) {
+        $vars = [];
+        foreach (['notation', 'title', 'stage'] as $key) {
             $value = trim($request->query->get($key) ?? '');
             if (!empty($value)) {
                 $vars[$key] = urldecode($value);
@@ -275,7 +277,7 @@ class MethodsController extends AbstractController
 
         // Check we have the bare minimum of information required
         if (!isset($vars['notation'])) {
-            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException("Request requires at least 'notation' to be set");
+            throw new BadRequestHttpException("Request requires at least 'notation' to be set");
         }
 
         // Do some basic conversion
@@ -290,19 +292,20 @@ class MethodsController extends AbstractController
             ->setParameter('stage', $vars['stage'])
             ->getArrayResult();
         if (!empty($methodsCheck)) {
-            $url = $this->generateUrl('Blueline_Methods_view', array( 'chromeless' => (($format == 'html') ? (intval($request->query->get('chromeless')) ?: null) : null), 'url' => $methodsCheck[0]['url'], '_format' => $format ));
+            $url = $this->generateUrl('Blueline_Methods_view', ['chromeless' => (('html' == $format) ? (intval($request->query->get('chromeless')) ?: null) : null), 'url' => $methodsCheck[0]['url'], '_format' => $format]);
+
             return $this->redirect($url, 301);
         }
 
         // Otherwise create and display the custom method
         $method = new Method($vars);
         $custom = true;
-        $similarMethods = array(
+        $similarMethods = [
             'differentOnlyAtLeadEnd' => null,
             'differentOnlyAtHalfLead' => null,
             'differentOnlyAtHalfLeadAndLeadEnd' => null,
-            'other' => null
-        );
+            'other' => null,
+        ];
 
         // Create response
         switch ($format) {
@@ -314,20 +317,22 @@ class MethodsController extends AbstractController
                 if (isset($section) && !in_array($section, ['numbers', 'lines', 'diagrams', 'grid'])) {
                     throw $this->createAccessDeniedException("Style must be unset, or one of 'numbers', 'lines', 'diagrams' or 'grid'.");
                 }
-                if (!$section || intval($request->query->get('scale')) === 0) {
-                    $url = $this->generateUrl('Blueline_Methods_custom_view', array(
-                        'stage'    => $vars['stage'],
+                if (!$section || 0 === intval($request->query->get('scale'))) {
+                    $url = $this->generateUrl('Blueline_Methods_custom_view', [
+                        'stage' => $vars['stage'],
                         'notation' => $vars['notation'],
-                        'scale'    => (intval($request->query->get('scale')) ?: 1),
-                        'style'    => (!$section) ? 'numbers' : $section,
-                        '_format'  => 'png'
-                    ));
+                        'scale' => (intval($request->query->get('scale')) ?: 1),
+                        'style' => (!$section) ? 'numbers' : $section,
+                        '_format' => 'png',
+                    ]);
+
                     return $this->redirect($url, 301);
                 }
-                return $this->proxyPngResponse($this->generateUrl('Blueline_Methods_custom_view', array(
-                    'stage'    => $vars['stage'],
-                    'notation' => $vars['notation']
-                )), $request, $httpClient);
+
+                return $this->proxyPngResponse($this->generateUrl('Blueline_Methods_custom_view', [
+                    'stage' => $vars['stage'],
+                    'notation' => $vars['notation'],
+                ]), $request, $httpClient);
             default:
                 return $this->render('Methods/view.'.$format.'.twig', compact('method', 'custom', 'similarMethods'));
         }
@@ -340,6 +345,7 @@ class MethodsController extends AbstractController
                     ->setMaxResults(12500)
                     ->setFirstResult(($page - 1) * 12500)
                     ->getArrayResult();
+
         return $this->render('Methods/sitemap.xml.twig', compact('methods'));
     }
 }

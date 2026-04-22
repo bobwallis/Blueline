@@ -39,9 +39,9 @@ class ResponseListener
             return;
         }
         $content = $response->getContent();
-        if ($content !== false) {
+        if (false !== $content) {
             $minifiedContent = preg_replace('/>\s+</', '><', $content);
-            if ($minifiedContent !== null) {
+            if (null !== $minifiedContent) {
                 $response->setContent($minifiedContent);
             }
         }

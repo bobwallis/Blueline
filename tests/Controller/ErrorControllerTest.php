@@ -10,7 +10,7 @@ class ErrorControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
-        foreach (array('/towers', '/towers/anything/here', '/associations', '/associations/anything/here') as $path) {
+        foreach (['/towers', '/towers/anything/here', '/associations', '/associations/anything/here'] as $path) {
             $client->request('GET', $path);
             $this->assertSame(410, $client->getResponse()->getStatusCode(), $path.' should return 410 Gone');
         }

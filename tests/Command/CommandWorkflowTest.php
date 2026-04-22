@@ -9,7 +9,7 @@ class CommandWorkflowTest extends CommandTestCase
 {
     public function testImportMethodsRefreshesCoreDataInvariantsWhenSlowTestsEnabled(): void
     {
-        if (getenv('BLUELINE_RUN_SLOW_COMMAND_TESTS') !== '1') {
+        if ('1' !== getenv('BLUELINE_RUN_SLOW_COMMAND_TESTS')) {
             $this->markTestSkipped('Set BLUELINE_RUN_SLOW_COMMAND_TESTS=1 to run importMethods integration coverage.');
         }
 

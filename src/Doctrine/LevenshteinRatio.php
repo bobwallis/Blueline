@@ -6,7 +6,7 @@ use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 use Doctrine\ORM\Query\TokenType;
 
 /**
- * Custom Doctrine DQL function: LEVENSHTEIN_RATIO(str1, str2)
+ * Custom Doctrine DQL function: LEVENSHTEIN_RATIO(str1, str2).
  *
  * Calculates normalized similarity score (0-100%) between two strings.
  * Formula: (1 - (Levenshtein_distance / max_string_length)) * 100
@@ -29,8 +29,8 @@ use Doctrine\ORM\Query\TokenType;
  */
 class LevenshteinRatio extends FunctionNode
 {
-    private $firstString = null;
-    private $secondString = null;
+    private $firstString;
+    private $secondString;
 
     public function parse(\Doctrine\ORM\Query\Parser $parser): void
     {

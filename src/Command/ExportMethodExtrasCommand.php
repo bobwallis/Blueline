@@ -17,7 +17,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Output is sent to stdout.
  * Run via: bin/console blueline:exportMethodExtras > src/Resources/data/method_extras.php
  */
-
 class ExportMethodExtrasCommand extends Command
 {
     protected function configure(): void
@@ -43,6 +42,7 @@ class ExportMethodExtrasCommand extends Command
         $output->write("<?php\n// Extra method data exported ".date('Y/m/d, H:i')."\n\$method_extras = ");
         $output->write(var_export($methods, true));
         $output->write(";\n");
+
         return 0;
     }
 }

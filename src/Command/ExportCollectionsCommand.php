@@ -17,7 +17,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Output is sent to stdout.
  * Run via: bin/console blueline:exportCollections > src/Resources/data/collections.php
  */
-
 class ExportCollectionsCommand extends Command
 {
     protected function configure(): void
@@ -56,6 +55,7 @@ class ExportCollectionsCommand extends Command
         $output->write("<?php\n// Collections data exported ".date('Y/m/d, H:i')."\n\$collections = ");
         $output->write(var_export($collections, true));
         $output->write(";\n");
+
         return 0;
     }
 }

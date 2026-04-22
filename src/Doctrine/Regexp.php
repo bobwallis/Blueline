@@ -6,7 +6,7 @@ use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 use Doctrine\ORM\Query\TokenType;
 
 /**
- * Custom Doctrine DQL function: REGEXP(str, regex)
+ * Custom Doctrine DQL function: REGEXP(str, regex).
  *
  * Performs database-native regex matching within DQL queries.
  * Returns boolean (use as "REGEXP(str, regex)= TRUE" in a WHERE clause).
@@ -29,8 +29,8 @@ use Doctrine\ORM\Query\TokenType;
  */
 class Regexp extends FunctionNode
 {
-    private $string = null;
-    private $regexp = null;
+    private $string;
+    private $regexp;
 
     public function parse(\Doctrine\ORM\Query\Parser $parser): void
     {

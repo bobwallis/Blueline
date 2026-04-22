@@ -78,7 +78,7 @@ class DataController extends AbstractController
             }
 
             $firstRow = $result->fetchAssociative();
-            if ($firstRow === false) {
+            if (false === $firstRow) {
                 return;
             }
 
@@ -92,7 +92,7 @@ class DataController extends AbstractController
             $i = 1;
             while (($row = $result->fetchAssociative()) !== false) {
                 fputcsv($handle, $row, ',', '"', '\\', "\n");
-                if ($i++ % 50 == 0) {
+                if (0 == $i++ % 50) {
                     flush();
                 }
             }

@@ -97,9 +97,9 @@ fi
 
 echo -e "\033[32m✓ PHP source lint passed\033[0m"
 
-echo -e "\n\033[1mCheck PHP code style (PSR-12)\033[0m"
+echo -e "\n\033[1mCheck PHP code style (Symfony standard)\033[0m"
 if ! "$repo_root/vendor/bin/php-cs-fixer" fix --config="$repo_root/.php-cs-fixer.dist.php" --dry-run --diff --verbose; then
-    echo -e "\033[33m⚠ PHP style check found PSR-12 violations in src/tests\033[0m"
+    echo -e "\033[33m⚠ PHP style check found Symfony-standard violations in src/tests\033[0m"
     echo "  Run: symfony composer fix:php-style to fix"
 else
     echo -e "\033[32m✓ PHP style check passed\033[0m"

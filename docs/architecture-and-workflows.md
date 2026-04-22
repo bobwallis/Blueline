@@ -60,7 +60,7 @@ This runs:
 - Symfony container lint
 - Twig template lint
 - PHP code lint
-- PHP-CS-Fixer PSR-12 style check for `src/` and `tests/` (non-blocking)
+- PHP-CS-Fixer Symfony style check for `src/` and `tests/` (non-blocking)
 - Frontend asset complication
 - PHPUnit
 

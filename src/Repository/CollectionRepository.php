@@ -2,8 +2,8 @@
 
 namespace Blueline\Repository;
 
-use Doctrine\ORM\EntityRepository;
 use Blueline\Entity\Collection;
+use Doctrine\ORM\EntityRepository;
 
 /**
  * Repository for querying Collection entities.

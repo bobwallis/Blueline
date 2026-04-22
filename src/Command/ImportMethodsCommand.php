@@ -2,17 +2,17 @@
 
 namespace Blueline\Command;
 
+use Blueline\Entity\Method;
+use Blueline\Helpers\MethodXMLIterator;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Statement;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Blueline\Helpers\MethodXMLIterator;
-use Blueline\Entity\Method;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /*
  * Symfony console command that imports bell-ringing method data from XML files.
@@ -30,7 +30,7 @@ use Blueline\Entity\Method;
 
 class ImportMethodsCommand extends Command
 {
-    private const METHOD_PARAMETER_TYPES = array(
+    private const METHOD_PARAMETER_TYPES = [
         'title' => ParameterType::STRING,
         'provisional' => ParameterType::BOOLEAN,
         'url' => ParameterType::STRING,
@@ -60,9 +60,9 @@ class ImportMethodsCommand extends Command
         'cccbrId' => ParameterType::STRING,
         'methodReferences' => ParameterType::STRING,
         'extensionConstruction' => ParameterType::STRING,
-    );
+    ];
 
-    private const PERFORMANCE_PARAMETER_TYPES = array(
+    private const PERFORMANCE_PARAMETER_TYPES = [
         'method_title' => ParameterType::STRING,
         'type' => ParameterType::STRING,
         'date' => ParameterType::STRING,
@@ -75,13 +75,13 @@ class ImportMethodsCommand extends Command
         'location_region' => ParameterType::STRING,
         'location_country' => ParameterType::STRING,
         'reference' => ParameterType::STRING,
-    );
+    ];
 
     /** @var array<string, Statement> */
-    private array $performanceInsertStatements = array();
+    private array $performanceInsertStatements = [];
 
     /** @var array<string, Statement> */
-    private array $methodUpsertStatements = array();
+    private array $methodUpsertStatements = [];
 
     public function __construct(private readonly Connection $connection)
     {
@@ -100,7 +100,7 @@ class ImportMethodsCommand extends Command
         $time = -microtime(true);
         // Set up styles
         $output->getFormatter()
-               ->setStyle('title', new OutputFormatterStyle('white', null, array( 'bold' )));
+               ->setStyle('title', new OutputFormatterStyle('white', null, ['bold']));
         $targetConsoleWidth = 75;
 
         // Print title
@@ -111,16 +111,17 @@ class ImportMethodsCommand extends Command
             $this->connection->executeStatement("DELETE FROM performances WHERE type NOT IN ('renamedMethod', 'duplicateMethod')");
         } catch (Exception $exception) {
             $output->writeln('<error>Failed to initialise import: '.$exception->getMessage().'</error>');
+
             return 0;
         }
 
         // Import data
-        $output->writeln("<info>Importing method data...</info>");
-        $validFields = array_flip(array('title', 'provisional', 'url', 'stage', 'classification', 'nameMetaphone','notation', 'notationExpanded', 'leadHeadCode', 'leadHead', 'fchGroups', 'lengthOfLead', 'lengthOfCourse', 'numberOfHunts', 'jump', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational', 'calls', 'ruleOffs', 'callingPositions', 'magic', 'cccbrId', 'methodReferences', 'extensionConstruction'));
-        $importedMethods = array();
+        $output->writeln('<info>Importing method data...</info>');
+        $validFields = array_flip(['title', 'provisional', 'url', 'stage', 'classification', 'nameMetaphone', 'notation', 'notationExpanded', 'leadHeadCode', 'leadHead', 'fchGroups', 'lengthOfLead', 'lengthOfCourse', 'numberOfHunts', 'jump', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational', 'calls', 'ruleOffs', 'callingPositions', 'magic', 'cccbrId', 'methodReferences', 'extensionConstruction']);
+        $importedMethods = [];
         $normaliseRow = static function (array $row): array {
             foreach ($row as $key => $value) {
-                if ($value === '') {
+                if ('' === $value) {
                     $row[$key] = null;
                 }
             }
@@ -166,10 +167,10 @@ class ImportMethodsCommand extends Command
                             try {
                                 $deleted = $this->connection->delete(
                                     'methods',
-                                    array('title' => $xmlRow['title'], 'provisional' => true),
-                                    array('title' => ParameterType::STRING, 'provisional' => ParameterType::BOOLEAN)
+                                    ['title' => $xmlRow['title'], 'provisional' => true],
+                                    ['title' => ParameterType::STRING, 'provisional' => ParameterType::BOOLEAN]
                                 );
-                                if ($deleted === 0) {
+                                if (0 === $deleted) {
                                     throw $exception;
                                 }
 
@@ -188,14 +189,14 @@ class ImportMethodsCommand extends Command
                         }
 
                         if (isset($xmlRow['performances'])) {
-                            $performanceRows = array();
-                            $performanceSignatures = array();
+                            $performanceRows = [];
+                            $performanceSignatures = [];
                             foreach ($xmlRow['performances'] as $performanceRow) {
                                 $performanceRows[] = $normaliseRow($performanceRow);
                                 $performanceSignatures[] = implode('|', array_keys($performanceRow));
                             }
 
-                            if (count(array_unique($performanceSignatures)) === 1) {
+                            if (1 === count(array_unique($performanceSignatures))) {
                                 $performanceSavepoint = 'import_performance_'.(string) $index;
                                 $this->connection->createSavepoint($performanceSavepoint);
                                 try {
@@ -212,7 +213,7 @@ class ImportMethodsCommand extends Command
                                     $performanceSavepoint = 'import_performance_'.(string) $index.'_'.(string) $performanceIndex;
                                     $this->connection->createSavepoint($performanceSavepoint);
                                     try {
-                                        $this->insertPerformanceRows(array($performanceRow));
+                                        $this->insertPerformanceRows([$performanceRow]);
                                         $this->connection->releaseSavepoint($performanceSavepoint);
                                     } catch (Exception $exception) {
                                         $this->connection->rollbackSavepoint($performanceSavepoint);
@@ -244,18 +245,19 @@ class ImportMethodsCommand extends Command
             $idsInDatabase = $this->connection->executeQuery('SELECT title FROM methods')->iterateAssociative();
         } catch (Exception $exception) {
             $output->writeln('<error>Failed to fetch methods for deletion check: '.$exception->getMessage().'</error>');
+
             return 0;
         }
 
         $progress = new ProgressBar($output, $idsInDatabaseCount);
         $progress->setBarWidth($targetConsoleWidth - (strlen((string) $idsInDatabaseCount) * 2) - 10);
         $progress->setRedrawFrequency(max(1, max(1, $idsInDatabaseCount / 100)));
-        $deleteStatements = array(
+        $deleteStatements = [
             $this->connection->prepare('DELETE FROM methods_similar WHERE method1_title = ? OR method2_title = ?'),
             $this->connection->prepare('DELETE FROM methods_collections WHERE method_title = ?'),
             $this->connection->prepare('DELETE FROM performances WHERE method_title = ?'),
             $this->connection->prepare('DELETE FROM methods WHERE title = ?'),
-        );
+        ];
         foreach ($idsInDatabase as $methodRow) {
             $methodTitle = $methodRow['title'];
             if (!isset($importedMethods[$methodTitle])) {
@@ -274,7 +276,7 @@ class ImportMethodsCommand extends Command
                     continue;
                 }
                 $progress->clear();
-                $output->writeln("\r<comment>".str_pad(" Method '".$methodTitle."' deleted", $targetConsoleWidth, ' ')."</comment>");
+                $output->writeln("\r<comment>".str_pad(" Method '".$methodTitle."' deleted", $targetConsoleWidth, ' ').'</comment>');
                 $progress->display();
             }
             $progress->advance();
@@ -284,13 +286,14 @@ class ImportMethodsCommand extends Command
 
         // Finish
         $time += microtime(true);
-        $output->writeln("\n<info>Finished updating method data in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true) / 1048576, 2).' MiB.</info>');
+        $output->writeln("\n<info>Finished updating method data in ".gmdate('H:i:s', (int) $time).'. Peak memory usage: '.number_format(memory_get_peak_usage(true) / 1048576, 2).' MiB.</info>');
+
         return 0;
     }
 
     private function insertPerformanceRows(array $rows): void
     {
-        if (count($rows) === 0) {
+        if (0 === count($rows)) {
             return;
         }
 
@@ -320,7 +323,7 @@ class ImportMethodsCommand extends Command
 
     private function upsertMethod(array $row): void
     {
-        $sqlRow = array();
+        $sqlRow = [];
         foreach ($row as $column => $value) {
             $sqlRow[strtolower($column)] = $value;
         }
@@ -340,9 +343,9 @@ class ImportMethodsCommand extends Command
         $statementKey = implode('|', $columns);
         if (!isset($this->methodUpsertStatements[$statementKey])) {
             $placeholders = implode(', ', array_fill(0, count($columns), '?'));
-            $updates = array();
+            $updates = [];
             foreach ($columns as $column) {
-                if ($column === 'title') {
+                if ('title' === $column) {
                     continue;
                 }
 

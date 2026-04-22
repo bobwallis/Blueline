@@ -7,9 +7,9 @@ use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Statement;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 /**
  * Symfony console command that imports supplemental method data (calls, rule-offs).
@@ -23,11 +23,10 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
  * Run via: bin/console blueline:importMethodExtras
  * Or as part of: bin/fetchAndImportData
  */
-
 class ImportMethodExtrasCommand extends Command
 {
     /** @var array<string, Statement> */
-    private array $updateMethodsStatements = array();
+    private array $updateMethodsStatements = [];
 
     public function __construct(private readonly Connection $connection)
     {
@@ -46,7 +45,7 @@ class ImportMethodExtrasCommand extends Command
         $time = -microtime(true);
         // Set up styles
         $output->getFormatter()
-               ->setStyle('title', new OutputFormatterStyle('white', null, array( 'bold' )));
+               ->setStyle('title', new OutputFormatterStyle('white', null, ['bold']));
 
         // Print title
         $output->writeln('<title>Updating extra method data</title>');
@@ -57,8 +56,8 @@ class ImportMethodExtrasCommand extends Command
             require __DIR__.'/../Resources/data/method_extras_calls.php';
             foreach ($method_extras_calls as $txtRow) {
                 $txtRow['calls'] = json_encode($txtRow['calls']);
-                $txtRow['callingPositions'] = json_encode($txtRow['callingPositions'] ?? $txtRow['callingpositions'] ?? array());
-                $txtRow['ruleOffs'] = json_encode($txtRow['ruleOffs'] ?? $txtRow['ruleoffs'] ?? array());
+                $txtRow['callingPositions'] = json_encode($txtRow['callingPositions'] ?? $txtRow['callingpositions'] ?? []);
+                $txtRow['ruleOffs'] = json_encode($txtRow['ruleOffs'] ?? $txtRow['ruleoffs'] ?? []);
                 unset($txtRow['callingpositions'], $txtRow['ruleoffs']);
                 $txtRow = $this->normaliseDatabaseRow($txtRow);
                 try {
@@ -113,48 +112,50 @@ class ImportMethodExtrasCommand extends Command
                     $renamedMethodPerformanceInsertStatement->bindValue(1, 'renamedMethod', ParameterType::STRING);
                     $renamedMethodPerformanceInsertStatement->bindValue(2, $newName, ParameterType::STRING);
                     $renamedMethodPerformanceInsertStatement->bindValue(3, $oldName, ParameterType::STRING);
-                    $renamedMethodPerformanceInsertStatement->bindValue(4, str_replace([' ', '$', '&', '+', ',', '/', ':', ';', '=', '?', '@', '"', "'", '<', '>', '#', '%', '{', '}', '|', "\\", '^', '~', '[', ']', '.'], ['_'], iconv('UTF-8', 'ASCII//TRANSLIT', $oldName)), ParameterType::STRING);
+                    $renamedMethodPerformanceInsertStatement->bindValue(4, str_replace([' ', '$', '&', '+', ',', '/', ':', ';', '=', '?', '@', '"', "'", '<', '>', '#', '%', '{', '}', '|', '\\', '^', '~', '[', ']', '.'], ['_'], iconv('UTF-8', 'ASCII//TRANSLIT', $oldName)), ParameterType::STRING);
                     $renamedMethodPerformanceInsertStatement->bindValue(5, $newName, ParameterType::STRING);
 
-                    if ($renamedMethodPerformanceInsertStatement->executeStatement() === 0) {
+                    if (0 === $renamedMethodPerformanceInsertStatement->executeStatement()) {
                         ++$skippedRenamedMethodCount;
                     }
                 }
             });
         } catch (Exception $exception) {
             $output->writeln('<error>Failed to refresh renamed method data: '.$exception->getMessage().'</error>');
-            if ($failedRenamedMethodTitle !== null) {
+            if (null !== $failedRenamedMethodTitle) {
                 $output->writeln('<comment> Rolled back renamed method import after failing for "'.$failedRenamedMethodTitle.'"</comment>');
             }
+
             return 0;
         }
 
         if ($skippedRenamedMethodCount > 0) {
-            $output->writeln('<comment> Skipped '.$skippedRenamedMethodCount.' renamed method entr'.($skippedRenamedMethodCount === 1 ? 'y' : 'ies').' because the target method was not present in methods</comment>');
+            $output->writeln('<comment> Skipped '.$skippedRenamedMethodCount.' renamed method entr'.(1 === $skippedRenamedMethodCount ? 'y' : 'ies').' because the target method was not present in methods</comment>');
         }
 
         $time += microtime(true);
-        $output->writeln("\n<info>Finished updating extra method data in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(memory_get_peak_usage(true) / 1048576, 2).' MiB.</info>');
+        $output->writeln("\n<info>Finished updating extra method data in ".gmdate('H:i:s', (int) $time).'. Peak memory usage: '.number_format(memory_get_peak_usage(true) / 1048576, 2).' MiB.</info>');
+
         return 0;
     }
 
     private function updateMethodsRow(array $row): void
     {
         $title = $row['title'] ?? null;
-        if ($title === null) {
+        if (null === $title) {
             throw new \InvalidArgumentException('Method extra row is missing title.');
         }
 
-        $updateColumns = array();
+        $updateColumns = [];
         foreach ($row as $column => $value) {
-            if ($column === 'title') {
+            if ('title' === $column) {
                 continue;
             }
 
             $updateColumns[$column] = $value;
         }
 
-        if (count($updateColumns) === 0) {
+        if (0 === count($updateColumns)) {
             return;
         }
 
@@ -185,12 +186,13 @@ class ImportMethodExtrasCommand extends Command
 
         return $this->updateMethodsStatements[$statementKey];
     }
+
     private function normaliseDatabaseRow(array $row): array
     {
-        $normalised = array();
+        $normalised = [];
         foreach ($row as $key => $value) {
             $databaseKey = strtolower($key);
-            if ($value === '') {
+            if ('' === $value) {
                 $value = null;
             }
             $normalised[$databaseKey] = $value;
@@ -209,7 +211,7 @@ class ImportMethodExtrasCommand extends Command
             return ParameterType::INTEGER;
         }
 
-        if ($value === null) {
+        if (null === $value) {
             return ParameterType::NULL;
         }
 

@@ -5,7 +5,6 @@ namespace Blueline\Tests\Controller;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class MethodsControllerTest extends WebTestCase
 {
@@ -97,7 +96,7 @@ class MethodsControllerTest extends WebTestCase
         $this->assertGreaterThan(0, $payload['count']);
         $this->assertNotEmpty($payload['results']);
         $this->assertTrue((bool) array_filter($payload['results'], function ($method) {
-            return stripos($method['title'], 'Oxford') !== false;
+            return false !== stripos($method['title'], 'Oxford');
         }), 'Search results should include an Oxford method');
 
         $this->assertStringContainsString('cccbrId', $payload['query']['fields']);
@@ -115,7 +114,7 @@ class MethodsControllerTest extends WebTestCase
         $this->assertNotEmpty($payload['results']);
 
         $firstResult = $payload['results'][0];
-        $this->assertSame(array('title', 'url'), array_keys($firstResult));
+        $this->assertSame(['title', 'url'], array_keys($firstResult));
         $this->assertArrayNotHasKey('collections', $firstResult);
         $this->assertArrayNotHasKey('performances', $firstResult);
         $this->assertArrayNotHasKey('methodSimilarity1', $firstResult);
@@ -132,7 +131,7 @@ class MethodsControllerTest extends WebTestCase
         $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
         $this->assertSame('title', $payload['query']['fields']);
         $this->assertNotEmpty($payload['results']);
-        $this->assertSame(array('title'), array_keys($payload['results'][0]));
+        $this->assertSame(['title'], array_keys($payload['results'][0]));
     }
 
     public function testMethodsSearchRejectsInvalidRegularExpressions()
@@ -187,7 +186,7 @@ class MethodsControllerTest extends WebTestCase
         $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/view?stage=8&notation=x1x1x45x27 request unsuccessful');
         $this->assertStringContainsString('Place', $client->getResponse()->getContent());
 
-        $client->request('GET', '/methods/view.json', array('stage' => 8, 'notation' => 'x1x1x45x27'));
+        $client->request('GET', '/methods/view.json', ['stage' => 8, 'notation' => 'x1x1x45x27']);
         $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/view.json?stage=8&notation=x1x1x45x27 request unsuccessful');
 
         $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
@@ -209,10 +208,10 @@ class MethodsControllerTest extends WebTestCase
         $client->request('GET', '/methods/view/Cambridge_Surprise_Minor.json');
         $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
-        $client->request('GET', '/methods/view', array(
+        $client->request('GET', '/methods/view', [
             'stage' => $payload[0]['stage'],
             'notation' => $payload[0]['notation'],
-        ));
+        ]);
 
         $this->assertSame(301, $client->getResponse()->getStatusCode());
         $this->assertStringContainsString('/methods/view/Cambridge_Surprise_Minor', (string) $client->getResponse()->headers->get('Location'));
@@ -222,7 +221,7 @@ class MethodsControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
-        $client->request('GET', '/methods/view.png', array('stage' => 8, 'notation' => 'x1x1x45x27'));
+        $client->request('GET', '/methods/view.png', ['stage' => 8, 'notation' => 'x1x1x45x27']);
         $this->assertSame(301, $client->getResponse()->getStatusCode());
         $this->assertStringContainsString('scale=1', (string) $client->getResponse()->headers->get('Location'));
         $this->assertStringContainsString('style=numbers', (string) $client->getResponse()->headers->get('Location'));
@@ -240,24 +239,24 @@ class MethodsControllerTest extends WebTestCase
         });
         static::getContainer()->set('blueline.image_server_client', $httpClient);
 
-        $client->request('GET', '/methods/view.png', array('stage' => 8, 'notation' => 'x1x1x45x27', 'scale' => 1, 'style' => 'numbers'));
+        $client->request('GET', '/methods/view.png', ['stage' => 8, 'notation' => 'x1x1x45x27', 'scale' => 1, 'style' => 'numbers']);
         $this->assertSame(200, $client->getResponse()->getStatusCode());
         $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'image/png'));
         $this->assertNotNull($requestDetails);
         $this->assertSame('GET', $requestDetails['method']);
         $this->assertSame('http://127.0.0.1:8001/?path=/methods/view%3Fstage%3D8%26notation%3Dx1x1x45x27&scale=1&style=numbers', $requestDetails['url']);
 
-        $client->request('GET', '/methods/view.png', array('stage' => 8, 'notation' => 'x1x1x45x27', 'scale' => 5, 'style' => 'numbers'));
+        $client->request('GET', '/methods/view.png', ['stage' => 8, 'notation' => 'x1x1x45x27', 'scale' => 5, 'style' => 'numbers']);
         $this->assertSame(401, $client->getResponse()->getStatusCode());
 
-        $client->request('GET', '/methods/view.png', array('stage' => 8, 'notation' => 'x1x1x45x27', 'scale' => 1, 'style' => 'invalid'));
+        $client->request('GET', '/methods/view.png', ['stage' => 8, 'notation' => 'x1x1x45x27', 'scale' => 1, 'style' => 'invalid']);
         $this->assertSame(401, $client->getResponse()->getStatusCode());
     }
 
     public function testMethodsSitemapReturnsXml()
     {
         $client = static::createClient();
-        foreach (array('/methods/sitemap_1', '/methods/sitemap_2') as $xml) {
+        foreach (['/methods/sitemap_1', '/methods/sitemap_2'] as $xml) {
             $client->request('GET', $xml.'.xml');
             $this->assertTrue($client->getResponse()->isSuccessful(), $xml.'.xml request unsuccessful');
             $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'text/xml; charset=UTF-8'), $xml.'.xml Content-Type header wrong');

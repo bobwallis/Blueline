@@ -38,10 +38,10 @@ class MethodSimilarity
         $count2 = count($rowArray2);
 
         // Edge cases
-        if ($count1 === 0) {
+        if (0 === $count1) {
             return $count2;
         }
-        if ($count2 === 0) {
+        if (0 === $count2) {
             return $count1;
         }
 

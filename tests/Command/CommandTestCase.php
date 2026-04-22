@@ -30,7 +30,7 @@ abstract class CommandTestCase extends KernelTestCase
 
     protected function tearDown(): void
     {
-        if ($this->originalMemoryLimit !== null) {
+        if (null !== $this->originalMemoryLimit) {
             ini_set('memory_limit', $this->originalMemoryLimit);
         }
 
@@ -48,7 +48,7 @@ abstract class CommandTestCase extends KernelTestCase
 
         $command = $application->find($name);
         $tester = new CommandTester($command);
-        if ($inputs !== []) {
+        if ([] !== $inputs) {
             $tester->setInputs($inputs);
         }
 
@@ -97,7 +97,7 @@ abstract class CommandTestCase extends KernelTestCase
             $this->fail('DB query failed in test helper: '.$exception->getMessage());
         }
 
-        if ($result === false || $result === null) {
+        if (false === $result || null === $result) {
             return null;
         }
 

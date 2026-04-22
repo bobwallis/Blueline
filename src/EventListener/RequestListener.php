@@ -4,8 +4,8 @@ namespace Blueline\EventListener;
 
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 /**
  * Symfony event listener for kernel.request events.
@@ -15,7 +15,6 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
  * - database_update: Timestamp of last database update.
  *                    Set to current time in non-prod environments
  *                    to disable caching during development.
- *
  */
 #[AsEventListener(event: 'kernel.request')]
 class RequestListener
@@ -31,7 +30,7 @@ class RequestListener
     {
         // Set global parameters that can be used in @Cache annotations and other places
         $event->getRequest()->attributes->set('endpoint', $this->params->get('blueline.endpoint'));
-        if ($this->kernelEnvironment == 'prod') {
+        if ('prod' == $this->kernelEnvironment) {
             $event->getRequest()->attributes->set('database_update', new \DateTime('@'.$this->params->get('blueline.database_update')));
         } else {
             $event->getRequest()->attributes->set('database_update', new \DateTime());

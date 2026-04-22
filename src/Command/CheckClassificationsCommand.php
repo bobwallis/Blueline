@@ -2,14 +2,14 @@
 
 namespace Blueline\Command;
 
+use Blueline\Entity\Method;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Blueline\Entity\Method;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Symfony console command that validates method classifications.
@@ -20,7 +20,6 @@ use Blueline\Entity\Method;
  *
  * Run via: bin/console blueline:checkMethodClassifications
  */
-
 class CheckClassificationsCommand extends Command
 {
     public function __construct(private readonly Connection $connection)
@@ -39,7 +38,7 @@ class CheckClassificationsCommand extends Command
         $time = -microtime(true);
         // Set up styles
         $output->getFormatter()
-               ->setStyle('title', new OutputFormatterStyle('white', null, array( 'bold' )));
+               ->setStyle('title', new OutputFormatterStyle('white', null, ['bold']));
         $targetConsoleWidth = 75;
 
         // Print title
@@ -50,6 +49,7 @@ class CheckClassificationsCommand extends Command
             $methods = $this->connection->executeQuery('SELECT title, stage, notationexpanded AS "notationExpanded", classification, jump, little, differential, plain, trebledodging AS "trebleDodging" FROM methods')->iterateAssociative();
         } catch (Exception $exception) {
             $output->writeln('<error>Failed to query methods table: '.$exception->getMessage().'</error>');
+
             return 0;
         }
 
@@ -100,7 +100,8 @@ class CheckClassificationsCommand extends Command
         $output->writeln('');
 
         $time += microtime(true);
-        $output->writeln("\n<info>Finished in ".gmdate("H:i:s", (int) $time).". Peak memory usage: ".number_format(round(memory_get_peak_usage(true) / 1048576, 2)).' MiB.</info>');
+        $output->writeln("\n<info>Finished in ".gmdate('H:i:s', (int) $time).'. Peak memory usage: '.number_format(round(memory_get_peak_usage(true) / 1048576, 2)).' MiB.</info>');
+
         return 0;
     }
 }

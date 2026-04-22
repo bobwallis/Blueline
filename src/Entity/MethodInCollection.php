@@ -5,12 +5,12 @@ namespace Blueline\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * MethodInCollection entity
+ * MethodInCollection entity.
  */
 #[ORM\Entity(repositoryClass: \Blueline\Repository\CollectionRepository::class)]
 #[ORM\Table(name: 'methods_collections')]
-#[ORM\Index(name: 'idx_methods_collections_collection_id', columns: array('collection_id'))]
-#[ORM\Index(name: 'idx_methods_collections_method_title', columns: array('method_title'))]
+#[ORM\Index(name: 'idx_methods_collections_collection_id', columns: ['collection_id'])]
+#[ORM\Index(name: 'idx_methods_collections_method_title', columns: ['method_title'])]
 class MethodInCollection
 {
     #[ORM\Id]
@@ -29,7 +29,7 @@ class MethodInCollection
     #[ORM\JoinColumn(name: 'collection_id', referencedColumnName: 'id')]
     private Collection $collection;
 
-    public function __construct($firstSet = array())
+    public function __construct($firstSet = [])
     {
         $this->setAll($firstSet);
     }
@@ -45,7 +45,7 @@ class MethodInCollection
     }
 
     /**
-     * Sets multiple variables using an array of them
+     * Sets multiple variables using an array of them.
      *
      * @param array $map
      */
@@ -53,10 +53,11 @@ class MethodInCollection
     {
         foreach ($map as $key => $value) {
             $method = 'set'.str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
-            if (is_callable(array( $this, $method ))) {
+            if (is_callable([$this, $method])) {
                 $this->$method($value);
             }
         }
+
         return $this;
     }
 
@@ -69,6 +70,7 @@ class MethodInCollection
     public function setPosition($position)
     {
         $this->position = $position;
+
         return $this;
     }
 
@@ -77,9 +79,10 @@ class MethodInCollection
         return $this->position;
     }
 
-    public function setMethod(?\Blueline\Entity\Method $method)
+    public function setMethod(?Method $method)
     {
         $this->method = $method;
+
         return $this;
     }
 
@@ -88,9 +91,10 @@ class MethodInCollection
         return $this->method;
     }
 
-    public function setCollection(?\Blueline\Entity\Collection $collection)
+    public function setCollection(?Collection $collection)
     {
         $this->collection = $collection;
+
         return $this;
     }
 

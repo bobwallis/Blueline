@@ -12,6 +12,7 @@ namespace Blueline\Helpers;
  *
  * @param array $array1 First array
  * @param array $array2 Second array
+ *
  * @return bool True if arrays are identical under some rotation, false otherwise
  */
 function arrays_equal_in_some_rotation(array $array1, array $array2): bool

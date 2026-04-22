@@ -2,11 +2,11 @@
 
 namespace Blueline\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Attribute\Cache;
 use Blueline\Helpers\PlaceNotation;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\Cache;
 
 /**
  * Controller for place notation parsing and conversion.
@@ -30,8 +30,8 @@ class NotationController extends AbstractController
     public function parse(Request $request)
     {
         // Collect passed in variables that are permissible
-        $vars = array();
-        foreach (array( 'notation', 'stage' ) as $key) {
+        $vars = [];
+        foreach (['notation', 'stage'] as $key) {
             $value = $request->query->get($key);
             $value = trim($value ?? '');
             if (!empty($value)) {
@@ -59,9 +59,8 @@ class NotationController extends AbstractController
                 $response->setContent($vars['expanded']."\n".$vars['siril']);
                 break;
             case 'json':
-                $response->setContent(json_encode(array( 'stage' => $vars['stage'], 'expanded' => $vars['expanded'], 'siril' => $vars['siril'])));
+                $response->setContent(json_encode(['stage' => $vars['stage'], 'expanded' => $vars['expanded'], 'siril' => $vars['siril']]));
                 break;
-
         }
 
         return $response;

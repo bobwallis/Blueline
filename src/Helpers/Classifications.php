@@ -11,10 +11,7 @@ namespace Blueline\Helpers;
  */
 class Classifications
 {
-    /**
-     * @access private
-     */
-    private static $_classifications = array(
+    private static $_classifications = [
         'Alliance',
         'Bob',
         'Delight',
@@ -23,10 +20,11 @@ class Classifications
         'Surprise',
         'Treble Bob',
         'Treble Place',
-    );
+    ];
 
     /**
-     * Return array of all classifications
+     * Return array of all classifications.
+     *
      * @return array
      */
     public static function toArray()
@@ -35,12 +33,14 @@ class Classifications
     }
 
     /**
-     * Test whether a string corresponds to a class
-     * @param  string  $test
-     * @return boolean
+     * Test whether a string corresponds to a class.
+     *
+     * @param string $test
+     *
+     * @return bool
      */
     public static function isClass($test)
     {
-        return (array_search(ucwords(strtolower($test)), self::$_classifications) !== false);
+        return false !== array_search(ucwords(strtolower($test)), self::$_classifications);
     }
-};
+}

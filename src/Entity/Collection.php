@@ -5,7 +5,7 @@ namespace Blueline\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Collection entity
+ * Collection entity.
  */
 #[ORM\Entity(repositoryClass: \Blueline\Repository\CollectionRepository::class)]
 #[ORM\Table(name: 'collections')]
@@ -29,7 +29,7 @@ class Collection
      *
      * @param array<string, mixed> $firstSet Initial property values keyed by setter-compatible names
      */
-    public function __construct($firstSet = array())
+    public function __construct($firstSet = [])
     {
         $this->methods = new \Doctrine\Common\Collections\ArrayCollection();
         $this->setAll($firstSet);
@@ -57,10 +57,11 @@ class Collection
         $objectVars = get_object_vars($this);
         array_walk($objectVars, function (&$v, $k) {
             // Filter out id because that's only really meaningful internally, and don't try to drill down into sub-entities
-            if ($k == 'id' || $k == 'methods') {
+            if ('id' == $k || 'methods' == $k) {
                 $v = null;
             }
         });
+
         return array_filter($objectVars);
     }
 
@@ -71,13 +72,14 @@ class Collection
      * Unknown keys are ignored.
      *
      * @param array<string, mixed> $map
+     *
      * @return Collection
      */
     public function setAll($map)
     {
         foreach ($map as $key => $value) {
             $method = 'set'.str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
-            if (is_callable(array( $this, $method ))) {
+            if (is_callable([$this, $method])) {
                 $this->$method($value);
             }
         }
@@ -89,6 +91,7 @@ class Collection
     public function setId($id)
     {
         $this->id = $id;
+
         return $this;
     }
 
@@ -100,6 +103,7 @@ class Collection
     public function setName($name)
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -111,6 +115,7 @@ class Collection
     public function setDescription($description)
     {
         $this->description = $description;
+
         return $this;
     }
 
@@ -119,13 +124,14 @@ class Collection
         return $this->description;
     }
 
-    public function addMethod(\Blueline\Entity\MethodInCollection $method)
+    public function addMethod(MethodInCollection $method)
     {
         $this->methods[] = $method;
+
         return $this;
     }
 
-    public function removeMethod(\Blueline\Entity\MethodInCollection $method)
+    public function removeMethod(MethodInCollection $method)
     {
         $this->methods->removeElement($method);
     }

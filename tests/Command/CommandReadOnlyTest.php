@@ -22,7 +22,7 @@ class CommandReadOnlyTest extends CommandTestCase
         $this->assertSame(0, $exitCode);
         $this->assertStringStartsWith("<?php\n// Collections data exported ", $output);
         $this->assertStringContainsString("\n\$collections = ", $output);
-        $this->assertStringContainsString("array (", $output);
+        $this->assertStringContainsString('array (', $output);
         $this->assertNoConsoleErrors($output);
     }
 
@@ -33,7 +33,7 @@ class CommandReadOnlyTest extends CommandTestCase
         $this->assertSame(0, $exitCode);
         $this->assertStringStartsWith("<?php\n// Extra method data exported ", $output);
         $this->assertStringContainsString("\n\$method_extras = ", $output);
-        $this->assertStringContainsString("array (", $output);
+        $this->assertStringContainsString('array (', $output);
         $this->assertNoConsoleErrors($output);
     }
 

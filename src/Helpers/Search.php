@@ -18,23 +18,23 @@ class Search
     public static function prepareStringForLike($string)
     {
         return preg_replace('/%+/', '%', str_replace(
-            array( '*', '?', ',', '.', ' ' ),
-            array( '%', '_', ' ', ' ', '%' ),
+            ['*', '?', ',', '.', ' '],
+            ['%', '_', ' ', ' ', '%'],
             '%'.strtolower($string).'%'
         ));
     }
 
     public static function requestToSearchVariables($request, $searchable)
     {
-        $searchVariables = array();
+        $searchVariables = [];
 
         // Fields
         $searchVariables['fields'] = $request->query->get('fields') ? array_filter(array_map('trim', explode(',', $request->query->get('fields'))), function ($f) use ($searchable) {
             return in_array($f, $searchable);
-        }) : array();
+        }) : [];
 
         // Conditions
-        foreach (array_merge(array( 'q', 'sort', 'order' ), $searchable) as $key) {
+        foreach (array_merge(['q', 'sort', 'order'], $searchable) as $key) {
             $value = trim($request->query->get($key) ?? '');
             if (!empty($value)) {
                 $searchVariables[$key] = $value;
@@ -43,7 +43,7 @@ class Search
 
         // Order
         $searchVariables['order'] = strtoupper(empty($searchVariables['order']) ? 'asc' : $searchVariables['order']);
-        if ($searchVariables['order'] != 'DESC') {
+        if ('DESC' != $searchVariables['order']) {
             $searchVariables['order'] = 'ASC';
         }
 
@@ -83,10 +83,10 @@ class Search
 
         // String variables
         foreach (array_keys(array_filter($entityMetadata->fieldMappings, function ($f) {
-            return in_array($f->type, array('string', 'text'));
+            return in_array($f->type, ['string', 'text']);
         })) as $key) {
             if (isset($searchVariables[$key])) {
-                if (strpos($searchVariables[$key], '/') === 0 && strlen($searchVariables[$key]) > 1) {
+                if (0 === strpos($searchVariables[$key], '/') && strlen($searchVariables[$key]) > 1) {
                     $query->andWhere('REGEXP(e.'.$key.', :'.$key.'Regexp) = TRUE')
                         ->setParameter($key.'Regexp', trim($searchVariables[$key], '/'));
                 } else {
@@ -98,22 +98,22 @@ class Search
 
         // Number variables
         foreach (array_keys(array_filter($entityMetadata->fieldMappings, function ($f) {
-            return in_array($f->type, array('smallint','integer','bigint','decimal','float'));
+            return in_array($f->type, ['smallint', 'integer', 'bigint', 'decimal', 'float']);
         })) as $key) {
             if (isset($searchVariables[$key])) {
                 $splitValues = preg_split('/,(?![^(\[]*[)\]])/', $searchVariables[$key]);
-                $splitValuesDQL = array();
-                $splitValuesParams = array();
+                $splitValuesDQL = [];
+                $splitValuesParams = [];
                 foreach ($splitValues as $i => $v) {
                     // Interval notation (for ranges), e.g. [0,2), [3,4]
-                    if ($v[0] == '[' || $v[0] == '(') {
-                        $c1 = $v[0] == '[' ? ' >= ' : ' > ';
-                        $c2 = substr($v, -1) == ']' ? ' <=' : ' < ';
+                    if ('[' == $v[0] || '(' == $v[0]) {
+                        $c1 = '[' == $v[0] ? ' >= ' : ' > ';
+                        $c2 = ']' == substr($v, -1) ? ' <=' : ' < ';
                         $vs = explode(',', substr($v, 1, strlen($v) - 2));
                         $splitValuesDQL[] = $query->expr()->andx('e.'.$key.$c1.':'.$key.$i.'lower', 'e.'.$key.$c2.':'.$key.$i.'upper');
                         $splitValuesParams[$key.$i.'lower'] = intval($vs[0]);
                         $splitValuesParams[$key.$i.'upper'] = intval($vs[1]);
-                        // Or just single numbers
+                    // Or just single numbers
                     } else {
                         $splitValuesDQL[] = 'e.'.$key.' = :'.$key.$i;
                         $splitValuesParams[$key.$i] = intval($v);
@@ -130,7 +130,7 @@ class Search
 
         // Boolean variables
         foreach (array_keys(array_filter($entityMetadata->fieldMappings, function ($f) {
-            return in_array($f->type, array('boolean'));
+            return in_array($f->type, ['boolean']);
         })) as $key) {
             if (isset($searchVariables[$key])) {
                 $query->andWhere('e.'.$key.(filter_var($searchVariables[$key], FILTER_VALIDATE_BOOLEAN) ? ' = TRUE' : ' = FALSE'));
@@ -149,4 +149,4 @@ class Search
 
         return $query;
     }
-};
+}

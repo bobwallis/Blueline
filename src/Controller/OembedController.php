@@ -3,13 +3,13 @@
 namespace Blueline\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints\Regex as RegexConstraint;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Attribute\Cache;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\Cache;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\Validator\Constraints\Regex as RegexConstraint;
+use Symfony\Component\Validator\Validation;
 
 /**
  * Controller for oEmbed protocol support.
@@ -35,14 +35,14 @@ class OembedController extends AbstractController
         $url = $request->query->get('url');
 
         // Throw correct error with non JSON requests
-        if ($request->getRequestFormat() != 'json') {
+        if ('json' != $request->getRequestFormat()) {
             throw new HttpException(501, 'Not implemented');
         }
 
         // Check it's a valid URL
-        $allowedURLs = array(
-            'methods_view' => '^'.str_replace(array('/','.','TITLE'), array('\/','\.','.+'), $params->get('blueline.endpoint') . $this->generateUrl('Blueline_Methods_view', array('url' => 'TITLE')))
-        );
+        $allowedURLs = [
+            'methods_view' => '^'.str_replace(['/', '.', 'TITLE'], ['\/', '\.', '.+'], $params->get('blueline.endpoint').$this->generateUrl('Blueline_Methods_view', ['url' => 'TITLE'])),
+        ];
         $urlConstraint = new RegexConstraint(pattern: '/'.implode('|', array_values($allowedURLs)).'/', message: 'Invalid URL');
         $validator = Validation::createValidator();
         $errors = $validator->validate($url, $urlConstraint);
@@ -54,27 +54,28 @@ class OembedController extends AbstractController
         $response = new JsonResponse();
 
         // Method view
-        if (preg_match('/'.$allowedURLs['methods_view'].'/', $url) == 1) {
+        if (1 == preg_match('/'.$allowedURLs['methods_view'].'/', $url)) {
             // Get method details
             $file_headers = @get_headers($url.'.json');
-            if ($file_headers[0] == 'HTTP/1.1 404 Not Found') {
+            if ('HTTP/1.1 404 Not Found' == $file_headers[0]) {
                 throw $this->createNotFoundException('Method not found');
             }
             $method = json_decode(file_get_contents($url.'.json'));
             $imageSize = getimagesize($url.'.png?scale=1&style=numbers');
-            $response->setData(array(
+            $response->setData([
                 'type' => 'photo',
                 'version' => '1.0',
                 'title' => $method[0]->title,
                 'provider_name' => 'Blueline',
-                'provider_url' => $params->get('blueline.endpoint') . $this->generateUrl('Blueline_welcome'),
+                'provider_url' => $params->get('blueline.endpoint').$this->generateUrl('Blueline_welcome'),
                 'url' => $url.'.png?scale=1&style=numbers',
                 'width' => $imageSize[0] ?? 0,
-                'height' => $imageSize[1] ?? 0
-            ));
+                'height' => $imageSize[1] ?? 0,
+            ]);
         } else {
             throw $this->createNotFoundException('URL not supported');
         }
+
         return $response;
     }
 }
