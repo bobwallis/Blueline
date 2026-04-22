@@ -156,6 +156,8 @@ span.code {
 	float: right;
 	height: var(--header-height);
 	width: var(--header-height);
+	border: 0;
+	padding: 0;
 	cursor: pointer;
 	background: var(--header-background) url(../images/settings.svg) no-repeat center center;
 	opacity: 0.6;
@@ -165,23 +167,24 @@ span.code {
 		opacity: 1;
 	}
 }
-#settings_wrap {
-	display: none;
+#settings_dialog {
 	box-sizing: border-box;
-	position: absolute;
-	z-index: 999;
+	position: fixed;
 	right: 0;
+	top: 0;
 	text-align: right;
 	width: 100%;
 	height: 100%;
-	opacity: 0;
+	max-width: none;
+	max-height: none;
+	margin: 0;
+	border: 0;
+	padding: 0;
+	background: transparent;
+}
+#settings_dialog::backdrop {
 	background-color: rgba(255,255,255,0.8);
 	backdrop-filter: blur(1px);
-	transition: opacity 200ms;
-	&.active {
-		display: block;
-		opacity: 1;
-	}
 }
 #settings {
 	display: inline-block;

@@ -32,9 +32,7 @@ function initialSet() {
 	});
 }
 
-eve.on('page.finished', function () {
-	initialSet();
-});
+eve.on('page.finished', function () { initialSet(); } );
 initialSet();
 
 settings.forEach(function (setting) {
@@ -49,16 +47,29 @@ settings.forEach(function (setting) {
 });
 
 
-// Show and hide the settings panel when the button is clicked, and hide it after submitting or pressing enter in the form.
-const settingsEl = document.getElementById('settings_wrap');
-document.getElementById('settings_button').addEventListener('click', function () {
-	settingsEl.className = (settingsEl.className === 'active') ? '' : 'active';
-});
+// Show and hide the settings dialog when the buttons are clicked, or form is submitted.
+const settingsDialogEl = document.getElementById('settings_dialog');
+const settingsButtonEl = document.getElementById('settings_button');
 
 function closeSettings(e) {
-	e.preventDefault();
-	settingsEl.className = '';
+	if(e) { e.preventDefault(); }
+	if(settingsDialogEl && settingsDialogEl.open) {
+		settingsDialogEl.close();
+	}
 }
 
-document.getElementById('settings_submit').addEventListener('click', closeSettings);
-document.getElementById('settings_form').addEventListener('submit', closeSettings);
+if (settingsDialogEl && settingsButtonEl) {
+	settingsButtonEl.addEventListener('click', function () {
+		settingsDialogEl.showModal();
+	});
+}
+
+const settingsSubmitEl = document.getElementById('settings_submit');
+if (settingsSubmitEl) {
+	settingsSubmitEl.addEventListener('click', closeSettings);
+}
+
+const settingsFormEl = document.getElementById('settings_form');
+if (settingsFormEl) {
+	settingsFormEl.addEventListener('submit', closeSettings);
+}
