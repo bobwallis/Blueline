@@ -35,7 +35,8 @@ RUN apt-get -y install --no-install-recommends \
         ripgrep silversearcher-ag shellcheck \
         composer php8.4-cli php8.4-opcache php8.4-pgsql php8.4-intl php8.4-mbstring php8.4-xml php8.4-zip php8.4-curl \
         php-zts-cli php-zts-intl php-zts-pdo php-zts-pdo-pgsql php-zts-pgsql php-zts-zip \
-        postgresql-17 postgresql-client-17
+        postgresql-17 postgresql-client-17 \
+        chromium
 
 # Clean up
 RUN apt-get autoremove -y \

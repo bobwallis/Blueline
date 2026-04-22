@@ -331,7 +331,7 @@ sudo apt-get update -qq && sudo apt-get upgrade -q -y --no-install-recommends
 
 # Core tools
 sudo apt-get install -q -y --no-install-recommends \
-	apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less gpg lsb-release zsh brotli zstd zopfli tzdata
+	apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less gpg lsb-release zsh brotli zstd zopfli tzdata chromium
 
 # Node.js 24 LTS — add NodeSource apt source if not already present
 if [ ! -f /etc/apt/sources.list.d/nodesource.sources ]; then
@@ -355,6 +355,7 @@ if ! command -v frankenphp > /dev/null 2>&1; then
 else
 	echo "  FrankenPHP already installed — skipping."
 fi
+
 # Postgres client, plus PHP 8.4 and extensions (Debian Trixie default — no extra apt source needed)
 sudo apt-get install -y -q --no-install-recommends \
 	postgresql-client-17 \
@@ -589,6 +590,12 @@ fi
 # APP_ENV, FRANKENPHP_PORT and local endpoint are always kept in sync with provisioning choices.
 upsert_env_value APP_ENV "$APP_ENV" "$REPO_ROOT/.env.local"
 upsert_env_value FRANKENPHP_PORT "$FRANKENPHP_PORT" "$REPO_ROOT/.env.local"
+if [ -z "$(get_env_value IMAGESERVER_PORT "$REPO_ROOT/.env.local")" ]; then
+	upsert_env_value IMAGESERVER_PORT "8001" "$REPO_ROOT/.env.local"
+	echo "  Written default IMAGESERVER_PORT."
+else
+	echo "  IMAGESERVER_PORT already set — skipping."
+fi
 _tunnel_id_in_env="$(get_env_value CLOUDFLARE_TUNNEL_ID "$REPO_ROOT/.env.local")"
 if [ "$APP_ENV" = "dev" ] || { [ "$APP_ENV" = "prod" ] && [ -z "$_tunnel_id_in_env" ]; }; then
 	upsert_env_value ENDPOINT "\"${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT}\"" "$REPO_ROOT/.env.local"
@@ -757,8 +764,45 @@ WantedBy=multi-user.target"
 			sudo systemctl restart blueline
 		fi
 		echo "  blueline.service enabled and started."
+
+		_image_server_port="$(get_env_value IMAGESERVER_PORT "$REPO_ROOT/.env.local")"
+		if [ -z "$_image_server_port" ]; then
+			_image_server_port="8001"
+		fi
+		_desired_image_unit="[Unit]
+Description=Blueline image server
+After=network.target blueline.service
+Requires=blueline.service
+
+[Service]
+Type=simple
+WorkingDirectory=${REPO_ROOT}
+Environment=IMAGESERVER_PORT=${_image_server_port}
+		Environment=FRANKENPHP_PORT=${FRANKENPHP_PORT}
+Environment=FRANKENPHP_SCHEME=${FRANKENPHP_SCHEME}
+ExecStart=/usr/bin/node ${REPO_ROOT}/bin/image-server.mjs
+User=${_current_user}
+Group=${_current_group}
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target"
+
+		_image_unit_file="/etc/systemd/system/blueline-image.service"
+		if [ ! -f "$_image_unit_file" ] || ! diff -q <(echo "$_desired_image_unit") "$_image_unit_file" > /dev/null 2>&1; then
+			echo "$_desired_image_unit" | sudo tee "$_image_unit_file" > /dev/null
+			echo "  Written $_image_unit_file."
+			sudo systemctl daemon-reload
+		else
+			echo "  image server unit file unchanged — skipping reload."
+		fi
+
+		sudo systemctl enable --now blueline-image
+		echo "  blueline-image.service enabled and started."
 	else
 		echo "  FrankenPHP is installed and configured for development."
+		echo "  Development image server can be started with ./bin/start-dev-image-server."
 	fi
 fi
 
@@ -910,6 +954,7 @@ echo -e "\n  Next steps:"
 echo     "    - Import data:             ./bin/fetchAndImportData"
 if [ "$APP_ENV" = "dev" ]; then
 	echo "    - Start/restart web app:   ./bin/start-dev-frankenphp"
+	echo "    - Start image server:      ./bin/start-dev-image-server"
 	echo "    - App endpoint:            ${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT}"
 fi
 

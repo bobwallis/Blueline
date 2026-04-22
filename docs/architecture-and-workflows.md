@@ -4,6 +4,7 @@
 - **Framework**: Symfony 7.4 application with Doctrine ORM and Twig.
 - **Backend**: PHP domain logic in `src/`.
 - **Frontend**: Source assets under `assets/`, managed by Symfony's AssetMapper with automatic versioning. Production builds use SensioLabs Minify Bundle for minification.
+- **Image rendering**: Local Node.js sidecar using Puppeteer and Chromium for `.png` images.
 - **Data store**: PostgreSQL (with `fuzzystrmatch` extension for search similarity features).
 
 ## Code structure
@@ -36,6 +37,14 @@ This script downloads external method data, runs import commands, recalculates s
 **Production**: Run `php bin/console asset-map:compile --env=prod` to compile assets and generate versioned files in `public/assets/` with minification applied via SensioLabs Minify Bundle. This is executed as part of `./bin/provision` and in the deployment pipeline.
 
 **Asset Versioning**: AssetMapper generates content-hash-based filenames (e.g., `all-abc123.css`, `main-xyz789.js`) automatically, providing cache busting without additional configuration.
+
+### PNG image generation
+
+`.png` requests under `/methods/view...` are handled by Symfony but proxied to a local Node.js image server running `bin/image-server.mjs`.
+
+- The image server opens the full method view page in Chromium via Puppeteer and takes a screenshot of it.
+- Requests are processed sequentially. Concurrent image requests queue behind the active render.
+- The browser instance is kept warm between requests and restarted after a configurable number of renders (`BROWSER_RESTART_AFTER`, default `200`) to limit memory growth over time.
 
 ### Quality checks
 Use:

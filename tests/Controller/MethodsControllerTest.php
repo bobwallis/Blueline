@@ -2,9 +2,17 @@
 namespace Blueline\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Response\MockResponse;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class MethodsControllerTest extends WebTestCase
 {
+    private function fakePngResponse(): string
+    {
+        return base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7Z0uoAAAAASUVORK5CYII=', true);
+    }
+
     public function testMethodViewChromelessLayoutIsResolvedPerRequest()
     {
         $client = static::createClient();
@@ -149,9 +157,25 @@ class MethodsControllerTest extends WebTestCase
         $client->request('GET', '/methods/view/Cambridge_Surprise_Minor.png?scale=1&style=invalid');
         $this->assertSame(401, $client->getResponse()->getStatusCode());
 
+        self::ensureKernelShutdown();
+        $client = static::createClient();
+        $requestDetails = null;
+        $httpClient = new MockHttpClient(function (string $method, string $url, array $options) use (&$requestDetails) {
+            $requestDetails = compact('method', 'url', 'options');
+
+            return new MockResponse($this->fakePngResponse(), [
+                'http_code' => 200,
+                'response_headers' => ['Content-Type: image/png'],
+            ]);
+        });
+        static::getContainer()->set('blueline.image_server_client', $httpClient);
+
         $client->request('GET', '/methods/view/Cambridge_Surprise_Minor.png?scale=1&style=numbers');
-        $this->assertSame(302, $client->getResponse()->getStatusCode());
-        $this->assertStringContainsString('scale=1&style=numbers', (string) $client->getResponse()->headers->get('Location'));
+        $this->assertSame(200, $client->getResponse()->getStatusCode());
+        $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'image/png'));
+        $this->assertNotNull($requestDetails);
+        $this->assertSame('GET', $requestDetails['method']);
+        $this->assertSame('http://127.0.0.1:8001/?path=/methods/view/Cambridge_Surprise_Minor&scale=1&style=numbers', $requestDetails['url']);
     }
 
     public function testCustomMethodViewHtmlAndJsonResponsesContainExpectedData()
@@ -202,9 +226,25 @@ class MethodsControllerTest extends WebTestCase
         $this->assertStringContainsString('scale=1', (string) $client->getResponse()->headers->get('Location'));
         $this->assertStringContainsString('style=numbers', (string) $client->getResponse()->headers->get('Location'));
 
+        self::ensureKernelShutdown();
+        $client = static::createClient();
+        $requestDetails = null;
+        $httpClient = new MockHttpClient(function (string $method, string $url, array $options) use (&$requestDetails) {
+            $requestDetails = compact('method', 'url', 'options');
+
+            return new MockResponse($this->fakePngResponse(), [
+                'http_code' => 200,
+                'response_headers' => ['Content-Type: image/png'],
+            ]);
+        });
+        static::getContainer()->set('blueline.image_server_client', $httpClient);
+
         $client->request('GET', '/methods/view.png', array('stage' => 8, 'notation' => 'x1x1x45x27', 'scale' => 1, 'style' => 'numbers'));
-        $this->assertSame(302, $client->getResponse()->getStatusCode());
-        $this->assertStringContainsString('scale=1&style=numbers', (string) $client->getResponse()->headers->get('Location'));
+        $this->assertSame(200, $client->getResponse()->getStatusCode());
+        $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'image/png'));
+        $this->assertNotNull($requestDetails);
+        $this->assertSame('GET', $requestDetails['method']);
+        $this->assertSame('http://127.0.0.1:8001/?path=/methods/view%3Fstage%3D8%26notation%3Dx1x1x45x27&scale=1&style=numbers', $requestDetails['url']);
 
         $client->request('GET', '/methods/view.png', array('stage' => 8, 'notation' => 'x1x1x45x27', 'scale' => 5, 'style' => 'numbers'));
         $this->assertSame(401, $client->getResponse()->getStatusCode());

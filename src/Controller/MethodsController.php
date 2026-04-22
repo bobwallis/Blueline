@@ -4,9 +4,11 @@ namespace Blueline\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\HttpKernel\Attribute\Cache;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Blueline\Helpers\Search;
 use Blueline\Entity\Method;
@@ -32,6 +34,31 @@ use Blueline\Helpers\PlaceNotation;
  */
 class MethodsController extends AbstractController
 {
+    private function proxyPngResponse(string $path, Request $request, HttpClientInterface $httpClient): Response
+    {
+        try {
+            $imageResponse = $httpClient->request('GET', 'http://127.0.0.1:'.$this->getParameter('blueline.image_server_port'), [
+                'query' => [
+                    'path' => $path,
+                    'scale' => (string) $request->query->get('scale'),
+                    'style' => (string) $request->query->get('style'),
+                ],
+            ]);
+
+            if ($imageResponse->getStatusCode() !== 200) {
+                throw new \RuntimeException('Image server returned a non-success status.');
+            }
+
+            return new Response($imageResponse->getContent(false), 200, [
+                'Content-Type' => 'image/png',
+            ]);
+        } catch (\Throwable) {
+            return new Response('Image generation temporarily unavailable.', 503, [
+                'Content-Type' => 'text/plain; charset=UTF-8',
+            ]);
+        }
+    }
+
     #[Cache(maxage: 129600, public: true)]
     public function welcome(Request $request)
     {
@@ -129,7 +156,7 @@ class MethodsController extends AbstractController
     }
 
     #[Cache(maxage: 129600, public: true, lastModified: 'database_update')]
-    public function view($url, Request $request, EntityManagerInterface $em)
+    public function view($url, Request $request, EntityManagerInterface $em, #[Autowire(service: 'blueline.image_server_client')] HttpClientInterface $httpClient)
     {
         $format = $request->getRequestFormat();
         $methodRepository = $em->getRepository(Method::class);
@@ -223,16 +250,14 @@ class MethodsController extends AbstractController
         // Create response
         switch ($format) {
             case 'png':
-                return $this->redirect($this->getParameter('blueline.image_endpoint').'?url='.$this->generateUrl('Blueline_Methods_view', array('url' => $url), UrlGeneratorInterface::ABSOLUTE_URL).'&scale='.$request->query->get('scale').'&style='.$request->query->get('style'), 302);
+                return $this->proxyPngResponse($this->generateUrl('Blueline_Methods_view', array('url' => $url)), $request, $httpClient);
             default:
                 return $this->render('Methods/view.'.$format.'.twig', compact('method', 'similarMethods'));
         }
     }
 
-    /**
-    * @Cache(maxage="129600", public=true, lastModified="database_update")
-    */
-    public function viewCustom(Request $request, EntityManagerInterface $em)
+    #[Cache(maxage: 129600, public: true, lastModified: 'database_update')]
+    public function viewCustom(Request $request, EntityManagerInterface $em, #[Autowire(service: 'blueline.image_server_client')] HttpClientInterface $httpClient)
     {
         $format = $request->getRequestFormat();
 
@@ -296,14 +321,10 @@ class MethodsController extends AbstractController
                     ));
                     return $this->redirect($url, 301);
                 }
-                $processUrl = $this->generateUrl('Blueline_Methods_custom_view', array(
+                return $this->proxyPngResponse($this->generateUrl('Blueline_Methods_custom_view', array(
                     'stage'    => $vars['stage'],
                     'notation' => $vars['notation']
-                ), true);
-                return $this->redirect($this->getParameter('blueline.image_endpoint').'?url='.urlencode($this->generateUrl('Blueline_Methods_custom_view', array(
-                    'stage'    => $vars['stage'],
-                    'notation' => $vars['notation']
-                ), UrlGeneratorInterface::ABSOLUTE_URL)).'&scale='.$request->query->get('scale').'&style='.$request->query->get('style'), 302);
+                )), $request, $httpClient);
             default:
                 return $this->render('Methods/view.'.$format.'.twig', compact('method', 'custom', 'similarMethods'));
         }

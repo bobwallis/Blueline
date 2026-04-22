@@ -30,12 +30,12 @@ When creating the container, `./bin/provision` runs automatically. If it fails, 
 The script `./bin/provision` will:
 
 - Update Debian packages to the latest versions
-- Install PHP, Composer, Symfony CLI, PostgreSQL, FrankenPHP, locale, and timezone packages (via apt sources where needed).
+- Install PHP, Composer, Symfony CLI, PostgreSQL, FrankenPHP, Chromium, locale, and timezone packages (via apt sources where needed).
 - Set locale and timezone to the UK
 - Install all of Blueline's PHP and NPM dependencies
 - Configure PHP's OPcache according to Symfony's reccomended settings
 - Configure PostgreSQL with suitable settings for the expected database workload
-- Generate `APP_SECRET` and write `DATABASE_URL`, `APP_ENV=dev`, `FRANKENPHP_PORT`, and `ENDPOINT` to `.env.local`
+- Generate `APP_SECRET` and write `DATABASE_URL`, `APP_ENV=dev`, `FRANKENPHP_PORT`, `IMAGESERVER_PORT`, and `ENDPOINT` to `.env.local`
 - Generate a managed `Caddyfile` configured for local HTTPS and FrankenPHP worker mode
 - Create the database, set-up the schema and install the `fuzzystrmatch` extension
 - Clear caches
@@ -62,18 +62,29 @@ Before running, check:
 Blueline runs on FrankenPHP in development.
 
 `./bin/provision` asks for a FrankenPHP HTTP port (default `8000`) and stores it in `.env.local` as `FRANKENPHP_PORT`.
+It also sets `IMAGESERVER_PORT` for the local Puppeteer image server (default `8001`).
 
-In the dev container, FrankenPHP is started automatically on container start.
+In the dev container, FrankenPHP and the image server are started automatically on container start.
 
 To start or restart it manually:
 
 - `bash ./bin/start-dev-frankenphp`
+- `bash ./bin/start-dev-image-server`
 
 Access the app at `http://localhost:<FRANKENPHP_PORT>/`.
 
 To inspect logs:
 
 - `tail -f var/log/frankenphp-dev.log`
+- `tail -f var/log/image-server.log`
+
+### PNG image generation
+
+Method image requests are rendered locally by `bin/image-server.mjs` using Puppeteer and Chromium.
+
+- The image server opens the full method view page and takes a screenshot.
+- Requests are handled sequentially; concurrent `.png` requests queue behind the current render.
+- Chromium is kept warm between requests and restarted after `BROWSER_RESTART_AFTER` renders (default `200`) to avoid unbounded memory growth during long-running sessions.
 
 ## Frontend assets
 

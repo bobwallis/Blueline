@@ -54,5 +54,5 @@
 	// Connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
 	"postCreateCommand": "chmod +x bin/provision && ./bin/provision",
-	"postStartCommand": "if command -v pg_ctlcluster >/dev/null 2>&1; then pg_isready -h localhost -p 5432 >/dev/null 2>&1 || sudo pg_ctlcluster 17 main start; fi; bash ./bin/start-dev-frankenphp"
+	"postStartCommand": "if command -v pg_ctlcluster >/dev/null 2>&1; then pg_isready -h localhost -p 5432 >/dev/null 2>&1 || sudo pg_ctlcluster 17 main start; fi; bash ./bin/start-dev-frankenphp && bash ./bin/start-dev-image-server"
 }

@@ -15,6 +15,9 @@
     "type": "git",
     "url": "git://github.com/bobwallis/Blueline.git"
   },
+  "dependencies": {
+    "puppeteer-core": "^24.9.0"
+  },
   "devDependencies": {
     "eslint": "^9.25.1",
     "globals": "^16.0.0",
