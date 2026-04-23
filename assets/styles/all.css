@@ -59,7 +59,7 @@ a {
 	text-decoration: underline;
 	text-decoration-color: #A1C4D0;
 	transition-property: color, text-decoration-color;
-	transition-duration: .15s;
+	transition-duration: 125ms;
   	background-color: transparent;
 	&:link { color: #29404C; }
 	&:visited { color: #4C2940; }
@@ -162,7 +162,7 @@ span.code {
 	background: var(--header-background) url(../images/settings.svg) no-repeat center center;
 	opacity: 0.6;
 	transition-property: opacity;
-	transition-duration: .15s;
+	transition-duration: 125ms;
 	&:hover {
 		opacity: 1;
 	}
@@ -194,7 +194,55 @@ span.code {
 	padding: var(--content-y-padding) calc(var(--content-x-padding) * 2);
 	background: #FFF;
 	text-align: left;
+	view-transition-name: settings-window;
 }
 #settings_submit {
 	cursor: pointer;
+}
+
+@supports (view-transition-name: foo) {
+	:root:active-view-transition-type(settings-in)::view-transition-group(root),
+	:root:active-view-transition-type(settings-out)::view-transition-group(root),
+	:root:active-view-transition-type(settings-in)::view-transition-group(settings-window),
+	:root:active-view-transition-type(settings-out)::view-transition-group(settings-window) {
+		animation-duration: 125ms;
+	}
+
+	:root:active-view-transition-type(settings-in)::view-transition-group(settings-window) {
+		animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+	}
+
+	:root:active-view-transition-type(settings-out)::view-transition-group(settings-window) {
+		animation-timing-function: cubic-bezier(0.68, 0, 0.77, 0);
+	}
+
+	:root:active-view-transition-type(settings-in)::view-transition-new(settings-window) {
+		animation-name: settings-dialog-in;
+	}
+
+	:root:active-view-transition-type(settings-out)::view-transition-old(settings-window) {
+		animation-name: settings-dialog-out;
+	}
+}
+
+@keyframes settings-dialog-in {
+	from {
+		opacity: 0;
+		transform: translate(24px, -24px) scale(0.96);
+	}
+	to {
+		opacity: 1;
+		transform: translate(0, 0) scale(1);
+	}
+}
+
+@keyframes settings-dialog-out {
+	from {
+		opacity: 1;
+		transform: translate(0, 0) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translate(24px, -24px) scale(0.96);
+	}
 }

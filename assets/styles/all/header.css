@@ -32,6 +32,12 @@
 		font-weight: normal;
 		text-transform: none;
 		margin: 0 0 0 calc(var(--header-height) * 0.25);
+		transition: opacity 125ms ease;
+		&.hide {
+			display: block;
+			opacity: 0;
+			pointer-events: none;
+		}
 	}
 }
 

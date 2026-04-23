@@ -51,22 +51,45 @@ settings.forEach(function (setting) {
 const settingsDialogEl = document.getElementById('settings_dialog');
 const settingsButtonEl = document.getElementById('settings_button');
 
+function runSettingsTransition(type, updateFn) {
+	if (!document.startViewTransition) {
+		updateFn();
+		return;
+	}
+
+	document.startViewTransition({
+		update: updateFn,
+		types: [type],
+	});
+}
+
 function closeSettings(e) {
 	if(e) { e.preventDefault(); }
 	if(settingsDialogEl && settingsDialogEl.open) {
-		settingsDialogEl.close();
+		runSettingsTransition('settings-out', function () {
+			settingsDialogEl.close();
+		});
 	}
 }
 
 if (settingsDialogEl && settingsButtonEl) {
 	settingsButtonEl.addEventListener('click', function () {
-		settingsDialogEl.showModal();
+		runSettingsTransition('settings-in', function () {
+			settingsDialogEl.showModal();
+		});
 	});
-}
 
-const settingsSubmitEl = document.getElementById('settings_submit');
-if (settingsSubmitEl) {
-	settingsSubmitEl.addEventListener('click', closeSettings);
+	settingsDialogEl.addEventListener('cancel', function (e) {
+		e.preventDefault();
+		closeSettings();
+	});
+
+	settingsDialogEl.addEventListener('click', function (e) {
+		if (e.target === settingsDialogEl) {
+			e.preventDefault();
+			closeSettings();
+		}
+	});
 }
 
 const settingsFormEl = document.getElementById('settings_form');

@@ -17,15 +17,15 @@ const Breadcrumb = {
 	 */
 	set(section) {
 		if (typeof section === 'string') {
-			breadcrumbSepEl.style.display = 'block';
 			breadcrumbEl.innerHTML = '<a href="' + URLHelper.baseURL + section + '/">' + section.charAt(0).toUpperCase() + section.slice(1) + '</a>';
-			breadcrumbEl.style.display = 'block';
+			breadcrumbSepEl.classList.remove('hide');
+			breadcrumbEl.classList.remove('hide');
 			Breadcrumb.section = section;
 			return;
 		}
 
-		breadcrumbSepEl.style.display = 'none';
-		breadcrumbEl.style.display = 'none';
+		breadcrumbSepEl.classList.add('hide');
+		breadcrumbEl.classList.add('hide');
 		Breadcrumb.section = null;
 	}
 };
@@ -33,14 +33,14 @@ const Breadcrumb = {
 if (breadcrumbSepEl === null) {
 	breadcrumbSepEl = document.createElement('h2');
 	breadcrumbSepEl.id = 'breadcrumb_sep';
-	breadcrumbSepEl.style.display = 'none';
+	breadcrumbSepEl.classList.add('hide');
 	breadcrumbSepEl.innerHTML = '&raquo;';
 	document.getElementById('top').appendChild(breadcrumbSepEl);
 }
 if (breadcrumbEl === null) {
 	breadcrumbEl = document.createElement('h2');
 	breadcrumbEl.id = 'breadcrumb';
-	breadcrumbEl.style.display = 'none';
+	breadcrumbEl.classList.add('hide');
 	document.getElementById('top').appendChild(breadcrumbEl);
 	Breadcrumb.section = null;
 } else {
