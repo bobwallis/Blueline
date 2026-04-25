@@ -7,7 +7,6 @@ const regExpSection = /^(.*)\/(associations|methods|towers)\//;
 const URLHelper = {
 	baseURL: '',
 	baseResourceURL: '',
-	currentURL: location.href,
 	/**
 	 * Convert relative links into absolute URLs rooted at the current location.
 	 *
@@ -49,15 +48,16 @@ const URLHelper = {
 		return null;
 	},
 	/**
-	 * Read a query-string parameter from the current location URL.
+	 * Read a query-string parameter from a URL.
 	 *
 	 * @param {string} name Query parameter name.
+	 * @param {string} [href=window.location.href] URL to inspect.
 	 * @returns {?string} Decoded value, empty string, or null if absent.
 	 */
-	parameter(name) {
+	parameter(name, href = window.location.href) {
 		const escaped = name.replace(/[\[\]]/g, '\\$&');
 		const regex = new RegExp('[?&]' + escaped + '(=([^&#]*)|&|#|$)');
-		const results = regex.exec(window.location.href);
+		const results = regex.exec(href);
 		if (!results) {
 			return null;
 		}

@@ -36,9 +36,10 @@ if (contentEl && searchEl && qEl) {
 	 * Show the search form and target it to the current section.
 	 *
 	 * @param {?string} section Current section key.
+	 * @param {string} [currentURL=window.location.href] URL to reflect in search state.
 	 * @returns {void}
 	 */
-	Search.show = function show(section) {
+	Search.show = function show(section, currentURL = window.location.href) {
 		if (typeof section !== 'string' || section === '') {
 			searchEl.setAttribute('action', '');
 			qEl.setAttribute('placeholder', 'Search');
@@ -49,7 +50,7 @@ if (contentEl && searchEl && qEl) {
 
 		const isFocused = document.activeElement === qEl;
 		if (!isFocused || (window.history.state !== null && window.history.state.type !== 'keyup' && window.history.state.type !== 'clipboard')) {
-			qEl.value = URLHelper.parameter('q') || '';
+			qEl.value = URLHelper.parameter('q', currentURL) || '';
 		}
 
 		if (Search.visible === false) {
@@ -61,12 +62,12 @@ if (contentEl && searchEl && qEl) {
 
 	Search.visible = searchEl.classList.contains('up') === false;
 
-	eve.on('page.request', function () {
-		const requestURL = URLHelper.absolutise(window.location.href);
+	eve.on('page.request', function (result) {
+		const requestURL = (result && result.newURL) || window.location.href;
 		const showSearchBar = URLHelper.showSearchBar(requestURL);
 
 		if (showSearchBar === true) {
-			Search.show(URLHelper.section(requestURL));
+			Search.show(URLHelper.section(requestURL), requestURL);
 		} else {
 			Search.hide();
 		}

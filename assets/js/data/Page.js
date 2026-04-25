@@ -7,7 +7,7 @@ import URLHelper from '../helpers/URL.js';
  * The module emits lifecycle events through `eve` so UI components can react
  * to navigation requests (`page.request`) and completed loads (`page.loaded`).
  */
-let mostRecentRequest = URLHelper.currentURL;
+let mostRecentRequest = window.location.href;
 
 const Page = {
 	/**
@@ -32,16 +32,16 @@ const Page = {
 		}
 
 		eve('page.request', window, {
-			oldURL: URLHelper.currentURL,
+			oldURL: mostRecentRequest,
 			newURL: url
 		});
-		URLHelper.currentURL = mostRecentRequest = url;
+		mostRecentRequest = url;
 
 		const request = new XMLHttpRequest();
 		request.open('GET', ((url.indexOf('?') === -1) ? url + '?chromeless=1' : url + '&chromeless=1'), true);
 		request.onload = function () {
 			const content = this.response;
-			if (mostRecentRequest === URLHelper.currentURL) {
+			if (mostRecentRequest === url) {
 				eve('page.loaded', window, {
 					URL: url,
 					content
