@@ -61,9 +61,12 @@ if (contentEl && searchEl && qEl) {
 
 	Search.visible = window.getComputedStyle(searchEl).display !== 'none';
 
-	eve.on('page.request', function (request) {
-		if (request.showSearchBar === true) {
-			Search.show(request.section);
+	eve.on('page.request', function () {
+		const requestURL = URLHelper.absolutise(window.location.href);
+		const showSearchBar = URLHelper.showSearchBar(requestURL);
+
+		if (showSearchBar === true) {
+			Search.show(URLHelper.section(requestURL));
 		} else {
 			Search.hide();
 		}

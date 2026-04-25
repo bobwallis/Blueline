@@ -47,8 +47,9 @@ if (breadcrumbEl === null) {
 	Breadcrumb.section = breadcrumbEl.textContent.toLowerCase();
 }
 
-eve.on('page.request', function (data) {
-	Breadcrumb.set(data.section || null);
+eve.on('page.request', function () {
+	const requestURL = URLHelper.absolutise(window.location.href);
+	Breadcrumb.set(URLHelper.section(requestURL) || null);
 });
 
 export default Breadcrumb;

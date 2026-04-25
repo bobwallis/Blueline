@@ -31,14 +31,9 @@ const Page = {
 			}
 		}
 
-		const newURLSection = URLHelper.section(url);
-		const newURLShowSearchBar = URLHelper.showSearchBar(url);
-
 		eve('page.request', window, {
 			oldURL: URLHelper.currentURL,
-			newURL: url,
-			section: newURLSection,
-			showSearchBar: newURLShowSearchBar
+			newURL: url
 		});
 		URLHelper.currentURL = mostRecentRequest = url;
 
@@ -49,9 +44,7 @@ const Page = {
 			if (mostRecentRequest === URLHelper.currentURL) {
 				eve('page.loaded', window, {
 					URL: url,
-					content,
-					section: newURLSection,
-					showSearchBar: newURLShowSearchBar
+					content
 				});
 			}
 		};
