@@ -26,7 +26,7 @@ if (contentEl && searchEl && qEl) {
 	Search.hide = function hide() {
 		if (Search.visible === true) {
 			qEl.blur();
-			searchEl.style.display = 'none';
+			searchEl.classList.add('up');
 			Search.visible = false;
 			contentEl.classList.remove('searchable');
 		}
@@ -53,13 +53,13 @@ if (contentEl && searchEl && qEl) {
 		}
 
 		if (Search.visible === false) {
-			searchEl.style.display = '';
+			searchEl.classList.remove('up');
 			Search.visible = true;
 			contentEl.classList.add('searchable');
 		}
 	};
 
-	Search.visible = window.getComputedStyle(searchEl).display !== 'none';
+	Search.visible = searchEl.classList.contains('up') === false;
 
 	eve.on('page.request', function () {
 		const requestURL = URLHelper.absolutise(window.location.href);

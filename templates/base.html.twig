@@ -61,7 +61,7 @@
 			{% endif %}
 			<button id="settings_button" type="button"><span class="hide">Settings</span></button>
 		</header>
-		<form id="search" role="search" action="{{ search_action|default('/') }}"{{ search|default(false) ? '' : ' style="display:none"' }}>
+		<form id="search" role="search" action="{{ search_action|default('/') }}"{{ search|default(false) ? '' : ' class="up"' }}>
 			<div>
 				<input type="text" accesskey="/" name="q" id="q" spellcheck="false" autocomplete="off" placeholder="{{ search_placeholder|default('Search') }}" value="{{ searchVariables['q']|default('') }}" />
 				<button type="submit" title="Search"><span class="hide">Search</span></button>

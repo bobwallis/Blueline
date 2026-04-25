@@ -51,9 +51,19 @@
 	z-index: 40;
 	width: 100%;
 	clear: both;
+	transform: translateY(0);
+	opacity: 1;
+	transition-property: transform, opacity;
+	transition-duration: 125ms;
+	transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
 	border-bottom: 1px solid var(--light-grey);
 	background-color: var(--title-background-overlay);
 	box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+	&.up {
+		transform: translateY(calc(-1 * var(--search-box-height)));
+		opacity: 0;
+		pointer-events: none;
+	}
 	div {
 		width: var(--search-width);
 		margin: var(--content-y-padding) var(--content-x-padding);
