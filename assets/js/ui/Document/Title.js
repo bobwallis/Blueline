@@ -1,10 +1,9 @@
 import eve from '../../lib/eve.js';
+import URLHelper from '../../helpers/URL.js';
 
 /**
  * Keep document.title aligned with the current in-app page and section.
  */
-const regExpSection = /\/(methods)\//;
-const regExpSearch = /\/(methods)\/search/;
 
 /**
  * Derive and set a user-facing document title for the loaded content.
@@ -16,16 +15,17 @@ eve.on('page.finished', function (url) {
 	let windowTitle = '';
 	const pageTitleEl = document.querySelectorAll('#content h1');
 	const pageTitle = (typeof pageTitleEl[0] !== 'undefined') ? pageTitleEl[0].innerText : '';
-	const section = regExpSection.exec(url);
+	const section = URLHelper.section(url);
+	const isSearchPage = URLHelper.showSearchBar(url) && url.indexOf('/search') !== -1;
 
 	if (pageTitle !== '') {
 		windowTitle += pageTitle + ' | ';
 	}
-	if (regExpSearch.exec(url) !== null) {
+	if (isSearchPage) {
 		windowTitle += 'Search | ';
 	}
 	if (section !== null) {
-		const sectionTitle = section[1].charAt(0).toUpperCase() + section[1].slice(1);
+		const sectionTitle = section.charAt(0).toUpperCase() + section.slice(1);
 		if (pageTitle !== sectionTitle) {
 			windowTitle += sectionTitle + ' | ';
 		}
