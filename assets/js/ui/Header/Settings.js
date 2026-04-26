@@ -1,5 +1,4 @@
 import eve from '../../lib/eve.js';
-import documentOn from '../../lib/document_on.js';
 import LocalStorage from '../../helpers/LocalStorage.js';
 
 /**
@@ -36,13 +35,15 @@ eve.on('page.finished', function () { initialSet(); } );
 initialSet();
 
 settings.forEach(function (setting) {
-	documentOn('change', '#' + setting + ', input[name=' + setting + ']', function (e) {
-		if (e.target.type === 'checkbox') {
-			LocalStorage.setSetting(setting, e.target.checked);
-		} else {
-			LocalStorage.setSetting(setting, e.target.value);
-		}
-		eve('setting.changed.' + setting);
+	document.querySelectorAll('#' + setting + ', input[name=' + setting + ']').forEach(function (el) {
+		el.addEventListener('change', function (e) {
+			if (e.target.type === 'checkbox') {
+				LocalStorage.setSetting(setting, e.target.checked);
+			} else {
+				LocalStorage.setSetting(setting, e.target.value);
+			}
+			eve('setting.changed.' + setting);
+		});
 	});
 });
 
