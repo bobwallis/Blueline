@@ -295,6 +295,6 @@ function checkForNewSettings() {
 	}
 }
 checkForNewSettings();
-eve.on('page.loaded', checkForNewSettings);
+eve.on('page.finished', checkForNewSettings);
 
 export default TabBar;

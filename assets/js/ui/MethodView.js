@@ -307,7 +307,7 @@ import Music from '../helpers/Music.js';
         });
     };
 
-    eve.on('page.loaded', checkForNewSettings);
+    eve.on('page.finished', checkForNewSettings);
     checkForNewSettings(); // Initial run
 
     // Add resize listener

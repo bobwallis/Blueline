@@ -1,4 +1,3 @@
-import eve from '../../lib/eve.js';
 import URLHelper from '../../helpers/URL.js';
 
 /**
@@ -18,14 +17,14 @@ const Breadcrumb = {
 	set(section) {
 		if (typeof section === 'string') {
 			breadcrumbEl.innerHTML = '<a href="' + URLHelper.baseURL + section + '/">' + section.charAt(0).toUpperCase() + section.slice(1) + '</a>';
-			breadcrumbSepEl.classList.remove('hide');
-			breadcrumbEl.classList.remove('hide');
+			breadcrumbSepEl.style.display = 'block';
+			breadcrumbEl.style.display = 'block';
 			Breadcrumb.section = section;
 			return;
 		}
 
-		breadcrumbSepEl.classList.add('hide');
-		breadcrumbEl.classList.add('hide');
+		breadcrumbSepEl.style.display = 'none';
+		breadcrumbEl.style.display = 'none';
 		Breadcrumb.section = null;
 	}
 };
@@ -33,23 +32,20 @@ const Breadcrumb = {
 if (breadcrumbSepEl === null) {
 	breadcrumbSepEl = document.createElement('h2');
 	breadcrumbSepEl.id = 'breadcrumb_sep';
-	breadcrumbSepEl.classList.add('hide');
+	breadcrumbSepEl.style.display = 'none';
 	breadcrumbSepEl.innerHTML = '&raquo;';
 	document.getElementById('top').appendChild(breadcrumbSepEl);
 }
 if (breadcrumbEl === null) {
 	breadcrumbEl = document.createElement('h2');
 	breadcrumbEl.id = 'breadcrumb';
-	breadcrumbEl.classList.add('hide');
+	breadcrumbEl.style.display = 'none';
 	document.getElementById('top').appendChild(breadcrumbEl);
 	Breadcrumb.section = null;
 } else {
 	Breadcrumb.section = breadcrumbEl.textContent.toLowerCase();
+	breadcrumbSepEl.style.display = 'block';
+	breadcrumbEl.style.display = 'block';
 }
-
-eve.on('page.request', function (result) {
-	const requestURL = (result && result.newURL) || window.location.href;
-	Breadcrumb.set(URLHelper.section(requestURL) || null);
-});
 
 export default Breadcrumb;

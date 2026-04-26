@@ -1,11 +1,9 @@
-import eve from '../../lib/eve.js';
 import URLHelper from '../../helpers/URL.js';
 import Page from '../../data/Page.js';
 
 /**
  * Manage search form visibility and interactive in-app search requests.
  */
-const contentEl = document.getElementById('content');
 const searchEl = document.getElementById('search');
 const qEl = document.getElementById('q');
 
@@ -17,7 +15,7 @@ const Search = {
 	show: noop
 };
 
-if (contentEl && searchEl && qEl) {
+if (searchEl && qEl) {
 	/**
 	 * Hide the search form and clear searchable layout state.
 	 *
@@ -26,9 +24,8 @@ if (contentEl && searchEl && qEl) {
 	Search.hide = function hide() {
 		if (Search.visible === true) {
 			qEl.blur();
-			searchEl.classList.add('up');
+			searchEl.style.display = 'none';
 			Search.visible = false;
-			contentEl.classList.remove('searchable');
 		}
 	};
 
@@ -54,24 +51,14 @@ if (contentEl && searchEl && qEl) {
 		}
 
 		if (Search.visible === false) {
-			searchEl.classList.remove('up');
+			searchEl.style.display = 'block';
 			Search.visible = true;
-			contentEl.classList.add('searchable');
 		}
 	};
 
 	Search.visible = searchEl.classList.contains('up') === false;
-
-	eve.on('page.request', function (result) {
-		const requestURL = (result && result.newURL) || window.location.href;
-		const showSearchBar = URLHelper.showSearchBar(requestURL);
-
-		if (showSearchBar === true) {
-			Search.show(URLHelper.section(requestURL), requestURL);
-		} else {
-			Search.hide();
-		}
-	});
+	searchEl.style.display = Search.visible ? 'block' : 'none';
+	searchEl.classList.remove('up');
 
 	if ('serviceWorker' in navigator) {
 		document.addEventListener('keyup', function (e) {
