@@ -24,6 +24,14 @@ section.method {
 		margin: var(--content-y-padding) var(--content-x-padding);
 	}
 
+	/* Ensure tab panel wrappers expand to floated canvas height. */
+	.line::after,
+	.grid::after {
+		content: '';
+		display: block;
+		clear: both;
+	}
+
 	/* Default tab shows/hides */
 	.details, .grid {
 		display: none;

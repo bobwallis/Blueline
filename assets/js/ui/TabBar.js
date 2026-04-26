@@ -6,6 +6,115 @@ import eve from '../lib/eve.js';
 const fragmentTabBars = new Map();
 
 /**
+ * Return a tab content panel element for a tab list item.
+ *
+ * @param {Element} tabEl The <li> tab element.
+ * @returns {Element|null}
+ */
+function getTabPanelEl(tabEl) {
+	if (!tabEl || !tabEl.id) {
+		return null;
+	}
+
+	return document.getElementById(tabEl.id.replace(/^tab_/, ''));
+}
+
+/**
+ * Find the active non-external tab in a container.
+ *
+ * @param {Element} containerEl The <ul> tab bar element.
+ * @returns {Element|null}
+ */
+function getActiveInternalTab(containerEl) {
+	if (!containerEl) {
+		return null;
+	}
+
+	for (let i = 0; i < containerEl.children.length; i++) {
+		const tab = containerEl.children[i];
+		if (!tab.matches || !tab.matches('li') || isExternalTab(tab)) {
+			continue;
+		}
+
+		if (tab.classList.contains('active')) {
+			return tab;
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Resolve an internal tab index (external tabs excluded) within one container.
+ *
+ * @param {Element} containerEl The <ul> tab bar element.
+ * @param {Element} tabEl The tab to index.
+ * @returns {number}
+ */
+function getInternalTabIndex(containerEl, tabEl) {
+	if (!containerEl || !tabEl) {
+		return -1;
+	}
+
+	let index = -1;
+	for (let i = 0; i < containerEl.children.length; i++) {
+		const tab = containerEl.children[i];
+		if (!tab.matches || !tab.matches('li') || isExternalTab(tab)) {
+			continue;
+		}
+
+		index++;
+		if (tab === tabEl) {
+			return index;
+		}
+	}
+
+	return -1;
+}
+
+/**
+ * Compute directional tab transition type from current and target tabs.
+ *
+ * @param {Element} containerEl The <ul> tab bar element.
+ * @param {Element|null} currentTab Current active tab.
+ * @param {Element} targetTab Target tab.
+ * @returns {string|null}
+ */
+function getTabTransitionType(containerEl, currentTab, targetTab) {
+	if (!containerEl || !currentTab || !targetTab || currentTab === targetTab) {
+		return null;
+	}
+
+	const currentIndex = getInternalTabIndex(containerEl, currentTab);
+	const targetIndex = getInternalTabIndex(containerEl, targetTab);
+	if (currentIndex < 0 || targetIndex < 0 || currentIndex === targetIndex) {
+		return null;
+	}
+
+	// Earlier tab targets move content to the right; later targets move to the left.
+	return targetIndex < currentIndex ? 'tab-right' : 'tab-left';
+}
+
+/**
+ * Run tab panel DOM updates inside a typed View Transition when available.
+ *
+ * @param {string|null} type Transition type name.
+ * @param {() => void} updateFn DOM mutation callback.
+ * @returns {ViewTransition|undefined}
+ */
+function runTabTransition(type, updateFn) {
+	if (!document.startViewTransition || !type) {
+		updateFn();
+		return undefined;
+	}
+
+	return document.startViewTransition({
+		update: updateFn,
+		types: [type],
+	});
+}
+
+/**
  * On every hashchange or popstate event, walk all registered fragment-aware tab bars,
  * remove any whose container is no longer in the DOM, and re-sync the rest to the
  * current URL fragment.
@@ -18,7 +127,7 @@ function syncFragmentTabBars() {
 			fragmentTabBars.delete(containerId);
 			return;
 		}
-		syncTabBarToFragment(fragmentState.containerEl, true);
+		syncTabBarToFragment(fragmentState.containerEl, true, true);
 	});
 }
 window.addEventListener('hashchange', syncFragmentTabBars);
@@ -56,27 +165,53 @@ function updateCurrentFragment(fragment, replace) {
  *
  * @param {Element} containerEl The <ul> tab bar element.
  * @param {Element} targetTab   The <li> tab to activate.
+ * @param {string|null} transitionType Optional typed View Transition name.
  * @returns {void}
  */
-function activateTab(containerEl, targetTab) {
+function activateTab(containerEl, targetTab, transitionType) {
 	if (!containerEl || !targetTab || targetTab.parentNode !== containerEl || isExternalTab(targetTab)) {
 		return;
 	}
 
-	const siblings = containerEl.children;
-	for (let i = 0; i < siblings.length; i++) {
-		const tab = siblings[i];
-		if (!tab.matches || !tab.matches('li')) {
-			continue;
-		}
+	const applyTabState = function () {
+		const siblings = containerEl.children;
+		for (let i = 0; i < siblings.length; i++) {
+			const tab = siblings[i];
+			if (!tab.matches || !tab.matches('li')) {
+				continue;
+			}
 
-		const isActive = (tab === targetTab);
-		tab.classList.toggle('active', isActive);
+			const isActive = (tab === targetTab);
+			tab.classList.toggle('active', isActive);
 
-		const contentEl = document.getElementById(tab.id.replace(/^tab_/, ''));
-		if (contentEl) {
-			contentEl.style.display = isActive ? 'block' : 'none';
+			const contentEl = getTabPanelEl(tab);
+			if (contentEl) {
+				contentEl.style.display = isActive ? 'block' : 'none';
+			}
 		}
+	};
+
+	const currentTab = getActiveInternalTab(containerEl);
+	const fromPanel = getTabPanelEl(currentTab);
+	const toPanel = getTabPanelEl(targetTab);
+	if (transitionType && fromPanel && toPanel && fromPanel !== toPanel) {
+		fromPanel.style.viewTransitionName = 'tab-panel';
+		toPanel.style.viewTransitionName = 'tab-panel';
+
+		const transition = runTabTransition(transitionType, applyTabState);
+
+		const clearTransitionNames = function () {
+			fromPanel.style.viewTransitionName = '';
+			toPanel.style.viewTransitionName = '';
+		};
+
+		if (transition && transition.finished && typeof transition.finished.finally === 'function') {
+			transition.finished.finally(clearTransitionNames);
+		} else {
+			requestAnimationFrame(clearTransitionNames);
+		}
+	} else {
+		applyTabState();
 	}
 
 	if (typeof Event === 'function') {
@@ -92,9 +227,10 @@ function activateTab(containerEl, targetTab) {
  *
  * @param {Element} containerEl               The <ul> tab bar element.
  * @param {boolean} normalizeDefaultFragment   Whether to strip the hash when it matches the default tab.
+ * @param {boolean} animate Whether to run directional tab transitions.
  * @returns {void}
  */
-function syncTabBarToFragment(containerEl, normalizeDefaultFragment) {
+function syncTabBarToFragment(containerEl, normalizeDefaultFragment, animate) {
 	const fragmentState = fragmentTabBars.get(containerEl.id);
 	if (!fragmentState) {
 		return;
@@ -103,7 +239,10 @@ function syncTabBarToFragment(containerEl, normalizeDefaultFragment) {
 	const currentFragment = decodeURIComponent(window.location.hash.replace(/^#/, ''));
 	const targetTabId = fragmentState.tabsByFragment[currentFragment] || fragmentState.defaultTabId;
 	const targetTab = document.getElementById(targetTabId);
-	activateTab(containerEl, targetTab);
+	const transitionType = animate
+		? getTabTransitionType(containerEl, getActiveInternalTab(containerEl), targetTab)
+		: null;
+	activateTab(containerEl, targetTab, transitionType);
 
 	if (normalizeDefaultFragment && currentFragment === fragmentState.defaultFragment) {
 		updateCurrentFragment('', true);
@@ -140,11 +279,13 @@ function tabClick(e) {
 		return;
 	}
 
-	activateTab(target.parentNode, target);
+	const containerEl = target.parentNode;
+	const transitionType = getTabTransitionType(containerEl, getActiveInternalTab(containerEl), target);
+	activateTab(containerEl, target, transitionType);
 
 	const fragment = target.getAttribute('data-fragment');
 	if (fragment !== null) {
-		const fragmentState = fragmentTabBars.get(target.parentNode.id);
+		const fragmentState = fragmentTabBars.get(containerEl.id);
 		updateCurrentFragment((fragmentState && fragment === fragmentState.defaultFragment) ? '' : fragment, false);
 	}
 }
@@ -245,10 +386,10 @@ function TabBar(options) {
 				defaultTabId: defaultTab.id,
 				tabsByFragment: tabsByFragment
 			});
-			// Perform an initial sync so the correct tab is shown for the current URL on load.
-			syncTabBarToFragment(containerEl, true);
+			// Perform an initial sync so the correct tab is shown for the current URL on load (with no animation).
+			syncTabBarToFragment(containerEl, true, false);
 		} else {
-			activateTab(containerEl, defaultTab);
+			activateTab(containerEl, defaultTab, null);
 		}
 	}
 

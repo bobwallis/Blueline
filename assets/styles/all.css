@@ -15,6 +15,7 @@
 	--search-width: 600px;
 	--search-width-small-screen: 304px;
 	--animation-speed: 100ms;
+	--tab-panel-slide-distance: clamp(64px, 16vw, 320px);
 
 	--background: #fff;
 	--header-background: #002856;
@@ -218,12 +219,33 @@ span.code {
 		animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
 	}
 
+	:root:active-view-transition-type(tab-left)::view-transition-group(tab-panel),
+	:root:active-view-transition-type(tab-right)::view-transition-group(tab-panel) {
+		animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+	}
+
 	:root:active-view-transition-type(settings-in)::view-transition-new(settings-window) {
 		animation-name: settings-dialog-in;
 	}
 
 	:root:active-view-transition-type(settings-out)::view-transition-old(settings-window) {
 		animation-name: settings-dialog-out;
+	}
+
+	:root:active-view-transition-type(tab-left)::view-transition-old(tab-panel) {
+		animation-name: tab-panel-out-left;
+	}
+
+	:root:active-view-transition-type(tab-left)::view-transition-new(tab-panel) {
+		animation-name: tab-panel-in-right;
+	}
+
+	:root:active-view-transition-type(tab-right)::view-transition-old(tab-panel) {
+		animation-name: tab-panel-out-right;
+	}
+
+	:root:active-view-transition-type(tab-right)::view-transition-new(tab-panel) {
+		animation-name: tab-panel-in-left;
 	}
 }
 
@@ -246,5 +268,49 @@ span.code {
 	to {
 		opacity: 0;
 		transform: translate(24px, -24px) scale(0.96);
+	}
+}
+
+@keyframes tab-panel-out-left {
+	from {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateX(calc(-1 * var(--tab-panel-slide-distance)));
+	}
+}
+
+@keyframes tab-panel-in-right {
+	from {
+		opacity: 0;
+		transform: translateX(var(--tab-panel-slide-distance));
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes tab-panel-out-right {
+	from {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateX(var(--tab-panel-slide-distance));
+	}
+}
+
+@keyframes tab-panel-in-left {
+	from {
+		opacity: 0;
+		transform: translateX(calc(-1 * var(--tab-panel-slide-distance)));
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
 	}
 }
