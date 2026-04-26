@@ -16,10 +16,18 @@ const Breadcrumb = {
 	 */
 	set(section) {
 		if (typeof section === 'string') {
+			if (Breadcrumb.section === section) {
+				return;
+			}
+
 			breadcrumbEl.innerHTML = '<a href="' + URLHelper.baseURL + section + '/">' + section.charAt(0).toUpperCase() + section.slice(1) + '</a>';
 			breadcrumbSepEl.style.display = 'block';
 			breadcrumbEl.style.display = 'block';
 			Breadcrumb.section = section;
+			return;
+		}
+
+		if (Breadcrumb.section === null) {
 			return;
 		}
 

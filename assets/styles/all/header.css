@@ -35,6 +35,14 @@
 	}
 }
 
+#breadcrumb {
+	view-transition-name: breadcrumb;
+}
+
+#breadcrumb_sep {
+	view-transition-name: breadcrumb-sep;
+}
+
 
 /* Search */
 #search {

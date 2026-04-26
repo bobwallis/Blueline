@@ -16,6 +16,7 @@
 	--search-width-small-screen: 304px;
 	--animation-speed: 100ms;
 	--tab-panel-slide-distance: clamp(64px, 16vw, 320px);
+	--breadcrumb-slide-distance: clamp(14px, 3vw, 28px);
 
 	--background: #fff;
 	--header-background: #002856;
@@ -224,6 +225,11 @@ span.code {
 		animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
 	}
 
+	:root:active-view-transition-type(breadcrumb-change)::view-transition-group(breadcrumb),
+	:root:active-view-transition-type(breadcrumb-change)::view-transition-group(breadcrumb-sep) {
+		animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+	}
+
 	:root:active-view-transition-type(settings-in)::view-transition-new(settings-window) {
 		animation-name: settings-dialog-in;
 	}
@@ -246,6 +252,16 @@ span.code {
 
 	:root:active-view-transition-type(tab-right)::view-transition-new(tab-panel) {
 		animation-name: tab-panel-in-left;
+	}
+
+	:root:active-view-transition-type(breadcrumb-change)::view-transition-old(breadcrumb),
+	:root:active-view-transition-type(breadcrumb-change)::view-transition-old(breadcrumb-sep) {
+		animation-name: breadcrumb-out-left;
+	}
+
+	:root:active-view-transition-type(breadcrumb-change)::view-transition-new(breadcrumb),
+	:root:active-view-transition-type(breadcrumb-change)::view-transition-new(breadcrumb-sep) {
+		animation-name: breadcrumb-in-left;
 	}
 }
 
@@ -312,5 +328,27 @@ span.code {
 	to {
 		opacity: 1;
 		transform: translateX(0);
+	}
+}
+
+@keyframes breadcrumb-in-left {
+	from {
+		opacity: 0;
+		transform: translateX(calc(-1 * var(--breadcrumb-slide-distance)));
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes breadcrumb-out-left {
+	from {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateX(calc(-1 * var(--breadcrumb-slide-distance)));
 	}
 }

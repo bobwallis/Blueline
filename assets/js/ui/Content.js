@@ -18,11 +18,19 @@ document.body.appendChild(loadingEl);
  * Run a DOM update inside a View Transition when supported.
  *
  * @param {() => void} updateFn DOM mutation callback.
+ * @param {?string} transitionType Optional typed transition name.
  * @returns {void}
  */
-function runContentTransition(updateFn) {
+function runContentTransition(updateFn, transitionType) {
 	if (document.startViewTransition) {
-		document.startViewTransition(updateFn);
+		if (typeof transitionType === 'string' && transitionType.length > 0) {
+			document.startViewTransition({
+				update: updateFn,
+				types: [transitionType],
+			});
+		} else {
+			document.startViewTransition(updateFn);
+		}
 	} else {
 		updateFn();
 	}
@@ -47,8 +55,6 @@ eve.on('page.request', function (result) {
 					Search.hide();
 				}
 
-				Breadcrumb.set(section || null);
-
 				contentEl.style.display = 'none';
 				contentEl.innerHTML = '';
 				loadingEl.style.display = 'block';
@@ -70,6 +76,8 @@ eve.on('page.loaded', function (result) {
 		const requestURL = (result && result.URL) || window.location.href;
 		const section = URLHelper.section(requestURL);
 		const showSearchBar = URLHelper.showSearchBar(requestURL);
+		const nextSection = section || null;
+		const transitionType = Breadcrumb.section !== nextSection ? 'breadcrumb-change' : null;
 
 		const applyContentUpdate = function () {
 			if (showSearchBar) {
@@ -78,7 +86,7 @@ eve.on('page.loaded', function (result) {
 				Search.hide();
 			}
 
-			Breadcrumb.set(section || null);
+			Breadcrumb.set(nextSection);
 
 			contentEl.innerHTML = result.content;
 			contentEl.style.display = 'block';
@@ -94,6 +102,6 @@ eve.on('page.loaded', function (result) {
 			eve('page.finished', window, result.URL);
 		};
 
-		runContentTransition(applyContentUpdate);
+		runContentTransition(applyContentUpdate, transitionType);
 	}
 });
