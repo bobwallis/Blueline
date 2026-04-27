@@ -3,7 +3,14 @@
  */
 import '../styles/all.css';
 import eve from './helpers/Eve.js';
-import './ui.js';
+import './ui/Document.js';
+import './ui/Header/Breadcrumb.js';
+import './ui/Header/Search.js';
+import './ui/Header/Settings.js';
+import './ui/Content.js';
+import './ui/TabBar.js';
+import './ui/CustomForm.js';
+import './ui/MethodView.js';
 import webfont from './helpers/Webfont.js';
 import ServiceWorker from './helpers/ServiceWorker.js';
 

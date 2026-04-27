@@ -2,7 +2,7 @@ import { mergeDeep } from './ObjectMerge.js';
 import GridOptions from './Grid/Options.js';
 import PlaceNotation from './PlaceNotation.js';
 import Canvas from '../ui/Canvas.js';
-import MeasureCanvasTextOffset from './MeasureCanvasTextOffset.js';
+import { measureXAndYTextPadding } from './MeasureCanvasText.js';
 
 /**
  * Render method grids to canvas using parsed place notation and display options.
@@ -115,7 +115,7 @@ import MeasureCanvasTextOffset from './MeasureCanvasTextOffset.js';
 
 			// Draw notation down side
 			if( options.sideNotation.show ) {
-				textMetrics = MeasureCanvasTextOffset( parseInt( options.sideNotation.font ), options.sideNotation.font, '0' );
+				textMetrics = measureXAndYTextPadding( parseInt( options.sideNotation.font ), options.sideNotation.font, '0' );
 				context.fillStyle = options.sideNotation.color;
 				context.font = options.sideNotation.font;
 				context.textAlign = 'right';
@@ -200,7 +200,7 @@ import MeasureCanvasTextOffset from './MeasureCanvasTextOffset.js';
 			if( options.numbers.show ) {
 				// Cache pre-rendered numbers
 				var fillTextCache_numbers = (function() {
-					var textMetrics = MeasureCanvasTextOffset( Math.max(bellWidth, rowHeight ), options.numbers.font, '0' );
+					var textMetrics = measureXAndYTextPadding( Math.max(bellWidth, rowHeight ), options.numbers.font, '0' );
 					return options.numbers.bells.map( function( bellOptions, bell ) {
 						if( bellOptions.color === 'transparent' ) {
 							return null;
@@ -359,7 +359,7 @@ import MeasureCanvasTextOffset from './MeasureCanvasTextOffset.js';
 
 							// The text inside the big circle
 							var placeStartFontSize = Math.round( 10*Math.min( options.placeStarts.diameter-((positionInLeadHead<9)?2:4), (((positionInLeadHead<9)?0.75:0.6)*options.placeStarts.diameter) )/10 ),
-								textMetrics = MeasureCanvasTextOffset( Math.ceil(options.placeStarts.diameter), placeStartFontSize+'px '+options.placeStarts.font, (positionInLeadHead+1).toString() );
+								textMetrics = measureXAndYTextPadding( Math.ceil(options.placeStarts.diameter), placeStartFontSize+'px '+options.placeStarts.font, (positionInLeadHead+1).toString() );
 							context.fillStyle = options.placeStarts.color;
 							context.font = placeStartFontSize+'px '+options.placeStarts.font;
 							context.textAlign = 'center';
