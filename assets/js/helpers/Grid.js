@@ -1,4 +1,4 @@
-import deepmerge from '../lib/deepmerge.js';
+import { mergeDeep } from './ObjectMerge.js';
 import GridOptions from './Grid/Options.js';
 import PlaceNotation from './PlaceNotation.js';
 import Canvas from '../ui/Canvas.js';
@@ -29,7 +29,7 @@ import MeasureCanvasTextOffset from './MeasureCanvasTextOffset.js';
 		 * @returns {void}
 		 */
 		this.setOptions = function( passedOptions ) {
-			options = GridOptions( deepmerge( options, passedOptions ) );
+			options = GridOptions( mergeDeep( options, passedOptions ) );
 		};
 
 		/**
@@ -59,11 +59,15 @@ import MeasureCanvasTextOffset from './MeasureCanvasTextOffset.js';
 		this.draw = function( returnImage ) {
 			returnImage = (typeof returnImage !== 'boolean')? false : returnImage;
 			// Set up canvas
-			var canvas =  new Canvas( deepmerge.all( [((typeof options.scale === 'number')? { scale: options.scale } : {}), {
+			var canvasOptions = {
 				id: options.id,
 				width: options.dimensions.canvas.width,
 				height: options.dimensions.canvas.height
-			}] ) );
+			};
+			if( typeof options.scale === 'number' ) {
+				canvasOptions.scale = options.scale;
+			}
+			var canvas =  new Canvas( canvasOptions );
 
 			// Create some shortcut variables for later use
 			var i, j, k, l, m, h, x, y,

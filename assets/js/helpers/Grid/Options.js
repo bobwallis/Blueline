@@ -1,4 +1,4 @@
-import deepmerge from '../../lib/deepmerge.js';
+import { mergeAll } from '../ObjectMerge.js';
 import PlaceNotation from '../PlaceNotation.js';
 import MeasureCanvasText from '../MeasureCanvasText.js';
 
@@ -166,7 +166,7 @@ import MeasureCanvasText from '../MeasureCanvasText.js';
 		} );
 
 		// Merge options object with the defaults
-		options = deepmerge.all( [{}, defaultOptions, defaultRuntimeOptions, passedOptions] );
+		options = mergeAll( [{}, defaultOptions, defaultRuntimeOptions, passedOptions] );
 
 		// Allow title to be shown by just setting title.text
 		if( options.title.text !== null ) { options.title.show = true; }

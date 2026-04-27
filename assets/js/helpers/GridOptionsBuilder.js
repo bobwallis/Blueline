@@ -1,4 +1,4 @@
-import deepmerge from '../lib/deepmerge.js';
+import { mergeAll } from './ObjectMerge.js';
 import PlaceNotation from './PlaceNotation.js';
 import MeasureCanvasText from './MeasureCanvasText.js';
 
@@ -163,7 +163,7 @@ import MeasureCanvasText from './MeasureCanvasText.js';
 
 					// Adjust rule offs to compensate for the fact we just sliced off some of the start of the method
 					// TODO: adjust rule-offs when the call adjusts the lead length
-					call.ruleOffs = deepmerge( {}, this.ruleOffs );
+					call.ruleOffs = structuredClone( this.ruleOffs );
 					call.ruleOffs.from -= start;
 
 					// Calculate which bells are affected by the call
@@ -221,7 +221,7 @@ import MeasureCanvasText from './MeasureCanvasText.js';
 				return thisgridOptionsplainCoursenumbers;
 			}
 			// Create initial object
-			thisgridOptionsplainCoursenumbers = deepmerge.all( [{}, sharedPlainCourseGridOptions, {
+			thisgridOptionsplainCoursenumbers = mergeAll( [{}, sharedPlainCourseGridOptions, {
 				id: sharedPlainCourseGridOptions.id+'_numbers',
 				numbers: {
 					show: true,
@@ -249,7 +249,7 @@ import MeasureCanvasText from './MeasureCanvasText.js';
 				return thisgridOptionscallsnumbers;
 			}
 			// Create initial object
-			thisgridOptionscallsnumbers = deepmerge( [], sharedCallsGridOptions );
+			thisgridOptionscallsnumbers = structuredClone( sharedCallsGridOptions );
 			// Set the colors and stroke widths of the lines in the calls
 			sharedCallsGridOptions.forEach( function( call, callIndex ) {
 				var isHuntBell, isWorkingBell, isAffected;
@@ -276,7 +276,7 @@ import MeasureCanvasText from './MeasureCanvasText.js';
 				return thisgridOptionsplainCoursediagrams;
 			}
 			// Create initial object
-			thisgridOptionsplainCoursediagrams = deepmerge.all( [{}, sharedPlainCourseGridOptions, {
+			thisgridOptionsplainCoursediagrams = mergeAll( [{}, sharedPlainCourseGridOptions, {
 				id: sharedPlainCourseGridOptions.id+'_numbers',
 				numbers: {
 					show: true,
@@ -315,7 +315,7 @@ import MeasureCanvasText from './MeasureCanvasText.js';
 				return thisgridOptionscallsdiagrams;
 			}
 			// Create initial object
-			thisgridOptionscallsdiagrams = deepmerge( [], sharedCallsGridOptions );
+			thisgridOptionscallsdiagrams = structuredClone( sharedCallsGridOptions );
 			// Set the colors and stroke widths of the lines in the calls
 			sharedCallsGridOptions.forEach( function( call, callIndex ) {
 				var isHuntBell, isWorkingBell, isAffected;
@@ -346,7 +346,7 @@ import MeasureCanvasText from './MeasureCanvasText.js';
 				return thisgridOptionsplainCourselines;
 			}
 			// Create initial object
-			thisgridOptionsplainCourselines = deepmerge.all( [{}, sharedPlainCourseGridOptions, {
+			thisgridOptionsplainCourselines = mergeAll( [{}, sharedPlainCourseGridOptions, {
 				id: sharedPlainCourseGridOptions.id+'_lines',
 				numbers: false,
 				verticalGuides: {
@@ -373,7 +373,7 @@ import MeasureCanvasText from './MeasureCanvasText.js';
 				return thisgridOptionscallslines;
 			}
 			// Create initial object
-			thisgridOptionscallslines = deepmerge( [], sharedCallsGridOptions );
+			thisgridOptionscallslines = structuredClone( sharedCallsGridOptions );
 			// Set the colors and stroke widths of the lines in the calls
 			sharedCallsGridOptions.forEach( function( call, callIndex ) {
 				var isHuntBell, isWorkingBell, isAffected;
@@ -401,7 +401,7 @@ import MeasureCanvasText from './MeasureCanvasText.js';
 				return thisgridOptionsplainCoursegrid;
 			}
 			// Create initial object
-			thisgridOptionsplainCoursegrid = deepmerge.all( [{}, sharedPlainCourseGridOptions, {
+			thisgridOptionsplainCoursegrid = mergeAll( [{}, sharedPlainCourseGridOptions, {
 				id: sharedPlainCourseGridOptions.id+'_grid',
 				title: false,
 				numberOfLeads: false,
@@ -431,7 +431,7 @@ import MeasureCanvasText from './MeasureCanvasText.js';
 				return thisgridOptionscallsgrid;
 			}
 			// Create initial object
-			thisgridOptionscallsgrid = deepmerge( [], sharedCallsGridOptions );
+			thisgridOptionscallsgrid = structuredClone( sharedCallsGridOptions );
 			// Set the colors and stroke widths of the lines in the calls
 			sharedCallsGridOptions.forEach( function( call, callIndex ) {
 				var isHuntBell, isAffected, i, j;

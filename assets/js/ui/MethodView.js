@@ -1,4 +1,3 @@
-import deepmerge from '../lib/deepmerge.js';
 import eve from '../lib/eve.js';
 import InteractiveGridOverlay from './MethodView/InteractiveGridOverlay.js';
 import webfont from '../lib/webfont.js';
@@ -74,7 +73,7 @@ import Music from '../helpers/Music.js';
             // Update Method Object if 'follow' changed
             if (newFollow !== lastFollow) {
                 options.workingBell = newFollow;
-                method = new GridOptionsBuilder(deepmerge({}, options));
+                method = new GridOptionsBuilder(structuredClone(options));
             }
 
             if (!method) {
