@@ -11,7 +11,7 @@ const fragmentTabBars = new Map();
  * @param {Element} tabEl The <li> tab element.
  * @returns {Element|null}
  */
-function getTabPanelEl(tabEl) {
+function getTabPanelEl (tabEl) {
 	if (!tabEl || !tabEl.id) {
 		return null;
 	}
@@ -25,7 +25,7 @@ function getTabPanelEl(tabEl) {
  * @param {Element} containerEl The <ul> tab bar element.
  * @returns {Element|null}
  */
-function getActiveInternalTab(containerEl) {
+function getActiveInternalTab (containerEl) {
 	if (!containerEl) {
 		return null;
 	}
@@ -51,7 +51,7 @@ function getActiveInternalTab(containerEl) {
  * @param {Element} tabEl The tab to index.
  * @returns {number}
  */
-function getInternalTabIndex(containerEl, tabEl) {
+function getInternalTabIndex (containerEl, tabEl) {
 	if (!containerEl || !tabEl) {
 		return -1;
 	}
@@ -80,7 +80,7 @@ function getInternalTabIndex(containerEl, tabEl) {
  * @param {Element} targetTab Target tab.
  * @returns {string|null}
  */
-function getTabTransitionType(containerEl, currentTab, targetTab) {
+function getTabTransitionType (containerEl, currentTab, targetTab) {
 	if (!containerEl || !currentTab || !targetTab || currentTab === targetTab) {
 		return null;
 	}
@@ -102,7 +102,7 @@ function getTabTransitionType(containerEl, currentTab, targetTab) {
  * @param {() => void} updateFn DOM mutation callback.
  * @returns {ViewTransition|undefined}
  */
-function runTabTransition(type, updateFn) {
+function runTabTransition (type, updateFn) {
 	if (!document.startViewTransition || !type) {
 		updateFn();
 		return undefined;
@@ -121,8 +121,8 @@ function runTabTransition(type, updateFn) {
  *
  * @returns {void}
  */
-function syncFragmentTabBars() {
-	fragmentTabBars.forEach(function(fragmentState, containerId) {
+function syncFragmentTabBars () {
+	fragmentTabBars.forEach(function (fragmentState, containerId) {
 		if (!document.body.contains(fragmentState.containerEl)) {
 			fragmentTabBars.delete(containerId);
 			return;
@@ -140,7 +140,7 @@ window.addEventListener('popstate', syncFragmentTabBars);
  * @param {Element} tabEl The <li> element to test.
  * @returns {boolean}
  */
-function isExternalTab(tabEl) {
+function isExternalTab (tabEl) {
 	return Boolean(tabEl && tabEl.getAttribute('data-external') === 'true');
 }
 
@@ -152,7 +152,7 @@ function isExternalTab(tabEl) {
  * @param {boolean} replace When true, use replaceState; when false, use pushState.
  * @returns {void}
  */
-function updateCurrentFragment(fragment, replace) {
+function updateCurrentFragment (fragment, replace) {
 	const url = new URL(window.location.href);
 	url.hash = fragment ? fragment : '';
 	window.history[replace ? 'replaceState' : 'pushState'](window.history.state, '', url);
@@ -168,7 +168,7 @@ function updateCurrentFragment(fragment, replace) {
  * @param {string|null} transitionType Optional typed View Transition name.
  * @returns {void}
  */
-function activateTab(containerEl, targetTab, transitionType) {
+function activateTab (containerEl, targetTab, transitionType) {
 	if (!containerEl || !targetTab || targetTab.parentNode !== containerEl || isExternalTab(targetTab)) {
 		return;
 	}
@@ -230,7 +230,7 @@ function activateTab(containerEl, targetTab, transitionType) {
  * @param {boolean} animate Whether to run directional tab transitions.
  * @returns {void}
  */
-function syncTabBarToFragment(containerEl, normalizeDefaultFragment, animate) {
+function syncTabBarToFragment (containerEl, normalizeDefaultFragment, animate) {
 	const fragmentState = fragmentTabBars.get(containerEl.id);
 	if (!fragmentState) {
 		return;
@@ -249,14 +249,13 @@ function syncTabBarToFragment(containerEl, normalizeDefaultFragment, animate) {
 	}
 }
 
-
 /**
  * Handle tab click interactions and toggle active panel visibility.
  *
  * @param {MouseEvent} e Click event.
  * @returns {void}
  */
-function tabClick(e) {
+function tabClick (e) {
 	const target = e.target.closest('li');
 	if (!target || !target.matches || !target.matches('li')) {
 		return;
@@ -296,8 +295,8 @@ function tabClick(e) {
  * @param {{landmark: string, tabs: Array<Object>, active?: number}} options Tab-bar settings.
  * @returns {void}
  */
-function TabBar(options) {
-	const containerId = options.landmark + '_';
+function TabBar (options) {
+	const containerId = `${options.landmark}_`;
 	let containerEl = document.getElementById(containerId);
 	if (!containerEl) {
 		// Swap the placeholder <span> in the DOM for a real <ul> tab bar.
@@ -314,23 +313,19 @@ function TabBar(options) {
 		// click handler can recognise them and skip panel activation. Internal tabs carry an
 		// optional data-fragment attribute that drives URL fragment support.
 		let htmlContent = '';
-		const escapeAttr = function (str) { return str ? str.replace(/"/g, '&quot;') : ''; };
+		const escapeAttr = function (str) {
+			return str ? str.replace(/"/g, '&quot;') : '';
+		};
 
 		for (let i = 0; i < options.tabs.length; i++) {
 			const t = options.tabs[i];
 			if (typeof t.external === 'string') {
-				htmlContent += '<li id="tab_' + escapeAttr(t.content) + '" data-external="true">' +
-					'<a href="' + escapeAttr(t.external) + '" class="external"' +
-					(t.onclick ? ' onclick="' + escapeAttr(t.onclick) + '"' : '') + '>' +
-					t.title + '</a></li>';
+				const onclickAttr = t.onclick ? ` onclick="${escapeAttr(t.onclick)}"` : '';
+				htmlContent += `<li id="tab_${escapeAttr(t.content)}" data-external="true"><a href="${escapeAttr(t.external)}" class="external"${onclickAttr}>${t.title}</a></li>`;
 			} else if (typeof t.content === 'string') {
-				const fragmentAttr = (typeof t.fragment === 'string' && t.fragment.length > 0)
-					? ' data-fragment="' + escapeAttr(t.fragment) + '"'
-					: '';
-				htmlContent += '<li id="tab_' + escapeAttr(t.content) + '"' +
-					fragmentAttr +
-					(t.className ? ' class="' + escapeAttr(t.className) + '"' : '') + '>' +
-					t.title + '</li>';
+				const fragmentAttr = (typeof t.fragment === 'string' && t.fragment.length > 0) ? ` data-fragment="${escapeAttr(t.fragment)}"` : '';
+				const classAttr = t.className ? ` class="${escapeAttr(t.className)}"` : '';
+				htmlContent += `<li id="tab_${escapeAttr(t.content)}"${fragmentAttr}${classAttr}>${t.title}</li>`;
 			}
 		}
 		containerEl.innerHTML = htmlContent;
@@ -402,7 +397,7 @@ function TabBar(options) {
  *
  * @returns {void}
  */
-function checkForNewSettings() {
+function checkForNewSettings () {
 	const tabBarPlaceholders = document.querySelectorAll('.TabBar[data-set]');
 
 	for (let i = 0; i < tabBarPlaceholders.length; i++) {
@@ -424,8 +419,7 @@ function checkForNewSettings() {
 			} else if (!settings.landmark && !el.id) {
 				continue;
 			}
-		}
-		catch (e) {
+		} catch (e) {
 			continue;
 		}
 

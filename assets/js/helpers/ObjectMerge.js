@@ -1,8 +1,8 @@
-function isPlainObject(value) {
+function isPlainObject (value) {
 	return Object.prototype.toString.call(value) === '[object Object]';
 }
 
-function cloneValue(value) {
+function cloneValue (value) {
 	if (value === null || typeof value !== 'object') {
 		return value;
 	}
@@ -10,20 +10,17 @@ function cloneValue(value) {
 	return structuredClone(value);
 }
 
-function mergeArray(target, source) {
+function mergeArray (target, source) {
 	var destination = Array.isArray(target) ? structuredClone(target) : [];
 
-	source.forEach(function(item, index) {
+	source.forEach(function (item, index) {
 		if (typeof destination[index] === 'undefined') {
 			destination[index] = cloneValue(item);
-		}
-		else if (Array.isArray(item) && Array.isArray(destination[index])) {
+		} else if (Array.isArray(item) && Array.isArray(destination[index])) {
 			destination[index] = mergeArray(destination[index], item);
-		}
-		else if (isPlainObject(item) && isPlainObject(destination[index])) {
+		} else if (isPlainObject(item) && isPlainObject(destination[index])) {
 			destination[index] = mergeDeep(destination[index], item);
-		}
-		else {
+		} else {
 			destination[index] = cloneValue(item);
 		}
 	});
@@ -31,7 +28,7 @@ function mergeArray(target, source) {
 	return destination;
 }
 
-function mergeDeep(target, source) {
+function mergeDeep (target, source) {
 	if (Array.isArray(source)) {
 		return mergeArray(target, source);
 	}
@@ -42,7 +39,7 @@ function mergeDeep(target, source) {
 
 	var destination = isPlainObject(target) ? structuredClone(target) : {};
 
-	Object.keys(source).forEach(function(key) {
+	Object.keys(source).forEach(function (key) {
 		if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
 			return;
 		}
@@ -52,11 +49,9 @@ function mergeDeep(target, source) {
 
 		if (Array.isArray(sourceValue)) {
 			destination[key] = mergeArray(targetValue, sourceValue);
-		}
-		else if (isPlainObject(sourceValue)) {
+		} else if (isPlainObject(sourceValue)) {
 			destination[key] = mergeDeep(targetValue, sourceValue);
-		}
-		else {
+		} else {
 			destination[key] = sourceValue;
 		}
 	});
@@ -64,12 +59,12 @@ function mergeDeep(target, source) {
 	return destination;
 }
 
-function mergeAll(values) {
+function mergeAll (values) {
 	if (!Array.isArray(values)) {
 		throw new Error('first argument should be an array');
 	}
 
-	return values.reduce(function(previousValue, currentValue) {
+	return values.reduce(function (previousValue, currentValue) {
 		return mergeDeep(previousValue, currentValue);
 	}, {});
 }

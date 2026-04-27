@@ -15,7 +15,7 @@ const LocalStorage = {
  * @param {string} key Logical key without the internal prefix.
  * @returns {*} Parsed JSON value or null.
  */
-LocalStorage.getItem = function getItem(key) {
+LocalStorage.getItem = function getItem (key) {
 	return JSON.parse(localStorage.getItem(prefix + key));
 };
 
@@ -26,7 +26,7 @@ LocalStorage.getItem = function getItem(key) {
  * @param {*} value JSON-serializable value.
  * @returns {void}
  */
-LocalStorage.setItem = function setItem(key, value) {
+LocalStorage.setItem = function setItem (key, value) {
 	localStorage.setItem(prefix + key, JSON.stringify(value));
 };
 
@@ -36,7 +36,7 @@ LocalStorage.setItem = function setItem(key, value) {
  * @param {string} key Logical key without the internal prefix.
  * @returns {void}
  */
-LocalStorage.removeItem = function removeItem(key) {
+LocalStorage.removeItem = function removeItem (key) {
 	localStorage.removeItem(prefix + key);
 };
 
@@ -45,7 +45,7 @@ LocalStorage.removeItem = function removeItem(key) {
  *
  * @returns {void}
  */
-LocalStorage.clear = function clear() {
+LocalStorage.clear = function clear () {
 	localStorage.clear();
 };
 
@@ -55,8 +55,8 @@ LocalStorage.clear = function clear() {
  * @param {string} key Cache key suffix.
  * @returns {*} Parsed cache value or null.
  */
-LocalStorage.getCache = function getCache(key) {
-	return LocalStorage.getItem('cache_' + key);
+LocalStorage.getCache = function getCache (key) {
+	return LocalStorage.getItem(`cache_${key}`);
 };
 
 /**
@@ -66,8 +66,8 @@ LocalStorage.getCache = function getCache(key) {
  * @param {*} value Cache payload.
  * @returns {void}
  */
-LocalStorage.setCache = function setCache(key, value) {
-	LocalStorage.setItem('cache_' + key, value);
+LocalStorage.setCache = function setCache (key, value) {
+	LocalStorage.setItem(`cache_${key}`, value);
 };
 
 /**
@@ -76,18 +76,18 @@ LocalStorage.setCache = function setCache(key, value) {
  * @param {string} key Cache key suffix.
  * @returns {void}
  */
-LocalStorage.removeCache = function removeCache(key) {
-	LocalStorage.removeItem('cache_' + key);
+LocalStorage.removeCache = function removeCache (key) {
+	LocalStorage.removeItem(`cache_${key}`);
 };
 
-const cacheKey = new RegExp('(^' + prefix + 'cache_.*|^' + prefix + 'Offset.*|^' + prefix + 'Width.*)');
+const cacheKey = new RegExp(`(^${prefix}cache_.*|^${prefix}Offset.*|^${prefix}Width.*)`);
 
 /**
  * Remove cached entries managed by Blueline while preserving other storage.
  *
  * @returns {void}
  */
-LocalStorage.clearCache = function clearCache() {
+LocalStorage.clearCache = function clearCache () {
 	const keys = [];
 	for (let i = 0; i < localStorage.length; ++i) {
 		const key = localStorage.key(i);
@@ -107,8 +107,8 @@ LocalStorage.clearCache = function clearCache() {
  * @param {*} defaultSetting Value returned when setting is not present.
  * @returns {*} Stored value or the provided default.
  */
-LocalStorage.getSetting = function getSetting(key, defaultSetting) {
-	const value = LocalStorage.getItem('setting_' + key);
+LocalStorage.getSetting = function getSetting (key, defaultSetting) {
+	const value = LocalStorage.getItem(`setting_${key}`);
 	return (value === null) ? defaultSetting : value;
 };
 
@@ -119,8 +119,8 @@ LocalStorage.getSetting = function getSetting(key, defaultSetting) {
  * @param {*} value Setting payload.
  * @returns {void}
  */
-LocalStorage.setSetting = function setSetting(key, value) {
-	LocalStorage.setItem('setting_' + key, value);
+LocalStorage.setSetting = function setSetting (key, value) {
+	LocalStorage.setItem(`setting_${key}`, value);
 };
 
 /**
@@ -129,18 +129,18 @@ LocalStorage.setSetting = function setSetting(key, value) {
  * @param {string} key Setting key suffix.
  * @returns {void}
  */
-LocalStorage.removeSetting = function removeSetting(key) {
-	LocalStorage.removeItem('setting_' + key);
+LocalStorage.removeSetting = function removeSetting (key) {
+	LocalStorage.removeItem(`setting_${key}`);
 };
 
-const settingsKey = new RegExp('^' + prefix + 'setting_.*');
+const settingsKey = new RegExp(`^${prefix}setting_.*`);
 
 /**
  * Remove all Blueline settings keys from storage.
  *
  * @returns {void}
  */
-LocalStorage.clearSettings = function clearSettings() {
+LocalStorage.clearSettings = function clearSettings () {
 	const keys = [];
 	for (let i = 0; i < localStorage.length; ++i) {
 		const key = localStorage.key(i);

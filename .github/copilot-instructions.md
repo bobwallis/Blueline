@@ -28,6 +28,7 @@
 - For PHP changes in `src/` or `tests/`, run `symfony composer lint:php-style` (or `symfony composer fix:php-style`) to enforce Symfony coding style via PHP-CS-Fixer.
 - Include very slow command tests only when needed with `BLUELINE_RUN_SLOW_COMMAND_TESTS=1 ./bin/test`.
 - For frontend iteration, run `npm run lint` (or `lint:js`, `lint:css`, `lint:svg`) when changing files under `assets/`.
+- To auto-fix JS style violations, run `npm run lint:js:fix` (applies ESLint `--fix`). Always run `npm run lint:js` afterwards to confirm no unfixable errors remain.
 - In normal dev loops, edit `assets/` and refresh the browser (no manual compile step).
 - Build frontend assets via `./bin/buildFrontendAssets` when validating production asset output.
 - Refresh method data via `./bin/fetchAndImportData` when relevant.

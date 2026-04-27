@@ -14,13 +14,13 @@ const ServiceWorker = {
 	 *
 	 * @returns {void}
 	 */
-	load() {
+	load () {
 		if (!('serviceWorker' in navigator)) {
 			return;
 		}
 
 		navigator.serviceWorker
-			.register(URLHelper.baseURL + 'service_worker.js?base=' + encodeURIComponent(URLHelper.baseURL))
+			.register(`${URLHelper.baseURL}service_worker.js?base=${encodeURIComponent(URLHelper.baseURL)}`)
 			.then((registration) => {
 				registration.addEventListener('updatefound', () => {
 					const newWorker = registration.installing;
@@ -42,7 +42,7 @@ const ServiceWorker = {
 	 * @param {string} url The URL to prefetch.
 	 * @returns {void}
 	 */
-	prefetch(url) {
+	prefetch (url) {
 		if (!('serviceWorker' in navigator)) {
 			return;
 		}

@@ -20,7 +20,7 @@ const Page = {
 	 * @param {string} type Navigation origin (for example `click`, `keyup`, `popstate`).
 	 * @returns {void}
 	 */
-	request(url, type) {
+	request (url, type) {
 		url = URLHelper.absolutise(url);
 
 		if (type !== 'popstate') {
@@ -38,7 +38,7 @@ const Page = {
 		mostRecentRequest = url;
 
 		const request = new XMLHttpRequest();
-		request.open('GET', ((url.indexOf('?') === -1) ? url + '?chromeless=1' : url + '&chromeless=1'), true);
+		request.open('GET', ((url.indexOf('?') === -1) ? `${url}?chromeless=1` : `${url}&chromeless=1`), true);
 		request.onload = function () {
 			const content = this.response;
 			if (mostRecentRequest === url) {

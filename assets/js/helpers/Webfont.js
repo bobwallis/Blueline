@@ -3,7 +3,7 @@ import eve from './Eve.js';
 let loaded = false;
 let loading = false;
 
-function load() {
+function load () {
 	if (loaded) {
 		return;
 	}
@@ -11,7 +11,7 @@ function load() {
 	eve('webfont_loaded');
 }
 
-export default function webfont(callback = function () {}) {
+export default function webfont (callback = function () {}) {
 	if (loaded) {
 		callback();
 	} else {

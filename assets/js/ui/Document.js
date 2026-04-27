@@ -15,7 +15,7 @@ eve.on('page.finished', function (url) {
 	const isSearchPage = URLHelper.showSearchBar(url) && url.indexOf('/search') !== -1;
 
 	if (pageTitle !== '') {
-		windowTitle += pageTitle + ' | ';
+		windowTitle += `${pageTitle} | `;
 	}
 	if (isSearchPage) {
 		windowTitle += 'Search | ';
@@ -23,10 +23,10 @@ eve.on('page.finished', function (url) {
 	if (section !== null) {
 		const sectionTitle = section.charAt(0).toUpperCase() + section.slice(1);
 		if (pageTitle !== sectionTitle) {
-			windowTitle += sectionTitle + ' | ';
+			windowTitle += `${sectionTitle} | `;
 		}
 	}
-	document.title = windowTitle + 'Blueline';
+	document.title = `${windowTitle}Blueline`;
 });
 
 /**

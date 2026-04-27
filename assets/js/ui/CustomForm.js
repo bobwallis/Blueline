@@ -34,7 +34,7 @@ eve.on('page.finished', function (url) {
  *
  * @returns {void}
  */
-function updateExpansion() {
+function updateExpansion () {
 	const customMethodNotation = document.getElementById('custom_method_notation');
 	const customMethodStage = document.getElementById('custom_method_stage');
 	const customMethodNotationParsed = document.getElementById('custom_method_notationParsed');
@@ -46,7 +46,9 @@ function updateExpansion() {
 			const longNotation = PlaceNotation.expand(notation, isNaN(stage) ? undefined : stage);
 			if (longNotation.length > 0) {
 				customMethodNotationParsed.classList.remove('placeholder');
-				customMethodNotationParsed.innerHTML = longNotation.replace(/(x|\.)/g, function (t) { return ' ' + t + ' '; });
+				customMethodNotationParsed.innerHTML = longNotation.replace(/(x|\.)/g, function (t) {
+					return ` ${t} `;
+				});
 			}
 		} else {
 			customMethodNotationParsed.innerHTML = '…';

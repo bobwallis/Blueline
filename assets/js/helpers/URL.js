@@ -13,12 +13,12 @@ const URLHelper = {
 	 * @param {string} [href=''] Candidate URL or path.
 	 * @returns {string} Absolute or unchanged URL.
 	 */
-	absolutise(href = '') {
+	absolutise (href = '') {
 		if (href.indexOf('/') === 0) {
-			return location.protocol + '//' + location.host + href;
+			return `${location.protocol}//${location.host}${href}`;
 		}
 		if (href.indexOf('javascript:') !== 0 && href.indexOf('//') !== 0 && href.indexOf('http://') !== 0 && href.indexOf('https://') !== 0) {
-			return location.href.substr(0, location.href.lastIndexOf('/')) + '/' + href;
+			return `${location.href.substr(0, location.href.lastIndexOf('/'))}/${href}`;
 		}
 		return href;
 	},
@@ -28,7 +28,7 @@ const URLHelper = {
 	 * @param {string} href Candidate URL or path.
 	 * @returns {boolean} True when link is internal and navigable in-app.
 	 */
-	isInternal(href) {
+	isInternal (href) {
 		if (href.indexOf('javascript:') === 0 || href.indexOf('_profiler/') !== -1) {
 			return false;
 		}
@@ -40,7 +40,7 @@ const URLHelper = {
 	 * @param {string} href URL to inspect.
 	 * @returns {?string} Section key (`associations`, `methods`, `towers`) or null.
 	 */
-	section(href) {
+	section (href) {
 		const match = regExpSection.exec(href);
 		if (match !== null && typeof match[2] === 'string') {
 			return match[2];
@@ -54,9 +54,9 @@ const URLHelper = {
 	 * @param {string} [href=window.location.href] URL to inspect.
 	 * @returns {?string} Decoded value, empty string, or null if absent.
 	 */
-	parameter(name, href = window.location.href) {
+	parameter (name, href = window.location.href) {
 		const escaped = name.replace(/[\[\]]/g, '\\$&');
-		const regex = new RegExp('[?&]' + escaped + '(=([^&#]*)|&|#|$)');
+		const regex = new RegExp(`[?&]${escaped}(=([^&#]*)|&|#|$)`);
 		const results = regex.exec(href);
 		if (!results) {
 			return null;
@@ -72,7 +72,7 @@ const URLHelper = {
 	 * @param {string} href URL to test.
 	 * @returns {boolean} True when URL maps to a search-bar route.
 	 */
-	showSearchBar(href) {
+	showSearchBar (href) {
 		return regExpShowSearchBar.test(href);
 	}
 };
@@ -87,6 +87,6 @@ URLHelper.baseResourceURL = URLHelper.baseURL.replace('app_dev.php/', '');
 if (URLHelper.baseURL.substr(-1) !== '/') {
 	URLHelper.baseURL += '/';
 }
-regExpIsInternalLink = new RegExp('^' + URLHelper.baseURL.replace('/', '\\/'));
+regExpIsInternalLink = new RegExp(`^${URLHelper.baseURL.replace('/', '\\/')}`);
 
 export default URLHelper;

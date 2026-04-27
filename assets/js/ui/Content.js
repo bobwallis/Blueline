@@ -21,7 +21,7 @@ document.body.appendChild(loadingEl);
  * @param {?string} transitionType Optional typed transition name.
  * @returns {void}
  */
-function runContentTransition(updateFn, transitionType) {
+function runContentTransition (updateFn, transitionType) {
 	if (document.startViewTransition) {
 		if (typeof transitionType === 'string' && transitionType.length > 0) {
 			document.startViewTransition({

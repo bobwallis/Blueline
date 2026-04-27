@@ -122,6 +122,7 @@ Run frontend linting directly during iteration:
 
 - `npm run lint` to run all frontend lint checks together
 - `npm run lint:js` for JavaScript in `assets/js/`
+- `npm run lint:js:fix` to auto-fix JavaScript style violations (runs ESLint with `--fix`); follow up with `npm run lint:js` to confirm no unfixable errors remain
 - `npm run lint:css` for CSS in `assets/styles/`
 - `npm run lint:svg` for SVG files in `assets/images/`
 
