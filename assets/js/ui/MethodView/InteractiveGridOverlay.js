@@ -1,4 +1,4 @@
-import eve from '../../lib/eve.js';
+import eve from '../../helpers/Eve.js';
 
 	/**
 	 * Display contextual tooltips over the main method line canvas.

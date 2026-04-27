@@ -1,4 +1,4 @@
-import eve from '../lib/eve.js';
+import eve from '../helpers/Eve.js';
 import URLHelper from '../helpers/URL.js';
 import Search from './Header/Search.js';
 import Breadcrumb from './Header/Breadcrumb.js';

@@ -1,4 +1,4 @@
-import eve from '../lib/eve.js';
+import eve from '../helpers/Eve.js';
 
 /**
  * Page-level fragment sync state is shared by any tab bars that opt into URL fragments.

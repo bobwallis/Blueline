@@ -1,4 +1,4 @@
-import documentOn from '../lib/document_on.js';
+import documentOn from '../helpers/DocumentOn.js';
 import ServiceWorker from '../helpers/ServiceWorker.js';
 import URLHelper from '../helpers/URL.js';
 import Page from '../data/Page.js';

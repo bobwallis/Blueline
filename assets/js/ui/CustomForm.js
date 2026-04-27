@@ -1,5 +1,5 @@
-import eve from '../lib/eve.js';
-import documentOn from '../lib/document_on.js';
+import eve from '../helpers/Eve.js';
+import documentOn from '../helpers/DocumentOn.js';
 import PlaceNotation from '../helpers/PlaceNotation.js';
 
 /**

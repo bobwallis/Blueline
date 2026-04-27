@@ -1,4 +1,4 @@
-import eve from '../../lib/eve.js';
+import eve from '../../helpers/Eve.js';
 import URLHelper from '../../helpers/URL.js';
 
 /**

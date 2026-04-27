@@ -1,4 +1,4 @@
-import eve from './eve.js';
+import eve from './Eve.js';
 
 let loaded = false;
 let loading = false;

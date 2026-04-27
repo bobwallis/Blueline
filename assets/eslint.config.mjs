@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
 	{
-		ignores: ['assets/js/lib/**', 'js/lib/**'],
+		ignores: ['js/lib/**'],
 	},
 	{
 		files: ['assets/js/**/*.js', 'js/**/*.js'],

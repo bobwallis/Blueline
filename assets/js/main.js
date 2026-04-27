@@ -2,9 +2,9 @@
  * Application entry point.
  */
 import '../styles/all.css';
-import eve from './lib/eve.js';
+import eve from './helpers/Eve.js';
 import './ui.js';
-import webfont from './lib/webfont.js';
+import webfont from './helpers/Webfont.js';
 import ServiceWorker from './helpers/ServiceWorker.js';
 
 
