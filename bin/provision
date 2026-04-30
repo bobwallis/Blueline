@@ -903,6 +903,7 @@ elif [ "$APP_ENV" = "prod" ]; then
 			printf '    service: https://localhost:%s\n' "$FRANKENPHP_PORT"
 			printf '    originRequest:\n'
 			printf '      noTLSVerify: true\n'
+			printf '      http2Origin: true\n'
 			printf '  - service: http_status:404\n'
 		} > "$_cf_config_dir/config.yml"
 		echo "  cloudflared config written to $_cf_config_dir/config.yml."
