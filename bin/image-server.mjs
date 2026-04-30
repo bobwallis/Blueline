@@ -44,7 +44,12 @@ async function launchBrowser() {
 	return puppeteer.launch({
 		executablePath: resolveBrowserPath(),
 		headless: true,
-		args: ['--no-sandbox', '--disable-setuid-sandbox'],
+		args: [
+			'--no-sandbox',
+			'--disable-setuid-sandbox',
+			'--ignore-certificate-errors',
+			'--allow-insecure-localhost',
+		],
 		ignoreHTTPSErrors: true,
 	});
 }
