@@ -3,7 +3,7 @@
 namespace Blueline\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\Cache;
@@ -29,8 +29,17 @@ use Symfony\Component\Validator\Validation;
  */
 class OembedController extends AbstractController
 {
+    public function __construct(
+        #[Autowire('%env(DEFAULT_URI)%')]
+        string $defaultUri,
+    ) {
+        $this->defaultUri = rtrim($defaultUri, '/');
+    }
+
+    private readonly string $defaultUri;
+
     #[Cache(maxage: 129600, public: true)]
-    public function index(Request $request, ParameterBagInterface $params)
+    public function index(Request $request)
     {
         $url = $request->query->get('url');
 
@@ -41,7 +50,7 @@ class OembedController extends AbstractController
 
         // Check it's a valid URL
         $allowedURLs = [
-            'methods_view' => '^'.str_replace(['/', '.', 'TITLE'], ['\/', '\.', '.+'], $params->get('blueline.endpoint').$this->generateUrl('Blueline_Methods_view', ['url' => 'TITLE'])),
+            'methods_view' => '^'.str_replace(['/', '.', 'TITLE'], ['\/', '\.', '.+'], $this->defaultUri.$this->generateUrl('Blueline_Methods_view', ['url' => 'TITLE'])),
         ];
         $urlConstraint = new RegexConstraint(pattern: '/'.implode('|', array_values($allowedURLs)).'/', message: 'Invalid URL');
         $validator = Validation::createValidator();
@@ -67,7 +76,7 @@ class OembedController extends AbstractController
                 'version' => '1.0',
                 'title' => $method[0]->title,
                 'provider_name' => 'Blueline',
-                'provider_url' => $params->get('blueline.endpoint').$this->generateUrl('Blueline_welcome'),
+                'provider_url' => $this->defaultUri.$this->generateUrl('Blueline_welcome'),
                 'url' => $url.'.png?scale=1&style=numbers',
                 'width' => $imageSize[0] ?? 0,
                 'height' => $imageSize[1] ?? 0,

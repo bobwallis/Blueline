@@ -3,7 +3,6 @@
 namespace Blueline\EventListener;
 
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
@@ -20,18 +19,24 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 class RequestListener
 {
     public function __construct(
-        private ParameterBagInterface $params,
+        #[Autowire('%env(DEFAULT_URI)%')]
+        string $defaultUri,
+        #[Autowire('%env(DATABASE_UPDATE)%')]
+        private readonly string $databaseUpdate,
         #[Autowire('%kernel.environment%')]
-        private string $kernelEnvironment,
+        private readonly string $kernelEnvironment,
     ) {
+        $this->defaultUri = rtrim($defaultUri, '/');
     }
+
+    private readonly string $defaultUri;
 
     public function onKernelRequest(RequestEvent $event)
     {
         // Set global parameters that can be used in @Cache annotations and other places
-        $event->getRequest()->attributes->set('endpoint', $this->params->get('blueline.endpoint'));
+        $event->getRequest()->attributes->set('endpoint', $this->defaultUri);
         if ('prod' == $this->kernelEnvironment) {
-            $event->getRequest()->attributes->set('database_update', new \DateTime('@'.$this->params->get('blueline.database_update')));
+            $event->getRequest()->attributes->set('database_update', new \DateTime('@'.$this->databaseUpdate));
         } else {
             $event->getRequest()->attributes->set('database_update', new \DateTime());
         }

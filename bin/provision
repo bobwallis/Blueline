@@ -587,7 +587,7 @@ else
 	fi
 fi
 
-# APP_ENV, FRANKENPHP_PORT and local endpoint are always kept in sync with provisioning choices.
+# APP_ENV, FRANKENPHP_PORT and local default URI are always kept in sync with provisioning choices.
 upsert_env_value APP_ENV "$APP_ENV" "$REPO_ROOT/.env.local"
 upsert_env_value FRANKENPHP_PORT "$FRANKENPHP_PORT" "$REPO_ROOT/.env.local"
 if [ -z "$(get_env_value IMAGESERVER_PORT "$REPO_ROOT/.env.local")" ]; then
@@ -598,7 +598,7 @@ else
 fi
 _tunnel_id_in_env="$(get_env_value CLOUDFLARE_TUNNEL_ID "$REPO_ROOT/.env.local")"
 if [ "$APP_ENV" = "dev" ] || { [ "$APP_ENV" = "prod" ] && [ -z "$_tunnel_id_in_env" ]; }; then
-	upsert_env_value ENDPOINT "\"${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT}\"" "$REPO_ROOT/.env.local"
+	upsert_env_value DEFAULT_URI "\"${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT}\"" "$REPO_ROOT/.env.local"
 fi
 
 
@@ -913,10 +913,10 @@ elif [ "$APP_ENV" = "prod" ]; then
 		sudo systemctl enable --now cloudflared
 		echo "  cloudflared service installed and started."
 
-		# Persist tunnel ID and endpoint in .env.local
+		# Persist tunnel ID and public default URI in .env.local
 		upsert_env_value CLOUDFLARE_TUNNEL_ID "${TUNNEL_ID}" "$REPO_ROOT/.env.local"
-		upsert_env_value ENDPOINT "\"https://${_public_hostname}\"" "$REPO_ROOT/.env.local"
-		echo "  CLOUDFLARE_TUNNEL_ID and ENDPOINT written to .env.local."
+		upsert_env_value DEFAULT_URI "\"https://${_public_hostname}\"" "$REPO_ROOT/.env.local"
+		echo "  CLOUDFLARE_TUNNEL_ID and DEFAULT_URI written to .env.local."
 	fi
 fi
 

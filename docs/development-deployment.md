@@ -35,7 +35,7 @@ The script `./bin/provision` will:
 - Install all of Blueline's PHP and NPM dependencies
 - Configure PHP's OPcache according to Symfony's reccomended settings
 - Configure PostgreSQL with suitable settings for the expected database workload
-- Generate `APP_SECRET` and write `DATABASE_URL`, `APP_ENV=dev`, `FRANKENPHP_PORT`, `IMAGESERVER_PORT`, and `ENDPOINT` to `.env.local`
+- Generate `APP_SECRET` and write `DATABASE_URL`, `APP_ENV=dev`, `FRANKENPHP_PORT`, `IMAGESERVER_PORT`, and `DEFAULT_URI` to `.env.local`
 - Generate a managed `Caddyfile` configured for local HTTPS and FrankenPHP worker mode
 - Create the database, set-up the schema and install the `fuzzystrmatch` extension
 - Clear caches

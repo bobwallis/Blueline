@@ -7,7 +7,6 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    blueline.endpoint: '%env(ENDPOINT)%'
     blueline.image_server_port: '%env(int:IMAGESERVER_PORT)%'
     blueline.database_update: '%env(DATABASE_UPDATE)%'
     .container.dumper.inline_factories: true

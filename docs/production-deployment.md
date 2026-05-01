@@ -42,7 +42,7 @@ The script `./bin/provision` will:
 - Install all of Blueline's PHP and NPM dependencies
 - Configure PHP's OPcache according to Symfony's reccomended production settings
 - Configure PostgreSQL with suitable settings for the expected database workload, and enable the systemd service
-- Generate `APP_SECRET` and write `DATABASE_URL`, `APP_ENV`, `FRANKENPHP_PORT`, and local `ENDPOINT` to `.env.local`
+- Generate `APP_SECRET` and write `DATABASE_URL`, `APP_ENV`, `FRANKENPHP_PORT`, and local `DEFAULT_URI` to `.env.local`
 - Create the database, set-up the schema and install the `fuzzystrmatch` extension
 - Generate a managed `Caddyfile` for FrankenPHP worker mode
 - Install and enable `blueline.service` to run FrankenPHP on configurable HTTPS localhost port
@@ -76,8 +76,8 @@ If only part of the stack should be managed by Blueline provisioning (for exampl
 ## Port and endpoint behavior
 
 - `./bin/provision` asks for a FrankenPHP HTTPS port and stores it in `.env.local` as `FRANKENPHP_PORT`.
-- Without a Cloudflare tunnel, `ENDPOINT` is set to `https://localhost:<FRANKENPHP_PORT>`.
-- With a Cloudflare tunnel, the tunnel origin points at `https://localhost:<FRANKENPHP_PORT>` and `ENDPOINT` is updated to your public hostname.
+- Without a Cloudflare tunnel, `DEFAULT_URI` is set to `https://localhost:<FRANKENPHP_PORT>`.
+- With a Cloudflare tunnel, the tunnel origin points at `https://localhost:<FRANKENPHP_PORT>` and `DEFAULT_URI` is updated to your public hostname.
 
 ## References
 
