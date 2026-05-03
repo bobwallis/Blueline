@@ -2,6 +2,12 @@
 framework:
     secret: '%env(APP_SECRET)%'
     web_link: true
+    # Trust the front-end server (FrankenPHP/Caddy) to supply X-Forwarded-Prefix so
+    # Symfony generates correct URLs when the app is served from a path prefix.
+    # Caddy always strips any client-supplied X-Forwarded-Prefix before setting its own,
+    # so REMOTE_ADDR here is safe — clients cannot inject the header.
+    trusted_proxies: 'REMOTE_ADDR'
+    trusted_headers: ['x-forwarded-prefix', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port']
     request:
         formats:
             png: 'image/png'

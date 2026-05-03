@@ -133,6 +133,29 @@ is_valid_port() {
 	return 0
 }
 
+# is_valid_path_prefix PREFIX
+# Returns 0 when PREFIX is empty (domain root) or a valid absolute path without trailing slash.
+is_valid_path_prefix() {
+	local prefix="$1"
+	# Empty is valid (domain root)
+	if [ -z "$prefix" ]; then
+		return 0
+	fi
+	# Must start with /
+	if [[ "$prefix" != /* ]]; then
+		return 1
+	fi
+	# Must not end with /
+	if [[ "$prefix" == */ ]]; then
+		return 1
+	fi
+	# Must not contain query string or fragment
+	if [[ "$prefix" == *\?* ]] || [[ "$prefix" == *\#* ]]; then
+		return 1
+	fi
+	return 0
+}
+
 # Detect Docker for environment-specific behavior.
 IS_DOCKER=false
 if [ -f /.dockerenv ]; then
@@ -213,6 +236,31 @@ else
 			FRANKENPHP_PORT="8443"
 		fi
 	fi
+fi
+
+PATH_PREFIX="$(get_env_value PATH_PREFIX)"
+# Strip any trailing slash from a previously stored value
+PATH_PREFIX="${PATH_PREFIX%/}"
+
+if [ "$NONINTERACTIVE" = false ]; then
+	while true; do
+		read -r -p "App path prefix (empty for domain root, e.g. /blueline) [${PATH_PREFIX}]: " _path_prefix_choice
+		_path_prefix_choice="${_path_prefix_choice:-$PATH_PREFIX}"
+		# Strip trailing slash from input
+		_path_prefix_choice="${_path_prefix_choice%/}"
+		if is_valid_path_prefix "$_path_prefix_choice"; then
+			PATH_PREFIX="$_path_prefix_choice"
+			break
+		fi
+		echo "Please enter a valid path prefix starting with / (e.g. /blueline), or leave empty for domain root."
+	done
+fi
+
+STATIC_FILES_ROOT="$(get_env_value STATIC_FILES_ROOT)"
+if [ -n "$PATH_PREFIX" ] && [ "$NONINTERACTIVE" = false ]; then
+	read -r -p "Static files root for requests outside ${PATH_PREFIX}/ (e.g. /var/www) [${STATIC_FILES_ROOT}]: " _static_files_root_choice
+	_static_files_root_choice="${_static_files_root_choice:-${STATIC_FILES_ROOT}}"
+	STATIC_FILES_ROOT="$_static_files_root_choice"
 fi
 
 # ask_yes_no "Prompt" [noninteractive_default_yes]
@@ -587,9 +635,13 @@ else
 	fi
 fi
 
-# APP_ENV, FRANKENPHP_PORT and local default URI are always kept in sync with provisioning choices.
+# APP_ENV, FRANKENPHP_PORT, PATH_PREFIX and local default URI are always kept in sync with provisioning choices.
 upsert_env_value APP_ENV "$APP_ENV" "$REPO_ROOT/.env.local"
 upsert_env_value FRANKENPHP_PORT "$FRANKENPHP_PORT" "$REPO_ROOT/.env.local"
+upsert_env_value PATH_PREFIX "\"${PATH_PREFIX}\"" "$REPO_ROOT/.env.local"
+if [ -n "$PATH_PREFIX" ]; then
+	upsert_env_value STATIC_FILES_ROOT "\"${STATIC_FILES_ROOT}\"" "$REPO_ROOT/.env.local"
+fi
 if [ -z "$(get_env_value IMAGESERVER_PORT "$REPO_ROOT/.env.local")" ]; then
 	upsert_env_value IMAGESERVER_PORT "8001" "$REPO_ROOT/.env.local"
 	echo "  Written default IMAGESERVER_PORT."
@@ -598,7 +650,7 @@ else
 fi
 _tunnel_id_in_env="$(get_env_value CLOUDFLARE_TUNNEL_ID "$REPO_ROOT/.env.local")"
 if [ "$APP_ENV" = "dev" ] || { [ "$APP_ENV" = "prod" ] && [ -z "$_tunnel_id_in_env" ]; }; then
-	upsert_env_value DEFAULT_URI "\"${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT}\"" "$REPO_ROOT/.env.local"
+	upsert_env_value DEFAULT_URI "\"${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT}${PATH_PREFIX}\"" "$REPO_ROOT/.env.local"
 fi
 
 
@@ -697,7 +749,8 @@ else
 			watch ${REPO_ROOT}/.env*"
 	fi
 
-	_desired_caddyfile="$(cat << CADDYFILE
+	if [ -z "$PATH_PREFIX" ]; then
+		_desired_caddyfile="$(cat << CADDYFILE
 # Managed by ./bin/provision
 {
 	frankenphp
@@ -705,6 +758,8 @@ else
 }
 
 	${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT} {
+	# Always strip any client-supplied X-Forwarded-Prefix
+	request_header -X-Forwarded-Prefix
 	root * ${REPO_ROOT}/public
 	php_server {
 		worker {
@@ -718,7 +773,58 @@ else
 	encode zstd gzip
 }
 CADDYFILE
-	)"
+		)"
+	else
+		if [ -n "$STATIC_FILES_ROOT" ]; then
+			_outside_prefix_block="
+	@_prefix_outside not path ${PATH_PREFIX}*
+	route @_prefix_outside {
+		root * ${STATIC_FILES_ROOT}
+		file_server
+	}"
+		else
+			_outside_prefix_block="
+	@_prefix_outside not path ${PATH_PREFIX}*
+	respond @_prefix_outside 404"
+		fi
+
+		_desired_caddyfile="$(cat << CADDYFILE
+# Managed by ./bin/provision
+{
+	frankenphp
+	order php_server before file_server
+}
+
+${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT} {
+	# Always strip any client-supplied X-Forwarded-Prefix (security hardening)
+	request_header -X-Forwarded-Prefix
+	header {
+		-Server
+		-X-Powered-By
+	}
+	encode zstd gzip
+
+	# Redirect bare prefix to canonical trailing-slash form
+	@_prefix_bare path ${PATH_PREFIX}
+	redir @_prefix_bare ${PATH_PREFIX}/ 301
+
+	# Serve the app for all requests under the path prefix
+	@_prefix_app path ${PATH_PREFIX}/*
+	route @_prefix_app {
+		request_header X-Forwarded-Prefix ${PATH_PREFIX}
+		uri strip_prefix ${PATH_PREFIX}
+		root * ${REPO_ROOT}/public
+		php_server {
+			worker {
+					file ${REPO_ROOT}/public/index.php${_caddy_watch_block}
+			}
+		}
+	}
+${_outside_prefix_block}
+}
+CADDYFILE
+		)"
+	fi
 
 	if [ ! -f "$REPO_ROOT/Caddyfile" ] || ! diff -q <(echo "$_desired_caddyfile") "$REPO_ROOT/Caddyfile" > /dev/null 2>&1; then
 		echo "$_desired_caddyfile" > "$REPO_ROOT/Caddyfile"
@@ -915,7 +1021,7 @@ elif [ "$APP_ENV" = "prod" ]; then
 
 		# Persist tunnel ID and public default URI in .env.local
 		upsert_env_value CLOUDFLARE_TUNNEL_ID "${TUNNEL_ID}" "$REPO_ROOT/.env.local"
-		upsert_env_value DEFAULT_URI "\"https://${_public_hostname}\"" "$REPO_ROOT/.env.local"
+		upsert_env_value DEFAULT_URI "\"https://${_public_hostname}${PATH_PREFIX}\"" "$REPO_ROOT/.env.local"
 		echo "  CLOUDFLARE_TUNNEL_ID and DEFAULT_URI written to .env.local."
 	fi
 fi
@@ -956,7 +1062,11 @@ echo     "    - Import data:             ./bin/fetchAndImportData"
 if [ "$APP_ENV" = "dev" ]; then
 	echo "    - Start/restart web app:   ./bin/start-dev-frankenphp"
 	echo "    - Start image server:      ./bin/start-dev-image-server"
-	echo "    - App endpoint:            ${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT}"
+	if [ -n "$PATH_PREFIX" ]; then
+		echo "    - App endpoint:            ${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT}${PATH_PREFIX}/"
+	else
+		echo "    - App endpoint:            ${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT}"
+	fi
 fi
 
 if [ "$APP_ENV" = "prod" ]; then
