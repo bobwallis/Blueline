@@ -41,6 +41,12 @@
 - Avoid introducing new dependencies unless clearly justified.
 - Update docs when behavior or developer workflow changes.
 
+## Output and edit behavior
+- Prefer balanced edits: solve the task end-to-end while avoiding broad, unrelated refactors.
+- Keep diffs easy to review: preserve existing naming, formatting, and file structure unless the task requires changes.
+- When changing multiple layers (for example, command + tests), complete both in the same change set when practical.
+- Explain validation clearly in final responses, including what was run and what was not run.
+
 ### FrankenPHP worker safety
 - Assume HTTP code can run in worker mode with long-lived service instances.
 - Do not cache request-derived values in service constructors or mutable service properties.
