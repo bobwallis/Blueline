@@ -1088,6 +1088,23 @@ CFCONFIG
 		fi
 		echo "  cloudflared service enabled and started."
 
+		# Tune kernel socket buffers recommended for cloudflared (QUIC/UDP performance).
+		_desired_sysctl_conf="$(cat << 'SYSCTLCONF'
+# Recommended socket buffer sizes for cloudflared (QUIC/UDP performance)
+net.core.rmem_max=7500000
+net.core.wmem_max=7500000
+SYSCTLCONF
+)"
+		_sysctl_conf_file="/etc/sysctl.d/99-cloudflared.conf"
+		if [ ! -f "$_sysctl_conf_file" ] || ! diff -q <(echo "$_desired_sysctl_conf") "$_sysctl_conf_file" > /dev/null 2>&1; then
+			echo "$_desired_sysctl_conf" | sudo tee "$_sysctl_conf_file" > /dev/null
+			sudo sysctl -w net.core.rmem_max=7500000
+			sudo sysctl -w net.core.wmem_max=7500000
+			echo "  Kernel socket buffer tuning written to $_sysctl_conf_file and applied."
+		else
+			echo "  Kernel socket buffer tuning already up to date — skipping."
+		fi
+
 		# Persist tunnel and domain details in .env.local
 		upsert_env_value CLOUDFLARE_TUNNEL_ID "${TUNNEL_ID}" "$REPO_ROOT/.env.local"
 		upsert_env_value CLOUDFLARE_TUNNEL_NAME "${CLOUDFLARE_TUNNEL_NAME}" "$REPO_ROOT/.env.local"
