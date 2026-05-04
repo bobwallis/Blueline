@@ -947,8 +947,8 @@ WantedBy=multi-user.target"
 			echo "  Restarting blueline.service to apply configuration changes..."
 			sudo systemctl restart blueline
 		else
-			echo "  Reloading blueline.service to pick up any runtime configuration changes..."
-			sudo systemctl reload blueline || sudo systemctl restart blueline
+			echo "  Restarting blueline.service to ensure configuration is applied..."
+			sudo systemctl restart blueline
 		fi
 		echo "  blueline.service enabled and started."
 
