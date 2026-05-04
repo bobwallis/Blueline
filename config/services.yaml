@@ -9,6 +9,7 @@
 parameters:
     blueline.image_server_port: '%env(int:IMAGESERVER_PORT)%'
     blueline.database_update: '%env(DATABASE_UPDATE)%'
+    blueline.path_prefix: '%env(PATH_PREFIX)%'
     .container.dumper.inline_factories: true
 
 services:
