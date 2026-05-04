@@ -825,6 +825,18 @@ else
 			watch ${REPO_ROOT}/.env*"
 	fi
 
+	_caddy_site_hosts="localhost:${FRANKENPHP_PORT}"
+	if [ -n "$CLOUDFLARE_PUBLIC_HOSTNAME" ]; then
+		_caddy_site_hosts="${_caddy_site_hosts}, ${CLOUDFLARE_PUBLIC_HOSTNAME}:${FRANKENPHP_PORT}"
+	fi
+	_caddy_site_label="${FRANKENPHP_SCHEME}://${_caddy_site_hosts}"
+	_caddy_tls_block=""
+	if [ "$FRANKENPHP_SCHEME" = "https" ]; then
+		_caddy_tls_block="
+	# Use an internal CA for origin TLS (cloudflared config sets noTLSVerify).
+	tls internal"
+	fi
+
 	if [ -z "$PATH_PREFIX" ]; then
 		_desired_caddyfile="$(cat << CADDYFILE
 # Managed by ./bin/provision
@@ -833,7 +845,7 @@ else
 	order php_server before file_server
 }
 
-	${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT} {
+${_caddy_site_label} {${_caddy_tls_block}
 	# Always strip any client-supplied X-Forwarded-Prefix
 	request_header -X-Forwarded-Prefix
 	root * ${REPO_ROOT}/public
@@ -871,7 +883,7 @@ CADDYFILE
 	order php_server before file_server
 }
 
-${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT} {
+${_caddy_site_label} {${_caddy_tls_block}
 	# Always strip any client-supplied X-Forwarded-Prefix (security hardening)
 	request_header -X-Forwarded-Prefix
 	header {
