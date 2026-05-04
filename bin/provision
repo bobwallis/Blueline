@@ -23,7 +23,7 @@ Options:
  --yes, -y       Non-interactive: answer yes to all prompts
  --env=dev|prod  Set APP_ENV directly
  --nodatabase    Skip local PostgreSQL install and configuration
- --nocloudflared Skip cloudflared install and tunnel setup (prod only)
+ --nocloudflared Skip cloudflared tunnel setup (prod only)
  --noserver      Skip FrankenPHP install and service setup (prod only)
  --help          Shows this message
 EOF
@@ -238,30 +238,31 @@ else
 	fi
 fi
 
-PATH_PREFIX="$(get_env_value PATH_PREFIX)"
-# Strip any trailing slash from a previously stored value
-PATH_PREFIX="${PATH_PREFIX%/}"
+IMAGESERVER_PORT="$(get_env_value IMAGESERVER_PORT)"
+if [ -z "$IMAGESERVER_PORT" ]; then
+	IMAGESERVER_PORT="8001"
+fi
 
 if [ "$NONINTERACTIVE" = false ]; then
 	while true; do
-		read -r -p "App path prefix (empty for domain root, e.g. /blueline) [${PATH_PREFIX}]: " _path_prefix_choice
-		_path_prefix_choice="${_path_prefix_choice:-$PATH_PREFIX}"
-		# Strip trailing slash from input
-		_path_prefix_choice="${_path_prefix_choice%/}"
-		if is_valid_path_prefix "$_path_prefix_choice"; then
-			PATH_PREFIX="$_path_prefix_choice"
+		read -r -p "Image server HTTP port? [${IMAGESERVER_PORT}]: " _imageserver_port_choice
+		_imageserver_port_choice="${_imageserver_port_choice:-$IMAGESERVER_PORT}"
+		if is_valid_port "$_imageserver_port_choice"; then
+			IMAGESERVER_PORT="$_imageserver_port_choice"
 			break
 		fi
-		echo "Please enter a valid path prefix starting with / (e.g. /blueline), or leave empty for domain root."
+		echo "Please enter a valid port number between 1 and 65535."
 	done
+else
+	if ! is_valid_port "$IMAGESERVER_PORT"; then
+		echo "  WARNING: Invalid IMAGESERVER_PORT '$IMAGESERVER_PORT' found, defaulting to 8001." >&2
+		IMAGESERVER_PORT="8001"
+	fi
 fi
 
-STATIC_FILES_ROOT="$(get_env_value STATIC_FILES_ROOT)"
-if [ -n "$PATH_PREFIX" ] && [ "$NONINTERACTIVE" = false ]; then
-	read -r -p "Static files root for requests outside ${PATH_PREFIX}/ (e.g. /var/www) [${STATIC_FILES_ROOT}]: " _static_files_root_choice
-	_static_files_root_choice="${_static_files_root_choice:-${STATIC_FILES_ROOT}}"
-	STATIC_FILES_ROOT="$_static_files_root_choice"
-fi
+PATH_PREFIX="$(get_env_value PATH_PREFIX)"
+# Strip any trailing slash from a previously stored value
+PATH_PREFIX="${PATH_PREFIX%/}"
 
 # ask_yes_no "Prompt" [noninteractive_default_yes]
 # Returns 0 for yes, 1 for no. In non-interactive mode defaults to "no" unless second arg is "yes".
@@ -308,7 +309,51 @@ resolve_skip_decision NODATABASE_ARG NODATABASE_ARG_SET "Skip PostgreSQL install
 
 if [ "$APP_ENV" = "prod" ]; then
 	resolve_skip_decision NOSERVER_ARG NOSERVER_ARG_SET "Skip FrankenPHP web server setup?"
-	resolve_skip_decision NOCLOUDFLARED_ARG NOCLOUDFLARED_ARG_SET "Skip cloudflared install and tunnel setup?"
+	resolve_skip_decision NOCLOUDFLARED_ARG NOCLOUDFLARED_ARG_SET "Skip cloudflared tunnel setup?"
+fi
+
+CLOUDFLARE_TUNNEL_NAME="$(get_env_value CLOUDFLARE_TUNNEL_NAME)"
+if [ -z "$CLOUDFLARE_TUNNEL_NAME" ]; then
+	CLOUDFLARE_TUNNEL_NAME="blueline"
+fi
+
+CLOUDFLARE_PUBLIC_HOSTNAME="$(get_env_value CLOUDFLARE_PUBLIC_HOSTNAME)"
+
+_tunnel_id_in_env="$(get_env_value CLOUDFLARE_TUNNEL_ID "$REPO_ROOT/.env.local")"
+if [ "$APP_ENV" = "prod" ] && [ "$NOCLOUDFLARED_ARG" = false ] && [ "$NONINTERACTIVE" = false ]; then
+	while true; do
+		read -r -p "Cloudflared public domain only (e.g. blueline.example.com). Path is configurable in the next question; enter just the domain now [${CLOUDFLARE_PUBLIC_HOSTNAME}]: " _public_hostname_choice
+		_public_hostname_choice="${_public_hostname_choice:-$CLOUDFLARE_PUBLIC_HOSTNAME}"
+		if [ -n "$_public_hostname_choice" ]; then
+			CLOUDFLARE_PUBLIC_HOSTNAME="$_public_hostname_choice"
+			break
+		fi
+		echo "Please enter a public domain name."
+	done
+
+	read -r -p "Cloudflared tunnel name [${CLOUDFLARE_TUNNEL_NAME}]: " _tunnel_name_choice
+	CLOUDFLARE_TUNNEL_NAME="${_tunnel_name_choice:-$CLOUDFLARE_TUNNEL_NAME}"
+fi
+
+if [ "$NONINTERACTIVE" = false ]; then
+	while true; do
+		read -r -p "App path prefix (empty for domain root, e.g. /blueline) [${PATH_PREFIX}]: " _path_prefix_choice
+		_path_prefix_choice="${_path_prefix_choice:-$PATH_PREFIX}"
+		# Strip trailing slash from input
+		_path_prefix_choice="${_path_prefix_choice%/}"
+		if is_valid_path_prefix "$_path_prefix_choice"; then
+			PATH_PREFIX="$_path_prefix_choice"
+			break
+		fi
+		echo "Please enter a valid path prefix starting with / (e.g. /blueline), or leave empty for domain root."
+	done
+fi
+
+STATIC_FILES_ROOT="$(get_env_value STATIC_FILES_ROOT)"
+if [ -n "$PATH_PREFIX" ] && [ "$NONINTERACTIVE" = false ]; then
+	read -r -p "Static files root for requests outside ${PATH_PREFIX}/ (e.g. /var/www) [${STATIC_FILES_ROOT}]: " _static_files_root_choice
+	_static_files_root_choice="${_static_files_root_choice:-${STATIC_FILES_ROOT}}"
+	STATIC_FILES_ROOT="$_static_files_root_choice"
 fi
 
 echo -e "\n\033[1mBlueline setup\033[0m"
@@ -319,8 +364,30 @@ echo "  NONINTERACTIVE: $NONINTERACTIVE"
 echo "  NODATABASE:     $NODATABASE_ARG"
 echo "  NOSERVER:       $NOSERVER_ARG"
 echo "  FRANKENPHP_PORT:$FRANKENPHP_PORT"
+echo "  IMAGESERVER_PORT:$IMAGESERVER_PORT"
+if [ -n "$PATH_PREFIX" ]; then
+	echo "  PATH_PREFIX:    $PATH_PREFIX"
+else
+	echo "  PATH_PREFIX:    (domain root)"
+fi
+if [ -n "$PATH_PREFIX" ]; then
+	if [ -n "$STATIC_FILES_ROOT" ]; then
+		echo "  STATIC_FILES_ROOT:$STATIC_FILES_ROOT"
+	else
+		echo "  STATIC_FILES_ROOT:(not set, outside prefix returns 404)"
+	fi
+else
+	echo "  STATIC_FILES_ROOT:(not used without PATH_PREFIX)"
+fi
 if [ "$APP_ENV" = "prod" ]; then
 	echo "  NOCLOUDFLARED:  $NOCLOUDFLARED_ARG"
+	if [ "$NOCLOUDFLARED_ARG" = false ]; then
+		echo "  CLOUDFLARE_TUNNEL_NAME:$CLOUDFLARE_TUNNEL_NAME"
+		echo "  CLOUDFLARE_DOMAIN:$CLOUDFLARE_PUBLIC_HOSTNAME"
+	fi
+	if [ -n "$_tunnel_id_in_env" ]; then
+		echo "  CLOUDFLARE_TUNNEL_ID:$_tunnel_id_in_env (already configured)"
+	fi
 else
 	echo "  NOCLOUDFLARED:  true (prod only option)"
 fi
@@ -394,6 +461,20 @@ if [ ! -f /etc/apt/sources.list.d/symfony-stable.list ]; then
 	curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | sudo -E bash -
 fi
 sudo apt-get install -q -y symfony-cli
+
+# Cloudflared — add Cloudflare apt source if not already present
+_cloudflared_repo_added=false
+if [ ! -f /etc/apt/sources.list.d/cloudflared.list ]; then
+	echo "  Adding Cloudflare cloudflared apt source..."
+	sudo mkdir -p --mode=0755 /usr/share/keyrings
+	curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+	echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list >/dev/null
+	_cloudflared_repo_added=true
+fi
+if [ "$_cloudflared_repo_added" = true ]; then
+	sudo apt-get update -q
+fi
+sudo apt-get install -q -y cloudflared
 
 # FrankenPHP — install using install script.
 if ! command -v frankenphp > /dev/null 2>&1; then
@@ -638,15 +719,10 @@ fi
 # APP_ENV, FRANKENPHP_PORT, PATH_PREFIX and local default URI are always kept in sync with provisioning choices.
 upsert_env_value APP_ENV "$APP_ENV" "$REPO_ROOT/.env.local"
 upsert_env_value FRANKENPHP_PORT "$FRANKENPHP_PORT" "$REPO_ROOT/.env.local"
+upsert_env_value IMAGESERVER_PORT "$IMAGESERVER_PORT" "$REPO_ROOT/.env.local"
 upsert_env_value PATH_PREFIX "\"${PATH_PREFIX}\"" "$REPO_ROOT/.env.local"
 if [ -n "$PATH_PREFIX" ]; then
 	upsert_env_value STATIC_FILES_ROOT "\"${STATIC_FILES_ROOT}\"" "$REPO_ROOT/.env.local"
-fi
-if [ -z "$(get_env_value IMAGESERVER_PORT "$REPO_ROOT/.env.local")" ]; then
-	upsert_env_value IMAGESERVER_PORT "8001" "$REPO_ROOT/.env.local"
-	echo "  Written default IMAGESERVER_PORT."
-else
-	echo "  IMAGESERVER_PORT already set — skipping."
 fi
 _tunnel_id_in_env="$(get_env_value CLOUDFLARE_TUNNEL_ID "$REPO_ROOT/.env.local")"
 if [ "$APP_ENV" = "dev" ] || { [ "$APP_ENV" = "prod" ] && [ -z "$_tunnel_id_in_env" ]; }; then
@@ -829,8 +905,10 @@ CADDYFILE
 	if [ ! -f "$REPO_ROOT/Caddyfile" ] || ! diff -q <(echo "$_desired_caddyfile") "$REPO_ROOT/Caddyfile" > /dev/null 2>&1; then
 		echo "$_desired_caddyfile" > "$REPO_ROOT/Caddyfile"
 		echo "  Caddyfile updated at $REPO_ROOT/Caddyfile."
+		CADDYFILE_CHANGED=true
 	else
 		echo "  Caddyfile already up to date — skipping."
+		CADDYFILE_CHANGED=false
 	fi
 
 	if [ "$APP_ENV" = "prod" ]; then
@@ -859,22 +937,21 @@ WantedBy=multi-user.target"
 		if [ ! -f "$_unit_file" ] || ! diff -q <(echo "$_desired_unit") "$_unit_file" > /dev/null 2>&1; then
 			echo "$_desired_unit" | sudo tee "$_unit_file" > /dev/null
 			echo "  Written $_unit_file."
-			sudo systemctl daemon-reload
 		else
-			echo "  systemd unit file unchanged — skipping reload."
+			echo "  systemd unit file unchanged."
 		fi
+		sudo systemctl daemon-reload
 
 		sudo systemctl enable --now blueline
-		if [ "$PHP_OPCACHE_CHANGED" = true ]; then
-			echo "  Restarting blueline.service to apply OPcache changes..."
+		if [ "$PHP_OPCACHE_CHANGED" = true ] || [ "$CADDYFILE_CHANGED" = true ]; then
+			echo "  Restarting blueline.service to apply configuration changes..."
 			sudo systemctl restart blueline
+		else
+			echo "  Reloading blueline.service to pick up any runtime configuration changes..."
+			sudo systemctl reload blueline || sudo systemctl restart blueline
 		fi
 		echo "  blueline.service enabled and started."
 
-		_image_server_port="$(get_env_value IMAGESERVER_PORT "$REPO_ROOT/.env.local")"
-		if [ -z "$_image_server_port" ]; then
-			_image_server_port="8001"
-		fi
 		_desired_image_unit="[Unit]
 Description=Blueline image server
 After=network.target blueline.service
@@ -883,7 +960,7 @@ Requires=blueline.service
 [Service]
 Type=simple
 WorkingDirectory=${REPO_ROOT}
-Environment=IMAGESERVER_PORT=${_image_server_port}
+Environment=IMAGESERVER_PORT=${IMAGESERVER_PORT}
 		Environment=FRANKENPHP_PORT=${FRANKENPHP_PORT}
 Environment=FRANKENPHP_SCHEME=${FRANKENPHP_SCHEME}
 ExecStart=/usr/bin/node ${REPO_ROOT}/bin/image-server.mjs
@@ -914,115 +991,109 @@ fi
 
 
 # ##############################################################################
-# SECTION 9: Cloudflared tunnel (interactive only)
+# SECTION 9: Cloudflared tunnel
 # ##############################################################################
 
 if [ "$APP_ENV" = "prod" ] && [ "$NOCLOUDFLARED_ARG" = true ]; then
 	echo -e "\n\033[1mSkipping cloudflared setup (--nocloudflared).\033[0m"
 	echo "  Reminder: install/configure cloudflared and your public ingress/tunnel manually."
-elif [ "$APP_ENV" = "prod" ] && grep -q "^CLOUDFLARE_TUNNEL_ID=" "$REPO_ROOT/.env.local" 2>/dev/null; then
-	echo -e "\n\033[1mCloudflared tunnel already configured — skipping.\033[0m"
 elif [ "$APP_ENV" = "prod" ]; then
-	# Add Cloudflare repository and install cloudflared when tunnel setup is enabled.
-	if [ ! -f /etc/apt/sources.list.d/cloudflared.list ]; then
-		sudo mkdir -p --mode=0755 /usr/share/keyrings
-		curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
-		echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
-	fi
-	sudo apt-get update -q
-	sudo apt-get install -y -q cloudflared
-
-	if [ "$NOCLOUDFLARED_ARG" = false ] && [ "$NONINTERACTIVE" = true ] && ! grep -q "^CLOUDFLARE_TUNNEL_ID=" "$REPO_ROOT/.env.local" 2>/dev/null; then
+	if [ "$NOCLOUDFLARED_ARG" = false ] && [ "$NONINTERACTIVE" = true ] && [ -z "$CLOUDFLARE_TUNNEL_NAME" -o -z "$CLOUDFLARE_PUBLIC_HOSTNAME" ]; then
 		echo -e "\n\033[1mSkipping cloudflared tunnel setup (non-interactive mode).\033[0m"
-		echo "  Re-run ./bin/provision interactively to complete the tunnel setup."
-	elif [ "$NOCLOUDFLARED_ARG" = false ] && ! grep -q "^CLOUDFLARE_TUNNEL_ID=" "$REPO_ROOT/.env.local" 2>/dev/null; then
-		echo -e "\n\033[1mSetting up Cloudflared tunnel\033[0m"
-		echo "  This will open a browser to authenticate with your Cloudflare account."
-		echo "  You will need an existing Cloudflare account and Zero Trust team."
+		echo "  Set CLOUDFLARE_TUNNEL_NAME and CLOUDFLARE_PUBLIC_HOSTNAME in .env.local, or re-run interactively."
+	elif [ "$NOCLOUDFLARED_ARG" = false ]; then
+		echo -e "\n\033[1mConfiguring Cloudflared tunnel\033[0m"
+		echo "  This will ensure tunnel routing and config are up to date."
 		echo
 
-		# Authenticate with Cloudflare (opens browser)
-		# cloudflared tunnel login refuses to overwrite an existing cert.pem; offer explicit re-login flow.
+		# Authenticate with Cloudflare only when needed (opens browser when cert is absent).
 		_cf_cert_path="$HOME/.cloudflared/cert.pem"
 		if [ -s "$_cf_cert_path" ]; then
-			echo "  Found existing Cloudflare certificate at $_cf_cert_path."
-			read -r -p "  Re-login and replace it? [y/N] " _replace_cf_cert
-			if [[ "$_replace_cf_cert" =~ ^[Yy]$ ]]; then
-				_cf_cert_backup="${_cf_cert_path}.bak.$(date +%Y%m%d%H%M%S)"
-				mv "$_cf_cert_path" "$_cf_cert_backup"
-				echo "  Backed up existing certificate to $_cf_cert_backup."
-				cloudflared tunnel login
-			else
-				echo "  Keeping existing certificate; skipping cloudflared tunnel login."
-			fi
+			echo "  Found existing Cloudflare certificate at $_cf_cert_path — skipping login."
+		elif [ "$NONINTERACTIVE" = true ]; then
+			echo "ERROR: Cloudflare certificate not found at $_cf_cert_path and cannot login in non-interactive mode." >&2
+			exit 1
 		else
 			cloudflared tunnel login
 		fi
 
-		# Prompt for tunnel name
-		read -r -p "  Tunnel name [blueline]: " _tunnel_name
-		_tunnel_name="${_tunnel_name:-blueline}"
-
-		# Create the tunnel and extract its ID
-		_tunnel_output="$(cloudflared tunnel create "$_tunnel_name" 2>&1)" || {
-			echo "ERROR: Failed to create cloudflared tunnel." >&2
-			echo "$_tunnel_output" >&2
-			exit 1
-		}
-		echo "$_tunnel_output"
-		TUNNEL_ID="$(printf '%s\n' "$_tunnel_output" | awk '/Created tunnel .* with id / {print $NF; exit}' | tr -d '\r')"
-		if [ -z "$TUNNEL_ID" ]; then
-			echo "ERROR: Could not extract tunnel ID from cloudflared output." >&2
-			exit 1
+		# Resolve tunnel by name; create it when absent.
+		_existing_tunnel_id="$(cloudflared tunnel list 2>/dev/null | awk -v tunnel_name="$CLOUDFLARE_TUNNEL_NAME" 'NR>1 && $2==tunnel_name {print $1; exit}')"
+		if [ -n "$_existing_tunnel_id" ]; then
+			TUNNEL_ID="$_existing_tunnel_id"
+			echo "  Using existing tunnel '$CLOUDFLARE_TUNNEL_NAME' (ID: $TUNNEL_ID)."
+		else
+			_tunnel_output="$(cloudflared tunnel create "$CLOUDFLARE_TUNNEL_NAME" 2>&1)" || {
+				echo "ERROR: Failed to create cloudflared tunnel '$CLOUDFLARE_TUNNEL_NAME'." >&2
+				echo "$_tunnel_output" >&2
+				exit 1
+			}
+			echo "$_tunnel_output"
+			TUNNEL_ID="$(printf '%s\n' "$_tunnel_output" | awk '/Created tunnel .* with id / {print $NF; exit}' | tr -d '\r')"
+			if [ -z "$TUNNEL_ID" ]; then
+				echo "ERROR: Could not extract tunnel ID from cloudflared output." >&2
+				exit 1
+			fi
+			echo "  Tunnel ID: $TUNNEL_ID"
 		fi
-		echo "  Tunnel ID: $TUNNEL_ID"
 
-		# Prompt for public hostname
-		read -r -p "  Public hostname (e.g. blueline.example.com): " _public_hostname
-		if [ -z "$_public_hostname" ]; then
+		if [ -z "$CLOUDFLARE_PUBLIC_HOSTNAME" ]; then
 			echo "ERROR: Public hostname is required." >&2
 			exit 1
 		fi
 
-		# Route DNS
-		_route_dns_output="$(cloudflared tunnel route dns "$TUNNEL_ID" "$_public_hostname" 2>&1)" || {
+		# Always (re)apply DNS route.
+		_route_dns_output="$(cloudflared tunnel route dns "$TUNNEL_ID" "$CLOUDFLARE_PUBLIC_HOSTNAME" 2>&1)" || {
 			_route_dns_status=$?
-			echo "ERROR: Failed to route DNS for tunnel $TUNNEL_ID to $_public_hostname." >&2
+			echo "ERROR: Failed to route DNS for tunnel $TUNNEL_ID to $CLOUDFLARE_PUBLIC_HOSTNAME." >&2
 			echo "$_route_dns_output" >&2
-			if ! cloudflared tunnel delete "$TUNNEL_ID" > /dev/null 2>&1; then
-				echo "WARNING: Failed to delete tunnel $TUNNEL_ID after DNS routing failure. Remove it manually." >&2
-			else
-				echo "  Deleted tunnel $TUNNEL_ID after DNS routing failure." >&2
-			fi
 			exit "$_route_dns_status"
 		}
 		echo "$_route_dns_output"
 
-		# Write cloudflared config
+		# Write cloudflared config when changed.
 		_cf_config_dir="$HOME/.cloudflared"
+		_cf_config_file="$_cf_config_dir/config.yml"
 		mkdir -p "$_cf_config_dir"
-		{
-			printf 'tunnel: %s\n' "$TUNNEL_ID"
-			printf 'credentials-file: %s/%s.json\n' "$_cf_config_dir" "$TUNNEL_ID"
-			printf 'ingress:\n'
-			printf '  - hostname: %s\n' "$_public_hostname"
-			printf '    service: https://localhost:%s\n' "$FRANKENPHP_PORT"
-			printf '    originRequest:\n'
-			printf '      noTLSVerify: true\n'
-			printf '      http2Origin: true\n'
-			printf '  - service: http_status:404\n'
-		} > "$_cf_config_dir/config.yml"
-		echo "  cloudflared config written to $_cf_config_dir/config.yml."
+		_desired_cf_config="$(cat << CFCONFIG
+tunnel: ${TUNNEL_ID}
+credentials-file: ${_cf_config_dir}/${TUNNEL_ID}.json
+ingress:
+  - hostname: ${CLOUDFLARE_PUBLIC_HOSTNAME}
+    service: https://localhost:${FRANKENPHP_PORT}
+    originRequest:
+      noTLSVerify: true
+      http2Origin: true
+  - service: http_status:404
+CFCONFIG
+)"
+		_cf_config_changed=false
+		if [ ! -f "$_cf_config_file" ] || ! diff -q <(echo "$_desired_cf_config") "$_cf_config_file" > /dev/null 2>&1; then
+			echo "$_desired_cf_config" > "$_cf_config_file"
+			_cf_config_changed=true
+			echo "  cloudflared config written to $_cf_config_file."
+		else
+			echo "  cloudflared config already up to date — skipping write."
+		fi
 
-		# Install and start cloudflared as a system service
-		sudo cloudflared --config "$_cf_config_dir/config.yml" service install
+		# Install service only if missing, then ensure it is enabled/running.
+		if ! sudo systemctl list-unit-files cloudflared.service --no-legend 2>/dev/null | grep -q '^cloudflared\.service'; then
+			sudo cloudflared --config "$_cf_config_file" service install
+			echo "  cloudflared service installed."
+		fi
 		sudo systemctl enable --now cloudflared
-		echo "  cloudflared service installed and started."
+		if [ "$_cf_config_changed" = true ]; then
+			echo "  Restarting cloudflared.service to apply config changes..."
+			sudo systemctl restart cloudflared
+		fi
+		echo "  cloudflared service enabled and started."
 
-		# Persist tunnel ID and public default URI in .env.local
+		# Persist tunnel and domain details in .env.local
 		upsert_env_value CLOUDFLARE_TUNNEL_ID "${TUNNEL_ID}" "$REPO_ROOT/.env.local"
-		upsert_env_value DEFAULT_URI "\"https://${_public_hostname}${PATH_PREFIX}\"" "$REPO_ROOT/.env.local"
-		echo "  CLOUDFLARE_TUNNEL_ID and DEFAULT_URI written to .env.local."
+		upsert_env_value CLOUDFLARE_TUNNEL_NAME "${CLOUDFLARE_TUNNEL_NAME}" "$REPO_ROOT/.env.local"
+		upsert_env_value CLOUDFLARE_PUBLIC_HOSTNAME "${CLOUDFLARE_PUBLIC_HOSTNAME}" "$REPO_ROOT/.env.local"
+		upsert_env_value DEFAULT_URI "\"https://${CLOUDFLARE_PUBLIC_HOSTNAME}${PATH_PREFIX}\"" "$REPO_ROOT/.env.local"
+		echo "  CLOUDFLARE_TUNNEL_ID, CLOUDFLARE_TUNNEL_NAME, CLOUDFLARE_PUBLIC_HOSTNAME and DEFAULT_URI written to .env.local."
 	fi
 fi
 
@@ -1071,7 +1142,6 @@ fi
 
 if [ "$APP_ENV" = "prod" ]; then
 	echo "    - Rebuild frontend assets: ./bin/buildFrontendAssets --env=prod"
-	echo "    - OPcache note:            Restart your web service to flush the cache."
 	if [ "$NODATABASE_ARG" = true ] || [ "$NOSERVER_ARG" = true ] || [ "$NOCLOUDFLARED_ARG" = true ]; then
 		echo "  Production manual checks:"
 		if [ "$NODATABASE_ARG" = true ]; then
