@@ -357,39 +357,39 @@ if [ -n "$PATH_PREFIX" ] && [ "$NONINTERACTIVE" = false ]; then
 fi
 
 echo -e "\n\033[1mBlueline setup\033[0m"
-echo "  REPO_ROOT:      $REPO_ROOT"
-echo "  APP_ENV:        $APP_ENV"
-echo "  IS_DOCKER:      $IS_DOCKER"
-echo "  NONINTERACTIVE: $NONINTERACTIVE"
-echo "  NODATABASE:     $NODATABASE_ARG"
-echo "  NOSERVER:       $NOSERVER_ARG"
-echo "  FRANKENPHP_PORT:$FRANKENPHP_PORT"
-echo "  IMAGESERVER_PORT:$IMAGESERVER_PORT"
+echo "  REPO_ROOT:             $REPO_ROOT"
+echo "  APP_ENV:               $APP_ENV"
+echo "  IS_DOCKER:             $IS_DOCKER"
+echo "  NONINTERACTIVE:        $NONINTERACTIVE"
+echo "  NODATABASE:            $NODATABASE_ARG"
+echo "  NOSERVER:              $NOSERVER_ARG"
+echo "  FRANKENPHP_PORT:       $FRANKENPHP_PORT"
+echo "  IMAGESERVER_PORT:      $IMAGESERVER_PORT"
 if [ -n "$PATH_PREFIX" ]; then
-	echo "  PATH_PREFIX:    $PATH_PREFIX"
+	echo "  PATH_PREFIX:           $PATH_PREFIX"
 else
-	echo "  PATH_PREFIX:    (domain root)"
+	echo "  PATH_PREFIX:           (domain root)"
 fi
 if [ -n "$PATH_PREFIX" ]; then
 	if [ -n "$STATIC_FILES_ROOT" ]; then
-		echo "  STATIC_FILES_ROOT:$STATIC_FILES_ROOT"
+		echo "  STATIC_FILES_ROOT:     $STATIC_FILES_ROOT"
 	else
-		echo "  STATIC_FILES_ROOT:(not set, outside prefix returns 404)"
+		echo "  STATIC_FILES_ROOT:     (not set, outside prefix returns 404)"
 	fi
 else
-	echo "  STATIC_FILES_ROOT:(not used without PATH_PREFIX)"
+	echo "  STATIC_FILES_ROOT:     (not used without PATH_PREFIX)"
 fi
 if [ "$APP_ENV" = "prod" ]; then
-	echo "  NOCLOUDFLARED:  $NOCLOUDFLARED_ARG"
+	echo "  NOCLOUDFLARED:         $NOCLOUDFLARED_ARG"
 	if [ "$NOCLOUDFLARED_ARG" = false ]; then
-		echo "  CLOUDFLARE_TUNNEL_NAME:$CLOUDFLARE_TUNNEL_NAME"
-		echo "  CLOUDFLARE_DOMAIN:$CLOUDFLARE_PUBLIC_HOSTNAME"
+		echo "  CLOUDFLARE_TUNNEL_NAME: $CLOUDFLARE_TUNNEL_NAME"
+		echo "  CLOUDFLARE_DOMAIN:      $CLOUDFLARE_PUBLIC_HOSTNAME"
 	fi
 	if [ -n "$_tunnel_id_in_env" ]; then
-		echo "  CLOUDFLARE_TUNNEL_ID:$_tunnel_id_in_env (already configured)"
+		echo "  CLOUDFLARE_TUNNEL_ID:   $_tunnel_id_in_env (already configured)"
 	fi
 else
-	echo "  NOCLOUDFLARED:  true (prod only option)"
+	echo "  NOCLOUDFLARED:         true (prod only option)"
 fi
 
 if [ "$NONINTERACTIVE" = false ]; then
