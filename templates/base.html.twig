@@ -59,7 +59,7 @@
 				<h2 id="breadcrumb_sep">&raquo;</h2>
 				<h2 id="breadcrumb"><a href="{{ breadcrumb.href }}">{{ breadcrumb.title}}</a></h2>
 			{% endif %}
-			<button id="settings_button" type="button"><span class="hide">Settings</span></button>
+			<button id="settings_button" type="button" aria-label="Settings"><span class="hide">Settings</span></button>
 		</header>
 		<form id="search" role="search" action="{{ search_action|default('/') }}"{{ search|default(false) ? '' : ' style="display:none"' }}>
 			<div>
