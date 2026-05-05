@@ -8,6 +8,7 @@ const frankenphpPort = Number.parseInt(process.env.FRANKENPHP_PORT || '8000', 10
 const frankenphpScheme = process.env.FRANKENPHP_SCHEME || 'http';
 const imageServerPort = Number.parseInt(process.env.IMAGESERVER_PORT || '8001', 10);
 const browserRestartAfter = Number.parseInt(process.env.BROWSER_RESTART_AFTER || '200', 10);
+const pathPrefix = (process.env.PATH_PREFIX || '').replace(/\/+$/, '');
 const allowedStyles = new Set(['numbers', 'lines', 'diagrams', 'grid']);
 const browserPathCandidates = [
 	process.env.CHROMIUM_PATH,
@@ -110,7 +111,8 @@ function sanitizePath(rawPath) {
 		throw createError(400, 'Path is required.');
 	}
 
-	if (!rawPath.startsWith('/methods/view')) {
+	const expectedPrefix = `${pathPrefix}/methods/view`;
+	if (!rawPath.startsWith(expectedPrefix) || (rawPath.length > expectedPrefix.length && rawPath[expectedPrefix.length] !== '/')) {
 		throw createError(400, 'Only /methods/view routes can be rendered.');
 	}
 
