@@ -954,13 +954,13 @@ WantedBy=multi-user.target"
 		fi
 		sudo systemctl daemon-reload
 
-		sudo systemctl enable --now blueline
-		if [ "$PHP_OPCACHE_CHANGED" = true ] || [ "$CADDYFILE_CHANGED" = true ]; then
-			echo "  Restarting blueline.service to apply configuration changes..."
-			sudo systemctl restart blueline
-		else
+		sudo systemctl enable blueline
+		if sudo systemctl is-active --quiet blueline; then
 			echo "  Restarting blueline.service to ensure configuration is applied..."
 			sudo systemctl restart blueline
+		else
+			echo "  Starting blueline.service..."
+			sudo systemctl start blueline
 		fi
 		echo "  blueline.service enabled and started."
 
@@ -994,7 +994,14 @@ WantedBy=multi-user.target"
 			echo "  image server unit file unchanged — skipping reload."
 		fi
 
-		sudo systemctl enable --now blueline-image
+		sudo systemctl enable blueline-image
+		if sudo systemctl is-active --quiet blueline-image; then
+			echo "  Restarting blueline-image.service to ensure configuration is applied..."
+			sudo systemctl restart blueline-image
+		else
+			echo "  Starting blueline-image.service..."
+			sudo systemctl start blueline-image
+		fi
 		echo "  blueline-image.service enabled and started."
 	else
 		echo "  FrankenPHP is installed and configured for development."
