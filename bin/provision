@@ -848,6 +848,8 @@ else
 ${_caddy_site_label} {${_caddy_tls_block}
 	# Always strip any client-supplied X-Forwarded-Prefix
 	request_header -X-Forwarded-Prefix
+	@_assets path /assets/*
+	header @_assets Cache-Control "public, max-age=31536000, immutable"
 	root * ${REPO_ROOT}/public
 	php_server {
 		worker {
@@ -868,6 +870,7 @@ CADDYFILE
 	@_prefix_outside not path ${PATH_PREFIX}*
 	route @_prefix_outside {
 		root * ${STATIC_FILES_ROOT}
+		header Cache-Control \"public, max-age=3600, must-revalidate\"
 		file_server
 	}"
 		else
@@ -901,6 +904,8 @@ ${_caddy_site_label} {${_caddy_tls_block}
 	route @_prefix_app {
 		request_header X-Forwarded-Prefix ${PATH_PREFIX}
 		uri strip_prefix ${PATH_PREFIX}
+		@_assets path /assets/*
+		header @_assets Cache-Control "public, max-age=31536000, immutable"
 		root * ${REPO_ROOT}/public
 		php_server {
 			worker {
