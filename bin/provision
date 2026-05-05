@@ -973,7 +973,7 @@ Requires=blueline.service
 Type=simple
 WorkingDirectory=${REPO_ROOT}
 Environment=IMAGESERVER_PORT=${IMAGESERVER_PORT}
-		Environment=FRANKENPHP_PORT=${FRANKENPHP_PORT}
+Environment=FRANKENPHP_PORT=${FRANKENPHP_PORT}
 Environment=FRANKENPHP_SCHEME=${FRANKENPHP_SCHEME}
 ExecStart=/usr/bin/node ${REPO_ROOT}/bin/image-server.mjs
 User=${_current_user}
