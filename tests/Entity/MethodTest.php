@@ -102,6 +102,65 @@ class MethodTest extends TestCase
             'symmetryText' => 'Palindromic, double and rotational',
             'notationSiril' => '&-5-4.5-5.36.4-7.58.6-9.70.8-8.9-8-T, +T',
         ],
+        'Cambridge Minor Pair Jump Maximus' => [
+            'title' => 'Cambridge Minor Pair Jump Maximus',
+            'notation' => '[3412][7856][ET90].[3412]56[9078]ET.[3412][7856][ET90].12[5634]78[ET90].[3412][7856][ET90].1234[7856][ET90].[3412][7856][ET90].[3412]56[9078]ET.[3412][7856][ET90].12[5634]78[ET90].[3412][7856][ET90].[3412][7856]90ET,1234[7856][ET90]',
+            'stage' => 12,
+            'classification' => 'Jump',
+            'nameMetaphone' => 'KMRJMNRPR',
+            'notationExpanded' => '[3412][7856][ET90].[3412]56[9078]ET.[3412][7856][ET90].12[5634]78[ET90].[3412][7856][ET90].1234[7856][ET90].[3412][7856][ET90].[3412]56[9078]ET.[3412][7856][ET90].12[5634]78[ET90].[3412][7856][ET90].[3412][7856]90ET.[3412][7856][ET90].12[5634]78[ET90].[3412][7856][ET90].[3412]56[9078]ET.[3412][7856][ET90].1234[7856][ET90].[3412][7856][ET90].12[5634]78[ET90].[3412][7856][ET90].[3412]56[9078]ET.[3412][7856][ET90].1234[7856][ET90]',
+            'leadHeadCode' => '234[7856][ET90]z',
+            'leadHead' => '1290ET567834',
+            'lengthOfLead' => 24,
+            'lengthOfCourse' => 120,
+            'numberOfLeads' => 5,
+            'numberOfHunts' => 2,
+            'plain' => false,
+            'trebleDodging' => false,
+            'palindromic' => true,
+            'doubleSym' => false,
+            'rotational' => false,
+            'calls' => [],
+            'ruleOffs' => ['every' => 24, 'from' => 0],
+            'callingPositions' => [],
+            'url' => 'Cambridge_Minor_Pair_Jump_Maximus',
+            'abbreviation' => 'Ca',
+            'symmetryText' => 'Palindromic',
+            'notationSiril' => '&[3412][7856][ET90].[3412]56[9078]E.[3412][7856][ET90].2[5634]78[ET90].[3412][7856][ET90].234[7856][ET90].[3412][7856][ET90].[3412]56[9078]E.[3412][7856][ET90].2[5634]78[ET90].[3412][7856][ET90].[3412][7856]90E, +234[7856][ET90]',
+        ],
+        'Plain Bob Royal' => [
+            'title' => 'Plain Bob Royal',
+            'notation' => 'x10x10x10x10x10,12',
+            'stage' => 10,
+            'classification' => 'Bob',
+            'nameMetaphone' => 'PLN',
+            'notationExpanded' => 'x10x10x10x10x10x10x10x10x10x12',
+            'leadHeadCode' => 'a',
+            'leadHead' => '1352749608',
+            'lengthOfLead' => 20,
+            'lengthOfCourse' => 180,
+            'numberOfLeads' => 9,
+            'numberOfHunts' => 1,
+            'plain' => true,
+            'trebleDodging' => false,
+            'palindromic' => true,
+            'doubleSym' => false,
+            'rotational' => false,
+            'calls' => [
+                'Bob' => ['symbol' => '-', 'notation' => '14', 'from' => 0, 'every' => 20, 'cover' => 1],
+                'Single' => ['symbol' => 's', 'notation' => '1234', 'from' => 0, 'every' => 20, 'cover' => 1],
+            ],
+            'ruleOffs' => ['every' => 20, 'from' => 0],
+            'callingPositions' => [
+                'from' => 0,
+                'every' => 20,
+                'titles' => ['W', 'S', 'V', 'F', 'B', 'I', 'X', 'M', 'H'],
+            ],
+            'url' => 'Plain_Bob_Royal',
+            'abbreviation' => 'Pl',
+            'symmetryText' => 'Palindromic',
+            'notationSiril' => '&-0-0-0-0-0, +2',
+        ],
     ];
 
     public static function canonicalMethodProvider(): array
@@ -110,6 +169,8 @@ class MethodTest extends TestCase
             'cambridge' => [self::CANONICAL_METHODS['Cambridge Surprise Minor']],
             'grandsire' => [self::CANONICAL_METHODS['Grandsire Triples']],
             'bristol' => [self::CANONICAL_METHODS['Bristol Surprise Maximus']],
+            'cambridge minor pair jump maximus' => [self::CANONICAL_METHODS['Cambridge Minor Pair Jump Maximus']],
+            'plain bob royal' => [self::CANONICAL_METHODS['Plain Bob Royal']],
         ];
     }
 
@@ -317,6 +378,7 @@ class MethodTest extends TestCase
         $method = new Method([
             'title' => $expected['title'],
             'notation' => $expected['notation'],
+            'stage' => $expected['stage'],
         ]);
 
         $this->assertSame($expected['stage'], $method->getStage());
@@ -455,6 +517,7 @@ class MethodTest extends TestCase
             'title' => $expected['title'],
             'notation' => $expected['notation'],
             'differential' => true,
+            'stage' => $expected['stage'],
         ]);
 
         $this->assertSame([], $method->getCalls());
@@ -467,6 +530,7 @@ class MethodTest extends TestCase
         $method = new Method([
             'title' => $expected['title'],
             'notation' => $expected['notation'],
+            'stage' => $expected['stage'],
         ]);
 
         $details = $method->getHuntDetails();
@@ -502,6 +566,7 @@ class MethodTest extends TestCase
         $method = new Method([
             'title' => $expected['title'],
             'notation' => $expected['notation'],
+            'stage' => $expected['stage'],
         ]);
 
         $firstClassification = $method->getClassification();
@@ -549,6 +614,7 @@ class MethodTest extends TestCase
         $method = new Method([
             'title' => $expected['title'],
             'notation' => $expected['notation'],
+            'stage' => $expected['stage'],
         ]);
 
         $array = $method->__toArray();

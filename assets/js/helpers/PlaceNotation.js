@@ -272,16 +272,21 @@ var PlaceNotation = {
 
 		// 5. Apply the proper permutation inversion logic to [ ] blocks
 		notationReversed = notationReversed.replace(/\[(.+?)\]/g, (m, p1) => {
-			let input = p1.split('');
+			let input = p1.split('').map(PlaceNotation.charToBell);
+			let lowestBell = Math.min.apply(Math, input);
 			let inverse = [];
-			input.forEach((char, zeroIndex) => {
-				// Logic: The bell at position (zeroIndex + 1) moves TO charToBell(char)
-				// In the inverse, that bell (char) moves TO (zeroIndex + 1)
-				let targetIndex = PlaceNotation.charToBell(char) - 1;
-				inverse[targetIndex] = PlaceNotation.bellToChar(zeroIndex + 1);
+
+			input.forEach((fromPosition, offset) => {
+				let toPosition = lowestBell + offset;
+				inverse[fromPosition] = toPosition;
 			});
 
-			return `[${inverse.join('')}]`;
+			let inverseChunk = [];
+			for (let position = lowestBell; position < lowestBell + input.length; ++position) {
+				inverseChunk.push(PlaceNotation.bellToChar(inverse[position]));
+			}
+
+			return `[${inverseChunk.join('')}]`;
 		});
 
 		// 6. Calculate trim point

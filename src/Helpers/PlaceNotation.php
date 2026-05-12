@@ -676,17 +676,20 @@ class PlaceNotation
         }, $notationReversed);
         // And now let's reverse properly...
         $notationReversed = preg_replace_callback('/\[(.+?)\]/', function ($m) {
-            $input = str_split($m[1]); // Split into characters
-            $inverse = []; // This will hold the inverse mapping of the jump change
-            foreach ($input as $zeroIndex => $char) {
-                // If the bell at position ($zeroIndex + 1) moves TO self::bellToInt($char),
-                // then in the inverse, t$char moves TO self::intToBell($zeroIndex + 1).
-                $inverse[self::bellToInt($char) - 1] = self::intToBell($zeroIndex + 1);
+            $input = array_map(self::class.'::bellToInt', str_split($m[1]));
+            $lowestBell = min($input);
+            $inverse = [];
+            foreach ($input as $offset => $fromPosition) {
+                $toPosition = $lowestBell + $offset;
+                $inverse[$fromPosition] = $toPosition;
             }
-            ksort($inverse); // Sort by keys to ensure the string is built in the order 1, 2, 3, 4...
 
-            // And then build the string
-            return '['.implode('', $inverse).']';
+            $inverseChunk = [];
+            for ($position = $lowestBell; $position < $lowestBell + count($input); ++$position) {
+                $inverseChunk[] = self::intToBell($inverse[$position]);
+            }
+
+            return '['.implode('', $inverseChunk).']';
         }, $notationReversed);
         $firstDot = (false !== strpos($notationReversed, '.')) ? strpos($notationReversed, '.') : 99999;
         $firstX = (false !== strpos($notationReversed, 'x')) ? strpos($notationReversed, 'x') : 99999;
