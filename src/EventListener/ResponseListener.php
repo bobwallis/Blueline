@@ -23,6 +23,7 @@ class ResponseListener
         }
 
         $response = $event->getResponse();
+        $contentType = strtolower((string) $response->headers->get('Content-Type', ''));
 
         // Add Cache-Control headers for error responses to prevent caching of error pages, but allow short CDN caching for 404/410 errors
         if ($response->isClientError() || $response->isServerError()) {
@@ -33,8 +34,12 @@ class ResponseListener
             }
         }
 
+        // Add CORS headers for JSON and PNG API responses
+        if (str_contains($contentType, 'application/json') || str_contains($contentType, 'image/png')) {
+            $response->headers->set('Access-Control-Allow-Origin', '*');
+        }
+
         // Strip whitespace between HTML tags (same as Twig's spaceless filter)
-        $contentType = strtolower((string) $response->headers->get('Content-Type', ''));
         if (!str_contains($contentType, 'text/html') && !str_contains($contentType, 'application/xhtml+xml')) {
             return;
         }
