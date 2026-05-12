@@ -65,8 +65,8 @@ This runs:
 - PHPUnit
 
 Or run targeted tests directly with PHPUnit:
-- `APP_ENV=test ./bin/phpunit tests/Controller`
-- `APP_ENV=test ./bin/phpunit --filter testActionName tests/Controller/DefaultControllerTest.php`
+- `./bin/phpunit tests/Controller`
+- `./bin/phpunit --filter testActionName tests/Controller/DefaultControllerTest.php`
 
 ## Change guidelines
 - Keep changes minimal and localised.

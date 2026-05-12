@@ -108,8 +108,8 @@ Run the full test pipeline (including linting, schema/container checks, asset co
 
 Run targeted tests directly with PHPUnit:
 
-- `APP_ENV=test ./bin/phpunit tests/Controller`
-- `APP_ENV=test ./bin/phpunit --filter testActionName tests/Controller/DefaultControllerTest.php`
+- `./bin/phpunit tests/Controller`
+- `./bin/phpunit --filter testActionName tests/Controller/DefaultControllerTest.php`
 
 Run PHP style checks/fixes for `src/` and `tests/`:
 
