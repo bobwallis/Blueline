@@ -1,4 +1,5 @@
-section.welcome  {
+/* Welcome Page */
+section.welcome {
 	ul {
 		list-style: none;
 		margin: 0;
@@ -28,13 +29,13 @@ section.welcome  {
 }
 
 #welcome_methods {
-	background-image: url(../../images/welcome_methods.svg);
+	background-image: url(../images/welcome_methods.svg);
 }
 
 #welcome_prover {
-	background-image: url(../../images/welcome_prover.svg);
+	background-image: url(../images/welcome_prover.svg);
 }
 
 #welcome_tutorials {
-	background-image: url(../../images/welcome_tutorials.svg);
+	background-image: url(../images/welcome_tutorials.svg);
 }

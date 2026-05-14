@@ -1,8 +1,6 @@
-@import 'all/header.css';
-@import 'all/content.css';
-@import 'all/forms.css';
-@import 'all/welcome.css';
-@import 'all/methods.css';
+@import 'layout.css';
+@import 'components.css';
+@import 'pages.css';
 
 :root {
 	--standalone-status-bar-height: 18px;
@@ -210,6 +208,7 @@ span.code {
 	cursor: pointer;
 }
 
+/* Animation definitions */
 @supports (view-transition-name: foo) {
 	:root::view-transition-group(*) {
 		animation-duration: var(--animation-speed);
