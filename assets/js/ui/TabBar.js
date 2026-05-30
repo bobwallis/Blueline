@@ -285,7 +285,7 @@ function tabClick (e) {
 	const fragment = target.getAttribute('data-fragment');
 	if (fragment !== null) {
 		const fragmentState = fragmentTabBars.get(containerEl.id);
-		updateCurrentFragment((fragmentState && fragment === fragmentState.defaultFragment) ? '' : fragment, false);
+		updateCurrentFragment((fragmentState && fragment === fragmentState.defaultFragment) ? '' : fragment, true);
 	}
 }
 
