@@ -100,7 +100,7 @@ class CalculateMethodSimilaritiesCommand extends Command
         }
 
         // Check there's not hundreds of methods to do
-        if (count($methods) > 25) {
+        if (count($methods) > 150) {
             $helper = $this->getHelper('question');
             if (!$helper instanceof QuestionHelper) {
                 throw new \RuntimeException('Question helper is not available.');
