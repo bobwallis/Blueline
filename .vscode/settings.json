@@ -10,6 +10,7 @@
         "symfony console lint:": true,
         "symfony console cache:": true,
         "symfony composer lint:": true,
+        "symfony composer validate": true,
         "npm run lint": true,
         "npm run -s lint": true,
         "node --check": true,

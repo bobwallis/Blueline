@@ -143,4 +143,19 @@ Guidance:
 
 - Red entries (confusingly!) in `outdated` are generally compatible patch/minor updates.
 - Yellow entries are major upgrades and should almost certainly be left alone until upgrading to a new major version of Symfony, which should be done following [their instructions](https://symfony.com/doc/current/setup/upgrade_major.html).
+- After dependency updates, run `symfony composer validate --no-check-publish` to confirm the Composer files are still consistent.
 - After dependency updates, commit `composer.json`, `composer.lock`, and `symfony.lock`.
+
+### Updating npm dependencies
+
+Use npm to keep the frontend dependency tree and lockfile in sync:
+
+- `npm update` to refresh already-declared dependencies to the newest versions allowed by `package.json`
+- `npm outdated` to inspect available npm updates
+
+Guidance:
+
+- Use `npm install <package>` for runtime dependencies that belong in `dependencies`.
+- Use `npm install -D <package>` for development-only dependencies that belong in `devDependencies`.
+- `npm update` does not add new packages to `package.json`; it only updates versions that are already declared.
+- After npm dependency updates, commit `package.json` and `package-lock.json`.
