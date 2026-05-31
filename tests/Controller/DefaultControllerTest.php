@@ -20,6 +20,7 @@ class DefaultControllerTest extends WebTestCase
             $this->assertTrue($client->getResponse()->isSuccessful(), $path.' request unsuccessful');
             $this->assertStringContainsString($expectedContent, $client->getResponse()->getContent(), $path.' response missing expected content');
             $this->assertStringContainsString('public', (string) $client->getResponse()->headers->get('Cache-Control'), $path.' missing cache control header');
+            $this->assertSame('key-order, params, except=("chromeless" "cache_bust")', $client->getResponse()->headers->get('No-Vary-Search'), $path.' No-Vary-Search header unexpected');
         }
     }
 

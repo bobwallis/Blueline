@@ -22,6 +22,7 @@ class ResponseListener
             return;
         }
 
+        $request = $event->getRequest();
         $response = $event->getResponse();
         $contentType = strtolower((string) $response->headers->get('Content-Type', ''));
 
@@ -39,6 +40,17 @@ class ResponseListener
             $response->headers->set('Access-Control-Allow-Origin', '*');
         }
 
+        // Tell browser caches which query params are semantic for each HTML route.
+        if (!$response->isClientError() && !$response->isServerError() && (str_contains($contentType, 'text/html') || str_contains($contentType, 'application/xhtml+xml'))) {
+            $route = (string) $request->attributes->get('_route');
+            $noVarySearch = match ($route) {
+                'Blueline_Methods_search' => 'key-order',
+                'Blueline_Methods_custom_view' => 'key-order, params, except=("chromeless" "cache_bust" "notation" "stage" "title")',
+                default => 'key-order, params, except=("chromeless" "cache_bust")',
+            };
+            $response->headers->set('No-Vary-Search', $noVarySearch);
+        }
+
         // Strip whitespace between HTML tags (same as Twig's spaceless filter)
         if (!str_contains($contentType, 'text/html') && !str_contains($contentType, 'application/xhtml+xml')) {
             return;
@@ -51,4 +63,5 @@ class ResponseListener
             }
         }
     }
+
 }

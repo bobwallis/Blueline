@@ -42,7 +42,7 @@ XML endpoints: /path.xml
 
 **Public-facing access** is currently provided via Cloudflare's free tier and may be rate-limited or deprioritised according to their policies.
 
-**Responses are cached** for a period of time (`Cache-Control: public, max-age=XXXXX`). To bypass caching, add a unique query parameter (e.g., `?cache_bust=12345`) to your requests.
+**Responses are cached** for a period of time (`Cache-Control: public, max-age=XXXXX`). To intentionally bypass cached responses, use the specific `cache_bust` query parameter with a unique value for each forced-refresh request (for example: `?cache_bust=2026-05-31T12:34:56Z`).
 
 **I am generally OK with all use of the service**, and it should handle all sensible usage but please consider:
 

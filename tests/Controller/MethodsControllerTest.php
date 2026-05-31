@@ -19,10 +19,12 @@ class MethodsControllerTest extends WebTestCase
 
         $client->request('GET', '/methods/view/Cambridge_Surprise_Minor?chromeless=1');
         $this->assertTrue($client->getResponse()->isSuccessful(), 'Chromeless request unsuccessful');
+        $this->assertSame('key-order, params, except=("chromeless" "cache_bust")', $client->getResponse()->headers->get('No-Vary-Search'));
         $this->assertStringNotContainsString('<header id="top"', $client->getResponse()->getContent());
 
         $client->request('GET', '/methods/view/Cambridge_Surprise_Minor');
         $this->assertTrue($client->getResponse()->isSuccessful(), 'Standard request unsuccessful');
+        $this->assertSame('key-order, params, except=("chromeless" "cache_bust")', $client->getResponse()->headers->get('No-Vary-Search'));
         $this->assertStringContainsString('<header id="top"', $client->getResponse()->getContent());
     }
 
@@ -47,6 +49,7 @@ class MethodsControllerTest extends WebTestCase
 
         $client->request('GET', '/methods/view/Cambridge_Surprise_Minor.json');
         $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/view/Cambridge_Surprise_Minor.json request unsuccessful');
+        $this->assertFalse($client->getResponse()->headers->has('No-Vary-Search'));
         $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'application/json'), '/methods/view/Cambridge_Surprise_Minor.json Content-Type header wrong');
 
         $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
@@ -85,10 +88,12 @@ class MethodsControllerTest extends WebTestCase
 
         $client->request('GET', '/methods/search?q=oxford');
         $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/search?q=oxford request unsuccessful');
+        $this->assertSame('key-order', $client->getResponse()->headers->get('No-Vary-Search'));
         $this->assertStringContainsString('Oxford', $client->getResponse()->getContent());
 
         $client->request('GET', '/methods/search.json?q=oxford');
         $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/search.json?q=oxford request unsuccessful');
+        $this->assertFalse($client->getResponse()->headers->has('No-Vary-Search'));
         $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'application/json'), '/methods/search.json?q=oxford Content-Type header wrong');
 
         $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
@@ -184,6 +189,7 @@ class MethodsControllerTest extends WebTestCase
 
         $client->request('GET', '/methods/view?stage=8&notation=x1x1x45x27');
         $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/view?stage=8&notation=x1x1x45x27 request unsuccessful');
+        $this->assertSame('key-order, params, except=("chromeless" "cache_bust" "notation" "stage" "title")', $client->getResponse()->headers->get('No-Vary-Search'));
         $this->assertStringContainsString('Place', $client->getResponse()->getContent());
 
         $client->request('GET', '/methods/view.json', ['stage' => 8, 'notation' => 'x1x1x45x27']);
