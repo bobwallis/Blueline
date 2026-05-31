@@ -36,6 +36,10 @@
 
 ## Coding expectations for generated changes
 - Prefer existing services, entities, repositories, and helpers over creating new abstractions.
+- State material assumptions when they affect the implementation; if the request is ambiguous, surface the competing interpretations instead of choosing silently.
+- Prefer the simplest implementation that satisfies the request; avoid speculative flexibility, abstractions, or handling for scenarios the task does not require.
+- Do not introduce helper methods, local helper functions, or one-off variables for logic that is only used once; inline it unless reuse or readability clearly justifies extraction.
+- If a simpler or lower-risk approach exists, call it out before adding complexity.
 - For database changes, update Doctrine entities and keep entity/schema in sync with this repo's schema validation flow.
 - For UI changes, prefer Twig templates and existing assets pipeline patterns.
 - Avoid introducing new dependencies unless clearly justified.
@@ -43,8 +47,13 @@
 
 ## Output and edit behavior
 - Prefer balanced edits: solve the task end-to-end while avoiding broad, unrelated refactors.
+- Keep changes surgical: every changed line should trace back to the request or to cleanup made necessary by the change itself.
+- Do not refactor adjacent code, comments, or formatting unless the task requires it.
+- Remove imports, variables, or helpers made unused by your own change, but do not clean up pre-existing dead code unless asked.
 - Keep diffs easy to review: preserve existing naming, formatting, and file structure unless the task requires changes.
 - When changing multiple layers (for example, command + tests), complete both in the same change set when practical.
+- For multi-step work, define short, verification-oriented success criteria and use them to drive the implementation.
+- When fixing bugs, prefer a reproducing test or another concrete check before or alongside the code change.
 - Explain validation clearly in final responses, including what was run and what was not run.
 
 ### FrankenPHP worker safety
