@@ -137,6 +137,32 @@ dl {
 	}
 }
 
+/* Search Results Paging */
+.paging {
+	margin: var(--content-y-padding) calc(var(--content-x-padding) * 2);
+	.extra {
+		color: #666;
+	}
+}
+
+.pagingLinks {
+	color: #CCC;
+	span {
+		color: #000;
+		margin: 0 6px;
+	}
+	a {
+		margin: 0 6px;
+		padding: 2px;
+	}
+}
+
+@media screen and (max-width: 850px) {
+	.paging {
+		text-align: center;
+	}
+}
+
 /* Tab Bar */
 .tabBar {
 	display: block;
