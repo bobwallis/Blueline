@@ -41,6 +41,7 @@ digraph "largeRelationshipsDiagram" {
       <TR><TD PORT="namemetaphone" COLSPAN="3" ALIGN="LEFT">namemetaphone</TD></TR>
       <TR><TD PORT="notation" COLSPAN="3" ALIGN="LEFT">notation</TD></TR>
       <TR><TD PORT="notationexpanded" COLSPAN="3" ALIGN="LEFT">notationexpanded</TD></TR>
+      <TR><TD PORT="notationsiril" COLSPAN="3" ALIGN="LEFT">notationsiril</TD></TR>
       <TR><TD PORT="leadheadcode" COLSPAN="3" ALIGN="LEFT">leadheadcode</TD></TR>
       <TR><TD PORT="leadhead" COLSPAN="3" ALIGN="LEFT">leadhead</TD></TR>
       <TR><TD PORT="fchgroups" COLSPAN="3" ALIGN="LEFT">fchgroups</TD></TR>

@@ -52,6 +52,9 @@ class Method
     #[ORM\Column(name: 'notationExpanded', type: 'string', length: 4096)]
     private string $notationExpanded;
 
+    #[ORM\Column(name: 'notationSiril', type: 'string', length: 4096, nullable: true)]
+    private ?string $notationSiril = null;
+
     #[ORM\Column(name: 'leadHeadCode', type: 'string', length: 31, nullable: true)]
     private ?string $leadHeadCode = null;
 
@@ -178,6 +181,7 @@ class Method
             'nameMetaphone' => fn () => $this->getNameMetaphone(),
             'notation' => fn () => $this->getNotation(),
             'notationExpanded' => fn () => $this->getNotationExpanded(),
+            'notationSiril' => fn () => $this->getNotationSiril(),
             'leadHeadCode' => fn () => $this->getLeadHeadCode(),
             'leadHead' => fn () => $this->getLeadHead(),
             'fchGroups' => fn () => $this->getFchGroups(),
@@ -265,6 +269,9 @@ class Method
     public function getAbbreviation()
     {
         if (!isset($this->abbreviation)) {
+            if (!isset($this->title) || (!isset($this->classification) && (!isset($this->notation) || !isset($this->stage)))) {
+                return null;
+            }
             $this->setAbbreviation(substr(trim(str_replace([$this->getStageText(), $this->getClassification(), 'Differential', 'Little', 'Jump'], '', $this->getTitle())), 0, 2));
         }
 
@@ -472,9 +479,23 @@ class Method
         return $this->notationExpanded;
     }
 
+    public function setNotationSiril($notationSiril)
+    {
+        $this->notationSiril = $notationSiril;
+
+        return $this;
+    }
+
     public function getNotationSiril()
     {
-        return PlaceNotation::siril($this->getNotationExpanded(), $this->getStage());
+        if (!isset($this->notationSiril)) {
+            if (!isset($this->notationExpanded) && (!isset($this->notation) || !isset($this->stage))) {
+                return null;
+            }
+            $this->setNotationSiril(PlaceNotation::siril($this->getNotationExpanded(), $this->getStage()));
+        }
+
+        return $this->notationSiril;
     }
 
     public function setLeadHeadCode($leadHeadCode)
@@ -968,6 +989,9 @@ class Method
     {
         // Set default calls
         if (!isset($this->calls)) {
+            if (!isset($this->notationExpanded) && (!isset($this->notation) || !isset($this->stage))) {
+                return [];
+            }
             $stage = $this->getStage();
             $notationExploded = PlaceNotation::explode($this->getNotationExpanded());
             $calls = [];

@@ -39,6 +39,7 @@ class ImportMethodsCommand extends Command
         'nameMetaphone' => ParameterType::STRING,
         'notation' => ParameterType::STRING,
         'notationExpanded' => ParameterType::STRING,
+        'notationSiril' => ParameterType::STRING,
         'leadHeadCode' => ParameterType::STRING,
         'leadHead' => ParameterType::STRING,
         'fchGroups' => ParameterType::STRING,
@@ -117,7 +118,7 @@ class ImportMethodsCommand extends Command
 
         // Import data
         $output->writeln('<info>Importing method data...</info>');
-        $validFields = array_flip(['title', 'provisional', 'url', 'stage', 'classification', 'nameMetaphone', 'notation', 'notationExpanded', 'leadHeadCode', 'leadHead', 'fchGroups', 'lengthOfLead', 'lengthOfCourse', 'numberOfHunts', 'jump', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational', 'calls', 'ruleOffs', 'callingPositions', 'magic', 'cccbrId', 'methodReferences', 'extensionConstruction']);
+        $validFields = array_flip(['title', 'provisional', 'url', 'stage', 'classification', 'nameMetaphone', 'notation', 'notationExpanded', 'notationSiril', 'leadHeadCode', 'leadHead', 'fchGroups', 'lengthOfLead', 'lengthOfCourse', 'numberOfHunts', 'jump', 'little', 'differential', 'plain', 'trebleDodging', 'palindromic', 'doubleSym', 'rotational', 'calls', 'ruleOffs', 'callingPositions', 'magic', 'cccbrId', 'methodReferences', 'extensionConstruction']);
         $importedMethods = [];
         $normaliseRow = static function (array $row): array {
             foreach ($row as $key => $value) {
@@ -148,6 +149,7 @@ class ImportMethodsCommand extends Command
                         $method = new Method($xmlRow);
                         $xmlRow['abbreviation'] = $method->getAbbreviation();
                         $xmlRow['lengthOfCourse'] = $method->getLengthOfCourse();
+                        $xmlRow['notationSiril'] = $method->getNotationSiril();
                         $xmlRow['calls'] = json_encode($method->getCalls());
                         $xmlRow['callingPositions'] = json_encode($method->getCallingPositions());
                         $xmlRow['ruleOffs'] = json_encode($method->getRuleOffs());

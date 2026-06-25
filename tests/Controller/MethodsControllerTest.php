@@ -139,6 +139,22 @@ class MethodsControllerTest extends WebTestCase
         $this->assertSame(['title'], array_keys($payload['results'][0]));
     }
 
+    public function testMethodsSearchJsonCanReturnNotationSirilField()
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/methods/search.json?q=cambridge%206&fields=title,abbreviation,stage,notationSiril,calls');
+        $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/search.json?q=cambridge%206&fields=title,abbreviation,stage,notationSiril,calls request unsuccessful');
+
+        $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('title,abbreviation,stage,notationSiril,calls', $payload['query']['fields']);
+        $this->assertNotEmpty($payload['results']);
+
+        $firstResult = $payload['results'][0];
+        $this->assertSame(['title', 'abbreviation', 'stage', 'notationSiril', 'calls'], array_keys($firstResult));
+        $this->assertTrue(is_string($firstResult['notationSiril']) || null === $firstResult['notationSiril']);
+    }
+
     public function testMethodsSearchRejectsInvalidRegularExpressions()
     {
         $client = static::createClient();

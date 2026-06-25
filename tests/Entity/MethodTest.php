@@ -625,9 +625,11 @@ class MethodTest extends TestCase
         $this->assertArrayNotHasKey('methodSimilarity2', $array);
         $this->assertArrayHasKey('classification', $array);
         $this->assertArrayHasKey('notationExpanded', $array);
+        $this->assertArrayHasKey('notationSiril', $array);
         $this->assertArrayHasKey('leadHead', $array);
         $this->assertArrayHasKey('lengthOfLead', $array);
         $this->assertSame($expected['title'], $array['title']);
         $this->assertSame($expected['classification'], $array['classification']);
+        $this->assertSame($expected['notationSiril'], $array['notationSiril']);
     }
 }
