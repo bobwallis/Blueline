@@ -258,11 +258,13 @@ class PlaceNotation
         $notationFull = preg_replace(['/[\[{\<].*[\]}\>]/', '/ FCH.*$/'], '', $notation);
 
         // Then guess
-        return max(array_map(function ($c) {
+        $bells = array_map(function ($c) {
             return PlaceNotation::bellToInt($c);
         }, array_filter(str_split(str_replace([' HL ', 'LE', 'LH'], '', $notationFull)), function ($c) {
             return preg_match('/[0-9A-Z]/', $c);
-        })));
+        }));
+
+        return $bells ? max($bells) : 2;
     }
 
     /**

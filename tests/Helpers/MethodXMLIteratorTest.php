@@ -104,6 +104,18 @@ class MethodXMLIteratorTest extends TestCase
         $this->assertSame('m12345', $method['cccbrId']);
     }
 
+    public function testIteratorExpandsCrossNotationWithoutExplicitStageMarkers(): void
+    {
+        $file = $this->createTempXmlFile('methods.xml', $this->xmlFixtureWithCrossNotationOnly());
+        $iterator = new MethodXMLIterator($file);
+
+        $iterator->rewind();
+        $method = $iterator->current();
+
+        $this->assertArrayNotHasKey('stage', $method);
+        $this->assertSame('x', $method['notationExpanded']);
+    }
+
     public function testIteratorParsesMethodReferencesAsTypedToken(): void
     {
         $file = $this->createTempXmlFile('methods.xml', $this->xmlFixtureWithNewFields());
@@ -233,6 +245,28 @@ XML;
             </performances>
         </method>
     </methodSet>
+</methods>
+XML;
+    }
+
+    private function xmlFixtureWithCrossNotationOnly(): string
+    {
+        return <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<methods>
+  <methodSet>
+    <properties>
+      <classification>Bob</classification>
+    </properties>
+    <method>
+      <title>Cross Notation Only</title>
+      <name>Cross</name>
+      <stage>0</stage>
+      <notation>x</notation>
+      <lengthOfLead>1</lengthOfLead>
+      <numberOfHunts>0</numberOfHunts>
+    </method>
+  </methodSet>
 </methods>
 XML;
     }
