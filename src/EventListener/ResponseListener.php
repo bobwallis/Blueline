@@ -43,7 +43,8 @@ class ResponseListener
         // Tell browser caches which query params are semantic for each HTML route.
         if (!$response->isClientError() && !$response->isServerError() && (str_contains($contentType, 'text/html') || str_contains($contentType, 'application/xhtml+xml'))) {
             $route = (string) $request->attributes->get('_route');
-            $noVarySearch = match ($route) {
+            $canonicalRoute = str_starts_with($route, 'pfx_') ? substr($route, 4) : $route;
+            $noVarySearch = match ($canonicalRoute) {
                 'Blueline_Methods_search' => 'key-order',
                 'Blueline_Methods_custom_view' => 'key-order, params, except=("chromeless" "cache_bust" "notation" "stage" "title")',
                 default => 'key-order, params, except=("chromeless" "cache_bust")',
@@ -63,5 +64,4 @@ class ResponseListener
             }
         }
     }
-
 }

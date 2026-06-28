@@ -61,4 +61,44 @@ class ResponseListenerTest extends TestCase
 
         $this->assertSame("<div>\n    <span>Test</span>\n</div>", $response->getContent());
     }
+
+    public function testSearchRouteSetsKeyOrderNoVarySearch(): void
+    {
+        $response = new Response('<div>Search</div>');
+        $response->headers->set('Content-Type', 'text/html; charset=UTF-8');
+
+        $request = Request::create('/methods/search.html?q=be');
+        $request->attributes->set('_route', 'Blueline_Methods_search');
+
+        $event = new ResponseEvent(
+            $this->createStub(HttpKernelInterface::class),
+            $request,
+            HttpKernelInterface::MAIN_REQUEST,
+            $response,
+        );
+
+        (new ResponseListener())->onKernelResponse($event);
+
+        $this->assertSame('key-order', $response->headers->get('No-Vary-Search'));
+    }
+
+    public function testPrefixedSearchRouteSetsKeyOrderNoVarySearch(): void
+    {
+        $response = new Response('<div>Search</div>');
+        $response->headers->set('Content-Type', 'text/html; charset=UTF-8');
+
+        $request = Request::create('/methods/search.html?q=be');
+        $request->attributes->set('_route', 'pfx_Blueline_Methods_search');
+
+        $event = new ResponseEvent(
+            $this->createStub(HttpKernelInterface::class),
+            $request,
+            HttpKernelInterface::MAIN_REQUEST,
+            $response,
+        );
+
+        (new ResponseListener())->onKernelResponse($event);
+
+        $this->assertSame('key-order', $response->headers->get('No-Vary-Search'));
+    }
 }
