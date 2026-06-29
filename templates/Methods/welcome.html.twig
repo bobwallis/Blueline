@@ -3,7 +3,9 @@
 {% block title %}Methods | {{ parent() }}{% endblock %}
 
 {% block preload %}
+	{% if not chromeless %}
 	<link rel="preload" href="{{ preload(asset('images/search.svg'), {as: 'image', type: 'image/svg+xml'}) }}" as="image" type="image/svg+xml" />
+	{% endif %}
 	<link rel="preload" href="{{ preload(asset('images/external.svg'), {as: 'image', type: 'image/svg+xml'}) }}" as="image" type="image/svg+xml" />
 {% endblock %}
 

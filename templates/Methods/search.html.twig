@@ -3,7 +3,9 @@
 {% block title %}Search | Methods | {{ parent() }}{% endblock %}
 
 {% block preload %}
+	{% if not chromeless %}
 	<link rel="preload" href="{{ preload(asset('images/search.svg'), {as: 'image', type: 'image/svg+xml'}) }}" as="image" type="image/svg+xml" />
+	{% endif %}
 {% endblock %}
 
 {% block og_title %}Methods{% endblock %}
