@@ -849,7 +849,9 @@ ${_caddy_site_label} {${_caddy_tls_block}
 	# Always strip any client-supplied X-Forwarded-Prefix
 	request_header -X-Forwarded-Prefix
 	@_assets path /assets/*
+	@_service_worker path /service_worker.js
 	header @_assets Cache-Control "public, max-age=31536000, immutable"
+	header @_service_worker Cache-Control "no-cache, must-revalidate"
 	root * ${REPO_ROOT}/public
 	php_server {
 		worker {
@@ -905,7 +907,9 @@ ${_caddy_site_label} {${_caddy_tls_block}
 		request_header X-Forwarded-Prefix ${PATH_PREFIX}
 		uri strip_prefix ${PATH_PREFIX}
 		@_assets path /assets/*
+		@_service_worker path /service_worker.js
 		header @_assets Cache-Control "public, max-age=31536000, immutable"
+		header @_service_worker Cache-Control "no-cache, must-revalidate"
 		root * ${REPO_ROOT}/public
 		php_server {
 			worker {

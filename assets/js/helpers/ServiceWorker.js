@@ -2,10 +2,33 @@
  * Service-worker registration and prefetch helper.
  *
  * Registers the application service worker (if supported) and handles
- * automatic reload when an update is installed.  Also exposes a `prefetch`
+ * automatic reload when an update takes control.  Also exposes a `prefetch`
  * method so that other modules can prime the service-worker cache.
  */
 import URLHelper from './URL.js';
+
+/**
+ * Determine whether connection quality is likely good enough for an immediate
+ * update-triggered reload.
+ *
+ * @returns {boolean}
+ */
+const shouldAutoReloadOnConnection = function () {
+	const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+	if (!connection) {
+		return true;
+	}
+	if (connection.saveData) {
+		return false;
+	}
+	if (typeof connection.effectiveType === 'string' && ['slow-2g', '2g'].includes(connection.effectiveType)) {
+		return false;
+	}
+	if (typeof connection.downlink === 'number' && connection.downlink > 0 && connection.downlink < 1.5) {
+		return false;
+	}
+	return true;
+};
 
 const ServiceWorker = {
 	/**
@@ -19,20 +42,20 @@ const ServiceWorker = {
 			return;
 		}
 
+		let didReloadForControllerChange = false;
+		navigator.serviceWorker.addEventListener('controllerchange', () => {
+			if (didReloadForControllerChange || !shouldAutoReloadOnConnection()) {
+				return;
+			}
+			didReloadForControllerChange = true;
+			window.location.reload();
+		});
+
 		navigator.serviceWorker
 			.register(`${URLHelper.baseURL}service_worker.js?base=${encodeURIComponent(URLHelper.baseURL)}`)
 			.then((registration) => {
-				registration.addEventListener('updatefound', () => {
-					const newWorker = registration.installing;
-					if (!newWorker) {
-						return;
-					}
-					newWorker.addEventListener('statechange', () => {
-						if (newWorker.state === 'installed') {
-							newWorker.postMessage({ action: 'skipWaiting' });
-							window.location.reload();
-						}
-					});
+				registration.update().catch(() => {
+					// Ignore transient failures in explicit update checks.
 				});
 			});
 	},

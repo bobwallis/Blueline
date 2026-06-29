@@ -93,6 +93,12 @@ Development mode uses AssetMapper directly. No build step is required:
 - Edit files in `assets/`
 - Refresh the browser
 
+### Service worker update behavior
+
+- The app service worker activates immediately, and tabs that the new worker takes control of may reload once to pick up updated content.
+- Automatic reload is gated by browser connection quality signals when available (`navigator.connection`). If the API is unavailable, the app defaults to reloading.
+- Previous cache versions are kept until a request that is missing from the new cache is fetched successfully. This preserves offline fallback for previously visited pages on poor connections.
+
 ### Inspect the database
 
 The container installs the [SQLTools](https://vscode-sqltools.mteixeira.dev/) VSCode extension which you can use to inspect the
