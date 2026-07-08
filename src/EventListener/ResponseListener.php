@@ -41,6 +41,7 @@ class ResponseListener
         }
 
         // Tell browser caches which query params are semantic for each HTML route.
+        /* Disable this for now until browser support is more consistent and bugs fixed...
         if (!$response->isClientError() && !$response->isServerError() && (str_contains($contentType, 'text/html') || str_contains($contentType, 'application/xhtml+xml'))) {
             $route = (string) $request->attributes->get('_route');
             $canonicalRoute = str_starts_with($route, 'pfx_') ? substr($route, 4) : $route;
@@ -51,7 +52,7 @@ class ResponseListener
             };
             $response->headers->set('No-Vary-Search', $noVarySearch);
         }
-
+        */
         // Strip whitespace between HTML tags (same as Twig's spaceless filter)
         if (!str_contains($contentType, 'text/html') && !str_contains($contentType, 'application/xhtml+xml')) {
             return;
