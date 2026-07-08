@@ -25,6 +25,22 @@ let requestQueue = Promise.resolve();
 let requestsHandled = 0;
 let shuttingDown = false;
 
+function log(level, message, context = {}) {
+	const entry = {
+		level,
+		ts: new Date().toISOString(),
+		msg: message,
+		...context,
+	};
+
+	if ('error' === level) {
+		console.error(JSON.stringify(entry));
+		return;
+	}
+
+	console.log(JSON.stringify(entry));
+}
+
 function createError(statusCode, message) {
 	const error = new Error(message);
 	error.statusCode = statusCode;
@@ -198,6 +214,7 @@ async function renderImage(path, scale, style) {
 	const browser = await getBrowser();
 	const page = await browser.newPage();
 	const canvasSelector = style === 'grid' ? '.method .grid canvas:first-child' : '.method .line canvas:first-child';
+	const startedAt = Date.now();
 
 	try {
 		await blockUnneededResources(page);
@@ -208,7 +225,12 @@ async function renderImage(path, scale, style) {
 		await page.waitForSelector(canvasSelector, { timeout: 15000 });
 		await preparePage(page, style);
 		const clip = await getClipDimensions(page, style);
-		return await page.screenshot({ clip, type: 'png' });
+		const image = await page.screenshot({ clip, type: 'png' });
+		const durationMs = Date.now() - startedAt;
+		if (durationMs >= 5000) {
+			log('info', 'Rendered method image slowly', { path, scale, style, durationMs });
+		}
+		return image;
 	} finally {
 		await page.close();
 		requestsHandled += 1;
@@ -223,11 +245,13 @@ function writeJson(response, statusCode, payload) {
 
 async function handleRequest(request, response) {
 	if (shuttingDown) {
+		log('error', 'Rejected request while shutting down', { method: request.method, url: request.url });
 		writeJson(response, 503, { error: 'Image server is shutting down.' });
 		return;
 	}
 
 	if (request.method !== 'GET') {
+		log('error', 'Rejected unsupported method', { method: request.method, url: request.url });
 		writeJson(response, 405, { error: 'Method not allowed.' });
 		return;
 	}
@@ -253,6 +277,12 @@ function enqueueRequest(request, response) {
 				await handleRequest(request, response);
 			} catch (error) {
 				const statusCode = Number.isInteger(error?.statusCode) ? error.statusCode : 503;
+				log('error', 'Image rendering failed', {
+					method: request.method,
+					url: request.url,
+					statusCode,
+					error: error instanceof Error ? error.message : 'Image rendering failed.',
+				});
 				writeJson(response, statusCode, {
 					error: error instanceof Error ? error.message : 'Image rendering failed.',
 				});
@@ -270,6 +300,7 @@ async function shutdown(signal) {
 	}
 
 	shuttingDown = true;
+	log('info', 'Blueline image server shutting down', { signal });
 	server.close();
 	await requestQueue.catch(() => undefined);
 	await closeBrowser();
@@ -277,6 +308,7 @@ async function shutdown(signal) {
 }
 
 server.listen(imageServerPort, '127.0.0.1', async () => {
+	log('info', 'Blueline image server listening', { host: '127.0.0.1', port: imageServerPort });
 	await getBrowser();
 });
 
