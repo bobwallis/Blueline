@@ -37,6 +37,7 @@ class MethodsController extends AbstractController
     {
         try {
             $imageResponse = $httpClient->request('GET', 'http://127.0.0.1:'.$this->getParameter('blueline.image_server_port'), [
+                'timeout' => 20,
                 'query' => [
                     'path' => $path,
                     'scale' => (string) $request->query->get('scale'),

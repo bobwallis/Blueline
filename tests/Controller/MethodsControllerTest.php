@@ -196,6 +196,7 @@ class MethodsControllerTest extends WebTestCase
         $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'image/png'));
         $this->assertNotNull($requestDetails);
         $this->assertSame('GET', $requestDetails['method']);
+        $this->assertSame(20.0, $requestDetails['options']['timeout']);
         $this->assertSame('http://127.0.0.1:8001/?path=/methods/view/Cambridge_Surprise_Minor&scale=1&style=numbers', $requestDetails['url']);
     }
 
@@ -266,6 +267,7 @@ class MethodsControllerTest extends WebTestCase
         $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'image/png'));
         $this->assertNotNull($requestDetails);
         $this->assertSame('GET', $requestDetails['method']);
+        $this->assertSame(20.0, $requestDetails['options']['timeout']);
         $this->assertSame('http://127.0.0.1:8001/?path=/methods/view%3Fstage%3D8%26notation%3Dx1x1x45x27&scale=1&style=numbers', $requestDetails['url']);
 
         $client->request('GET', '/methods/view.png', ['stage' => 8, 'notation' => 'x1x1x45x27', 'scale' => 5, 'style' => 'numbers']);

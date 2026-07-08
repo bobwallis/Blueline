@@ -201,9 +201,11 @@ async function renderImage(path, scale, style) {
 
 	try {
 		await blockUnneededResources(page);
+		page.setDefaultTimeout(15000);
+		page.setDefaultNavigationTimeout(15000);
 		await page.setViewport({ width: 5000, height: 1200, deviceScaleFactor: scale });
-		await page.goto(buildRenderUrl(path, style), { waitUntil: 'load' });
-		await page.waitForSelector(canvasSelector);
+		await page.goto(buildRenderUrl(path, style), { waitUntil: 'domcontentloaded', timeout: 15000 });
+		await page.waitForSelector(canvasSelector, { timeout: 15000 });
 		await preparePage(page, style);
 		const clip = await getClipDimensions(page, style);
 		return await page.screenshot({ clip, type: 'png' });
