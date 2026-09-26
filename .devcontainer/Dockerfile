@@ -24,11 +24,11 @@ RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | bash \
     && apt-get install -y symfony-cli
 
-# Install FrankenPHP
+# Install FrankenPHP (note the PHP version setting)
 RUN curl -fsSL https://files.henderkes.com/install.sh | sudo sh -s 8.4 \
     && apt-get install -y frankenphp
 
-# Install OS packages and PHP extensions
+# Install OS packages and PHP extensions (PHP version should match the FrankenPHP install script above)
 RUN apt-get -y install --no-install-recommends \
         zsh \
         apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less gpg lsb-release zsh brotli zstd zopfli tzdata \
