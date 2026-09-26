@@ -13,6 +13,7 @@ class DefaultControllerTest extends WebTestCase
             '/' => 'Blueline',
             '/about' => 'methods.notationExpanded',
             '/methods/notation' => 'Place Notation Guide',
+            '/methods/discover' => 'Plain Bob Minor',
         ];
 
         foreach ($pages as $path => $expectedContent) {

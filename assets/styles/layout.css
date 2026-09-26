@@ -230,6 +230,34 @@ section.text {
 			padding: 0 0 0 var(--content-x-padding)var(--content-x-padding);
 		}
 	}
+	ol.method-list, ul.method-list {
+		list-style: none;
+		padding: 0;
+		li {
+			border-bottom: 1px solid var(--light-grey-lightened);
+			padding: 0;
+			&:last-child {
+				border-bottom: 0;
+			}
+			a {
+				display: block;
+				padding: calc(var(--content-y-padding) - 2px) calc(var(--content-x-padding) * 3 / 2);
+			}
+		}
+		&.indent li a {
+			padding-left: calc(var(--content-x-padding) * 3);
+		}
+	}
+	.method-list-label {
+		margin-left: calc(var(--content-x-padding) / 2);
+	}
+	.category-heading {
+		position: sticky;
+		top: var(--header-height);
+		z-index: 1;
+		padding-top: calc(var(--content-y-padding) / 2);
+		background: var(--background);
+	}
 }
 
 /* Header bar */

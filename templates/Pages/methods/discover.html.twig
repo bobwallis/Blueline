@@ -1,0 +1,157 @@
+{% extends chromeless ? 'base.chromeless.html.twig': 'base.html.twig' %}
+
+{% block title %}Discover Methods | Methods | {{ parent() }}{% endblock %}
+{% set search = false %}
+
+{% set breadcrumb = { 'title': 'Methods', 'href': path('Blueline_Methods_welcome') } %}
+
+{% block og_title %}Discover Methods{% endblock %}
+{% block og_description %}Popular and commonly rung methods for bellringers{% endblock %}
+
+{% block body %}
+	{% from 'Macros/header.html.twig' import header %}
+	<section class="text">
+		{{ header('Discover Methods') }}
+		<div class="wrap">
+			<p>There are over 20,000 methods in the library, so it can be hard to know what to search for. The below lists out popular and commonly rung methods in a few categories.</p>
+		</div>
+
+		<div class="category-heading"><div class="wrap"><h2>Doubles</h2></div></div>
+		<ul class="method-list">
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Plain_Hunt_Doubles' } ) }}">Plain Hunt Doubles</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Plain_Bob_Doubles' } ) }}">Plain Bob Doubles</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Grandsire_Doubles' } ) }}">Grandsire Doubles</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Reverse_Canterbury_Pleasure_Place_Doubles' } ) }}">Reverse Canterbury Pleasure Place Doubles</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'St_Simons_Bob_Doubles' } ) }}">St Simon's Bob Doubles</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Stedman_Doubles' } ) }}">Stedman Doubles</a></li>
+		</ul>
+		<div class="wrap"><h3 class="method-list-label">Try Also</h3></div>
+		<ul class="method-list indent">
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'St_Martins_Bob_Doubles' } ) }}">St Martin's Bob Doubles</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'New_Bob_Doubles' } ) }}">New Bob Doubles</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'All_Saints_Place_Doubles' } ) }}">All Saints Place Doubles</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Erin_Doubles' } ) }}">Erin Doubles</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Banana_Doubles' } ) }}">Banana Doubles</a></li>
+		</ul>
+
+		<div class="category-heading"><div class="wrap"><h2>Minor</h2></div></div>
+		<ul class="method-list">
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Plain_Bob_Minor' } ) }}">Plain Bob Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Little_Bob_Minor' } ) }}">Little Bob Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'St_Clements_College_Bob_Minor' } ) }}">St Clement's College Bob Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Double_Oxford_Bob_Minor' } ) }}">Double Oxford Bob Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Bala_Bob_Minor' } ) }}">Bala Bob Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Kent_Treble_Bob_Minor' } ) }}">Kent Treble Bob Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Cambridge_Surprise_Minor' } ) }}">Cambridge Surprise Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'London_Surprise_Minor' } ) }}">London Surprise Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Norwich_Surprise_Minor' } ) }}">Norwich Surprise Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Carlisle_Surprise_Minor' } ) }}">Carlisle Surprise Minor</a></li>
+		</ul>
+		<div class="wrap"><h3 class="method-list-label">Try Also</h3></div>
+		<ul class="method-list indent">
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Single_Oxford_Bob_Minor' } ) }}">Single Oxford Bob Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Double_Court_Bob_Minor' } ) }}">Double Court Bob Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Frodsham_Bob_Minor' } ) }}">Frodsham Bob Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Frodsham_Bob_Minor' } ) }}">Frodsham Bob Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Oxford_Treble_Bob_Minor' } ) }}">Oxford Treble Bob Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Yorkshire_Block_Delight_Minor' } ) }}">Yorkshire Block Delight Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Beverley_Surprise_Minor' } ) }}">Beverley Surprise Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Ipswich_Surprise_Minor' } ) }}">Ipswich Surprise Minor</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Bourne_Surprise_Minor' } ) }}">Bourne Surprise Minor</a></li>
+		</ul>
+
+		<div class="category-heading"><div class="wrap"><h2>Triples</h2></div></div>
+		<ul class="method-list">
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Grandsire_Triples' } ) }}">Grandsire Triples</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'St_Clements_College_Bob_Triples' } ) }}">St Clement's College Bob Triples</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Single_Oxford_Bob_Triples' } ) }}">Single Oxford Bob Triples</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Stedman_Triples' } ) }}">Stedman Triples</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Erin_Triples' } ) }}">Erin Triples</a></li>
+		</ul>
+
+		<div class="category-heading"><div class="wrap"><h2>Major</h2></div></div>
+		<ul class="method-list">
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Plain_Bob_Major' } ) }}">Plain Bob Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Little_Bob_Major' } ) }}">Little Bob Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Kent_Treble_Bob_Major' } ) }}">Kent Treble Bob Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Double_Norwich_Court_Bob_Major' } ) }}">Double Norwich Court Bob Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Shipway_Major' } ) }}">Shipway Major</a></li>
+		</ul>
+
+		<div class="category-heading"><div class="wrap"><h2>Surprise &amp; Delight Major</h2></div></div>
+		<ul class="method-list">
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Cambridge_Surprise_Major' } ) }}">Cambridge Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Yorkshire_Surprise_Major' } ) }}">Yorkshire Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Superlative_Surprise_Major' } ) }}">Superlative Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Cornwall_Surprise_Major' } ) }}">Cornwall Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Bristol_Surprise_Major' } ) }}">Bristol Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Lessness_Surprise_Major' } ) }}">Lessness Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'London_Surprise_Major' } ) }}">London Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Deva_Surprise_Major' } ) }}">Deva Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Glasgow_Surprise_Major' } ) }}">Glasgow Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Belfast_Surprise_Major' } ) }}">Belfast Surprise Major</a></li>
+		</ul>
+		<div class="wrap"><h3 class="method-list-label">Try Also</h3></div>
+		<ul class="method-list indent">
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Lancashire_Surprise_Major' } ) }}">Lancashire Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Kenninghall_Surprise_Major' } ) }}">Kenninghall Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Cooktown_Orchid_Delight_Major' } ) }}">Cooktown Orchid Delight Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Turramurra_Surprise_Major' } ) }}">Turramurra Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Painswick_Surprise_Major' } ) }}">Painswick Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Double_Dublin_Surprise_Major' } ) }}">Double Dublin Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Frodsham_Surprise_Major' } ) }}">Frodsham Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Ytterbium_Surprise_Major' } ) }}">Ytterbium Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Jovium_Surprise_Major' } ) }}">Jovium Surprise Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Mareham_Delight_Major' } ) }}">Mareham Delight Major</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Rook_and_Gaskill_Surprise_Major' } ) }}">Rook and Gaskill Surprise Major</a></li>
+		</ul>
+
+		<div class="category-heading"><div class="wrap"><h2>Caters</h2></div></div>
+		<ul class="method-list">
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Grandsire_Caters' } ) }}">Grandsire Caters</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Single_Oxford_Bob_Caters' } ) }}">Single Oxford Bob Caters</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Stedman_Caters' } ) }}">Stedman Caters</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Erin_Caters' } ) }}">Erin Caters</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Double_Norwich_Court_Bob_Caters' } ) }}">Double Norwich Court Bob Caters</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Flada_Caters' } ) }}">Flada Caters</a></li>
+		</ul>
+
+		<div class="category-heading"><div class="wrap"><h2>Royal</h2></div></div>
+		<ul class="method-list">
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Plain_Bob_Royal' } ) }}">Plain Bob Royal</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Little_Bob_Royal' } ) }}">Little Bob Royal</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Cambridge_Surprise_Royal' } ) }}">Cambridge Surprise Royal</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Yorkshire_Surprise_Royal' } ) }}">Yorkshire Surprise Royal</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'London_No3_Surprise_Royal' } ) }}">London No.3 Surprise Royal</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Bristol_Surprise_Royal' } ) }}">Bristol Surprise Royal</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Triton_Delight_Royal' } ) }}">Triton Delight Royal</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Snow_Tiger_Surprise_Royal' } ) }}">Snow Tiger Surprise Royal</a></li>
+		</ul>
+
+		<div class="category-heading"><div class="wrap"><h2>Cinques</h2></div></div>
+		<ul class="method-list">
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Grandsire_Cinques' } ) }}">Grandsire Cinques</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Stedman_Cinques' } ) }}">Stedman Cinques</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Erin_Cinques' } ) }}">Erin Cinques</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Titanic_Cinques' } ) }}">Titanic Cinques</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Double_Norwich_Court_Bob_Cinques' } ) }}">Double Norwich Court Bob Cinques</a></li>
+		</ul>
+
+		<div class="category-heading"><div class="wrap"><h2>Maximus</h2></div></div>
+		<ul class="method-list">
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Little_Bob_Maximus' } ) }}">Little Bob Maximus</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Cambridge_Surprise_Maximus' } ) }}">Cambridge Surprise Maximus</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Yorkshire_Surprise_Maximus' } ) }}">Yorkshire Surprise Maximus</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Bristol_Surprise_Maximus' } ) }}">Bristol Surprise Maximus</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Orion_Surprise_Maximus' } ) }}">Orion Surprise Maximus</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Avon_Delight_Maximus' } ) }}">Avon Delight Maximus</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Rigel_Surprise_Maximus' } ) }}">Rigel Surprise Maximus</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Strathclyde_Surprise_Maximus' } ) }}">Strathclyde Surprise Maximus</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Ariel_Surprise_Maximus' } ) }}">Ariel Surprise Maximus</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Zanussi_Surprise_Maximus' } ) }}">Zanussi Surprise Maximus</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Maypole_Alliance_Maximus' } ) }}">Maypole Alliance Maximus</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Phobos_Surprise_Maximus' } ) }}">Phobos Surprise Maximus</a></li>
+			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Deimos_Alliance_Maximus' } ) }}">Deimos Alliance Maximus</a></li>
+		</ul>
+	</section>
+{% endblock %}
