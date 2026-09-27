@@ -62,6 +62,9 @@ if ! [[ "$method_count" =~ ^[0-9]+$ ]] || [ "$method_count" -eq 0 ]; then
     echo -e "\n\033[32m✓ Test method data imported\033[0m"
 fi
 
+echo -e "\n\033[1mClear production cache\033[0m"
+symfony console cache:clear --env=prod
+
 echo -e "\n\033[1mValidate database schema and mapping files\033[0m"
 symfony console doctrine:schema:validate
 
