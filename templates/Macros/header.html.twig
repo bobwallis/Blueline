@@ -1,4 +1,4 @@
-{% macro header( title, subtitle, tabs ) %}
+{% macro header( title, subtitle = null, tabs = null ) %}
 <header>
 	<h1>{% if title.title is defined %}{{ title.title }}{% if title.title2 is defined and title.title2 is not empty %} <span class="normalweight">({{ title.title2 }})</span>{% endif %}{% else %}{{ title }}{% endif %}</h1>
 	{% if subtitle is not empty %}<h2>{{ subtitle }}</h2>{% endif %}
