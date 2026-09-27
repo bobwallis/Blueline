@@ -26,6 +26,7 @@
 - Do not pass path/filter arguments to `./bin/test`; it does not support targeted subsets.
 - For targeted tests, call PHPUnit directly, e.g. `./bin/phpunit tests/Controller` or `./bin/phpunit --filter <name> <path>`.
 - For PHP changes in `src/` or `tests/`, run `symfony composer lint:php-style` (or `symfony composer fix:php-style`) to enforce Symfony coding style via PHP-CS-Fixer.
+- Use `symfony composer <command>` for Composer operations. Use `symfony console <command>` (including production commands); do not invoke as `php bin/console` or `./bin/console`. Raw `php` remains appropriate for PHP-specific tools such as linting and PHPUnit.
 - Include very slow command tests only when needed with `BLUELINE_RUN_SLOW_COMMAND_TESTS=1 ./bin/test`.
 - For frontend iteration, run `npm run lint` (or `lint:js`, `lint:css`, `lint:svg`) when changing files under `assets/`.
 - To auto-fix JS style violations, run `npm run lint:js:fix` (applies ESLint `--fix`). Always run `npm run lint:js` afterwards to confirm no unfixable errors remain.
