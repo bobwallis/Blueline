@@ -1,5 +1,3 @@
-import eve from '../helpers/Eve.js';
-
 /**
  * Page-level fragment sync state is shared by any tab bars that opt into URL fragments.
  */
@@ -393,7 +391,7 @@ function TabBar (options) {
 
 /**
  * Discover uninitialised tab placeholders and activate them.
- * Immediate run, and then re-run on each page.loaded event to catch future additions.
+ * Run immediately, then re-run after each `bl:page:finished` event to catch future additions.
  *
  * @returns {void}
  */
@@ -430,6 +428,6 @@ function checkForNewSettings () {
 	}
 }
 checkForNewSettings();
-eve.on('page.finished', checkForNewSettings);
+window.addEventListener('bl:page:finished', checkForNewSettings);
 
 export default TabBar;

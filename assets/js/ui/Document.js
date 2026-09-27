@@ -1,4 +1,3 @@
-import eve from '../helpers/Eve.js';
 import documentOn from '../helpers/DocumentOn.js';
 import ServiceWorker from '../helpers/ServiceWorker.js';
 import URLHelper from '../helpers/URL.js';
@@ -7,7 +6,8 @@ import Page from '../data/Page.js';
 /**
  * Keep document.title aligned with the current in-app page and section.
  */
-eve.on('page.finished', function (url) {
+window.addEventListener('bl:page:finished', function (event) {
+	const url = event.detail;
 	let windowTitle = '';
 	const pageTitleEl = document.querySelectorAll('#content h1');
 	const pageTitle = (typeof pageTitleEl[0] !== 'undefined') ? pageTitleEl[0].innerText : '';

@@ -1,4 +1,3 @@
-import eve from '../helpers/Eve.js';
 import documentOn from '../helpers/DocumentOn.js';
 import PlaceNotation from '../helpers/PlaceNotation.js';
 
@@ -14,7 +13,8 @@ let prevURL = location.href;
  * @param {string} url Current URL after navigation.
  * @returns {void}
  */
-eve.on('page.finished', function (url) {
+window.addEventListener('bl:page:finished', function (event) {
+	const url = event.detail;
 	const customMethodNotation = document.getElementById('custom_method_notation');
 	if (customMethodNotation !== null) {
 		const queryString = prevURL.replace(/^.*?(\?|$)/, '');

@@ -1,5 +1,3 @@
-import eve from '../../helpers/Eve.js';
-
 	/**
 	 * Display contextual tooltips over the main method line canvas.
 	 */
@@ -10,7 +8,7 @@ import eve from '../../helpers/Eve.js';
 	document.body.appendChild( tooltipElement );
 
 	// Clear and reset if the page changes
-	eve.on( 'page.request', function() {
+	window.addEventListener('bl:page:request', function() {
 		tooltipElement.style.display = 'none';
 	} );
 

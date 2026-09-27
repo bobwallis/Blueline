@@ -1,4 +1,3 @@
-import eve from '../helpers/Eve.js';
 import InteractiveGridOverlay from './MethodView/InteractiveGridOverlay.js';
 import webfont from '../helpers/Webfont.js';
 import URL from '../helpers/URL.js';
@@ -304,7 +303,7 @@ var checkForNewSettings = function () {
 	});
 };
 
-eve.on('page.finished', checkForNewSettings);
+window.addEventListener('bl:page:finished', checkForNewSettings);
 checkForNewSettings(); // Initial run
 
 // Add resize listener
@@ -314,6 +313,6 @@ window.addEventListener('resize', function () {
 	resizeTimeout = setTimeout(redrawMethodView, 50); // Debounce
 });
 
-eve.on('setting.changed.*', redrawMethodView);
+window.addEventListener('bl:setting:changed', redrawMethodView);
 
 export default newMethodView;

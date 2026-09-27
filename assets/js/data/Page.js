@@ -1,11 +1,10 @@
-import eve from '../helpers/Eve.js';
 import URLHelper from '../helpers/URL.js';
 
 /**
  * Coordinate browser history updates and chromeless page fetches.
  *
- * The module emits lifecycle events through `eve` so UI components can react
- * to navigation requests (`page.request`) and completed loads (`page.loaded`).
+ * The module emits lifecycle events so UI components can react to navigation
+ * requests and completed loads.
  */
 let mostRecentRequest = window.location.href;
 
@@ -31,10 +30,12 @@ const Page = {
 			}
 		}
 
-		eve('page.request', window, {
-			oldURL: mostRecentRequest,
-			newURL: url
-		});
+		window.dispatchEvent(new CustomEvent('bl:page:request', {
+			detail: {
+				oldURL: mostRecentRequest,
+				newURL: url
+			}
+		}));
 		mostRecentRequest = url;
 
 		const request = new XMLHttpRequest();
@@ -42,10 +43,12 @@ const Page = {
 		request.onload = function () {
 			const content = this.response;
 			if (mostRecentRequest === url) {
-				eve('page.loaded', window, {
-					URL: url,
-					content
-				});
+				window.dispatchEvent(new CustomEvent('bl:page:loaded', {
+					detail: {
+						URL: url,
+						content
+					}
+				}));
 			}
 		};
 		request.send();

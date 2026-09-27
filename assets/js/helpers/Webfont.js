@@ -1,5 +1,3 @@
-import eve from './Eve.js';
-
 let loaded = false;
 let loading = false;
 
@@ -8,14 +6,14 @@ function load () {
 		return;
 	}
 	loaded = true;
-	eve('webfont_loaded');
+	window.dispatchEvent(new CustomEvent('bl:webfont:loaded'));
 }
 
 export default function webfont (callback = function () {}) {
 	if (loaded) {
 		callback();
 	} else {
-		eve.once('webfont_loaded', callback);
+		window.addEventListener('bl:webfont:loaded', () => callback(), { once: true });
 	}
 
 	if (loading) {

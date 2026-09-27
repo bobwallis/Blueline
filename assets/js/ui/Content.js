@@ -1,4 +1,3 @@
-import eve from '../helpers/Eve.js';
 import URLHelper from '../helpers/URL.js';
 import Search from './Header/Search.js';
 import Breadcrumb from './Header/Breadcrumb.js';
@@ -41,7 +40,9 @@ function runContentTransition (updateFn, transitionType) {
  *
  * @returns {void}
  */
-eve.on('page.request', function (result) {
+
+window.addEventListener('bl:page:request', function (event) {
+	const result = event.detail;
 	const requestURL = (result && result.newURL) || window.location.href;
 	const section = URLHelper.section(requestURL);
 	const showSearchBar = URLHelper.showSearchBar(requestURL);
@@ -64,12 +65,13 @@ eve.on('page.request', function (result) {
 });
 
 /**
- * Inject new page content and emit page.finished when complete.
+ * Inject new page content and emit `bl:page:finished` when complete.
  *
  * @param {{content?: string, URL?: string}} result Page load payload.
  * @returns {void}
  */
-eve.on('page.loaded', function (result) {
+window.addEventListener('bl:page:loaded', function (event) {
+	const result = event.detail;
 	clearTimeout(showLoadingTimeout);
 
 	if (typeof result.content !== 'undefined') {
@@ -99,7 +101,7 @@ eve.on('page.loaded', function (result) {
 				contentEl.classList.remove('searchable');
 			}
 
-			eve('page.finished', window, result.URL);
+			window.dispatchEvent(new CustomEvent('bl:page:finished', { detail: result.URL }));
 		};
 
 		runContentTransition(applyContentUpdate, transitionType);

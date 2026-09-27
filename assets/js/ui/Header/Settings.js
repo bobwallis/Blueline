@@ -1,4 +1,3 @@
-import eve from '../../helpers/Eve.js';
 import LocalStorage from '../../helpers/LocalStorage.js';
 
 /**
@@ -31,7 +30,7 @@ function initialSet() {
 	});
 }
 
-eve.on('page.finished', function () { initialSet(); } );
+window.addEventListener('bl:page:finished', function () { initialSet(); } );
 initialSet();
 
 settings.forEach(function (setting) {
@@ -42,7 +41,7 @@ settings.forEach(function (setting) {
 			} else {
 				LocalStorage.setSetting(setting, e.target.value);
 			}
-			eve('setting.changed.' + setting);
+			window.dispatchEvent(new CustomEvent('bl:setting:changed', { detail: { setting } }));
 		});
 	});
 });

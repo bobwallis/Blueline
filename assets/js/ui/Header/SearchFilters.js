@@ -80,7 +80,7 @@ for (const flag of searchForm.querySelectorAll('#search_filters input[type="chec
 	});
 }
 
-searchForm.addEventListener('search:sync', (event) => syncFromURL(event.detail.url));
+searchForm.addEventListener('bl:search:sync', (event) => syncFromURL(event.detail.url));
 syncFromURL(window.location.href);
 
 if (typeof ResizeObserver !== 'undefined') {

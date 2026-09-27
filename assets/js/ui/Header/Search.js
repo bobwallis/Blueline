@@ -72,7 +72,7 @@ const Search = {
 			searchEl.style.display = 'block';
 			Search.visible = true;
 		}
-		searchEl.dispatchEvent(new CustomEvent('search:sync', { detail: { url: currentURL } }));
+		searchEl.dispatchEvent(new CustomEvent('bl:search:sync', { detail: { url: currentURL } }));
 	}
 };
 
