@@ -85,15 +85,15 @@ ol, ul {
 	li {
 		padding: 0;
 		border-bottom: 1px solid var(--light-grey-lightened);
-		&.none {
-			padding: calc(var(--content-y-padding) - 2px) calc(var(--content-x-padding) * 3 / 2);
-		}
 		&:first-child {
 			padding-top: 0;
 		}
 		&:last-child {
 			padding-bottom: 0;
 			border-bottom: 0;
+		}
+		&.none {
+			padding: calc(var(--content-y-padding) - 2px) calc(var(--content-x-padding) * 3 / 2);
 		}
 		a {
 			display: block;
