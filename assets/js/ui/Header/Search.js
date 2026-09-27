@@ -7,6 +7,30 @@ import Page from '../../data/Page.js';
 const searchEl = document.getElementById('search');
 const qEl = document.getElementById('q');
 
+function searchFormParams(formEl) {
+	const params = new URLSearchParams();
+	const multiValues = new Map();
+	for (const [name, value] of new FormData(formEl).entries()) {
+		if (name.endsWith('[]')) {
+			const key = name.slice(0, -2);
+			if (!multiValues.has(key)) {
+				multiValues.set(key, []);
+			}
+			multiValues.get(key).push(value);
+		} else {
+			params.append(name, value);
+		}
+	}
+	for (const [name, values] of multiValues.entries()) {
+		params.set(name, values.join(','));
+	}
+	return params;
+}
+
+function searchFormQuery(formEl) {
+	return searchFormParams(formEl).toString().replace(/%2C/g, ',');
+}
+
 const Search = {
 	visible: false,
 
@@ -48,6 +72,7 @@ const Search = {
 			searchEl.style.display = 'block';
 			Search.visible = true;
 		}
+		searchEl.dispatchEvent(new CustomEvent('search:sync', { detail: { url: currentURL } }));
 	}
 };
 
@@ -80,14 +105,14 @@ if ('serviceWorker' in navigator) {
 
 		if (inputEl.value === '') {
 			if (formEl && formEl.hasAttribute('action')) {
-				href = formEl.getAttribute('action').replace(/search\/?$/, '');
+				const params = (typeof FormData !== 'undefined' && typeof URLSearchParams !== 'undefined') ? searchFormQuery(formEl) : '';
+				href = params ? formEl.getAttribute('action') + '?' + params : formEl.getAttribute('action').replace(/search\/?$/, '');
 			} else {
 				return;
 			}
 		} else if (formEl && formEl.hasAttribute('action')) {
 			if (typeof FormData !== 'undefined' && typeof URLSearchParams !== 'undefined') {
-				const formData = new FormData(formEl);
-				const params = new URLSearchParams(formData).toString();
+				const params = searchFormQuery(formEl);
 				href = formEl.getAttribute('action') + '?' + params;
 			} else {
 				href = formEl.getAttribute('action') + '?q=' + encodeURIComponent(inputEl.value);
@@ -113,14 +138,14 @@ if ('serviceWorker' in navigator) {
 
 		let href;
 		if (typeof FormData !== 'undefined' && typeof URLSearchParams !== 'undefined') {
-			const formData = new FormData(formEl);
-			const params = new URLSearchParams(formData).toString();
+			const params = searchFormQuery(formEl);
 			href = formEl.getAttribute('action') + '?' + params;
 		} else {
 			href = formEl.getAttribute('action') + '?q=' + encodeURIComponent(formEl.querySelector('[name="q"]').value);
 		}
 		Page.request(href, 'submit');
 	});
+
 }
 
 export default Search;

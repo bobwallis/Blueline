@@ -62,9 +62,37 @@
 			<button id="settings_button" type="button" aria-label="Settings"><span class="hide">Settings</span></button>
 		</header>
 		<form id="search" role="search" action="{{ search_action|default('/') }}"{{ search|default(false) ? '' : ' style="display:none"' }}>
-			<div>
+			<div class="search-field">
 				<input type="text" accesskey="/" name="q" id="q" spellcheck="false" autocomplete="off" placeholder="{{ search_placeholder|default('Search') }}" value="{{ searchVariables['q']|default('') }}" />
+				<button id="search_filters_toggle" type="button" aria-label="Filters" title="Filters" aria-controls="search_filters" aria-expanded="false" hidden>
+					<img src="{{ asset('images/filter.svg') }}" alt="" aria-hidden="true" />
+					<span class="hide">Filters</span>
+				</button>
 				<button type="submit" title="Search"><span class="hide">Search</span></button>
+			</div>
+			<div id="search_filters" class="search-filters" hidden>
+				<div class="search-filter">
+					<label class="search-filter-label" for="search_stage">Stage</label>
+					<select id="search_stage" name="stage[]" multiple>
+						{% for stage, stage_name in search_filter_stages %}
+						<option value="{{ stage }}"{{ stage in (searchVariables['stage']|default('')|split(',')) ? ' selected' : '' }}>{{ stage_name }}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="search-filter">
+					<label class="search-filter-label" for="search_classification">Method class</label>
+					<div class="search-filter-controls">
+						<select id="search_classification" name="classification[]" multiple>
+							{% for classification in search_filter_classifications %}
+							<option value="{{ classification }}"{{ classification in (searchVariables['classification']|default('')|split(',')) ? ' selected' : '' }}>{{ classification }}</option>
+							{% endfor %}
+						</select>
+						<div class="search-filter-flags">
+							<label class="search-filter-flag"><input type="checkbox" name="little" value="1"{{ searchVariables['little']|default('')|lower in ['1', 'true', 'yes', 'on'] ? ' checked' : '' }}> Little</label>
+							<label class="search-filter-flag"><input type="checkbox" name="jump" value="1"{{ searchVariables['jump']|default('')|lower in ['1', 'true', 'yes', 'on'] ? ' checked' : '' }}> Jump</label>
+						</div>
+					</div>
+				</div>
 			</div>
 		</form>
 		<dialog id="settings_dialog" aria-labelledby="settings_title" closedby="any">

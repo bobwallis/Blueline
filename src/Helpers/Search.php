@@ -35,7 +35,14 @@ class Search
 
         // Conditions
         foreach (array_merge(['q', 'sort', 'order'], $searchable) as $key) {
-            $value = trim($request->query->get($key) ?? '');
+            $value = $request->query->all()[$key] ?? '';
+            if (is_array($value)) {
+                $value = implode(',', array_filter(array_map(function ($item) {
+                    return is_scalar($item) ? trim((string) $item) : '';
+                }, $value)));
+            } else {
+                $value = trim((string) $value);
+            }
             if (!empty($value)) {
                 $searchVariables[$key] = $value;
             }
@@ -86,6 +93,20 @@ class Search
             return in_array($f->type, ['string', 'text']);
         })) as $key) {
             if (isset($searchVariables[$key])) {
+                if ('classification' == $key) {
+                    $classifications = array_values(array_unique(array_filter(array_map('trim', explode(',', $searchVariables[$key])))));
+                    $knownClassifications = array_map('strtolower', Classifications::toArray());
+                    if (count($classifications) > 0 && 0 === count(array_diff(array_map('strtolower', $classifications), $knownClassifications))) {
+                        $classificationFilter = $query->expr()->orX();
+                        foreach ($classifications as $i => $classification) {
+                            $classificationFilter->add('LOWER(e.classification) = :classificationOption'.$i);
+                            $query->setParameter('classificationOption'.$i, strtolower($classification));
+                        }
+                        $query->andWhere($classificationFilter);
+
+                        continue;
+                    }
+                }
                 if (0 === strpos($searchVariables[$key], '/') && strlen($searchVariables[$key]) > 1) {
                     $query->andWhere('REGEXP(e.'.$key.', :'.$key.'Regexp) = TRUE')
                         ->setParameter($key.'Regexp', trim($searchVariables[$key], '/'));

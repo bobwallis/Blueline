@@ -2,6 +2,8 @@
 
 namespace Blueline\Twig;
 
+use Blueline\Helpers\Classifications;
+use Blueline\Helpers\Stages;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Error\RuntimeError;
@@ -70,7 +72,7 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
     /**
      * Provide global Twig variables.
      *
-     * @return array{chromeless: bool, db_age: mixed}
+     * @return array{chromeless: bool, db_age: mixed, search_filter_stages: array, search_filter_classifications: array}
      */
     public function getGlobals(): array
     {
@@ -85,6 +87,8 @@ class BluelineExtension extends AbstractExtension implements GlobalsInterface
         return [
             'chromeless' => $chromeless,
             'db_age' => $this->params->get('blueline.database_update'),
+            'search_filter_stages' => Stages::toArray(),
+            'search_filter_classifications' => Classifications::toArray(),
         ];
     }
 

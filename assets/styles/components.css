@@ -93,6 +93,7 @@ input.center {
 input[type="checkbox"] {
 	display: inline-block;
 	vertical-align: middle;
+	accent-color: var(--header-background);
 	margin: 0 calc(var(--content-x-padding) * 0.5);
 	line-height: 28px;
 }

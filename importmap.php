@@ -19,4 +19,7 @@ return [
     'es-module-shims' => [
         'version' => '2.8.0',
     ],
+    'choices.js' => [
+        'version' => '11.2.4',
+    ],
 ];

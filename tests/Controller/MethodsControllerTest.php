@@ -102,6 +102,59 @@ class MethodsControllerTest extends WebTestCase
         $this->assertStringContainsString('cccbrId', $payload['query']['fields']);
     }
 
+    public function testMethodsSearchSupportsMultipleFilterValues()
+    {
+        $client = static::createClient();
+        $queries = [
+            ['/methods/search.json?stage=6%2C8&classification=Surprise%2CTreble%20Bob&fields=title,stage,classification&count=1000', []],
+            ['/methods/search.json?stage=6,8&classification=Surprise,Treble%20Bob&fields=title,stage,classification&count=1000', []],
+            ['/methods/search.json', [
+                'stage' => ['6', '8'],
+                'classification' => ['Surprise', 'Treble Bob'],
+                'fields' => 'title,stage,classification',
+                'count' => 1000,
+            ]],
+        ];
+
+        foreach ($queries as [$url, $parameters]) {
+            $client->request('GET', $url, $parameters);
+
+            $this->assertTrue($client->getResponse()->isSuccessful());
+            $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+            $this->assertNotEmpty($payload['results']);
+            $classifications = array_values(array_unique(array_column($payload['results'], 'classification')));
+            $stages = array_values(array_unique(array_column($payload['results'], 'stage')));
+            sort($classifications);
+            sort($stages);
+            $this->assertSame(['Surprise', 'Treble Bob'], $classifications);
+            $this->assertSame([6, 8], $stages);
+        }
+    }
+
+    public function testMethodsSearchRetainsFreeTextClassificationFiltering()
+    {
+        $client = static::createClient();
+        $client->request('GET', '/methods/search.json?classification=prise&fields=title,classification&count=1000');
+
+        $this->assertTrue($client->getResponse()->isSuccessful());
+        $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertNotEmpty($payload['results']);
+        $this->assertSame(['Surprise'], array_values(array_unique(array_column($payload['results'], 'classification'))));
+    }
+
+    public function testMethodsSearchSupportsPositiveBooleanFilters()
+    {
+        $client = static::createClient();
+
+        foreach (['little', 'jump'] as $filter) {
+            $client->request('GET', '/methods/search.json?'.$filter.'=1&fields=title,'.$filter.'&count=1000');
+            $this->assertTrue($client->getResponse()->isSuccessful());
+            $payload = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+            $this->assertNotEmpty($payload['results']);
+            $this->assertSame([true], array_values(array_unique(array_column($payload['results'], $filter))));
+        }
+    }
+
     public function testMethodsSearchJsonReturnsOnlyRequestedFields()
     {
         $client = static::createClient();

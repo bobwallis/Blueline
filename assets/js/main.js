@@ -6,6 +6,7 @@ import eve from './helpers/Eve.js';
 import './ui/Document.js';
 import './ui/Header/Breadcrumb.js';
 import './ui/Header/Search.js';
+import './ui/Header/SearchFilters.js';
 import './ui/Header/Settings.js';
 import './ui/Content.js';
 import './ui/TabBar.js';
