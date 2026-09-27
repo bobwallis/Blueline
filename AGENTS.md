@@ -1,27 +1,13 @@
-# Copilot instructions for Blueline
+# AGENTS.md
 
-## Project baseline
+## Project overview
 - Stack: Symfony 7.4 (PHP 8.4+), Doctrine ORM, Twig templates, PostgreSQL, AssetMapper-managed frontend assets.
 - App namespace is `Blueline\\` under `src/`.
 - Match coding style and naming in nearby files.
 - Keep changes small and focused; avoid unrelated refactors.
+- See [docs/architecture-and-workflows.md](docs/architecture-and-workflows.md) for the full code structure and operational runbooks.
 
-## Important directories
-- `src/Controller/`: HTTP controllers.
-- `src/Entity/`: Doctrine entities.
-- `src/Repository/`: Doctrine query/repository logic.
-- `src/Command/`: Symfony console commands used for import/export and maintenance.
-- `src/EventListener/`: Request/response lifecycle hooks and worker cleanup.
-- `src/Doctrine/`: custom Doctrine DQL functions used by repositories and queries.
-- `src/Twig/`: Twig extensions and template-level helpers.
-- `src/Helpers/`: domain helpers and lookup logic.
-- `assets/`: JS and CSS used by the frontend.
-- `templates/`: Twig views.
-- `config/`: Symfony config and routes.
-- `public/`: built frontend assets and entry points.
-- `tests/`: PHPUnit tests.
-
-## Development workflow
+## Setup, build, and test commands
 - Use `./bin/test` only for full-suite validation.
 - Do not pass path/filter arguments to `./bin/test`; it does not support targeted subsets.
 - For targeted tests, call PHPUnit directly, e.g. `./bin/phpunit tests/Controller` or `./bin/phpunit --filter <name> <path>`.
@@ -35,7 +21,7 @@
 - Refresh method data via `./bin/fetchAndImportData` when relevant.
 - Use `./bin/update` as the maintenance entry point for pull/provision/data refresh flows.
 
-## Coding expectations for generated changes
+## Code style and coding expectations
 - Prefer existing services, entities, repositories, and helpers over creating new abstractions.
 - State material assumptions when they affect the implementation; if the request is ambiguous, surface the competing interpretations instead of choosing silently.
 - Prefer the simplest implementation that satisfies the request; avoid speculative flexibility, abstractions, or handling for scenarios the task does not require.
@@ -45,17 +31,6 @@
 - For UI changes, prefer Twig templates and existing assets pipeline patterns.
 - Avoid introducing new dependencies unless clearly justified.
 - Update docs when behavior or developer workflow changes.
-
-## Output and edit behavior
-- Prefer balanced edits: solve the task end-to-end while avoiding broad, unrelated refactors.
-- Keep changes surgical: every changed line should trace back to the request or to cleanup made necessary by the change itself.
-- Do not refactor adjacent code, comments, or formatting unless the task requires it.
-- Remove imports, variables, or helpers made unused by your own change, but do not clean up pre-existing dead code unless asked.
-- Keep diffs easy to review: preserve existing naming, formatting, and file structure unless the task requires changes.
-- When changing multiple layers (for example, command + tests), complete both in the same change set when practical.
-- For multi-step work, define short, verification-oriented success criteria and use them to drive the implementation.
-- When fixing bugs, prefer a reproducing test or another concrete check before or alongside the code change.
-- Explain validation clearly in final responses, including what was run and what was not run.
 
 ### FrankenPHP worker safety
 - Assume HTTP code can run in worker mode with long-lived service instances.
@@ -73,7 +48,7 @@
 - Services under `src/` are auto-wired/auto-configured except excluded paths in `config/services.yaml` (including `src/Helpers/`).
 - Prefer existing custom DQL helpers in `src/Doctrine/` (for example, Levenshtein and regex functions) before adding PHP-side query workarounds.
 
-## Testing expectations
+## Testing instructions
 - Add or update targeted tests in `tests/` when changing behavior.
 - At minimum, run `./bin/test` for validation before submitting.
 - During iteration, run only relevant tests via direct PHPUnit commands instead of trying to scope `./bin/test`.
@@ -81,10 +56,21 @@
 - When changing frontend assets, ensure CSS/JS/SVG linting passes (`npm run lint`) before final validation.
 - `./bin/test` may prompt to create/populate the test database when missing.
 
-## Safety constraints
+## Security considerations
 - Do not delete or rewrite large sections of legacy code unless explicitly requested.
 - Do not modify `.env*` defaults or deployment/runtime config without clear intent in the task.
 - Never commit secrets or credentials.
+
+## Output and edit behavior
+- Prefer balanced edits: solve the task end-to-end while avoiding broad, unrelated refactors.
+- Keep changes surgical: every changed line should trace back to the request or to cleanup made necessary by the change itself.
+- Do not refactor adjacent code, comments, or formatting unless the task requires it.
+- Remove imports, variables, or helpers made unused by your own change, but do not clean up pre-existing dead code unless asked.
+- Keep diffs easy to review: preserve existing naming, formatting, and file structure unless the task requires changes.
+- When changing multiple layers (for example, command + tests), complete both in the same change set when practical.
+- For multi-step work, define short, verification-oriented success criteria and use them to drive the implementation.
+- When fixing bugs, prefer a reproducing test or another concrete check before or alongside the code change.
+- Explain validation clearly in final responses, including what was run and what was not run.
 
 ## Scope notes
 - Keep this file focused on coding-impact rules; avoid copying full operations runbooks.
