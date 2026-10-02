@@ -115,7 +115,7 @@ else
 	)
 fi
 
-env "${IMAGE_SERVER_ENV[@]}" nohup node "$SERVER_PATH" >> "$LOG_FILE" 2>&1 < /dev/null &
+env "${IMAGE_SERVER_ENV[@]}" nohup nice -n 15 node "$SERVER_PATH" >> "$LOG_FILE" 2>&1 < /dev/null &
 NEW_PID=$!
 printf '%s\n' "$NEW_PID" > "$PID_FILE"
 

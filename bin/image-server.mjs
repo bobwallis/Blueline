@@ -264,7 +264,7 @@ async function handleRequest(request, response) {
 
 	response.writeHead(200, {
 		'Content-Type': 'image/png',
-		'Cache-Control': 'public, max-age=21600',
+		'Cache-Control': 'public, max-age=129600',
 	});
 	response.end(image);
 }

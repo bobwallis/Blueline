@@ -46,6 +46,7 @@ The script `./bin/provision` will:
 - Create the database, set-up the schema and install the `fuzzystrmatch` extension
 - Generate a managed `Caddyfile` for FrankenPHP worker mode
 - Install and enable `blueline.service` to run FrankenPHP on configurable HTTPS localhost port
+- Install and enable `blueline-image.service` (Puppeteer image renderer) at low CPU/IO/OOM priority so it yields to FrankenPHP and PostgreSQL
 - Install cloudflared and walk through Cloudflare tunnel creation (interactive)
 - Clear caches
 - Warm production cache

@@ -986,6 +986,10 @@ Environment=FRANKENPHP_PORT=${FRANKENPHP_PORT}
 Environment=FRANKENPHP_SCHEME=${FRANKENPHP_SCHEME}
 Environment=PATH_PREFIX=${PATH_PREFIX}
 ExecStart=/usr/bin/node ${REPO_ROOT}/bin/image-server.mjs
+Nice=15
+CPUWeight=20
+IOWeight=20
+OOMScoreAdjust=500
 User=${_current_user}
 Group=${_current_group}
 Restart=on-failure
