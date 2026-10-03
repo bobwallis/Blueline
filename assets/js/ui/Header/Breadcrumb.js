@@ -42,13 +42,13 @@ if (breadcrumbSepEl === null) {
 	breadcrumbSepEl.id = 'breadcrumb_sep';
 	breadcrumbSepEl.style.display = 'none';
 	breadcrumbSepEl.innerHTML = '&raquo;';
-	document.getElementById('top').appendChild(breadcrumbSepEl);
+	document.getElementById('top').insertBefore(breadcrumbSepEl, document.getElementById('settings_button'));
 }
 if (breadcrumbEl === null) {
 	breadcrumbEl = document.createElement('h2');
 	breadcrumbEl.id = 'breadcrumb';
 	breadcrumbEl.style.display = 'none';
-	document.getElementById('top').appendChild(breadcrumbEl);
+	document.getElementById('top').insertBefore(breadcrumbEl, document.getElementById('settings_button'));
 	Breadcrumb.section = null;
 } else {
 	Breadcrumb.section = breadcrumbEl.textContent.toLowerCase();
