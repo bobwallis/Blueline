@@ -73,6 +73,7 @@ Or run targeted tests directly with PHPUnit:
 - Preserve existing architecture and naming unless intentionally changing it.
 - Prefer adding tests close to changed behavior.
 - If adding a feature that affects setup or runbook steps, update `README.md` and other files in `./docs`.
+- For UI/styling changes, see `docs/design-language.md` for the colour, typography, spacing, and layout tokens/patterns to reuse.
 
 ### FrankenPHP worker safety
 - `src/Command/` commands are run using `symfony console ...` commands, but HTTP requests may be run using FrankenPHP's worker mode, and so should be architected to work well in that scenario.

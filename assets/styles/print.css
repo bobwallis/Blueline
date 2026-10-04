@@ -1,5 +1,5 @@
 /* Hide anything we don't want to print at all */
-#top, #search, #loading, .tabBar {
+#top, #search, #settings_dialog, #loading, #back_link, #lineOverlay_tooltip, .tabBar {
 	display: none;
 }
 

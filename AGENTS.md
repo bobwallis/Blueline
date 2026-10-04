@@ -28,7 +28,7 @@
 - Do not introduce helper methods, local helper functions, or one-off variables for logic that is only used once; inline it unless reuse or readability clearly justifies extraction.
 - If a simpler or lower-risk approach exists, call it out before adding complexity.
 - For database changes, update Doctrine entities and keep entity/schema in sync with this repo's schema validation flow.
-- For UI changes, prefer Twig templates and existing assets pipeline patterns.
+- For UI changes, prefer Twig templates and existing assets pipeline patterns. See [docs/design-language.md](docs/design-language.md) for the colour, typography, spacing, and layout conventions to follow.
 - Avoid introducing new dependencies unless clearly justified.
 - Update docs when behavior or developer workflow changes.
 

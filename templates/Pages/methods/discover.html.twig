@@ -10,13 +10,13 @@
 
 {% block body %}
 	{% from 'Macros/header.html.twig' import header %}
+	{{ header('Discover Methods') }}
 	<section class="text">
-		{{ header('Discover Methods') }}
 		<div class="wrap">
 			<p>There are over 20,000 methods in the library, so it can be hard to know what to search for. The below lists out popular and commonly rung methods in a few categories.</p>
 		</div>
 
-		<div class="category-heading"><div class="wrap"><h2>Doubles</h2></div></div>
+		<div class="category-heading"><h2>Doubles</h2></div>
 		<ul class="method-list">
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Plain_Hunt_Doubles' } ) }}">Plain Hunt Doubles</a></li>
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Plain_Bob_Doubles' } ) }}">Plain Bob Doubles</a></li>
@@ -25,7 +25,7 @@
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'St_Simons_Bob_Doubles' } ) }}">St Simon's Bob Doubles</a></li>
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Stedman_Doubles' } ) }}">Stedman Doubles</a></li>
 		</ul>
-		<div class="wrap"><h3 class="method-list-label">Try Also</h3></div>
+		<h3 class="method-list-label">Try Also</h3>
 		<ul class="method-list indent">
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'St_Martins_Bob_Doubles' } ) }}">St Martin's Bob Doubles</a></li>
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'New_Bob_Doubles' } ) }}">New Bob Doubles</a></li>
@@ -34,7 +34,7 @@
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Banana_Doubles' } ) }}">Banana Doubles</a></li>
 		</ul>
 
-		<div class="category-heading"><div class="wrap"><h2>Minor</h2></div></div>
+		<div class="category-heading"><h2>Minor</h2></div>
 		<ul class="method-list">
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Plain_Bob_Minor' } ) }}">Plain Bob Minor</a></li>
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Little_Bob_Minor' } ) }}">Little Bob Minor</a></li>
@@ -47,7 +47,7 @@
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Norwich_Surprise_Minor' } ) }}">Norwich Surprise Minor</a></li>
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Carlisle_Surprise_Minor' } ) }}">Carlisle Surprise Minor</a></li>
 		</ul>
-		<div class="wrap"><h3 class="method-list-label">Try Also</h3></div>
+		<h3 class="method-list-label">Try Also</h3>
 		<ul class="method-list indent">
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Single_Oxford_Bob_Minor' } ) }}">Single Oxford Bob Minor</a></li>
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Double_Court_Bob_Minor' } ) }}">Double Court Bob Minor</a></li>
@@ -60,7 +60,7 @@
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Bourne_Surprise_Minor' } ) }}">Bourne Surprise Minor</a></li>
 		</ul>
 
-		<div class="category-heading"><div class="wrap"><h2>Triples</h2></div></div>
+		<div class="category-heading"><h2>Triples</h2></div>
 		<ul class="method-list">
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Grandsire_Triples' } ) }}">Grandsire Triples</a></li>
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'St_Clements_College_Bob_Triples' } ) }}">St Clement's College Bob Triples</a></li>
@@ -69,7 +69,7 @@
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Erin_Triples' } ) }}">Erin Triples</a></li>
 		</ul>
 
-		<div class="category-heading"><div class="wrap"><h2>Major</h2></div></div>
+		<div class="category-heading"><h2>Major</h2></div>
 		<ul class="method-list">
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Plain_Bob_Major' } ) }}">Plain Bob Major</a></li>
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Little_Bob_Major' } ) }}">Little Bob Major</a></li>
@@ -78,7 +78,7 @@
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Shipway_Major' } ) }}">Shipway Major</a></li>
 		</ul>
 
-		<div class="category-heading"><div class="wrap"><h2>Surprise &amp; Delight Major</h2></div></div>
+		<div class="category-heading"><h2>Surprise &amp; Delight Major</h2></div>
 		<ul class="method-list">
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Cambridge_Surprise_Major' } ) }}">Cambridge Surprise Major</a></li>
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Yorkshire_Surprise_Major' } ) }}">Yorkshire Surprise Major</a></li>
@@ -91,7 +91,7 @@
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Glasgow_Surprise_Major' } ) }}">Glasgow Surprise Major</a></li>
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Belfast_Surprise_Major' } ) }}">Belfast Surprise Major</a></li>
 		</ul>
-		<div class="wrap"><h3 class="method-list-label">Try Also</h3></div>
+		<h3 class="method-list-label">Try Also</h3>
 		<ul class="method-list indent">
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Lancashire_Surprise_Major' } ) }}">Lancashire Surprise Major</a></li>
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Kenninghall_Surprise_Major' } ) }}">Kenninghall Surprise Major</a></li>
@@ -106,7 +106,7 @@
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Rook_and_Gaskill_Surprise_Major' } ) }}">Rook and Gaskill Surprise Major</a></li>
 		</ul>
 
-		<div class="category-heading"><div class="wrap"><h2>Caters</h2></div></div>
+		<div class="category-heading"><h2>Caters</h2></div>
 		<ul class="method-list">
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Grandsire_Caters' } ) }}">Grandsire Caters</a></li>
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Single_Oxford_Bob_Caters' } ) }}">Single Oxford Bob Caters</a></li>
@@ -116,7 +116,7 @@
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Flada_Caters' } ) }}">Flada Caters</a></li>
 		</ul>
 
-		<div class="category-heading"><div class="wrap"><h2>Royal</h2></div></div>
+		<div class="category-heading"><h2>Royal</h2></div>
 		<ul class="method-list">
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Plain_Bob_Royal' } ) }}">Plain Bob Royal</a></li>
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Little_Bob_Royal' } ) }}">Little Bob Royal</a></li>
@@ -128,7 +128,7 @@
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Snow_Tiger_Surprise_Royal' } ) }}">Snow Tiger Surprise Royal</a></li>
 		</ul>
 
-		<div class="category-heading"><div class="wrap"><h2>Cinques</h2></div></div>
+		<div class="category-heading"><h2>Cinques</h2></div>
 		<ul class="method-list">
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Grandsire_Cinques' } ) }}">Grandsire Cinques</a></li>
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Stedman_Cinques' } ) }}">Stedman Cinques</a></li>
@@ -137,7 +137,7 @@
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Double_Norwich_Court_Bob_Cinques' } ) }}">Double Norwich Court Bob Cinques</a></li>
 		</ul>
 
-		<div class="category-heading"><div class="wrap"><h2>Maximus</h2></div></div>
+		<div class="category-heading"><h2>Maximus</h2></div>
 		<ul class="method-list">
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Little_Bob_Maximus' } ) }}">Little Bob Maximus</a></li>
 			<li><a href="{{ path( 'Blueline_Methods_view', { 'url': 'Cambridge_Surprise_Maximus' } ) }}">Cambridge Surprise Maximus</a></li>

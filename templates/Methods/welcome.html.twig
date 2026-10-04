@@ -27,8 +27,10 @@
 			<h2>Custom Method</h2>
 			<p>To view a method not in the collections enter the stage and place notation below. Various abbreviated place notation formats are supported, <a href="{{ path( 'Blueline_Pages_view', {page: 'methods/notation'} ) }}">see here for a guide</a>.</p>
 			<form id="custom_method" action="{{ path( 'Blueline_Methods_custom_view' ) }}">
-				<h3>Stage</h3>
-				<div class="select-wrapper">
+				<div class="custom-method-fields">
+				<div class="custom-method-field custom-method-stage">
+					<label for="custom_method_stage">Stage</label>
+					<div class="select-wrapper">
 					<select id="custom_method_stage" name="stage">
 						<option value="" disabled selected>…</option>
 						<option value="4">4 - Minimus</option>
@@ -40,11 +42,25 @@
 						<option value="10">10 - Royal</option>
 						<option value="11">11 - Cinques</option>
 						<option value="12">12 - Maximus</option>
+						<option value="13">13 - Sextuples</option>
+						<option value="14">14 - Fourteen</option>
+						<option value="15">15 - Septuples</option>
+						<option value="16">16 - Sixteen</option>
+						<option value="17">17 - Octuples</option>
+						<option value="18">18 - Eighteen</option>
+						<option value="19">19 - Nineteen</option>
+						<option value="20">20 - Twenty</option>
+						<option value="21">21 - Twenty-one</option>
+						<option value="22">22 - Twenty-two</option>
 					</select>
+					</div>
 				</div>
-				<h3>Place Notation</h3>
-				<div class="input-wrapper">
-					<input id="custom_method_notation" name="notation" type="text" placeholder="…" autocomplete="off" autocapitalize="none" />
+				<div class="custom-method-field custom-method-notation">
+					<label for="custom_method_notation">Place Notation</label>
+					<div class="input-wrapper">
+						<input id="custom_method_notation" name="notation" type="text" placeholder="…" autocomplete="off" autocapitalize="none" />
+					</div>
+				</div>
 				</div>
 				<p id="custom_method_notationParsed" class="placeholder">…</p>
 				<input type="submit" value="View" />

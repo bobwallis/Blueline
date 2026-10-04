@@ -20,7 +20,7 @@ input[type="reset"] {
 }
 
 input[type="submit"], input[type="reset"] {
-	border-radius: 2px;
+	border-radius: var(--radius-md);
 	border: 0;
 	margin: 0 var(--content-y-padding) 0 0;
 	padding: calc(var(--content-y-padding) * 0.75) calc(var(--content-x-padding) * 0.75);
@@ -28,7 +28,7 @@ input[type="submit"], input[type="reset"] {
 	text-transform: uppercase;
 	text-align: center;
 	transition: background-color 0.5s ease, color 0.5s ease;
-	box-shadow: 0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.24);
+	box-shadow: var(--shadow-2);
 	&:disabled {
 		background-color: #DDD;
 		color: #AAA;
@@ -39,7 +39,7 @@ input[type="number"] {
 	padding: 0 0 0 5px;
 }
 
-input[type="text"], input[type="number"], select {
+input[type="text"], input[type="number"] {
 	display: inline-block;
 	vertical-align: middle;
 	background-color: #F3F3F3;
@@ -48,23 +48,36 @@ input[type="text"], input[type="number"], select {
 	padding: 0 5px;
 	line-height: 28px;
 	border: 0;
-	&:focus {
-		outline: 0;
-		border: 0;
+	&:focus-visible {
+		outline: 1px solid var(--header-background);
+		outline-offset: 1px;
 	}
+}
+
+select:focus-visible {
+	outline: 0;
+}
+
+#method_follow {
+	border: 0;
+	background-color: transparent;
+	height: 100%;
 }
 
 .select-wrapper, .input-wrapper {
 	display: inline-block;
 	vertical-align: middle;
 	border: 1px solid var(--light-grey);
-	border-radius: 1px;
+	border-radius: var(--radius-sm);
 	background-color: #F3F3F3;
 	height: 28px;
-	box-shadow: 0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.24);
+	box-shadow: var(--shadow-2);
 	input, select {
-		border-radius: 1px;
+		border-radius: var(--radius-sm);
 	}
+}
+.select-wrapper:focus-within {
+	border-color: var(--header-background);
 }
 span.select-wrapper, span.input-wrapper {
 	margin: 0;
@@ -79,16 +92,6 @@ input.tiny {
 input.medium {
 	width: 220px;
 }
-input.long {
-	width: 320px;
-}
-input.right {
-	text-align: right;
-}
-input.center {
-	text-align: center;
-}
-
 /* Checkboxes */
 input[type="checkbox"] {
 	display: inline-block;
@@ -98,6 +101,60 @@ input[type="checkbox"] {
 	line-height: 28px;
 }
 
+#settings input[type="checkbox"] {
+	appearance: none;
+	position: relative;
+	box-sizing: border-box;
+	width: 40px;
+	height: 22px;
+	border: 1px solid var(--light-grey);
+	border-radius: 999px;
+	background-color: #FFF;
+	cursor: pointer;
+	transition: background-color var(--animation-speed) var(--easing-standard), border-color var(--animation-speed) var(--easing-standard);
+	&::before {
+		content: "";
+		position: absolute;
+		top: 3px;
+		left: 3px;
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+		background-color: var(--header-background);
+		transition: transform var(--animation-speed) var(--easing-standard), background-color var(--animation-speed) var(--easing-standard);
+	}
+	&:checked {
+		border-color: var(--header-background);
+		background-color: var(--header-background);
+		&::before {
+			background-color: #FFF;
+			transform: translateX(18px);
+		}
+	}
+	&:focus-visible {
+		outline: 2px solid var(--header-background);
+		outline-offset: 2px;
+	}
+	&:disabled {
+		cursor: not-allowed;
+		opacity: 0.55;
+	}
+}
+
+@media (forced-colors: active) {
+	#settings input[type="checkbox"] {
+		appearance: auto;
+		width: auto;
+		height: auto;
+		border: 0;
+		border-radius: initial;
+		background: none;
+		&::before {
+			content: none;
+		}
+	}
+}
+
 /* Radio Buttons */
 label.radio_image {
 	img {
@@ -105,22 +162,32 @@ label.radio_image {
 		height: 25px;
 	}
 	& > input {
-		visibility: hidden;
 		position: absolute;
-		top: -100px;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+		border: 0;
 		& + img {
 			display: inline-block;
 			vertical-align: middle;
 			margin: 0 calc(var(--content-x-padding) * 0.5);
 			cursor: pointer;
 			border: 1px solid var(--light-grey);
-			border-radius: 2px;
-			box-shadow: 0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.24);
+			border-radius: var(--radius-sm);
+			box-shadow: var(--shadow-2);
 			transition-property: border-color;
 			transition-duration: .2s;
 		}
 		&:checked + img {
 			border-color: var(--header-background);
+		}
+		&:focus-visible + img {
+			outline: 1px solid var(--header-background);
+			outline-offset: 2px;
 		}
 	}
 }
@@ -135,19 +202,66 @@ label.radio_image {
 /* Method Display Components */
 #custom_method {
 	margin-left: var(--content-x-padding);
-	h3 {
-		font-size: 14px;
-		font-weight: normal;
-		color: #002856;
-		margin: var(--content-y-padding) 0 calc(var(--content-y-padding) * 0.5);
-		text-transform: uppercase;
-		text-rendering: optimizeLegibility;
+	.custom-method-fields {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--content-y-padding) var(--content-x-padding);
+		margin-top: var(--content-y-padding);
+		max-width: 640px;
+	}
+	.custom-method-field {
+		min-width: 0;
+		label {
+			display: block;
+			margin-bottom: 3px;
+			font-size: 12px;
+			line-height: 12px;
+			font-weight: 600;
+			color: var(--header-background);
+			text-transform: uppercase;
+		}
+	}
+	.custom-method-stage {
+		flex: 0 0 170px;
+	}
+	.custom-method-notation {
+		flex: 1 1 240px;
 	}
 	div.select-wrapper, div.input-wrapper {
-		width: 300px;
+		display: block;
+		box-sizing: border-box;
+		width: 100%;
+		height: 32px;
+		border-radius: var(--radius-md);
+		input {
+			border-radius: var(--radius-md);
+		}
+	}
+	.select-wrapper select {
+		border-radius: var(--radius-md);
+		appearance: none;
+		box-sizing: border-box;
+		width: 100%;
+		height: 100%;
+		padding: 0 28px 0 8px;
+		border: 0;
+		background: #F3F3F3 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23002856' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center;
+		color: inherit;
+		font: inherit;
+		&:focus-visible {
+			outline: 1px solid var(--header-background);
+			outline-offset: 1px;
+		}
+	}
+	input[type="text"] {
+		line-height: 30px;
 	}
 	#custom_method_notationParsed {
-		margin-left: 5px;
+		box-sizing: border-box;
+		max-width: 640px;
+		margin: var(--content-y-padding) 0;
+		color: #999;
+		overflow-wrap: anywhere;
 	}
 }
 
@@ -176,6 +290,22 @@ section.method {
 	}
 }
 
+@media screen and (min-width: 1201px) {
+	/* Line diagrams may need more room than the content column offers: grow to fit (up to the viewport), never narrower than the column, centred on it */
+	.line-breakout {
+		position: relative;
+		left: 50%;
+		transform: translateX(-50%);
+		width: max-content;
+		min-width: 100%;
+		max-width: 100vw;
+		box-sizing: border-box;
+		display: flex;
+		justify-content: center;
+		flex-wrap: wrap;
+	}
+}
+
 #lineOverlay_tooltip {
 	position: absolute;
 	font: 10px var(--sans-stack);
@@ -184,7 +314,7 @@ section.method {
 	display: none;
 	background-color: #FFF;
 	border: 1px solid var(--header-background);
-	box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.2), 0 1px 5px 0 rgba(0,0,0,0.12);
+	box-shadow: var(--shadow-4);
 	opacity: 0;
 	transition: opacity 200ms, top 10ms, left 10ms;
 	pointer-events: none;

@@ -26,7 +26,7 @@ const Page = {
 			if (type === 'keyup' && window.history.state !== null && window.history.state.type === 'keyup') {
 				history.replaceState({ url, type: 'keyup' }, null, url);
 			} else {
-				history.pushState({ url, type }, null, url);
+				history.pushState({ url, type, from: mostRecentRequest }, null, url);
 			}
 		}
 

@@ -61,16 +61,17 @@
 			{% endif %}
 			<button id="settings_button" type="button" aria-label="Settings"><span class="hide">Settings</span></button>
 		</header>
+		{% set search_filters_open = search_filters_enabled|default(false) and (searchVariables['stage']|default('') != '' or searchVariables['classification']|default('') != '' or searchVariables['little']|default('') != '' or searchVariables['jump']|default('') != '') %}
 		<form id="search" role="search" action="{{ search_action|default('/') }}"{{ search|default(false) ? '' : ' style="display:none"' }}>
 			<div class="search-field">
 				<input type="text" accesskey="/" name="q" id="q" spellcheck="false" autocomplete="off" placeholder="{{ search_placeholder|default('Search') }}" value="{{ searchVariables['q']|default('') }}" />
-				<button id="search_filters_toggle" type="button" aria-label="Filters" title="Filters" aria-controls="search_filters" aria-expanded="false" hidden>
+				<button id="search_filters_toggle" type="button" aria-label="Filters" title="Filters" aria-controls="search_filters" aria-expanded="{{ search_filters_open ? 'true' : 'false' }}"{{ search_filters_enabled|default(false) ? '' : ' hidden' }}>
 					<img src="{{ asset('images/filter.svg') }}" alt="" aria-hidden="true" />
 					<span class="hide">Filters</span>
 				</button>
 				<button type="submit" title="Search"><span class="hide">Search</span></button>
 			</div>
-			<div id="search_filters" class="search-filters" hidden>
+			<div id="search_filters" class="search-filters"{{ search_filters_open ? '' : ' hidden' }}>
 				<div class="search-filter">
 					<label class="search-filter-label" for="search_stage">Stage</label>
 					<select id="search_stage" name="stage[]" multiple>
@@ -100,7 +101,7 @@
 				<h2 id="settings_title">Settings</h2>
 				<form id="settings_form" method="get">
 					<p>Draw lines through the&nbsp;&nbsp;<span class="select-wrapper"><select id="method_follow" name="method_follow"><option value="heaviest" selected="selected">heaviest</option><option value="lightest">lightest</option></select></span>&nbsp;&nbsp;bell.</p>
-					<p>Use the following style: <label class="radio_image"><input type="radio" name="method_style" value="numbers" checked="checked"><img src="{{ asset('images/preview_numbers.png') }}" loading="lazy"></label><label class="radio_image"><input type="radio" name="method_style" value="lines"><img src="{{ asset('images/preview_lines.png') }}" loading="lazy"></label><label class="radio_image"><input type="radio" name="method_style" value="diagrams"><img src="{{ asset('images/preview_diagrams.png') }}" loading="lazy"></label></p>
+					<p>Use the following style: <label class="radio_image"><input type="radio" name="method_style" value="numbers" checked="checked"><img src="{{ asset('images/preview_numbers.png') }}" alt="Numbers" loading="lazy"></label><label class="radio_image"><input type="radio" name="method_style" value="lines"><img src="{{ asset('images/preview_lines.png') }}" alt="Lines" loading="lazy"></label><label class="radio_image"><input type="radio" name="method_style" value="diagrams"><img src="{{ asset('images/preview_diagrams.png') }}" alt="Diagrams" loading="lazy"></label></p>
 					<p><label for="method_tooltips">Show descriptive tooltips?</label><input type="checkbox" id="method_tooltips" name="method_tooltips" checked="checked"></p>
 					<p><label for="method_music">Highlight music?</label><input type="checkbox" id="method_music" name="method_music"></p>
 					<p>Increase/decrease size using pinch-to-zoom or by pressing Ctrl + or Ctrl -.</p>

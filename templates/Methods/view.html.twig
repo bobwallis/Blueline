@@ -18,13 +18,13 @@
 
 {% block body %}
 {% from 'Macros/header.html.twig' import header %}
+	{{ header( { 'title': method.title }, null, { 'id': 'method_tabBar', 'active': 1, 'tabs': [
+		{ 'title': 'Details', 'content': 'method_details', 'fragment': 'details' },
+		{ 'title': 'Line', 'content': 'method_line', 'fragment': 'line' },
+		{ 'title': 'Grid', 'content': 'method_grid', 'fragment': 'grid' },
+		(method.stage <= 12)? { 'title': 'Practice', 'content': 'method_practice', 'external': 'https://bobwallis.github.io/MethodTutor/#title='~method.title|url_encode~'&notation='~method.notation|url_encode~'&stage='~method.stage~'&ruleoffs='~method.ruleOffs|json_encode()|url_encode~'&allowMethodSelection=false', 'onclick': 'window.open(this.href,\'targetWindow\',\'toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=yes,width=500,height=650\');return false;' } : {}
+	] } ) }}
 	<section class="method" data-cccbr-id="{{ method.cccbrId|default('') }}">
-		{{ header( { 'title': method.title }, null, { 'id': 'method_tabBar', 'active': 1, 'tabs': [
-			{ 'title': 'Details', 'content': 'method_details', 'fragment': 'details' },
-			{ 'title': 'Line', 'content': 'method_line', 'fragment': 'line' },
-			{ 'title': 'Grid', 'content': 'method_grid', 'fragment': 'grid' },
-			(method.stage <= 12)? { 'title': 'Practice', 'content': 'method_practice', 'external': 'https://bobwallis.github.io/MethodTutor/#title='~method.title|url_encode~'&notation='~method.notation|url_encode~'&stage='~method.stage~'&ruleoffs='~method.ruleOffs|json_encode()|url_encode~'&allowMethodSelection=false', 'onclick': 'window.open(this.href,\'targetWindow\',\'toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=yes,width=500,height=650\');return false;' } : {}
-		] } ) }}
 		<div id="method_details" class="details">
 			<dl>
 {% if method.provisional %}
@@ -139,7 +139,7 @@
 				<dd>Details on the <a href="{{ path( 'Blueline_Pages_view', { 'page': 'about' } ) }}">about page</a>.</dd>
 			</dl>
 		</div>
-		<div id="method_line" class="line"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 1, 'style': 'numbers' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
+		<div id="method_line" class="line line-breakout"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 1, 'style': 'numbers' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
 		<div id="method_grid" class="grid"><noscript><div class="wrap"><img src="{{ path( 'Blueline_Methods_view', { 'url': method.url, '_format': 'png', 'scale': 1, 'style': 'grid' } ) }}" alt="{{ method.title }}" /></div></noscript></div>
 		<div class="MethodView" data-set="{{ {
 			id: 0,

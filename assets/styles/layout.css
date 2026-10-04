@@ -1,57 +1,57 @@
 /* Content Area */
 #content {
 	padding-top: var(--header-height);
-	view-transition-name: content;
 }
 #content.searchable {
 	padding-top: calc(var(--header-height) + var(--search-box-height));
 }
 
+@media screen and (min-width: 1201px) {
+	#content {
+		max-width: var(--content-max-width);
+		margin: 0 auto;
+		padding-top: var(--header-bar-height);
+	}
+	#content.searchable {
+		padding-top: calc(var(--header-bar-height) + var(--search-box-height) - var(--header-overlap));
+	}
+
+	/* Content column borders live on fixed viewport-height lines so they reach the bottom of the screen and stay put during overscroll/bounce */
+	body::before, body::after {
+		content: '';
+		position: fixed;
+		top: 0;
+		bottom: 0;
+		/* A border snaps to device pixels at fractional zoom like the card borders; a 1px background does not */
+		border-left: 1px solid var(--light-grey);
+		pointer-events: none;
+		z-index: 2;
+	}
+	body::before {
+		left: max(0px, calc((100% - var(--content-max-width)) / 2));
+	}
+	body::after {
+		right: max(0px, calc((100% - var(--content-max-width)) / 2));
+	}
+	/* A line diagram wider than the content column hides the column borders that would cut through or trail below it */
+	body:has(#method_line.wide)::before,
+	body:has(#method_line.wide)::after {
+		display: none;
+	}
+}
+
 section {
-	font-size: 13px;
+	font-size: 14px;
 	h1, h2, h3 {
 		font-weight: bold;
 	}
 	h2 {
-		font-size: 16px;
+		font-size: 18px;
 		margin: calc(var(--content-y-padding) * 1.5) 0 0 0;
 	}
 	h3 {
 		font-size: 12px;
 		margin: var(--content-y-padding) 0 0 0;
-	}
-	header {
-		clear: both;
-		border-color: var(--light-grey);
-		border-width: 1px 0;
-		border-style: solid;
-		background-color: var(--title-background);
-		padding: 10px;
-		h1 {
-			font-size: 25px;
-			line-height: 25px;
-			margin: 0;
-		}
-		h2 {
-			font-size: 18px;
-			line-height: 20px;
-			margin: 0 0 0 5px;
-		}
-		h3 {
-			margin: 0;
-		}
-		#settings {
-			margin: 0 0 var(--content-y-padding);
-			padding: 0 var(--content-x-padding);
-			border: 1px solid var(--light-grey);
-			background-color: #FFF;
-			h3 {
-				margin: var(--content-y-padding) 0;
-			}
-			h4 {
-				margin: var(--content-y-padding) 0 calc(var(--content-y-padding) / -2);
-			}
-		}
 	}
 	p {
 		margin: var(--content-y-padding) 0;
@@ -74,6 +74,81 @@ section {
 		vertical-align: top;
 		padding: 4px;
 		border: 1px solid var(--light-grey);
+	}
+}
+header.section {
+	clear: both;
+	position: relative;
+	border-color: var(--light-grey);
+	border-width: 1px 0;
+	border-style: solid;
+	background-color: var(--title-background);
+	padding: 10px var(--content-y-padding);
+	isolation: isolate;
+	h1 {
+		font-size: 28px;
+		line-height: 28px;
+		margin: 0;
+	}
+	h2 {
+		font-size: 20px;
+		line-height: 22px;
+		margin: 0 0 0 5px;
+	}
+	h3 {
+		margin: 0;
+	}
+}
+
+/* Extends the header colour up behind the fixed bar so elastic overscroll at the top of the page shows no white gap */
+@media screen and (max-width: 1200px) {
+	header.section::before {
+		content: '';
+		position: absolute;
+		z-index: -1;
+		top: -250vh;
+		bottom: 100%;
+		left: 0;
+		right: 0;
+		background-color: var(--title-background);
+		pointer-events: none;
+	}
+}
+
+/* The header card sits above the fixed bar, so on wide screens the fill lives on #content (above the column lines, below the bar) */
+@media screen and (min-width: 1201px) {
+	#content:has(> header.section) {
+		position: relative;
+	}
+	#content:has(> header.section)::before {
+		content: '';
+		position: absolute;
+		z-index: 3;
+		top: -250vh;
+		height: calc(250vh + var(--header-bar-height) - 1px);
+		left: calc(50% - 50vw);
+		width: 100vw;
+		background-color: var(--title-background-lightened);
+		pointer-events: none;
+	}
+}
+
+/* Section header cards overlap the tall header bar, matching the search card on other pages */
+@media screen and (min-width: 1201px) {
+	header.section {
+		position: sticky;
+		top: calc(var(--header-bar-height) - var(--header-overlap));
+		margin-top: calc(-1 * var(--header-overlap));
+		min-height: var(--header-bar-height);
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		z-index: 44;
+		border-width: 1px;
+		border-color: transparent;
+		border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+		background-color: transparent;
 	}
 }
 
@@ -140,6 +215,7 @@ dl {
 /* Search Results Paging */
 .paging {
 	margin: var(--content-y-padding) calc(var(--content-x-padding) * 2);
+	text-align: center;
 	.extra {
 		color: #666;
 	}
@@ -149,49 +225,63 @@ dl {
 	color: #CCC;
 	span {
 		color: #000;
-		margin: 0 6px;
 	}
-	a {
-		margin: 0 6px;
-		padding: 2px;
+	a, span {
+		box-sizing: border-box;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 24px;
+		min-height: 32px;
+		padding: 6px 4px;
+		vertical-align: middle;
 	}
 }
 
-@media screen and (max-width: 850px) {
-	.paging {
-		text-align: center;
-	}
-}
-
-/* Tab Bar */
+.TabBar,
 .tabBar {
-	display: block;
-	clear: both;
+	height: 40px;
 	margin: 10px 0 -10px 0 !important;
+}
+.TabBar {
+	display: block;
+}
+
+/* Tab Bar - Fluent tablist style: flat items with an underline indicator */
+.tabBar {
+	display: flex;
+	justify-content: flex-start;
+	clear: both;
 	padding: 0;
-	height: 25px;
-	font-size: 12px;
+	gap: 4px;
+	font-size: 14px;
 	list-style: none;
 	user-select: none;
-	text-align: left;
 	li {
-		display: inline-block;
-		border-top-right-radius: 3px;
-		border-top-left-radius: 3px;
-		border: 1px solid var(--light-grey);
-		background-color: var(--title-background);
-		border-bottom: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 0;
+		border-bottom: 2px solid transparent;
+		background-color: transparent;
+		color: #666;
 		cursor: pointer;
-		margin-right: 10px;
-		line-height: 24px;
-		padding: 0 14px;
-		transition-property: background-color;
+		line-height: 22px;
+		padding: 8px 16px;
+		border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+		&:first-child { padding-top: 8px; }
+		&:last-child { padding-bottom: 8px; }
+		transition-property: color, border-color, background-color;
 		transition-duration: var(--animation-speed);
-		&:hover { background: var(--background); }
-		&.active {
-			background-color: var(--background);
-			border-bottom: 1px solid var(--background);
+		transition-timing-function: var(--easing-standard);
+		&:hover {
+			background-color: var(--light-grey-lightened);
 			color: #000;
+		}
+		&.active {
+			background-color: var(--title-background-lightened);
+			border-bottom-color: var(--header-background);
+			color: var(--header-background);
 			font-weight: bold;
 			cursor: default;
 		}
@@ -199,6 +289,9 @@ dl {
 			display: inline-block;
 			padding: 0;
 			border: 0;
+			color: inherit;
+			text-decoration: none;
+			&:link, &:visited, &:active, &:hover { color: inherit; }
 			&.external {
 				padding-right: 13px;
 			}
@@ -208,10 +301,9 @@ dl {
 
 @media screen and (max-width: 500px) {
 	.tabBar {
-		height: 30px;
 		li {
-			line-height: 29px;
-			padding: 0 18px;
+			padding-right: 12px;
+			padding-left: 12px;
 		}
 	}
 }
@@ -227,7 +319,7 @@ section.text {
 		padding: 0 0 0 calc(var(--content-x-padding) * 2);
 		li {
 			border: 0;
-			padding: 0 0 0 var(--content-x-padding)var(--content-x-padding);
+			padding: 0 0 0 calc(var(--content-x-padding) * 2);
 		}
 	}
 	ol.method-list, ul.method-list {
@@ -249,14 +341,24 @@ section.text {
 		}
 	}
 	.method-list-label {
-		margin-left: calc(var(--content-x-padding) / 2);
+		margin-left: calc(var(--content-x-padding) * 3 / 2);
+		margin-right: calc(var(--content-x-padding) * 3 / 2);
 	}
 	.category-heading {
 		position: sticky;
 		top: var(--header-height);
 		z-index: 1;
-		padding-top: calc(var(--content-y-padding) / 2);
+		padding: calc(var(--content-y-padding) / 2) 0 calc(var(--content-y-padding) / 2) var(--content-x-padding);
 		background: var(--background);
+		h2 {
+			margin: 0;
+		}
+	}
+}
+
+@media screen and (min-width: 1201px) {
+	section.text .category-heading {
+		top: calc(var(--header-bar-height) * 2 - var(--header-overlap));
 	}
 }
 
@@ -266,7 +368,7 @@ section.text {
 	top: 0;
 	left: 0;
 	width: 100%;
-	height: var(--header-height);
+	height: var(--header-bar-height);
 	background-color: var(--header-background);
 	color: var(--light-grey);
 	line-height: var(--header-height);
@@ -275,12 +377,15 @@ section.text {
 	a {
 		color: var(--light-grey);
 		border: 0;
-		outline: 0;
 		text-decoration: none;
 		text-shadow: none;
 		background-image: none;
 		&:hover {
 			color: #FFF;
+		}
+		&:focus-visible {
+			outline: 1px solid #FFF;
+			outline-offset: 2px;
 		}
 	}
 	h1, h2 {
@@ -297,12 +402,51 @@ section.text {
 	}
 }
 
+/* Wider bar: keep the breadcrumb/logo and settings button tucked to the top and at their original corner inset until centering kicks in (see below) */
+@media screen and (min-width: 1201px) {
+	#top {
+		display: flex;
+		align-items: flex-start;
+	}
+	#settings_button {
+		margin-left: auto;
+	}
+}
+
+/* Once the viewport clears this, the overlap card is safely capped at --content-max-width, so center the chrome and give it more breathing room from the edges */
+@media screen and (min-width: 1720px) {
+	#top {
+		align-items: center;
+		box-sizing: border-box;
+		padding: 0 var(--content-x-padding) 0 calc(var(--content-x-padding) * 2);
+	}
+	#top > h1 {
+		margin-left: 0;
+	}
+}
+
 #breadcrumb {
 	view-transition-name: breadcrumb;
 }
 
 #breadcrumb_sep {
 	view-transition-name: breadcrumb-sep;
+}
+
+/* Sits in the left gutter beside the content column; BackLink.js hides it when the gutter is too narrow */
+#back_link {
+	position: fixed;
+	top: calc(var(--header-bar-height) + 12px);
+	right: calc(50% + var(--content-max-width) / 2 + var(--content-y-padding));
+	z-index: 45;
+	transform: translateY(-50%);
+	font-size: 14px;
+	color: #888;
+	text-decoration: none;
+	white-space: nowrap;
+	&:hover {
+		color: #666;
+	}
 }
 
 /* Search */
@@ -316,7 +460,6 @@ section.text {
 	clear: both;
 	border-bottom: 1px solid var(--light-grey);
 	background-color: var(--title-background-overlay);
-	box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 	.search-field {
 		box-sizing: border-box;
 		display: flex;
@@ -324,11 +467,15 @@ section.text {
 		width: var(--search-width);
 		margin: var(--content-y-padding) var(--content-x-padding);
 		overflow: hidden;
-		border-radius: 2px;
+		border-radius: var(--radius-md);
 		border: 1px solid var(--light-grey);
 		height: 32px;
 		background: #FFF url(../images/search.svg) no-repeat right center;
 		background-size: contain;
+		&:focus-within {
+			outline: 1px solid var(--header-background);
+			outline-offset: 2px;
+		}
 	}
 	#q {
 		display: block;
@@ -409,6 +556,15 @@ section.text {
 			line-height: 12px;
 			font-weight: 600;
 		}
+		/* Reserve the Choices.js height and hide the native select until it is enhanced */
+		select:not(.choices__input) {
+			display: block;
+			box-sizing: border-box;
+			width: 100%;
+			max-width: 445px;
+			height: 32px;
+			visibility: hidden;
+		}
 	}
 	.search-filter-flag {
 		display: flex;
@@ -426,7 +582,7 @@ section.text {
 			height: 14px;
 			margin: 0;
 			border: 1px solid var(--light-grey);
-			border-radius: 2px;
+			border-radius: var(--radius-sm);
 			background-color: #fff;
 			cursor: pointer;
 			&:checked {
@@ -445,7 +601,7 @@ section.text {
 				transform: rotate(45deg);
 			}
 			&:focus-visible {
-				outline: 2px solid var(--header-background);
+				outline: 1px solid var(--header-background);
 				outline-offset: 2px;
 			}
 		}
@@ -474,9 +630,17 @@ section.text {
 		padding: 2px 6px;
 		overflow: hidden;
 		border: 1px solid var(--light-grey);
-		border-radius: 2px;
+		border-radius: var(--radius-sm);
 		background: #fff;
 		cursor: text;
+	}
+	&.is-open > .choices__inner {
+		border-bottom-right-radius: 0;
+		border-bottom-left-radius: 0;
+	}
+	&:focus-within > .choices__inner {
+		outline: 1px solid var(--header-background);
+		outline-offset: 2px;
 	}
 	&.is-disabled .choices__inner {
 		background-color: #e5e5e5;
@@ -512,7 +676,7 @@ section.text {
 			line-height: 1.2;
 			padding: 2px 5px;
 			border: 1px solid var(--light-grey);
-			border-radius: 6px;
+			border-radius: var(--radius-md);
 			background: var(--title-background);
 			color: var(--header-background);
 		}
@@ -562,14 +726,17 @@ section.text {
 		position: absolute;
 		z-index: 5;
 		top: 100%;
-		left: 0;
+		left: -3px;
 		display: none;
-		width: 100%;
+		box-sizing: border-box;
+		width: calc(100% + 6px);
 		max-height: 220px;
 		overflow-y: auto;
-		border: 1px solid #c9c9c9;
+		border: 1px solid var(--header-background);
+		border-bottom-left-radius: var(--radius-sm);
+		border-bottom-right-radius: var(--radius-sm);
 		background: #fff;
-		box-shadow: 0 2px 5px rgb(0 0 0 / 14%);
+		box-shadow: var(--shadow-4);
 		&.is-active {
 			display: block;
 		}
@@ -590,7 +757,7 @@ section.text {
 #search [hidden] {
 	display: none !important;
 }
-@media screen and (max-width: 850px) {
+@media screen and (max-width: 1200px) {
 	#search {
 		.search-field {
 			width: 95%;
@@ -602,5 +769,54 @@ section.text {
 	#search .search-filters {
 		grid-template-columns: minmax(0, min(445px, 100%));
 		justify-content: center;
+	}
+}
+
+/* Wide screens: the search box becomes a centered card overlapping the tall header bar */
+@media screen and (min-width: 1201px) {
+	#search {
+		top: calc(var(--header-bar-height) - var(--header-overlap));
+		box-sizing: border-box;
+		left: max(0px, calc((100% - var(--content-max-width)) / 2));
+		width: 100%;
+		max-width: var(--content-max-width);
+		z-index: 44;
+		border: 1px solid transparent;
+		border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+		background-color: transparent;
+	}
+	#search .search-filters {
+		background-color: var(--title-background);
+	}
+}
+
+/* Cards overlapping the tall header bar get a full-width band below the bar; the card surface moves to ::after so the band can sit behind it */
+@media screen and (min-width: 1201px) {
+	header.section::before,
+	#search::before {
+		content: '';
+		position: absolute;
+		z-index: -2;
+		left: calc(50% - 50vw);
+		width: 100vw;
+		top: calc(var(--header-overlap) - 1px);
+		bottom: -1px;
+		border-bottom: 1px solid var(--light-grey);
+		background-color: var(--title-background-lightened);
+		pointer-events: none;
+	}
+	header.section::after,
+	#search::after {
+		content: '';
+		position: absolute;
+		z-index: -1;
+		inset: -1px;
+		border: 1px solid var(--light-grey);
+		border-radius: inherit;
+		background-color: var(--title-background);
+		pointer-events: none;
+	}
+	html {
+		overflow-x: clip;
 	}
 }

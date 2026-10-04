@@ -48,7 +48,8 @@ if ('serviceWorker' in navigator) {
 		}
 	});
 
-	window.history.replaceState({ url: location.href, type: 'load' }, null, location.href);
+	const previousState = window.history.state;
+	window.history.replaceState({ url: location.href, type: 'load', from: previousState && previousState.from }, null, location.href);
 	window.addEventListener('popstate', function (e) {
 		const state = e.state;
 		if (state !== null && typeof state.url === 'string') {

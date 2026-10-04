@@ -5,8 +5,8 @@
 
 {% block body %}
 	{% from 'Macros/header.html.twig' import header %}
+	{{ header(status_text) }}
 	<section class="text">
-		{{ header(status_text) }}
 		<div class="wrap">
 			<p>An error has ocurred. The server returned a "{{ status_code }} {{ status_text }}" status code.</p>
 			{% if status_code == 410 %}

@@ -48,6 +48,12 @@ newMethodView = function (o) {
 		return;
 	}
 
+	// Flag when the line has outgrown the content column so CSS can hide the column borders
+	new ResizeObserver(function () {
+		var contentEl = document.getElementById('content');
+		lineContainerEl.classList.toggle('wide', !!contentEl && lineContainerEl.offsetWidth > contentEl.clientWidth);
+	}).observe(lineContainerEl);
+
 	redrawMethodView();
 };
 
@@ -139,13 +145,15 @@ var redrawMethodView = function () {
 		var newNumberOfColumns = (function () {
 			var numberOfLeads = method.numberOfLeads;
 			var callWidth = (line_calls && line_calls[0] && typeof line_calls[0].measure === 'function') ? line_calls[0].measure().canvas.width : 0;
-			var contentEl = document.getElementById('content');
-			var availableWidth = contentEl ? contentEl.offsetWidth - 24 : window.innerWidth - 24;
-
-			var leadsPerColumn = 1;
-			var numberOfColumns = numberOfLeads;
+			// Desktop line view breaks out of the content column (see .line-breakout), so measure against the page, not the container
+			var availableWidth = (window.matchMedia('(min-width: 1201px)').matches ? document.documentElement.clientWidth : lineContainerEl.offsetWidth) - 24;
 
 			if (numberOfLeads <= 0) return 1;
+
+			// Floor keeps columns at least the height of a lead of a plain method (2*stage), so short-lead methods don't render very wide and short
+			var leadLength = method.notation.exploded.length;
+			var leadsPerColumn = Math.max(1, Math.ceil((2 * method.stage) / leadLength));
+			var numberOfColumns = Math.ceil(numberOfLeads / leadsPerColumn);
 
 			// Assume setOptions modifies the instance directly
 			line_plainCourse.setOptions({ layout: { numberOfColumns: numberOfColumns } });
