@@ -392,13 +392,13 @@ section.text {
 		text-transform: uppercase;
 		font-weight: normal;
 		float: left;
-		margin: 0 0 0 calc(var(--header-height) * 0.25);
-		font-size: calc(var(--header-height) * 0.55);
+		margin: 0 0 0 calc(var(--header-text-unit) * 0.25);
+		font-size: calc(var(--header-text-unit) * 0.55);
 	}
 	h2 {
 		font-weight: normal;
 		text-transform: none;
-		margin: 0 0 0 calc(var(--header-height) * 0.25);
+		margin: 0 0 0 calc(var(--header-text-unit) * 0.25);
 	}
 }
 
@@ -413,15 +413,31 @@ section.text {
 	}
 }
 
+/* With no search card or section header overlapping the bar, vertically centre the breadcrumb/logo and settings button in it */
+@media screen and (min-width: 1201px) {
+	body:not(:has(#content.searchable, #content > header.section)) #top {
+		align-items: center;
+	}
+}
+
+/* The breadcrumb/logo inset widens before the rest of the chrome is re-centered */
+@media screen and (min-width: 1325px) {
+	#top {
+		box-sizing: border-box;
+		--top-padding-left: calc(var(--content-x-padding) * 2);
+		padding-left: var(--top-padding-left);
+	}
+	#top > h1 {
+		margin-left: 0;
+	}
+}
+
 /* Once the viewport clears this, the overlap card is safely capped at --content-max-width, so center the chrome and give it more breathing room from the edges */
 @media screen and (min-width: 1720px) {
 	#top {
 		align-items: center;
-		box-sizing: border-box;
-		padding: 0 var(--content-x-padding) 0 calc(var(--content-x-padding) * 2);
-	}
-	#top > h1 {
-		margin-left: 0;
+		--top-padding-right: var(--content-x-padding);
+		padding-right: var(--top-padding-right);
 	}
 }
 

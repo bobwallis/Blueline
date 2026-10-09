@@ -71,6 +71,7 @@ When adding new wide content (tables, diagrams, etc.), prefer reusing `.line-bre
 ### Header / search overlap card
 
 - `#top` (the blue header bar) grows taller via `--header-bar-height` (66px at `≥1201px`, otherwise equal to `--header-height`). The logo/breadcrumb and settings button keep their `--header-height`-driven size. At wide sizes `#top` uses flex alignment to keep them at the top corners; from `1720px`, it centers them vertically and adds horizontal inset padding.
+- When running as an installed desktop app with window controls overlay (`display-mode: window-controls-overlay`, enabled via `display_override` in the manifest), `#top` acts as the titlebar: `--header-height` is raised to at least 44px and `env(titlebar-area-height)` (so the small-screen bar is taller than a standard titlebar; the 66px wide bar is kept), `#top` keeps its normal horizontal padding but is padded further if needed to stay clear of the OS window controls, and it is a drag region (`app-region: drag`) with links/buttons set to `no-drag`.
 - A single centred "card", matching the content column's width, visually overlaps the bottom of the tall bar by `--header-overlap` (32px):
   - On listing/search pages, the card is `#search`.
   - On method view pages, the card is the method `<header>` (title + tabs) - the same overlap slot, not stacked with search.

@@ -3,6 +3,7 @@
 
 :root {
 	--header-height: 35px;
+	--header-text-unit: 35px;
 	--header-bar-height: var(--header-height);
 	--header-overlap: 32px;
 	--search-box-height: calc(var(--content-y-padding) * 2 + 33px);
@@ -48,6 +49,39 @@
 		--header-bar-height: 66px;
 		--content-x-padding: 20px;
 		--content-y-padding: 16px;
+	}
+}
+
+/* Installed desktop app with window controls overlay: #top becomes the titlebar */
+/* stylelint-disable-next-line media-feature-name-value-no-unknown */
+@media (display-mode: window-controls-overlay) {
+	:root {
+		--header-height: max(44px, env(titlebar-area-height, 0px));
+	}
+	#top {
+		box-sizing: border-box;
+		padding-left: max(env(titlebar-area-x, 0px), var(--top-padding-left, 0px));
+		padding-right: max(calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw)), var(--top-padding-right, 0px));
+		-webkit-app-region: drag;
+		app-region: drag;
+		a, button {
+			-webkit-app-region: no-drag;
+			app-region: no-drag;
+		}
+	}
+	#top #settings_button {
+		height: env(titlebar-area-height, var(--header-height));
+		width: env(titlebar-area-height, var(--header-height));
+		align-self: flex-start;
+		opacity: 1;
+		background-image: none;
+		&::before {
+			content: '';
+			display: block;
+			height: 100%;
+			background: url(../images/settings.svg) no-repeat center center;
+			filter: brightness(0) invert(1);
+		}
 	}
 }
 
