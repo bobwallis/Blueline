@@ -299,6 +299,24 @@ dl {
 	}
 }
 
+/* Small filled star beside starred methods in method lists */
+.method-list li.starred,
+section.search li.starred {
+	position: relative;
+	&::before {
+		content: "";
+		position: absolute;
+		top: 50%;
+		left: calc((var(--content-x-padding) * 3 / 2 - 12px) / 2);
+		width: 12px;
+		height: 12px;
+		transform: translateY(-50%);
+		background: url(../images/star.svg) no-repeat center center / contain;
+		opacity: 0.75;
+		pointer-events: none;
+	}
+}
+
 /* Star toggle: right-aligned, icon only */
 .tabBar li.star {
 	width: 20px;

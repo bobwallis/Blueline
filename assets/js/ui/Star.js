@@ -85,6 +85,7 @@ function renderStarredLists () {
 		ul.className = 'method-list';
 		list.forEach(function (m) {
 			const li = document.createElement('li');
+			li.classList.toggle('starred', !el.hasAttribute('data-plain'));
 			const a = document.createElement('a');
 			a.href = `/methods/view/${encodeURIComponent(m.url)}`;
 			a.textContent = m.title;
@@ -97,6 +98,19 @@ function renderStarredLists () {
 }
 
 /**
+ * Flag starred methods in search and discover lists so CSS can show a star beside them.
+ *
+ * @returns {void}
+ */
+function markStarredListItems () {
+	const starredUrls = new Set(getStarred().map((m) => `/methods/view/${encodeURIComponent(m.url)}`));
+	document.querySelectorAll('.method-list li, section.search li').forEach(function (li) {
+		const a = li.querySelector('a');
+		li.classList.toggle('starred', !!a && !li.closest('[data-plain]') && starredUrls.has(a.getAttribute('href')));
+	});
+}
+
+/**
  * Apply star UI to the current page.
  *
  * @returns {void}
@@ -104,6 +118,7 @@ function renderStarredLists () {
 function update () {
 	addStarTab();
 	renderStarredLists();
+	markStarredListItems();
 }
 
 update();
