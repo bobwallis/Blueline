@@ -13,7 +13,7 @@
 		"vscode": {
 			"settings": {
 				"terminal.integrated.defaultProfile.linux": "zsh",
-				"remote.autoForwardPorts": true,
+				"remote.autoForwardPorts": false,
 				"remote.restoreForwardedPorts": true,
 				"sqltools.connections": [{
 					"name": "Container database",
@@ -41,6 +41,7 @@
 		}
 	},
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"forwardPorts": [8000],
 	"portsAttributes": {
 		"8000": {
 			"label": "Blueline (Dev Server)",
@@ -49,7 +50,7 @@
 		}
 	},
 	"otherPortsAttributes": {
-		"onAutoForward": "notify"
+		"onAutoForward": "ignore"
 	},
 	// Connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
