@@ -299,6 +299,31 @@ dl {
 	}
 }
 
+/* Star toggle: right-aligned, icon only */
+.tabBar li.star {
+	width: 20px;
+	margin-left: auto;
+	padding-right: 12px;
+	padding-left: 12px;
+	background: url(../images/star-outline.svg) no-repeat center center;
+	position: relative;
+	&:hover {
+		background-color: var(--light-grey-lightened);
+	}
+	/* Filled star layered over the outline so the two can cross-fade */
+	&::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background: url(../images/star.svg) no-repeat center center;
+		opacity: 0;
+		transition: opacity var(--animation-speed) var(--easing-standard);
+	}
+	&.starred::after {
+		opacity: 1;
+	}
+}
+
 @media screen and (max-width: 500px) {
 	.tabBar {
 		li {

@@ -54,7 +54,7 @@ Fluent-inspired scales, introduced as tokens rather than one-off values:
 
 ## Icons
 
-No icon font/library is used. Icons are vendored individually as local `.svg` files in `assets/images/` (e.g. `search.svg`, `filter.svg`, `settings.svg`, `external.svg`), applied via CSS `background-image` or an inline `<img>`.
+No icon font/library is used. Icons are vendored individually as local `.svg` files in `assets/images/` (e.g. `search.svg`, `filter.svg`, `settings.svg`, `external.svg`, `star.svg`, `star-outline.svg`), applied via CSS `background-image` or an inline `<img>`.
 
 When Material Design Icons are needed, follow the same convention: copy only the specific glyph(s) required from the Material Design Icons project into `assets/images/` as standalone `.svg` files (Apache-2.0 licensed) - do not add an `@mdi/*` npm/importmap dependency for a handful of glyphs.
 

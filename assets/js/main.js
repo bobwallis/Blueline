@@ -9,6 +9,7 @@ import './ui/Header/SearchFilters.js';
 import './ui/Header/Settings.js';
 import './ui/Content.js';
 import './ui/TabBar.js';
+import './ui/Star.js';
 import './ui/Header/BackLink.js';
 import './ui/CustomForm.js';
 import './ui/MethodView.js';
