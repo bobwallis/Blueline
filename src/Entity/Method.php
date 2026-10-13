@@ -638,6 +638,11 @@ class Method
         return $this->numberOfHunts;
     }
 
+    public function getNumberOfWorkingBells(): int
+    {
+        return $this->getStage() - $this->getNumberOfHunts();
+    }
+
     private $lead;
 
     /**

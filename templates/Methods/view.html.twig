@@ -53,7 +53,7 @@
 				<dd>{{ method.fchGroups }}</dd>
 {% endif %}
 				<dt>Hunt&nbsp;Bells</dt>
-				<dd>{{ ( method.numberOfHunts > 0 )? method.hunts|join(', ') : 'None' }}</dd>
+				<dd>{{ ( method.numberOfHunts > 0 )? method.numberOfHunts ~ ' hunt bell' ~ (method.numberOfHunts > 1 ? 's' : '') ~ ' (' ~ method.hunts|join(', ', ' and ') ~ ')' : 'No hunt bells' }}; {{ method.numberOfWorkingBells }} working bell{{ method.numberOfWorkingBells != 1 ? 's' : '' }}</dd>
 {% if method.lengthOfLead > 0 %}
 				<dt>Lengths</dt>
 				<dd>{{ method.lengthOfLead }} rows per lead<br/>{{ method.lengthOfCourse }} rows per course ({{ method.lengthOfCourse / method.lengthOfLead }} leads)</dd>
