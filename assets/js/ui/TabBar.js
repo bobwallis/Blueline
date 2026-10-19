@@ -185,8 +185,13 @@ function activateTab (containerEl, targetTab, transitionType) {
 			const contentEl = getTabPanelEl(tab);
 			if (contentEl) {
 				contentEl.style.display = isActive ? 'block' : 'none';
+				tab.setAttribute('aria-selected', String(isActive));
+				tab.tabIndex = isActive ? 0 : -1;
+				contentEl.setAttribute('role', 'tabpanel');
+				contentEl.setAttribute('aria-labelledby', tab.id);
 			}
 		}
+		window.dispatchEvent(new CustomEvent('bl:tab:activated', { detail: { panel: targetTab.id.replace(/^tab_/, '') } }));
 	};
 
 	const currentTab = getActiveInternalTab(containerEl);
@@ -287,6 +292,23 @@ function tabClick (e) {
 	}
 }
 
+function tabKeyDown (event) {
+	const tabs = [...event.currentTarget.children].filter(tab => !isExternalTab(tab) && getTabPanelEl(tab));
+	const index = tabs.indexOf(event.target);
+	if (index === -1) return;
+	let next;
+	if (event.key === 'ArrowRight') next = tabs[(index + 1) % tabs.length];
+	else if (event.key === 'ArrowLeft') next = tabs[(index + tabs.length - 1) % tabs.length];
+	else if (event.key === 'Home') next = tabs[0];
+	else if (event.key === 'End') next = tabs[tabs.length - 1];
+	else if (event.key === 'Enter' || event.key === ' ') next = tabs[index];
+	if (!next) return;
+	event.preventDefault();
+	next.focus();
+	next.click();
+	next.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+
 /**
  * Initialise one tab bar instance from parsed settings.
  *
@@ -306,6 +328,7 @@ function TabBar (options) {
 		containerEl = document.createElement('ul');
 		containerEl.id = containerId;
 		containerEl.className = 'tabBar';
+		containerEl.setAttribute('role', 'tablist');
 
 		// Build the <li> items from the options. External tabs get data-external="true" so the
 		// click handler can recognise them and skip panel activation. Internal tabs carry an
@@ -323,7 +346,7 @@ function TabBar (options) {
 			} else if (typeof t.content === 'string') {
 				const fragmentAttr = (typeof t.fragment === 'string' && t.fragment.length > 0) ? ` data-fragment="${escapeAttr(t.fragment)}"` : '';
 				const classAttr = t.className ? ` class="${escapeAttr(t.className)}"` : '';
-				htmlContent += `<li id="tab_${escapeAttr(t.content)}"${fragmentAttr}${classAttr}>${t.title}</li>`;
+				htmlContent += `<li id="tab_${escapeAttr(t.content)}" role="tab" aria-controls="${escapeAttr(t.content)}"${fragmentAttr}${classAttr}>${t.title}</li>`;
 			}
 		}
 		containerEl.innerHTML = htmlContent;
@@ -387,6 +410,7 @@ function TabBar (options) {
 	}
 
 	containerEl.addEventListener('click', tabClick);
+	containerEl.addEventListener('keydown', tabKeyDown);
 }
 
 /**
