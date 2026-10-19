@@ -92,6 +92,19 @@ input.tiny {
 input.medium {
 	width: 220px;
 }
+.method-calls {
+	float: left;
+	display: flow-root;
+}
+
+.method-calls-switch {
+	display: block;
+	clear: both;
+	margin: calc(var(--content-x-padding) * 0.5) 0;
+	opacity: 0.666;
+	zoom: 0.8;
+}
+
 /* Checkboxes */
 input[type="checkbox"] {
 	display: inline-block;
@@ -101,6 +114,7 @@ input[type="checkbox"] {
 	line-height: 28px;
 }
 
+.method-calls-switch input[type="checkbox"],
 #settings input[type="checkbox"] {
 	appearance: none;
 	position: relative;
@@ -142,6 +156,7 @@ input[type="checkbox"] {
 }
 
 @media (forced-colors: active) {
+	.method-calls-switch input[type="checkbox"],
 	#settings input[type="checkbox"] {
 		appearance: auto;
 		width: auto;

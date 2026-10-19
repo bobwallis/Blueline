@@ -17,7 +17,7 @@ var newMethodView;
 var options, method, methodTexts,
 	lineContainerEl, gridContainerEl,
 	active = false,
-	lastShowToolTips, lastHighlightMusic, lastStyle, lastFollow, lastScale, lastNumberOfColumns,
+	lastShowToolTips, lastHighlightMusic, lastStyle, lastFollow, lastNearCalls, lastScale, lastNumberOfColumns,
 	music,
 	options_plainCourse, line_plainCourse, line_calls;
 
@@ -32,7 +32,7 @@ newMethodView = function (o) {
 	options = o;
 	active = true;
 
-	lastShowToolTips = lastHighlightMusic = lastStyle = lastFollow = lastScale = lastNumberOfColumns = music = null;
+	lastShowToolTips = lastHighlightMusic = lastStyle = lastFollow = lastNearCalls = lastScale = lastNumberOfColumns = music = null;
 
 	lineContainerEl = document.querySelector(options.lineContainer);
 	gridContainerEl = document.querySelector(options.gridContainer);
@@ -52,9 +52,77 @@ newMethodView = function (o) {
 	new ResizeObserver(function () {
 		var contentEl = document.getElementById('content');
 		lineContainerEl.classList.toggle('wide', !!contentEl && lineContainerEl.offsetWidth > contentEl.clientWidth);
+		alignNearCallsSwitches();
 	}).observe(lineContainerEl);
+	// The grid tab can be hidden while drawing, so realign once it becomes visible
+	new ResizeObserver(alignNearCallsSwitches).observe(gridContainerEl);
 
 	redrawMethodView();
+};
+
+var nearCallsSwitches = new WeakMap();
+
+/**
+     * Build the near/far calls switch, shown under the calls on both the line and grid views.
+     *
+     * @param {Element} containerEl Line or grid container the switch belongs to.
+     * @param {boolean} checked Whether 'near' calls are currently selected.
+     * @returns {HTMLLabelElement}
+     */
+var createNearCallsSwitch = function (containerEl, checked) {
+	// Reuse one switch per container: rebuilding it on each redraw would cancel its CSS transition
+	var labelEl = nearCallsSwitches.get(containerEl);
+	if (!labelEl) {
+		labelEl = document.createElement('label');
+		labelEl.className = 'method-calls-switch';
+		var inputEl = document.createElement('input');
+		inputEl.type = 'checkbox';
+		inputEl.name = 'method_near_calls_inline';
+		inputEl.checked = labelEl.dataset.rendered = checked;
+		inputEl.style.marginLeft = '0';
+		inputEl.addEventListener('change', function (e) {
+			LocalStorage.setSetting('method_near_calls', e.target.checked);
+			window.dispatchEvent(new CustomEvent('bl:setting:changed', { detail: { setting: 'method_near_calls' } }));
+		});
+		labelEl.appendChild(inputEl);
+		labelEl.appendChild(document.createTextNode("Always default to 'near' Bobs and Singles"));
+		nearCallsSwitches.set(containerEl, labelEl);
+	}
+	return labelEl;
+};
+
+/**
+     * Animate a re-attached near/far switch from its last rendered state to the current one.
+     *
+     * @param {HTMLLabelElement} labelEl Switch element, already attached to the DOM.
+     * @param {boolean} checked Whether 'near' calls are currently selected.
+     * @returns {void}
+     */
+var animateNearCallsSwitch = function (labelEl, checked) {
+	var inputEl = labelEl.firstChild;
+	if (labelEl.dataset.rendered !== String(checked)) {
+		inputEl.checked = !checked;
+		inputEl.getBoundingClientRect(); // Force a style flush so the transition starts from the old state
+		inputEl.checked = checked;
+	}
+	labelEl.dataset.rendered = checked;
+};
+
+/**
+     * Pad each near/far switch so it lines up with the left edge of the first call above it.
+     *
+     * @returns {void}
+     */
+var alignNearCallsSwitches = function () {
+	document.querySelectorAll('.method-calls-switch').forEach(function (switchEl) {
+		var callsEl = switchEl.parentElement;
+		var firstCallCanvas = callsEl.querySelector('canvas');
+		if (!firstCallCanvas || firstCallCanvas.offsetWidth === 0) {
+			return;
+		}
+		var zoom = parseFloat(getComputedStyle(switchEl).zoom) || 1;
+		switchEl.style.paddingLeft = `${(firstCallCanvas.getBoundingClientRect().left - callsEl.getBoundingClientRect().left) / zoom}px`;
+	});
 };
 
 /**
@@ -73,12 +141,31 @@ var redrawMethodView = function () {
 		var newScale = (typeof window.devicePixelRatio === 'number') ? window.devicePixelRatio : 1;
 		var newFollow = LocalStorage.getSetting('method_follow', 'heaviest');
 		var newStyle = (URL.parameter('style') !== null) ? URL.parameter('style') : LocalStorage.getSetting('method_style', 'numbers');
+		var newNearCalls = !!LocalStorage.getSetting('method_near_calls', true);
+		var hasFarCalls = Object.keys(options.calls || {}).some(function (title) {
+			return title.endsWith(' (Far)');
+		});
 		var widths, maxWidth;
 
-		// Update Method Object if 'follow' changed
-		if (newFollow !== lastFollow) {
+		// Update Method Object if 'follow' or the near/far call preference changed
+		if (newFollow !== lastFollow || newNearCalls !== lastNearCalls) {
 			options.workingBell = newFollow;
-			method = new GridOptionsBuilder(structuredClone(options));
+			var methodOptions = structuredClone(options);
+			var unwantedSuffix = newNearCalls ? ' (Far)' : ' (Near)';
+			Object.keys(methodOptions.calls || {}).forEach(function (title) {
+				if (title.endsWith(unwantedSuffix)) {
+					delete methodOptions.calls[title];
+				}
+			});
+			// Methods with both near and far calls have calling positions for each
+			if (methodOptions.callingPositions && !methodOptions.callingPositions.titles) {
+				methodOptions.callingPositions = methodOptions.callingPositions[newNearCalls ? 'near' : 'far'] || false;
+			}
+			method = new GridOptionsBuilder(methodOptions);
+			if (newNearCalls !== lastNearCalls) {
+				// Force the grid and call lines to be rebuilt
+				lastScale = lastStyle = null;
+			}
 		}
 
 		if (!method) {
@@ -121,7 +208,7 @@ var redrawMethodView = function () {
 		}
 
 		// Re-create line views if style or music highlighting changed
-		if (newHighlightMusic !== lastHighlightMusic || newFollow !== lastFollow || newStyle !== lastStyle) {
+		if (newHighlightMusic !== lastHighlightMusic || newFollow !== lastFollow || newNearCalls !== lastNearCalls || newStyle !== lastStyle) {
 			options_plainCourse = method.gridOptions.plainCourse[newStyle]();
 			options_plainCourse.highlighting = newHighlightMusic ? { show: true, colors: music } : false;
 			line_plainCourse = new MethodGrid(options_plainCourse);
@@ -189,9 +276,15 @@ var redrawMethodView = function () {
 			});
 
 			gridContainerEl.appendChild(grid_plainCourse.draw());
+			var gridCallsEl = document.createElement('div');
+			gridCallsEl.className = 'method-calls';
 			for (var i = 0; i < grid_calls.length; i++) {
-				gridContainerEl.appendChild(grid_calls[i].draw());
+				gridCallsEl.appendChild(grid_calls[i].draw());
 			}
+			if (hasFarCalls) {
+				gridCallsEl.appendChild(createNearCallsSwitch(gridContainerEl, newNearCalls));
+			}
+			gridContainerEl.appendChild(gridCallsEl);
 
 			// Align grid canvases
 			var gridCanvases = gridContainerEl.querySelectorAll('canvas');
@@ -213,9 +306,16 @@ var redrawMethodView = function () {
 		if (newScale !== lastScale || newStyle !== lastStyle) {
 			lineContainerEl.innerHTML = '';
 
+			// Calls (and the near/far switch under them) sit in their own wrapper so the switch only clears the calls
+			var lineCallsEl = document.createElement('div');
+			lineCallsEl.className = 'method-calls';
 			for (var i = 0; i < line_calls.length; i++) {
-				lineContainerEl.appendChild(line_calls[i].draw());
+				lineCallsEl.appendChild(line_calls[i].draw());
 			}
+			if (hasFarCalls) {
+				lineCallsEl.appendChild(createNearCallsSwitch(lineContainerEl, newNearCalls));
+			}
+			lineContainerEl.appendChild(lineCallsEl);
 
 			// Align call canvases
 			var callCanvases = lineContainerEl.querySelectorAll('canvas');
@@ -257,10 +357,19 @@ var redrawMethodView = function () {
 			}
 		}
 
+		alignNearCallsSwitches();
+		[lineContainerEl, gridContainerEl].forEach(function (containerEl) {
+			var switchEl = nearCallsSwitches.get(containerEl);
+			if (switchEl && switchEl.isConnected) {
+				animateNearCallsSwitch(switchEl, newNearCalls);
+			}
+		});
+
 		// Update last known states
 		lastShowToolTips = newShowTooltips;
 		lastHighlightMusic = newHighlightMusic;
 		lastStyle = newStyle;
+		lastNearCalls = newNearCalls;
 		lastScale = newScale;
 		lastNumberOfColumns = newNumberOfColumns;
 		lastFollow = newFollow;

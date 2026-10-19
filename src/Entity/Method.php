@@ -1012,10 +1012,19 @@ class Method
                     case 0:
                         if (0 == $stage % 2) {
                             if ($leadEndChange == '1'.$n) {
-                                $calls = [
-                                    'Bob' => ['symbol' => '-', 'notation' => '1'.$n_2, 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1],
-                                    'Single' => ['symbol' => 's', 'notation' => '1'.$n_2.$n_1.$n, 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1],
-                                ];
+                                if ($stage > 6) {
+                                    $calls = [
+                                        'Bob (Near)' => ['symbol' => '-', 'notation' => '14', 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1],
+                                        'Bob (Far)' => ['symbol' => '-', 'notation' => '1'.$n_2, 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1],
+                                        'Single (Near)' => ['symbol' => 's', 'notation' => '1234', 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1],
+                                        'Single (Far)' => ['symbol' => 's', 'notation' => '1'.$n_2.$n_1.$n, 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1],
+                                    ];
+                                } else {
+                                    $calls = [
+                                        'Bob' => ['symbol' => '-', 'notation' => '1'.$n_2, 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1],
+                                        'Single' => ['symbol' => 's', 'notation' => '1'.$n_2.$n_1.$n, 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1],
+                                    ];
+                                }
                             }
                         }
                         break;
@@ -1027,10 +1036,12 @@ class Method
                                     'Single' => ['symbol' => 's', 'notation' => '1234', 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1],
                                 ];
                             } elseif ($leadEndChange == '1'.$n) {
-                                if ('m' == $this->getLeadHeadCode() && $stage > 6) {
+                                if ($stage > 6) {
                                     $calls = [
-                                        'Bob' => ['symbol' => '-', 'notation' => '14', 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1],
-                                        'Single' => ['symbol' => 's', 'notation' => '1234', 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1],
+                                        'Bob (Near)' => ['symbol' => '-', 'notation' => '14', 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1],
+                                        'Bob (Far)' => ['symbol' => '-', 'notation' => '1'.$n_2, 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1],
+                                        'Single (Near)' => ['symbol' => 's', 'notation' => '1234', 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1],
+                                        'Single (Far)' => ['symbol' => 's', 'notation' => '1'.$n_2.$n_1.$n, 'from' => 0, 'every' => $lengthOfLead, 'cover' => 1],
                                     ];
                                 } else {
                                     $calls = [
@@ -1136,60 +1147,69 @@ class Method
             $stage = $this->getStage();
             $calls = $this->getCalls();
             $lengthOfLead = $this->getLengthOfLead();
-            if ($stage > 4 && !empty($calls) && isset($calls['Bob']) && $calls['Bob']['every'] == $lengthOfLead && 0 == $calls['Bob']['from'] && 1 == $calls['Bob']['cover']) {
-                // Calling positions for calls at lead ends (Home, Wrong and so forth)
-                $bobNotation = PlaceNotation::explodedToPermutations($stage, PlaceNotation::explode($calls['Bob']['notation']));
-                $leadHeads = $this->getLeadHeads();
-                // Work out what the lead end of a bobbed lead looks like
-                $notation = PlaceNotation::explodedToPermutations($stage, PlaceNotation::explode($this->getNotationExpanded()));
-                $notation[$lengthOfLead - 1] = $bobNotation[0];
-                $bobbedLead = PlaceNotation::apply($notation, PlaceNotation::rounds($stage));
-                $bobbedLeadHeadPermutation = array_map(function ($b) {
-                    return PlaceNotation::bellToInt($b) - 1;
-                }, array_pop($bobbedLead));
-                // Collect an array of what happens at each lead if a bob is called
-                $bobbedLeadHeads = [PlaceNotation::permute(PlaceNotation::rounds($stage), $bobbedLeadHeadPermutation)];
-                for ($i = 1; $i < count($leadHeads); ++$i) {
-                    array_push($bobbedLeadHeads, PlaceNotation::permute($leadHeads[$i - 1], $bobbedLeadHeadPermutation));
-                }
-                // Convert the array of lead heads into calling position names
-                $this->callingPositions = ['from' => 0, 'every' => $lengthOfLead, 'titles' => array_map(function ($leadEnd) use ($stage) {
-                    $position = array_search(PlaceNotation::intToBell($stage), $leadEnd);
-                    switch ($position + 1) {
-                        case $stage:
-                            return 'H';
-                        case $stage - 1:
-                            if (0 == $stage % 2) {
-                                return 'W';
-                            }
-
-                            return 'M';
-                        case 2:
-                            return 'I';
-                        case 3:
-                            return 'B';
-                        case 4:
-                            return 'F';
-                        case $stage - 2:
-                            if (0 == $stage % 2) {
-                                return 'M';
-                            }
-
-                            return 'W';
-                        case 5:
-                            return 'V';
-                        case 6:
-                            return 'X';
-                        case 7:
-                            return 'S';
-                        case 8:
-                            return 'E';
-                        case 9:
-                            return 'N';
+            $bobs = isset($calls['Bob']) ? ['single' => $calls['Bob']] : array_filter(['near' => $calls['Bob (Near)'] ?? null, 'far' => $calls['Bob (Far)'] ?? null]);
+            $callingPositions = [];
+            foreach ($bobs as $variant => $bob) {
+                if ($stage > 4 && $bob['every'] == $lengthOfLead && 0 == $bob['from'] && 1 == $bob['cover']) {
+                    // Calling positions for calls at lead ends (Home, Wrong and so forth)
+                    $bobNotation = PlaceNotation::explodedToPermutations($stage, PlaceNotation::explode($bob['notation']));
+                    $leadHeads = $this->getLeadHeads();
+                    // Work out what the lead end of a bobbed lead looks like
+                    $notation = PlaceNotation::explodedToPermutations($stage, PlaceNotation::explode($this->getNotationExpanded()));
+                    $notation[$lengthOfLead - 1] = $bobNotation[0];
+                    $bobbedLead = PlaceNotation::apply($notation, PlaceNotation::rounds($stage));
+                    $bobbedLeadHeadPermutation = array_map(function ($b) {
+                        return PlaceNotation::bellToInt($b) - 1;
+                    }, array_pop($bobbedLead));
+                    // Collect an array of what happens at each lead if a bob is called
+                    $bobbedLeadHeads = [PlaceNotation::permute(PlaceNotation::rounds($stage), $bobbedLeadHeadPermutation)];
+                    for ($i = 1; $i < count($leadHeads); ++$i) {
+                        array_push($bobbedLeadHeads, PlaceNotation::permute($leadHeads[$i - 1], $bobbedLeadHeadPermutation));
                     }
-                }, $bobbedLeadHeads)];
-            } else {
+                    // Convert the array of lead heads into calling position names
+                    $callingPositions[$variant] = ['from' => 0, 'every' => $lengthOfLead, 'titles' => array_map(function ($leadEnd) use ($stage) {
+                        $position = array_search(PlaceNotation::intToBell($stage), $leadEnd);
+                        switch ($position + 1) {
+                            case $stage:
+                                return 'H';
+                            case $stage - 1:
+                                if (0 == $stage % 2) {
+                                    return 'W';
+                                }
+
+                                return 'M';
+                            case 2:
+                                return 'I';
+                            case 3:
+                                return 'B';
+                            case 4:
+                                return 'F';
+                            case $stage - 2:
+                                if (0 == $stage % 2) {
+                                    return 'M';
+                                }
+
+                                return 'W';
+                            case 5:
+                                return 'V';
+                            case 6:
+                                return 'X';
+                            case 7:
+                                return 'S';
+                            case 8:
+                                return 'E';
+                            case 9:
+                                return 'N';
+                        }
+                    }, $bobbedLeadHeads)];
+                }
+            }
+            if (empty($callingPositions)) {
                 $this->callingPositions = [];
+            } elseif (isset($callingPositions['single'])) {
+                $this->callingPositions = $callingPositions['single'];
+            } else {
+                $this->callingPositions = $callingPositions;
             }
         }
 

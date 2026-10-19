@@ -3,7 +3,7 @@ import LocalStorage from '../../helpers/LocalStorage.js';
 /**
  * Synchronise settings UI controls with persisted local settings.
  */
-const settings = ['method_follow', 'method_style', 'method_tooltips', 'method_music'];
+const settings = ['method_follow', 'method_style', 'method_tooltips', 'method_music', 'method_near_calls'];
 
 /**
  * Apply persisted settings to matching form controls.
@@ -31,6 +31,7 @@ function initialSet() {
 }
 
 window.addEventListener('bl:page:finished', function () { initialSet(); } );
+window.addEventListener('bl:setting:changed', function () { initialSet(); } );
 initialSet();
 
 settings.forEach(function (setting) {
