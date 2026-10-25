@@ -40,4 +40,8 @@ Collection data has been added manually and is based on common practice in chang
 
 Performance data (the date and location of the first towerbell and handbell peals of each method, where known) is sourced from the CCCBR data. The [XML schema (part 7)](https://cccbr.github.io/methods-library/method_xml_1.0.pdf) has been mapped into the `performances` table in an obvious way.
 
-Renamed methods are also stored in the `performances` table (with `type = 'renamedMethod'`) using data from [`src/Resources/data/method_renamed.php`](../src/Resources/data/method_renamed.php), turn sourced [from here](https://framework.cccbr.org.uk/version1/amendedmethodtitles.html).
+Renamed methods are also stored in the `performances` table (with `type = 'renamedMethod'`) using data from [`src/Resources/data/method_renamed.php`](../src/Resources/data/method_renamed.php), [sourced from here](https://framework.cccbr.org.uk/version1/amendedmethodtitles.html).
+
+## Touches
+
+Touches are generated on-the-fly by the scripts in [`../assets/js/touch_generator/`](../assets/js/touch_generator/) and not stored in the database or on users' devices.

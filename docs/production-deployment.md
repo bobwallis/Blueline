@@ -6,7 +6,7 @@ This guide covers production deployment and operations for Blueline.
 
 Blueline runs on a dedicated VM with:
 
-- Debian 13 (Trixie)
+- Debian operating system
 - PostgreSQL for data storage
 - FrankenPHP for serving the application
 - Cloudflare Tunnel for secure public access, caching, and public ingress
@@ -20,7 +20,7 @@ The VM does not need to expose inbound ports directly.
 - `sudo` access for the provisioning user
 - A Cloudflare account with Zero Trust enabled
 
-Any environment that can run the required software should run Blueline, but note that URL generation for method names relies on iconv transliteration (UTF-8 to ASCII). If using a non-Debian base image, ensure iconv transliteration support is available (for example, avoid musl-only environments like Alpine).
+Any environment that can run the required software should run Blueline, but note that URL generation for method names relies on iconv transliteration (UTF-8 to ASCII). If using a non-Debian base image, ensure iconv transliteration support is available (for example, avoid musl-only environments like Alpine Linux).
 
 ## Initial production setup
 
@@ -30,35 +30,35 @@ From the repository root:
 2. Review arguments for your environment.
 3. Run `./bin/provision` with any required flags.
 
-If only part of the stack should be managed by Blueline provisioning (for example, if you are using an external database, alternate web server, or no Cloudflare tunnel), use the relevant command-line options.
+If only part of the stack should be managed by Blueline's provisioning scripts (for example, if you are using an external database, alternate web server, or no Cloudflare tunnel), use the relevant command-line options.
 
 ## Provisioning script behavior
 
 The script `./bin/provision` will:
 
-- Update Debian packages to the latest versions
+- Update Debian packages to the latest versions.
 - Install PHP, Composer, Symfony CLI, PostgreSQL, FrankenPHP, locale, and timezone packages (via apt sources where needed).
-- Set locale and timezone to the UK
-- Install all of Blueline's PHP and NPM dependencies
-- Configure PHP's OPcache according to Symfony's reccomended production settings
-- Configure PostgreSQL with suitable settings for the expected database workload, and enable the systemd service
-- Generate `APP_SECRET` and write `DATABASE_URL`, `APP_ENV`, `FRANKENPHP_PORT`, and local `DEFAULT_URI` to `.env.local`
-- Create the database, set-up the schema and install the `fuzzystrmatch` extension
-- Generate a managed `Caddyfile` for FrankenPHP worker mode
-- Install and enable `blueline.service` to run FrankenPHP on configurable HTTPS localhost port
-- Install and enable `blueline-image.service` (Puppeteer image renderer) at low CPU/IO/OOM priority so it yields to FrankenPHP and PostgreSQL
-- Install cloudflared and walk through Cloudflare tunnel creation (interactive)
-- Clear caches
-- Warm production cache
-- Build frontend JS, CSS and image assets
-- Dump compiled `.env`
-- Pre-generate error pages
+- Set locale and timezone to the UK.
+- Install all of Blueline's PHP and NPM dependencies.
+- Configure PHP's OPcache according to Symfony's reccomended production settings.
+- Configure PostgreSQL with suitable settings for the expected database workload, and enable the systemd service.
+- Generate `APP_SECRET` and write `DATABASE_URL`, `APP_ENV`, `FRANKENPHP_PORT`, and local `DEFAULT_URI` to `.env.local`.
+- Create the database, set-up the schema and install the `fuzzystrmatch` extension.
+- Generate a managed `Caddyfile` for FrankenPHP worker mode.
+- Install and enable `blueline.service` to run FrankenPHP on configurable HTTPS localhost port.
+- Install and enable `blueline-image.service` (Puppeteer image renderer) at low CPU/IO/OOM priority so it yields to FrankenPHP and PostgreSQL.
+- Install cloudflared and walk through Cloudflare tunnel creation (interactive).
+- Clear caches.
+- Warm production cache.
+- Build frontend JS, CSS and image assets.
+- Dump compiled `.env`.
+- Pre-generate error pages.
 
-Provisioning is idempotent where possible and safe to re-run.
+Provisioning is idempotent where possible and is safe to re-run later.
 
 ## Data import
 
-The provisioning script does not populate the database with data. Do this by running `./bin/update` or `bin/fetchAndImportData`.
+The provisioning script does **not** populate the database with data. Do this by running `./bin/update` or `bin/fetchAndImportData`.
 
 ## Ongoing production updates
 

@@ -2,6 +2,15 @@
 
 Blueline is an application for searching and exploring bell-ringing methods and related data.
 
+*Primary Mission*: Provide a fast, accessible, and reliable web application for bellringers to look up, visualise, and learn methods and related data.
+
+*Target Audience*: Bellringers of all skill levels using a desktop or mobile device. Noting offline use /low-connectivity is common at tower practices or events.
+
+*Key Experience Driver*: Instant lookup speed, clean rendering of blueline diagrams, and minimal noise.
+
+*Maintainability*: Stick to long-term-support versions of supporting software where possible, without adding heavy third-party runtime frameworks unnecessarily.
+
+
 ## Documentation index
 
 - [Development and installation](docs/development-deployment.md): Local setup, development workflow, testing, and dependency updates.

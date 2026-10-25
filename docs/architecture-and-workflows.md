@@ -60,30 +60,7 @@ This script downloads external method data, runs import commands, recalculates s
 - The browser instance is kept warm between requests and restarted after a configurable number of renders (`BROWSER_RESTART_AFTER`, default `200`) to limit memory growth over time.
 
 ### Quality checks
-Use:
-- `./bin/test`
-
-For PHP style checks/fixes in `src/` and `tests/`:
-- `symfony composer lint:php-style`
-- `symfony composer fix:php-style`
-
-This runs:
-- A check that the test database exists and  has data
-- Doctrine schema validation
-- Symfony container lint
-- Twig template lint
-- PHP code lint
-- PHP-CS-Fixer Symfony style check for `src/` and `tests/` (non-blocking)
-- Frontend asset compilation
-- Node.js tests of the touch_generator
-- PHPUnit
-
-Or run targeted tests directly with PHPUnit:
-- `./bin/phpunit tests/Controller`
-- `./bin/phpunit --filter testActionName tests/Controller/DefaultControllerTest.php`
-
-Or to test the touch_generator only via a dependency-free Node test suite, including independent proving, packed engines, calling/Siril round trips, and real worker-pool tests:
-- `npm run test:js`
+Use `./bin/test`, or other things as described in [development-deployment.md](development-deployment.md).
 
 ## Change guidelines
 - Keep changes minimal and localised.

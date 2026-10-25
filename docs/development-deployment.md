@@ -15,11 +15,11 @@ To minimise breakage from ecosystem churn, Blueline targets stable LTS tooling w
 
 ## Preferred development setup
 
-The easiest development workflow uses [Visual Studio Code](https://code.visualstudio.com/) with [Remote Containers](https://code.visualstudio.com/docs/remote/containers). This creates a single Docker development container with the required configuration.
+The easiest development workflow uses [Visual Studio Code](https://code.visualstudio.com/) with [Remote Containers](https://code.visualstudio.com/docs/remote/containers). This creates a single Docker development container, isolated from the rest of your computer, similar to the recommended production deployment/configuration.
 
 ### Requirements
 
-Open the project folder in Visual Studio Code. Dev container configuration is in `.devcontainer/`.
+Open the project folder in Visual Studio Code. Dev container configuration is in `.devcontainer/` and you should be prompted to open the project in a container.
 
 ### Initial development setup
 
@@ -29,16 +29,16 @@ When creating the container, `./bin/provision` runs automatically. If it fails, 
 
 The script `./bin/provision` will:
 
-- Update Debian packages to the latest versions
+- Update Debian packages to the latest versions.
 - Install PHP, Composer, Symfony CLI, PostgreSQL, FrankenPHP, Chromium, locale, and timezone packages (via apt sources where needed).
-- Set locale and timezone to the UK
-- Install all of Blueline's PHP and NPM dependencies
-- Configure PHP's OPcache according to Symfony's reccomended settings
-- Configure PostgreSQL with suitable settings for the expected database workload
-- Generate `APP_SECRET` and write `DATABASE_URL`, `APP_ENV=dev`, `FRANKENPHP_PORT`, `IMAGESERVER_PORT`, and `DEFAULT_URI` to `.env.local`
-- Generate a managed `Caddyfile` configured for local HTTPS and FrankenPHP worker mode
-- Create the database, set-up the schema and install the `fuzzystrmatch` extension
-- Clear caches
+- Set locale and timezone to the UK.
+- Install all of Blueline's PHP and NPM dependencies.
+- Configure PHP's OPcache according to Symfony's reccomended settings.
+- Configure PostgreSQL with suitable settings for the expected database workload.
+- Generate `APP_SECRET` and write `DATABASE_URL`, `APP_ENV=dev`, `FRANKENPHP_PORT`, `IMAGESERVER_PORT`, and `DEFAULT_URI` to `.env.local`.
+- Generate a managed `Caddyfile` configured for local HTTPS and FrankenPHP worker mode.
+- Create the database, set-up the schema and install the `fuzzystrmatch` extension.
+- Clear caches.
 
 On subsequent runs, it skips already-completed steps and is safe to re-run.
 
@@ -137,6 +137,9 @@ The full `./bin/test` pipeline includes frontend linting and will fail if any as
 Some command tests are very slow (primarily method import tests). Include them with:
 
 - `BLUELINE_RUN_SLOW_COMMAND_TESTS=1 ./bin/test`
+
+To test the touch_generator only via a dependency-free Node test suite, including independent proving, packed engines, calling/Siril round trips, and real worker-pool tests:
+- `npm run test:js`
 
 ### Updating PHP dependencies
 
