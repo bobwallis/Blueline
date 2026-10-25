@@ -468,7 +468,7 @@ var PlaceNotation = {
 		}
 		var row = new Array(stage), i = stage, mid = Math.floor(stage / 2);
 		while (i--) {
-			row[i] = Math.ceil(i / 2) + ((i % 2 === 0) ? 0 : mid);
+			row[i] = Math.floor(i / 2) + ((i % 2 === 0) ? 0 : mid);
 		}
 		return row;
 	},
