@@ -579,7 +579,7 @@ section.method {
 		grid-template-columns: auto minmax(0, 1fr);
 		align-items: center;
 	}
-	.touch-position-setting {
+	.touch-position-setting, .touch-named-rows-setting {
 		margin: calc(var(--content-y-padding) / 2) 0;
 	}
 	input[type="number"] {

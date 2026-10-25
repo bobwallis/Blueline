@@ -1,4 +1,4 @@
-import { initialSearchTasks, matchesCallingPositions, matchesTenorsTogether, snapshotBuffers } from '../../touch_generator/Search.js';
+import { initialSearchTasks, matchesCallingPositions, matchesMusic, matchesTenorsTogether, snapshotBuffers } from '../../touch_generator/Search.js';
 
 // Sort and merge length ranges so containment checks compare whole ranges.
 // The last range's maximum is the search's complete-touch allowance.
@@ -45,6 +45,9 @@ export default class TouchSearchPool {
 		minParts = 1,
 		callingPositions = [],
 		tenorsTogether = false,
+		noBackstroke65s = false,
+		namedRows = [],
+		tenorBehind = false,
 		maximumResults = 250,
 		// Touches disables this once the user toggles singles for the method.
 		autoSingles = true,
@@ -57,6 +60,9 @@ export default class TouchSearchPool {
 		this.minParts = minParts;
 		this.callingPositions = this.validateCallingPositions(callingPositions);
 		this.tenorsTogether = this.validateTenorsTogether(tenorsTogether);
+		this.noBackstroke65s = this.validateNoBackstroke65s(noBackstroke65s);
+		this.tenorBehind = this.validateTenorBehind(tenorBehind);
+		this.namedRows = this.validateNamedRows(namedRows, this.tenorBehind);
 		this.maximumResults = maximumResults;
 		this.urls = urls;
 		this.onChange = onChange;
@@ -174,6 +180,7 @@ export default class TouchSearchPool {
 			&& touch.length / (touch.partLength ?? touch.length) >= this.minParts
 			&& matchesCallingPositions(this.method, touch, this.callingPositions)
 			&& (!this.tenorsTogether || matchesTenorsTogether(this.method, touch))
+			&& matchesMusic(touch.music, { noBackstroke65s: this.noBackstroke65s, namedRows: this.namedRows, tenorBehind: this.tenorBehind })
 			&& (this.allowSingles || !touch.word.some(call => this.method.calls[call].symbol === 's'));
 	}
 
@@ -195,19 +202,39 @@ export default class TouchSearchPool {
 		return enabled;
 	}
 
-	updateOptions ({ lengthRanges = this.lengthRanges, minParts = this.minParts, callingPositions = this.callingPositions, tenorsTogether = this.tenorsTogether, maximumResults = this.maximumResults, budgetMs = this.budgetMs }) {
+	validateNoBackstroke65s (enabled) {
+		if (typeof enabled !== 'boolean' || enabled && !this.method.back65) throw new Error('65s at back can only be excluded on even stages.');
+		return enabled;
+	}
+
+	validateTenorBehind (enabled) {
+		if (typeof enabled !== 'boolean' || enabled && !this.method.namedRowsBehind) throw new Error('A tenor behind can only be assumed on odd stages.');
+		return enabled;
+	}
+
+	validateNamedRows (names, tenorBehind) {
+		if (!Array.isArray(names) || names.some(name => !(tenorBehind ? this.method.namedRowsBehind : this.method.namedRows).some(row => row.name === name))) throw new Error('Invalid named rows.');
+		return [...new Set(names)].sort();
+	}
+
+	updateOptions ({ lengthRanges = this.lengthRanges, minParts = this.minParts, callingPositions = this.callingPositions, tenorsTogether = this.tenorsTogether, noBackstroke65s = this.noBackstroke65s, namedRows = this.namedRows, tenorBehind = this.tenorBehind, maximumResults = this.maximumResults, budgetMs = this.budgetMs }) {
 		validateOptions(minParts, maximumResults, budgetMs, this.changeLimit);
 		lengthRanges = normaliseRanges(lengthRanges, this.changeLimit);
 		const maxChanges = lengthRanges.at(-1)[1];
 		callingPositions = this.validateCallingPositions(callingPositions);
 		tenorsTogether = this.validateTenorsTogether(tenorsTogether);
+		noBackstroke65s = this.validateNoBackstroke65s(noBackstroke65s);
+		tenorBehind = this.validateTenorBehind(tenorBehind);
+		namedRows = this.validateNamedRows(namedRows, tenorBehind);
 		// Expanded eligibility, such as a newly covered length, can include
 		// candidates already discarded by a worker. Restart exploration, not
 		// the result cache. A changed maximum also changes closure pruning, so
 		// its old frontier cannot be reused. Position changes also change which
 		// fixed-tenor rotations must be explored. Restart even on narrowing,
-		// retaining proved results.
-		const restart = maxChanges !== this.method.maxChanges || lengthRanges.some(([min, max]) => !this.lengthRanges.some(([low, high]) => low <= min && max <= high)) || minParts < this.minParts || callingPositions.join(',') !== this.callingPositions.join(',') || tenorsTogether !== this.tenorsTogether;
+		// retaining proved results. Music filters also choose each cached
+		// touch's displayed rotation and change 65s pruning, so restart on any
+		// change; fresh results replace cached rotations that no longer match.
+		const restart = maxChanges !== this.method.maxChanges || lengthRanges.some(([min, max]) => !this.lengthRanges.some(([low, high]) => low <= min && max <= high)) || minParts < this.minParts || callingPositions.join(',') !== this.callingPositions.join(',') || tenorsTogether !== this.tenorsTogether || noBackstroke65s !== this.noBackstroke65s || namedRows.join(',') !== this.namedRows.join(',') || tenorBehind !== this.tenorBehind;
 		const previousState = this.state;
 		if (this.state === 'running') this.pause('stopped');
 		this.remainingMs = Math.max(0, budgetMs - this.elapsedMs);
@@ -215,6 +242,9 @@ export default class TouchSearchPool {
 		this.minParts = minParts;
 		this.callingPositions = callingPositions;
 		this.tenorsTogether = tenorsTogether;
+		this.noBackstroke65s = noBackstroke65s;
+		this.namedRows = namedRows;
+		this.tenorBehind = tenorBehind;
 		this.maximumResults = maximumResults;
 		this.budgetMs = budgetMs;
 		this.method = { ...this.method, maxChanges };
@@ -360,7 +390,7 @@ export default class TouchSearchPool {
 				entry.sliceMs = sliceMs;
 				// Split the first two decisions quickly to create varied lanes
 				// before spending full slices deep in any one call pattern.
-				entry.worker.postMessage({ type: 'task', task: entry.task, limits: { budgetNodes: entry.task.prefix.length < 2 ? 1 : Math.ceil(entry.budgetNodes * sliceMs / 500), budgetMs: sliceMs, maximumResults: Infinity, snapshots: true, lengthRanges: this.lengthRanges, minParts: this.minParts, callingPositions: this.callingPositions, tenorsTogether: this.tenorsTogether } }, snapshotBuffers(entry.task));
+				entry.worker.postMessage({ type: 'task', task: entry.task, limits: { budgetNodes: entry.task.prefix.length < 2 ? 1 : Math.ceil(entry.budgetNodes * sliceMs / 500), budgetMs: sliceMs, maximumResults: Infinity, snapshots: true, lengthRanges: this.lengthRanges, minParts: this.minParts, callingPositions: this.callingPositions, tenorsTogether: this.tenorsTogether, noBackstroke65s: this.noBackstroke65s, namedRows: this.namedRows, tenorBehind: this.tenorBehind } }, snapshotBuffers(entry.task));
 			}
 		} catch (error) {
 			this.fail(error.message || 'Could not send work to the touch search worker.');

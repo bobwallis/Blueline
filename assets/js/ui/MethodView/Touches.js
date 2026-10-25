@@ -49,6 +49,49 @@ class Touches {
 		this.positions = panel.querySelector('[data-touch-positions]');
 		this.tenors = panel.querySelector('[data-touch-tenors]');
 		this.tenors.checked = false;
+		// 65s and named rows depend only on stage, so set them up once per page.
+		// "65s" names the two heaviest bells reversed (87s on eight). On odd
+		// stages, assuming a tenor behind switches to the next stage's named rows.
+		const { namedRows, namedRowsBehind } = compileMethod(this.config);
+		this.back65 = panel.querySelector('[data-touch-back65]');
+		this.back65.checked = this.config.stage % 2 === 0;
+		this.back65Name = `${PlaceNotation.bellToChar(this.config.stage - 1)}${PlaceNotation.bellToChar(this.config.stage - 2)}s`;
+		panel.querySelector('[data-touch-back65-label]').textContent = `No ${this.back65Name} at back`;
+		panel.querySelector('[data-touch-back65-setting]').hidden = this.config.stage % 2 !== 0;
+		this.tenorBehind = panel.querySelector('[data-touch-tenor-behind]');
+		this.tenorBehind.checked = !!namedRowsBehind;
+		panel.querySelector('[data-touch-tenor-behind-setting]').hidden = !namedRowsBehind;
+		const rowChoices = (selected = []) => (this.tenorBehind.checked ? namedRowsBehind : namedRows).map(({ name, row }) => ({ value: name, label: `${name} (${row.map(PlaceNotation.bellToChar).join('')})`, selected: selected.includes(name) }));
+		this.namedRows = panel.querySelector('[data-touch-named-rows]');
+		this.namedRowChoices = new Choices(this.namedRows, {
+			allowHTML: false,
+			labelId: 'touch_named_rows_label',
+			itemSelectText: '',
+			removeItemButton: true,
+			removeItemIconText: () => '×',
+			searchPlaceholderValue: 'Search named rows',
+			placeholderValue: 'Any rows',
+			shouldSort: false,
+			choices: rowChoices(),
+			callbackOnCreateTemplates () {
+				return {
+					item (config, data, ...args) {
+						return Choices.defaults.templates.item.call(this, config, { ...data, label: data.value }, ...args);
+					},
+				};
+			},
+		});
+		this.namedRows.addEventListener('change', () => {
+			this.namedRowChoices.input.element.placeholder = this.namedRows.selectedOptions.length ? 'Rows' : 'Any rows';
+		});
+		// Registered before the settings listener below, so it reads the new list.
+		// Keep selections whose names exist with and without the tenor.
+		this.tenorBehind.addEventListener('change', () => {
+			const selected = [...this.namedRows.selectedOptions].map(option => option.value);
+			this.namedRowChoices.removeActiveItems();
+			this.namedRowChoices.setChoices(rowChoices(selected), 'value', 'label', true);
+			this.namedRowChoices.input.element.placeholder = this.namedRows.selectedOptions.length ? 'Rows' : 'Any rows';
+		});
 		this.positionChoices = new Choices(this.positions, {
 			allowHTML: false,
 			labelId: 'touch_calling_positions_label',
@@ -118,7 +161,7 @@ class Touches {
 		this.part.value = 1;
 		this.limit.value = 100;
 		this.budget.value = LocalStorage.getSetting('touch_budget_seconds', 20);
-		for (const input of [panel.querySelector('.touch-length-setting'), this.part, this.limit, this.budget, this.positions, this.tenors]) {
+		for (const input of [panel.querySelector('.touch-length-setting'), this.part, this.limit, this.budget, this.positions, this.tenors, this.back65, this.tenorBehind, this.namedRows]) {
 			input.addEventListener('change', event => {
 				const row = event.target.closest('.touch-custom-length');
 				const [from, to] = row?.querySelectorAll('input[type="number"]') ?? [];
@@ -207,6 +250,9 @@ class Touches {
 			minParts: this.part.valueAsNumber,
 			callingPositions: [...this.positions.selectedOptions].map(option => option.value),
 			tenorsTogether: this.tenors.checked,
+			noBackstroke65s: this.back65.checked,
+			namedRows: [...this.namedRows.selectedOptions].map(option => option.value),
+			tenorBehind: this.tenorBehind.checked,
 			maximumResults: this.limit.valueAsNumber,
 			budgetMs: this.budget.valueAsNumber * 1000,
 		};
@@ -276,13 +322,14 @@ class Touches {
 		for (const touch of visible) {
 			const key = touch.key;
 			const previous = this.shown.get(key);
-			if (previous?.touch === touch) continue;
+			// Cards list music read with or without a tenor behind; rebuild on a switch.
+			if (previous?.touch === touch && previous.tenorBehind === pool.tenorBehind) continue;
 			try {
 				const card = this.addResult(touch);
 				if (previous) {
 					previous.card.remove();
 				}
-				this.shown.set(key, { touch, card });
+				this.shown.set(key, { touch, card, tenorBehind: pool.tenorBehind });
 			} catch (error) {
 				console.error('Touch presentation failed:', error);
 				pool.fail(error.message);
@@ -304,6 +351,8 @@ class Touches {
 		card.setAttribute('aria-label', `View ${touch.length}-change touch details`);
 		const summary = element('h3', `${touch.length} changes`, 'touch-title');
 		card.append(summary);
+		const music = this.musicSummary(touch);
+		if (music) card.append(element('p', music, 'touch-music'));
 		card.append(this.layoutTable(layouts, layouts.defaultLayout));
 		card.addEventListener('keydown', event => {
 			if (event.key === 'Enter' || event.key === ' ') {
@@ -373,6 +422,14 @@ class Touches {
 		return wrap;
 	}
 
+	// Named rows found (wrapped across hand/back pairs) and backstroke 65s.
+	musicSummary (touch) {
+		return [
+			...Object.entries((this.pool?.tenorBehind ? touch.music?.tenorBehind : touch.music)?.namedRows ?? {}).map(([name, count]) => count > 1 ? `${name} ×${count}` : name),
+			...this.method.back65 && touch.music?.backstroke65s ? [`${touch.music.backstroke65s} ${this.back65Name} at back`] : [],
+		].join(' · ');
+	}
+
 	expandResult (touch, description, layouts) {
 		// Build on demand, leaving the list untouched. Native dialog supplies
 		// focus containment, Escape dismissal and focus return to its opener.
@@ -395,6 +452,7 @@ class Touches {
 			card.append(calling);
 		}
 		if (!description.calling) card.append(element('p', 'Traditional calling positions could not be validated for this touch. Use the call sequence.'));
+		card.append(element('p', `Music: ${this.musicSummary(touch) || 'none of the named rows'}.`));
 		if (description.incompleteCall) card.append(element('p', 'The touch finishes part-way through the final plain or called replacement block.'));
 		else if (description.partial) card.append(element('p', '(p) is the next plain call point, which is not reached. The touch finishes with plain changes before it.'));
 		const tabs = element('div', null, 'touch-layout-tabs');
@@ -484,6 +542,7 @@ function initialise () {
 	current?.pool?.dispose();
 	current?.dialog.close();
 	current?.positionChoices.destroy();
+	current?.namedRowChoices.destroy();
 	current = null;
 	const panel = document.getElementById('method_touches');
 	if (!panel) return;
@@ -502,6 +561,7 @@ window.addEventListener('bl:page:request', () => {
 	current?.pool?.dispose();
 	current?.dialog.close();
 	current?.positionChoices.destroy();
+	current?.namedRowChoices.destroy();
 	current = null;
 });
 window.addEventListener('bl:page:finished', initialise);

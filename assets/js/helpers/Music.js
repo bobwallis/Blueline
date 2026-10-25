@@ -111,6 +111,16 @@ var namedRows = [{}, {}, {}, {}, {},
 });
 
 /**
+ * List the named rows recognised at a stage, as zero-based bell rows.
+ *
+ * @param {number} stage Number of bells.
+ * @returns {Object<string, number[]>} Row name to row.
+ */
+export function namedRowsForStage (stage) {
+	return namedRows[stage] || {};
+}
+
+/**
  * Detect and score named rows (for example Rounds, Back Rounds, Queens).
  *
  * @param {ScoredRow} scoredRow Row structure being scored in place.

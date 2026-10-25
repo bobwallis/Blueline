@@ -9,8 +9,9 @@
  * 3. TouchSearchPool uses initialSearchTasks to divide the starting searches.
  * 4. Each worker runs searchSlice: replay a task's prefix, explore further call
  *    choices, then return touches and unfinished branches for rescheduling.
- * 5. Before emitting a touch, canonicalTouch proves it with simulate and gives
- *    rotations a shared key. Presentation also uses simulate for text/export.
+ * 5. Before emitting a touch, canonicalTouch proves it with simulate, gives
+ *    rotations a shared key and picks a display rotation passing the music
+ *    filters. Presentation also uses simulate for text/export.
  *
  * Rows contain 0-based bells by position; a change p gives new[i] = old[p[i]].
  * This module has no imports so workers can load its versioned URL directly.
@@ -327,6 +328,134 @@ export function necklacePeriod (word, count, callsPerLead, previousPeriod) {
 }
 
 /**
+ * Necklace pruning for searches that prune rows with 65s at back. Rotating a
+ * touch relabels its bells, so most rotations change which rows end 65. A
+ * rotation starting at a lead head with both tenors home, an even number of
+ * changes in, keeps every row's 65s status and stroke: only those compete.
+ * searchSlice calls this after each whole lead, once homes[leads - 1] is set.
+ *
+ * Each tied candidate rotation is a border of the call word (in whole-lead
+ * symbols), so follow the KMP border chain rather than storing candidates.
+ * Return false to prune when the new lead makes a tenors-home rotation
+ * smaller; otherwise extend borders. Unlike necklacePeriod, ties are allowed
+ * to close: the shared rotation key removes duplicates.
+ */
+export function tenorsHomeNecklace (word, leads, callsPerLead, borders, homes) {
+	const lead = leads - 1;
+	const compare = function (a, b) {
+		for (let slot = 0; slot < callsPerLead; slot++) {
+			const difference = word[a * callsPerLead + slot] - word[b * callsPerLead + slot];
+			if (difference) return difference;
+		}
+		return 0;
+	};
+	if (lead === 0) {
+		borders[1] = 0;
+		return true;
+	}
+	// Border b of the first `lead` leads is the rotation starting at lead - b.
+	for (let border = borders[lead]; ; border = borders[border]) {
+		if (homes[lead - border] && compare(lead, border) < 0) return false;
+		if (!border) break;
+	}
+	let border = borders[lead];
+	while (border > 0 && compare(lead, border) !== 0) border = borders[border];
+	borders[leads] = compare(lead, border) === 0 ? border + 1 : 0;
+	return true;
+}
+
+/**
+ * Summarise a proved touch's music for result cards and pool filtering (and,
+ * later, scoring). rows are simulate's rows: rows[i] is row i+1, so even
+ * indexes are handstrokes. Search each handstroke followed by its backstroke,
+ * so named rows wrapped across the pair count too. A true touch's only
+ * whole-row Rounds is its final row, so Rounds counts only when wrapped.
+ * "65s" means the two heaviest bells reversed at the back (87s on eight).
+ * On odd stages, also read the rows with a tenor covering behind, against the
+ * next stage's named rows, so the filter can switch without searching again.
+ */
+export function touchMusic (method, rows) {
+	const n = method.stage;
+	let backstroke65s = 0;
+	for (let i = 1; i < rows.length; i += 2) if (rows[i][n - 2] === n - 1 && rows[i][n - 1] === n - 2) backstroke65s++;
+	const music = { namedRows: countNamedRows(method.namedRows || [], rows), backstroke65s };
+	if (method.namedRowsBehind) music.tenorBehind = { namedRows: countNamedRows(method.namedRowsBehind, rows.map(row => row.concat(n))) };
+	return music;
+}
+
+function countNamedRows (named, rows) {
+	const counts = {}, n = rows[0]?.length;
+	for (let i = 0; i < rows.length; i += 2) {
+		const pair = i + 1 < rows.length ? rows[i].concat(rows[i + 1]) : rows[i];
+		for (const { name, row } of named) {
+			for (let k = 0; k + n <= pair.length; k++) {
+				if (name === 'Rounds' && k % n === 0) continue;
+				let j = 0;
+				while (j < n && pair[k + j] === row[j]) j++;
+				if (j === n) counts[name] = (counts[name] || 0) + 1;
+			}
+		}
+	}
+	return counts;
+}
+
+// Every selected named row must appear; 65s at back must not. tenorBehind
+// selects the named rows read with a cover bell (odd stages only).
+export function matchesMusic (music, { noBackstroke65s = false, namedRows = [], tenorBehind = false } = {}) {
+	if (!noBackstroke65s && !namedRows.length) return true;
+	const found = (tenorBehind ? music?.tenorBehind : music)?.namedRows;
+	return !!found && (!noBackstroke65s || music.backstroke65s === 0) && namedRows.every(name => found[name] > 0);
+}
+
+/**
+ * Return a test of whether the rotation starting at rows[offset] passes the
+ * music filters, for canonicalTouch, without relabelling every row each time.
+ * Rotating after row R relabels bell R[b] as b. So a rotated row ends 65 iff
+ * the original ends R[n-1], R[n-2]; it contains named row N iff the original
+ * contains N.map(b => R[b]). Count row ends by stroke and collect pair windows
+ * once; each rotation is then a few lookups. In an odd-length touch, wrapping
+ * changes stroke, so relabel those rotations directly instead. With a tenor
+ * behind, append the cover to every row; relabelling never moves it.
+ */
+function musicRotations (method, rows, filters) {
+	const n = method.stage, length = rows.length, m = filters.tenorBehind ? n + 1 : n;
+	const wanted = ((filters.tenorBehind ? method.namedRowsBehind : method.namedRows) || []).filter(entry => filters.namedRows?.includes(entry.name));
+	const start = offset => offset ? rows[offset - 1] : Array.from({ length: n }, (_, i) => i);
+	if (length % 2) {
+		return offset => {
+			const inverse = [];
+			start(offset).forEach((bell, place) => {
+				inverse[bell] = place;
+			});
+			return matchesMusic(touchMusic(method, rows.slice(offset).concat(rows.slice(0, offset)).map(row => row.map(bell => inverse[bell]))), filters);
+		};
+	}
+	// A rotation by an odd number of rows swaps strokes, so index ends by
+	// (row number % 2) and windows by which index starts each pair.
+	const ends = new Uint32Array(n * n * 2);
+	rows.forEach((row, i) => ends[(row[n - 2] * n + row[n - 1]) * 2 + (i + 1) % 2]++);
+	const windows = [null, null];
+	const read = filters.tenorBehind ? rows.map(row => row.concat(n)) : rows;
+	return offset => {
+		const head = filters.tenorBehind ? start(offset).concat(n) : start(offset);
+		if (filters.noBackstroke65s && ends[(head[n - 1] * n + head[n - 2]) * 2 + offset % 2]) return false;
+		if (!wanted.length) return true;
+		if (!windows[offset % 2]) {
+			// Whole-row (aligned) windows are kept apart for the Rounds rule.
+			const set = windows[offset % 2] = new Set();
+			for (let i = offset % 2; i < length + offset % 2; i += 2) {
+				const pair = read[i % length].concat(read[(i + 1) % length]);
+				for (let k = 0; k <= m; k++) set.add(`${k % m ? 'w' : 'a'}${pair.slice(k, k + m).join(',')}`);
+			}
+		}
+		return wanted.every(({ name, row }) => {
+			const key = row.map(bell => head[bell]).join(',');
+			return windows[offset % 2].has(`w${key}`) || name !== 'Rounds' && windows[offset % 2].has(`a${key}`);
+		});
+	};
+}
+
+/**
  * Ring rows and remember those on the current search branch.
  * searchSlice calls apply to form a candidate, checks rounds, then calls push
  * to reject repeats/store the row. Backtracking calls pop in reverse order.
@@ -631,13 +760,17 @@ export function repeatsCourseBob (method, previous, entry, bell, length) {
  * result; simulate proves both the input and the selected display sequence.
  * Rotation is allowed only where method phase and call-block boundaries join.
  * Partial leads/unfinished blocks keep their own keys; reversals stay distinct.
+ * Rotations relabel bells, so music filters can differ between rotations:
+ * display only one that passes them, or return null if none does.
  */
-export function canonicalTouch (method, touch, preserveCalling = false, tenorsTogether = false) {
+export function canonicalTouch (method, touch, preserveCalling = false, tenorsTogether = false, music = {}) {
 	const proof = simulate(method, touch);
 	const signature = proof.steps.map(step => `${step.change}:${step.call}`);
+	const musical = music.noBackstroke65s || music.namedRows?.length ? musicRotations(method, proof.rows, music) : null;
 	if (touch.length % method.length || proof.incompleteCall) {
 		// A partial-lead loop cannot wrap around while preserving the method's change order.
-		return { ...touch, partLength: touch.length, callPositions: [...proof.callRows.filter(entry => entry.call).map(entry => entry.position), ...(proof.incompleteCall && proof.steps.at(-1).blockCall ? [null] : [])], key: `${touch.length}/${touch.phase}/${signature.join('.')}` };
+		if (musical && !musical(0)) return null;
+		return { ...touch, partLength: touch.length, music: touchMusic(method, proof.rows), callPositions: [...proof.callRows.filter(entry => entry.call).map(entry => entry.position), ...(proof.incompleteCall && proof.steps.at(-1).blockCall ? [null] : [])], key: `${touch.length}/${touch.phase}/${signature.join('.')}` };
 	}
 	let key = null, bestOffset = 0, bestScore = null, bestTie = null;
 	const calls = proof.callRows.filter(entry => entry.call);
@@ -669,6 +802,7 @@ export function canonicalTouch (method, touch, preserveCalling = false, tenorsTo
 			phase, length: touch.length,
 			word: proof.steps.slice(offset).concat(proof.steps.slice(0, offset)).filter(step => method.points[step.change]).map(step => step.call),
 		})) continue;
+		if (musical && !musical(offset)) continue;
 		let course = phase === 0 && regular && courseOrder.length > 0 && method.title !== 'Stedman Triples';
 		let lastColumn = -1;
 		let previous = null;
@@ -699,10 +833,11 @@ export function canonicalTouch (method, touch, preserveCalling = false, tenorsTo
 			bestOffset = offset;
 		}
 	}
+	if (musical && !bestScore) return null;
 	const rotated = proof.steps.slice(bestOffset).concat(proof.steps.slice(0, bestOffset));
 	const best = { phase: (touch.phase + bestOffset) % method.length, length: touch.length, word: Uint8Array.from(rotated.filter(step => method.points[step.change]), step => step.call) };
 	const bestProof = simulate(method, best);
-	return { ...best, partLength: shortestPartLength(method, best), callPositions: bestProof.callRows.filter(entry => entry.call).map(entry => entry.position), key: `${touch.length}/${key}` };
+	return { ...best, partLength: shortestPartLength(method, best), music: touchMusic(method, bestProof.rows), callPositions: bestProof.callRows.filter(entry => entry.call).map(entry => entry.position), key: `${touch.length}/${key}` };
 }
 
 // Shared by search eligibility and multipart display. A part must restore the
@@ -740,14 +875,19 @@ export function snapshotBuffers (task) {
  * A task fixes a start phase and prefix (one call ID per decision, including
  * plains). Replay that prefix from rounds, then try further choices depth-first.
  *
- * Each loop chooses/rings one change, checks closure and pruning, then descends
+ * Each loop chooses/rings one change, checks closure and pruning (truth,
+ * rotations, closure distance and 65s at back), then descends
  * or tries a sibling. Whole-lead boundaries also try repeating the current part.
  * record proves/deduplicates candidates. On yielding, return results plus a
  * transferable DFS snapshot; shallow splits and baseline tests use prefixes.
  * Either continuation can be assigned to any worker.
  */
-export function searchSlice (method, task, { budgetNodes = 100000, budgetMs = 300, maximumResults = 24, lengthRanges = [[1, Infinity]], minParts = 1, callingPositions = [], tenorsTogether = false, multipart = true, snapshots = false, random = Math.random } = {}) {
+export function searchSlice (method, task, { budgetNodes = 100000, budgetMs = 300, maximumResults = 24, lengthRanges = [[1, Infinity]], minParts = 1, callingPositions = [], tenorsTogether = false, noBackstroke65s = false, namedRows = [], tenorBehind = false, multipart = true, snapshots = false, random = Math.random } = {}) {
 	if (tenorsTogether && !method.tenorsTogether?.supported) throw new Error('Tenors together is not supported for this method.');
+	if (noBackstroke65s && !method.back65) throw new Error('65s at back can only be excluded on even stages.');
+	if (tenorBehind && !method.namedRowsBehind) throw new Error('A tenor behind can only be assumed on odd stages.');
+	if (namedRows.some(name => !(tenorBehind ? method.namedRowsBehind : method.namedRows)?.some(entry => entry.name === name))) throw new Error('Unknown named row for this stage.');
+	const back65 = noBackstroke65s ? method.back65 : null;
 	// Bound base-pattern exploration by both its scheduled horizon and the
 	// minimum part count. Closure bounds and repeated touches still use the
 	// complete-touch allowance, not this limit on exploring a possible part.
@@ -769,6 +909,10 @@ export function searchSlice (method, task, { budgetNodes = 100000, budgetMs = 30
 	const activeCalls = saved?.activeCalls ?? new Uint8Array(method.maxChanges + 1);
 	const offsets = saved?.offsets ?? new Uint16Array(method.maxChanges + 1);
 	const remaining = saved?.remaining ?? new Uint16Array(method.maxChanges + 1);
+	// Per-lead state for tenorsHomeNecklace: KMP borders of the call word, and
+	// whether the lead head after that many leads has both tenors home.
+	const borders = saved?.borders ?? new Uint16Array(Math.floor(method.maxChanges / method.length) + 2);
+	const homes = saved?.homes ?? new Uint8Array(Math.floor(method.maxChanges / method.length) + 2);
 	const bounds = task.mode ? method.shortcuts[task.phase][task.mode] : null;
 	// Tables omitting singles are only valid when this task cannot ring them.
 	const distances = task.mode ? (task.allowSingles === false ? method.distances?.noSingles ?? method.distances?.singles : method.distances?.singles)?.[task.phase]?.[task.mode] : null;
@@ -787,8 +931,9 @@ export function searchSlice (method, task, { budgetNodes = 100000, budgetMs = 30
 		// part do not guarantee permitted positions in every later part.
 		if (!matchesCallingPositions(method, candidate, callingPositions)) return;
 		if (tenorsTogether && !matchesTenorsTogether(method, candidate)) return;
-		const result = canonicalTouch(method, candidate, callingPositions, tenorsTogether);
-		if (result.length / result.partLength < minParts) return;
+		// Music depends on the rotation; canonicalTouch rejects touches with no passing rotation.
+		const result = canonicalTouch(method, candidate, callingPositions, tenorsTogether, { noBackstroke65s, namedRows, tenorBehind });
+		if (!result || result.length / result.partLength < minParts) return;
 		if (!seen.has(result.key)) {
 			seen.add(result.key);
 			results.push(result);
@@ -829,7 +974,7 @@ export function searchSlice (method, task, { budgetNodes = 100000, budgetMs = 30
 				// ancestor siblings. Never copy a full snapshot for each branch.
 				const { packed, ...state } = engine;
 				void packed;
-				frontier.push({ ...task, snapshot: { engine: state, depth, cursors, choiceOrders, wordLengths, word, parities, periods, activeCalls, offsets, remaining } });
+				frontier.push({ ...task, snapshot: { engine: state, depth, cursors, choiceOrders, wordLengths, word, parities, periods, activeCalls, offsets, remaining, borders, homes } });
 				break;
 			}
 			// Save the unfinished branch and ancestor siblings, deepest first.
@@ -893,8 +1038,15 @@ export function searchSlice (method, task, { budgetNodes = 100000, budgetMs = 30
 			// Whole-lead rotations also require the start phase to be outside a call's interior.
 			// With a position filter, rotating/relabeling may change eligibility;
 			// explore each calling instead of discarding its non-necklace forms.
-			period = necklacePeriod(word, nextCount, callsPerLead, period);
-			if (!period) continue;
+			// Pruning 65s needs rotations that keep them; with an odd lead length
+			// a whole-lead rotation could swap strokes, so explore every calling.
+			if (!back65) {
+				period = necklacePeriod(word, nextCount, callsPerLead, period);
+				if (!period) continue;
+			} else if (method.length % 2 === 0) {
+				if (!tenorsHomeNecklace(word, length / method.length, callsPerLead, borders, homes)) continue;
+				homes[length / method.length] = ((back65.high ? engine.high : engine.low) & back65.mask) === back65.home ? 1 : 0;
+			}
 		}
 		if (parity === 0 && engine.isRounds()) {
 			// Never extend a first return to rounds, even in the other finish
@@ -902,6 +1054,10 @@ export function searchSlice (method, task, { budgetNodes = 100000, budgetMs = 30
 			if (nextCount >= prefix.length && (!task.mode || (task.mode === 'whole') === whole) && (!whole || task.mode !== 'whole' || length / method.length % period === 0)) record({ phase: task.phase, length, word: word.slice(0, nextCount) });
 			continue;
 		}
+		// Every extension rings this row at the same stroke, so a backstroke 65
+		// rules out the branch. Required named rows cannot prune: a later row may
+		// supply them. Both are rechecked over rotations when recorded.
+		if (back65 && length % 2 === 0 && ((back65.high ? engine.high : engine.low) & back65.mask) === back65.value) continue;
 		if (bounds) {
 			// Any bell or row parity unable to return within the remaining budget rules out closure.
 			const slot = (task.phase + length) % method.length, remaining = method.maxChanges - length;

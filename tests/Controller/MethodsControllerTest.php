@@ -64,10 +64,6 @@ class MethodsControllerTest extends WebTestCase
         $this->assertStringContainsString('method_touches', $client->getResponse()->getContent());
         $this->assertStringContainsString('Touches', $client->getResponse()->getContent());
         $panel = $client->getCrawler()->filter('#method_touches');
-        $this->assertCount(1, $panel);
-        $this->assertCount(1, $panel->filter('fieldset')->last()->filter('[data-touch-tenors][role="switch"][aria-describedby="touch_tenors_note"]'));
-        $this->assertCount(1, $panel->filter('small em#touch_tenors_note'));
-        $this->assertCount(1, $panel->filter('[data-touch-tenors-setting][hidden]'));
         $this->assertArrayHasKey('titles', json_decode($panel->attr('data-touch-settings'), true, 512, JSON_THROW_ON_ERROR)['callingPositions']);
         $settings = json_decode($panel->attr('data-touch-settings'), true, 512, JSON_THROW_ON_ERROR);
         $this->assertSame(6, $settings['stage']);

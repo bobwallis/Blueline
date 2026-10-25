@@ -559,6 +559,62 @@ test('length/part filters retain results, count only matches, and lowering the l
 	} finally { pool.dispose(); }
 });
 
+test('music filters are validated, hide non-matching results, restart on change and reach workers', () => {
+	const posted = [];
+	assert.throws(() => new TouchSearchPool(compileMethod(stedman), urls, () => {}, { noBackstroke65s: true }), /even stages/);
+	assert.throws(() => new TouchSearchPool(compileMethod(bristol), urls, () => {}, { namedRows: ['Weasels'] }), /Invalid named rows/);
+	const pool = new TouchSearchPool(compileMethod(bristol), urls, () => {}, {
+		concurrency: 1, namedRows: ['Queens', 'Rounds', 'Queens'],
+		workerFactory: () => ({ postMessage (message) { posted.push(message); }, terminate () {} }),
+	});
+	try {
+		assert.deepEqual(pool.namedRows, ['Queens', 'Rounds']);
+		for (const [key, music] of [['both', { namedRows: { Queens: 1, Rounds: 2 }, backstroke65s: 0 }], ['queens', { namedRows: { Queens: 1 }, backstroke65s: 3 }]]) {
+			pool.results.set(key, { key, length: 64, partLength: 64, phase: 0, word: Uint8Array.of(1), music });
+		}
+		assert.deepEqual(pool.matchingResults().map(touch => touch.key), ['both']);
+		pool.start();
+		pool.receive(pool.workers[0], { type: 'ready' });
+		assert.equal(posted.at(-1).limits.namedRows.join(), 'Queens,Rounds');
+		let current = pool.workers[0];
+		pool.updateOptions({ namedRows: ['Queens', 'Rounds'] });
+		assert.equal(pool.workers[0], current, 'unchanged filters keep the frontier');
+		pool.updateOptions({ namedRows: ['Queens'], noBackstroke65s: true });
+		assert.notEqual(pool.workers[0], current, 'music changes restart');
+		assert.deepEqual(pool.matchingResults().map(touch => touch.key), ['both']);
+		current = pool.workers[0];
+		pool.receive(current, { type: 'ready' });
+		assert.equal(posted.at(-1).limits.noBackstroke65s, true);
+		pool.updateOptions({ namedRows: [], noBackstroke65s: false });
+		assert.equal(pool.matchingResults().length, 2);
+		assert.equal(pool.results.size, 2);
+		assert.throws(() => pool.updateOptions({ tenorBehind: true }), /odd stages/);
+	} finally { pool.dispose(); }
+});
+
+test('a tenor behind selects the next stage\'s named rows for validation, filtering and workers', () => {
+	const posted = [];
+	const method = compileMethod(stedman);
+	assert.throws(() => new TouchSearchPool(method, urls, () => {}, { namedRows: ['Hagdyke'] }), /Invalid named rows/);
+	const pool = new TouchSearchPool(method, urls, () => {}, {
+		concurrency: 1, tenorBehind: true, namedRows: ['Queens'],
+		workerFactory: () => ({ postMessage (message) { posted.push(message); }, terminate () {} }),
+	});
+	try {
+		pool.results.set('behind', { key: 'behind', length: 84, partLength: 84, phase: 0, word: Uint8Array.of(1), music: { namedRows: {}, backstroke65s: 0, tenorBehind: { namedRows: { Queens: 1 } } } });
+		pool.results.set('without', { key: 'without', length: 84, partLength: 84, phase: 0, word: Uint8Array.of(1), music: { namedRows: { Queens: 1 }, backstroke65s: 0, tenorBehind: { namedRows: {} } } });
+		assert.deepEqual(pool.matchingResults().map(touch => touch.key), ['behind']);
+		pool.start();
+		pool.receive(pool.workers[0], { type: 'ready' });
+		assert.equal(posted.at(-1).limits.tenorBehind, true);
+		const current = pool.workers[0];
+		pool.updateOptions({ tenorBehind: false });
+		assert.notEqual(pool.workers[0], current, 'switching the tenor restarts');
+		assert.deepEqual(pool.matchingResults().map(touch => touch.key), ['without']);
+		assert.throws(() => pool.updateOptions({ tenorBehind: true, namedRows: ['Rounds'] }), /Invalid named rows/);
+	} finally { pool.dispose(); }
+});
+
 test('length ranges are merged, and only newly eligible lengths or a new maximum restart exploration', () => {
 	const pool = new TouchSearchPool(compileMethod(bristol), urls, () => {}, {
 		concurrency: 1, lengthRanges: [[1250, 1350], [1, 480], [400, 500], [501, 600]],

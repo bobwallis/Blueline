@@ -1,4 +1,5 @@
 import PlaceNotation from '../helpers/PlaceNotation.js';
+import { namedRowsForStage } from '../helpers/Music.js';
 import { compileCallingPositions, compilePacked, compileTenorsTogether } from './Search.js';
 
 /**
@@ -8,7 +9,7 @@ import { compileCallingPositions, compilePacked, compileTenorsTogether } from '.
  *
  * Compilation follows the ringing order: read the plain lead, add the calls
  * allowed at each change, then prepare truth-search shortcuts, describe one
- * lead for the pruning tables, and compile packed rows.
+ * lead for the pruning tables, compile packed rows, then add music filter data.
  * The worker separately checks the plain course before starting the search.
  */
 
@@ -137,6 +138,24 @@ export function compileMethod (input, nearCalls = true) {
 		// 6. Compile the bit operations RowEngine will use to ring each change.
 		packed: compilePacked(stage, permutations),
 	};
+	// 7. Music filters. Search.js has no imports, so pass Music.js's named rows
+	// in the method. On even stages, also give searchSlice the packed word and
+	// mask covering the last two places, the value matching a row ending with
+	// the two heaviest bells reversed (65 on six), and the value with both home.
+	// On odd stages, a tenor may be assumed to cover behind: then rows are read
+	// with it appended, against the next stage's named rows. Its Rounds could
+	// only be the final whole row, which is not counted, so omit it.
+	method.namedRows = Object.entries(namedRowsForStage(stage)).map(([name, row]) => ({ name, row }));
+	if (stage % 2) method.namedRowsBehind = Object.entries(namedRowsForStage(stage + 1)).filter(([name]) => name !== 'Rounds').map(([name, row]) => ({ name, row }));
+	if (stage % 2 === 0) {
+		const field = (1 << method.packed.bits) - 1, shift = place => (place % 8) * method.packed.bits;
+		method.back65 = {
+			high: stage - 2 >= 8,
+			mask: field << shift(stage - 2) | field << shift(stage - 1),
+			value: (stage - 1) << shift(stage - 2) | (stage - 2) << shift(stage - 1),
+			home: (stage - 2) << shift(stage - 2) | (stage - 1) << shift(stage - 1),
+		};
+	}
 	const positions = input.callingPositions?.titles ? input.callingPositions : input.callingPositions?.[nearCalls ? 'near' : 'far'];
 	method.callingPositions = compileCallingPositions(method);
 	// Offer only positions declared by the method, using the selected call
