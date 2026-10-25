@@ -38,6 +38,19 @@ This script downloads external method data, runs import commands, recalculates s
 
 **Asset Versioning**: AssetMapper generates content-hash-based filenames (e.g., `all-abc123.css`, `main-xyz789.js`) automatically, providing cache busting without additional configuration.
 
+### Touch generation on method pages
+
+- The **Touches** tab searches locally in browser web workers, showing distinct true touches ordered by length.
+- [Compile.js](../assets/js/touch_generator/Compile.js) prepares the method and calls; [Search.js](../assets/js/touch_generator/Search.js) explores call sequences, checks every row for truth, and removes rotation-equivalent results.
+- Touches start at the method's first change and end at the first return to rounds. Multipart discovery repeats shorter call patterns within the selected length limits.
+- [TouchSearchPool.js](../assets/js/ui/MethodView/TouchSearchPool.js) shares work across short-base and full-depth searches, favouring multipart discovery while preserving early finishes.
+- Workers resume saved search snapshots. Pruning tables skip impossible branches without replacing exact truth checks.
+- Settings control lengths, minimum parts, calling positions, singles, result limits and search time. Pausing retains work; broader settings can restart exploration while retaining proved results.
+- **Allowed calling positions** rejects disallowed calls during exploration, not just in the displayed results. The optional **Tenors together** switch intersects this filter with call-specific permissions derived from the plain lead's directed working-place cycle. At every lead head it preserves the two heaviest working bells' directed separation as at rounds: continuing plain until the heavier bell is home must bring the other bell home too. They need not be neighbours in the cycle (Cambridge Minor and Major are supported); Bristol's separation happens to be one lead. This is not an adjacency check on intermediate rows, nor only a check at Home positions actually reached in the touch. Multipart touches and display rotations are rechecked. The switch is off by default, hidden without defined calling positions, and disabled with an explanation unless the working places form one cycle and calls end at the lead head. Its note lists the method's permissions independently of other selected settings.
+- Calling-position names for singles refer to the corresponding bob at the same decision, not simply the single's destination. With standard 14 bobs and 1234 singles (for example, Bristol or Cambridge Major), single Before finishes in 2nds while bob Before finishes in 3rds; single In finishes in 3rds while bob In finishes in 2nds. The optional single-position name Thirds (T) is not used: the label remains In (I). As the [CCCBR explanation](https://callingitround.cccbr.org.uk/docs/calling/3_demystifying_in_out_make/) notes, names vary by method and stage; no method-specific Out/Make override is applied.
+- [Touches.js](../assets/js/ui/MethodView/Touches.js) handles the UI; [Presentation.js](../assets/js/touch_generator/Presentation.js) builds lead/course layouts, compact sequences and Siril exports.
+- Source-file comments explain the algorithms, scheduling, worker loading and presentation rules in more detail. Regression tests live in [tests/JavaScript/TouchGenerator/](../tests/JavaScript/TouchGenerator/).
+
 ### PNG image generation
 
 `.png` requests under `/methods/view...` are handled by Symfony but proxied to a local Node.js image server running `bin/image-server.mjs`.
@@ -61,12 +74,16 @@ This runs:
 - Twig template lint
 - PHP code lint
 - PHP-CS-Fixer Symfony style check for `src/` and `tests/` (non-blocking)
-- Frontend asset complication
+- Frontend asset compilation
+- Node.js tests of the touch_generator
 - PHPUnit
 
 Or run targeted tests directly with PHPUnit:
 - `./bin/phpunit tests/Controller`
 - `./bin/phpunit --filter testActionName tests/Controller/DefaultControllerTest.php`
+
+Or to test the touch_generator only via a dependency-free Node test suite, including independent proving, packed engines, calling/Siril round trips, and real worker-pool tests:
+- `npm run test:js`
 
 ## Change guidelines
 - Keep changes minimal and localised.

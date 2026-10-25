@@ -371,6 +371,22 @@ class MethodTest extends TestCase
         $this->assertCount(0, $performances);
     }
 
+    public function testPlainBobDoublesPreservesStoredCallingPositionTitles(): void
+    {
+        $method = new Method([
+            'title' => 'Plain Bob Doubles',
+            'notation' => '5.1.5.1.5.1.5.1.5.12',
+            'stage' => 5,
+        ]);
+        $this->assertArrayNotHasKey('convention', $method->getCallingPositions());
+        $method->setCallingPositions(['from' => 0, 'every' => 10, 'titles' => ['I', 'B', 'M', 'H']]);
+        $this->assertSame([
+            'from' => 0,
+            'every' => 10,
+            'titles' => ['I', 'B', 'M', 'H'],
+        ], $method->getCallingPositions());
+    }
+
     // Canonical-method inference matrix (runs against all entries in CANONICAL_METHODS)
 
     #[DataProvider('canonicalMethodProvider')]

@@ -1,3 +1,173 @@
+.touches {
+	padding: var(--content-y-padding) var(--content-x-padding);
+	font-size: 14px;
+	.touch-search-status {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: var(--content-x-padding);
+		[data-touch-progress] {
+			color: #666;
+			text-align: right;
+		}
+		@media (max-width: 700px) {
+			flex-direction: column;
+			align-items: center;
+			gap: 0;
+			text-align: center;
+			[data-touch-progress] {
+				text-align: center;
+			}
+		}
+	}
+	.touch-status-actions {
+		display: flex;
+		align-items: baseline;
+		flex-wrap: wrap;
+		column-gap: calc(var(--content-x-padding) / 2);
+		justify-content: center;
+	}
+	.touch-actions {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: var(--content-y-padding);
+		margin: 0;
+		&:not(:has(button:not([hidden]))) {
+			display: none;
+			margin: 0;
+		}
+	}
+	button, .touch-prover-link {
+		border: 1px solid var(--light-grey);
+		border-radius: var(--radius-md);
+		padding: calc(var(--content-y-padding) / 2) var(--content-x-padding);
+		background: var(--title-background);
+		color: inherit;
+		cursor: pointer;
+	}
+	.touch-prover-link {
+		text-decoration: none;
+	}
+	button[hidden] {
+		display: none;
+	}
+	.touch-actions button {
+		font-size: 12px;
+		line-height: 1.25;
+		padding: 2px 6px;
+		white-space: nowrap;
+	}
+	[data-touch-results] {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+		gap: var(--content-y-padding) var(--content-x-padding);
+		align-items: stretch;
+	}
+	.touch-result {
+		min-width: 0;
+		border: 1px solid var(--light-grey);
+		border-radius: var(--radius-md);
+		padding: var(--content-y-padding) var(--content-x-padding);
+		margin: 0;
+		cursor: pointer;
+	}
+	.touch-title {
+		font-size: inherit;
+		margin: 0;
+		text-align: left;
+	}
+	.touch-layout {
+		overflow-x: auto;
+		margin: 0;
+		table {
+			border: 0;
+			border-collapse: collapse;
+			font-family: monospace;
+			white-space: nowrap;
+		}
+		thead {
+			border-bottom: 1px solid var(--mid-grey);
+		}
+		tbody {
+			border-bottom: 1px solid var(--mid-grey);
+		}
+		th, td {
+			border: 0;
+			padding: 2px 10px;
+			text-align: center;
+			font-weight: normal;
+		}
+		th:first-child, td:first-child {
+			padding-left: 0;
+			text-align: left;
+		}
+		.touch-has-partial th:first-child, .touch-has-partial td:first-child {
+			padding-left: 1ch;
+		}
+		.touch-bracketed-head {
+			display: inline-block;
+			position: relative;
+		}
+		.touch-head-open, .touch-head-close {
+			position: absolute;
+			top: 0;
+		}
+		.touch-head-open {
+			right: 100%;
+		}
+		.touch-head-close {
+			left: 100%;
+		}
+		p {
+			margin: 5px 0 0 0;
+		}
+	}
+	.touch-dialog {
+		box-sizing: border-box;
+		width: min(720px, calc(100% - 32px));
+		margin: calc(var(--header-height) * 1.5) auto 16px;
+		max-height: calc(100% - var(--header-height) * 1.5 - 16px);
+		overflow: auto;
+		padding: calc(var(--content-y-padding) * 2) var(--content-x-padding);
+		border: 1px solid var(--light-grey);
+		border-radius: var(--radius-md);
+		background: white;
+		color: var(--header-background);
+	}
+	.touch-dialog::backdrop {
+		background: rgba(255, 255, 255, 0.8);
+		backdrop-filter: blur(1px);
+	}
+	.touch-layout-tabs {
+		display: flex;
+		gap: var(--content-x-padding);
+		[aria-selected="true"] {
+			background: var(--header-background);
+			color: white;
+		}
+	}
+	summary {
+		cursor: pointer;
+	}
+	button:focus-visible, .touch-result:focus-visible, .touch-prover-link:focus-visible, summary:focus-visible {
+		outline: 2px solid var(--header-background);
+		outline-offset: 2px;
+	}
+	.touch-calling {
+		display: block;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		margin-top: calc(var(--content-y-padding) / 2);
+	}
+	.touch-sequence, pre {
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+		font-family: monospace;
+	}
+}
+
 /* Forms and Form Elements */
 fieldset {
 	margin-top: var(--content-y-padding);
@@ -115,6 +285,7 @@ input[type="checkbox"] {
 }
 
 .method-calls-switch input[type="checkbox"],
+.touch-settings input[type="checkbox"],
 #settings input[type="checkbox"] {
 	appearance: none;
 	position: relative;
@@ -157,6 +328,7 @@ input[type="checkbox"] {
 
 @media (forced-colors: active) {
 	.method-calls-switch input[type="checkbox"],
+	.touch-settings input[type="checkbox"],
 	#settings input[type="checkbox"] {
 		appearance: auto;
 		width: auto;
@@ -355,4 +527,97 @@ section.method {
 		border-width: 6px;
 		margin-top: -6px;
 	}
+}
+
+/* Collapsed by default; three setting groups sit side by side when expanded. */
+.touches .touch-settings {
+	margin: 0 0 var(--content-y-padding);
+	border: 1px solid var(--light-grey);
+	border-radius: var(--radius-md);
+	> summary {
+		padding: calc(var(--content-y-padding) / 2) var(--content-x-padding);
+		font-family: var(--serif-stack);
+		cursor: pointer;
+		&:hover {
+			background: var(--title-background-lightened);
+		}
+	}
+	&[open] > summary {
+		border-bottom: 1px solid var(--light-grey);
+	}
+	.touch-settings-groups {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--content-y-padding) var(--content-x-padding);
+		padding: 0 var(--content-x-padding) var(--content-y-padding);
+		@media (max-width: 700px) {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+	fieldset {
+		min-width: 0;
+		margin: var(--content-y-padding) 0 0;
+		padding: 0 var(--content-x-padding) calc(var(--content-y-padding) / 2);
+		border: 1px solid var(--light-grey);
+		border-radius: var(--radius-md);
+	}
+	p {
+		margin: calc(var(--content-y-padding) / 2) 0;
+	}
+	.touch-setting-label {
+		display: block;
+		margin: calc(var(--content-y-padding) / 2) 0 3px;
+		font-weight: 600;
+	}
+	.touch-setting-note {
+		display: block;
+		margin-top: 3px;
+		grid-column: 2;
+	}
+	.touch-annotated-setting {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		align-items: center;
+	}
+	.touch-position-setting {
+		margin: calc(var(--content-y-padding) / 2) 0;
+	}
+	input[type="number"] {
+		width: 6em;
+	}
+	.touch-custom-length input[type="number"] {
+		width: 4.5em;
+		font-size: 12px;
+	}
+	/* Labels and inputs form two aligned columns. */
+	.touch-limits {
+		display: grid;
+		grid-template-columns: max-content 6em;
+		align-items: center;
+		gap: calc(var(--content-y-padding) / 2) 0.5em;
+		margin: calc(var(--content-y-padding) / 2) 0;
+		input[type="number"] {
+			width: auto;
+		}
+	}
+	button {
+		font-size: 12px;
+		line-height: 1.25;
+		padding: 2px 6px;
+	}
+	/* Line up with the text beside the switches (switch width plus its margins and a space). */
+	[data-touch-add-length] {
+		margin-left: calc(40px + var(--content-x-padding) + 0.25em);
+	}
+}
+
+/* Spinner beside the status text while workers are searching. */
+.touches [data-touch-status].touch-running::before {
+	content: "";
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	margin-right: 6px;
+	vertical-align: -3px;
+	background: url(../images/loading.svg) no-repeat center / 16px;
 }

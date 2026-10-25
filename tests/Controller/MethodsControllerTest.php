@@ -13,6 +13,23 @@ class MethodsControllerTest extends WebTestCase
         return base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7Z0uoAAAAASUVORK5CYII=', true);
     }
 
+    public function testPlainBobDoublesSharesCallingPositionsAcrossApiDiagramAndTouches(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/methods/view/Plain_Bob_Doubles.json');
+        $this->assertTrue($client->getResponse()->isSuccessful());
+        $method = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR)[0];
+        $this->assertArrayNotHasKey('convention', $method['callingPositions']);
+        $this->assertContains('B', $method['callingPositions']['titles']);
+        $this->assertNotContains('O', $method['callingPositions']['titles']);
+        $client->request('GET', '/methods/view/Plain_Bob_Doubles');
+        $this->assertTrue($client->getResponse()->isSuccessful());
+        $touches = json_decode($client->getCrawler()->filter('#method_touches')->attr('data-touch-settings'), true, 512, JSON_THROW_ON_ERROR);
+        $diagram = json_decode($client->getCrawler()->filter('.MethodView')->attr('data-set'), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame($method['callingPositions'], $touches['callingPositions']);
+        $this->assertSame($method['callingPositions'], $diagram['callingPositions']);
+    }
+
     public function testMethodViewChromelessLayoutIsResolvedPerRequest()
     {
         $client = static::createClient();
@@ -44,6 +61,21 @@ class MethodsControllerTest extends WebTestCase
         $this->assertStringContainsString('Cambridge Surprise Minor', $client->getResponse()->getContent());
         $this->assertStringContainsString('Place', $client->getResponse()->getContent());
         $this->assertStringContainsString('section class="method" data-cccbr-id="', $client->getResponse()->getContent());
+        $this->assertStringContainsString('method_touches', $client->getResponse()->getContent());
+        $this->assertStringContainsString('Touches', $client->getResponse()->getContent());
+        $panel = $client->getCrawler()->filter('#method_touches');
+        $this->assertCount(1, $panel);
+        $this->assertCount(1, $panel->filter('fieldset')->last()->filter('[data-touch-tenors][role="switch"][aria-describedby="touch_tenors_note"]'));
+        $this->assertCount(1, $panel->filter('small em#touch_tenors_note'));
+        $this->assertCount(1, $panel->filter('[data-touch-tenors-setting][hidden]'));
+        $this->assertArrayHasKey('titles', json_decode($panel->attr('data-touch-settings'), true, 512, JSON_THROW_ON_ERROR)['callingPositions']);
+        $settings = json_decode($panel->attr('data-touch-settings'), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(6, $settings['stage']);
+        $this->assertSame(24, $settings['lengthOfLead']);
+        $this->assertSame('156342', $settings['leadHead']);
+        $this->assertSame('&-3-4-2-3-4-5, +2', $settings['notationSiril']);
+        $this->assertStringContainsString('/assets/js/touch_generator/SearchWorker-', $settings['workerURL']);
+        $this->assertStringContainsString('/assets/js/touch_generator/Search-', $settings['runtimeURL']);
 
         $client->request('GET', '/methods/view/Cambridge_Surprise_Minor.json');
         $this->assertTrue($client->getResponse()->isSuccessful(), '/methods/view/Cambridge_Surprise_Minor.json request unsuccessful');

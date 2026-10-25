@@ -87,6 +87,7 @@ Returns an array containing one method object with extended relationship data:
 - `similar` object groups related methods by type of difference
 - Empty arrays in `similar` indicate no matches in that category
 - All fields may be `null` if data is not available. In the source data from the CCCBR null often implies false.
+- Where defined, `callingPositions` contains the plain-course calling-position `titles` (or `near`/`far` variants).
 
 #### Example:
 

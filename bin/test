@@ -115,6 +115,12 @@ if ! npm run lint; then
 fi
 echo -e "\033[32m✓ Frontend asset lint passed\033[0m"
 
+echo -e "\n\033[1mTest touch generation JavaScript\033[0m"
+if ! npm run test:js; then
+    echo -e "\033[31m✗ Touch generation tests failed\033[0m"
+    exit 1
+fi
+
 echo -e "\n\033[1mCompile production assets\033[0m"
 "$repo_root/bin/buildFrontendAssets" --env=prod > /dev/null
 if [ ! -f public/assets/manifest.json ]; then

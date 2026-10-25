@@ -13,6 +13,7 @@ import './ui/Star.js';
 import './ui/Header/BackLink.js';
 import './ui/CustomForm.js';
 import './ui/MethodView.js';
+import './ui/MethodView/Touches.js';
 import webfont from './helpers/Webfont.js';
 import ServiceWorker from './helpers/ServiceWorker.js';
 
