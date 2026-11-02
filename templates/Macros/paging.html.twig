@@ -9,7 +9,7 @@
 			<span>&laquo</span>
 		{% endif %}
 		{% if pageCount > 7 %}
-			{# If we're near the start #}
+			{# If we're near the end #}
 			{% if pageActive >= pageCount-2 %}
 				<a href="{{ path( searchPath, searchVariables|merge( { 'offset': 0 } ) ) }}">1</a> | &hellip; |
 				<a href="{{ path( searchPath, searchVariables|merge( { 'offset': (searchVariables['offset']-searchVariables['count']) } ) ) }}">{{ pageActive - 1 }}</a> |
@@ -19,7 +19,7 @@
 						| <a href="{{ path( searchPath, searchVariables|merge( { 'offset': searchVariables['count']*(n-1) } ) ) }}">{{ n }}</a>
 					{% endfor %}
 				{% endif %}
-			{# If we're near the end #}
+			{# If we're near the start #}
 			{% elseif pageActive <= 3 %}
 				{% if pageActive > 1 %}
     			{% for n in range( 1, pageActive-1 ) %}
@@ -37,7 +37,7 @@
 				<a href="{{ path( searchPath, searchVariables|merge( { 'offset': (searchVariables['offset']+searchVariables['count']) } ) ) }}">{{ pageActive + 1 }}</a> | &hellip; |
 				<a href="{{ path( searchPath, searchVariables|merge( { 'offset': searchVariables['count']*(pageCount-1) } ) ) }}">{{ pageCount }}</a>
 			{% endif %}
-		{# If there's fewer than seven pages #}
+		{# If there are seven pages or fewer #}
 		{% else %}
 			{% for n in range( 1, pageCount ) %}
 				{% if not loop.first %}|{% endif %}

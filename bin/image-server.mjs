@@ -4,6 +4,11 @@ import { existsSync } from 'node:fs';
 
 import puppeteer from 'puppeteer-core';
 
+/**
+ * Render method-detail pages as PNGs through a local HTTP sidecar.
+ *
+ * The browser is reused between renders, while a promise queue serialises requests.
+ */
 const frankenphpPort = Number.parseInt(process.env.FRANKENPHP_PORT || '8000', 10);
 const frankenphpScheme = process.env.FRANKENPHP_SCHEME || 'http';
 const imageServerPort = Number.parseInt(process.env.IMAGESERVER_PORT || '8001', 10);
@@ -128,6 +133,7 @@ function sanitizePath(rawPath) {
 	}
 
 	const expectedPrefix = `${pathPrefix}/methods/view`;
+	// This sidecar renders only method views; it is not a general-purpose URL screenshot proxy.
 	if (!rawPath.startsWith(expectedPrefix) || (rawPath.length > expectedPrefix.length && rawPath[expectedPrefix.length] !== '/')) {
 		throw createError(400, 'Only /methods/view routes can be rendered.');
 	}
@@ -270,6 +276,7 @@ async function handleRequest(request, response) {
 }
 
 function enqueueRequest(request, response) {
+	// Serialize browser work so concurrent requests cannot compete for the same renderer.
 	requestQueue = requestQueue
 		.catch(() => undefined)
 		.then(async () => {

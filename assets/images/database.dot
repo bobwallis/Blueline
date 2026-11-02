@@ -80,6 +80,20 @@ digraph "largeRelationshipsDiagram" {
     URL="tables/methods_collections.html"
     tooltip="methods_collections"
   ];
+  "methods_similar" [
+    label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#ffffff">
+      <TR><TD COLSPAN="3" BGCOLOR="#002856" ALIGN="CENTER"><FONT COLOR="#E0DED9"><B>methods_similar</B></FONT></TD></TR>
+      <TR><TD PORT="method1_title" COLSPAN="3" BGCOLOR="#F3F3F3" ALIGN="LEFT">method1_title</TD></TR>
+      <TR><TD PORT="method2_title" COLSPAN="3" BGCOLOR="#F3F3F3" ALIGN="LEFT">method2_title</TD></TR>
+      <TR><TD PORT="similarity" COLSPAN="3" ALIGN="LEFT">similarity</TD></TR>
+      <TR><TD PORT="onlydifferentoverleadend" COLSPAN="3" ALIGN="LEFT">onlydifferentoverleadend</TD></TR>
+      <TR><TD PORT="onlydifferentoverhalflead" COLSPAN="3" ALIGN="LEFT">onlydifferentoverhalflead</TD></TR>
+      <TR><TD PORT="onlydifferentoverleadendandhalflead" COLSPAN="3" ALIGN="LEFT">onlydifferentoverleadendandhalflead</TD></TR>
+    </TABLE>>
+    URL="tables/methods_similar.html"
+    tooltip="methods_similar"
+  ];
   "performances" [
     label=<
     <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#ffffff">
@@ -105,5 +119,7 @@ digraph "largeRelationshipsDiagram" {
   ];
   "methods_collections":"collection_id":w -> "collections":"id":e [arrowhead=none dir=back arrowtail=crowodot];
   "methods_collections":"method_title":w -> "methods":"title":e [arrowhead=none dir=back arrowtail=crowodot];
+  "methods_similar":"method1_title":w -> "methods":"title":e [arrowhead=none dir=back arrowtail=crowodot];
+  "methods_similar":"method2_title":w -> "methods":"title":e [arrowhead=none dir=back arrowtail=crowodot];
   "performances":"method_title":w -> "methods":"title":e [arrowhead=none dir=back arrowtail=crowodot];
 }

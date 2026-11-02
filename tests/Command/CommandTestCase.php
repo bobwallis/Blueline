@@ -11,6 +11,12 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Tester\CommandTester;
 
+/**
+ * Shared command-test harness with command runners and database helpers.
+ *
+ * Streamed command output can be captured as a bounded preview. The harness also
+ * restores the process memory limit and output-buffer depth after each test.
+ */
 abstract class CommandTestCase extends KernelTestCase
 {
     protected Connection $connection;

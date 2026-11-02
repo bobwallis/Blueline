@@ -1,3 +1,4 @@
+/* Component styling for the shared controls, method views, search and settings UI. */
 .touches {
 	padding: var(--content-y-padding) var(--content-x-padding);
 	font-size: 14px;

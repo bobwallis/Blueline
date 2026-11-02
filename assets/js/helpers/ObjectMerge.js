@@ -11,6 +11,7 @@ function cloneValue (value) {
 }
 
 function mergeArray (target, source) {
+	// Merge arrays by index; entries not supplied by the source remain in the cloned target.
 	var destination = Array.isArray(target) ? structuredClone(target) : [];
 
 	source.forEach(function (item, index) {
@@ -28,6 +29,9 @@ function mergeArray (target, source) {
 	return destination;
 }
 
+/**
+ * Recursively merge plain objects, merge arrays by index and replace scalar values.
+ */
 function mergeDeep (target, source) {
 	if (Array.isArray(source)) {
 		return mergeArray(target, source);
@@ -40,6 +44,7 @@ function mergeDeep (target, source) {
 	var destination = isPlainObject(target) ? structuredClone(target) : {};
 
 	Object.keys(source).forEach(function (key) {
+		// Avoid keys with special prototype semantics when copying into a plain object.
 		if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
 			return;
 		}

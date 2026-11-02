@@ -4,6 +4,11 @@ namespace Blueline\Tests\Command;
 
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
+/**
+ * Check that data-import commands preserve core database invariants.
+ *
+ * The full method import is gated because it is slow and writes to the test database.
+ */
 #[RunTestsInSeparateProcesses]
 class CommandWorkflowTest extends CommandTestCase
 {

@@ -1,3 +1,8 @@
+/**
+ * Cache document navigations by data version, with older-cache and offline fallbacks.
+ *
+ * Prefetch messages are limited to same-origin chromeless document pages.
+ */
 var version = '{$DATABASE_UPDATE}';
 var legacyCacheCleanupPromise = null;
 var prefetchTimeoutMs = 3000;
@@ -91,6 +96,7 @@ self.addEventListener( 'fetch', function( event ) {
                     .then( function( response ) {
                         if( response.ok ) {
                             cache.put( event.request, response.clone() );
+                            // Keep older pages available until the new cache has a successful copy.
                             event.waitUntil( clearLegacyCaches( currentCacheName ) );
                         }
                         return response;

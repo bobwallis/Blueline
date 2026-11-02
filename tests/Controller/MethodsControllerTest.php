@@ -6,6 +6,11 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
+/**
+ * Cover method search/detail formats, canonical redirects and shared view data.
+ *
+ * PNG responses use a mocked image server so the tests do not launch Chromium.
+ */
 class MethodsControllerTest extends WebTestCase
 {
     private function fakePngResponse(): string

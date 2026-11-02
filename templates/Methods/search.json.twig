@@ -1,3 +1,4 @@
+{# query.count is the requested page size; the envelope count is the total match count. #}
 {{ {
 	'query': searchVariables,
 	'results': (methods|default([]))|toArray(searchVariables.fields|split(',')),

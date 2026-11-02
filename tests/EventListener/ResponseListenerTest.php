@@ -9,6 +9,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
+/**
+ * Verify that response minification is limited to main-request HTML responses.
+ */
 class ResponseListenerTest extends TestCase
 {
     public function testMinifiesHtmlResponsesOnMainRequests(): void

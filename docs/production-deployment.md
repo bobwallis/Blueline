@@ -1,87 +1,74 @@
-# Production Deployment
+# Production deployment
 
-This guide covers production deployment and operations for Blueline.
+**Purpose:** Explain the supported production deployment model, provisioning and update operations.
+
+**Audience:** Maintainers and operators responsible for a production instance.
+
+**Prerequisites:** Repository checkout, Debian 13 (Trixie) with internet access, `sudo` access for the provisioning user, and a Cloudflare account with Zero Trust when using the managed tunnel.
 
 ## Deployment model
 
-Blueline runs on a dedicated VM with:
+The documented deployment uses a dedicated VM with PostgreSQL, FrankenPHP and a Cloudflare Tunnel. The VM does not need to expose inbound ports directly as external access is via the tunnel. Provisioning installs and manages the local services, configures the tunnel interactively, warms the production cache and builds production frontend assets.
 
-- Debian operating system
-- PostgreSQL for data storage
-- FrankenPHP for serving the application
-- Cloudflare Tunnel for secure public access, caching, and public ingress
+Other environments may work if they provide the required software. Method URL generation uses iconv transliteration from UTF-8 to ASCII; non-Debian environments must provide compatible transliteration support (for example, Alpine's musl environment does not).
 
-The VM does not need to expose inbound ports directly.
+## Initial setup
 
-## Production requirements
+From the repository root, review the script's current help and then select the options that match the deployment:
 
-- A Debian 13 (Trixie) machine with internet access
-- This repository cloned on the machine
-- `sudo` access for the provisioning user
-- A Cloudflare account with Zero Trust enabled
+```sh
+./bin/provision --help
+./bin/provision --env=prod
+```
 
-Any environment that can run the required software should run Blueline, but note that URL generation for method names relies on iconv transliteration (UTF-8 to ASCII). If using a non-Debian base image, ensure iconv transliteration support is available (for example, avoid musl-only environments like Alpine Linux).
+Provisioning is idempotent where possible. Shared package, locale, dependency and environment setup is described in the [development guide](development-deployment.md#provisioning-behavior). Production-specific actions include:
 
-## Initial production setup
+- Configuring and enabling the local PostgreSQL service and database schema, including `fuzzystrmatch`, unless `--nodatabase` is used.
+- Generating the managed Caddyfile and enabling `blueline.service` for FrankenPHP worker mode.
+- Enabling `blueline-image.service` for Puppeteer image rendering, with lower CPU, I/O and out-of-memory priority than the main application and database services.
+- Running the interactive Cloudflare Tunnel setup unless `--nocloudflared` is used.
+- Clearing and warming the production cache, compiling frontend assets, dumping compiled environment variables and pre-generating error pages.
 
-From the repository root:
+Provisioning writes the production application secret, database URL, environment and server port to `.env.local`. The tunnel origin uses the local HTTPS port; after tunnel setup, `DEFAULT_URI` is set to the public hostname.
 
-1. Run `./bin/provision --help`.
-2. Review arguments for your environment.
-3. Run `./bin/provision` with any required flags.
+| Option | Effect |
+| --- | --- |
+| `--env=prod` | Set the application environment to production. |
+| `--nodatabase` | Skip local PostgreSQL installation and configuration. |
+| `--nocloudflared` | Skip Cloudflare Tunnel setup. |
+| `--noserver` | Skip FrankenPHP installation and service setup. |
+| `--yes` | Answer yes to provisioning prompts non-interactively. |
 
-If only part of the stack should be managed by Blueline's provisioning scripts (for example, if you are using an external database, alternate web server, or no Cloudflare tunnel), use the relevant command-line options.
-
-## Provisioning script behavior
-
-The script `./bin/provision` will:
-
-- Update Debian packages to the latest versions.
-- Install PHP, Composer, Symfony CLI, PostgreSQL, FrankenPHP, locale, and timezone packages (via apt sources where needed).
-- Set locale and timezone to the UK.
-- Install all of Blueline's PHP and NPM dependencies.
-- Configure PHP's OPcache according to Symfony's reccomended production settings.
-- Configure PostgreSQL with suitable settings for the expected database workload, and enable the systemd service.
-- Generate `APP_SECRET` and write `DATABASE_URL`, `APP_ENV`, `FRANKENPHP_PORT`, and local `DEFAULT_URI` to `.env.local`.
-- Create the database, set-up the schema and install the `fuzzystrmatch` extension.
-- Generate a managed `Caddyfile` for FrankenPHP worker mode.
-- Install and enable `blueline.service` to run FrankenPHP on configurable HTTPS localhost port.
-- Install and enable `blueline-image.service` (Puppeteer image renderer) at low CPU/IO/OOM priority so it yields to FrankenPHP and PostgreSQL.
-- Install cloudflared and walk through Cloudflare tunnel creation (interactive).
-- Clear caches.
-- Warm production cache.
-- Build frontend JS, CSS and image assets.
-- Dump compiled `.env`.
-- Pre-generate error pages.
-
-Provisioning is idempotent where possible and is safe to re-run later.
+When using an external database, alternate server or no tunnel, review the script and configure those external resources and environment values separately. `--nodatabase`, `--noserver` and `--nocloudflared` skip local setup; they do not provision replacements.
 
 ## Data import
 
-The provisioning script does **not** populate the database with data. Do this by running `./bin/update` or `bin/fetchAndImportData`.
+Provisioning does not populate the database. Import or refresh method data with:
 
-## Ongoing production updates
+```sh
+./bin/fetchAndImportData --env=prod
+```
 
-Use:
+The standard update workflow also imports data unless `--nodata` is supplied.
 
-- `./bin/update`
+## Ongoing updates
 
-This updates application code, re-runs provisioning, and refreshes database data.
+Review the available flags before updating:
 
-Before running in production, review:
+```sh
+./bin/update --help
+./bin/update --env=prod
+```
 
-- `./bin/update --help`
+`./bin/update` pulls code, reruns provisioning and refreshes method data by default. It supports `--nopull`, `--nodata`, `--nodatabase`, `--nocloudflared`, `--noserver` and `--env=dev|prod`. The default pull step restores `package-lock.json`, `composer.lock` and `symfony.lock` before `git pull`; preserve any local changes to these files before running the updater.
 
-If only part of the stack should be managed by Blueline provisioning (for example, if you are using an external database, alternate web server, or no Cloudflare tunnel), use the relevant command-line options.
+## Ports and public URL
 
-## Port and endpoint behavior
+Provisioning asks for a local FrankenPHP HTTPS port and stores it in `.env.local` as `FRANKENPHP_PORT`. Without a Cloudflare Tunnel, `DEFAULT_URI` is set to `https://localhost:<FRANKENPHP_PORT>`. With a tunnel, its origin points to that local HTTPS endpoint and `DEFAULT_URI` is updated to the configured public hostname.
 
-- `./bin/provision` asks for a FrankenPHP HTTPS port and stores it in `.env.local` as `FRANKENPHP_PORT`.
-- Without a Cloudflare tunnel, `DEFAULT_URI` is set to `https://localhost:<FRANKENPHP_PORT>`.
-- With a Cloudflare tunnel, the tunnel origin points at `https://localhost:<FRANKENPHP_PORT>` and `DEFAULT_URI` is updated to your public hostname.
+## Related documentation
 
-## References
-
-- [Development and installation guide](development-deployment.md)
+- [Development and installation](development-deployment.md)
 - [Architecture and workflows](architecture-and-workflows.md)
-- [Cloudflare Tunnel docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)
+- [API reference](api.md)
+- [Cloudflare Tunnel documentation](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)

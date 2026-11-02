@@ -1,90 +1,95 @@
 # Architecture and workflows
 
+**Purpose:** Describe the application structure and shared technical conventions that affect implementation.
+
+**Audience:** Contributors and maintainers.
+
+**Prerequisites:** Familiarity with PHP, Symfony and browser JavaScript is useful but not required.
+
 ## High-level architecture
-- **Framework**: Symfony 7.4 application with Doctrine ORM and Twig.
-- **Backend**: PHP domain logic in `src/`.
-- **Frontend**: Source assets under `assets/`, managed by Symfony's AssetMapper with automatic versioning. Production builds use SensioLabs Minify Bundle for minification.
-- **Image rendering**: Local Node.js sidecar using Puppeteer and Chromium for `.png` images.
-- **Data store**: PostgreSQL (with `fuzzystrmatch` extension for search similarity features).
+
+- **Framework:** Symfony 7.4 application using Doctrine ORM and Twig.
+- **Backend:** PHP domain logic and HTTP controllers in `src/`.
+- **Frontend:** JavaScript and CSS in `assets/`, served through Symfony AssetMapper. Production asset output is built and minified during provisioning.
+- **Image rendering:** Local Node.js sidecar using Puppeteer and Chromium to render method pages as PNG images.
+- **Data store:** PostgreSQL, including the `fuzzystrmatch` extension used by search.
 
 ## Code structure
-- `src/Controller/`: HTTP controllers.
-- `src/Entity/`: Doctrine entities.
-- `src/Repository/`: Doctrine query/repository logic.
-- `src/Command/`: Symfony console commands used for import/export and maintenance.
-- `src/Helpers/`: domain-specific helpers and lookup logic.
-- `assets/`: JS and CSS used by the frontend.
-- `templates/`: Twig views.
-- `config/`: Symfony config and routes.
-- `public/`: built frontend assets and entry points.
-- `tests/`: PHPUnit tests.
 
-## Core operational workflows
+| Path | Responsibility |
+| --- | --- |
+| `src/Controller/` | HTTP endpoints and response creation. |
+| `src/Entity/` | Doctrine entities and serialization. |
+| `src/Repository/` | Doctrine query and repository logic. |
+| `src/Command/` | Symfony console commands for import, export and maintenance. |
+| `src/Helpers/` | Domain-specific helpers and lookup logic. |
+| `src/Doctrine/` | Custom DQL functions. |
+| `assets/` | Browser JavaScript, CSS and images. |
+| `templates/` | Twig views and response templates. |
+| `config/` | Symfony configuration and routes. |
+| `public/` | Public entry points and generated production assets. |
+| `tests/` | PHPUnit and JavaScript tests. |
 
-### Environment setup
-Follow [development-deployment.md](development-deployment.md) or [production-deploymeny.md](production-deployment.md) for setup.
+## Core workflows
 
-### Data import/update
-Use:
-- `./bin/fetchAndImportData`
+### Setup and data
 
-This script downloads external method data, runs import commands, recalculates similarities, and bumps `DATABASE_UPDATE`.
+Follow the [development guide](development-deployment.md) for local setup, tests and data import. Follow the [production guide](production-deployment.md) for deployment and live operations.
 
-### Frontend asset management
+### Frontend assets
 
-**Development**: Edit CSS/JS/image files in `assets/` and refresh your browser. Symfony's AssetMapper handles mapping and versioning automatically on each request—no build step required.
+In development, edit files under `assets/` and refresh the browser; AssetMapper handles mapping and versioning without a manual build. Production compilation is part of provisioning; see [production deployment](production-deployment.md).
 
-**Production**: Run `php bin/console asset-map:compile --env=prod` to compile assets and generate versioned files in `public/assets/` with minification applied via SensioLabs Minify Bundle. This is executed as part of `./bin/provision` and in the deployment pipeline.
+### PNG rendering
 
-**Asset Versioning**: AssetMapper generates content-hash-based filenames (e.g., `all-abc123.css`, `main-xyz789.js`) automatically, providing cache busting without additional configuration.
+Requests for `.png` under `/methods/view...` are handled by Symfony and proxied to `bin/image-server.mjs`. The sidecar opens the full method view in Chromium via Puppeteer and takes a screenshot. Requests are processed sequentially, and Chromium restarts after a configurable number of renders (`BROWSER_RESTART_AFTER`, default `200`) to limit memory growth. See the [development guide](development-deployment.md#running-the-application) for startup commands and logs.
 
-### Touch generation on method pages
+### Touch generation
 
-- The **Touches** tab searches locally in browser web workers, showing distinct true touches ordered by length.
-- [Compile.js](../assets/js/touch_generator/Compile.js) prepares the method and calls; [Search.js](../assets/js/touch_generator/Search.js) explores call sequences, checks every row for truth, and removes rotation-equivalent results.
-- Touches start at the method's first change and end at the first return to rounds. Multipart discovery repeats shorter call patterns within the selected length limits.
-- [TouchSearchPool.js](../assets/js/ui/MethodView/TouchSearchPool.js) shares work across short-base and full-depth searches, favouring multipart discovery while preserving early finishes.
-- Workers resume saved search snapshots. Pruning tables skip impossible branches without replacing exact truth checks.
-- Settings control lengths, minimum parts, calling positions, singles, music, result limits and search time. Pausing retains work; broader settings can restart exploration while retaining proved results.
-- **Allowed calling positions** rejects disallowed calls during exploration, not just in the displayed results. The optional **Tenors together** switch intersects this filter with call-specific permissions derived from the plain lead's directed working-place cycle. At every lead head it preserves the two heaviest working bells' directed separation as at rounds: continuing plain until the heavier bell is home must bring the other bell home too. They need not be neighbours in the cycle (Cambridge Minor and Major are supported); Bristol's separation happens to be one lead. This is not an adjacency check on intermediate rows, nor only a check at Home positions actually reached in the touch. Multipart touches and display rotations are rechecked. The switch is off by default, hidden without defined calling positions, and disabled with an explanation unless the working places form one cycle and calls end at the lead head. Its note lists the method's permissions independently of other selected settings.
-- **Music** filters depend on the rotation, because rotating a touch relabels its bells. Each touch is shown in a rotation that passes the filters, and touches with no passing rotation are dropped. Music is read in handstroke/backstroke pairs, so named rows can be found wrapped across the pair; for Rounds, only wrapped matches count. **No 65s at back** (even stages only, on by default; labelled for the stage, e.g. 87s on Major, 09s on Royal) rejects backstrokes ending in the two heaviest bells reversed. It prunes during exploration. For that to be safe, the duplicate-rotation pruning compares only rotations that start at a lead head with both tenors home, which leave every row's 65s status unchanged (or none, for odd lead lengths). **Required named rows** (a Choices.js multi-select of Music.js's rows for the stage) must all appear, and are checked only when a touch is recorded. On odd stages, **Assume tenor behind** (on by default) reads every row with a covering tenor appended and offers the next stage's named rows instead (Rounds is omitted, since it could only be the closing row); for example Queens on Triples is 1357246(8), and Back Rounds can wrap as 8|7654321. The line-view music highlighting is unaffected. Cards and the details dialog list the named rows found and any backstroke 65s.
-- Calling-position names for singles refer to the corresponding bob at the same decision, not simply the single's destination. With standard 14 bobs and 1234 singles (for example, Bristol or Cambridge Major), single Before finishes in 2nds while bob Before finishes in 3rds; single In finishes in 3rds while bob In finishes in 2nds. The optional single-position name Thirds (T) is not used: the label remains In (I). As the [CCCBR explanation](https://callingitround.cccbr.org.uk/docs/calling/3_demystifying_in_out_make/) notes, names vary by method and stage; no method-specific Out/Make override is applied.
-- [Touches.js](../assets/js/ui/MethodView/Touches.js) handles the UI; [Presentation.js](../assets/js/touch_generator/Presentation.js) builds lead/course layouts, compact sequences and Siril exports.
-- Source-file comments explain the algorithms, scheduling, worker loading and presentation rules in more detail. Regression tests live in [tests/JavaScript/TouchGenerator/](../tests/JavaScript/TouchGenerator/).
+Touch search behavior, controls and ringing rules have a dedicated [touch-generation guide](touch-generator.md).
 
-### PNG image generation
+## Offline and service worker
 
-`.png` requests under `/methods/view...` are handled by Symfony but proxied to a local Node.js image server running `bin/image-server.mjs`.
+The service worker supports previously visited document pages when the network is unavailable:
 
-- The image server opens the full method view page in Chromium via Puppeteer and takes a screenshot of it.
-- Requests are processed sequentially. Concurrent image requests queue behind the active render.
-- The browser instance is kept warm between requests and restarted after a configurable number of renders (`BROWSER_RESTART_AFTER`, default `200`) to limit memory growth over time.
+- On installation it caches the application home page and its chromeless variant, then activates immediately and takes control of existing clients.
+- It intercepts only `GET` requests for navigations/documents; it does not cache API, image or other subresource requests.
+- It looks in the current version's cache first. On a network miss it fetches the page and stores successful responses.
+- If fetching fails, it checks older caches before returning an offline message. Once a page is fetched successfully under the new version, older caches are deleted.
+- The frontend can prefetch same-origin document URLs in chromeless form, with a timeout. This is used to preload links on mouseover.
+- When a new worker takes control, the page may reload once. The frontend suppresses this automatic reload when available connection signals indicate data-saving or a slow connection; if the Network Information API is unavailable, it allows the reload.
 
-### Quality checks
-Use `./bin/test`, or other things as described in [development-deployment.md](development-deployment.md).
+Offline support is limited to pages already cached or available from a previous cache; it does not preload the whole database or similar.
 
 ## Change guidelines
-- Keep changes minimal and localised.
-- Preserve existing architecture and naming unless intentionally changing it.
-- Prefer adding tests close to changed behavior.
-- If adding a feature that affects setup or runbook steps, update `README.md` and other files in `./docs`.
-- For UI/styling changes, see `docs/design-language.md` for the colour, typography, spacing, and layout tokens/patterns to reuse.
 
-### FrankenPHP worker safety
-- `src/Command/` commands are run using `symfony console ...` commands, but HTTP requests may be run using FrankenPHP's worker mode, and so should be architected to work well in that scenario.
-- Treat service instances as long-lived when running in worker mode.
+- Keep changes minimal and localised; preserve existing architecture unless intentionally changing it.
+- Add tests close to changed behavior.
+- Keep each procedure or behavior in its canonical document; update the [documentation index](README.md) when adding maintained documentation.
+- For UI changes, follow the tokens and patterns in [design language](design-language.md).
+- Use `symfony console <command>` for Symfony commands.
+
+## FrankenPHP worker safety
+
+HTTP requests may run in FrankenPHP worker mode, where service instances remain alive across requests:
+
 - Do not cache request-derived values in service constructors or mutable service properties.
-- Resolve request-dependent values at request/render time (for example via `RequestStack` in the method that needs the current request).
-- Treat Doctrine query/result caches as app-level caches; do not clear them per request unless metrics show they are causing unacceptable pressure.
-- Add request-end cleanup for stateful subsystems (for example clearing Doctrine's EntityManager on `kernel.terminate`) to avoid cross-request state reuse.
+- Resolve request-dependent values at request/render time, for example through `RequestStack`.
+- Treat Doctrine query and result caches as application-level caches; do not clear them per request without evidence of unacceptable pressure.
+- Preserve request-end cleanup for stateful subsystems, for example clearing Doctrine's EntityManager on `kernel.terminate`.
 
-### Naming policy: PHP vs PostgreSQL
-- **PHP code uses camelCase** for properties, array keys, and DTO-style payloads.
-- **PostgreSQL identifiers remain lowercase** (unquoted behavior and existing schema conventions).
-- **Doctrine is the mapping boundary** between camelCase PHP and lowercase database identifiers.
+## PHP and PostgreSQL naming
 
-#### Practical rules
-- In Doctrine ORM/DQL, use entity property names (camelCase).
-- In raw SQL (DBAL), use real database identifiers (lowercase).
-- If DBAL results are consumed as associative arrays and camelCase keys are needed in PHP, alias explicitly at the fetch boundary, for example: `notationexpanded AS "notationExpanded"`.
+- Use camelCase in PHP properties, entity fields and DTO-style keys.
+- Use lowercase database identifiers in raw SQL and DBAL.
+- Doctrine is the mapping boundary between PHP camelCase and PostgreSQL identifiers.
+- In DQL, use entity property names. When DBAL results require camelCase array keys, alias columns explicitly at the fetch boundary, for example `notationexpanded AS "notationExpanded"`.
 - Do not rely on unquoted mixed-case SQL identifiers; PostgreSQL folds them to lowercase.
+
+## Related documentation
+
+- [Development and installation](development-deployment.md)
+- [Production deployment](production-deployment.md)
+- [Touch generation](touch-generator.md)
+- [Design language](design-language.md)
+- [Data and copyright](data-and-copyright.md)

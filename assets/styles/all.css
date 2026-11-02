@@ -1,3 +1,4 @@
+/* Global tokens and responsive entry point for the application stylesheets. */
 @import 'layout.css';
 @import 'components.css';
 

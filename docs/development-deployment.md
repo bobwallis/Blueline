@@ -1,170 +1,167 @@
-# Development and Installation
+# Local development and installation
 
-This guide covers local installation and day-to-day development for Blueline.
+**Purpose:** Set up Blueline locally and document the day-to-day development, testing and dependency workflows.
+
+**Audience:** Contributors and maintainers working on a local checkout.
+
+**Prerequisites:** A Git checkout, Docker-compatible environment, Visual Studio Code and its Dev Containers support, and internet access for provisioning and data import.
 
 ## Environment baseline
 
-To minimise breakage from ecosystem churn, Blueline targets stable LTS tooling where possible:
+Blueline targets stable long-term-support tooling where practical:
 
-- [Debian Trixie](https://www.debian.org/releases/trixie/) for containers and VMs
-- [Symfony](https://symfony.com/releases/7.4) 7.4
-- [PHP](https://www.php.net/) 8.4 (version provided by Trixie)
-- [PostgreSQL](https://www.postgresql.org/) 17 (version provided by Trixie)
-- [Node.js](https://nodejs.org) 24 (current LTS)
-- Bash scripts using basic command-line tools
+- Debian Trixie for containers and VMs.
+- Symfony 7.4, the current LTS release.
+- PHP 8.4, as provided by Trixie.
+- PostgreSQL 17, as provided by Trixie.
+- Node.js 24, the current LTS release.
+- Bash scripts using standard command-line tools.
 
 ## Preferred development setup
 
-The easiest development workflow uses [Visual Studio Code](https://code.visualstudio.com/) with [Remote Containers](https://code.visualstudio.com/docs/remote/containers). This creates a single Docker development container, isolated from the rest of your computer, similar to the recommended production deployment/configuration.
+Open the repository in Visual Studio Code and choose **Reopen in Container** when prompted. The configuration is in `.devcontainer/`; its post-create step runs `./bin/provision`, and its post-start step starts FrankenPHP and the image server.
 
-### Requirements
+If provisioning did not complete, rerun it from the repository root:
 
-Open the project folder in Visual Studio Code. Dev container configuration is in `.devcontainer/` and you should be prompted to open the project in a container.
+```sh
+./bin/provision
+```
 
-### Initial development setup
+### Provisioning behavior
 
-When creating the container, `./bin/provision` runs automatically. If it fails, run it again. It must complete to ensure the database is created and configured.
+`./bin/provision` is idempotent where possible. In development it:
 
-## Provisioning script behavior
+- Updates Debian packages and installs PHP, Composer, Symfony CLI, PostgreSQL, FrankenPHP, Chromium, locale and timezone packages.
+- Sets the locale and timezone to the UK, installs PHP and npm dependencies, configures PHP OPcache and tunes PostgreSQL for the expected workload.
+- Generates `APP_SECRET` and writes `DATABASE_URL`, `APP_ENV=dev`, `FRANKENPHP_PORT`, `IMAGESERVER_PORT` and `DEFAULT_URI` to `.env.local`.
+- Generates a managed Caddyfile for local HTTPS and FrankenPHP worker mode.
+- Creates the database schema, installs PostgreSQL's `fuzzystrmatch` extension and clears caches.
 
-The script `./bin/provision` will:
+Provisioning does not import method data.
 
-- Update Debian packages to the latest versions.
-- Install PHP, Composer, Symfony CLI, PostgreSQL, FrankenPHP, Chromium, locale, and timezone packages (via apt sources where needed).
-- Set locale and timezone to the UK.
-- Install all of Blueline's PHP and NPM dependencies.
-- Configure PHP's OPcache according to Symfony's reccomended settings.
-- Configure PostgreSQL with suitable settings for the expected database workload.
-- Generate `APP_SECRET` and write `DATABASE_URL`, `APP_ENV=dev`, `FRANKENPHP_PORT`, `IMAGESERVER_PORT`, and `DEFAULT_URI` to `.env.local`.
-- Generate a managed `Caddyfile` configured for local HTTPS and FrankenPHP worker mode.
-- Create the database, set-up the schema and install the `fuzzystrmatch` extension.
-- Clear caches.
+## Importing and updating data
 
-On subsequent runs, it skips already-completed steps and is safe to re-run.
+Import method data into the local PostgreSQL database with:
 
-## Data import
+```sh
+./bin/fetchAndImportData
+```
 
-Run `./bin/fetchAndImportData` to download method data and import it into PostgreSQL.
+The script downloads and imports method data, updates derived data including method similarities, and refreshes the database update timestamp used by cache validation.
 
-## Maintenance workflow
+For the combined maintenance workflow, inspect the available options and then run:
 
-Run `./bin/update` to pull new code, re-run provisioning, and refresh data.
+```sh
+./bin/update --help
+./bin/update
+```
 
-Before running, check:
+`./bin/update` pulls application code, reruns provisioning and refreshes data by default. It restores the Composer and npm lockfiles before pulling, so do not run it with local changes to those files that you need to keep.
 
-- `./bin/update --help`
-- Any command-line arguments needed for your environment (for example, external database or alternate web server)
+## Running the application
 
-## Development workflow
+The development server uses FrankenPHP. The Dev Container forwards port `8000`; the configured port is stored as `FRANKENPHP_PORT` in `.env.local`. The image server uses `IMAGESERVER_PORT` (normally `8001`) and is not exposed as a public application endpoint.
 
-### Run the app
+Access the application at `http://localhost:8000/` in the default container setup. The container starts both services automatically. To start them manually:
 
-Blueline runs on FrankenPHP in development.
+```sh
+bash ./bin/start-dev-frankenphp
+bash ./bin/start-dev-image-server
+```
 
-`./bin/provision` asks for a FrankenPHP HTTP port (default `8000`) and stores it in `.env.local` as `FRANKENPHP_PORT`.
-It also sets `IMAGESERVER_PORT` for the local Puppeteer image server (default `8001`).
+Logs are written to `var/log/frankenphp-dev.log` and `var/log/image-server.log`:
 
-In the dev container, FrankenPHP and the image server are started automatically on container start.
+```sh
+tail -f var/log/frankenphp-dev.log
+tail -f var/log/image-server.log
+```
 
-To start or restart it manually:
+Method PNG requests are rendered by the local Puppeteer image server. The renderer opens the full method page in Chromium and takes a screenshot; requests are handled sequentially, Chromium is kept warm, and it restarts after 200 renders by default. See [architecture and workflows](architecture-and-workflows.md#png-rendering) for the architecture.
 
-- `bash ./bin/start-dev-frankenphp`
-- `bash ./bin/start-dev-image-server`
+## Frontend development
 
-Access the app at `http://localhost:<FRANKENPHP_PORT>/`.
+Development mode uses AssetMapper directly; no manual build step is needed while iterating:
 
-To inspect logs:
+1. Edit files under `assets/`.
+2. Refresh the browser.
 
-- `tail -f var/log/frankenphp-dev.log`
-- `tail -f var/log/image-server.log`
+Service-worker and offline behavior is documented in [architecture and workflows](architecture-and-workflows.md#offline-and-service-worker).
 
-### PNG image generation
+## Inspecting the database
 
-Method image requests are rendered locally by `bin/image-server.mjs` using Puppeteer and Chromium.
+The Dev Container includes the SQLTools and PostgreSQL driver extensions. The configured local connection uses `localhost:5432` with database, username and password `blueline`.
 
-- The image server opens the full method view page and takes a screenshot.
-- Requests are handled sequentially; concurrent `.png` requests queue behind the current render.
-- Chromium is kept warm between requests and restarted after `BROWSER_RESTART_AFTER` renders (default `200`) to avoid unbounded memory growth during long-running sessions.
+The Doctrine `test` environment resolves to the same PostgreSQL database as `dev`. Tests can write to the database; for example, the method-similarity command test deletes and recalculates `methods_similar` rows. Only run the full suite when those effects are acceptable.
 
-## Frontend assets
+## Testing and linting
 
-Development mode uses AssetMapper directly. No build step is required:
+Use the full test pipeline only for complete validation:
 
-- Edit files in `assets/`
-- Refresh the browser
+```sh
+./bin/test
+```
 
-### Service worker update behavior
+The script checks database/schema setup, the Symfony container, Twig, PHP syntax and style, frontend and documentation lint, JavaScript tests, production asset compilation and PHPUnit. If the test database cannot be reached, it prompts before creating the database and schema. If the methods table is empty, it separately prompts before importing method data.
 
-- The app service worker activates immediately, and tabs that the new worker takes control of may reload once to pick up updated content.
-- Automatic reload is gated by browser connection quality signals when available (`navigator.connection`). If the API is unavailable, the app defaults to reloading.
-- Previous cache versions are kept until a request that is missing from the new cache is fetched successfully. This preserves offline fallback for previously visited pages on poor connections.
+Run targeted PHPUnit tests directly:
 
-### Inspect the database
+```sh
+./bin/phpunit tests/Controller
+./bin/phpunit --filter testActionName tests/Controller/ExampleTest.php
+```
 
-The container installs the [SQLTools](https://vscode-sqltools.mteixeira.dev/) VSCode extension which you can use to inspect the
-database and run queries direcly against it if needed. The default development connection uses `localhost:5432` with database/user/password all set to `blueline`.
+PHP style checks use the Symfony ruleset:
 
-### Testing
+```sh
+symfony composer lint:php-style
+symfony composer fix:php-style
+```
 
-The `test` environment is set to use the same database as `dev`.
+The full pipeline reports PHP-CS-Fixer violations without failing solely for style. Run the style check directly when validating a PHP style change.
 
-Run the full test pipeline (including linting, schema/container checks, asset compilation validation, and the full PHPUnit suite):
+Frontend lint commands:
 
-- `./bin/test`
+```sh
+npm run lint
+npm run lint:js
+npm run lint:css
+npm run lint:svg
+npm run test:js
+```
 
-Run targeted tests directly with PHPUnit:
+`npm run lint` includes the Markdown and internal-link checks. For JavaScript auto-fixing, run `npm run lint:js:fix`, then rerun `npm run lint:js`.
 
-- `./bin/phpunit tests/Controller`
-- `./bin/phpunit --filter testActionName tests/Controller/DefaultControllerTest.php`
+Very slow command tests, primarily method import tests, are excluded unless explicitly enabled:
 
-Run PHP style checks/fixes for `src/` and `tests/`:
+```sh
+BLUELINE_RUN_SLOW_COMMAND_TESTS=1 ./bin/test
+```
 
-- `symfony composer lint:php-style`
-- `symfony composer fix:php-style`
+## Updating dependencies
 
-The project targets Symfony coding style via PHP-CS-Fixer. `./bin/test` reports style violations without failing the run.
+Use Symfony's Composer wrapper:
 
-Run frontend linting directly during iteration:
+```sh
+symfony composer update
+symfony composer outdated
+symfony composer validate --no-check-publish
+```
 
-- `npm run lint` to run all frontend lint checks together
-- `npm run lint:js` for JavaScript in `assets/js/`
-- `npm run lint:js:fix` to auto-fix JavaScript style violations (runs ESLint with `--fix`); follow up with `npm run lint:js` to confirm no unfixable errors remain
-- `npm run lint:css` for CSS in `assets/styles/`
-- `npm run lint:svg` for SVG files in `assets/images/`
+Review major-version changes carefully, especially Symfony upgrades. Keep `composer.json`, `composer.lock` and `symfony.lock` in sync.
 
-The full `./bin/test` pipeline includes frontend linting and will fail if any asset lint check fails.
+Use npm for JavaScript dependencies:
 
-Some command tests are very slow (primarily method import tests). Include them with:
+```sh
+npm update
+npm outdated
+```
 
-- `BLUELINE_RUN_SLOW_COMMAND_TESTS=1 ./bin/test`
+Use `npm install <package>` for runtime dependencies and `npm install -D <package>` for development dependencies. `npm update` updates declared packages but does not add new ones. Keep `package.json` and `package-lock.json` in sync.
 
-To test the touch_generator only via a dependency-free Node test suite, including independent proving, packed engines, calling/Siril round trips, and real worker-pool tests:
-- `npm run test:js`
+## Related documentation
 
-### Updating PHP dependencies
-
-Use Symfony Composer wrappers:
-
-- `symfony composer update` to update compatible package versions
-- `symfony composer outdated` to inspect available updates
-
-Guidance:
-
-- Red entries (confusingly!) in `outdated` are generally compatible patch/minor updates.
-- Yellow entries are major upgrades and should almost certainly be left alone until upgrading to a new major version of Symfony, which should be done following [their instructions](https://symfony.com/doc/current/setup/upgrade_major.html).
-- After dependency updates, run `symfony composer validate --no-check-publish` to confirm the Composer files are still consistent.
-- After dependency updates, commit `composer.json`, `composer.lock`, and `symfony.lock`.
-
-### Updating npm dependencies
-
-Use npm to keep the frontend dependency tree and lockfile in sync:
-
-- `npm update` to refresh already-declared dependencies to the newest versions allowed by `package.json`
-- `npm outdated` to inspect available npm updates
-
-Guidance:
-
-- Use `npm install <package>` for runtime dependencies that belong in `dependencies`.
-- Use `npm install -D <package>` for development-only dependencies that belong in `devDependencies`.
-- `npm update` does not add new packages to `package.json`; it only updates versions that are already declared.
-- After npm dependency updates, commit `package.json` and `package-lock.json`.
+- [Architecture and workflows](architecture-and-workflows.md)
+- [Production deployment](production-deployment.md)
+- [Design language](design-language.md)
+- [Touch generation](touch-generator.md)
+- [Repository instructions](../AGENTS.md)

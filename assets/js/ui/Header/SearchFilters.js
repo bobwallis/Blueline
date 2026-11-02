@@ -1,5 +1,10 @@
 import Choices from 'choices.js';
 
+/**
+ * Keep method-search filters in sync with navigation URLs and submit user changes.
+ *
+ * Programmatic Choices.js updates are guarded so restoring URL state does not submit the form.
+ */
 const searchForm = document.getElementById('search');
 const filtersToggle = document.getElementById('search_filters_toggle');
 const filtersPanel = document.getElementById('search_filters');
@@ -45,6 +50,7 @@ function syncFromURL(url) {
 		filtersToggle.setAttribute('aria-expanded', String(!filtersPanel.hidden));
 	}
 	syncing = true;
+	// Updating Choices.js can fire change events; do not treat URL restoration as user input.
 	choices[0].removeActiveItems();
 	choices[0].setChoiceByValue(valuesFromURL(url, 'stage'));
 	choices[1].removeActiveItems();

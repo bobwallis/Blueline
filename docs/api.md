@@ -1,203 +1,57 @@
-# Blueline API Documentation
+# API reference
+
+**Purpose:** Document Blueline's public read-only HTTP endpoints, their parameters, response fields and cache behavior.
+
+**Audience:** API consumers and maintainers.
+
+**Prerequisites:** None. Requests use the public site URL or a local Blueline installation.
 
 ## Overview
 
-The Blueline API provides programmatic access to a library of bell-ringing methods, collections, and performance records. The API is **read-only** and returns data as JSON.
+The API exposes method search and detail views, place-notation conversion, oEmbed metadata and CSV data exports. Endpoints are public and do not require authentication. The route suffix selects the response format; JSON is not selected through an `Accept` header alone.
 
-## Quick Start
+The public deployment may be subject to CDN rate limits. Cache responses where practical and avoid unnecessary parallel requests, particularly for PNG rendering.
 
-Fetch a method by its URL identifier:
+## Base URL and formats
 
-```bash
-curl https://rsw.me.uk/blueline/methods/view/Cambridge_Surprise_Major.json
-```
+The public base URL is `https://rsw.me.uk/blueline`. Use the corresponding base URL for another installation.
 
-Response:
-```json
-[{
-  "title": "Cambridge Surprise Major",
-  "stage": 8,
-  "classification": "Surprise",
-  "notation": "x38x14x1258x36x14x58x16x78,12",
-  "url": "Cambridge_Surprise_Major",
-  ..............
-}]
-```
+| Suffix | Format |
+| --- | --- |
+| `.json` | JSON |
+| `.png` | PNG image |
+| `.csv` | CSV export |
+| `.txt` | Plain text notation output |
+| `.xml` | XML route where available; oEmbed XML is not implemented. |
 
-## Base URL & Content Negotiation
+## Method endpoints
 
-Blueline uses HTTP content negotiation via file extension (suffix) to determine response format. Add `.json` to any endpoint path to request JSON output. Some endpoints also support PNG, XML, or CSV.
+### `GET /methods/search.json`
 
-```
-Base: https://rsw.me.uk/blueline
-JSON endpoints: /path.json
-PNG endpoints: /path.png
-CSV endpoints: /path.csv
-XML endpoints: /path.xml
-```
+Search methods and return a JSON envelope containing the query values, results and total match count.
 
-## Authentication & Access
-
-**No authentication required.** All API endpoints are public and read-only.
-
-**Public-facing access** is currently provided via Cloudflare's free tier and may be rate-limited or deprioritised according to their policies.
-
-**Responses are cached** for a period of time (`Cache-Control: public, max-age=XXXXX`). To intentionally bypass cached responses, use the specific `cache_bust` query parameter with a unique value for each forced-refresh request (for example: `?cache_bust=2026-05-31T12:34:56Z`).
-
-**I am generally OK with all use of the service**, and it should handle all sensible usage but please consider:
-
-- Implementing request caching on your client
-- Using `If-Modified-Since` headers to leverage Cloudflare-side caching
-- Not sending multiple parallel requests, particularly for PNG image generation
-
-## Endpoints Reference
-
-### GET /methods/view/{url}.json
-
-Retrieve a single method by its URL identifier, including related methods that differ only at specific points.
-
-#### Parameters:
+#### Parameters
 
 | Name | Required | Type | Description |
-|------|----------|------|-------------|
-| `url` | Yes | String | URL identifier (e.g., `Cambridge_Surprise_Major`). Use canonical URL form with underscores replacing spaces and proper capitalization. Invalid or non-existent URLs redirect (301) or return 404. |
+| --- | --- | --- | --- |
+| `q` | No | String | Search method names by text or phonetic match. A multi-character value beginning with `/` is treated as a regular expression against the title; an invalid expression returns `400`. A trailing stage, classification, `little` or `differential` term can also be interpreted as a filter. |
+| `stage` | No | Integer | Filter by number of bells, for example `stage=6`. |
+| `classification` | No | String | Filter by classification, for example `classification=Surprise`. |
+| `little` | No | Boolean | Filter the `little` field. |
+| `differential` | No | Boolean | Filter the `differential` field. |
+| `fields` | No | String | Comma-separated camelCase field names to return, for example `fields=title,url,notationSiril`. Unknown names are ignored; if none are recognized, the default field set is used. |
+| `sort` | No | String | Method field to sort by. Defaults to `magic`. |
+| `order` | No | String | `ASC` or `DESC`; defaults to `ASC`. |
+| `count` | No | Integer | Maximum results per page. Defaults to `15`. |
+| `offset` | No | Integer | Number of results to skip. Defaults to `0`. |
 
-#### Response:
+The API uses `count` and `offset` for pagination; it does not read a `limit` parameter.
 
-Returns an array containing one method object with extended relationship data:
+#### Response
 
-```json
-[{
-  "title": "Cambridge Surprise Major",
-  "abbreviation": "C",
-  "stage": 8,
-  "classification": "Surprise",
-  "notation": "x38x14x1258x36x14x58x16x78,12",
-  "notationExpanded": "x38x14x1258x36x14x58x16x78x16x58x14x36x1258x14x38x12",
-  "leadHead": "15738264",
-  "leadHeadCode": "b",
-  "fchGroups": "BDEe",
-  ..............
-}]
-```
+The top-level `count` is the total number of matching methods. `query.count` is the requested page size, not the total.
 
-#### Characteristics:
-
-- Response is always an array (for API consistency)
-- `similar` object groups related methods by type of difference
-- Empty arrays in `similar` indicate no matches in that category
-- All fields may be `null` if data is not available. In the source data from the CCCBR null often implies false.
-- Where defined, `callingPositions` contains the plain-course calling-position `titles` (or `near`/`far` variants).
-
-#### Example:
-
-```bash
-curl 'https://rsw.me.uk/blueline/methods/view/Cambridge_Surprise_Major.json'
-```
-
----
-
-### GET /methods/view/{url}.png
-
-Retrieve a PNG diagram/image of a method showing its structural pattern and notation.
-
-#### Parameters:
-
-| Name | Required | Type | Description |
-|------|----------|------|-------------|
-| `url` | Yes | String | URL identifier (e.g., `Cambridge_Surprise_Major`). Use canonical URL form with underscores replacing spaces and proper capitalization. Invalid or non-existent URLs redirect (302) or return 404. |
-| `scale` | No | Integer | Image scale factor (default: `1`). Larger values produce bigger diagrams; useful for high-resolution displays. |
-| `style` | No | String | Diagram style. `numbers`, `lines`, `grid`, `diagrams`. Default: `numbers`. |
-
-#### Response:
-
-Returns a PNG image binary.
-
-#### Behavior:
-
-- Content-Type is `image/png`
-- Responses include `Content-Disposition: attachment` header (triggers download in browsers with a filename like `Cambridge_Surprise_Major.png`)
-- Invalid or non-existent URLs trigger a temporary redirect (302) or return 404
-- Generation is on-demand; large diagrams may take a moment to render
-
-#### Example:
-
-```bash
-# Fetch and save method diagram
-curl -L 'https://rsw.me.uk/blueline/methods/view/Cambridge_Surprise_Major.png' -o Cambridge_Surprise_Major.png
-
-# With custom styling
-curl -L 'https://rsw.me.uk/blueline/methods/view/Cambridge_Surprise_Major.png?scale=4&style=grid' -o diagram_large.png
-```
-
----
-
-### GET /methods/view.(json|png)
-
-Parse and generate a response for a custom or ad-hoc method notation. Useful for exploring methods not yet in the database.
-
-#### Parameters:
-
-| Name | Required | Type | Description |
-|------|----------|------|-------------|
-| `notation` | Yes | String | Place notation (e.g., `x38x14x1258x36x14x58x16x78,12` or `3,1.5.1.5.1`). Supports multiple notation styles. |
-| `stage` | No | Integer | Number of bells (3–12+). Auto-detected from notation if omitted. |
-| `title` | No | String | Custom title for the method. If omitted, title is auto-generated. |
-
-#### Response:
-
-Returns an array with one synthetic method object. Or an image of it.
-
-```json
-[{
-  "title": "Cambridge Surprise Major;",
-  "stage": 8,
-  "notation": "x38x14x1258x36x14x58x16x78",
-  "notationExpanded": "x38x14x1258x36x14x58x16x78",
-  "leadHead": "74256831",
-  "lengthOfLead": 16,
-  "lengthOfCourse": 128,
-  "classification": "Surprise",
-  "similar": null,
-  ...
-}]
-```
-
-#### Behavior:
-
-- If the notation matches an existing database method, the request redirects (301) to `/methods/view/{url}.json` for that method
-- Custom methods do not include similarity data or database-specific fields
-- Stage is guessed from the bell characters present in notation if not provided
-
-#### Example:
-
-```bash
-curl 'https://rsw.me.uk/blueline/methods/view.json?notation=x38x14x1258x36x14x58x16x78&stage=8&title=Cambridge%20Surprise%20Major'
-```
-
----
-
-### GET /methods/search.json
-
-Search for methods by query string, with optional filtering by stage, classification, and other properties.
-
-#### Parameters:
-
-| Name | Required | Type | Description |
-|------|----------|------|-------------|
-| `q` | No | String | Search query. Supports plain text (searches title and phonetically), regex patterns (must start with `/`, e.g., `/^Cambridge/`), or stage + classification filtering. |
-| `stage` | No | Integer | Filter by number of bells (e.g., `stage=6`). Can also be appended to `q` (e.g., `q=surprise 6` infers stage 6). |
-| `classification` | No | String | Filter by method classification (e.g., `classification=Surprise`). Case-insensitive. |
-| `little` | No | Boolean | Filter to little methods (e.g., `little=true`). |
-| `differential` | No | Boolean | Filter to differential methods. |
-| `fields` | No | String | Comma-separated field names to return (e.g., `fields=title,url,stage`). If omitted, defaults include title, abbreviation, url, classification, stage, notation, ruleOffs, calls, callingPositions, and cccbrId. |
-| `sort` | No | String | Sort order. Default is `magic` (a calculated ranking based on how likely it is the user is searching for each method); other values: `title`, `stage`, etc. |
-| `limit` | No | Integer | Maximum results per page. Default: 10. |
-| `offset` | No | Integer | Results offset (for pagination). Default: 0. |
-
-#### Response:
-
-Returns an envelope with query metadata, result array, and total count:
+The following is an illustrative, intentionally abbreviated response shape; it is not a sample captured from a live service. See the [method field reference](#method-json-fields) for the complete field list.
 
 ```json
 {
@@ -210,320 +64,274 @@ Returns an envelope with query metadata, result array, and total count:
     "sort": "magic"
   },
   "results": [
-    { "title": "Cambridge Surprise Major", "url": "Cambridge_Surprise_Major", "stage": 8, "classification": "Surprise" },
-    { "title": "Old Cambridge Surprise Major", "url": "Old_Cambridge_Surprise_Major", "stage": 8, "classification": "Surprise" },
-    { "title": "Kimmeridge Surprise Major", "url": "Kimmeridge_Surprise_Major", "stage": 8, "classification": "Surprise" }
+    {
+      "title": "Cambridge Surprise Major",
+      "url": "Cambridge_Surprise_Major",
+      "stage": 8,
+      "classification": "Surprise"
+    }
   ],
-  "count": 9
+  "count": 1
 }
 ```
 
-#### Characteristics:
+#### Examples
 
-- Plain text queries use LIKE matching on the string, and phonetic matching to implement basic spell checking.
-- Regex queries must be valid regex (checked server-side; returns 400 for invalid patterns)
-- Search is case-insensitive
-- Field filtering allows fetching only required data
-
-#### Example:
-
-```bash
-# Simple text search
+```sh
+# Text search
 curl 'https://rsw.me.uk/blueline/methods/search.json?q=cambridge'
 
-# Regex search
-curl 'https://rsw.me.uk/blueline/methods/search.json?q=/^Cambridge.*Major/'
-
-# Filtered search with field selection
+# Search and filter
 curl 'https://rsw.me.uk/blueline/methods/search.json?q=surprise&stage=6&fields=title,url'
 
-# Pagination
-curl 'https://rsw.me.uk/blueline/methods/search.json?q=major&limit=50&offset=100'
+# Regular-expression search
+curl 'https://rsw.me.uk/blueline/methods/search.json?q=%2F%5ECambridge%2F'
+
+# Request the next page of 50 results
+curl 'https://rsw.me.uk/blueline/methods/search.json?q=major&count=50&offset=50'
 ```
 
-#### Pagination:
+### `GET /methods/view/{url}.json`
 
-Search results support cursor-based pagination:
+Return one method as a one-element JSON array. The method object contains the fields listed in [Method JSON fields](#method-json-fields) and a `similar` object with groups named `differentOnlyAtLeadEnd`, `differentOnlyAtHalfLead`, `differentOnlyAtHalfLeadAndLeadEnd` and `other`. Each group contains related methods; an empty group has no matches.
 
-```bash
-# Fetch first 50 results
-curl 'https://rsw.me.uk/blueline/methods/search.json?q=major&limit=50&offset=0'
+For example:
 
-# Fetch next 50
-curl 'https://rsw.me.uk/blueline/methods/search.json?q=major&limit=50&offset=50'
+```sh
+curl 'https://rsw.me.uk/blueline/methods/view/Cambridge_Surprise_Major.json'
 ```
 
-#### Field Selection:
+Method URL identifiers use underscores in place of spaces. Requests that canonicalise to another method URL are permanently redirected (`301`); an unknown method returns `404`.
 
-Reduce bandwidth by requesting only required fields:
+The endpoint always returns an array, even though it contains one method.
 
-```bash
-# Fetch only essential data
-curl 'https://rsw.me.uk/blueline/methods/search.json?q=cambridge&fields=title,url,stage'
+### `GET /methods/view/{url}.png`
 
-# Response only includes: title, url, stage
+Render a method detail page as a PNG image.
+
+| Parameter | Required | Type | Description |
+| --- | --- | --- | --- |
+| `scale` | No | Integer | Image scale; defaults to `1`. Values greater than `4` are rejected with `403`. |
+| `style` | No | String | One of `numbers`, `lines`, `diagrams` or `grid`; defaults to `numbers`. |
+
+The response has content type `image/png`; the controller does not set a `Content-Disposition` header. Missing/default style or scale values may be normalised with a permanent `301` redirect. Invalid styles return `403`, a missing method returns `404`, and image-rendering failures return `503`.
+
+```sh
+curl -L 'https://rsw.me.uk/blueline/methods/view/Cambridge_Surprise_Major.png' -o Cambridge_Surprise_Major.png
+curl -L 'https://rsw.me.uk/blueline/methods/view/Cambridge_Surprise_Major.png?scale=4&style=grid' -o diagram.png
 ```
 
-#### Regex Search:
+### `GET /methods/view.json`
 
-Advanced searches using regular expressions:
+Parse and display a custom method that may not be in the database. The result is a one-element array with a synthetic method object and the same `similar` group keys as a database method; each custom-method group is `null`.
 
-```bash
-# Methods starting with "Cambridge"
-curl 'https://rsw.me.uk/blueline/methods/search.json?q=/^Cambridge/'
+| Parameter | Required | Type | Description |
+| --- | --- | --- | --- |
+| `notation` | Yes | String | Place notation, for example `x38x14x1258x36x14x58x16x78` or `3,1.5.1.5.1`. |
+| `stage` | No | Integer | Number of bells. If omitted, the stage is guessed from the notation. |
+| `title` | No | String | Optional display title. |
 
-# Methods with "Surprise" or "Treble"
-curl 'https://rsw.me.uk/blueline/methods/search.json?q=/Surprise|Treble/'
+If the expanded notation and stage match a database method, the endpoint permanently redirects (`301`) to that method's detail URL. Missing `notation` returns `400`.
 
-# Invalid regex returns 400
-curl 'https://rsw.me.uk/blueline/methods/search.json?q=/[/'  # Bad regex
+```sh
+curl 'https://rsw.me.uk/blueline/methods/view.json?notation=x38x14x1258x36x14x58x16x78&stage=8&title=Example'
 ```
 
----
+The custom method also supports `.png`; the image parameters and status behavior are the same as for a database method.
 
-### GET /services/notation.json
+## Place notation
 
-Parse and expand bell-ringing place notation into canonical forms.
+### `GET /services/notation.json` or `GET /services/notation.txt`
 
-#### Parameters:
+Parse place notation and return its expanded and SiRIL forms. `expanded` and `siril` are produced by distinct conversions; the former is not SiRIL notation.
 
-| Name | Required | Type | Description |
-|------|----------|------|-------------|
-| `notation` | Yes | String | Place notation string (e.g., `x38x14x1258x36x14x58x16x78`, `3,1.5.1.5.1`, or `-1-1-1 le2`). Supports multiple notation conventions. |
-| `stage` | No | Integer | Number of bells. Auto-detected from notation if omitted. |
+| Parameter | Required | Type | Description |
+| --- | --- | --- | --- |
+| `notation` | Yes | String | Place notation in a supported notation style. |
+| `stage` | No | Integer | Number of bells. If omitted, it is inferred from the bell symbols in the notation. |
 
-#### Response:
+JSON response fields are `stage`, `expanded` and `siril`. The `.txt` response contains the expanded notation on the first line and the SiRIL notation on the second. Missing `notation` returns `400`.
 
-Returns an object with parsed notation in three canonical forms:
+Example using a value checked against `PlaceNotation`:
 
 ```json
 {
   "stage": 8,
-  "expanded": "x38x14x1258x36x14x58x16x78",
-  "siril": "&-3, +4, &-25, +36, &-4, +5, &-6, +7"
+  "expanded": "x38x14x1258x36x14x58x16x78x16x58x14x36x1258x14x38x12",
+  "siril": "&-3-4-25-36-4-5-6-7, +2"
 }
 ```
 
-#### Fields:
-
-| Field | Description |
-|-------|-------------|
-| `stage` | Detected or specified number of bells. |
-| `expanded` | Expanded place notation (e.g., `x16x16...` for standard SiRIL form, or `3.1.5.1.5.1` for lower-stage). |
-| `siril` | SIRIL notation (abbreviation style), using `+` for hand strokes and `&` or `-` for back strokes. |
-
-#### Behavior:
-
-- Stage is guessed from bell numbers present in notation if not explicitly provided
-- Supports multiple input formats (legacy, SiRIL, ASCII, UTF-8 ampersand)
-- Returns 400 if `notation` parameter is missing
-- Cached for 3.6 days (129600 seconds)
-
-#### Example:
-
-```bash
-# Auto-detect stage
-curl 'https://rsw.me.uk/blueline/services/notation.json?notation=3,1.5.1.5.1'
-# Returns: { "stage": 5, "expanded": "3.1.5.1.5.1.5.1.5.1", "siril": "+3, &1.5.1.5.1" }
-
-# Explicit stage
-curl 'https://rsw.me.uk/blueline/services/notation.json?notation=x38x14x1258x36x14x58x16x78&stage=8'
-# Returns: { "stage": 8, "expanded": "x38x14x1258x36x14x58x16x78", "siril": "&-3, +4, &-25, +36, &-4, +5, &-6, +7" }
+```sh
+curl 'https://rsw.me.uk/blueline/services/notation.json?notation=x38x14x1258x36x14x58x16x78%2C12&stage=8'
+curl 'https://rsw.me.uk/blueline/services/notation.txt?notation=3%2C1.5.1.5.1'
 ```
 
----
+## oEmbed
 
-### GET /services/oembed.json
+### `GET /services/oembed.json`
 
-Retrieve oEmbed metadata for embedding method detail pages in third-party sites. Implements the [oEmbed 1.0 specification](https://oembed.com/).
-
-#### Parameters:
-
-| Name | Required | Type | Description |
-|------|----------|------|-------------|
-| `url` | Yes | String | Full URL of the method detail page (e.g., `https://rsw.me.uk/blueline/methods/view/Cambridge_Surprise_Major`). Must match the API's base domain. |
-
-#### Response:
-
-Current JSON response for this method URL:
-
-```json
-{
-  "type": "https://tools.ietf.org/html/rfc2616#section-10",
-  "title": "An error occurred",
-  "status": 500,
-  "detail": "Internal Server Error"
-}
-```
-
-#### Fields:
+The controller's intended JSON response follows oEmbed 1.0 and describes a method diagram as a photo. It accepts a `url` parameter containing a method detail-page URL on the installation's configured base URL.
 
 | Field | Description |
-|-------|-------------|
-| `type` | Always `"photo"`. |
-| `version` | oEmbed spec version (`"1.0"`). |
+| --- | --- |
+| `type` | `photo`. |
+| `version` | oEmbed version, `1.0`. |
 | `title` | Method title. |
-| `provider_name` | Always `"Blueline"`. |
-| `provider_url` | Link to API provider homepage. |
-| `url` | PNG image URL (method diagram). Includes `scale` and `style` parameters. |
-| `width` | Image width in pixels. |
-| `height` | Image height in pixels. |
+| `provider_name` | `Blueline`. |
+| `provider_url` | The installation's home page. |
+| `url` | PNG URL for the method diagram, using `scale=1&style=numbers`. |
+| `width`, `height` | Dimensions read from the generated image; the controller uses `0` when a dimension is unavailable. |
 
-#### Behavior:
+The valid local response is covered by [`OembedControllerTest`](../tests/Controller/OembedControllerTest.php), which verifies these fields when the method and image routes are reachable. A prior document reported a `500` response for the endpoint, but that result could not be confirmed; production was not queried. **TODO(owner): confirm whether the historical `500` report applies to production and remains relevant.**
 
-- Only JSON response format is supported (XML returns 501)
-- URL must be a valid method detail page; invalid URLs return 500 or 404
-- The returned image URL includes `scale=1&style=numbers` by default (can be customized)
-- Useful for embedding method diagrams in social media posts, blogs, wikis, and documentation
+Only JSON is implemented; requesting XML returns `501`. The URL must match a supported method detail page. The current local integration test confirms that an invalid URL returns `500` because validation raises a generic exception; this is not a stable client error contract.
 
-#### Example:
-
-```bash
-curl 'https://rsw.me.uk/blueline/services/oembed.json?url=https://rsw.me.uk/blueline/methods/view/Cambridge_Surprise_Major'
+```sh
+curl --get 'https://rsw.me.uk/blueline/services/oembed.json' \
+  --data-urlencode 'url=https://rsw.me.uk/blueline/methods/view/Cambridge_Surprise_Major'
 ```
 
----
+## CSV exports
 
-### GET /data/{table}.csv
+### `GET /data/{table}.csv`
 
-Export database tables as CSV for analysis and bulk import. Responses are streamed for memory efficiency.
+Stream one of the exported database tables as CSV. Responses use `text/csv` and an attachment filename. Exports are ordered by the relevant table keys.
 
-#### Parameters:
+| Table | CSV columns |
+| --- | --- |
+| `collections` | `id`, `name`, `description` |
+| `methods` | `title`, `url`, `abbreviation`, `provisional`, `stage`, `classification`, `namemetaphone`, `notation`, `notationexpanded`, `notationsiril`, `leadheadcode`, `leadhead`, `fchgroups`, `lengthoflead`, `lengthofcourse`, `numberofleads`, `numberofhunts`, `jump`, `little`, `differential`, `plain`, `trebledodging`, `palindromic`, `doublesym`, `rotational`, `calls`, `ruleoffs`, `callingpositions`, `magic`, `cccbrid`, `methodreferences`, `extensionconstruction` |
+| `methods_collections` | `id`, `position`, `method_title` |
+| `methods_similar` | `method1_title`, `method2_title`, `stage`, `similarity`, `onlydifferentoverleadend` |
+| `performances` | `id`, `type`, `date`, `society`, `rung_title`, `rung_url`, `reference`, `location_room`, `location_building`, `location_address`, `location_town`, `location_county`, `location_region`, `location_country`, `method_title` |
 
-| Name | Required | Type | Description |
-|------|----------|------|-------------|
-| `table` | Yes | String | Table name. Allowed values: `collections`, `methods`, `methods_collections`, `methods_similar`, `performances`. |
+### Collection and relation fields
 
-#### Supported Tables:
+| Export | Field | Type | Description |
+| --- | --- | --- | --- |
+| `collections` | `id` | String | Collection identifier. |
+| `collections` | `name` | String | Collection name. |
+| `collections` | `description` | String | Collection description. |
+| `methods_collections` | `id` | String | Collection identifier; aliases `collection_id`. |
+| `methods_collections` | `position` | Integer | Method position within the collection. |
+| `methods_collections` | `method_title` | String | Related method title. |
+| `methods_similar` | `method1_title` | String | First related method title. |
+| `methods_similar` | `method2_title` | String | Second related method title. |
+| `methods_similar` | `stage` | Integer | Stage of the first method. |
+| `methods_similar` | `similarity` | Float | Calculated similarity score; nullable in the entity. |
+| `methods_similar` | `onlydifferentoverleadend` | Boolean | Whether the pair differs only over the lead end; nullable in the entity. |
 
-| Table | Description | Columns |
-|-------|-------------|---------|
-| `collections` | Method collections/groupings | id, name, description |
-| `methods` | Complete method library | All Method entity fields (see Field Reference below) |
-| `methods_collections` | Method-to-collection membership mapping | collection_id, position, method_title |
-| `methods_similar` | Method similarity scores and flags | method1_title, method2_title, stage, similarity, onlydifferentoverleadend |
-| `performances` | Documented bell-ringing performances | Links method to performance records |
+### Performance fields
 
-#### Response:
+Performance exports use the database's lowercase column names. Except for `id` and `type`, the entity permits these fields to be null.
 
-CSV-formatted data, ordered by relevant keys (e.g., methods by stage, then classification, then title).
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | Integer | Internal performance-record identifier. |
+| `type` | String | Performance record category, such as a first tower-bell or handbell peal, or a `renamedMethod` record. |
+| `date` | Date or null | Performance date, exported as a date value. |
+| `society` | String or null | Society associated with the performance. |
+| `rung_title` | String or null | Title used for the rung method. |
+| `rung_url` | String or null | URL identifier for the rung method. |
+| `reference` | String or null | Source reference. |
+| `location_room` | String or null | Room or ringing space. |
+| `location_building` | String or null | Building name. |
+| `location_address` | String or null | Street address. |
+| `location_town` | String or null | Town or locality. |
+| `location_county` | String or null | County. |
+| `location_region` | String or null | Region. |
+| `location_country` | String or null | Country. |
+| `method_title` | String | Related method title. |
 
-#### Behavior:
+In `methods_collections`, the exported `id` column is the collection identifier (`collection_id` in the database), aliased by the export query. The methods CSV uses lowercase PostgreSQL column names; the JSON method fields use camelCase. Collections and performances are available as CSV exports, not as separate JSON endpoints.
 
-- Content-Type is `text/csv`
-- Responses include `Content-Disposition: attachment` header (triggers download in browsers)
-- Caching respects database update timestamps (7-day max-age)
-- Large tables are streamed; suitable for production use
-- Useful for data analysis, backups, and integrations
-
-#### Example:
-
-```bash
-# Download methods table
+```sh
 curl -O 'https://rsw.me.uk/blueline/data/methods.csv'
-
-# Download collections
 curl 'https://rsw.me.uk/blueline/data/collections.csv' | head -20
 ```
 
----
+## Method JSON fields
 
-## Field Reference
-
-### Method Entity
-
-The Method entity has ~40 fields. Common fields are listed below; refer to API responses for the complete set.
-
-Method attributes are defined according to [v2 of the CCCBR's Framework for Method Ringing](https://framework.cccbr.org.uk/version2/).
+These are the method fields exposed by the JSON serializer. Database method responses also add `similar`. A full detail response omits falsey values (`null`, `false`, `0`, `"0"`, empty strings and empty arrays) because of the serializer's filtering; field-selected search results include each requested known field, including a `null` value.
 
 | Field | Type | Description |
-|-------|------|-------------|
-| `title` | String | Method name (e.g., `"Cambridge Surprise Major"`). |
-| `url` | String | URL identifier; unique, canonical form (e.g., `"Cambridge_Surprise_Major"`). |
-| `abbreviation` | String \| null | Short abbreviation if applicable (e.g., `"C"`). |
-| `stage` | Integer | Number of bells (3–12+). |
-| `classification` | String \| null | Method type (e.g., `"Surprise"`, `"Treble Place"`, `"Principle"`). |
-| `notation` | String | Place notation (input form, may be abbreviated). |
-| `notationExpanded` | String | Fully expanded place notation. |
-| `leadHead` | String | Lead head change (permutation of bells at end of lead). |
-| `leadHeadCode` | String \| null | Named code for lead head formula. |
-| `lengthOfLead` | Integer | Row count per lead. |
-| `lengthOfCourse` | Integer | Row count per course. |
-| `numberOfLeads` | Integer \| null | Leads per course. |
-| `numberOfHunts` | Integer \| null | Number of hunting bells. |
-| `magic` | Integer \| null | A calculated ranking based on how likely it is the user is searching for each method. |
-| `calls` | Array \| null | Recognised calls (e.g., `["bob", "single"]`). |
-| `ruleOffs` | Array \| null | Rule-off points/names. |
-| `callingPositions` | Array \| null | Calling positions. |
-| `cccbrId` | String \| null | Central Council of Church Bell Ringers (CCCBR) identifier. Used on Complib, and other places. |
-| `methodReferences` | String \| null | References and sources. |
-| `extensionConstruction` | String \| null | Notes on how the method extends to higher stages. |
-| `provisional` | Boolean \| null | Whether method status is provisional/unconfirmed. |
-| `little` | Boolean \| null | Whether method is little. |
-| `differential` | Boolean \| null | Whether method is differential. |
-| `plain` | Boolean \| null | Whether method is plain hunting. |
-| `trebleDodging` | Boolean \| null | Whether treble dodges. |
-| `palindromic` | Boolean \| null | Whether notation is palindromic. |
-| `doubleSym` | Boolean \| null | Whether notation has double symmetry. |
-| `rotational` | Boolean \| null | Whether notation is rotationally symmetric. |
+| --- | --- | --- |
+| `title` | String | Method title. |
+| `url` | String | Canonical URL identifier. |
+| `abbreviation` | String or null | Method abbreviation. |
+| `provisional` | Boolean or null | Provisional status. |
+| `stage` | Integer | Number of bells. |
+| `classification` | String or null | Method classification. |
+| `nameMetaphone` | String or null | Phonetic key used for search matching. |
+| `notation` | String | Source place notation, which may use abbreviations. |
+| `notationExpanded` | String | Expanded and normalised place notation. |
+| `notationSiril` | String or null | SiRIL representation derived from expanded notation and stage when needed. |
+| `leadHeadCode` | String or null | Lead-head code, when defined. |
+| `leadHead` | String | Lead-head change. |
+| `fchGroups` | String or null | FCH group value from the source data. |
+| `lengthOfLead` | Integer | Number of changes in a lead. |
+| `lengthOfCourse` | Integer | Number of changes in a course. |
+| `numberOfLeads` | Integer or null | Number of leads in a course, when supplied. |
+| `numberOfHunts` | Integer or null | Number of hunting bells, when supplied. |
+| `jump` | Boolean or null | Source flag indicating a jump method. |
+| `little` | Boolean or null | Source flag indicating a little method. |
+| `differential` | Boolean or null | Source flag indicating a differential method. |
+| `plain` | Boolean or null | Source plain-method flag. |
+| `trebleDodging` | Boolean or null | Source treble-dodging flag. |
+| `palindromic` | Boolean or null | Whether the method is palindromic. |
+| `doubleSym` | Boolean or null | Source flag for double symmetry. |
+| `rotational` | Boolean or null | Source flag for rotational symmetry. |
+| `calls` | Array or null | Call definitions used for method displays. |
+| `ruleOffs` | Array or null | Lead-display divisions. |
+| `callingPositions` | Array or null | Calling-position definitions. |
+| `magic` | Integer or null | Search-ranking value. |
+| `cccbrId` | String or null | CCCBR method identifier. |
+| `methodReferences` | String or null | Method references and source notes. |
+| `extensionConstruction` | String or null | Notes about construction at higher stages. |
 
-### Collection Entity
+The serializer is implemented by [`Method::__toArray()`](../src/Entity/Method.php); derived-field and source details are in [Data and copyright](data-and-copyright.md).
 
-Represents a curated grouping of methods.
+## Status codes and redirects
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | String | Collection name (e.g., `"Surprise Methods"`). |
-| `description` | String | Text description. |
+| Status | Documented behavior |
+| --- | --- |
+| `200` | Successful response. |
+| `301` | Permanent canonicalisation redirect for method URLs, PNG defaults, or custom notation matching a database method. |
+| `400` | Required notation parameter missing, or invalid search regular expression. |
+| `403` | PNG request uses a style outside the supported list or a scale greater than `4`. |
+| `404` | Unknown method or route/table not supported by the route definition. |
+| `501` | oEmbed XML response requested; XML is not implemented. |
+| `503` | PNG rendering is temporarily unavailable. |
 
-### Performance Entity
+Unexpected errors may use Symfony's default error response; no stable JSON error-body schema is promised.
 
-Documents a bell-ringing performance/ringing record.
+## Caching and client usage
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `methodTitle` | String | Title of the rung method. |
-| `date` | Date | Date of performance. |
-| `location` | String | Church or location name. |
-| `bellsRung` | Integer | Number of bells rung. |
-| Details | ... | Additional performance metadata. |
+The application marks these responses public and sets the following maximum ages:
 
----
+| Endpoint | `Cache-Control` max age | Conditional update |
+| --- | ---: | --- |
+| Method search | 6 hours | `Last-Modified` uses the database update timestamp. |
+| Method detail and custom method view | 36 hours | `Last-Modified` uses the database update timestamp. |
+| Place-notation conversion | 36 hours | No database update timestamp is set. |
+| oEmbed | 36 hours | No database update timestamp is set. |
+| CSV exports | 7 days | `Last-Modified` uses the database update timestamp. |
 
-## Error Handling
+Where a `Last-Modified` header is present, clients can send `If-Modified-Since` and handle a conditional response. CDN behavior may add another cache layer.
 
-All errors return appropriate HTTP status codes with JSON error details (when applicable).
+There is no active application-level `cache_bust` parameter handling. Do not rely on that parameter to invalidate responses. **TODO(owner): confirm whether the production CDN treats arbitrary query parameters as cache-key changes before documenting a cache-bypass policy.**
 
-| Status | Condition |
-|--------|-----------|
-| `200` | Successful request. |
-| `301` | Permanent redirect (e.g., canonical URL form or renamed method). Follow Location header. |
-| `302` | Temporary redirect (e.g., PNG rendering). Follow Location header. |
-| `400` | Bad request (missing required parameter, invalid regex, etc.). Client error; review parameters. |
-| `404` | Not found (method does not exist, invalid table in CSV export). |
-| `500` | Server error (unexpected condition, validation failure). Rare; check URL validity. |
-| `501` | Not implemented (e.g., oEmbed XML format). |
+Recommended client behavior:
 
+- Cache responses for the advertised period when practical.
+- Use conditional requests when a `Last-Modified` header is present.
+- Avoid bursts of parallel requests, especially for PNG images.
+- Treat the public endpoint as a shared service that may be rate-limited.
 
-### Client Libraries
+## Related documentation
 
-Any HTTP client supporting JSON is compatible:
-
-**JavaScript (fetch API):**
-```javascript
-fetch('https://rsw.me.uk/blueline/methods/view/Cambridge_Surprise_Major.json')
-  .then(res => res.json())
-  .then(data => console.log(data[0].title));
-```
-
-**Python (requests):**
-```python
-import requests
-r = requests.get('https://rsw.me.uk/blueline/methods/search.json', params={'q': 'cambridge surprise major', 'fields': 'title,url,stage,classification'})
-print(r.json()['results'])
-```
-
-**cURL (as documented above):**
-```bash
-curl 'https://rsw.me.uk/blueline/methods/search.json?q=major&fields=title,stage'
-```
+- [Data sources and derived fields](data-and-copyright.md)
+- [Development and installation](development-deployment.md)
+- [Production deployment](production-deployment.md)
+- [Documentation index](README.md)

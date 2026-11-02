@@ -8,6 +8,8 @@
   "scripts": {
     "test:js": "node --test tests/JavaScript/TouchGenerator/*.test.mjs",
     "lint": "npm-run-all --serial lint:*",
+    "lint:docs": "markdownlint-cli2",
+    "lint:docs:links": "markdown-link-check --quiet README.md AGENTS.md docs/*.md",
     "lint:js:fix": "eslint --fix --max-warnings=0 --no-warn-ignored --config assets/eslint.config.mjs assets/js/**/*.js",
     "lint:js": "eslint --max-warnings=0 --no-warn-ignored --config assets/eslint.config.mjs assets/js/**/*.js",
     "lint:css": "stylelint --max-warnings=0 --config stylelint-config-recommended assets/styles/**/*.css",
@@ -21,9 +23,11 @@
     "puppeteer-core": "^25.0.0"
   },
   "devDependencies": {
-	  "@stylistic/eslint-plugin": "^5.2.3",
+    "@stylistic/eslint-plugin": "^5.2.3",
     "eslint": "^10.2.1",
     "globals": "^17.5.0",
+    "markdown-link-check": "3.15.0",
+    "markdownlint-cli2": "0.24.0",
     "npm-run-all": "^4.1.5",
     "stylelint": "^17.8.0",
     "stylelint-config-recommended": "^18.0.0",

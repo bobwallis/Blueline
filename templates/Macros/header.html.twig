@@ -1,3 +1,4 @@
+{# Accepts a plain title or a title object with a secondary title, plus optional tab data. #}
 {% macro header( title, subtitle = null, tabs = null ) %}
 <header class="section">
 	<h1>{% if title.title is defined %}{{ title.title }}{% if title.title2 is defined and title.title2 is not empty %} <span class="normalweight">({{ title.title2 }})</span>{% endif %}{% else %}{{ title }}{% endif %}</h1>

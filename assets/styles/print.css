@@ -1,3 +1,5 @@
+/* Print-only rules hide interactive chrome and remove non-print backgrounds. */
+
 /* Hide anything we don't want to print at all */
 #top, #search, #settings_dialog, #loading, #back_link, #lineOverlay_tooltip, .tabBar, .method-calls-switch {
 	display: none;

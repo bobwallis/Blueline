@@ -1,1 +1,2 @@
+{# Keep the single-method array shape and add the related-method groups as a separate field. #}
 [{{ method|toArray|merge({"similar":similarMethods})|json_encode|raw }}]

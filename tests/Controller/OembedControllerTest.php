@@ -4,6 +4,11 @@ namespace Blueline\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
+/**
+ * Check the oEmbed contract through the configured method and image endpoints.
+ *
+ * The valid-response test requires those local routes to be reachable at DEFAULT_URI.
+ */
 class OembedControllerTest extends WebTestCase
 {
     public function testOembedXmlIsNotImplemented()

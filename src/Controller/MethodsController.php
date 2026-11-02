@@ -65,6 +65,11 @@ class MethodsController extends AbstractController
         return $this->render('Methods/welcome.'.$request->getRequestFormat().'.twig');
     }
 
+    /**
+     * Return the requested result page and total match count.
+     *
+     * Applies request filters and renders the selected HTML or JSON representation.
+     */
     #[Cache(maxage: 21600, public: true, lastModified: 'database_update')]
     public function search(Request $request, EntityManagerInterface $em)
     {

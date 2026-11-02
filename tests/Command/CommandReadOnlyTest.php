@@ -4,6 +4,9 @@ namespace Blueline\Tests\Command;
 
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
+/**
+ * Check command registration and read-only export output without running imports.
+ */
 #[RunTestsInSeparateProcesses]
 class CommandReadOnlyTest extends CommandTestCase
 {

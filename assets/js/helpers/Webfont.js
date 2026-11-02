@@ -1,3 +1,9 @@
+/**
+ * Notify callers once the local Blueline font faces have settled.
+ *
+ * Concurrent callers share the same load operation; browsers without the Font Loading API
+ * still receive the completion event immediately.
+ */
 let loaded = false;
 let loading = false;
 

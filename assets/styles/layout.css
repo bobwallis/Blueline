@@ -1,3 +1,4 @@
+/* Shared page structure, responsive content layout and header positioning. */
 /* Content Area */
 #content {
 	padding-top: var(--header-height);

@@ -268,7 +268,10 @@ class PlaceNotation
     }
 
     /**
-     * Expands a shortened place notation format into a fully expanded one.
+     * Convert supported notation shorthand into the normalised form used by parsing.
+     *
+     * Infers a missing stage, expands symmetry and lead-head shorthand, then canonicalises
+     * the changes; the stage determines implicit external places and letter-prefix forms.
      *
      * @param string $notation
      * @param int    $stage

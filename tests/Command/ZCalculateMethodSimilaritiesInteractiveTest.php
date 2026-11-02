@@ -4,6 +4,11 @@ namespace Blueline\Tests\Command;
 
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
+/**
+ * Exercise targeted and interactive similarity calculation against the test database.
+ *
+ * These tests delete and recalculate rows in `methods_similar`.
+ */
 #[RunTestsInSeparateProcesses]
 class ZCalculateMethodSimilaritiesInteractiveTest extends CommandTestCase
 {
