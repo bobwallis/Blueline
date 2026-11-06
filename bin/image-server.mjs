@@ -163,7 +163,7 @@ async function preparePage(page, style) {
 	const container = style === 'grid' ? 'grid' : 'line';
 
 	await page.evaluate((selectedContainer) => {
-		const removableSelectors = '#top, #search, #loading, #menu, .method header, .method .details, .sf-toolbar';
+		const removableSelectors = '#top, #search, #loading, #menu, header.section, .method header, .method .details, .sf-toolbar';
 		for (const node of document.querySelectorAll(removableSelectors)) {
 			node.remove();
 		}
