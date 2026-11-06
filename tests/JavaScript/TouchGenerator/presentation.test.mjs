@@ -250,26 +250,26 @@ test('dialog sequences independently abbreviate repeating calls and calling posi
 	const screenshot = describeTouch(compileMethod(cambridge), {
 		phase: 0, length: 720, word: Array(3).fill([0, 0, 0, 0, 1, 0, 0, 1, 0, 1]).flat(),
 	});
-	assert.equal(screenshot.sequence, 'p p p p - p p - p - (x3)');
-	assert.equal(screenshot.calling, 'H W H (x3)');
+	assert.equal(screenshot.sequence, 'x3 · p p p p - p p - p -');
+	assert.equal(screenshot.calling, 'x3 · H W H');
 
 	const different = describeTouch(compileMethod(plainBobMinor), {
 		phase: 0, length: 720, word: Array(6).fill([0, 0, 0, 1, 0, 0, 2, 1, 1, 0]).flat(),
 	});
-	assert.equal(different.sequence, 'p p p - p p s - - p (x6)');
-	assert.equal(different.calling, 'I sW F H H sB I I B sH W F (x2)');
+	assert.equal(different.sequence, 'x6 · p p p - p p s - - p');
+	assert.equal(different.calling, 'x2 · I sW F H H sB I I B sH W F');
 
 	const nonrepeatingPositions = describeTouch(compileMethod(bristol), {
 		phase: 0, length: 288, word: [1, 0, 0, 1, 0, 0, 1, 0, 0],
 	});
-	assert.equal(nonrepeatingPositions.sequence, '- p p (x3)');
+	assert.equal(nonrepeatingPositions.sequence, 'x3 · - p p');
 	assert.equal(nonrepeatingPositions.calling, 'H I V');
 
 	const partial = describeTouch(compileMethod({ ...cambridge, title: 'London Surprise Minor', notation: '36x36.14x12x36.14x14.36,12' }), {
 		phase: 0, length: 122, word: [0, 0, 1, 0, 2],
 	});
 	assert.equal(partial.sequence, 'p p - p s (p)');
-	assert.ok(!partial.calling?.includes('(x'));
+	assert.ok(!partial.calling?.startsWith('x'));
 });
 
 test('multipart summaries show only the shortest whole-lead part with spaced call symbols', () => {

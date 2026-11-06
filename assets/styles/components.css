@@ -1,4 +1,9 @@
 /* Component styling for the shared controls, method views, search and settings UI. */
+html:has(.touch-dialog:modal) {
+	overflow: hidden;
+	scrollbar-gutter: stable;
+}
+
 .touches {
 	padding: var(--content-y-padding) var(--content-x-padding);
 	font-size: 14px;
@@ -39,25 +44,17 @@
 			margin: 0;
 		}
 	}
-	button, .touch-prover-link {
-		border: 1px solid var(--light-grey);
-		border-radius: var(--radius-md);
-		padding: calc(var(--content-y-padding) / 2) var(--content-x-padding);
-		background: var(--title-background);
-		color: inherit;
-		cursor: pointer;
-	}
 	.touch-prover-link {
 		text-decoration: none;
+		&.external {
+			padding-right: 24px;
+			background-image: url(../images/external.svg);
+			background-repeat: no-repeat;
+			background-position: right 8px center;
+		}
 	}
 	button[hidden] {
 		display: none;
-	}
-	.touch-actions button {
-		font-size: 12px;
-		line-height: 1.25;
-		padding: 2px 6px;
-		white-space: nowrap;
 	}
 	[data-touch-results] {
 		display: grid;
@@ -77,6 +74,11 @@
 		font-size: inherit;
 		margin: 0;
 		text-align: left;
+	}
+	.touch-music {
+		font-size: 12px;
+		color: #666;
+		margin: calc(var(--content-y-padding) / 2) 0 0;
 	}
 	.touch-layout {
 		overflow-x: auto;
@@ -130,22 +132,96 @@
 		margin: calc(var(--header-height) * 1.5) auto 16px;
 		max-height: calc(100% - var(--header-height) * 1.5 - 16px);
 		overflow: auto;
-		padding: calc(var(--content-y-padding) * 2) var(--content-x-padding);
+		padding: var(--content-y-padding) var(--content-x-padding);
 		border: 1px solid var(--light-grey);
-		border-radius: var(--radius-md);
 		background: white;
+		box-shadow: var(--shadow-8);
 		color: var(--header-background);
+		opacity: 0;
+		scale: 0.97;
+		transition:
+			opacity calc(var(--animation-speed) * 2) var(--easing-standard),
+			scale calc(var(--animation-speed) * 2) var(--easing-standard),
+			display calc(var(--animation-speed) * 2) allow-discrete,
+			overlay calc(var(--animation-speed) * 2) allow-discrete;
+		&[open] {
+			opacity: 1;
+			scale: 1;
+		}
+		.touch-dialog-title {
+			margin: 0;
+			padding-right: 40px;
+			> span {
+				display: block;
+			}
+			.touch-duration {
+				color: #888;
+			}
+		}
+		.touch-metadata {
+			display: grid;
+			gap: 4px;
+			margin: 4px 0 0;
+			padding-left: calc(var(--content-x-padding) / 2);
+			> * {
+				margin: 0;
+			}
+		}
+		.touch-close {
+			position: absolute;
+			top: var(--content-y-padding);
+			right: var(--content-x-padding);
+			width: 40px;
+			height: 40px;
+			padding: 0;
+			border: 0;
+			background: url(../images/x.svg) no-repeat center / 20px;
+			&:hover {
+				background-color: var(--light-grey-lightened);
+			}
+		}
+		.tabBar {
+			margin: 4px 0 0 !important;
+			justify-content: center;
+			border-bottom: 1px solid var(--light-grey-lightened);
+		}
+		.touch-dialog-panels {
+			display: grid;
+		}
+		.touch-dialog-panel {
+			grid-area: 1 / 1;
+			min-width: 0;
+			padding-top: var(--content-y-padding);
+			> :first-child {
+				margin-top: 0;
+			}
+			/* Keep inactive tabs in the grid's height calculation, but not its focus or accessibility tree. */
+			&[style*="display: none"] {
+				display: block !important;
+				visibility: hidden;
+				view-transition-name: none !important;
+			}
+		}
 	}
 	.touch-dialog::backdrop {
 		background: rgba(255, 255, 255, 0.8);
 		backdrop-filter: blur(1px);
+		opacity: 0;
+		transition:
+			opacity calc(var(--animation-speed) * 2) var(--easing-standard),
+			display calc(var(--animation-speed) * 2) allow-discrete,
+			overlay calc(var(--animation-speed) * 2) allow-discrete;
 	}
-	.touch-layout-tabs {
-		display: flex;
-		gap: var(--content-x-padding);
-		[aria-selected="true"] {
-			background: var(--header-background);
-			color: white;
+	.touch-dialog[open]::backdrop {
+		opacity: 1;
+	}
+	@starting-style {
+		.touch-dialog[open] {
+			opacity: 0;
+			scale: 0.97;
+		}
+		.touch-dialog[open]::backdrop {
+			opacity: 0;
 		}
 	}
 	summary {
@@ -167,6 +243,9 @@
 		overflow-wrap: anywhere;
 		font-family: monospace;
 	}
+	.touch-export pre {
+		margin-left: var(--content-x-padding);
+	}
 }
 
 /* Forms and Form Elements */
@@ -181,29 +260,31 @@ fieldset {
 	}
 }
 
-input[type="submit"] {
-	background-color: var(--header-background);
-	color: white;
-}
-input[type="reset"] {
-	background-color: #DDD;
-	color: black;
-}
-
-input[type="submit"], input[type="reset"] {
+input[type="submit"], input[type="reset"], .touches :is(button, .touch-prover-link) {
+	border: 1px solid var(--light-grey);
 	border-radius: var(--radius-md);
-	border: 0;
-	margin: 0 var(--content-y-padding) 0 0;
-	padding: calc(var(--content-y-padding) * 0.75) calc(var(--content-x-padding) * 0.75);
-	font-size: 11px;
-	text-transform: uppercase;
+	padding: 4px 8px;
+	background-color: var(--title-background);
+	color: var(--header-background);
+	font-size: 12px;
+	line-height: 1.25;
 	text-align: center;
-	transition: background-color 0.5s ease, color 0.5s ease;
-	box-shadow: var(--shadow-2);
-	&:disabled {
-		background-color: #DDD;
-		color: #AAA;
+	white-space: nowrap;
+	cursor: pointer;
+	transition-property: color, border-color, background-color;
+	transition-duration: var(--animation-speed);
+	transition-timing-function: var(--easing-standard);
+	&:hover:not(:disabled) {
+		border-color: var(--header-background);
+		background-color: var(--light-grey-lightened);
 	}
+	&:disabled {
+		color: #AAA;
+		cursor: default;
+	}
+}
+input[type="submit"], input[type="reset"] {
+	margin: 0 var(--content-y-padding) 0 0;
 }
 
 input[type="number"] {
@@ -213,7 +294,7 @@ input[type="number"] {
 input[type="text"], input[type="number"] {
 	display: inline-block;
 	vertical-align: middle;
-	background-color: #F3F3F3;
+	background-color: var(--title-background);
 	width: 100%;
 	height: 100%;
 	padding: 0 5px;
@@ -240,9 +321,8 @@ select:focus-visible {
 	vertical-align: middle;
 	border: 1px solid var(--light-grey);
 	border-radius: var(--radius-sm);
-	background-color: #F3F3F3;
+	background-color: var(--title-background);
 	height: 28px;
-	box-shadow: var(--shadow-2);
 	input, select {
 		border-radius: var(--radius-sm);
 	}
@@ -433,7 +513,7 @@ label.radio_image {
 		height: 100%;
 		padding: 0 28px 0 8px;
 		border: 0;
-		background: #F3F3F3 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23002856' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center;
+		background: var(--title-background) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23002856' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center;
 		color: inherit;
 		font: inherit;
 		&:focus-visible {
@@ -600,11 +680,6 @@ section.method {
 		input[type="number"] {
 			width: auto;
 		}
-	}
-	button {
-		font-size: 12px;
-		line-height: 1.25;
-		padding: 2px 6px;
 	}
 	/* Line up with the text beside the switches (switch width plus its margins and a space). */
 	[data-touch-add-length] {

@@ -170,12 +170,12 @@
 						</label></p>
 					</fieldset>
 					<fieldset>
-						<legend>Limits</legend>
-						<div class="touch-limits">
-							<label for="touch_limit">Max. # displayed touches</label>
-							<input id="touch_limit" type="number" min="1" step="1" required data-touch-limit>
-							<label for="touch_budget">Search budget (seconds)</label>
-							<input id="touch_budget" type="number" min="1" max="2147483" step="1" required data-touch-budget>
+						<legend>Music</legend>
+						<p data-touch-back65-setting hidden><label><input type="checkbox" role="switch" data-touch-back65> <span data-touch-back65-label>No 65s at back</span></label></p>
+						<p data-touch-tenor-behind-setting hidden><label><input type="checkbox" role="switch" data-touch-tenor-behind> Assume tenor behind</label></p>
+						<div class="touch-named-rows-setting">
+							<label id="touch_named_rows_label" class="touch-setting-label" for="touch_named_rows">Required named rows</label>
+							<select id="touch_named_rows" multiple data-touch-named-rows></select>
 						</div>
 					</fieldset>
 					<fieldset>
@@ -194,12 +194,12 @@
 						</div>
 					</fieldset>
 					<fieldset>
-						<legend>Music</legend>
-						<p data-touch-back65-setting hidden><label><input type="checkbox" role="switch" data-touch-back65> <span data-touch-back65-label>No 65s at back</span></label></p>
-						<p data-touch-tenor-behind-setting hidden><label><input type="checkbox" role="switch" data-touch-tenor-behind> Assume tenor behind</label></p>
-						<div class="touch-named-rows-setting">
-							<label id="touch_named_rows_label" class="touch-setting-label" for="touch_named_rows">Required named rows</label>
-							<select id="touch_named_rows" multiple data-touch-named-rows></select>
+						<legend>Limits</legend>
+						<div class="touch-limits">
+							<label for="touch_limit">Max. # displayed touches</label>
+							<input id="touch_limit" type="number" min="1" step="1" required data-touch-limit>
+							<label for="touch_budget">Search budget (seconds)</label>
+							<input id="touch_budget" type="number" min="1" max="2147483" step="1" required data-touch-budget>
 						</div>
 					</fieldset>
 				</div>

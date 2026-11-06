@@ -97,3 +97,8 @@ const settingsFormEl = document.getElementById('settings_form');
 if (settingsFormEl) {
 	settingsFormEl.addEventListener('submit', closeSettings);
 }
+
+const settingsCloseEl = document.getElementById('settings_close');
+if (settingsCloseEl) {
+	settingsCloseEl.addEventListener('click', closeSettings);
+}

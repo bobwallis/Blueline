@@ -163,6 +163,10 @@ a {
 ::-webkit-scrollbar-track:vertical {
 	border-top: var(--header-bar-height) solid var(--header-background);
 }
+.touch-dialog::-webkit-scrollbar-track:vertical,
+.touch-dialog ::-webkit-scrollbar-track:vertical {
+	border-top: 0;
+}
 ::-webkit-scrollbar-thumb {
 	border: 2px solid transparent;
 	border-radius: 6px;
@@ -257,6 +261,7 @@ span.code {
 	backdrop-filter: blur(1px);
 }
 #settings {
+	position: relative;
 	display: inline-block;
 	max-width: 600px;
 	margin: calc(var(--header-height) + var(--content-y-padding)) var(--content-x-padding) 0;
@@ -270,10 +275,28 @@ span.code {
 #settings_submit {
 	cursor: pointer;
 }
+#settings_close {
+	position: absolute;
+	top: var(--content-y-padding);
+	right: var(--content-x-padding);
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	border: 0;
+	background: url(../images/x.svg) no-repeat center / 20px;
+	cursor: pointer;
+	&:hover {
+		background-color: var(--light-grey-lightened);
+	}
+	&:focus-visible {
+		outline: 2px solid var(--header-background);
+		outline-offset: 2px;
+	}
+}
 
 /* Animation definitions */
 @supports (view-transition-name: foo) {
-	:root::view-transition-group(*) {
+	::view-transition-group(*) {
 		animation-duration: var(--animation-speed);
 	}
 
@@ -282,8 +305,8 @@ span.code {
 		animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
 	}
 
-	:root:active-view-transition-type(tab-left)::view-transition-group(tab-panel),
-	:root:active-view-transition-type(tab-right)::view-transition-group(tab-panel) {
+	:active-view-transition-type(tab-left)::view-transition-group(tab-panel),
+	:active-view-transition-type(tab-right)::view-transition-group(tab-panel) {
 		animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
 	}
 
@@ -300,19 +323,19 @@ span.code {
 		animation-name: settings-dialog-out;
 	}
 
-	:root:active-view-transition-type(tab-left)::view-transition-old(tab-panel) {
+	:active-view-transition-type(tab-left)::view-transition-old(tab-panel) {
 		animation-name: tab-panel-out-left;
 	}
 
-	:root:active-view-transition-type(tab-left)::view-transition-new(tab-panel) {
+	:active-view-transition-type(tab-left)::view-transition-new(tab-panel) {
 		animation-name: tab-panel-in-right;
 	}
 
-	:root:active-view-transition-type(tab-right)::view-transition-old(tab-panel) {
+	:active-view-transition-type(tab-right)::view-transition-old(tab-panel) {
 		animation-name: tab-panel-out-right;
 	}
 
-	:root:active-view-transition-type(tab-right)::view-transition-new(tab-panel) {
+	:active-view-transition-type(tab-right)::view-transition-new(tab-panel) {
 		animation-name: tab-panel-in-left;
 	}
 

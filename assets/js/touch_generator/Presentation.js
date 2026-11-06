@@ -72,7 +72,7 @@ function repeatedSequence (tokens, separator, allowRepeat) {
 	if (allowRepeat) {
 		for (let length = 1; length <= tokens.length / 2; length++) {
 			if (tokens.length % length === 0 && tokens.every((token, i) => token === tokens[i % length])) {
-				return `${tokens.slice(0, length).join(separator)} (x${tokens.length / length})`;
+				return `x${tokens.length / length} · ${tokens.slice(0, length).join(separator)}`;
 			}
 		}
 	}

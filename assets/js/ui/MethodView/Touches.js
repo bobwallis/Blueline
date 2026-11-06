@@ -3,6 +3,7 @@ import { describeTouch, siril, touchLayouts } from '../../touch_generator/Presen
 import PlaceNotation from '../../helpers/PlaceNotation.js';
 import LocalStorage from '../../helpers/LocalStorage.js';
 import TouchSearchPool from './TouchSearchPool.js';
+import TabBar from '../TabBar.js';
 import Choices from 'choices.js';
 
 /**
@@ -351,9 +352,9 @@ class Touches {
 		card.setAttribute('aria-label', `View ${touch.length}-change touch details`);
 		const summary = element('h3', `${touch.length} changes`, 'touch-title');
 		card.append(summary);
-		const music = this.musicSummary(touch);
-		if (music) card.append(element('p', music, 'touch-music'));
 		card.append(this.layoutTable(layouts, layouts.defaultLayout));
+		const music = this.musicSummary(touch);
+		if (music) card.append(element('p', `Contains: ${music}`, 'touch-music'));
 		card.addEventListener('keydown', event => {
 			if (event.key === 'Enter' || event.key === ' ') {
 				event.preventDefault();
@@ -362,6 +363,7 @@ class Touches {
 		});
 		card.addEventListener('click', () => {
 			card.focus();
+			const origin = card.getBoundingClientRect();
 			try {
 				this.expandResult(touch, description, layouts);
 			} catch (error) {
@@ -369,12 +371,10 @@ class Touches {
 				const title = element('h2', 'Touch details unavailable');
 				title.id = 'touch_dialog_title';
 				this.dialog.replaceChildren(title, element('p', `Could not display touch details: ${error.message}`));
-				const close = element('button', 'Close');
-				close.type = 'button';
-				close.addEventListener('click', () => this.dialog.close());
-				this.dialog.append(close);
+				this.dialog.append(this.closeButton());
 				if (!this.dialog.open) this.dialog.showModal();
 			}
+			this.dialog.style.transformOrigin = `${origin.left + origin.width / 2 - this.dialog.offsetLeft}px ${origin.top + origin.height / 2 - this.dialog.offsetTop}px`;
 		});
 		// Workers return out of order; insert by length rather than rebuilding existing cards.
 		const next = [...this.results.children].find(child => Number(child.dataset.length) > touch.length);
@@ -425,9 +425,19 @@ class Touches {
 	// Named rows found (wrapped across hand/back pairs) and backstroke 65s.
 	musicSummary (touch) {
 		return [
-			...Object.entries((this.pool?.tenorBehind ? touch.music?.tenorBehind : touch.music)?.namedRows ?? {}).map(([name, count]) => count > 1 ? `${name} ×${count}` : name),
+			...Object.entries((this.pool?.tenorBehind ? touch.music?.tenorBehind : touch.music)?.namedRows ?? {}).map(([name, count]) => count > 1 ? `${name}\u00a0×${count}` : name),
 			...this.method.back65 && touch.music?.backstroke65s ? [`${touch.music.backstroke65s} ${this.back65Name} at back`] : [],
 		].join(' · ');
+	}
+
+	closeButton () {
+		const close = element('button', null, 'touch-close');
+		close.type = 'button';
+		close.autofocus = true;
+		close.setAttribute('aria-label', 'Close');
+		close.title = 'Close';
+		close.addEventListener('click', () => this.dialog.close());
+		return close;
 	}
 
 	expandResult (touch, description, layouts) {
@@ -435,65 +445,53 @@ class Touches {
 		// focus containment, Escape dismissal and focus return to its opener.
 		const card = this.dialog;
 		card.replaceChildren();
-		const title = element('h2', `${touch.length} changes (~${description.duration})`);
+		const title = element('h2', null, 'touch-dialog-title');
+		const length = element('span', `${touch.length} changes `);
+		length.append(element('span', `(~${description.duration})`, 'touch-duration'));
+		title.append(element('span', this.config.title), length);
 		title.id = 'touch_dialog_title';
-		const close = element('button', 'Close');
-		close.type = 'button';
-		close.autofocus = true;
-		close.addEventListener('click', () => card.close());
-		card.append(close, title);
-		card.append(element('p', `${description.start}. ${description.finish}.`));
-		const sequence = element('p', 'Call sequence: ');
-		sequence.append(element('span', description.sequence, 'touch-sequence'));
-		card.append(sequence);
-		if (description.calling) {
-			const calling = element('p', `Calling positions (bell ${PlaceNotation.bellToChar(this.method.stage - 1)}): `);
-			calling.append(element('span', description.calling, 'touch-sequence'));
-			card.append(calling);
-		}
-		if (!description.calling) card.append(element('p', 'Traditional calling positions could not be validated for this touch. Use the call sequence.'));
-		card.append(element('p', `Music: ${this.musicSummary(touch) || 'none of the named rows'}.`));
+		card.append(this.closeButton(), title);
+		const metadata = element('div', null, 'touch-metadata');
+		metadata.append(
+			element('p', `${description.start}. ${description.finish}.`),
+			element('p', this.method.calls.slice(1).map(call => `${call.title}: ${this.config.calls[call.title].notation}`).join('; ')),
+		);
+		card.append(metadata);
 		if (description.incompleteCall) card.append(element('p', 'The touch finishes part-way through the final plain or called replacement block.'));
 		else if (description.partial) card.append(element('p', '(p) is the next plain call point, which is not reached. The touch finishes with plain changes before it.'));
-		const tabs = element('div', null, 'touch-layout-tabs');
-		tabs.setAttribute('role', 'tablist');
-		tabs.setAttribute('aria-label', 'Touch layout');
-		const panels = [];
+		const tabs = element('span');
+		tabs.id = 'touch_dialog_tabs';
+		card.append(tabs);
+		const panels = element('div', null, 'touch-dialog-panels');
+		card.append(panels);
+		const tabOptions = [];
+		const music = this.musicSummary(touch);
 		for (const type of layouts.courses ? ['leads', 'courses'] : ['leads']) {
-			const button = element('button', type === 'leads' ? 'By leads' : 'By course');
-			button.type = 'button';
-			button.id = `touch_tab_${type}`;
-			button.setAttribute('role', 'tab');
-			button.setAttribute('aria-controls', `touch_panel_${type}`);
-			const panel = this.layoutTable(layouts, type);
+			const panel = element('div', null, 'touch-dialog-panel');
 			panel.id = `touch_panel_${type}`;
-			panel.setAttribute('role', 'tabpanel');
-			panel.setAttribute('aria-labelledby', button.id);
 			panel.tabIndex = 0;
-			button.addEventListener('click', () => {
-				for (const entry of panels) {
-					const active = entry.button === button;
-					entry.button.setAttribute('aria-selected', String(active));
-					entry.button.tabIndex = active ? 0 : -1;
-					entry.panel.hidden = !active;
-				}
-			});
-			button.addEventListener('keydown', event => {
-				if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
-				event.preventDefault();
-				const index = panels.findIndex(entry => entry.button === button);
-				const next = event.key === 'Home' ? 0 : event.key === 'End' ? panels.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : panels.length - 1)) % panels.length;
-				panels[next].button.click();
-				panels[next].button.focus();
-			});
-			panels.push({ button, panel, type });
-			tabs.append(button);
+			if (type === 'leads') {
+				const sequence = element('p', 'Call sequence: ');
+				sequence.append(element('span', description.sequence, 'touch-sequence'));
+				panel.append(sequence);
+			}
+			panel.append(this.layoutTable(layouts, type));
+			if (music) panel.append(element('p', `Contains: ${music}`, 'touch-music'));
+			panels.append(panel);
+			tabOptions.push({ title: type === 'leads' ? 'By Leads' : 'By Course', content: panel.id });
 		}
-		card.append(tabs, ...panels.map(entry => entry.panel));
-		panels.find(entry => entry.type === layouts.defaultLayout).button.click();
-		const exportDetails = element('details', null, 'touch-export');
-		exportDetails.append(element('summary', 'Siril for external proving'));
-		card.append(exportDetails);
+		const exportDetails = element('div', null, 'touch-dialog-panel touch-export');
+		exportDetails.id = 'touch_panel_prove';
+		exportDetails.tabIndex = 0;
+		exportDetails.append(element('p', 'Siril code for use in external proving tools:'));
+		panels.append(exportDetails);
+		tabOptions.push({ title: 'Prove', content: exportDetails.id });
+		TabBar({
+			landmark: tabs.id,
+			tabs: tabOptions,
+			active: tabOptions.findIndex(tab => tab.content === `touch_panel_${layouts.defaultLayout}`),
+		});
+		card.querySelector('.tabBar').setAttribute('aria-label', 'Touch details');
 		card.showModal();
 		let text;
 		try {
@@ -506,9 +504,9 @@ class Touches {
 		const pre = element('pre', text);
 		exportDetails.append(pre);
 		const actions = element('div', null, 'touch-actions');
-		const copy = element('button', 'Copy Siril');
+		const copy = element('button', 'Copy Code');
 		copy.type = 'button';
-		const prover = element('a', 'Open in Composition Prover', 'touch-prover-link');
+		const prover = element('a', 'Open in Prover', 'touch-prover-link external');
 		// The prover reads Siril from the fragment when the user opens the link;
 		// generating a result does not contact the external app.
 		prover.href = `https://bobwallis.github.io/CompositionProver/#${new URLSearchParams({
@@ -521,13 +519,18 @@ class Touches {
 		prover.rel = 'noopener noreferrer';
 		const feedback = element('p');
 		feedback.setAttribute('role', 'status');
+		let copyReset = null;
 		copy.addEventListener('click', async () => {
+			clearTimeout(copyReset);
 			try {
 				if (!navigator.clipboard) throw new Error('Clipboard access is unavailable. Select the Siril text to copy it manually.');
 				await navigator.clipboard.writeText(text);
-				feedback.textContent = 'Siril copied.';
+				feedback.textContent = '';
+				copy.textContent = 'Code Copied';
+				copyReset = setTimeout(() => { copy.textContent = 'Copy Code'; }, 2000);
 			} catch (error) {
 				console.error('Siril copy failed:', error);
+				copy.textContent = 'Copy Code';
 				feedback.textContent = `Copy failed: ${error.message}`;
 			}
 		});
