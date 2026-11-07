@@ -106,7 +106,7 @@ test('capability is conservative and follows selected calling-position metadata'
 	assert.match(compileMethod({ ...bristol, callingPositions: undefined }).tenorsTogether.reason, /not defined/);
 	assert.equal(compileMethod(cambridge).tenorsTogether.supported, true);
 	assert.equal(compileMethod(cambridgeMajor).tenorsTogether.supported, true);
-	assert.match(compileMethod(stedman).tenorsTogether.reason, /lead head/);
+	assert.match(compileMethod(stedman).tenorsTogether.reason, /not defined/);
 	const variants = { near: bristol.callingPositions, far: { titles: [] } };
 	assert.equal(compileMethod({ ...bristol, callingPositions: variants }).tenorsTogether.supported, true);
 	assert.equal(compileMethod({ ...bristol, callingPositions: variants }, false).tenorsTogether.supported, false);

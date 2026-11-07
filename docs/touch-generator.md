@@ -33,6 +33,7 @@ This guide describes touch search and its controls for contributors working on t
 
 - [Touches.js](../assets/js/ui/MethodView/Touches.js) handles the UI; [Presentation.js](../assets/js/touch_generator/Presentation.js) builds lead/course layouts, compact sequences and Siril exports.
 - The details dialog shows additional details about the touch, including links to proving tools.
+- When starting or ending falls mid-segment, the table and Siril listing show the preceding/suceeding segment head in brackets instead of rounds (if needed calculating backwards using inverse plain changes). It is not counted in the touch; the start description gives the numbered change on which the touch starts in that segment.
 - Source-file comments explain the algorithms, scheduling, worker loading and presentation rules in more detail. Regression tests live in [tests/JavaScript/TouchGenerator/](../tests/JavaScript/TouchGenerator/).
 
 ## Related documentation

@@ -11,12 +11,32 @@ export const bristol = {
 };
 
 export const stedman = {
-	callingPositions: { titles: Array.from({ length: 14 }, (_, i) => String(i + 1)) },
 	title: 'Stedman Triples', stage: 7, notation: '3.1.7.3.1.3.1.3.7.1.3.1',
+	ruleOffs: { every: 6, from: -3 },
 	leadHead: '6347251', lengthOfLead: 12, lengthOfCourse: 84,
 	calls: {
 		Bob: { symbol: '-', notation: '5', from: -3, every: 6, cover: 1 },
 		Single: { symbol: 's', notation: '567', from: -3, every: 6, cover: 1 },
+	},
+};
+
+export const doubleNorwichCaters = {
+	title: 'Double Norwich Court Bob Caters', stage: 9,
+	notation: '9,1.5.1.7.3.9.5.9.1',
+	leadHead: '128967453', lengthOfLead: 18, lengthOfCourse: 144,
+	ruleOffs: { every: 18, from: 0 },
+	calls: {
+		Bob: { symbol: '-', notation: '3', from: 4, every: 18, cover: 1 },
+		Single: { symbol: 's', notation: '123', from: 4, every: 18, cover: 1 },
+	},
+};
+
+export const erinCaters = {
+	title: 'Erin Caters', stage: 9, notation: '9,3.1.3',
+	ruleOffs: { every: 6, from: -5 },
+	calls: {
+		Bob: { symbol: '-', notation: '7', from: -5, every: 6, cover: 1 },
+		Single: { symbol: 's', notation: '789', from: -5, every: 6, cover: 1 },
 	},
 };
 

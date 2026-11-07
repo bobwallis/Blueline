@@ -403,8 +403,10 @@ test('calling-position lookup follows complete call blocks and Stedman six numbe
 		}
 	}
 	const method = compileMethod(stedman);
-	assert.equal(method.callingPositions.options.length, 14);
-	assert.ok(method.callingPositions.options.some(option => option.label === 'Six 14 (14)'));
+	assert.deepEqual(method.callingPositions.options, []);
+	assert.deepEqual(method.callingPositions.courseOrder, []);
+	assert.ok(method.callingPositions.lookup.every(calls => Object.values(calls).every(places => places.every(position => position === null))));
+	assert.deepEqual(method.callingPositions, compileMethod({ ...stedman, title: 'Another six-based method' }).callingPositions);
 	const unsupported = compileMethod({ ...bristol, calls: { ...bristol.calls, Extra: { ...bristol.calls.Bob, from: 16 } } });
 	assert.deepEqual(unsupported.callingPositions.options, []);
 });
@@ -427,11 +429,11 @@ test('calling-position pruning preserves all eligible rotations, repeated parts 
 		method.shortcuts = compileShortcuts(method);
 		const baseline = method.phases.flatMap(phase => bruteForce(method, phase));
 		const codes = method.callingPositions.options.map(option => option.value);
-		const filters = fixture === stedman ? [codes.slice(0, 7), codes] : [['H'], ['W', 'H'], codes];
+		const filters = codes.length ? [['H'], ['W', 'H'], codes] : [[]];
 		for (const callingPositions of filters) {
 			const eligible = baseline.filter(touch => {
 				const proof = simulate(method, touch);
-				return !(proof.incompleteCall && proof.steps.at(-1).blockCall)
+				return !callingPositions.length || !(proof.incompleteCall && proof.steps.at(-1).blockCall)
 					&& proof.callRows.every(entry => !entry.call || callingPositions.includes(entry.position));
 			});
 			for (const minParts of [1, 3]) {

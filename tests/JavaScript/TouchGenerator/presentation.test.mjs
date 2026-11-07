@@ -4,8 +4,20 @@ import PlaceNotation from '../../../assets/js/helpers/PlaceNotation.js';
 import { compileMethod } from '../../../assets/js/touch_generator/Compile.js';
 import { applyPermutation, canonicalTouch, coursePartLength, positionName, repeatsCourseBob, simulate } from '../../../assets/js/touch_generator/Search.js';
 import { callingTokens, compactComposition, describeTouch, duration, expandCalling, siril, touchLayouts } from '../../../assets/js/touch_generator/Presentation.js';
-import { bristol, stedman, cambridge, york, plainBobMinor, plainBobMaximus, grandsireTriples, grandsireDoubles } from './fixtures.mjs';
+import { bristol, stedman, cambridge, york, plainBobMinor, plainBobMaximus, grandsireTriples, grandsireDoubles, doubleNorwichCaters, erinCaters, jump } from './fixtures.mjs';
 import { bruteForce, prove } from './oracle.mjs';
+
+const stedman166 = {
+	phase: 0, length: 166,
+	word: [0, 0, 0, 2, 1, 0, 2, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 2, 1, 0],
+};
+
+test('call definitions include only call types actually selected in the touch', () => {
+	const method = compileMethod(bristol);
+	assert.equal(describeTouch(method, { phase: 0, length: 64, word: Uint8Array.from([2, 2]) }).callsDescription, 'Single: 1234. Calls can happen every 32 changes.');
+	assert.equal(describeTouch(method, { phase: 0, length: 224, word: Array(7).fill(0) }).callsDescription, '');
+	assert.ok(describeTouch(compileMethod(stedman), stedman166).callsDescription.startsWith('Bob: 5; Single: 567.'));
+});
 
 function exportedRows (text, stage) {
 	// Printing strings change output, not the rung changes. Ignore them in
@@ -85,7 +97,7 @@ test('lead layouts show calls to the left of independently proved segment heads,
 				assert.equal(layout.leads.reduce((length, lead) => length + lead.length, 0), layout.partLength);
 				assert.equal(layout.parts * layout.partLength, touch.length);
 				for (const lead of layout.leads) {
-					if (lead.end !== touch.length || simulate(method, touch).steps.at(-1).blockEnd) {
+					if (!lead.partial) {
 						assert.equal(lead.row, rows[lead.end - 1].map(PlaceNotation.bellToChar).join(''));
 					}
 					assert.equal(lead.symbol, lead.call ? method.calls[lead.call].symbol : '');
@@ -96,6 +108,236 @@ test('lead layouts show calls to the left of independently proved segment heads,
 			}
 		}
 	}
+});
+
+test('rule-off schedules are independent of calls, normalise offsets and reject invalid metadata', () => {
+	assert.deepEqual(compileMethod(bristol).boundaries.flatMap((boundary, slot) => boundary ? [slot + 1] : []), [32]);
+	assert.deepEqual(compileMethod(stedman).boundaries.flatMap((boundary, slot) => boundary ? [slot + 1] : []), [3, 9]);
+	assert.deepEqual(compileMethod(erinCaters).boundaries.flatMap((boundary, slot) => boundary ? [slot + 1] : []), [1]);
+	for (const ruleOffs of [{ every: 0, from: 0 }, { every: 5, from: 0 }, { every: 6, from: 0.5 }]) {
+		assert.throws(() => compileMethod({ ...stedman, ruleOffs }), /Rule-offs/);
+	}
+	const shifted = compileMethod({ ...doubleNorwichCaters, ruleOffs: { every: 18, from: -14 } });
+	const original = compileMethod(doubleNorwichCaters);
+	for (const key of ['points', 'choices', 'covers', 'interiors', 'permutations']) assert.deepEqual(shifted[key], original[key], key);
+});
+
+test('Double Norwich 180 prints five actual lead heads per part, not call-point rows', () => {
+	const method = compileMethod(doubleNorwichCaters);
+	const touch = { phase: 0, length: 180, word: [0, 1, 1, 1, 1, 0, 1, 1, 1, 1] };
+	const layout = touchLayouts(method, touch);
+	const rows = prove(method, touch);
+	assert.equal(rows.length, 180);
+	assert.equal(layout.parts, 2);
+	assert.equal(layout.partLength, 90);
+	assert.deepEqual(layout.leads.map(lead => lead.end), [18, 36, 54, 72, 90]);
+	assert.deepEqual(layout.leads.map(lead => lead.row), ['128967453', '175394268', '146832795', '129587436', '173654289']);
+	assert.deepEqual(layout.leads.map(lead => lead.symbol), ['', '-', '-', '-', '-']);
+	assert.ok(layout.leads.every(lead => !lead.partial));
+	assert.deepEqual(layout.leads.flatMap(lead => lead.word), touch.word.slice(0, 5));
+	const description = describeTouch(method, touch);
+	assert.equal(description.callsDescription, 'Bob: 3. Calls can happen every 18 changes, and the first position is at change 4.');
+	assert.equal(layout.start, '123456789');
+	assert.equal(layout.startPartial, false);
+	assert.equal(description.start, 'Plain-course start');
+	assert.equal(description.partial, false);
+	assert.equal(description.finalSegmentChange, null);
+	assert.equal(description.finish, 'Backstroke finish');
+	assert.equal(description.sequence, 'x2 · p - - - -');
+	const text = siril(method, touch);
+	assert.deepEqual(exportedRows(text, method.stage), rows);
+	assert.ok(text.includes('comp = 2(segment1,4segment2);'), 'export reuses the plain and bob lead segments, printing all ten reached heads');
+	assert.ok(text.includes('"  @";'), 'plain heads align with called heads');
+	assert.ok(!text.includes('(462318597)'));
+	assert.ok(!text.includes('tail ='));
+});
+
+test('multipart projected heads are calculated from the displayed part endpoint', () => {
+	const method = compileMethod({ ...doubleNorwichCaters, ruleOffs: { every: 18, from: 4 } });
+	const touch = { phase: 0, length: 180, word: [0, 1, 1, 1, 1, 0, 1, 1, 1, 1] };
+	const layout = touchLayouts(method, touch);
+	assert.equal(layout.parts, 2);
+	assert.equal(layout.leads.at(-1).end, 90);
+	assert.equal(layout.leads.at(-1).partial, true);
+	assert.equal(layout.leads.at(-1).row, '647318592', 'next plain head after the first part, not after final rounds');
+	assert.deepEqual(Array(2).fill(layout.leads.flatMap(lead => lead.word)).flat(), touch.word);
+	assert.match(siril(method, touch), /^tail = .*?, "  \(462318597\)";$/m);
+	assert.deepEqual(exportedRows(siril(method, touch), method.stage), prove(method, touch));
+});
+
+test('multiple calls within a rule-off segment retain their order and distinguish shared symbols', () => {
+	const method = compileMethod({
+		title: 'Multiple calls per segment', stage: 4, notation: 'x14x14',
+		ruleOffs: { every: 4, from: 0 },
+		calls: {
+			Red: { symbol: '-', notation: '12', from: 2, every: 4, cover: 1 },
+			Blue: { symbol: '-', notation: '12', from: 0, every: 4, cover: 1 },
+		},
+	});
+	const touch = { phase: 0, length: 4, word: [1, 2] };
+	const layout = touchLayouts(method, touch);
+	assert.equal(layout.leads.length, 1);
+	assert.equal(layout.leads[0].row, '1234');
+	assert.equal(layout.leads[0].symbol, 'Red (-) Blue (-)');
+	assert.deepEqual(layout.leads[0].word, touch.word);
+	assert.equal(layout.leads[0].partial, false);
+	assert.equal(describeTouch(method, touch).sequence, 'Red (-) Blue (-)');
+	assert.equal(describeTouch(method, touch).callsDescription, 'Red: 12. Calls can happen every 4 changes, and the first position is at change 2. Blue: 12. Calls can happen every 4 changes.');
+	const text = siril(method, touch);
+	assert.match(text, /"Red \(-\) Blue \(-\) @";/);
+	assert.deepEqual(exportedRows(text, method.stage), prove(method, touch));
+});
+
+test('Erin exports and multipart layouts retain the offset six heads', () => {
+	const method = compileMethod(erinCaters);
+	const touch = { phase: 0, length: 42, word: Array(7).fill(1) };
+	const rows = prove(method, touch);
+	const layout = touchLayouts(method, touch);
+	assert.equal(rows.length, 42);
+	assert.equal(layout.parts, 7);
+	assert.equal(layout.start, '132547698');
+	assert.equal(layout.startPartial, true);
+	assert.match(describeTouch(method, touch).start, /initial segment-head shown in brackets is not rung; the touch starts on change 6 of the initial segment/);
+	assert.ok(siril(method, touch).includes('start = "  (132547698)\\n'));
+	assert.deepEqual(layout.leads.map(lead => lead.end), [1, 6]);
+	assert.equal(layout.leads[0].row, rows[0].map(PlaceNotation.bellToChar).join(''));
+	assert.equal(layout.leads[0].partial, false);
+	assert.equal(layout.leads[1].partial, true);
+	const projected = PlaceNotation.apply(method.permutations[0], rows[5]).map(PlaceNotation.bellToChar).join('');
+	assert.equal(layout.leads[1].row, projected);
+	assert.deepEqual(layout.leads.flatMap(lead => lead.word), [1]);
+	assert.deepEqual(exportedRows(siril(method, touch), 9), rows);
+	assert.equal(describeTouch(method, touch).finish, 'Backstroke finish');
+	assert.ok(describeTouch(method, touch).sequence.endsWith('(p)'));
+});
+
+test('calls crossing rule-offs are listed once at their start and ring every replacement change', () => {
+	const method = compileMethod({
+		title: 'Cross-boundary calls', stage: 4, notation: '14.12.14.12',
+		ruleOffs: { every: 2, from: 0 },
+		calls: { Bob: { symbol: '-', notation: '34.14', from: 2, every: 4, cover: 2 } },
+	});
+	const touch = { phase: 0, length: 12, word: [1, 1, 1] };
+	const rows = prove(method, touch);
+	const layout = touchLayouts(method, touch);
+	assert.equal(layout.parts, 3);
+	assert.deepEqual(layout.leads.map(lead => lead.end), [2, 4]);
+	assert.deepEqual(layout.leads.map(lead => lead.row), [rows[1], rows[3]].map(row => row.map(PlaceNotation.bellToChar).join('')));
+	assert.deepEqual(layout.leads.map(lead => lead.symbol), ['-', '']);
+	assert.deepEqual(layout.leads.map(lead => lead.word), [[1], []]);
+	assert.ok(layout.leads.every(lead => !lead.partial));
+	assert.equal(describeTouch(method, touch).callsDescription, 'Bob: 34.14. Calls replace 2 changes, can happen every 4 changes, and the first position is at change 2.');
+	assert.deepEqual(exportedRows(siril(method, touch), method.stage), rows);
+	const early = compileMethod({
+		title: 'Interrupted cross-boundary call', stage: 4, notation: '14.14.12.12',
+		ruleOffs: { every: 2, from: 0 },
+		calls: { Bob: { symbol: '-', notation: '1234.12.14', from: 1, every: 4, cover: 3 } },
+	});
+	const finish = { phase: 0, length: 1, word: [1] };
+	assert.equal(touchLayouts(early, finish).leads[0].row, '1243', 'project only to the next rule-off, retaining the committed call');
+	assert.equal(describeTouch(early, finish).incompleteCall, true);
+	assert.match(siril(early, finish), /^tail = .*?, "- \(1243\)";$/m);
+	assert.deepEqual(exportedRows(siril(early, finish), 4), prove(early, finish));
+	const boundaryFinish = compileMethod({
+		title: 'Rounds at a rule-off inside a call', stage: 4, notation: '14.12.14.12',
+		ruleOffs: { every: 2, from: 0 },
+		calls: { Bob: { symbol: '-', notation: '14.12', from: 2, every: 4, cover: 2 } },
+	});
+	const interrupted = { phase: 0, length: 2, word: [1] };
+	assert.equal(describeTouch(boundaryFinish, interrupted).partial, false);
+	assert.equal(describeTouch(boundaryFinish, interrupted).incompleteCall, true);
+	assert.equal(touchLayouts(boundaryFinish, interrupted).leads[0].row, '1234');
+	assert.equal(touchLayouts(boundaryFinish, interrupted).leads[0].partial, false);
+	assert.ok(!describeTouch(boundaryFinish, interrupted).sequence.includes('(p)'));
+	assert.deepEqual(exportedRows(siril(boundaryFinish, interrupted), 4), prove(boundaryFinish, interrupted));
+});
+
+test('call descriptions normalise zero and negative schedules to positive replacement positions', () => {
+	const minor = compileMethod(plainBobMinor);
+	const minorTouch = { phase: 0, length: 120, word: [0, 0, 0, 1, 1, 0, 0, 0, 1, 1] };
+	assert.equal(describeTouch(minor, minorTouch).callsDescription, 'Bob: 14. Calls can happen every 12 changes.');
+	const grandsire = compileMethod(grandsireTriples);
+	assert.equal(describeTouch(grandsire, { phase: 0, length: 42, word: [1, 1, 1] }).callsDescription, 'Bob: 3.1. Calls replace 2 changes, can happen every 14 changes, and the first position is at change 13.');
+	const mixed = compileMethod({
+		title: 'Different replacement lengths', stage: 4, notation: 'x14x14',
+		calls: {
+			Short: { symbol: '-', notation: '12', from: 2, every: 4, cover: 1 },
+			Long: { symbol: 's', notation: '14.12', from: 3, every: 4, cover: 2 },
+		},
+	});
+	const touch = bruteForce({ ...mixed, maxChanges: 24 }, 0)[0];
+	assert.ok(touch);
+	assert.equal(describeTouch(mixed, touch).callsDescription, 'Short: 12. Calls can happen every 4 changes, and the first position is at change 2.');
+});
+
+test('mid-segment starts project the preceding plain head without ringing extra changes', () => {
+	const touch = stedman166;
+	const plain = PlaceNotation.parse(PlaceNotation.expand(stedman.notation, stedman.stage), stedman.stage);
+	const preceding = PlaceNotation.apply(plain.slice(-3).reverse(), PlaceNotation.rounds(7));
+	assert.equal(preceding.map(PlaceNotation.bellToChar).join(''), '3215476');
+	assert.deepEqual(PlaceNotation.allRows(plain.slice(-3), preceding).map(row => row.map(PlaceNotation.bellToChar).join('')), ['3215476', '3124567', '1325476', '1234567']);
+	assert.deepEqual(PlaceNotation.allRows(plain.slice(0, 2), PlaceNotation.rounds(7)).map(row => row.map(PlaceNotation.bellToChar).join('')), ['1234567', '2135476', '2314567']);
+	for (const title of ['Stedman Triples', 'Another offset method']) {
+		const compiled = compileMethod({ ...stedman, title });
+		const layout = touchLayouts(compiled, touch);
+		assert.equal(layout.start, preceding.map(PlaceNotation.bellToChar).join(''));
+		assert.equal(layout.startPartial, true);
+		assert.equal(describeTouch(compiled, touch).start, 'Plain-course start: The initial segment-head shown in brackets is not rung; the touch starts on change 4 of the initial segment');
+		assert.equal(describeTouch(compiled, touch).callsDescription, 'Bob: 5; Single: 567. Calls can happen every 6 changes, and the first position is at change 3.');
+		assert.equal(layout.leads.reduce((sum, lead) => sum + lead.length, 0), 166);
+		const text = siril(compiled, touch);
+		assert.ok(text.includes(`start = "  (${layout.start})\\n`));
+		assert.deepEqual(exportedRows(text, 7), prove(compiled, touch));
+	}
+});
+
+test('Siril opening heads align with call-labelled segment heads', () => {
+	const method = compileMethod({
+		title: 'Stedman Doubles', stage: 5, notation: '3.1.5.3.1.3,1',
+		ruleOffs: { every: 6, from: -3 },
+		calls: { Single: { symbol: 's', notation: '45', from: 0, every: 6, cover: 1 } },
+	});
+	const touch = {
+		phase: 0, length: 120,
+		word: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+	};
+	const text = siril(method, touch);
+	assert.ok(prove(method, touch));
+	assert.ok(text.includes('start = "  (32154)\\n  —————";'));
+	assert.match(text, /^segment1 = .*?, "   @";$/m);
+	assert.match(text, /^segment11 = .*?, "s  @";$/m);
+	assert.match(text, /^tail = .*?, "s \(.*\)";$/m);
+	assert.deepEqual(exportedRows(text, method.stage), prove(method, touch));
+});
+
+test('opening heads invert non-self-inverse jump changes and respect the starting phase', () => {
+	const method = compileMethod({ ...jump, ruleOffs: { every: 2, from: 1 } });
+	for (const phase of [0, 1]) {
+		const touch = { phase, length: 6, word: [1, 1, 1] };
+		const layout = touchLayouts(method, touch);
+		assert.equal(layout.start, phase ? '1234' : '2341');
+		assert.equal(layout.startPartial, phase === 0);
+		assert.equal(describeTouch(method, touch).finalSegmentChange, phase ? null : 1);
+		assert.match(describeTouch(method, touch).start, phase ? /^Rounds after change 1 of the lead$/ : /starts on change 2 of the initial segment/);
+		if (!phase) {
+			const projected = [...layout.start].map(PlaceNotation.charToBell);
+			assert.deepEqual(PlaceNotation.apply(method.permutations[1], projected), PlaceNotation.rounds(4));
+		}
+		assert.equal(describeTouch(method, touch).callsDescription, `Bob: 14. Calls can happen every 2 changes${phase ? ', and the first position is at change 1' : ''}.`);
+	}
+});
+
+test('final segment change counts from the preceding rule-off, including unrung opening changes', () => {
+	const method = compileMethod({
+		title: 'Short offset touch', stage: 4, notation: '14.14.12.12',
+		ruleOffs: { every: 4, from: 2 },
+		calls: { Bob: { symbol: '-', notation: '1234', from: 1, every: 4, cover: 1 } },
+	});
+	const touch = { phase: 0, length: 1, word: [1] };
+	const description = describeTouch(method, touch);
+	assert.equal(description.partial, true);
+	assert.equal(description.finalSegmentChange, 3, 'starting rounds are already two changes into the segment');
+	assert.ok(touchLayouts(method, touch).startPartial);
 });
 
 test('course layout uses named plain-course order, omits unused positions and defaults per total length', () => {
@@ -310,7 +552,7 @@ test('Siril indents a parenthesised handstroke finish by one space', () => {
 	const touch = bruteForce(method, 0).find(touch => touch.length === 65);
 	assert.ok(touch);
 	const text = siril(method, touch);
-	assert.match(text, /^tail = .*?, " \([1-7]{7}\)";$/m);
+	assert.match(text, /^tail = .*?, "  \([1-7]{7}\)";$/m);
 	assert.ok(!text.includes('"  (@)"'));
 	assert.deepEqual(exportedRows(text, method.stage), prove(method, touch));
 });
@@ -406,17 +648,16 @@ test('Bristol tenor position names match method metadata', () => {
 	assert.ok(describeTouch(method, touch).calling);
 });
 
-test('published Stedman calling round trips to the true 166-change touch and partial finish', () => {
+test('Stedman 166 retains its exact call word and partial finish without numbered calling', () => {
 	const method = compileMethod(stedman);
-	const tokens = 's4.5.s7.s12.13.s4.s7.s12.13'.split('.').map(token => ({
-		call: token.startsWith('s') ? 2 : 1,
-		position: token.replace('s', ''),
-	}));
-	const touch = { phase: 0, length: 166, word: expandCalling(method, tokens, 0, 166) };
+	const touch = stedman166;
 	assert.ok(prove(method, touch));
 	const description = describeTouch(method, touch);
-	assert.equal(description.calling, 's4.5.s7.s12.13.s4.s7.s12.13 (p)');
+	assert.equal(description.calling, null);
+	assert.equal(callingTokens(method, touch), null);
+	assert.equal(description.sequence, `${touch.word.map(call => method.calls[call].symbol).join(' ')} (p)`);
 	assert.ok(description.partial);
+	assert.equal(description.finalSegmentChange, 1);
 	assert.equal(description.finish, 'Backstroke finish');
 	assert.equal(simulate(method, touch).callRows.filter(entry => entry.call).length, 9);
 });
@@ -425,7 +666,7 @@ test('Siril pieces reproduce every independently proved row, exact starts and ta
 	const methods = [compileMethod(bristol), compileMethod(stedman), compileMethod(stedman)];
 	const touches = [
 		{ phase: 0, word: [2, 2], length: 64 },
-		{ phase: 0, length: 166, word: expandCalling(methods[1], 's4.5.s7.s12.13.s4.s7.s12.13'.split('.').map(t => ({ call: t[0] === 's' ? 2 : 1, position: t.replace('s', '') })), 0, 166) },
+		stedman166,
 		bruteForce({ ...methods[2], maxChanges: 54 }, 3)[0],
 	];
 	for (let i = 0; i < methods.length; i++) {

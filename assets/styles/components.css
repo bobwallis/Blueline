@@ -127,6 +127,16 @@ html:has(.touch-dialog:modal) {
 		}
 	}
 	.touch-dialog {
+		.touch-layout {
+			width: fit-content;
+			max-width: 100%;
+			margin: 0 auto;
+			padding-top: var(--content-y-padding);
+			text-align: left;
+			table {
+				margin: 0;
+			}
+		}
 		box-sizing: border-box;
 		width: min(720px, calc(100% - 32px));
 		margin: calc(var(--header-height) * 1.5) auto 16px;
@@ -160,11 +170,14 @@ html:has(.touch-dialog:modal) {
 		}
 		.touch-metadata {
 			display: grid;
-			gap: 4px;
+			gap: 0.75em;
 			margin: 4px 0 0;
 			padding-left: calc(var(--content-x-padding) / 2);
 			> * {
 				margin: 0;
+			}
+			.touch-metadata-label {
+				font-weight: 500;
 			}
 		}
 		.touch-close {
@@ -662,6 +675,15 @@ section.method {
 	}
 	.touch-position-setting, .touch-named-rows-setting {
 		margin: calc(var(--content-y-padding) / 2) 0;
+	}
+	.touch-named-rows-setting .choices {
+		.choices__inner {
+			flex-wrap: wrap;
+		}
+		.choices__list--multiple {
+			flex-wrap: wrap;
+			overflow: visible;
+		}
 	}
 	input[type="number"] {
 		width: 6em;

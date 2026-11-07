@@ -55,6 +55,12 @@ export function compileMethod (input, nearCalls = true) {
 	const plain = parse(input.notation);
 	const length = plain.permutations.length;
 	if (input.lengthOfLead != null && input.lengthOfLead !== length) throw new Error('Lead length does not match the method notation.');
+	// Printed heads need not coincide with the start or end of a call block.
+	const ruleOffs = input.ruleOffs ?? { every: length, from: 0 };
+	if (!Number.isInteger(ruleOffs.every) || ruleOffs.every < 1 || length % ruleOffs.every !== 0 || !Number.isInteger(ruleOffs.from)) {
+		throw new Error('Rule-offs must have an integer offset and a positive period dividing the lead length.');
+	}
+	const boundaries = Array.from({ length }, (_, slot) => (slot + 1 - ruleOffs.from) % ruleOffs.every === 0);
 	const permutations = plain.permutations.slice();
 	// 2. Build the decision schedule. Slots are changes within the plain lead.
 	// choices[slot] lists call IDs (0 = plain); calls maps those IDs to changes.
@@ -78,7 +84,7 @@ export function compileMethod (input, nearCalls = true) {
 		const slots = choices.map((_, i) => i).filter(i => (i + 1 - call.from) % call.every === 0);
 		const effective = slots.filter(i => parsed.permutations.some((p, offset) => permutations[(i + offset) % length].some((b, j) => b !== p[j])));
 		if (!effective.length) continue;
-		calls.push({ title, symbol: call.symbol || title, permutation: permutations.length, permutations: parsed.permutations.map((_, i) => permutations.length + i), tokens: parsed.tokens, cover: call.cover, notation: parsed.tokens[0], from: call.from, every: call.every });
+		calls.push({ title, symbol: call.symbol || title, permutation: permutations.length, permutations: parsed.permutations.map((_, i) => permutations.length + i), tokens: parsed.tokens, cover: call.cover, notation: parsed.tokens[0], displayNotation: call.notation, from: call.from, every: call.every });
 		permutations.push(...parsed.permutations);
 		for (const slot of effective) {
 			if (choices[slot].length > 1 && covers[slot] !== call.cover) throw new Error('Calls at the same decision point must cover the same number of changes.');
@@ -127,7 +133,7 @@ export function compileMethod (input, nearCalls = true) {
 	const method = {
 		title: input.title,
 		notationSiril: input.notationSiril,
-		stage, length, permutations, calls, choices, points, covers, interiors, closureChoices, checkpoint, windowPaths,
+		stage, length, boundaries, permutations, calls, choices, points, covers, interiors, closureChoices, checkpoint, windowPaths,
 		tokens: plain.tokens,
 		// Search and display rotations start at the method's first change only.
 		phases: [0],

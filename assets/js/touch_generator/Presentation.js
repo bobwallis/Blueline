@@ -20,7 +20,7 @@ export function duration (length) {
 
 export function callingTokens (method, touch) {
 	// Abbreviate the exact sequence to called tenor positions, omitting plains.
-	// Support lead-end calls and calibrated Stedman six numbers; other schedules
+	// Support lead-end calling positions; other schedules
 	// keep the exact sequence only. expandCalling checks this abbreviation later.
 	const proof = simulate(method, touch);
 	if (!method.callingPositions?.lookup.some(calls => Object.values(calls).some(places => places.some(Boolean)))) return null;
@@ -79,6 +79,35 @@ function repeatedSequence (tokens, separator, allowRepeat) {
 	return tokens.join(separator);
 }
 
+function initialSegmentHead (method, phase) {
+	// Project backwards through plain changes, not through calls from the touch.
+	// Invert each permutation explicitly: jump changes need not be self-inverse.
+	let row = PlaceNotation.rounds(method.stage), slot = (phase + method.length - 1) % method.length;
+	let length = 0;
+	while (!method.boundaries[slot]) {
+		const permutation = method.permutations[slot];
+		row = applyPermutation(row, permutation.map((_, source) => permutation.indexOf(source)));
+		slot = (slot + method.length - 1) % method.length;
+		length++;
+		if (length === method.length) throw new Error('Could not find the initial segment head.');
+	}
+	return { row: row.map(PlaceNotation.bellToChar).join(''), partial: length > 0, segmentChange: length + 1 };
+}
+
+function describeCalls (method, touch) {
+	const groups = new Map();
+	for (const [index, call] of method.calls.entries()) {
+		if (!index || !touch.word.includes(index)) continue;
+		const positions = method.choices.flatMap((choices, slot) => choices.includes(index) ? [(slot - touch.phase + method.length) % method.length + 1] : []).sort((a, b) => a - b);
+		const gaps = positions.map((position, i) => (positions[(i + 1) % positions.length] - position + method.length) % method.length || method.length);
+		const regular = gaps.every(gap => gap === gaps[0]);
+		const timing = `${call.cover > 1 ? `replace ${call.cover} changes, ` : ''}${regular ? `can happen every ${gaps[0]} changes${positions[0] === gaps[0] ? '' : `, and the first position is at change ${positions[0]}`}` : `can happen at changes ${positions.join(', ')} of each ${method.length}-change lead`}`;
+		if (!groups.has(timing)) groups.set(timing, []);
+		groups.get(timing).push(`${call.title}: ${call.displayNotation}`);
+	}
+	return Array.from(groups, ([timing, calls]) => `${calls.join('; ')}. Calls ${timing}.`).join(' ');
+}
+
 export function describeTouch (method, touch) {
 	// Prove the touch, summarise any repeating part, then validate the optional
 	// calling abbreviation. Return display data; Touches builds the actual card.
@@ -89,18 +118,24 @@ export function describeTouch (method, touch) {
 	// starts at the same method/call phase. This only compresses the display.
 	if (partLength < touch.length) {
 		const callsPerLead = method.points.filter(Boolean).length;
-		multipart = `${touch.length / partLength} parts; ${Array.from(touch.word.slice(0, partLength / method.length * callsPerLead), call => method.calls[call].symbol).join(' ')}`;
+		multipart = `${touch.length / partLength} parts; ${Array.from(touch.word.slice(0, partLength / method.length * callsPerLead), call => callSymbol(method, call)).join(' ')}`;
 	}
-	// "(p)" marks a plain tail before the next decision, not an extra call.
+	// "(p)" marks a plain continuation to the next rule-off, not an extra call.
 	// Finishing inside a selected block instead gets an incomplete-call label.
-	const partial = !proof.steps.at(-1).blockEnd;
+	const partial = !method.boundaries[proof.steps.at(-1).change];
+	let finalSegmentChange = 0, slot = proof.steps.at(-1).change;
+	while (!method.boundaries[slot]) {
+		finalSegmentChange++;
+		slot = (slot + method.length - 1) % method.length;
+	}
+	const opening = initialSegmentHead(method, touch.phase);
 	const tokens = callingTokens(method, touch);
 	let calling = null;
 	if (tokens) {
 		try {
 			const expanded = expandCalling(method, tokens, touch.phase, touch.length);
 			if (expanded.length === touch.word.length && expanded.every((c, i) => c === touch.word[i])) {
-				calling = repeatedSequence(tokens.map(token => `${method.calls[token.call].symbol === 's' ? 's' : method.calls[token.call].symbol === '-' ? '' : `${method.calls[token.call].symbol}:`}${token.position}`), method.title === 'Stedman Triples' ? '.' : ' ', !partial && !proof.incompleteCall);
+				calling = repeatedSequence(tokens.map(token => `${method.calls[token.call].symbol === 's' ? 's' : method.calls[token.call].symbol === '-' ? '' : `${method.calls[token.call].symbol}:`}${token.position}`), ' ', !partial && !proof.incompleteCall);
 			}
 		} catch (error) {
 			if (!(error instanceof AmbiguousCallingError) && !(error instanceof FalseTouchError)) throw error;
@@ -110,37 +145,61 @@ export function describeTouch (method, touch) {
 	return {
 		duration: duration(touch.length),
 		calling: calling ? `${calling}${partial && !proof.incompleteCall ? ' (p)' : ''}` : null,
-		sequence: `${repeatedSequence(Array.from(touch.word, call => method.calls[call].symbol), ' ', !partial && !proof.incompleteCall)}${partial && !proof.incompleteCall ? ' (p)' : ''}`,
+		sequence: `${repeatedSequence(Array.from(touch.word, call => callSymbol(method, call)), ' ', !partial && !proof.incompleteCall)}${partial && !proof.incompleteCall ? ' (p)' : ''}`,
 		multipart,
-		start: touch.phase === 0 ? 'Plain-course start' : `Rounds after change ${touch.phase} of the lead`,
+		start: `${touch.phase === 0 ? 'Plain-course start' : `Rounds after change ${touch.phase} of the lead`}${opening.partial ? `: The initial segment-head shown in brackets is not rung; the touch starts on change ${opening.segmentChange} of the initial segment` : ''}`,
+		callsDescription: describeCalls(method, touch),
 		finish: touch.length % 2 ? 'Handstroke finish' : 'Backstroke finish',
 		partial,
+		finalSegmentChange: partial ? finalSegmentChange : null,
 		incompleteCall: proof.incompleteCall,
 		counts: method.calls.slice(1).map((call, index) => `${Array.from(touch.word).filter(c => c === index + 1).length} ${call.title.toLowerCase()} calls`).join(', '),
 	};
 }
 
-function unfinishedSegmentHead (method, proof) {
-	// The bracketed head is not rung: continue after rounds to the next block
-	// end. Finish an already chosen call first; otherwise continue plain.
-	const last = proof.steps.at(-1);
-	if (last.blockEnd) return null;
-	let row = proof.rows.at(-1), slot = (last.change + 1) % method.length;
-	let active = last.blockCall, offset = last.offset + 1;
-	const start = (last.change - last.offset + method.length) % method.length;
-	let left = method.interiors[slot] ? method.covers[start] - offset : 0;
+function unfinishedSegmentHead (method, proof, end = proof.steps.length) {
+	// Continue from this endpoint (which may be a part end, not final rounds)
+	// to the next rule-off, preserving any already committed replacement.
+	const last = proof.steps[end - 1];
+	if (method.boundaries[last.change]) return null;
+	let row = proof.rows[end - 1], slot = (last.change + 1) % method.length;
+	let active = last.blockEnd ? 0 : last.blockCall, offset = last.offset + 1;
 	for (let i = 0; i < method.length; i++) {
-		if (method.points[slot]) {
-			active = 0;
-			offset = 0;
-			left = method.covers[slot];
-		}
 		row = applyPermutation(row, method.permutations[active ? method.calls[active].permutations[offset] : slot]);
-		if (left && --left === 0) return row.map(PlaceNotation.bellToChar).join('');
-		offset++;
+		if (method.boundaries[slot]) return row.map(PlaceNotation.bellToChar).join('');
+		if (active && ++offset === method.calls[active].cover) active = 0;
 		slot = (slot + 1) % method.length;
 	}
 	throw new Error('Could not find the unfinished segment end.');
+}
+
+function callSymbol (method, call) {
+	const { symbol, title } = method.calls[call];
+	return method.calls.slice(1).filter(entry => entry.symbol === symbol).length > 1 ? `${title} (${symbol})` : symbol;
+}
+
+function presentationSegments (method, proof, length) {
+	const leads = [];
+	let from = 0;
+	for (let i = 0; i < length; i++) {
+		const step = proof.steps[i];
+		const boundary = method.boundaries[step.change];
+		if (!boundary && i + 1 !== length) continue;
+		const decisions = proof.steps.slice(from, i + 1).filter(entry => method.points[entry.change]);
+		const called = decisions.filter(entry => entry.call);
+		leads.push({
+			number: leads.length + 1,
+			length: i + 1 - from,
+			end: i + 1,
+			row: !boundary ? unfinishedSegmentHead(method, proof, i + 1) : proof.rows[i].map(PlaceNotation.bellToChar).join(''),
+			call: called[0]?.call || 0,
+			symbol: called.map(entry => callSymbol(method, entry.call)).join(' '),
+			word: decisions.map(entry => entry.call),
+			partial: !boundary,
+		});
+		from = i + 1;
+	}
+	return leads;
 }
 
 export function touchLayouts (method, touch) {
@@ -149,36 +208,20 @@ export function touchLayouts (method, touch) {
 	const proof = simulate(method, touch);
 	const partLength = shortestPartLength(method, touch, proof.incompleteCall);
 	const courseLength = coursePartLength(touch, proof, partLength, method.stage);
-	const leads = [];
-	let from = 0;
-	for (let i = 0; i < courseLength; i++) {
-		const step = proof.steps[i];
-		if (!step.blockEnd && i + 1 !== courseLength) continue;
-		const decisions = proof.steps.slice(from, i + 1).filter(entry => method.points[entry.change]);
-		leads.push({
-			number: leads.length + 1,
-			length: i + 1 - from,
-			end: i + 1,
-			row: !step.blockEnd ? unfinishedSegmentHead(method, proof) : proof.rows[i].map(PlaceNotation.bellToChar).join(''),
-			call: step.blockCall,
-			symbol: step.blockCall ? method.calls[step.blockCall].symbol : '',
-			word: decisions.map(entry => entry.call),
-			partial: !step.blockEnd || from === 0 && touch.phase !== 0,
-		});
-		from = i + 1;
-	}
+	const leads = presentationSegments(method, proof, partLength);
 	// Course tables require an ordinary lead-end schedule and declared named
-	// positions. Numbered sixes and mid-lead starts keep the segment listing.
+	// positions. Other schedules and mid-lead starts keep the segment listing.
 	// Use full course-head rows, not inferred coursing orders.
 	let courses = null;
 	const regular = method.points.filter(Boolean).length === 1
-		&& method.points.some((point, slot) => point && slot + method.covers[slot] === method.length);
-	if (touch.phase === 0 && regular && method.title !== 'Stedman Triples' && !proof.incompleteCall && method.lengthOfCourse && method.callingPositions.options.length) {
+		&& method.points.some((point, slot) => point && slot + method.covers[slot] === method.length)
+		&& method.boundaries.every((boundary, slot) => boundary === (slot === method.length - 1));
+	if (touch.phase === 0 && regular && !proof.incompleteCall && method.lengthOfCourse && method.callingPositions.options.length) {
 		const columns = method.callingPositions.courseOrder;
 		const rows = [], used = new Set();
 		let entries = [], cells = {}, lastColumn = -1, valid = columns.length > 0;
 		let previous = null;
-		for (const lead of leads) {
+		for (const lead of courseLength === partLength ? leads : presentationSegments(method, proof, courseLength)) {
 			entries.push(lead);
 			const call = proof.callRows.find(entry => entry.change === lead.end);
 			if (lead.call) {
@@ -202,11 +245,13 @@ export function touchLayouts (method, touch) {
 		}
 		if (valid) courses = { columns: columns.filter(column => used.has(column)), rows, partLength: courseLength, parts: touch.length / courseLength };
 	}
+	const opening = initialSegmentHead(method, touch.phase);
 	return {
 		parts: touch.length / partLength,
 		partLength,
-		start: PlaceNotation.rounds(method.stage).map(PlaceNotation.bellToChar).join(''),
-		leads: leads.filter(lead => lead.end <= partLength),
+		start: opening.row,
+		startPartial: opening.partial,
+		leads,
 		courses,
 		defaultLayout: courses && touch.length >= 2 * method.lengthOfCourse ? 'courses' : 'leads',
 	};
@@ -252,27 +297,33 @@ function sirilNotation (method, tokens) {
 
 export function siril (method, touch) {
 	// Export the proved changes, not the abbreviated calling positions.
-	// Walk from one completed call block to the next, defining reusable segments,
-	// then use compactComposition to assemble them into a proveable composition.
+	// Print at rule-offs, reusing call-block definitions when schedules align.
+	// compactComposition assembles the segments into a proveable composition.
 	const proof = simulate(method, touch);
+	const opening = initialSegmentHead(method, touch.phase);
+	const rowPadding = opening.partial ? ' ' : '';
 	const { steps } = proof;
 	const definitions = new Map();
+	const segmentNames = new Map();
 	const blocks = [];
 	const points = method.points.flatMap((point, i) => point ? [(i + (method.covers?.[i] || 1) - 1) % method.length] : []).sort((a, b) => a - b);
+	const aligned = method.boundaries.every((boundary, slot) => boundary === points.includes(slot));
 	const regular = points.length === 1 && points[0] === method.length - 1;
 	const names = method.calls.map((call, i) => i === 0 ? 'p' : call.symbol === '-' ? 'b' : call.symbol === 's' ? 's' : `c${i}`);
 	for (let i = names.length - 1; i > 0; i--) {
 		if (names.indexOf(names[i]) !== i) names[i] = `c${i}`;
 	}
-	let segment = [];
+	let segment = [], decisions = [];
 	for (let i = 0; i < steps.length; i++) {
 		const step = steps[i];
 		segment.push(step.token);
-		if (!step.blockEnd && i !== steps.length - 1) continue;
+		if (method.points[step.change]) decisions.push(step.call);
+		const boundary = method.boundaries[step.change];
+		if (!boundary && i !== steps.length - 1) continue;
 		const slot = points.indexOf(step.change);
 		const previous = points[(slot + points.length - 1) % points.length];
 		const fullLength = slot < 0 ? 0 : (step.change - previous + method.length) % method.length || method.length;
-		if (segment.length === fullLength) {
+		if (aligned && segment.length === fullLength) {
 			// Share a body m between p/b/s (numbered for multiple call slots).
 			// Remove the entire cover tail before defining the called alternatives:
 			// Grandsire replaces two changes, not just the lead-end change.
@@ -298,27 +349,32 @@ export function siril (method, touch) {
 					if (!method.choices[start].includes(call)) continue;
 					const name = `${names[call]}${suffix}`;
 					const last = call ? method.calls[call].tokens || [method.calls[call].notation] : Array.from({ length: cover }, (_, offset) => method.tokens[(start + offset) % method.length]);
-					const symbol = call ? method.calls[call].symbol : ' ';
-					definitions.set(name, `${notation ? `${commonName}, ` : ''}${sirilNotation(method, last)}, ${JSON.stringify(`${symbol} @`)}`);
+					const symbol = call ? callSymbol(method, call) : ' ';
+					definitions.set(name, `${notation ? `${commonName}, ` : ''}${sirilNotation(method, last)}, ${JSON.stringify(`${call ? `${symbol} ` : '  '}${rowPadding}@`)}`);
 				}
 			}
 			const name = `${names[step.blockCall]}${suffix}`;
 			blocks.push(name);
 		} else {
-			// Partial starts/finishes use only the changes actually rung, even
-			// when rounds interrupts a multi-change call.
-			const name = i === steps.length - 1 ? 'tail' : 'opening';
-			const symbol = step.blockCall ? method.calls[step.blockCall].symbol : '';
-			const head = i === steps.length - 1 && !step.blockEnd ? unfinishedSegmentHead(method, proof) : '@';
-			definitions.set(name, `${sirilNotation(method, segment)}, ${JSON.stringify(`${symbol} (${head})`)}`);
+			// Literal segments also handle calls displaced from rule-offs or
+			// spanning them. Printing never introduces additional rung changes.
+			const symbol = decisions.filter(Boolean).map(call => callSymbol(method, call)).join(' ');
+			const head = !boundary ? `(${unfinishedSegmentHead(method, proof)})` : '@';
+			const padding = i === steps.length - 1 && !boundary ? '' : rowPadding;
+			const marker = symbol ? `${symbol} ${padding}${head}` : `${boundary || opening.partial ? '  ' : ' '}${padding}${head}`;
+			const notation = `${sirilNotation(method, segment)}, ${JSON.stringify(marker)}`;
+			const name = segmentNames.get(notation) ?? (i === steps.length - 1 && !boundary ? 'tail' : `segment${blocks.length + 1}`);
+			definitions.set(name, notation);
+			segmentNames.set(notation, name);
 			blocks.push(name);
 		}
 		segment = [];
+		decisions = [];
 	}
 	return [
 		`${method.stage} bells;`,
 		`// ${String(method.title || 'Custom method').replace(/[\r\n]/g, ' ')}: ${touch.length} changes; start phase ${touch.phase}`,
-		`start = "  @\\n  ${'—'.repeat(method.stage)}";`,
+		`start = ${JSON.stringify(`${opening.partial ? `  (${opening.row})` : '  @'}\n  ${'—'.repeat(method.stage)}`)};`,
 		`finish = "  ${'—'.repeat(method.stage)}\\n";`,
 		...Array.from(definitions, ([name, notation]) => `${name} = ${notation};`),
 		`comp = ${compactComposition(blocks)};`,

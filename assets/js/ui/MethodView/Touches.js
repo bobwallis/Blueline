@@ -352,9 +352,8 @@ class Touches {
 		card.setAttribute('aria-label', `View ${touch.length}-change touch details`);
 		const summary = element('h3', `${touch.length} changes`, 'touch-title');
 		card.append(summary);
-		card.append(this.layoutTable(layouts, layouts.defaultLayout));
 		const music = this.musicSummary(touch);
-		if (music) card.append(element('p', `Contains: ${music}`, 'touch-music'));
+		card.append(this.layoutTable(layouts, layouts.defaultLayout, music));
 		card.addEventListener('keydown', event => {
 			if (event.key === 'Enter' || event.key === ' ') {
 				event.preventDefault();
@@ -382,7 +381,7 @@ class Touches {
 		return card;
 	}
 
-	layoutTable (layouts, type) {
+	layoutTable (layouts, type, music) {
 		const wrap = element('div', null, 'touch-layout');
 		const table = element('table');
 		table.setAttribute('aria-label', type === 'courses' ? 'By course' : 'By leads');
@@ -392,6 +391,10 @@ class Touches {
 		const header = element('tr');
 		for (const title of type === 'courses' ? [omitTreble ? layouts.start.slice(1) : layouts.start, ...layouts.courses.columns] : ['', layouts.start]) {
 			const th = element('th', title);
+			if (type === 'leads' && title && layouts.startPartial) {
+				table.classList.add('touch-has-partial');
+				th.replaceChildren(this.bracketedHead(title));
+			}
 			th.scope = 'col';
 			header.append(th);
 		}
@@ -406,9 +409,7 @@ class Touches {
 			const rowCell = element('td');
 			if (row.partial) {
 				table.classList.add('touch-has-partial');
-				const bracketed = element('span', null, 'touch-bracketed-head');
-				bracketed.append(element('span', '(', 'touch-head-open'), document.createTextNode(head), element('span', ')', 'touch-head-close'));
-				rowCell.append(bracketed);
+				rowCell.append(this.bracketedHead(head));
 			} else rowCell.textContent = head;
 			if (type === 'courses') tr.append(rowCell);
 			for (const column of columns) tr.append(element('td', type === 'courses' ? row.cells[column] || '' : row.symbol));
@@ -419,7 +420,14 @@ class Touches {
 		wrap.append(table);
 		const parts = type === 'courses' ? layouts.courses.parts : layouts.parts;
 		if (parts > 1) wrap.append(element('p', `${parts} parts`));
+		if (music) wrap.append(element('p', `Contains: ${music}`, 'touch-music'));
 		return wrap;
+	}
+
+	bracketedHead (head) {
+		const bracketed = element('span', null, 'touch-bracketed-head');
+		bracketed.append(element('span', '(', 'touch-head-open'), document.createTextNode(head), element('span', ')', 'touch-head-close'));
+		return bracketed;
 	}
 
 	// Named rows found (wrapped across hand/back pairs) and backstroke 65s.
@@ -440,6 +448,14 @@ class Touches {
 		return close;
 	}
 
+	metadataParagraph (text, separator) {
+		const paragraph = element('p');
+		const boundary = text.indexOf(separator);
+		const end = boundary < 0 ? text.length : boundary + 1;
+		paragraph.append(element('span', text.slice(0, end), 'touch-metadata-label'), document.createTextNode(text.slice(end)));
+		return paragraph;
+	}
+
 	expandResult (touch, description, layouts) {
 		// Build on demand, leaving the list untouched. Native dialog supplies
 		// focus containment, Escape dismissal and focus return to its opener.
@@ -451,14 +467,6 @@ class Touches {
 		title.append(element('span', this.config.title), length);
 		title.id = 'touch_dialog_title';
 		card.append(this.closeButton(), title);
-		const metadata = element('div', null, 'touch-metadata');
-		metadata.append(
-			element('p', `${description.start}. ${description.finish}.`),
-			element('p', this.method.calls.slice(1).map(call => `${call.title}: ${this.config.calls[call.title].notation}`).join('; ')),
-		);
-		card.append(metadata);
-		if (description.incompleteCall) card.append(element('p', 'The touch finishes part-way through the final plain or called replacement block.'));
-		else if (description.partial) card.append(element('p', '(p) is the next plain call point, which is not reached. The touch finishes with plain changes before it.'));
 		const tabs = element('span');
 		tabs.id = 'touch_dialog_tabs';
 		card.append(tabs);
@@ -470,13 +478,14 @@ class Touches {
 			const panel = element('div', null, 'touch-dialog-panel');
 			panel.id = `touch_panel_${type}`;
 			panel.tabIndex = 0;
-			if (type === 'leads') {
-				const sequence = element('p', 'Call sequence: ');
-				sequence.append(element('span', description.sequence, 'touch-sequence'));
-				panel.append(sequence);
+			const metadata = element('div', null, 'touch-metadata');
+			if (description.callsDescription) metadata.append(this.metadataParagraph(description.callsDescription, '. '));
+			if (description.start !== 'Plain-course start') metadata.append(this.metadataParagraph(`${description.start}.`, ': '));
+			if (description.partial || description.finish !== 'Backstroke finish') {
+				metadata.append(this.metadataParagraph(`${description.finish}${description.partial ? `: The final segment-head shown in brackets is not reached; the touch finishes on change ${description.finalSegmentChange} of the final segment.` : '.'}`, ': '));
 			}
-			panel.append(this.layoutTable(layouts, type));
-			if (music) panel.append(element('p', `Contains: ${music}`, 'touch-music'));
+			if (metadata.childElementCount) panel.append(metadata);
+			panel.append(this.layoutTable(layouts, type, music));
 			panels.append(panel);
 			tabOptions.push({ title: type === 'leads' ? 'By Leads' : 'By Course', content: panel.id });
 		}

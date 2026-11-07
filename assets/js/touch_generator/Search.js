@@ -605,41 +605,23 @@ export function positionName (stage, place) {
 
 // Compile the same position lookup for display, filtering and early rejection.
 // Index by decision slot, call ID and tenor place BEFORE the replacement block.
-// Stedman's six numbers instead use the plain alternative's end row and slot.
 export function compileCallingPositions (method) {
-	const numbered = new Map();
-	if (method.title === 'Stedman Triples') {
-		let row = Array.from({ length: method.stage }, (_, i) => i), number = 0;
-		for (let i = 0; i < method.lengthOfCourse; i++) {
-			const slot = i % method.length;
-			row = applyPermutation(row, method.permutations[slot]);
-			if (method.points[slot]) {
-				const key = `${slot}:${row.indexOf(method.stage - 1)}`;
-				if (numbered.has(key)) {
-					numbered.clear();
-					break;
-				}
-				numbered.set(key, String(++number));
-			}
-		}
-		if (numbered.size !== 14) numbered.clear();
-	}
 	const regular = method.points.filter(Boolean).length === 1 && method.points.some((point, slot) => point && (slot + method.covers[slot]) % method.length === 0);
 	const names = { H: 'Home', W: 'Wrong', M: 'Middle', I: 'In', B: 'Before', F: 'Fourths', V: 'Fifth', X: 'Sixth', S: 'Seventh', E: 'Eighth', N: 'Ninth' };
 	const options = new Map();
 	const lookup = method.choices.map((choices, slot) => choices.reduce((calls, call) => {
 		if (!call) return calls;
 		calls[call] = Array.from({ length: method.stage }, (_, place) => {
-			if (!numbered.size && !regular) return null;
+			if (!regular) return null;
 			// A single uses the named bob position at this decision, not the
 			// single's potentially different final place (e.g. Before in 2nds).
 			const reference = method.calls[call].symbol === 's' ? choices.find(id => method.calls[id].symbol === '-') ?? call : call;
 			for (let offset = 0; offset < method.covers[slot]; offset++) {
-				const permutation = method.permutations[numbered.size ? (slot + offset) % method.length : method.calls[reference].permutations[offset]];
+				const permutation = method.permutations[method.calls[reference].permutations[offset]];
 				place = permutation.indexOf(place);
 			}
-			const code = numbered.size ? numbered.get(`${slot}:${place}`) ?? null : positionName(method.stage, place + 1);
-			if (code) options.set(code, { value: code, label: `${numbered.size ? `Six ${code}` : names[code] || `Place ${place + 1}`} (${code})` });
+			const code = positionName(method.stage, place + 1);
+			if (code) options.set(code, { value: code, label: `${names[code] || `Place ${place + 1}`} (${code})` });
 			return code;
 		});
 		return calls;
@@ -803,7 +785,7 @@ export function canonicalTouch (method, touch, preserveCalling = false, tenorsTo
 			word: proof.steps.slice(offset).concat(proof.steps.slice(0, offset)).filter(step => method.points[step.change]).map(step => step.call),
 		})) continue;
 		if (musical && !musical(offset)) continue;
-		let course = phase === 0 && regular && courseOrder.length > 0 && method.title !== 'Stedman Triples';
+		let course = phase === 0 && regular && courseOrder.length > 0;
 		let lastColumn = -1;
 		let previous = null;
 		// Course parts must repeat the tenor calling, not just the call word.

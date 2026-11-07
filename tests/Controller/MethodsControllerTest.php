@@ -35,6 +35,23 @@ class MethodsControllerTest extends WebTestCase
         $this->assertSame($method['callingPositions'], $diagram['callingPositions']);
     }
 
+    public function testTouchesShareRuleOffBoundariesWithMethodDiagrams(): void
+    {
+        $client = static::createClient();
+        foreach ([
+            'Double_Norwich_Court_Bob_Caters' => ['every' => 18, 'from' => 0],
+            'Stedman_Triples' => ['every' => 6, 'from' => -3],
+            'Erin_Caters' => ['every' => 6, 'from' => -5],
+        ] as $url => $expected) {
+            $client->request('GET', '/methods/view/'.$url);
+            $this->assertTrue($client->getResponse()->isSuccessful());
+            $touches = json_decode($client->getCrawler()->filter('#method_touches')->attr('data-touch-settings'), true, 512, JSON_THROW_ON_ERROR);
+            $diagram = json_decode($client->getCrawler()->filter('.MethodView')->attr('data-set'), true, 512, JSON_THROW_ON_ERROR);
+            $this->assertSame($expected, $touches['ruleOffs']);
+            $this->assertSame($diagram['ruleOffs'], $touches['ruleOffs']);
+        }
+    }
+
     public function testMethodViewChromelessLayoutIsResolvedPerRequest()
     {
         $client = static::createClient();
@@ -73,6 +90,7 @@ class MethodsControllerTest extends WebTestCase
         $settings = json_decode($panel->attr('data-touch-settings'), true, 512, JSON_THROW_ON_ERROR);
         $this->assertSame(6, $settings['stage']);
         $this->assertSame(24, $settings['lengthOfLead']);
+        $this->assertSame(['every' => 24, 'from' => 0], $settings['ruleOffs']);
         $this->assertSame('156342', $settings['leadHead']);
         $this->assertSame('&-3-4-2-3-4-5, +2', $settings['notationSiril']);
         $this->assertStringContainsString('/assets/js/touch_generator/SearchWorker-', $settings['workerURL']);
