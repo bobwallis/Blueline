@@ -623,11 +623,24 @@ test('Siril preserves cross-lead block state and finishes inside a selected call
 	assert.match(siril(early, touch), /^tail = .*?, "- \(1324\)";$/m);
 });
 
-test('timing matches the product thresholds', () => {
-	assert.equal(duration(240), '8 mins');
-	assert.equal(duration(1250), '42 mins');
-	assert.equal(duration(576), '19 mins');
-	assert.equal(duration(24), '1 min');
+test('timing uses stage-based speeds and rounds to at least one minute', () => {
+	assert.equal(duration(240, 8), '8 mins');
+	assert.equal(duration(1250, 8), '42 mins');
+	assert.equal(duration(576, 8), '19 mins');
+	assert.equal(duration(24, 8), '1 min');
+	assert.equal(duration(200, 5), '7 mins');
+	assert.equal(duration(200, 8), '7 mins');
+	assert.equal(duration(200, 12), '9 mins');
+	assert.equal(duration(600, 2), '10 mins');
+	assert.equal(duration(500, 4), '10 mins');
+	for (const [stage, minutes] of [[6, 42], [8, 42], [10, 50], [12, 55], [14, 60], [16, 65]]) {
+		assert.equal(duration(1260, stage), `${minutes} mins`);
+		assert.equal(duration(1260, stage - 1), `${minutes} mins`);
+	}
+	const method = compileMethod(plainBobMaximus);
+	const touch = { phase: 0, length: plainBobMaximus.lengthOfCourse, word: Array(plainBobMaximus.lengthOfCourse / method.length).fill(0) };
+	assert.equal(describeTouch(method, touch).duration, duration(touch.length, 12));
+	assert.notEqual(describeTouch(method, touch).duration, duration(touch.length, 8));
 });
 
 test('Bristol tenor position names match method metadata', () => {

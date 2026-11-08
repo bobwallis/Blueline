@@ -1,5 +1,6 @@
 import PlaceNotation from '../helpers/PlaceNotation.js';
 import { applyPermutation, coursePartLength, FalseTouchError, repeatsCourseBob, shortestPartLength, simulate } from './Search.js';
+import { estimatedMinutes } from './Timing.js';
 
 /**
  * Turn a generated touch into card text and Siril, without touching the DOM.
@@ -12,9 +13,8 @@ import { applyPermutation, coursePartLength, FalseTouchError, repeatsCourseBob, 
 
 class AmbiguousCallingError extends Error {}
 
-export function duration (length) {
-	// Approximate at 30 changes/minute, rounded to at least one whole minute.
-	const minutes = Math.max(1, Math.round(length / 30));
+export function duration (length, stage) {
+	const minutes = Math.max(1, Math.round(estimatedMinutes(length, stage)));
 	return `${minutes} ${minutes === 1 ? 'min' : 'mins'}`;
 }
 
@@ -143,7 +143,7 @@ export function describeTouch (method, touch) {
 		}
 	}
 	return {
-		duration: duration(touch.length),
+		duration: duration(touch.length, method.stage),
 		calling: calling ? `${calling}${partial && !proof.incompleteCall ? ' (p)' : ''}` : null,
 		sequence: `${repeatedSequence(Array.from(touch.word, call => callSymbol(method, call)), ' ', !partial && !proof.incompleteCall)}${partial && !proof.incompleteCall ? ' (p)' : ''}`,
 		multipart,

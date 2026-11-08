@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import PlaceNotation from '../../../assets/js/helpers/PlaceNotation.js';
 import { compileMethod, maximumChanges, standardLengthRanges } from '../../../assets/js/touch_generator/Compile.js';
+import { estimatedMinutes } from '../../../assets/js/touch_generator/Timing.js';
 import { RowEngine, compilePacked, compileShortcuts, compileDistances, distanceAt, initialSearchTasks, necklacePeriod, permutationParity, multipartDisjoint, validateCourse, searchSlice, canonicalTouch, shortestPartLength, simulate, positionName, matchesCallingPositions, snapshotBuffers } from '../../../assets/js/touch_generator/Search.js';
 import { bristol, stedman, cambridge, cambridgeMaximus, plainBobMinor, plainBobMaximus, plainBobDoubles, jump, grandsireTriples, grandsireDoubles } from './fixtures.mjs';
 import { bruteForce, prove } from './oracle.mjs';
@@ -33,12 +34,19 @@ test('standard length ranges offer only lengths a single touch can reach', () =>
 	const ranges = stage => standardLengthRanges(stage).map(({ label, min, max, checked }) => [label, min, max, checked]);
 	assert.deepEqual(ranges(4), [['Short', 1, 24, true], ['Extent', 24, 24, true]]);
 	assert.deepEqual(ranges(5), [['Short', 1, 120, true], ['Extent', 120, 120, true]]);
-	assert.deepEqual(ranges(6), [['Short', 1, 480, true], ['Extent', 720, 720, true], ['Quarter peal', 540, 720, true]]);
-	assert.deepEqual(ranges(7), [['Short', 1, 480, true], ['Quarter peal', 1250, 1350, true], ['Peal', 5000, 5040, false]]);
-	for (const stage of [8, 12, 16]) assert.deepEqual(ranges(stage), [['Short', 1, 480, true], ['Quarter peal', 1250, 1350, true], ['Peal', 5000, 5280, false]]);
+	assert.deepEqual(ranges(6), [['Short', 1, 390, true], ['Extent', 720, 720, true], ['Quarter peal', 540, 720, true]]);
+	assert.deepEqual(ranges(7), [['Short', 1, 390, true], ['Quarter peal', 1250, 1350, true], ['Peal', 5000, 5040, false]]);
+	for (const [stage, short] of [[8, 390], [10, 327], [12, 297], [14, 273], [16, 252]]) assert.deepEqual(ranges(stage), [['Short', 1, short, true], ['Quarter peal', 1250, 1350, true], ['Peal', 5000, 5280, false]]);
 	for (const stage of [2, 3, 4, 5, 6, 7, 8, 16]) assert.ok(standardLengthRanges(stage).every(range => range.max <= maximumChanges(stage)));
-	// Short stops at three plain courses when that is below 480.
-	assert.deepEqual([plainBobMinor, plainBobDoubles, stedman, bristol, cambridgeMaximus].map(fixture => standardLengthRanges(fixture.stage, fixture.lengthOfCourse)[0].max), [180, 120, 252, 480, 480]);
+});
+
+test('Short allows 13 estimated minutes regardless of plain-course length', () => {
+	for (let stage = 2; stage <= 16; stage++) {
+		const { max } = standardLengthRanges(stage)[0];
+		assert.ok(estimatedMinutes(max, stage) <= 13);
+		if (max < maximumChanges(stage)) assert.ok(estimatedMinutes(max + 1, stage) > 13);
+	}
+	assert.deepEqual([plainBobMinor, plainBobDoubles, stedman, bristol, cambridgeMaximus].map(fixture => standardLengthRanges(fixture.stage)[0].max), [390, 120, 390, 390, 297]);
 });
 
 test('base horizons preserve the completed-touch cap, exact truth and exhaustive full-depth coverage', () => {

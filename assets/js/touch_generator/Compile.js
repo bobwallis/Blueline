@@ -1,6 +1,7 @@
 import PlaceNotation from '../helpers/PlaceNotation.js';
 import { namedRowsForStage } from '../helpers/Music.js';
 import { compileCallingPositions, compilePacked, compileTenorsTogether } from './Search.js';
+import { changesForMinutes } from './Timing.js';
 
 /**
  * Prepare method-page data for the search workers.
@@ -23,11 +24,11 @@ export function maximumChanges (stage) {
 // Conventional lengths offered as touch-length checkboxes. A single touch
 // ends at its first return to rounds, so it cannot exceed the extent: on
 // Minor, a quarter peal is usually two touches of 540–720 changes. Short
-// touches stop at three plain courses where that is shorter than 480.
-export function standardLengthRanges (stage, lengthOfCourse) {
+// touches allow up to 13 estimated minutes, independently of the method.
+export function standardLengthRanges (stage) {
 	const extent = maximumChanges(stage);
 	return [
-		{ label: 'Short', min: 1, max: Math.min(480, extent, lengthOfCourse > 0 ? 3 * lengthOfCourse : Infinity), checked: true },
+		{ label: 'Short', min: 1, max: Math.min(changesForMinutes(13, stage), extent), checked: true },
 		stage <= 6 && { label: 'Extent', min: extent, max: extent, checked: true },
 		stage === 6 && { label: 'Quarter peal', min: 540, max: 720, checked: true },
 		stage >= 7 && { label: 'Quarter peal', min: 1250, max: 1350, checked: true },

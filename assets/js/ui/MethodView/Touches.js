@@ -116,7 +116,7 @@ class Touches {
 		});
 		// Length choices are page-local: navigation rebuilds the defaults.
 		this.ceiling = maximumChanges(this.config.stage);
-		this.standardLengths = standardLengthRanges(this.config.stage, this.config.lengthOfCourse).map(range => {
+		this.standardLengths = standardLengthRanges(this.config.stage).map(range => {
 			const input = element('input');
 			input.type = 'checkbox';
 			input.setAttribute('role', 'switch');
