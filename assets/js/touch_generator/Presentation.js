@@ -129,6 +129,7 @@ export function describeTouch (method, touch) {
 		slot = (slot + method.length - 1) % method.length;
 	}
 	const opening = initialSegmentHead(method, touch.phase);
+	const headUnit = method.boundaries.filter(Boolean).length === 1 ? 'lead' : 'segment';
 	const tokens = callingTokens(method, touch);
 	let calling = null;
 	if (tokens) {
@@ -147,7 +148,8 @@ export function describeTouch (method, touch) {
 		calling: calling ? `${calling}${partial && !proof.incompleteCall ? ' (p)' : ''}` : null,
 		sequence: `${repeatedSequence(Array.from(touch.word, call => callSymbol(method, call)), ' ', !partial && !proof.incompleteCall)}${partial && !proof.incompleteCall ? ' (p)' : ''}`,
 		multipart,
-		start: `${touch.phase === 0 ? 'Plain-course start' : `Rounds after change ${touch.phase} of the lead`}${opening.partial ? `: The initial segment-head shown in brackets is not rung; the touch starts on change ${opening.segmentChange} of the initial segment` : ''}`,
+		start: `${touch.phase === 0 ? 'Plain-course start' : `Rounds after change ${touch.phase} of the lead`}${opening.partial ? `: The initial ${headUnit}-head shown in brackets is not rung; the touch starts on change ${opening.segmentChange} of the initial ${headUnit}` : ''}`,
+		headUnit,
 		callsDescription: describeCalls(method, touch),
 		finish: touch.length % 2 ? 'Handstroke finish' : 'Backstroke finish',
 		partial,

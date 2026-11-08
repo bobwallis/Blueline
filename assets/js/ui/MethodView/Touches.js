@@ -482,7 +482,7 @@ class Touches {
 			if (description.callsDescription) metadata.append(this.metadataParagraph(description.callsDescription, '. '));
 			if (description.start !== 'Plain-course start') metadata.append(this.metadataParagraph(`${description.start}.`, ': '));
 			if (description.partial || description.finish !== 'Backstroke finish') {
-				metadata.append(this.metadataParagraph(`${description.finish}${description.partial ? `: The final segment-head shown in brackets is not reached; the touch finishes on change ${description.finalSegmentChange} of the final segment.` : '.'}`, ': '));
+				metadata.append(this.metadataParagraph(`${description.finish}${description.partial ? `: The final ${description.headUnit}-head shown in brackets is not reached; the touch finishes on change ${description.finalSegmentChange} of the final ${description.headUnit}.` : '.'}`, ': '));
 			}
 			if (metadata.childElementCount) panel.append(metadata);
 			panel.append(this.layoutTable(layouts, type, music));

@@ -197,7 +197,8 @@ test('Erin exports and multipart layouts retain the offset six heads', () => {
 	assert.equal(layout.parts, 7);
 	assert.equal(layout.start, '132547698');
 	assert.equal(layout.startPartial, true);
-	assert.match(describeTouch(method, touch).start, /initial segment-head shown in brackets is not rung; the touch starts on change 6 of the initial segment/);
+	assert.equal(describeTouch(method, touch).headUnit, 'lead');
+	assert.match(describeTouch(method, touch).start, /initial lead-head shown in brackets is not rung; the touch starts on change 6 of the initial lead/);
 	assert.ok(siril(method, touch).includes('start = "  (132547698)\\n'));
 	assert.deepEqual(layout.leads.map(lead => lead.end), [1, 6]);
 	assert.equal(layout.leads[0].row, rows[0].map(PlaceNotation.bellToChar).join(''));
@@ -318,7 +319,7 @@ test('opening heads invert non-self-inverse jump changes and respect the startin
 		assert.equal(layout.start, phase ? '1234' : '2341');
 		assert.equal(layout.startPartial, phase === 0);
 		assert.equal(describeTouch(method, touch).finalSegmentChange, phase ? null : 1);
-		assert.match(describeTouch(method, touch).start, phase ? /^Rounds after change 1 of the lead$/ : /starts on change 2 of the initial segment/);
+		assert.match(describeTouch(method, touch).start, phase ? /^Rounds after change 1 of the lead$/ : /starts on change 2 of the initial lead/);
 		if (!phase) {
 			const projected = [...layout.start].map(PlaceNotation.charToBell);
 			assert.deepEqual(PlaceNotation.apply(method.permutations[1], projected), PlaceNotation.rounds(4));
@@ -563,6 +564,8 @@ test('London early finish displays and exports the unreached plain head, not rou
 	const layout = touchLayouts(method, touch);
 	assert.deepEqual(layout.leads.map(lead => lead.row), ['142635', '164523', '135642', '163254', '124635', '162543']);
 	assert.equal(layout.leads.at(-1).partial, true);
+	assert.equal(describeTouch(method, touch).headUnit, 'lead');
+	assert.equal(describeTouch(method, touch).partial, true);
 	const text = siril(method, touch);
 	assert.match(text, /^tail = .*?, " \(162543\)";$/m);
 	assert.deepEqual(exportedRows(text, method.stage), prove(method, touch), 'the bracketed head is printed only, not rung');
