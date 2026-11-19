@@ -14,7 +14,7 @@ import Music from '../helpers/Music.js';
 var newMethodView;
 
 // Module scope variables
-var options, method, methodTexts,
+var options, method, getTooltipRows,
 	lineContainerEl, gridContainerEl,
 	active = false, hasFarCalls,
 	lastShowToolTips, lastHighlightMusic, lastStyle, lastFollow, lastNearCalls, lastScale, lastNumberOfColumns,
@@ -38,6 +38,7 @@ newMethodView = function (o) {
 
 	lastShowToolTips = lastHighlightMusic = lastStyle = lastFollow = lastNearCalls = lastScale = lastNumberOfColumns = music = null;
 	lastGridMethod = lastGridScale = null;
+	getTooltipRows = null;
 
 	lineContainerEl = document.querySelector(options.lineContainer);
 	gridContainerEl = document.querySelector(options.gridContainer);
@@ -166,6 +167,22 @@ var redrawGrid = function (scale, nearCalls) {
 	lastGridScale = scale;
 };
 
+var prepareTooltipRows = function (method, follow) {
+	var workingGroups = method.workGroups.filter(function (group) {
+		return group.length > 1;
+	});
+	// Tooltips describe one group of working bells, not hunt bells or differentials.
+	if (workingGroups.length !== 1) {
+		return null;
+	}
+	var bell = follow === 'lightest' ? Math.min(...workingGroups[0]) : Math.max(...workingGroups[0]);
+	var rows;
+	return function () {
+		rows ??= Text.fromNotation(`${method.notation.text}.`.repeat(method.numberOfLeads), method.stage, bell, true).coreRows;
+		return rows;
+	};
+};
+
 /**
      * Recompute and redraw the method view when display settings change.
      *
@@ -212,25 +229,9 @@ var redrawMethodView = function () {
 			return;
 		}
 
-		// Re-create text tooltips if settings changed
+		// Reuse the lazy text source across layout-only redraws.
 		if (newShowTooltips !== lastShowToolTips || newFollow !== lastFollow) {
-			if (newShowTooltips) {
-				methodTexts = method.workGroups.map(function (e) {
-					var toFollow = (newFollow == 'lightest') ? Math.min.apply(null, e) : Math.max.apply(null, e);
-					var notationString = `${method.notation.text}.`;
-					var fullNotation = '';
-					for (var i = 0; i < method.numberOfLeads; i++) {
-						fullNotation += notationString;
-					}
-					return {
-						bell: toFollow,
-						hunt: (e.length === 1),
-						text: Text.fromNotation(fullNotation, method.stage, toFollow, true)
-					};
-				});
-			} else {
-				methodTexts = [];
-			}
+			getTooltipRows = newShowTooltips ? prepareTooltipRows(method, newFollow) : null;
 		}
 
 		// Analyze music if needed
@@ -356,8 +357,8 @@ var redrawMethodView = function () {
 			var newPlainCourseEl = line_plainCourse.draw();
 			lineContainerEl.insertBefore(newPlainCourseEl, lineContainerEl.firstChild);
 
-			if (newShowTooltips) {
-				InteractiveGridOverlay(line_plainCourse, method, methodTexts);
+			if (getTooltipRows) {
+				InteractiveGridOverlay(line_plainCourse, getTooltipRows);
 			}
 		}
 
