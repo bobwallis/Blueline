@@ -4,7 +4,7 @@ This guide describes touch search and its controls for contributors working on t
 
 ## Search model
 
-- The **Touches** tab searches locally in browser web workers, showing distinct true touches ordered by length (shortest first), then by the preferred calling's music points per 100 changes (highest first).
+- The **Touches** tab sets up its controls when first opened, including on direct `#touches` links. It searches locally in browser web workers, showing distinct true touches ordered by length (shortest first), then by the preferred calling's music points per 100 changes (highest first).
 - [Compile.js](../assets/js/touch_generator/Compile.js) prepares the method and calls; [Search.js](../assets/js/touch_generator/Search.js) explores call sequences, checks every row for truth, and removes rotation-equivalent results.
 - The work is divided into separate jobs by:
   - the first two calls, for example "plain, plain", "plain, bob", "bob, plain" and "bob, bob" (more when singles are allowed);

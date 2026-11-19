@@ -144,6 +144,7 @@ function sanitizePath(rawPath) {
 function buildRenderUrl(path, style) {
 	const url = new URL(path, `${frankenphpScheme}://localhost:${frankenphpPort}`);
 	url.searchParams.set('style', style);
+	if (style === 'grid') url.hash = 'grid';
 	return url.toString();
 }
 

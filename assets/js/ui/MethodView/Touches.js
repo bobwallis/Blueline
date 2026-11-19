@@ -9,12 +9,16 @@ import { musicReading } from '../../helpers/MusicPatterns.js';
 
 /**
  * Connect the Touches tab to generation and presentation.
- * initialise binds the current page. On first tab activation, startIfActive
- * compiles Twig's method data and starts a TouchSearchPool. Each pool update
+ * initialise binds the controls on first tab activation. startIfActive compiles
+ * Twig's method data and starts a TouchSearchPool. Each pool update
  * calls render -> addResult; clicking a card opens a dialog with layouts/export.
  * The listeners below pause hidden-page work and dispose workers on navigation.
  */
 let current = null;
+
+function isTouchesTabActive () {
+	return document.getElementById('tab_method_touches')?.classList.contains('active');
+}
 
 function element (tag, text, className) {
 	// Generated method/calling/export text is textContent, never interpolated HTML.
@@ -196,10 +200,6 @@ class Touches {
 		});
 	}
 
-	isActive () {
-		return document.getElementById('tab_method_touches')?.classList.contains('active');
-	}
-
 	applySettings () {
 		if (![this.part, this.limit, this.budget, ...this.customLengths.querySelectorAll('input')].every(control => control.reportValidity())) return;
 		try {
@@ -271,8 +271,7 @@ class Touches {
 	}
 
 	startIfActive () {
-		// Compile and launch lazily on the first visible activation, not on every tab switch.
-		if (this.pool || !this.isActive() || document.hidden) return;
+		if (this.pool || !isTouchesTabActive() || document.hidden) return;
 		try {
 			const options = this.searchOptions();
 			if (!options.lengthRanges.length) {
@@ -734,13 +733,7 @@ class Touches {
 }
 
 function initialise () {
-	// Bind a fresh controller after navigation/back-forward restoration:
-	// the restored DOM may survive, but pagehide has terminated its workers.
-	current?.pool?.dispose();
-	current?.dialog.close();
-	current?.positionChoices.destroy();
-	current?.namedRowChoices.destroy();
-	current = null;
+	if (current || !isTouchesTabActive()) return;
 	const panel = document.getElementById('method_touches');
 	if (!panel) return;
 	try {
@@ -755,7 +748,9 @@ function initialise () {
 // Tab switches leave searches running; navigation tears them down.
 window.addEventListener('bl:tab:activated', event => {
 	if (event.detail?.panel === 'touch_panel_line') current?.renderLine?.();
-	current?.startIfActive();
+	if (event.detail?.panel !== 'method_touches') return;
+	if (current) current.startIfActive();
+	else initialise();
 });
 window.addEventListener('bl:page:request', () => {
 	current?.pool?.dispose();
@@ -770,7 +765,8 @@ window.addEventListener('pagehide', () => {
 	current?.dialog.close();
 });
 window.addEventListener('pageshow', event => {
-	if (event.persisted) initialise();
+	// The restored DOM keeps its controller, but pagehide terminated its workers.
+	if (event.persisted) current?.reset();
 });
 window.addEventListener('bl:setting:changed', event => {
 	if (event.detail?.setting === 'method_near_calls') current?.reset();

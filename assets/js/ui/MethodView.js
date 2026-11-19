@@ -16,8 +16,9 @@ var newMethodView;
 // Module scope variables
 var options, method, methodTexts,
 	lineContainerEl, gridContainerEl,
-	active = false,
+	active = false, hasFarCalls,
 	lastShowToolTips, lastHighlightMusic, lastStyle, lastFollow, lastNearCalls, lastScale, lastNumberOfColumns,
+	lastGridMethod, lastGridScale,
 	music,
 	options_plainCourse, line_plainCourse, line_calls;
 
@@ -31,8 +32,12 @@ var options, method, methodTexts,
 newMethodView = function (o) {
 	options = o;
 	active = true;
+	hasFarCalls = Object.keys(options.calls || {}).some(function (title) {
+		return title.endsWith(' (Far)');
+	});
 
 	lastShowToolTips = lastHighlightMusic = lastStyle = lastFollow = lastNearCalls = lastScale = lastNumberOfColumns = music = null;
+	lastGridMethod = lastGridScale = null;
 
 	lineContainerEl = document.querySelector(options.lineContainer);
 	gridContainerEl = document.querySelector(options.gridContainer);
@@ -125,6 +130,42 @@ var alignNearCallsSwitches = function () {
 	});
 };
 
+var redrawGrid = function (scale, nearCalls) {
+	if (gridContainerEl.style.display === 'none' || (method === lastGridMethod && scale === lastGridScale)) {
+		return;
+	}
+
+	gridContainerEl.innerHTML = '';
+	gridContainerEl.appendChild(new MethodGrid(method.gridOptions.plainCourse.grid()).draw());
+
+	var gridCallsEl = document.createElement('div');
+	gridCallsEl.className = 'method-calls';
+	method.gridOptions.calls.grid().forEach(function (callOptions) {
+		gridCallsEl.appendChild(new MethodGrid(callOptions).draw());
+	});
+	var switchEl;
+	if (hasFarCalls) {
+		switchEl = createNearCallsSwitch(gridContainerEl, nearCalls);
+		gridCallsEl.appendChild(switchEl);
+	}
+	gridContainerEl.appendChild(gridCallsEl);
+
+	var canvases = Array.from(gridContainerEl.querySelectorAll('canvas'));
+	var widths = canvases.map(function (canvas) {
+		return canvas.offsetWidth;
+	});
+	var maxWidth = Math.max.apply(null, widths);
+	canvases.forEach(function (canvas, index) {
+		canvas.style.marginLeft = `${12 + maxWidth - widths[index]}px`;
+	});
+	if (switchEl) {
+		alignNearCallsSwitches();
+		animateNearCallsSwitch(switchEl, nearCalls);
+	}
+	lastGridMethod = method;
+	lastGridScale = scale;
+};
+
 /**
      * Recompute and redraw the method view when display settings change.
      *
@@ -142,9 +183,6 @@ var redrawMethodView = function () {
 		var newFollow = LocalStorage.getSetting('method_follow', 'heaviest');
 		var newStyle = (URL.parameter('style') !== null) ? URL.parameter('style') : LocalStorage.getSetting('method_style', 'numbers');
 		var newNearCalls = !!LocalStorage.getSetting('method_near_calls', true);
-		var hasFarCalls = Object.keys(options.calls || {}).some(function (title) {
-			return title.endsWith(' (Far)');
-		});
 		var widths, maxWidth;
 
 		// Update Method Object if 'follow' or the near/far call preference changed
@@ -266,41 +304,7 @@ var redrawMethodView = function () {
 			return numberOfColumns;
 		})();
 
-		// Redraw grid views if scale changed
-		if (newScale !== lastScale) {
-			gridContainerEl.innerHTML = '';
-
-			var grid_plainCourse = new MethodGrid(method.gridOptions.plainCourse.grid());
-			var grid_calls = method.gridOptions.calls.grid().map(function (callOptions) {
-				return new MethodGrid(callOptions);
-			});
-
-			gridContainerEl.appendChild(grid_plainCourse.draw());
-			var gridCallsEl = document.createElement('div');
-			gridCallsEl.className = 'method-calls';
-			for (var i = 0; i < grid_calls.length; i++) {
-				gridCallsEl.appendChild(grid_calls[i].draw());
-			}
-			if (hasFarCalls) {
-				gridCallsEl.appendChild(createNearCallsSwitch(gridContainerEl, newNearCalls));
-			}
-			gridContainerEl.appendChild(gridCallsEl);
-
-			// Align grid canvases
-			var gridCanvases = gridContainerEl.querySelectorAll('canvas');
-			if (gridCanvases.length > 0) {
-				widths = [];
-				for (var j = 0; j < gridCanvases.length; j++) {
-					widths.push(gridCanvases[j].offsetWidth);
-				}
-				maxWidth = Math.max.apply(null, [0].concat(widths));
-				for (var k = 0; k < gridCanvases.length; k++) {
-					var canvas = gridCanvases[k];
-					var marginLeft = Math.max(0, 12 + maxWidth - widths[k]);
-					canvas.style.marginLeft = `${marginLeft}px`;
-				}
-			}
-		}
+		redrawGrid(newScale, newNearCalls);
 
 		// Redraw call lines if scale or style changed
 		if (newScale !== lastScale || newStyle !== lastStyle) {
@@ -358,12 +362,10 @@ var redrawMethodView = function () {
 		}
 
 		alignNearCallsSwitches();
-		[lineContainerEl, gridContainerEl].forEach(function (containerEl) {
-			var switchEl = nearCallsSwitches.get(containerEl);
-			if (switchEl && switchEl.isConnected) {
-				animateNearCallsSwitch(switchEl, newNearCalls);
-			}
-		});
+		var lineSwitchEl = nearCallsSwitches.get(lineContainerEl);
+		if (lineSwitchEl && lineSwitchEl.isConnected) {
+			animateNearCallsSwitch(lineSwitchEl, newNearCalls);
+		}
 
 		// Update last known states
 		lastShowToolTips = newShowTooltips;
@@ -422,6 +424,17 @@ var checkForNewSettings = function () {
 
 window.addEventListener('bl:page:finished', checkForNewSettings);
 checkForNewSettings(); // Initial run
+
+window.addEventListener('bl:tab:activated', function (event) {
+	if (!active || gridContainerEl.id !== event.detail?.panel) {
+		return;
+	}
+	try {
+		redrawGrid(window.devicePixelRatio, lastNearCalls);
+	} catch (error) {
+		console.error('Error during MethodView grid redraw:', error);
+	}
+});
 
 // Add resize listener
 var resizeTimeout;

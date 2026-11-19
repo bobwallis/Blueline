@@ -42,7 +42,7 @@ In development, edit files under `assets/` and refresh the browser; AssetMapper 
 
 ### PNG rendering
 
-Requests for `.png` under `/methods/view...` are handled by Symfony and proxied to `bin/image-server.mjs`. The sidecar opens the full method view in Chromium via Puppeteer and takes a screenshot. Requests are processed sequentially, and Chromium restarts after a configurable number of renders (`BROWSER_RESTART_AFTER`, default `200`) to limit memory growth. See the [development guide](development-deployment.md#running-the-application) for startup commands and logs.
+Requests for `.png` under `/methods/view...` are handled by Symfony and proxied to `bin/image-server.mjs`. The sidecar opens the full method view in Chromium via Puppeteer and takes a screenshot. For Grid images it opens `#grid`, because the interactive page does not draw the Grid until its tab is active. Requests are processed sequentially, and Chromium restarts after a configurable number of renders (`BROWSER_RESTART_AFTER`, default `200`) to limit memory growth. See the [development guide](development-deployment.md#running-the-application) for startup commands and logs.
 
 ### Touch generation
 
