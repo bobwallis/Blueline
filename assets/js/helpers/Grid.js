@@ -200,33 +200,15 @@ var MethodGrid = function (passedOptions) {
 
 		// Draw numbers
 		if (options.numbers.show) {
-			// Cache pre-rendered numbers
-			var fillTextCache_numbers = (function () {
-				var textMetrics = measureXAndYTextPadding(Math.max(bellWidth, rowHeight), options.numbers.font, '0');
-				return options.numbers.bells.map(function (bellOptions, bell) {
-					if (bellOptions.color === 'transparent') {
-						return null;
-					}
-					var size = Math.max(bellWidth, rowHeight),
-						cacheCanvas = new Canvas({
-							id: `ccn${bell}`,
-							width: size,
-							height: size
-						});
-					var context = cacheCanvas.context;
-					context.font = options.numbers.font;
-					context.textAlign = 'center';
-					context.textBaseline = 'middle';
-					context.fillStyle = bellOptions.color;
-					context.fillText(PlaceNotation.bellToChar(bell), size / 2 + textMetrics.x, size / 2 + textMetrics.y);
-					return cacheCanvas;
-				});
-			})();
+			var numberMetrics = measureXAndYTextPadding(Math.max(bellWidth, rowHeight), options.numbers.font, '0'),
+				numberLeft = canvasLeftPadding + bellWidth / 2 + numberMetrics.x,
+				numberTop = canvasTopPadding + rowHeight / 2 + numberMetrics.y,
+				numberColumnWidth = rowWidth + interColumnPadding + columnRightPadding;
 
-			// Calculate reused offsets
-			var columnSidePadding = interColumnPadding + columnRightPadding,
-				sidePadding = canvasLeftPadding + (bellWidth / 2) - (Math.max(bellWidth, rowHeight) / 2),
-				topPadding = canvasTopPadding + (rowHeight / 2) - (Math.max(bellWidth, rowHeight) / 2);
+			context.save();
+			context.font = options.numbers.font;
+			context.textAlign = 'center';
+			context.textBaseline = 'middle';
 
 			// Share the row sequence across bells without changing their drawing order.
 			var rows = [];
@@ -236,32 +218,24 @@ var MethodGrid = function (passedOptions) {
 				}
 				var row = options.startRow,
 					rowIndex = 0,
-					fillTextCacheScale = fillTextCache_numbers[bell].scale,
-					fillTextCacheSize = Math.max(bellWidth, rowHeight),
-					fillTextSourceSize = Math.floor(fillTextCacheSize * fillTextCacheScale);
+					glyph = PlaceNotation.bellToChar(bell);
+				context.fillStyle = bellOptions.color;
 				for (i = 0; i < numberOfColumns; ++i) {
+					var columnLeft = numberLeft + i * numberColumnWidth;
 					for (j = 0; j < leadsPerColumn && (i * leadsPerColumn) + j < numberOfLeads; ++j) {
 						if (j === 0) {
-							context.drawImage(fillTextCache_numbers[bell].element,
-								0, 0,
-								fillTextSourceSize, fillTextSourceSize,
-								sidePadding + (row.indexOf(bell) * bellWidth) + i * (rowWidth + columnSidePadding),
-								topPadding,
-								fillTextCacheSize, fillTextCacheSize);
+							context.fillText(glyph, columnLeft + row.indexOf(bell) * bellWidth, numberTop);
 						}
 						for (k = 0; k < leadLength;) {
 							row = rows[rowIndex] ||= PlaceNotation.apply(options.notation.parsed[k], row);
 							++rowIndex;
-							context.drawImage(fillTextCache_numbers[bell].element,
-								0, 0,
-								fillTextSourceSize, fillTextSourceSize,
-								sidePadding + (row.indexOf(bell) * bellWidth) + i * (rowWidth + columnSidePadding),
-								topPadding + (j * leadLength * rowHeight) + (++k * rowHeight),
-								fillTextCacheSize, fillTextCacheSize);
+							context.fillText(glyph, columnLeft + row.indexOf(bell) * bellWidth,
+								numberTop + (j * leadLength + ++k) * rowHeight);
 						}
 					}
 				}
 			});
+			context.restore();
 		}
 
 		// Draw lines
