@@ -541,20 +541,40 @@ var PlaceNotation = {
 	 * @returns {number[]} Transformed row.
 	 */
 	apply: function (permutation, row) {
-		var permuted;
+		// If working with a list of permutations...
 		if (typeof permutation[0].forEach === 'function') {
-			permuted = row;
-			permutation.forEach(function (p) {
-				permuted = this.apply(p, permuted);
-			}, this);
-			return permuted;
+			// If it's a list of one, then bypass
+			if (permutation.length === 1) {
+				permutation = permutation[0];
+			} else {
+				// Otherwise compose the permutations into a single effective permutation
+				var stage = permutation[0].length,
+					current = permutation[permutation.length - 1].slice(),
+					next = new Array(stage),
+					i = permutation.length - 2,
+					j, p, swap;
+				while (i >= 0) {
+					p = permutation[i];
+					for (j = 0; j < stage; ++j) {
+						next[j] = p[current[j]];
+					}
+					swap = current;
+					current = next;
+					next = swap;
+					--i;
+				}
+				permutation = current;
+			}
 		}
-		var i = permutation.length,
-			j = row.length;
-		permuted = new Array(j);
+		// When working with a single permutation, apply it directly to the row
+		var permuted = new Array(j);
+		i = permutation.length;
+		j = row.length;
+		// Copy entries beyond the permutation unchanged
 		while (j-- > i) {
 			permuted[j] = row[j];
 		}
+		// Then fill the permuted positions from right to left
 		do {
 			permuted[j] = row[permutation[j]];
 		} while (j--);
