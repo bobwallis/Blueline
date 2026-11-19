@@ -16,6 +16,9 @@ var PlaceNotation = {
 	 * @returns {string} Display character for that bell.
 	 */
 	bellToChar: function (bell) {
+		if (typeof bell === 'number' && Number.isInteger(bell)) {
+			return PlaceNotation.bellToCharMap[bell];
+		}
 		return PlaceNotation.bellToCharMap[parseInt(bell, 10)];
 	},
 	/**
