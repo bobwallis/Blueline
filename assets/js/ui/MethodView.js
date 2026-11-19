@@ -58,10 +58,7 @@ newMethodView = function (o) {
 	new ResizeObserver(function () {
 		var contentEl = document.getElementById('content');
 		lineContainerEl.classList.toggle('wide', !!contentEl && lineContainerEl.offsetWidth > contentEl.clientWidth);
-		alignNearCallsSwitches();
 	}).observe(lineContainerEl);
-	// The grid tab can be hidden while drawing, so realign once it becomes visible
-	new ResizeObserver(alignNearCallsSwitches).observe(gridContainerEl);
 
 	redrawMethodView();
 };
@@ -115,19 +112,26 @@ var animateNearCallsSwitch = function (labelEl, checked) {
 };
 
 /**
-     * Pad each near/far switch so it lines up with the left edge of the first call above it.
+     * Align the canvases and switch without measuring the rendered layout.
      *
+     * @param {Element} container Container whose canvases should align.
+     * @param {Element} callsEl Wrapper containing the call canvases and optional switch.
      * @returns {void}
      */
-var alignNearCallsSwitches = function () {
-	document.querySelectorAll('.method-calls-switch').forEach(function (switchEl) {
-		var callsEl = switchEl.parentElement;
-		var firstCallCanvas = callsEl.querySelector('canvas');
-		if (!firstCallCanvas || firstCallCanvas.offsetWidth === 0) {
-			return;
+var alignCanvases = function (container, callsEl) {
+	var canvases = Array.from(container.querySelectorAll('canvas'));
+	var firstCall = callsEl.querySelector('canvas');
+	var widths = canvases.map(function (canvas) {
+		// Canvas sets a CSS pixel width; round it
+		return Math.round(parseFloat(canvas.style.width));
+	});
+	var maxWidth = Math.max(0, ...widths);
+	canvases.forEach(function (canvas, index) {
+		var margin = `${12 + maxWidth - widths[index]}px`;
+		canvas.style.marginLeft = margin;
+		if (canvas === firstCall) {
+			callsEl.style.setProperty('--first-call-margin', margin);
 		}
-		var zoom = parseFloat(getComputedStyle(switchEl).zoom) || 1;
-		switchEl.style.paddingLeft = `${(firstCallCanvas.getBoundingClientRect().left - callsEl.getBoundingClientRect().left) / zoom}px`;
 	});
 };
 
@@ -151,16 +155,8 @@ var redrawGrid = function (scale, nearCalls) {
 	}
 	gridContainerEl.appendChild(gridCallsEl);
 
-	var canvases = Array.from(gridContainerEl.querySelectorAll('canvas'));
-	var widths = canvases.map(function (canvas) {
-		return canvas.offsetWidth;
-	});
-	var maxWidth = Math.max.apply(null, widths);
-	canvases.forEach(function (canvas, index) {
-		canvas.style.marginLeft = `${12 + maxWidth - widths[index]}px`;
-	});
+	alignCanvases(gridContainerEl, gridCallsEl);
 	if (switchEl) {
-		alignNearCallsSwitches();
 		animateNearCallsSwitch(switchEl, nearCalls);
 	}
 	lastGridMethod = method;
@@ -200,7 +196,6 @@ var redrawMethodView = function () {
 		var newFollow = LocalStorage.getSetting('method_follow', 'heaviest');
 		var newStyle = (URL.parameter('style') !== null) ? URL.parameter('style') : LocalStorage.getSetting('method_style', 'numbers');
 		var newNearCalls = !!LocalStorage.getSetting('method_near_calls', true);
-		var widths, maxWidth;
 
 		// Update Method Object if 'follow' or the near/far call preference changed
 		if (newFollow !== lastFollow || newNearCalls !== lastNearCalls) {
@@ -320,22 +315,8 @@ var redrawMethodView = function () {
 			if (hasFarCalls) {
 				lineCallsEl.appendChild(createNearCallsSwitch(lineContainerEl, newNearCalls));
 			}
+			alignCanvases(lineCallsEl, lineCallsEl);
 			lineContainerEl.appendChild(lineCallsEl);
-
-			// Align call canvases
-			var callCanvases = lineContainerEl.querySelectorAll('canvas');
-			if (callCanvases.length > 0) {
-				widths = [];
-				for (var j = 0; j < callCanvases.length; j++) {
-					widths.push(callCanvases[j].offsetWidth);
-				}
-				maxWidth = Math.max.apply(null, [0].concat(widths));
-				for (var k = 0; k < callCanvases.length; k++) {
-					var canvas = callCanvases[k];
-					var marginLeft = Math.max(0, 12 + maxWidth - widths[k]);
-					canvas.style.marginLeft = `${marginLeft}px`;
-				}
-			}
 		}
 
 		// Redraw plain course line if needed (and update overlay)
@@ -362,7 +343,6 @@ var redrawMethodView = function () {
 			}
 		}
 
-		alignNearCallsSwitches();
 		var lineSwitchEl = nearCallsSwitches.get(lineContainerEl);
 		if (lineSwitchEl && lineSwitchEl.isConnected) {
 			animateNearCallsSwitch(lineSwitchEl, newNearCalls);

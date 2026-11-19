@@ -487,11 +487,13 @@ input.medium {
 }
 
 .method-calls-switch {
+	--switch-zoom: 0.8;
 	display: block;
 	clear: both;
 	margin: calc(var(--content-x-padding) * 0.5) 0;
+	padding-left: calc(var(--first-call-margin, 0px) / var(--switch-zoom));
 	opacity: 0.666;
-	zoom: 0.8;
+	zoom: var(--switch-zoom);
 }
 
 /* Checkboxes */
