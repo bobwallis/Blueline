@@ -224,12 +224,14 @@ var MethodGrid = function (passedOptions) {
 				sidePadding = canvasLeftPadding + (bellWidth / 2) - (Math.max(bellWidth, rowHeight) / 2),
 				topPadding = canvasTopPadding + (rowHeight / 2) - (Math.max(bellWidth, rowHeight) / 2);
 
-			// Draw each bell separately
+			// Share the row sequence across bells without changing their drawing order.
+			var rows = [];
 			options.numbers.bells.forEach(function (bellOptions, bell) { // For each number
 				if (bellOptions.color === 'transparent') { // Only bother drawing at all if not transparent
 					return;
 				}
 				var row = options.startRow,
+					rowIndex = 0,
 					fillTextCacheScale = fillTextCache_numbers[bell].scale,
 					fillTextCacheSize = Math.max(bellWidth, rowHeight),
 					fillTextSourceSize = Math.floor(fillTextCacheSize * fillTextCacheScale);
@@ -244,7 +246,8 @@ var MethodGrid = function (passedOptions) {
 								fillTextCacheSize, fillTextCacheSize);
 						}
 						for (k = 0; k < leadLength;) {
-							row = PlaceNotation.apply(options.notation.parsed[k], row);
+							row = rows[rowIndex] ||= PlaceNotation.apply(options.notation.parsed[k], row);
+							++rowIndex;
 							context.drawImage(fillTextCache_numbers[bell].element,
 								0, 0,
 								fillTextSourceSize, fillTextSourceSize,
