@@ -1,5 +1,5 @@
 import { mergeDeep } from './ObjectMerge.js';
-import GridOptions from './Grid/Options.js';
+import GridOptions, { canvasWidth } from './Grid/Options.js';
 import PlaceNotation from './PlaceNotation.js';
 import Canvas from '../ui/Canvas.js';
 import { measureXAndYTextPadding } from './MeasureCanvasText.js';
@@ -48,6 +48,10 @@ var MethodGrid = function (passedOptions) {
 	 */
 	this.measure = function () {
 		return options.dimensions;
+	};
+
+	this.measureWidth = function (numberOfColumns) {
+		return canvasWidth(options, Math.min(numberOfColumns, options.layout.numberOfLeads));
 	};
 
 	/**

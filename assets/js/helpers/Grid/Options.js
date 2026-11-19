@@ -2,6 +2,15 @@ import { mergeAll } from '../ObjectMerge.js';
 import PlaceNotation from '../PlaceNotation.js';
 import MeasureCanvasText from '../MeasureCanvasText.js';
 
+export function canvasWidth( options, numberOfColumns ) {
+	var dimensions = options.dimensions,
+		padding = dimensions.column.padding;
+	return Math.max(
+		dimensions.canvas.padding.left + ((dimensions.row.width + padding.left + padding.right) * numberOfColumns) + (padding.between * (numberOfColumns - 1)),
+		options.title.show ? MeasureCanvasText( options.title.text, options.title.font ) : 0
+	);
+}
+
 /**
  * Normalize and enrich raw grid options into a complete render-ready structure.
  */
@@ -224,10 +233,7 @@ import MeasureCanvasText from '../MeasureCanvasText.js';
 
 		// Canvas dimensions
 		options.dimensions.canvas = {
-			width: Math.max(
-				options.dimensions.canvas.padding.left + ((options.dimensions.row.width + options.dimensions.column.padding.left + options.dimensions.column.padding.right)*options.layout.numberOfColumns) + (options.dimensions.column.padding.between*(options.layout.numberOfColumns-1)),
-				options.title.show? MeasureCanvasText( options.title.text, options.title.font ) : 0
-			),
+			width: canvasWidth( options, options.layout.numberOfColumns ),
 			height: options.dimensions.canvas.padding.top + (options.dimensions.row.height * ((options.layout.leadsPerColumn * options.layout.leadLength)+1)),
 			padding: options.dimensions.canvas.padding
 		};

@@ -276,25 +276,17 @@ var redrawMethodView = function () {
 			var leadsPerColumn = Math.max(1, Math.ceil((2 * method.stage) / leadLength));
 			var numberOfColumns = Math.ceil(numberOfLeads / leadsPerColumn);
 
-			// Assume setOptions modifies the instance directly
-			line_plainCourse.setOptions({ layout: { numberOfColumns: numberOfColumns } });
-
-			var iterations = 0;
-			var maxIterations = numberOfLeads + 1;
-
-			while (leadsPerColumn <= numberOfLeads && iterations < maxIterations) {
-				var measuredWidth = line_plainCourse.measure().canvas.width;
+			while (leadsPerColumn < numberOfLeads) {
+				var measuredWidth = line_plainCourse.measureWidth(numberOfColumns);
 				if (measuredWidth + callWidth + 48 <= availableWidth) {
 					break;
 				}
 				leadsPerColumn++;
 				numberOfColumns = Math.ceil(numberOfLeads / leadsPerColumn);
-				line_plainCourse.setOptions({ layout: { numberOfColumns: numberOfColumns } });
-				iterations++;
 			}
 
-			if (iterations >= maxIterations) {
-				console.warn('MethodView: Column calculation loop reached max iterations.');
+			if (numberOfColumns !== line_plainCourse.getOptions().layout.numberOfColumns) {
+				line_plainCourse.setOptions({ layout: { numberOfColumns: numberOfColumns } });
 			}
 
 			return numberOfColumns;
