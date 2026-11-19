@@ -271,7 +271,8 @@ dl {
 		padding: 8px 16px;
 		border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 		&:first-child { padding-top: 8px; }
-		&:last-child { padding-bottom: 8px; }
+		/* Undo the generic list rule's last-item border removal so the active indicator still shows. */
+		&:last-child { padding-bottom: 8px; border-bottom: 2px solid transparent; }
 		transition-property: color, border-color, background-color;
 		transition-duration: var(--animation-speed);
 		transition-timing-function: var(--easing-standard);

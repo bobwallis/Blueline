@@ -154,7 +154,8 @@
 			calls: method.calls|default(false),
 			callingPositions: method.callingPositions|default(false),
 			workerURL: asset('js/touch_generator/SearchWorker.js'),
-			runtimeURL: asset('js/touch_generator/Search.js')
+			runtimeURL: asset('js/touch_generator/Search.js'),
+			musicURL: asset('js/helpers/MusicPatterns.js')
 		}|json_encode() }}">
 			<details class="touch-settings">
 				<summary>Search settings</summary>
@@ -174,6 +175,9 @@
 						<legend>Music</legend>
 						<p data-touch-back65-setting hidden><label><input type="checkbox" role="switch" data-touch-back65> <span data-touch-back65-label>No 65s at back</span></label></p>
 						<p data-touch-tenor-behind-setting hidden><label><input type="checkbox" role="switch" data-touch-tenor-behind> Assume tenor behind</label></p>
+						<p><label for="touch_min_music">Min. music points / 100 changes <input id="touch_min_music" type="number" min="0" step="any" value="0" required data-touch-min-music></label></p>
+						<p><label for="touch_min_runs">Min. runs (including wraps) <input id="touch_min_runs" type="number" min="0" step="1" value="0" required data-touch-min-runs></label></p>
+						<p data-touch-crus-setting hidden><label for="touch_min_crus">Min. CRUs <input id="touch_min_crus" type="number" min="0" step="1" value="0" required data-touch-min-crus></label></p>
 						<div class="touch-named-rows-setting">
 							<label id="touch_named_rows_label" class="touch-setting-label" for="touch_named_rows">Required named rows</label>
 							<select id="touch_named_rows" multiple data-touch-named-rows></select>
@@ -200,7 +204,7 @@
 							<label for="touch_limit">Max. # displayed touches</label>
 							<input id="touch_limit" type="number" min="1" step="1" required data-touch-limit>
 							<label for="touch_budget">Search budget (seconds)</label>
-							<input id="touch_budget" type="number" min="1" max="2147483" step="1" required data-touch-budget>
+							<input id="touch_budget" type="number" min="1" step="1" required data-touch-budget>
 						</div>
 					</fieldset>
 				</div>

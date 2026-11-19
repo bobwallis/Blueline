@@ -4,11 +4,11 @@ import { Worker } from 'node:worker_threads';
 import { setTimeout as wait } from 'node:timers/promises';
 import TouchSearchPool from '../../../assets/js/ui/MethodView/TouchSearchPool.js';
 import { compileMethod } from '../../../assets/js/touch_generator/Compile.js';
-import { canonicalTouch, matchesCallingPositions, matchesTenorsTogether } from '../../../assets/js/touch_generator/Search.js';
+import { canonicalTouch, matchesCallingPositions, matchesTenorsTogether, matchesMusic } from '../../../assets/js/touch_generator/MusicRuntime.js';
 import { bristol, stedman, grandsireTriples, plainBobDoubles } from './fixtures.mjs';
 import { bruteForce, prove, tenorsTogetherAtLeadHeads } from './oracle.mjs';
 
-const urls = { worker: new URL('./node-worker.mjs', import.meta.url), runtime: new URL('../../../assets/js/touch_generator/Search.js', import.meta.url).href };
+const urls = { worker: new URL('./node-worker.mjs', import.meta.url), runtime: new URL('../../../assets/js/touch_generator/Search.js', import.meta.url).href, music: new URL('../../../assets/js/helpers/MusicPatterns.js', import.meta.url).href };
 
 class NodeWorker {
 	constructor (url) {
@@ -184,10 +184,165 @@ test('simultaneous batches show at most 250 matching results by default and reta
 	assert.equal(pool.nodes, 12, 'displayed exploration excludes prefix replay');
 	assert.equal(pool.results.size, 280);
 	assert.equal(pool.matchingResults().length, 250);
-	assert.equal(pool.state, 'capped');
+	assert.equal(pool.state, 'running');
 	assert.equal(pool.allowSingles, false, 'the result cap is not search exhaustion');
 	assert.equal(terminated.length, 0, 'capping pauses rather than discards resumable work');
 	pool.dispose();
+});
+
+test('later musical discoveries replace displayed baseline results without stopping at the display limit', () => {
+	const pool = new TouchSearchPool(compileMethod(bristol), urls, () => {}, {
+		concurrency: 1, maximumResults: 1, autoSingles: false,
+		workerFactory: () => ({ postMessage () {}, terminate () {} }),
+	});
+	try {
+		pool.start();
+		const entry = pool.workers[0];
+		pool.receive(entry, { type: 'ready' });
+		const task = { ...entry.task, prefix: Uint8Array.of(0, 1) };
+		const touch = (key, density) => ({ key, length: 64, word: Uint8Array.of(1), music: { density, score: density * 0.64 } });
+		pool.receive(entry, { type: 'slice', results: [touch('first', 1)], frontier: [task], nodes: 1, explored: 1 });
+		assert.equal(pool.state, 'running');
+		assert.deepEqual(pool.matchingResults().map(touch => touch.key), ['first']);
+		pool.receive(entry, { type: 'slice', results: [touch('better', 2)], frontier: [task], nodes: 1, explored: 1 });
+		assert.equal(pool.state, 'running');
+		assert.deepEqual(pool.matchingResults().map(touch => touch.key), ['better']);
+		assert.equal(pool.results.size, 2);
+		pool.updateOptions({ maximumResults: 2 });
+		assert.deepEqual(pool.matchingResults().map(touch => touch.key), ['better', 'first']);
+	} finally { pool.dispose(); }
+});
+
+test('music minimums are validated at the pool boundary and transmitted to workers', () => {
+	const messages = [];
+	const pool = new TouchSearchPool(compileMethod(bristol), urls, () => {}, {
+		concurrency: 1, minMusic: 0.01, minRuns: 1, minCRUs: 1,
+		workerFactory: () => ({ postMessage (message) { messages.push(message); }, terminate () {} }),
+	});
+	try {
+		assert.throws(() => pool.updateOptions({ minRuns: 0.5 }), /whole numbers/);
+		assert.equal(pool.minRuns, 1);
+		pool.start();
+		pool.receive(pool.workers[0], { type: 'ready' });
+		assert.equal(messages.at(-1).limits.minMusic, 0.01);
+		assert.equal(messages.at(-1).limits.minRuns, 1);
+		assert.equal(messages.at(-1).limits.minCRUs, 1);
+	} finally { pool.dispose(); }
+	assert.throws(() => new TouchSearchPool(compileMethod(stedman), urls, () => {}, { minCRUs: 1 }), /eight bells/);
+});
+
+test('pending music counts only queued or running in-range rechecks, including across pause and rejection', () => {
+	const pool = new TouchSearchPool(compileMethod(bristol), urls, () => {}, {
+		concurrency: 1, autoSingles: false,
+		workerFactory: () => ({ postMessage () {}, terminate () {} }),
+	});
+	try {
+		for (const [key, length] of [['short', 64], ['long', 224]]) {
+			pool.results.set(key, { key, length, phase: 0, word: Uint8Array.of(1), rotations: [] });
+		}
+		pool.updateOptions({ lengthRanges: [[1, 128]], namedRows: ['Tittums'] });
+		assert.equal(pool.stale.size, 2, 'both cached representatives are invalidated');
+		assert.equal(pool.pendingMusicCount, 1, 'only the in-range touch awaits rechecking');
+		const rechecks = [...pool.lanes.values()].flat().filter(task => task.mode === 'recheck');
+		assert.equal(rechecks.length, 1);
+		assert.equal(rechecks[0].refreshKey, 'short');
+		pool.tasks = [];
+		pool.lanes.clear();
+		pool.enqueue(rechecks);
+		pool.start();
+		const entry = pool.workers[0];
+		pool.receive(entry, { type: 'ready' });
+		assert.equal(pool.pendingMusicCount, 1, 'in-flight rechecks still count');
+		pool.pause();
+		assert.equal(pool.pendingMusicCount, 1, 'pause retains pending work');
+		pool.receive(entry, { type: 'slice', results: [], frontier: [{ ...rechecks[0], rotationState: {} }], nodes: 0, explored: 0 });
+		assert.equal(pool.pendingMusicCount, 1, 'a resumed rotation continuation is not completion');
+		pool.start();
+		pool.receive(entry, { type: 'slice', results: [], frontier: [], nodes: 0, explored: 0 });
+		assert.equal(pool.pendingMusicCount, 0, 'a rejected recheck is finished');
+		assert.equal(pool.stale.size, 2, 'rejected and out-of-range representatives stay hidden');
+		assert.equal(pool.matchingResults().length, 0);
+		assert.equal(pool.state, 'complete');
+		pool.updateOptions({ lengthRanges: [[1, 300]] });
+		assert.equal(pool.pendingMusicCount, 2, 'expanding lengths schedules the retained stale touches again');
+		pool.dispose();
+		assert.equal(pool.pendingMusicCount, 0, 'discarded work is no longer pending');
+	} finally { pool.dispose(); }
+});
+
+test('all workers drain cached music refreshes before new discovery or singles preparation', () => {
+	let clock = 0;
+	const messages = [];
+	const pool = new TouchSearchPool(compileMethod(stedman), urls, () => {}, {
+		concurrency: 3, autoSingles: false, now: () => clock,
+		workerFactory: () => ({ postMessage (message) { messages.push(message); }, terminate () {} }),
+	});
+	try {
+		for (let i = 0; i < 4; i++) {
+			const key = `cached-${i}`;
+			pool.results.set(key, { key, length: 60, phase: 0, word: Uint8Array.of(2), rotations: [] });
+		}
+		pool.setAllowSingles(true);
+		pool.updateOptions({ tenorBehind: true, namedRows: ['Tittums'] });
+		pool.start();
+		for (const entry of pool.workers) pool.receive(entry, { type: 'ready' });
+		assert.ok(pool.workers.every(entry => entry.task?.mode === 'recheck'));
+		assert.equal(pool.pendingMusicCount, 4);
+		assert.ok(!messages.some(message => message.type === 'prepare-singles'));
+		const [first, second, third] = pool.workers;
+		clock += 50;
+		const continuation = first.task;
+		pool.receive(first, { type: 'slice', results: [], frontier: [continuation], nodes: 0, explored: 0 });
+		assert.equal(first.task.mode, 'recheck', 'resumed refreshes also take priority');
+		pool.receive(first, { type: 'slice', results: [], frontier: [], nodes: 0, explored: 0 });
+		assert.equal(first.task.mode, 'recheck', 'queued refresh is assigned next');
+		pool.receive(second, { type: 'slice', results: [], frontier: [], nodes: 0, explored: 0 });
+		assert.equal(second.busy, false, 'wait for in-flight refreshes instead of exploring');
+		assert.equal(pool.pendingMusicCount, 2);
+		pool.receive(third, { type: 'slice', results: [], frontier: [], nodes: 0, explored: 0 });
+		assert.equal(pool.pendingMusicCount, 1);
+		assert.ok(messages.filter(message => message.type === 'task').every(message => message.task.mode === 'recheck'));
+		assert.ok([...pool.horizons.values()].every(horizon => horizon.spentMs === 0), 'refreshes do not distort exploration weights');
+		pool.receive(first, { type: 'slice', results: [], frontier: [], nodes: 0, explored: 0 });
+		assert.equal(pool.pendingMusicCount, 0);
+		assert.ok(pool.workers.some(entry => entry.busy && entry.task?.mode !== 'recheck'), 'discovery resumes after refresh');
+		assert.equal(pool.state, 'running');
+	} finally { pool.dispose(); }
+});
+
+test('real workers refresh cached baselines and alternative sets under music minimum changes', async () => {
+	const method = { ...compileMethod(plainBobDoubles), maxChanges: 60 };
+	const pool = new TouchSearchPool(method, urls, () => {}, {
+		concurrency: 2, maximumResults: 100, autoSingles: false,
+		workerFactory: url => new NodeWorker(url),
+	});
+	try {
+		pool.start();
+		await until(() => ['complete', 'error'].includes(pool.state));
+		assert.equal(pool.error, null);
+		assert.equal(pool.pendingMusicCount, 0, 'completed successful rechecks are no longer pending');
+		const retained = pool.results.size;
+		assert.ok(retained > 0);
+		const minimum = Math.max(...pool.matchingResults().map(touch => touch.music.density));
+		for (const minMusic of [minimum, 0]) {
+			pool.updateOptions({ minMusic });
+			await until(() => ['complete', 'error'].includes(pool.state));
+			assert.equal(pool.error, null);
+			for (const touch of pool.matchingResults()) {
+				assert.ok(matchesMusic(touch.music, { minMusic }));
+				assert.deepEqual(touch, canonicalTouch(method, touch, [], false, { minMusic }));
+			}
+			assert.ok(pool.matchingResults().length > 0);
+			assert.ok(pool.results.size >= retained);
+		}
+		assert.equal(pool.stale.size, 0);
+		pool.updateOptions({ minMusic: 1000000 });
+		await until(() => ['complete', 'error'].includes(pool.state));
+		assert.equal(pool.error, null);
+		assert.equal(pool.pendingMusicCount, 0, 'completed rejected rechecks are no longer pending');
+		assert.equal(pool.matchingResults().length, 0);
+		assert.ok(pool.stale.size > 0, 'rejected cached representatives remain hidden');
+	} finally { pool.dispose(); }
 });
 
 test('active wall-clock budget stops dispatch, and worker errors are explicit', () => {
@@ -297,7 +452,7 @@ test('slice allowances follow displayed counts and remaining time without a resu
 		entry.budgetNodes = 1000;
 		for (const [count, expected] of [[19, 500], [100, 500], [199, 500], [200, 1000], [249, 1000]]) {
 			pool.results.clear();
-			for (let i = 0; i < count; i++) pool.results.set(String(i), { length: 64, word: Uint8Array.of(1) });
+			for (let i = 0; i < count; i++) pool.results.set(String(i), { key: String(i), length: 64, word: Uint8Array.of(1) });
 			pool.tasks = [];
 			pool.lanes.clear();
 			pool.enqueue([{ phase: 0, mode: 'whole', prefix: Uint8Array.of(0, 1) }]);
@@ -306,7 +461,7 @@ test('slice allowances follow displayed counts and remaining time without a resu
 			const sent = messages.at(-1);
 			assert.equal(sent.limits.budgetMs, expected);
 			assert.equal(sent.limits.budgetNodes, 1000 * expected / 500);
-			assert.equal(sent.limits.maximumResults, Infinity);
+			assert.equal(sent.limits.maximumResults, 24);
 			assert.equal(sent.limits.snapshots, true);
 		}
 		clock = 19900;
@@ -640,7 +795,7 @@ test('length ranges are merged, and only newly eligible lengths or a new maximum
 	} finally { pool.dispose(); }
 });
 
-test('raising a result cap resumes the retained frontier without terminating or reseeding workers', () => {
+test('raising the display limit keeps exploration running without terminating or reseeding workers', () => {
 	const pool = new TouchSearchPool(compileMethod(bristol), urls, () => {}, {
 		concurrency: 1, maximumResults: 1,
 		workerFactory: () => ({ postMessage () {}, terminate () {} }),
@@ -651,7 +806,7 @@ test('raising a result cap resumes the retained frontier without terminating or 
 		pool.receive(entry, { type: 'ready' });
 		const task = { ...entry.task, prefix: Uint8Array.of(0, 1) };
 		pool.receive(entry, { type: 'slice', nodes: 1, explored: 1, results: [{ key: 'one', length: 64, partLength: 32, word: Uint8Array.of(1) }], frontier: [task] });
-		assert.equal(pool.state, 'capped');
+		assert.equal(pool.state, 'running');
 		pool.updateOptions({ maximumResults: 2 });
 		assert.equal(pool.state, 'running');
 		assert.equal(pool.workers[0], entry);
@@ -722,7 +877,7 @@ test('invalid search options are rejected without mutating the search', () => {
 	pool.dispose();
 });
 
-test('expanded options with enough cached matches report capped, not exhausted', () => {
+test('expanded options continue searching even with enough cached matches', () => {
 	const pool = new TouchSearchPool(compileMethod(bristol), urls, () => {}, {
 		workerFactory: () => ({ postMessage () {}, terminate () {} }),
 	});
@@ -730,7 +885,7 @@ test('expanded options with enough cached matches report capped, not exhausted',
 		pool.results.set('saved', { key: 'saved', length: 64, partLength: 32, word: Uint8Array.of(1) });
 		pool.state = 'complete';
 		pool.updateOptions({ lengthRanges: [[1, 5280]], maximumResults: 1 });
-		assert.equal(pool.state, 'capped');
+		assert.equal(pool.state, 'running');
 		assert.ok(pool.tasks.length > 0, 'expanded exploration remains queued');
 		pool.updateOptions({ maximumResults: 2 });
 		assert.equal(pool.state, 'running');

@@ -127,6 +127,11 @@ html:has(.touch-dialog:modal) {
 		}
 	}
 	.touch-dialog {
+		[data-touch-rotation] {
+			display: block;
+			max-width: 100%;
+			margin: 5px 0;
+		}
 		.touch-layout {
 			width: fit-content;
 			max-width: 100%;
@@ -215,6 +220,124 @@ html:has(.touch-dialog:modal) {
 				view-transition-name: none !important;
 			}
 		}
+		/* A written-out touch can be very long; don't let it set the other tabs' height. */
+		.touch-dialog-panel.touch-line-panel {
+			position: relative;
+			&[style*="display: none"] {
+				display: none !important;
+			}
+		}
+		.touch-line {
+			width: 100%;
+			font-family: monospace;
+			line-height: 1.5;
+			white-space: nowrap;
+		}
+		.touch-line-lead {
+			content-visibility: auto;
+			contain-intrinsic-block-size: auto calc(var(--touch-line-rows) * 1.5em);
+		}
+		.touch-line-row {
+			display: grid;
+			/* Equal side columns keep the bells centred independently of scores and calls. */
+			grid-template-columns: minmax(0, 1fr) calc(var(--touch-line-bells) * 1ch) minmax(0, 1fr);
+			gap: 1ch;
+		}
+		.touch-line-bells {
+			flex: none;
+			width: calc(var(--touch-line-bells) * 1ch);
+			/* Rule-offs match the method line's default 3/1 dash without changing row height. */
+			.touch-line-rule-off & {
+				background: repeating-linear-gradient(to right, rgba(0, 0, 0, 0.4) 0 3px, transparent 3px 4px) left bottom / 100% 1px no-repeat;
+			}
+			mark {
+				color: inherit;
+				background: rgb(0 255 0 / var(--touch-line-shade));
+			}
+			.touch-line-warning {
+				background: rgb(255 0 0 / 0.2);
+			}
+		}
+		.touch-line-cover {
+			color: #999;
+		}
+		.touch-line-score {
+			align-self: center;
+			justify-self: end;
+			padding-right: 0.5rem;
+			font-family: var(--sans-stack);
+			font-size: 0.8em;
+			color: #888;
+			text-align: right;
+		}
+		.touch-line-call {
+			position: relative;
+			padding-left: 1.5ch;
+			font-family: var(--sans-stack);
+			white-space: normal;
+			/* Bracket together the rows from which a multi-change call's changes are made. */
+			&[data-part]::before {
+				content: "";
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				width: 0.5ch;
+				border-right: 1px solid var(--header-background);
+			}
+			&[data-part="start"]::before {
+				top: 0.3em;
+				border-top: 1px solid var(--header-background);
+			}
+			&[data-part="end"]::before {
+				bottom: 0.3em;
+				border-bottom: 1px solid var(--header-background);
+			}
+		}
+		.touch-line-tooltip {
+			position: absolute;
+			z-index: 1;
+			width: max-content;
+			max-width: 240px;
+			padding: 5px 8px;
+			transform: translate(-50%, calc(-100% - 7px));
+			font: 12px var(--sans-stack);
+			background: white;
+			border: 1px solid var(--header-background);
+			box-shadow: var(--shadow-4);
+			pointer-events: none;
+			visibility: hidden;
+			opacity: 0;
+			transition:
+				opacity calc(var(--animation-speed) * 2) var(--easing-standard),
+				visibility calc(var(--animation-speed) * 2);
+			&.touch-line-tooltip-visible {
+				visibility: visible;
+				opacity: 1;
+			}
+			&::after {
+				content: "";
+				position: absolute;
+				top: 100%;
+				left: calc(50% + var(--touch-line-arrow, 0px) - 5px);
+				width: 8px;
+				height: 8px;
+				margin-top: -4px;
+				background: white;
+				border: solid var(--header-background);
+				border-width: 0 1px 1px 0;
+				transform: rotate(45deg);
+			}
+			&.touch-line-tooltip-below {
+				transform: translate(-50%, 7px);
+				&::after {
+					top: auto;
+					bottom: 100%;
+					margin: 0 0 -4px;
+					border-width: 1px 0 0 1px;
+				}
+			}
+		}
 	}
 	.touch-dialog::backdrop {
 		background: rgba(255, 255, 255, 0.8);
@@ -258,6 +381,8 @@ html:has(.touch-dialog:modal) {
 	}
 	.touch-export pre {
 		margin-left: var(--content-x-padding);
+		border-left: 2px solid var(--header-background);
+		padding-left: var(--content-x-padding);
 	}
 }
 
@@ -597,7 +722,7 @@ section.method {
 	border: 1px solid var(--header-background);
 	box-shadow: var(--shadow-4);
 	opacity: 0;
-	transition: opacity 200ms, top 10ms, left 10ms;
+	transition: opacity calc(var(--animation-speed) * 2), top 10ms, left 10ms;
 	pointer-events: none;
 	&:after, &:before {
 		position: absolute;

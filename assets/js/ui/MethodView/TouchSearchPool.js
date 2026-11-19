@@ -1,4 +1,10 @@
-import { initialSearchTasks, matchesCallingPositions, matchesMusic, matchesTenorsTogether, snapshotBuffers } from '../../touch_generator/Search.js';
+import { initialSearchTasks, matchesCallingPositions, matchesMusic, matchesTenorsTogether, snapshotBuffers, validateMusicMinimums } from '../../touch_generator/Search.js';
+import { musicReading } from '../../helpers/MusicPatterns.js';
+
+export function compareTouches (a, b, tenorBehind = false) {
+	const first = musicReading(a.music, tenorBehind), second = musicReading(b.music, tenorBehind);
+	return a.length - b.length || (second?.density ?? 0) - (first?.density ?? 0) || (second?.score ?? 0) - (first?.score ?? 0) || a.key.localeCompare(b.key);
+}
 
 // Sort and merge length ranges so containment checks compare whole ranges.
 // The last range's maximum is the search's complete-touch allowance.
@@ -48,6 +54,9 @@ export default class TouchSearchPool {
 		noBackstroke65s = false,
 		namedRows = [],
 		tenorBehind = false,
+		minMusic = 0,
+		minRuns = 0,
+		minCRUs = 0,
 		maximumResults = 250,
 		// Touches disables this once the user toggles singles for the method.
 		autoSingles = true,
@@ -63,6 +72,8 @@ export default class TouchSearchPool {
 		this.noBackstroke65s = this.validateNoBackstroke65s(noBackstroke65s);
 		this.tenorBehind = this.validateTenorBehind(tenorBehind);
 		this.namedRows = this.validateNamedRows(namedRows, this.tenorBehind);
+		validateMusicMinimums({ minMusic, minRuns, minCRUs }, method.stage + (tenorBehind ? 1 : 0));
+		Object.assign(this, { minMusic, minRuns, minCRUs });
 		this.maximumResults = maximumResults;
 		this.urls = urls;
 		this.onChange = onChange;
@@ -82,6 +93,8 @@ export default class TouchSearchPool {
 		this.quietSince = now();
 		this.resetSearch();
 		this.results = new Map();
+		this.stale = new Set();
+		this.pendingMusic = new Set();
 		this.workers = [];
 		// The first worker's validated pruning tables, reused by every later worker.
 		this.bundle = null;
@@ -95,7 +108,7 @@ export default class TouchSearchPool {
 	start (freshBudget = true) {
 		// Start/resume retained work. Search more renews the configured run budget;
 		// visibility resume keeps the remaining time.
-		if (['running', 'complete', 'capped', 'error', 'disposed'].includes(this.state)) return;
+		if (['running', 'complete', 'error', 'disposed'].includes(this.state)) return;
 		if (freshBudget) {
 			this.remainingMs = this.budgetMs;
 			this.elapsedMs = 0;
@@ -118,7 +131,7 @@ export default class TouchSearchPool {
 					entry.worker.onmessageerror = () => this.fail('Touch search worker returned an unreadable message.');
 					if (this.bundle || i === 0) {
 						entry.initialised = true;
-						entry.worker.postMessage({ type: 'init', runtimeURL: this.urls.runtime, method: this.method, bundle: this.bundle, singles: this.singlesStarted });
+						entry.worker.postMessage({ type: 'init', runtimeURL: this.urls.runtime, musicURL: this.urls.music, method: this.method, bundle: this.bundle, singles: this.singlesStarted });
 					}
 				}
 			}
@@ -166,7 +179,7 @@ export default class TouchSearchPool {
 			this.quietSince = this.now();
 			this.seedSearch(true);
 		}
-		if (allow && ['complete', 'budget', 'stopped', 'capped'].includes(this.state) || this.state === 'capped' && this.matchingResults().length < this.maximumResults) {
+		if (allow && ['complete', 'budget', 'stopped'].includes(this.state)) {
 			this.state = 'idle';
 			this.start();
 		} else {
@@ -176,11 +189,11 @@ export default class TouchSearchPool {
 	}
 
 	matches (touch) {
-		return this.lengthRanges.some(([min, max]) => touch.length >= min && touch.length <= max)
+		return !this.stale.has(touch.key) && this.lengthRanges.some(([min, max]) => touch.length >= min && touch.length <= max)
 			&& touch.length / (touch.partLength ?? touch.length) >= this.minParts
 			&& matchesCallingPositions(this.method, touch, this.callingPositions)
 			&& (!this.tenorsTogether || matchesTenorsTogether(this.method, touch))
-			&& matchesMusic(touch.music, { noBackstroke65s: this.noBackstroke65s, namedRows: this.namedRows, tenorBehind: this.tenorBehind })
+			&& matchesMusic(touch.music, this)
 			&& (this.allowSingles || !touch.word.some(call => this.method.calls[call].symbol === 's'));
 	}
 
@@ -189,7 +202,14 @@ export default class TouchSearchPool {
 	}
 
 	matchingResults () {
-		return [...this.results.values()].filter(touch => this.matches(touch)).slice(0, this.maximumResults);
+		return [...this.results.values()].filter(touch => this.matches(touch)).sort((a, b) => compareTouches(a, b, this.tenorBehind)).slice(0, this.maximumResults);
+	}
+
+	get pendingMusicCount () {
+		return [...this.pendingMusic].filter(key => {
+			const touch = this.results.get(key);
+			return touch && this.lengthRanges.some(([min, max]) => touch.length >= min && touch.length <= max);
+		}).length;
 	}
 
 	validateCallingPositions (positions) {
@@ -217,7 +237,7 @@ export default class TouchSearchPool {
 		return [...new Set(names)].sort();
 	}
 
-	updateOptions ({ lengthRanges = this.lengthRanges, minParts = this.minParts, callingPositions = this.callingPositions, tenorsTogether = this.tenorsTogether, noBackstroke65s = this.noBackstroke65s, namedRows = this.namedRows, tenorBehind = this.tenorBehind, maximumResults = this.maximumResults, budgetMs = this.budgetMs }) {
+	updateOptions ({ lengthRanges = this.lengthRanges, minParts = this.minParts, callingPositions = this.callingPositions, tenorsTogether = this.tenorsTogether, noBackstroke65s = this.noBackstroke65s, namedRows = this.namedRows, tenorBehind = this.tenorBehind, minMusic = this.minMusic, minRuns = this.minRuns, minCRUs = this.minCRUs, maximumResults = this.maximumResults, budgetMs = this.budgetMs }) {
 		validateOptions(minParts, maximumResults, budgetMs, this.changeLimit);
 		lengthRanges = normaliseRanges(lengthRanges, this.changeLimit);
 		const maxChanges = lengthRanges.at(-1)[1];
@@ -226,6 +246,7 @@ export default class TouchSearchPool {
 		noBackstroke65s = this.validateNoBackstroke65s(noBackstroke65s);
 		tenorBehind = this.validateTenorBehind(tenorBehind);
 		namedRows = this.validateNamedRows(namedRows, tenorBehind);
+		validateMusicMinimums({ minMusic, minRuns, minCRUs }, this.method.stage + (tenorBehind ? 1 : 0));
 		// Expanded eligibility, such as a newly covered length, can include
 		// candidates already discarded by a worker. Restart exploration, not
 		// the result cache. A changed maximum also changes closure pruning, so
@@ -234,7 +255,8 @@ export default class TouchSearchPool {
 		// retaining proved results. Music filters also choose each cached
 		// touch's displayed rotation and change 65s pruning, so restart on any
 		// change; fresh results replace cached rotations that no longer match.
-		const restart = maxChanges !== this.method.maxChanges || lengthRanges.some(([min, max]) => !this.lengthRanges.some(([low, high]) => low <= min && max <= high)) || minParts < this.minParts || callingPositions.join(',') !== this.callingPositions.join(',') || tenorsTogether !== this.tenorsTogether || noBackstroke65s !== this.noBackstroke65s || namedRows.join(',') !== this.namedRows.join(',') || tenorBehind !== this.tenorBehind;
+		const representativesChanged = callingPositions.join(',') !== this.callingPositions.join(',') || tenorsTogether !== this.tenorsTogether || noBackstroke65s !== this.noBackstroke65s || namedRows.join(',') !== this.namedRows.join(',') || tenorBehind !== this.tenorBehind || minMusic !== this.minMusic || minRuns !== this.minRuns || minCRUs !== this.minCRUs;
+		const restart = maxChanges !== this.method.maxChanges || lengthRanges.some(([min, max]) => !this.lengthRanges.some(([low, high]) => low <= min && max <= high)) || minParts < this.minParts || representativesChanged;
 		const previousState = this.state;
 		if (this.state === 'running') this.pause('stopped');
 		this.remainingMs = Math.max(0, budgetMs - this.elapsedMs);
@@ -245,19 +267,23 @@ export default class TouchSearchPool {
 		this.noBackstroke65s = noBackstroke65s;
 		this.namedRows = namedRows;
 		this.tenorBehind = tenorBehind;
+		Object.assign(this, { minMusic, minRuns, minCRUs });
 		this.maximumResults = maximumResults;
 		this.budgetMs = budgetMs;
 		this.method = { ...this.method, maxChanges };
 		if (restart) {
 			this.terminate();
 			this.resetSearch();
+			if (representativesChanged) for (const touch of this.results.values()) if (touch.rotations) this.stale.add(touch.key);
+			this.enqueue([...this.results.values()].filter(touch => this.stale.has(touch.key) && this.lengthRanges.some(([min, max]) => touch.length >= min && touch.length <= max)).map(({ key, phase, length, word }) => {
+				this.pendingMusic.add(key);
+				return { phase, mode: 'recheck', refreshKey: key, prefix: new Uint8Array(), candidate: { phase, length, word }, maxPartChanges: maxChanges };
+			}));
 		}
-		if (['running', 'capped', 'complete', 'budget'].includes(previousState) && this.matchingResults().length >= maximumResults) {
-			this.state = 'capped';
-			this.onChange(this);
-		} else if (['running', 'capped', 'complete', 'budget'].includes(previousState)) {
+		if (['running', 'complete', 'budget'].includes(previousState)) {
 			this.state = 'idle';
-			if (['running', 'budget'].includes(previousState) && this.remainingMs === 0) this.pause('budget');
+			if (previousState === 'budget' && representativesChanged) this.start();
+			else if (['running', 'budget'].includes(previousState) && this.remainingMs === 0) this.pause('budget');
 			else this.start(!['running', 'budget'].includes(previousState));
 		} else {
 			this.state = previousState;
@@ -288,7 +314,7 @@ export default class TouchSearchPool {
 					other.worker.postMessage({ type: 'tables', distances: message.bundle.distances });
 				} else {
 					other.initialised = true;
-					other.worker.postMessage({ type: 'init', runtimeURL: this.urls.runtime, method: this.method, bundle: this.bundle });
+					other.worker.postMessage({ type: 'init', runtimeURL: this.urls.runtime, musicURL: this.urls.music, method: this.method, bundle: this.bundle });
 				}
 			}
 		} else if (message.type === 'slice') {
@@ -297,13 +323,17 @@ export default class TouchSearchPool {
 				return;
 			}
 			const horizon = this.horizons.get(entry.task?.maxPartChanges ?? this.method.maxChanges);
-			horizon.spentMs += this.now() - entry.startedAt;
+			// Refreshing cached results is not exploration of this horizon.
+			if (entry.task?.mode !== 'recheck') horizon.spentMs += this.now() - entry.startedAt;
+			// A rejected recheck returns no result. It is still finished, while
+			// its cached representative must remain stale and hidden.
+			if (entry.task?.mode === 'recheck' && !message.frontier.length) this.pendingMusic.delete(entry.task.refreshKey);
 			entry.busy = false;
 			entry.task = null;
 			// Estimate throughput including all executed work, not just new rows.
 			// Store the 500ms-equivalent node allowance, then scale it for the
 			// next slice. Round-trip time includes messaging and snapshot transfer.
-			entry.budgetNodes = Math.max(128, Math.min(1000000, Math.floor(message.nodes * 500 / Math.max(1, this.now() - entry.startedAt))));
+			if (message.nodes > 0) entry.budgetNodes = Math.max(128, Math.min(1000000, Math.floor(message.nodes * 500 / Math.max(1, this.now() - entry.startedAt))));
 			this.nodes += message.explored;
 			this.enqueue(message.frontier);
 			for (const result of message.results) {
@@ -314,6 +344,7 @@ export default class TouchSearchPool {
 				// Keep proved results, even while filtered/capped. The display limit
 				// is separate so narrowing settings never destroys useful results.
 				const previous = this.results.get(result.key);
+				const stale = this.stale.delete(result.key);
 				if (!previous && this.matches(result)) {
 					this.quietMs = 0;
 					this.quietSince = this.now();
@@ -321,7 +352,7 @@ export default class TouchSearchPool {
 				// A changed filter can prefer another eligible rotation even if
 				// the cached one still matches. Fresh workers rank under the new
 				// settings; replace only changed calling, avoiding duplicate redraws.
-				if (!previous || this.matches(result) && (!this.matches(previous) || result.phase !== previous.phase || result.word.some((call, i) => call !== previous.word[i]))) this.results.set(result.key, result);
+				if (!previous || stale || this.matches(result) && (!this.matches(previous) || result.phase !== previous.phase || result.word.some((call, i) => call !== previous.word[i]))) this.results.set(result.key, result);
 			}
 		} else {
 			this.fail('Touch search worker returned an unknown message.');
@@ -335,10 +366,6 @@ export default class TouchSearchPool {
 		// Dispatch only while running. An empty queue is not completion until
 		// every worker has replied: those replies may contain more branches.
 		if (this.state !== 'running') return;
-		if (this.matchingResults().length >= this.maximumResults) {
-			this.pause('capped');
-			return;
-		}
 		if (this.now() - this.startedAt >= this.remainingMs) {
 			this.pause('budget');
 			return;
@@ -346,12 +373,12 @@ export default class TouchSearchPool {
 		// Try singles after exhausting no-single work, or after a stall in sparse
 		// trees that never exhaust, unless a maximum-length touch was found.
 		// Budget/result caps are not exhaustion. Never override a user's choice.
-		if (this.autoSingles && !this.singlesStarted && (this.stalled || !this.tasks.length && this.workers.every(entry => entry.ready && !entry.busy)) && ![...this.results.values()].some(touch => this.matches(touch) && touch.length === this.method.maxChanges) && this.method.calls.some(call => call.symbol === 's')) {
+		if (!this.pendingMusic.size && this.autoSingles && !this.singlesStarted && (this.stalled || !this.tasks.length && this.workers.every(entry => entry.ready && !entry.busy)) && ![...this.results.values()].some(touch => this.matches(touch) && touch.length === this.method.maxChanges) && this.method.calls.some(call => call.symbol === 's')) {
 			this.setAllowSingles(true);
 			return;
 		}
 		try {
-			if (this.singlesStarted && this.bundle && !this.bundle.distances.singles && !this.preparing) {
+			if (!this.pendingMusic.size && this.singlesStarted && this.bundle && !this.bundle.distances.singles && !this.preparing) {
 				// Build the singles table once, off the search budget. Singles
 				// tasks still run meanwhile, just without its pruning.
 				const entry = this.workers.find(entry => entry.ready && !entry.busy);
@@ -369,6 +396,16 @@ export default class TouchSearchPool {
 				let index = -1, lowest = Infinity;
 				for (let i = 0; i < this.tasks.length; i++) {
 					const task = this.lanes.get(this.tasks[i]).at(-1);
+					// Drain cached rechecks before generating more candidates.
+					// If the last rechecks are in flight, leave other workers
+					// idle rather than delaying refresh with fresh search slices.
+					if (this.pendingMusic.size) {
+						if (task.mode === 'recheck') {
+							index = i;
+							break;
+						}
+						continue;
+					}
 					if (!this.allowSingles && task.requireSingle) continue;
 					const horizon = this.horizons.get(task.maxPartChanges);
 					// Reserve in-flight slices too, so multiple idle workers do
@@ -390,7 +427,7 @@ export default class TouchSearchPool {
 				entry.sliceMs = sliceMs;
 				// Split the first two decisions quickly to create varied lanes
 				// before spending full slices deep in any one call pattern.
-				entry.worker.postMessage({ type: 'task', task: entry.task, limits: { budgetNodes: entry.task.prefix.length < 2 ? 1 : Math.ceil(entry.budgetNodes * sliceMs / 500), budgetMs: sliceMs, maximumResults: Infinity, snapshots: true, lengthRanges: this.lengthRanges, minParts: this.minParts, callingPositions: this.callingPositions, tenorsTogether: this.tenorsTogether, noBackstroke65s: this.noBackstroke65s, namedRows: this.namedRows, tenorBehind: this.tenorBehind } }, snapshotBuffers(entry.task));
+				entry.worker.postMessage({ type: 'task', task: entry.task, limits: { budgetNodes: entry.task.prefix.length < 2 ? 1 : Math.ceil(entry.budgetNodes * sliceMs / 500), budgetMs: sliceMs, maximumResults: 24, snapshots: true, lengthRanges: this.lengthRanges, minParts: this.minParts, callingPositions: this.callingPositions, tenorsTogether: this.tenorsTogether, noBackstroke65s: this.noBackstroke65s, namedRows: this.namedRows, tenorBehind: this.tenorBehind, minMusic: this.minMusic, minRuns: this.minRuns, minCRUs: this.minCRUs } }, snapshotBuffers(entry.task));
 			}
 		} catch (error) {
 			this.fail(error.message || 'Could not send work to the touch search worker.');
@@ -400,9 +437,8 @@ export default class TouchSearchPool {
 	}
 
 	enqueue (tasks) {
-		// Rotate between shallow lanes, but search depth-first inside each lane:
-		// one deep search can fill the cap with similar touches, while a global
-		// breadth-first queue would grow too large. Reverse returned branches so
+		// Rotate between shallow lanes, but search depth-first inside each lane
+		// to avoid an ever-growing breadth-first queue. Reverse returned branches so
 		// pop() resumes the worker's deepest unfinished branch first.
 		const groups = new Map();
 		for (const task of tasks) {
@@ -449,6 +485,7 @@ export default class TouchSearchPool {
 		for (const entry of this.workers) entry.worker.terminate();
 		this.workers = [];
 		this.preparing = null;
+		this.pendingMusic.clear();
 	}
 
 	dispose () {

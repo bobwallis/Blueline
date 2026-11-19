@@ -9,9 +9,9 @@
  * 3. TouchSearchPool uses initialSearchTasks to divide the starting searches.
  * 4. Each worker runs searchSlice: replay a task's prefix, explore further call
  *    choices, then return touches and unfinished branches for rescheduling.
- * 5. Before emitting a touch, canonicalTouch proves it with simulate, gives
- *    rotations a shared key and picks a display rotation passing the music
- *    filters. Presentation also uses simulate for text/export.
+ * 5. Rotation tasks drain canonicalTouchSteps between worker slices, giving
+ *    rotations a shared key, the simplest passing calling and all strictly
+ *    more musical passing alternatives. Presentation uses simulate for exports.
  *
  * Rows contain 0-based bells by position; a change p gives new[i] = old[p[i]].
  * This module has no imports so workers can load its versioned URL directly.
@@ -366,45 +366,36 @@ export function tenorsHomeNecklace (word, leads, callsPerLead, borders, homes) {
 
 /**
  * Summarise a proved touch's music for result cards and pool filtering (and,
- * later, scoring). rows are simulate's rows: rows[i] is row i+1, so even
+ * scoring). rows are simulate's rows: rows[i] is row i+1, so even
  * indexes are handstrokes. Search each handstroke followed by its backstroke,
  * so named rows wrapped across the pair count too. A true touch's only
- * whole-row Rounds is its final row, so Rounds counts only when wrapped.
+ * whole-row Rounds is its final row; compulsory endpoints are not scored.
  * "65s" means the two heaviest bells reversed at the back (87s on eight).
  * On odd stages, also read the rows with a tenor covering behind, against the
  * next stage's named rows, so the filter can switch without searching again.
  */
-export function touchMusic (method, rows) {
+export function touchMusic (method, rows, analyseMusic) {
+	if (typeof analyseMusic !== 'function') throw new Error('The shared music analyser was not loaded.');
 	const n = method.stage;
 	let backstroke65s = 0;
 	for (let i = 1; i < rows.length; i += 2) if (rows[i][n - 2] === n - 1 && rows[i][n - 1] === n - 2) backstroke65s++;
-	const music = { namedRows: countNamedRows(method.namedRows || [], rows), backstroke65s };
-	if (method.namedRowsBehind) music.tenorBehind = { namedRows: countNamedRows(method.namedRowsBehind, rows.map(row => row.concat(n))) };
+	const music = { ...analyseMusic(rows, { stage: n, namedRows: method.namedRows || [], excludeRounds: true }), backstroke65s };
+	if (method.namedRowsBehind) music.tenorBehind = analyseMusic(rows.map(row => row.concat(n)), { stage: n + 1, namedRows: method.namedRowsBehind, excludeRounds: true });
 	return music;
 }
 
-function countNamedRows (named, rows) {
-	const counts = {}, n = rows[0]?.length;
-	for (let i = 0; i < rows.length; i += 2) {
-		const pair = i + 1 < rows.length ? rows[i].concat(rows[i + 1]) : rows[i];
-		for (const { name, row } of named) {
-			for (let k = 0; k + n <= pair.length; k++) {
-				if (name === 'Rounds' && k % n === 0) continue;
-				let j = 0;
-				while (j < n && pair[k + j] === row[j]) j++;
-				if (j === n) counts[name] = (counts[name] || 0) + 1;
-			}
-		}
-	}
-	return counts;
+export function validateMusicMinimums ({ minMusic = 0, minRuns = 0, minCRUs = 0 } = {}, stage) {
+	if (!Number.isFinite(minMusic) || minMusic < 0 || !Number.isSafeInteger(minRuns) || minRuns < 0 || !Number.isSafeInteger(minCRUs) || minCRUs < 0) throw new Error('Music minimums must be non-negative; counts must be whole numbers.');
+	if (minCRUs && stage !== 8) throw new Error('CRUs are only counted on eight bells, including Triples with a tenor behind.');
 }
 
-// Every selected named row must appear; 65s at back must not. tenorBehind
-// selects the named rows read with a cover bell (odd stages only).
-export function matchesMusic (music, { noBackstroke65s = false, namedRows = [], tenorBehind = false } = {}) {
-	if (!noBackstroke65s && !namedRows.length) return true;
-	const found = (tenorBehind ? music?.tenorBehind : music)?.namedRows;
-	return !!found && (!noBackstroke65s || music.backstroke65s === 0) && namedRows.every(name => found[name] > 0);
+// Every selected named row and minimum must pass; 65s at back must not.
+// tenorBehind selects all music read with a cover bell (odd stages only).
+export function matchesMusic (music, { noBackstroke65s = false, namedRows = [], tenorBehind = false, minMusic = 0, minRuns = 0, minCRUs = 0 } = {}) {
+	if (!noBackstroke65s && !namedRows.length && !minMusic && !minRuns && !minCRUs) return true;
+	const reading = tenorBehind ? music?.tenorBehind : music;
+	return !!reading && (!noBackstroke65s || music.backstroke65s === 0) && namedRows.every(name => reading.namedRows[name] > 0)
+		&& (!minMusic || reading.density >= minMusic) && (!minRuns || reading.runs >= minRuns) && (!minCRUs || reading.crus >= minCRUs);
 }
 
 /**
@@ -417,7 +408,7 @@ export function matchesMusic (music, { noBackstroke65s = false, namedRows = [], 
  * changes stroke, so relabel those rotations directly instead. With a tenor
  * behind, append the cover to every row; relabelling never moves it.
  */
-function musicRotations (method, rows, filters) {
+function musicRotations (method, rows, filters, analyseMusic) {
 	const n = method.stage, length = rows.length, m = filters.tenorBehind ? n + 1 : n;
 	const wanted = ((filters.tenorBehind ? method.namedRowsBehind : method.namedRows) || []).filter(entry => filters.namedRows?.includes(entry.name));
 	const start = offset => offset ? rows[offset - 1] : Array.from({ length: n }, (_, i) => i);
@@ -427,7 +418,7 @@ function musicRotations (method, rows, filters) {
 			start(offset).forEach((bell, place) => {
 				inverse[bell] = place;
 			});
-			return matchesMusic(touchMusic(method, rows.slice(offset).concat(rows.slice(0, offset)).map(row => row.map(bell => inverse[bell]))), filters);
+			return matchesMusic(touchMusic(method, rows.slice(offset).concat(rows.slice(0, offset)).map(row => row.map(bell => inverse[bell])), analyseMusic), filters);
 		};
 	}
 	// A rotation by an odd number of rows swaps strokes, so index ends by
@@ -603,11 +594,12 @@ export function positionName (stage, place) {
 	return ({ 5: 'V', 6: 'X', 7: 'S', 8: 'E', 9: 'N' })[place] || String(place);
 }
 
+export const positionTitles = { H: 'Home', W: 'Wrong', M: 'Middle', I: 'In', B: 'Before', F: 'Fourths', V: 'Fifth', X: 'Sixth', S: 'Seventh', E: 'Eighth', N: 'Ninth' };
+
 // Compile the same position lookup for display, filtering and early rejection.
 // Index by decision slot, call ID and tenor place BEFORE the replacement block.
 export function compileCallingPositions (method) {
 	const regular = method.points.filter(Boolean).length === 1 && method.points.some((point, slot) => point && (slot + method.covers[slot]) % method.length === 0);
-	const names = { H: 'Home', W: 'Wrong', M: 'Middle', I: 'In', B: 'Before', F: 'Fourths', V: 'Fifth', X: 'Sixth', S: 'Seventh', E: 'Eighth', N: 'Ninth' };
 	const options = new Map();
 	const lookup = method.choices.map((choices, slot) => choices.reduce((calls, call) => {
 		if (!call) return calls;
@@ -621,7 +613,7 @@ export function compileCallingPositions (method) {
 				place = permutation.indexOf(place);
 			}
 			const code = positionName(method.stage, place + 1);
-			if (code) options.set(code, { value: code, label: `${names[code] || `Place ${place + 1}`} (${code})` });
+			if (code) options.set(code, { value: code, label: `${positionTitles[code] || `Place ${place + 1}`} (${code})` });
 			return code;
 		});
 		return calls;
@@ -745,34 +737,56 @@ export function repeatsCourseBob (method, previous, entry, bell, length) {
  * Rotations relabel bells, so music filters can differ between rotations:
  * display only one that passes them, or return null if none does.
  */
-export function canonicalTouch (method, touch, preserveCalling = false, tenorsTogether = false, music = {}) {
+export function canonicalTouch (method, touch, preserveCalling = false, tenorsTogether = false, music = {}, analyseMusic) {
+	const iterator = canonicalTouchSteps(method, touch, preserveCalling, tenorsTogether, music, analyseMusic);
+	for (;;) {
+		const step = iterator.next();
+		if (step.done) return step.value;
+	}
+}
+
+/**
+ * Yield serialisable rotation progress between analyses. Search workers can
+ * resume it in another slice; synchronous callers simply drain the iterator.
+ */
+export function* canonicalTouchSteps (method, touch, preserveCalling = false, tenorsTogether = false, music = {}, analyseMusic, saved) {
+	validateMusicMinimums(music, method.stage + (music.tenorBehind ? 1 : 0));
 	const proof = simulate(method, touch);
 	const signature = proof.steps.map(step => `${step.change}:${step.call}`);
-	const musical = music.noBackstroke65s || music.namedRows?.length ? musicRotations(method, proof.rows, music) : null;
+	const musical = proof.rows.length % 2 === 0 && (music.noBackstroke65s || music.namedRows?.length) ? musicRotations(method, proof.rows, { ...music, minMusic: 0, minRuns: 0, minCRUs: 0 }, analyseMusic) : null;
 	if (touch.length % method.length || proof.incompleteCall) {
 		// A partial-lead loop cannot wrap around while preserving the method's change order.
 		if (musical && !musical(0)) return null;
-		return { ...touch, partLength: touch.length, music: touchMusic(method, proof.rows), callPositions: [...proof.callRows.filter(entry => entry.call).map(entry => entry.position), ...(proof.incompleteCall && proof.steps.at(-1).blockCall ? [null] : [])], key: `${touch.length}/${touch.phase}/${signature.join('.')}` };
+		const summary = touchMusic(method, proof.rows, analyseMusic);
+		if (!matchesMusic(summary, music)) return null;
+		return { ...touch, partLength: touch.length, music: summary, rotations: [], callPositions: [...proof.callRows.filter(entry => entry.call).map(entry => entry.position), ...(proof.incompleteCall && proof.steps.at(-1).blockCall ? [null] : [])], key: `${touch.length}/${touch.phase}/${signature.join('.')}` };
 	}
-	let key = null, bestOffset = 0, bestScore = null, bestTie = null;
+	let { key = null } = saved || {};
+	const candidates = saved?.candidates || [], evaluated = new Set(saved?.evaluated || []);
 	const calls = proof.callRows.filter(entry => entry.call);
 	const partLength = shortestPartLength(method, touch);
 	const courseOrder = method.callingPositions?.courseOrder || [];
 	const rankCourse = touch.length >= 2 * method.lengthOfCourse;
-	const regular = method.points.filter(Boolean).length === 1 && method.points.some((point, slot) => point && slot + (method.covers?.[slot] || 1) === method.length);
+	const regular = method.points.filter(Boolean).length === 1
+		&& method.points.some((point, slot) => point && slot + (method.covers?.[slot] || 1) === method.length)
+		&& method.boundaries?.every((boundary, slot) => boundary === (slot === method.length - 1));
 	// Display ranking is separate from the shared rotation key:
 	// 1. Eligible positions (when filtered), then normal lead starts.
 	// 2. Fewer calls outside W/M/H, then fewer distinct calling positions.
 	// 3. For long touches, ordered course columns, allowing numbered bob runs.
-	// 4. Lexical phase/call signature breaks ties independently of discovery.
+	// 4. Music breaks simplicity ties; lexical order only breaks equal scores.
+	// If no passing rotation supports a course table, hidden tenor-position
+	// preferences are unhelpful: choose by music instead.
 	// Relabelling a rotated start changes which original bell becomes tenor.
 	// Evaluate that bell throughout, not the old tenor's position labels.
-	for (let offset = 0; offset < touch.length; offset++) {
+	for (let offset = saved?.nextOffset || 0; offset < touch.length; offset++) {
 		const phase = (touch.phase + offset) % method.length;
 		if (!method.phases.includes(phase) || proof.steps[offset].offset) continue;
 		const candidateKey = signature.slice(offset).concat(signature.slice(0, offset)).join('.');
 		if (key === null || candidateKey < key) key = candidateKey;
 		if (preserveCalling === true && offset !== 0) continue;
+		if (evaluated.has(candidateKey)) continue;
+		evaluated.add(candidateKey);
 		const bell = offset ? proof.rows[offset - 1][method.stage - 1] : method.stage - 1;
 		const positions = calls.map(entry => {
 			const before = entry.change - (method.covers?.[entry.slot] || 1) - 1;
@@ -785,13 +799,13 @@ export function canonicalTouch (method, touch, preserveCalling = false, tenorsTo
 			word: proof.steps.slice(offset).concat(proof.steps.slice(0, offset)).filter(step => method.points[step.change]).map(step => step.call),
 		})) continue;
 		if (musical && !musical(offset)) continue;
-		let course = phase === 0 && regular && courseOrder.length > 0;
+		let course = phase === 0 && regular && !!method.lengthOfCourse && courseOrder.length > 0 && method.callingPositions.options.length > 0;
 		let lastColumn = -1;
 		let previous = null;
 		// Course parts must repeat the tenor calling, not just the call word.
 		// Use the same tenor-restoring boundary as the renderer.
-		const courseLength = rankCourse && course ? coursePartLength(touch, proof, partLength, method.stage, offset) : partLength;
-		for (const entry of rankCourse && course ? [...proof.callRows.filter(entry => entry.change > offset), ...proof.callRows.filter(entry => entry.change <= offset)] : []) {
+		const courseLength = course ? coursePartLength(touch, proof, partLength, method.stage, offset) : partLength;
+		for (const entry of course ? [...proof.callRows.filter(entry => entry.change > offset), ...proof.callRows.filter(entry => entry.change <= offset)] : []) {
 			if ((entry.change - offset + touch.length - 1) % touch.length + 1 > courseLength) break;
 			if (entry.call) {
 				const position = positions[calls.indexOf(entry)];
@@ -808,18 +822,39 @@ export function canonicalTouch (method, touch, preserveCalling = false, tenorsTo
 			new Set(positions).size,
 			rankCourse && !course ? 1 : 0,
 		];
-		const difference = bestScore ? score.findIndex((value, i) => value !== bestScore[i]) : -1;
-		if (!bestScore || difference >= 0 && score[difference] < bestScore[difference] || difference < 0 && candidateKey < bestTie) {
-			bestScore = score;
-			bestTie = candidateKey;
-			bestOffset = offset;
+		const inverse = [];
+		(offset ? proof.rows[offset - 1] : Array.from({ length: method.stage }, (_, i) => i)).forEach((bell, place) => {
+			inverse[bell] = place;
+		});
+		const summary = touchMusic(method, proof.rows.slice(offset).concat(proof.rows.slice(0, offset)).map(row => row.map(bell => inverse[bell])), analyseMusic);
+		if (matchesMusic(summary, music)) {
+			candidates.push({ offset, score, course: !!course, tie: candidateKey, music: summary });
 		}
+		yield { nextOffset: offset + 1, key, candidates, evaluated: [...evaluated] };
 	}
-	if (musical && !bestScore) return null;
-	const rotated = proof.steps.slice(bestOffset).concat(proof.steps.slice(0, bestOffset));
-	const best = { phase: (touch.phase + bestOffset) % method.length, length: touch.length, word: Uint8Array.from(rotated.filter(step => method.points[step.change]), step => step.call) };
+	if (!candidates.length) return null;
+	const reading = summary => music.tenorBehind ? summary.tenorBehind : summary;
+	const courseAvailable = candidates.some(candidate => candidate.course);
+	const rank = candidate => courseAvailable ? [...candidate.score, -reading(candidate.music).score] : [candidate.score[0], -reading(candidate.music).score];
+	candidates.sort((a, b) => {
+		const first = rank(a), second = rank(b);
+		return first.reduce((difference, value, i) => difference || value - second[i], 0) || a.tie.localeCompare(b.tie);
+	});
+	const { offset: bestOffset, tie: bestTie } = candidates[0];
+	const make = offset => {
+		const rotated = proof.steps.slice(offset).concat(proof.steps.slice(0, offset));
+		const variant = { phase: (touch.phase + offset) % method.length, length: touch.length, word: Uint8Array.from(rotated.filter(step => method.points[step.change]), step => step.call) };
+		return { ...variant, partLength: shortestPartLength(method, variant), music: candidates.find(candidate => candidate.offset === offset).music };
+	};
+	const best = make(bestOffset);
 	const bestProof = simulate(method, best);
-	return { ...best, partLength: shortestPartLength(method, best), music: touchMusic(method, bestProof.rows), callPositions: bestProof.callRows.filter(entry => entry.call).map(entry => entry.position), key: `${touch.length}/${key}` };
+	const seen = new Set([bestTie]);
+	const rotations = candidates.filter(candidate => {
+		if (reading(candidate.music).score <= reading(best.music).score || seen.has(candidate.tie)) return false;
+		seen.add(candidate.tie);
+		return true;
+	}).sort((a, b) => reading(b.music).score - reading(a.music).score || a.score.reduce((difference, value, i) => difference || value - b.score[i], 0) || a.tie.localeCompare(b.tie)).map(candidate => make(candidate.offset));
+	return { ...best, rotations, callPositions: bestProof.callRows.filter(entry => entry.call).map(entry => entry.position), key: `${touch.length}/${key}` };
 }
 
 // Shared by search eligibility and multipart display. A part must restore the
@@ -864,11 +899,24 @@ export function snapshotBuffers (task) {
  * transferable DFS snapshot; shallow splits and baseline tests use prefixes.
  * Either continuation can be assigned to any worker.
  */
-export function searchSlice (method, task, { budgetNodes = 100000, budgetMs = 300, maximumResults = 24, lengthRanges = [[1, Infinity]], minParts = 1, callingPositions = [], tenorsTogether = false, noBackstroke65s = false, namedRows = [], tenorBehind = false, multipart = true, snapshots = false, random = Math.random } = {}) {
+export function searchSlice (method, task, { budgetNodes = 100000, budgetMs = 300, maximumResults = 24, lengthRanges = [[1, Infinity]], minParts = 1, callingPositions = [], tenorsTogether = false, noBackstroke65s = false, namedRows = [], tenorBehind = false, minMusic = 0, minRuns = 0, minCRUs = 0, analyseMusic, multipart = true, snapshots = false, random = Math.random } = {}) {
 	if (tenorsTogether && !method.tenorsTogether?.supported) throw new Error('Tenors together is not supported for this method.');
 	if (noBackstroke65s && !method.back65) throw new Error('65s at back can only be excluded on even stages.');
 	if (tenorBehind && !method.namedRowsBehind) throw new Error('A tenor behind can only be assumed on odd stages.');
 	if (namedRows.some(name => !(tenorBehind ? method.namedRowsBehind : method.namedRows)?.some(entry => entry.name === name))) throw new Error('Unknown named row for this stage.');
+	validateMusicMinimums({ minMusic, minRuns, minCRUs }, method.stage + (tenorBehind ? 1 : 0));
+	if (task.mode === 'recheck' || task.mode === 'music') {
+		const deadline = performance.now() + budgetMs;
+		const iterator = canonicalTouchSteps(method, task.candidate, callingPositions, tenorsTogether, { noBackstroke65s, namedRows, tenorBehind, minMusic, minRuns, minCRUs }, analyseMusic, task.rotationState);
+		for (;;) {
+			const step = iterator.next();
+			if (step.done) {
+				const result = step.value;
+				return { results: result && result.length / result.partLength >= minParts ? [result] : [], frontier: [], nodes: 0, explored: 0 };
+			}
+			if (performance.now() >= deadline) return { results: [], frontier: [{ ...task, rotationState: step.value }], nodes: 0, explored: 0 };
+		}
+	}
 	const back65 = noBackstroke65s ? method.back65 : null;
 	// Bound base-pattern exploration by both its scheduled horizon and the
 	// minimum part count. Closure bounds and repeated touches still use the
@@ -913,12 +961,17 @@ export function searchSlice (method, task, { budgetNodes = 100000, budgetMs = 30
 		// part do not guarantee permitted positions in every later part.
 		if (!matchesCallingPositions(method, candidate, callingPositions)) return;
 		if (tenorsTogether && !matchesTenorsTogether(method, candidate)) return;
-		// Music depends on the rotation; canonicalTouch rejects touches with no passing rotation.
-		const result = canonicalTouch(method, candidate, callingPositions, tenorsTogether, { noBackstroke65s, namedRows, tenorBehind });
-		if (!result || result.length / result.partLength < minParts) return;
-		if (!seen.has(result.key)) {
-			seen.add(result.key);
-			results.push(result);
+		// Evaluate rotations separately, so even a long touch can pause between
+		// rotations rather than holding the worker beyond its slice allowance.
+		const key = `${candidate.phase}/${candidate.length}/${candidate.word.join(',')}`;
+		if (!seen.has(key)) {
+			seen.add(key);
+			if (budgetMs === Infinity) {
+				const result = canonicalTouch(method, candidate, callingPositions, tenorsTogether, { noBackstroke65s, namedRows, tenorBehind, minMusic, minRuns, minCRUs }, analyseMusic);
+				if (result && result.length / result.partLength >= minParts) results.push(result);
+			} else {
+				frontier.push({ phase: candidate.phase, mode: 'music', prefix: new Uint8Array(), candidate, maxPartChanges: task.maxPartChanges, allowSingles: task.allowSingles, requireSingle: task.requireSingle });
+			}
 		}
 	};
 	while (depth >= 0) {
@@ -950,7 +1003,7 @@ export function searchSlice (method, task, { budgetNodes = 100000, budgetMs = 30
 			depth--;
 			continue;
 		}
-		if (count >= prefix.length && decisions > 0 && (nodes >= budgetNodes || results.length >= maximumResults || nodes % 128 === 0 && performance.now() >= deadline)) {
+		if (count >= prefix.length && decisions > 0 && (nodes >= budgetNodes || results.length + frontier.length >= maximumResults || nodes % 128 === 0 && performance.now() >= deadline)) {
 			if (snapshots && prefix.length >= 2) {
 				// One snapshot owns the entire remaining DFS subtree, including
 				// ancestor siblings. Never copy a full snapshot for each branch.

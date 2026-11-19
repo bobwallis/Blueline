@@ -1,10 +1,11 @@
 import { compileMethod, maximumChanges, standardLengthRanges } from '../../touch_generator/Compile.js';
-import { describeTouch, siril, touchLayouts } from '../../touch_generator/Presentation.js';
+import { describeTouch, siril, touchLayouts, touchLine } from '../../touch_generator/Presentation.js';
 import PlaceNotation from '../../helpers/PlaceNotation.js';
 import LocalStorage from '../../helpers/LocalStorage.js';
 import TouchSearchPool from './TouchSearchPool.js';
 import TabBar from '../TabBar.js';
 import Choices from 'choices.js';
+import { musicReading } from '../../helpers/MusicPatterns.js';
 
 /**
  * Connect the Touches tab to generation and presentation.
@@ -35,6 +36,7 @@ class Touches {
 		this.dialog = panel.querySelector('[data-touch-dialog]');
 		this.dialog.addEventListener('click', event => {
 			if (event.target === this.dialog) this.dialog.close();
+			if (!event.target.closest?.('.touch-line-row[data-notes]')) this.hideLineTooltip?.();
 		});
 		this.dialog.addEventListener('keydown', event => {
 			if (event.key === 'Escape') {
@@ -61,6 +63,10 @@ class Touches {
 		panel.querySelector('[data-touch-back65-setting]').hidden = this.config.stage % 2 !== 0;
 		this.tenorBehind = panel.querySelector('[data-touch-tenor-behind]');
 		this.tenorBehind.checked = !!namedRowsBehind;
+		this.minMusic = panel.querySelector('[data-touch-min-music]');
+		this.minRuns = panel.querySelector('[data-touch-min-runs]');
+		this.minCRUs = panel.querySelector('[data-touch-min-crus]');
+		this.configureCRUs();
 		panel.querySelector('[data-touch-tenor-behind-setting]').hidden = !namedRowsBehind;
 		const rowChoices = (selected = []) => (this.tenorBehind.checked ? namedRowsBehind : namedRows).map(({ name, row }) => ({ value: name, label: `${name} (${row.map(PlaceNotation.bellToChar).join('')})`, selected: selected.includes(name) }));
 		this.namedRows = panel.querySelector('[data-touch-named-rows]');
@@ -88,6 +94,7 @@ class Touches {
 		// Registered before the settings listener below, so it reads the new list.
 		// Keep selections whose names exist with and without the tenor.
 		this.tenorBehind.addEventListener('change', () => {
+			this.configureCRUs();
 			const selected = [...this.namedRows.selectedOptions].map(option => option.value);
 			this.namedRowChoices.removeActiveItems();
 			this.namedRowChoices.setChoices(rowChoices(selected), 'value', 'label', true);
@@ -162,7 +169,7 @@ class Touches {
 		this.part.value = 1;
 		this.limit.value = 100;
 		this.budget.value = LocalStorage.getSetting('touch_budget_seconds', 20);
-		for (const input of [panel.querySelector('.touch-length-setting'), this.part, this.limit, this.budget, this.positions, this.tenors, this.back65, this.tenorBehind, this.namedRows]) {
+		for (const input of [panel.querySelector('.touch-length-setting'), this.part, this.limit, this.budget, this.positions, this.tenors, this.back65, this.tenorBehind, this.namedRows, this.minMusic, this.minRuns, this.minCRUs]) {
 			input.addEventListener('change', event => {
 				const row = event.target.closest('.touch-custom-length');
 				const [from, to] = row?.querySelectorAll('input[type="number"]') ?? [];
@@ -246,6 +253,7 @@ class Touches {
 	searchOptions () {
 		if (![this.part, this.limit, this.budget].every(control => control.checkValidity() && Number.isSafeInteger(control.valueAsNumber))) throw new Error('Enter whole numbers within the allowed ranges for minimum parts, result limit and search budget.');
 		if (![...this.customLengths.querySelectorAll('input')].every(control => control.checkValidity())) throw new Error(`Enter custom touch lengths from 1 to ${this.ceiling}.`);
+		if (![this.minMusic, this.minRuns, this.minCRUs].every(control => control.checkValidity() && Number.isFinite(control.valueAsNumber))) throw new Error('Enter non-negative music minimums; run and CRU counts must be whole numbers.');
 		return {
 			lengthRanges: this.lengthRanges(),
 			minParts: this.part.valueAsNumber,
@@ -254,6 +262,9 @@ class Touches {
 			noBackstroke65s: this.back65.checked,
 			namedRows: [...this.namedRows.selectedOptions].map(option => option.value),
 			tenorBehind: this.tenorBehind.checked,
+			minMusic: this.minMusic.valueAsNumber,
+			minRuns: this.minRuns.valueAsNumber,
+			minCRUs: this.minCRUs.valueAsNumber,
 			maximumResults: this.limit.valueAsNumber,
 			budgetMs: this.budget.valueAsNumber * 1000,
 		};
@@ -269,7 +280,7 @@ class Touches {
 				return;
 			}
 			this.method = compileMethod(this.config, !!LocalStorage.getSetting('method_near_calls', true));
-			this.pool = new TouchSearchPool(this.method, { worker: this.config.workerURL, runtime: this.config.runtimeURL }, pool => this.render(pool), { ...options, autoSingles: !this.singlesChangedByUser });
+			this.pool = new TouchSearchPool(this.method, { worker: this.config.workerURL, runtime: this.config.runtimeURL, music: this.config.musicURL }, pool => this.render(pool), { ...options, autoSingles: !this.singlesChangedByUser });
 			if (this.singles.checked) this.pool.setAllowSingles(true);
 			this.pool.start();
 		} catch (error) {
@@ -308,7 +319,6 @@ class Touches {
 			stopped: 'Search stopped.',
 			hidden: 'Search paused while the app is hidden.',
 			complete: pool.matchingResults().length ? 'Search complete for the current settings.' : 'No touches found matching these settings.',
-			capped: `Limit of ${pool.maximumResults} touches reached.`,
 			error: `Search failed: ${pool.error}. Already generated touches are retained.`,
 		};
 		const lengths = this.lengthRanges().length > 0;
@@ -317,9 +327,12 @@ class Touches {
 		this.singles.checked = pool.allowSingles;
 		this.singles.disabled = !this.method.calls.some(call => call.symbol === 's');
 		const visible = new Set(lengths ? pool.matchingResults() : []);
-		this.progress.textContent = `${visible.size} touches shown · ${pool.results.size - visible.size} hidden · ${pool.nodes.toLocaleString()} changes explored`;
+		this.progress.textContent = `Best ${visible.size} touches shown · ${pool.results.size - visible.size} hidden · ${pool.nodes.toLocaleString()} changes explored`;
+		if (pool.pendingMusicCount) this.progress.textContent += ` · ${pool.pendingMusicCount} awaiting refreshed music${pool.state === 'stopped' ? ' (Search more to refresh)' : ''}`;
 		this.stop.hidden = pool.state !== 'running';
-		this.more.hidden = !lengths || !['budget', 'stopped', 'capped'].includes(pool.state);
+		this.more.hidden = !lengths || !['budget', 'stopped'].includes(pool.state);
+		const focused = document.activeElement;
+		const focusedKey = this.results.contains(focused) ? focused.closest('[data-key]')?.dataset.key : null;
 		for (const touch of visible) {
 			const key = touch.key;
 			const previous = this.shown.get(key);
@@ -338,6 +351,20 @@ class Touches {
 			}
 		}
 		for (const card of this.results.children) card.hidden = !visible.has(pool.results.get(card.dataset.key));
+		let next = this.results.firstElementChild;
+		for (const touch of visible) {
+			const card = this.shown.get(touch.key).card;
+			if (card !== next) {
+				if (this.results.moveBefore) this.results.moveBefore(card, next);
+				else this.results.insertBefore(card, next);
+			}
+			next = card.nextElementSibling;
+		}
+		if (focusedKey) {
+			const replacement = this.shown.get(focusedKey)?.card;
+			const target = replacement && !replacement.hidden ? replacement : this.shown.get(visible.values().next().value?.key)?.card;
+			if (target && document.activeElement !== target) target.focus({ preventScroll: true });
+		}
 	}
 
 	addResult (touch) {
@@ -352,8 +379,11 @@ class Touches {
 		card.setAttribute('aria-label', `View ${touch.length}-change touch details`);
 		const summary = element('h3', `${touch.length} changes`, 'touch-title');
 		card.append(summary);
+		const reading = musicReading(touch.music, this.pool?.tenorBehind);
 		const music = this.musicSummary(touch);
 		card.append(this.layoutTable(layouts, layouts.defaultLayout, music));
+		card.append(element('p', `${this.points(reading.density)} points / 100 changes · ${this.points(reading.score)} total points`, 'touch-music'));
+		if (touch.rotations?.length) card.append(element('p', `${touch.rotations.length} higher-scoring ${touch.rotations.length === 1 ? 'rotation' : 'rotations'} in details`, 'touch-music'));
 		card.addEventListener('keydown', event => {
 			if (event.key === 'Enter' || event.key === ' ') {
 				event.preventDefault();
@@ -375,9 +405,7 @@ class Touches {
 			}
 			this.dialog.style.transformOrigin = `${origin.left + origin.width / 2 - this.dialog.offsetLeft}px ${origin.top + origin.height / 2 - this.dialog.offsetTop}px`;
 		});
-		// Workers return out of order; insert by length rather than rebuilding existing cards.
-		const next = [...this.results.children].find(child => Number(child.dataset.length) > touch.length);
-		this.results.insertBefore(card, next || null);
+		this.results.append(card);
 		return card;
 	}
 
@@ -424,16 +452,132 @@ class Touches {
 		return wrap;
 	}
 
+	lineTable (panel, line) {
+		// Write rows as text, one element per music segment. Shading follows the
+		// line diagram's green scale, but with a floor so every event with a
+		// tooltip is visible. Leads are separate blocks so the browser can skip
+		// laying out off-screen parts of long touches.
+		const table = element('div', null, 'touch-line');
+		table.setAttribute('role', 'table');
+		table.setAttribute('aria-label', 'Rows and calls');
+		table.style.setProperty('--touch-line-bells', line.stage);
+		const cover = line.cover ? line.stage - 1 : -1;
+		const bells = (parent, text, from, to) => {
+			if (cover >= from && cover < to) {
+				if (cover > from) parent.append(text.slice(from, cover));
+				parent.append(element('span', text[cover], 'touch-line-cover'));
+			} else if (to > from) parent.append(text.slice(from, to));
+		};
+		const shade = score => Math.max(0.12, 0.35 * Math.min((Math.min(100, score * 20) / (100 - line.stage * 3)) ** (1 / 1.4), 1)).toFixed(3);
+		let lead = null;
+		const finishLead = () => {
+			lead.style.setProperty('--touch-line-rows', lead.childElementCount);
+			table.append(lead);
+			lead = null;
+		};
+		for (const row of line.rows) {
+			if (!lead) {
+				lead = element('div', null, 'touch-line-lead');
+				lead.setAttribute('role', 'rowgroup');
+			}
+			const tr = element('div', null, `touch-line-row${row.ruleOff ? ' touch-line-rule-off' : ''}`);
+			tr.setAttribute('role', 'row');
+			const notes = [...new Set(row.segments.flatMap(segment => segment.notes))];
+			if (notes.length) tr.dataset.notes = notes.join(' ');
+			const cell = element('span', null, 'touch-line-bells');
+			let place = 0;
+			for (const segment of row.segments) {
+				bells(cell, row.bells, place, segment.start);
+				const mark = element('mark', null, segment.warning ? 'touch-line-warning' : null);
+				if (!segment.warning) mark.style.setProperty('--touch-line-shade', shade(segment.score));
+				bells(mark, row.bells, segment.start, segment.end);
+				cell.append(mark);
+				place = segment.end;
+			}
+			bells(cell, row.bells, place, line.stage);
+			const score = element('span', row.score > 0 ? row.score.toLocaleString('en-GB', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) : '', 'touch-line-score');
+			const call = element('span', row.call, 'touch-line-call');
+			if (row.callPart) call.dataset.part = row.callPart;
+			for (const node of [score, cell, call]) node.setAttribute('role', 'cell');
+			tr.append(score, cell, call);
+			lead.append(tr);
+			if (row.ruleOff) finishLead();
+		}
+		if (lead) finishLead();
+
+		// One tooltip serves every row: hover for mice and pens, tap to pin.
+		const tooltip = element('div', null, 'touch-line-tooltip');
+		tooltip.id = 'touch_line_tooltip';
+		tooltip.setAttribute('role', 'tooltip');
+		let shown = null, pinned = false;
+		const hide = () => {
+			shown?.removeAttribute('aria-describedby');
+			shown = null;
+			pinned = false;
+			tooltip.classList.remove('touch-line-tooltip-visible');
+		};
+		const show = row => {
+			shown?.removeAttribute('aria-describedby');
+			shown = row;
+			row.setAttribute('aria-describedby', tooltip.id);
+			tooltip.replaceChildren(...row.dataset.notes.split(' ').map(index => element('div', line.notes[index])));
+			const box = row.querySelector('.touch-line-bells').getBoundingClientRect(), frame = panel.getBoundingClientRect();
+			const centre = box.left + box.width / 2 - frame.left;
+			const half = tooltip.offsetWidth / 2;
+			const left = Math.min(Math.max(centre, half), panel.clientWidth - half);
+			const below = box.top - this.dialog.getBoundingClientRect().top < tooltip.offsetHeight + 16;
+			tooltip.classList.toggle('touch-line-tooltip-below', below);
+			tooltip.style.left = `${left}px`;
+			tooltip.style.top = `${(below ? box.bottom : box.top) - frame.top}px`;
+			tooltip.style.setProperty('--touch-line-arrow', `${centre - left}px`);
+			tooltip.classList.add('touch-line-tooltip-visible');
+		};
+		table.addEventListener('pointerover', event => {
+			const row = event.target.closest('.touch-line-row[data-notes]');
+			if (event.pointerType !== 'touch' && !pinned && row && row !== shown) show(row);
+		});
+		table.addEventListener('pointerout', event => {
+			const row = event.target.closest('.touch-line-row[data-notes]');
+			if (event.pointerType !== 'touch' && !pinned && row && !row.contains(event.relatedTarget)) hide();
+		});
+		table.addEventListener('click', event => {
+			const row = event.target.closest('.touch-line-row[data-notes]');
+			if (!row) return;
+			if (pinned && shown === row) hide();
+			else {
+				show(row);
+				pinned = true;
+			}
+		});
+		this.hideLineTooltip = hide;
+		panel.append(table, tooltip);
+	}
+
 	bracketedHead (head) {
 		const bracketed = element('span', null, 'touch-bracketed-head');
 		bracketed.append(element('span', '(', 'touch-head-open'), document.createTextNode(head), element('span', ')', 'touch-head-close'));
 		return bracketed;
 	}
 
-	// Named rows found (wrapped across hand/back pairs) and backstroke 65s.
+	configureCRUs () {
+		const supported = this.config.stage + (this.tenorBehind.checked ? 1 : 0) === 8;
+		this.panel.querySelector('[data-touch-crus-setting]').hidden = !supported;
+		this.minCRUs.disabled = !supported;
+		if (!supported) this.minCRUs.value = 0;
+	}
+
+	points (value) {
+		return value.toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+	}
+
 	musicSummary (touch) {
+		const reading = musicReading(touch.music, this.pool?.tenorBehind);
 		return [
-			...Object.entries((this.pool?.tenorBehind ? touch.music?.tenorBehind : touch.music)?.namedRows ?? {}).map(([name, count]) => count > 1 ? `${name}\u00a0×${count}` : name),
+			`${reading.runs} runs`,
+			`${reading.thirds} thirds`,
+			`${reading.tittums} interleaves`,
+			...(this.method.stage + (this.pool?.tenorBehind ? 1 : 0) === 8 ? [`${reading.crus} CRUs`] : []),
+			...Object.entries(reading.namedRows).map(([name, count]) => count > 1 ? `${name}\u00a0×${count}` : name),
 			...this.method.back65 && touch.music?.backstroke65s ? [`${touch.music.backstroke65s} ${this.back65Name} at back`] : [],
 		].join(' · ');
 	}
@@ -456,7 +600,7 @@ class Touches {
 		return paragraph;
 	}
 
-	expandResult (touch, description, layouts) {
+	expandResult (touch, description, layouts, group = touch) {
 		// Build on demand, leaving the list untouched. Native dialog supplies
 		// focus containment, Escape dismissal and focus return to its opener.
 		const card = this.dialog;
@@ -467,6 +611,31 @@ class Touches {
 		title.append(element('span', this.config.title), length);
 		title.id = 'touch_dialog_title';
 		card.append(this.closeButton(), title);
+		if (group.rotations?.length) {
+			const label = element('label', 'Calling rotation ');
+			const select = element('select');
+			select.setAttribute('data-touch-rotation', '');
+			const variants = [group, ...group.rotations];
+			variants.forEach((variant, index) => {
+				const reading = musicReading(variant.music, this.pool?.tenorBehind);
+				const option = element('option', `${index ? `Higher-scoring rotation ${index}` : 'Preferred calling'} (${this.points(reading.density)} points / 100 changes)`);
+				option.value = index;
+				option.selected = variant === touch;
+				select.append(option);
+			});
+			select.addEventListener('change', () => {
+				const variant = variants[select.selectedIndex];
+				try {
+					this.expandResult(variant, describeTouch(this.method, variant), touchLayouts(this.method, variant), group);
+					card.querySelector('[data-touch-rotation]').focus();
+				} catch (error) {
+					console.error('Touch rotation could not be displayed:', error);
+					card.append(element('p', `Could not display this rotation: ${error.message}`));
+				}
+			});
+			label.append(select);
+			card.append(label);
+		}
 		const tabs = element('span');
 		tabs.id = 'touch_dialog_tabs';
 		card.append(tabs);
@@ -495,13 +664,29 @@ class Touches {
 		exportDetails.append(element('p', 'Siril code for use in external proving tools:'));
 		panels.append(exportDetails);
 		tabOptions.push({ title: 'Prove', content: exportDetails.id });
+		const linePanel = element('div', null, 'touch-dialog-panel touch-line-panel');
+		linePanel.id = 'touch_panel_line';
+		linePanel.tabIndex = 0;
+		panels.append(linePanel);
+		tabOptions.push({ title: 'Line', content: linePanel.id });
+		// Writing out a long touch is comparatively expensive, so wait until
+		// the tab is first opened. Rotation changes rebuild the whole dialog.
+		this.renderLine = () => {
+			this.renderLine = null;
+			try {
+				this.lineTable(linePanel, touchLine(this.method, touch, this.pool?.tenorBehind));
+			} catch (error) {
+				console.error('Touch line could not be displayed:', error);
+				linePanel.append(element('p', `Could not display the line: ${error.message}`));
+			}
+		};
 		TabBar({
 			landmark: tabs.id,
 			tabs: tabOptions,
 			active: tabOptions.findIndex(tab => tab.content === `touch_panel_${layouts.defaultLayout}`),
 		});
 		card.querySelector('.tabBar').setAttribute('aria-label', 'Touch details');
-		card.showModal();
+		if (!card.open) card.showModal();
 		let text;
 		try {
 			text = siril(this.method, touch);
@@ -568,7 +753,10 @@ function initialise () {
 }
 
 // Tab switches leave searches running; navigation tears them down.
-window.addEventListener('bl:tab:activated', () => current?.startIfActive());
+window.addEventListener('bl:tab:activated', event => {
+	if (event.detail?.panel === 'touch_panel_line') current?.renderLine?.();
+	current?.startIfActive();
+});
 window.addEventListener('bl:page:request', () => {
 	current?.pool?.dispose();
 	current?.dialog.close();

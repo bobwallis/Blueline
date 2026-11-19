@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import PlaceNotation from '../../../assets/js/helpers/PlaceNotation.js';
 import { compileMethod } from '../../../assets/js/touch_generator/Compile.js';
-import { applyPermutation, canonicalTouch, coursePartLength, positionName, repeatsCourseBob, simulate } from '../../../assets/js/touch_generator/Search.js';
-import { callingTokens, compactComposition, describeTouch, duration, expandCalling, siril, touchLayouts } from '../../../assets/js/touch_generator/Presentation.js';
-import { bristol, stedman, cambridge, york, plainBobMinor, plainBobMaximus, grandsireTriples, grandsireDoubles, doubleNorwichCaters, erinCaters, jump } from './fixtures.mjs';
+import { applyPermutation, canonicalTouch, coursePartLength, positionName, repeatsCourseBob, simulate, touchMusic } from '../../../assets/js/touch_generator/MusicRuntime.js';
+import { callingTokens, compactComposition, describeTouch, duration, expandCalling, siril, touchLayouts, touchLine } from '../../../assets/js/touch_generator/Presentation.js';
+import { bristol, stedman, cambridge, york, plainBobMinor, plainBobMaximus, grandsireTriples, grandsireDoubles, doubleNorwichCaters, erinCaters, jump, plainBobDoubles } from './fixtures.mjs';
 import { bruteForce, prove } from './oracle.mjs';
 
 const stedman166 = {
@@ -69,7 +69,10 @@ test('York rotations prefer back-position tenor calling deterministically withou
 	const method = compileMethod(york);
 	const word = expandCalling(method, 'W H W W H W W F'.split(' ').map(position => ({ call: 1, position })), 0, 552);
 	const expected = canonicalTouch(method, { phase: 0, length: 552, word });
-	assert.equal(describeTouch(method, expected).calling, 'W W H W W F W H');
+	const previous = canonicalTouch(method, { phase: 0, length: 552, word: expandCalling(method, 'W W H W W F W H'.split(' ').map(position => ({ call: 1, position })), 0, 552) }, true);
+	assert.ok(expected.music.score >= previous.music.score);
+	assert.equal(expected.callPositions.filter(position => !['W', 'M', 'H'].includes(position)).length, previous.callPositions.filter(position => !['W', 'M', 'H'].includes(position)).length);
+	assert.equal(new Set(expected.callPositions).size, new Set(previous.callPositions).size);
 	assert.ok(touchLayouts(method, expected).courses);
 	for (let offset = 0; offset < word.length; offset++) {
 		const rotated = { phase: 0, length: 552, word: word.slice(offset).concat(word.slice(0, offset)) };
@@ -145,6 +148,8 @@ test('Double Norwich 180 prints five actual lead heads per part, not call-point 
 	assert.equal(description.finish, 'Backstroke finish');
 	assert.equal(description.sequence, 'x2 · p - - - -');
 	const text = siril(method, touch);
+	assert.ok(text.includes('// Double Norwich Court Bob Caters: 180 changes'));
+	assert.ok(!text.includes('start phase'));
 	assert.deepEqual(exportedRows(text, method.stage), rows);
 	assert.ok(text.includes('comp = 2(segment1,4segment2);'), 'export reuses the plain and bob lead segments, printing all ten reached heads');
 	assert.ok(text.includes('"  @";'), 'plain heads align with called heads');
@@ -430,7 +435,8 @@ test('York course tables count consecutive place-bell-repeating bobs and round-t
 		assert.deepEqual(exportedRows(siril(method, example), method.stage), prove(method, example));
 	}
 	const expected = canonicalTouch(method, touch);
-	assert.deepEqual([...expected.word], word, 'the grouped table must also be recognised by rotation ranking');
+	assert.ok(touchLayouts(method, expected).courses, 'the grouped table must also be recognised by rotation ranking');
+	assert.ok(expected.music.score >= canonicalTouch(method, touch, true).music.score, 'music should break equal simplicity ranks');
 	for (let offset = 0; offset < word.length; offset++) {
 		const result = canonicalTouch(method, { ...touch, word: word.slice(offset).concat(word.slice(0, offset)) });
 		assert.equal(result.key, expected.key);
@@ -699,4 +705,57 @@ test('Siril falls back to exact common notation when the entity prefix is not a 
 	const method = compileMethod({ ...bristol, notationSiril: '+18, &-5' });
 	const touch = { phase: 0, word: [2, 2], length: 64 };
 	assert.deepEqual(exportedRows(siril(method, touch), 8), prove(method, touch));
+});
+
+test('line merges places sharing music events and splits wraps across both rows', () => {
+	const line = touchLine(compileMethod(bristol), { phase: 0, length: 64, word: [2, 2] });
+	assert.equal(line.rows.length, 65);
+	assert.equal(line.rows[0].bells, '12345678');
+	const note = segment => segment.notes.map(index => line.notes[index]);
+	// 24135678 at backstroke: the 5678 run and its CRU cover the same places,
+	// so one segment carries both notes; 135 also touches place 5.
+	assert.deepEqual(line.rows[6].segments.map(segment => [segment.start, segment.end]), [[2, 4], [4, 5], [5, 8]]);
+	assert.deepEqual(note(line.rows[6].segments[2]), ['1.250: Run of 4 bells, at back, backstroke', '1.250: CRU, at back, backstroke']);
+	assert.equal(line.rows[6].segments[2].score, 1.25);
+	// A Tittums-like 6543 wrapping from 21438675 into 24136857.
+	const wrap = line.notes.indexOf('1.000: Tittums-like sequence of 4 bells, wrapped from handstroke to backstroke');
+	assert.deepEqual(line.rows[3].segments.filter(segment => segment.notes.includes(wrap)).map(segment => segment.start), [5, 7]);
+	assert.deepEqual(line.rows[4].segments.filter(segment => segment.notes.includes(wrap)).map(segment => segment.start), [1, 3]);
+	assert.deepEqual(line.rows[64].segments, []);
+	// Row scores credit wraps to their backstroke row and total the touch.
+	assert.equal(line.rows[3].score, 0);
+	assert.equal(line.rows[4].score, 1);
+	assert.equal(line.rows.reduce((total, row) => total + row.score, 0), touchMusic(compileMethod(bristol), simulate(compileMethod(bristol), { phase: 0, length: 64, word: [2, 2] }).rows).score);
+});
+
+test('line labels calls on the row they are made from and rules off segment heads', () => {
+	const bristolLine = touchLine(compileMethod(bristol), { phase: 0, length: 64, word: [2, 2] });
+	assert.deepEqual(bristolLine.rows.flatMap((row, index) => row.call ? [[index, row.call]] : []), [[31, 'Single (Home)'], [63, 'Single (Home)']]);
+	assert.deepEqual(bristolLine.rows.flatMap((row, index) => row.ruleOff ? [index] : []), [32, 64]);
+	assert.ok(bristolLine.rows.every(row => row.callPart === null));
+	// Grandsire's bob replaces two changes: label the row before the first and
+	// bracket both rows the called changes are made from.
+	const grandsire = touchLine(compileMethod(grandsireTriples), { phase: 0, length: 42, word: [1, 1, 1] });
+	assert.deepEqual(grandsire.rows.flatMap((row, index) => row.call ? [[index, row.call]] : []), [[12, 'Bob (In)'], [26, 'Bob (Fourths)'], [40, 'Bob (Home)']]);
+	assert.deepEqual(grandsire.rows.flatMap((row, index) => row.callPart ? [[index, row.callPart]] : []), [[12, 'start'], [13, 'end'], [26, 'start'], [27, 'end'], [40, 'start'], [41, 'end']]);
+	const undeclared = touchLine(compileMethod({ ...grandsireTriples, callingPositions: false }), { phase: 0, length: 42, word: [1, 1, 1] });
+	assert.deepEqual(undeclared.rows.flatMap(row => row.call ? [row.call] : []), ['Bob', 'Bob', 'Bob']);
+	assert.deepEqual(grandsire.rows.flatMap((row, index) => row.ruleOff ? [index] : []), [14, 28, 42]);
+});
+
+test('line reads music with a covering tenor and flags 65s at backstroke', () => {
+	const doubles = touchLine(compileMethod(plainBobDoubles), { phase: 0, length: 40, word: [0, 0, 0, 0] }, true);
+	assert.equal(doubles.stage, 6);
+	assert.equal(doubles.cover, true);
+	assert.equal(doubles.rows[2].bells, '241536');
+	assert.deepEqual(doubles.rows[2].segments.map(segment => segment.start), [1, 3, 5]);
+	assert.equal(touchLine(compileMethod(plainBobDoubles), { phase: 0, length: 40, word: [0, 0, 0, 0] }).rows[2].bells, '24153');
+	const minor = touchLine(compileMethod(plainBobMinor), { phase: 0, length: 72, word: [2, 0, 1, 2, 0, 1] });
+	const flagged = minor.rows.flatMap((row, index) => row.segments.some(segment => segment.warning) ? [index] : []);
+	assert.ok(flagged.length > 0);
+	for (const index of flagged) {
+		assert.equal(index % 2, 0);
+		assert.match(minor.rows[index].bells, /65$/);
+		assert.deepEqual(minor.rows[index].segments.filter(segment => segment.warning).map(segment => [segment.start, segment.end, minor.notes[segment.notes[0]]]), [[4, 6, '65s at back, backstroke']]);
+	}
 });

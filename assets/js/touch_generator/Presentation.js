@@ -1,5 +1,6 @@
 import PlaceNotation from '../helpers/PlaceNotation.js';
-import { applyPermutation, coursePartLength, FalseTouchError, repeatsCourseBob, shortestPartLength, simulate } from './Search.js';
+import { analyseMusic } from '../helpers/MusicPatterns.js';
+import { applyPermutation, positionTitles, coursePartLength, FalseTouchError, repeatsCourseBob, shortestPartLength, simulate } from './Search.js';
 import { estimatedMinutes } from './Timing.js';
 
 /**
@@ -259,6 +260,90 @@ export function touchLayouts (method, touch) {
 	};
 }
 
+function musicNote (event) {
+	const names = { runs: 'Run', thirds: 'Thirds sequence', tittums: 'Tittums-like sequence' };
+	const name = event.name || (event.type === 'crus' ? 'CRU' : `${names[event.type]} of ${event.length} bells`);
+	const place = event.stroke === 'wrap' ? 'wrapped from handstroke to backstroke' : `${event.name ? '' : event.position === 'internal' ? 'internal, ' : `at ${event.position}, `}${event.stroke}stroke`;
+	return `${event.score.toLocaleString('en-GB', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}: ${name}, ${place}`;
+}
+
+export function touchLine (method, touch, tenorBehind = false) {
+	// Write out every row with the scoring events used by touchMusic, merged
+	// into per-row segments of places sharing the same events. Most rows have
+	// none, so callers render plain text plus one element per segment.
+	const proof = simulate(method, touch);
+	const n = method.stage, behind = tenorBehind && !!method.namedRowsBehind, stage = n + (behind ? 1 : 0);
+	const analysis = analyseMusic(behind ? proof.rows.map(row => row.concat(n)) : proof.rows, {
+		stage,
+		namedRows: (behind ? method.namedRowsBehind : method.namedRows) || [],
+		excludeRounds: true,
+		includeEvents: true,
+	});
+	const notes = [], noteIds = new Map();
+	// Display row 0 is the opening rounds, so proof row i is display row i + 1.
+	const marked = Array.from({ length: proof.rows.length + 1 }, () => new Map());
+	const mark = (rowIndex, place, note, score, warning = false) => {
+		if (!noteIds.has(note)) noteIds.set(note, notes.push(note) - 1);
+		const entry = marked[rowIndex].get(place) || { notes: new Set(), score: 0, warning: false };
+		entry.notes.add(noteIds.get(note));
+		entry.score = Math.max(entry.score, score);
+		entry.warning ||= warning;
+		marked[rowIndex].set(place, entry);
+	};
+	// Credit each passage's points to the row where it ends, so a wrap counts
+	// once and the column totals the touch's score.
+	const rowScores = new Float64Array(proof.rows.length + 1);
+	for (const event of analysis.events) {
+		const note = musicNote(event);
+		for (const position of event.positions) mark(event.rowIndex + 1 + Math.floor(position / stage), position % stage, note, event.score);
+		rowScores[event.rowIndex + 1 + Math.floor(event.positions.at(-1) / stage)] += event.score;
+	}
+	if (method.back65) {
+		const note = `${PlaceNotation.bellToChar(n - 1)}${PlaceNotation.bellToChar(n - 2)}s at back, backstroke`;
+		for (let i = 1; i < proof.rows.length; i += 2) {
+			if (proof.rows[i][n - 2] === n - 1 && proof.rows[i][n - 1] === n - 2) {
+				mark(i + 1, n - 2, note, 0, true);
+				mark(i + 1, n - 1, note, 0, true);
+			}
+		}
+	}
+	// Label each call on the row from which its first changed change is made.
+	// Calls replacing several changes also mark the rows of the later changes.
+	const positions = new Map(proof.callRows.map(entry => [entry.change, entry.position]));
+	const calls = new Map(), callParts = new Map();
+	proof.steps.forEach((step, i) => {
+		if (!method.points[step.change] || !step.call) return;
+		const cover = method.covers?.[step.change] || 1;
+		const position = positions.get(i + cover);
+		// Name positions only where the method declares them (not, e.g., Grandsire).
+		const declared = method.callingPositions?.options.some(option => option.value === position);
+		const title = declared ? positionTitles[position] || (/^\d+$/.test(position) ? `Place ${position}` : position) : null;
+		calls.set(i, `${method.calls[step.call].title}${title ? ` (${title})` : ''}`);
+		const last = Math.min(i + cover, proof.steps.length) - 1;
+		if (last > i) for (let row = i; row <= last; row++) callParts.set(row, row === i ? 'start' : row === last ? 'end' : 'middle');
+	});
+	const rows = [PlaceNotation.rounds(n), ...proof.rows].map((row, index) => {
+		const segments = [];
+		for (let place = 0; place < stage; place++) {
+			const entry = marked[index].get(place);
+			if (!entry) continue;
+			const ids = [...entry.notes].sort((a, b) => a - b);
+			const previous = segments.at(-1);
+			if (previous?.end === place && previous.warning === entry.warning && previous.notes.join() === ids.join()) previous.end++;
+			else segments.push({ start: place, end: place + 1, notes: ids, score: entry.score, warning: entry.warning });
+		}
+		return {
+			bells: row.map(PlaceNotation.bellToChar).join('') + (behind ? PlaceNotation.bellToChar(n) : ''),
+			call: calls.get(index) || '',
+			callPart: callParts.get(index) || null,
+			score: rowScores[index],
+			ruleOff: index > 0 && !!method.boundaries[proof.steps[index - 1].change],
+			segments,
+		};
+	});
+	return { stage, cover: behind, rows, notes };
+}
+
 export function compactComposition (blocks) {
 	// Shorten siril's block list with repetitions such as 6p or 3(6p,b).
 	// Greedily choose the biggest text saving, then compress inside that unit.
@@ -375,7 +460,7 @@ export function siril (method, touch) {
 	}
 	return [
 		`${method.stage} bells;`,
-		`// ${String(method.title || 'Custom method').replace(/[\r\n]/g, ' ')}: ${touch.length} changes; start phase ${touch.phase}`,
+		`// ${String(method.title || 'Custom method').replace(/[\r\n]/g, ' ')}: ${touch.length} changes`,
 		`start = ${JSON.stringify(`${opening.partial ? `  (${opening.row})` : '  @'}\n  ${'—'.repeat(method.stage)}`)};`,
 		`finish = "  ${'—'.repeat(method.stage)}\\n";`,
 		...Array.from(definitions, ([name, notation]) => `${name} = ${notation};`),

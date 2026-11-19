@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import PlaceNotation from '../../../assets/js/helpers/PlaceNotation.js';
 import { compileMethod } from '../../../assets/js/touch_generator/Compile.js';
-import { canonicalTouch, compileShortcuts, initialSearchTasks, matchesCallingPositions, matchesTenorsTogether, searchSlice } from '../../../assets/js/touch_generator/Search.js';
+import { canonicalTouch, compileShortcuts, initialSearchTasks, matchesCallingPositions, matchesTenorsTogether, searchSlice } from '../../../assets/js/touch_generator/MusicRuntime.js';
 import { bristol, cambridge, cambridgeMajor, grandsireDoubles, grandsireTriples, plainBobDoubles, stedman } from './fixtures.mjs';
 import { bruteForce, prove, tenorsTogetherAtLeadHeads } from './oracle.mjs';
 

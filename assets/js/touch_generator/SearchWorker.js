@@ -9,7 +9,7 @@
  * unfinished continuations, which we send back as a slice for rescheduling.
  * Snapshot buffers transfer ownership; the next worker restores the whole DFS.
  */
-let runtime, method, initialising, paused = false;
+let runtime, analyseMusic, method, initialising, paused = false;
 
 // Yield between validation/table chunks so pause/resume messages can be handled.
 async function drain (generator) {
@@ -31,6 +31,7 @@ self.onmessage = async function (event) {
 			initialising = (async () => {
 				// Workers lack the document import map, so load the AssetMapper-versioned runtime URL.
 				runtime = await import(event.data.runtimeURL);
+				({ analyseMusic } = await import(event.data.musicURL));
 				method = event.data.method;
 				if (event.data.bundle) {
 					Object.assign(method, event.data.bundle);
@@ -54,9 +55,9 @@ self.onmessage = async function (event) {
 			await initialising;
 			Object.assign(method.distances, event.data.distances);
 		} else if (event.data.type === 'task') {
-			const result = runtime.searchSlice(method, event.data.task, event.data.limits);
+			const result = runtime.searchSlice(method, event.data.task, { ...event.data.limits, analyseMusic });
 			// Transfer word/prefix storage instead of copying it; each buffer only once.
-			self.postMessage({ type: 'slice', ...result }, [...new Set([...result.results.map(touch => touch.word.buffer), ...result.frontier.flatMap(task => [task.prefix.buffer, ...runtime.snapshotBuffers(task)])])]);
+			self.postMessage({ type: 'slice', ...result }, [...new Set([...result.results.flatMap(touch => [touch.word.buffer, ...(touch.rotations || []).map(rotation => rotation.word.buffer)]), ...result.frontier.flatMap(task => [task.prefix.buffer, ...runtime.snapshotBuffers(task)])])]);
 		}
 	} catch (error) {
 		// Let the pool surface validation, runtime-loading and search failures in the tab.

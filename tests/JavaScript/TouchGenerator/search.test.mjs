@@ -3,7 +3,7 @@ import test from 'node:test';
 import PlaceNotation from '../../../assets/js/helpers/PlaceNotation.js';
 import { compileMethod, maximumChanges, standardLengthRanges } from '../../../assets/js/touch_generator/Compile.js';
 import { estimatedMinutes } from '../../../assets/js/touch_generator/Timing.js';
-import { RowEngine, compilePacked, compileShortcuts, compileDistances, distanceAt, initialSearchTasks, necklacePeriod, permutationParity, multipartDisjoint, validateCourse, searchSlice, canonicalTouch, shortestPartLength, simulate, positionName, matchesCallingPositions, snapshotBuffers } from '../../../assets/js/touch_generator/Search.js';
+import { RowEngine, compilePacked, compileShortcuts, compileDistances, distanceAt, initialSearchTasks, necklacePeriod, permutationParity, multipartDisjoint, validateCourse, searchSlice, canonicalTouch, shortestPartLength, simulate, positionName, matchesCallingPositions, snapshotBuffers } from '../../../assets/js/touch_generator/MusicRuntime.js';
 import { bristol, stedman, cambridge, cambridgeMaximus, plainBobMinor, plainBobMaximus, plainBobDoubles, jump, grandsireTriples, grandsireDoubles } from './fixtures.mjs';
 import { bruteForce, prove } from './oracle.mjs';
 
