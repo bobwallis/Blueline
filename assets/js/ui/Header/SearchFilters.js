@@ -10,23 +10,27 @@ const filtersToggle = document.getElementById('search_filters_toggle');
 const filtersPanel = document.getElementById('search_filters');
 const stageSelect = document.getElementById('search_stage');
 const classificationSelect = document.getElementById('search_classification');
-const choices = [stageSelect, classificationSelect].map((select) => new Choices(select, {
-	allowHTML: false,
-	itemSelectText: '',
-	removeItemButton: true,
-	removeItemIconText: () => '×',
-	searchEnabled: true,
-	searchPlaceholderValue: 'Search options',
-	shouldSort: false
-}));
+const selects = [stageSelect, classificationSelect];
+let choices;
 let syncing = false;
+
+function initialiseChoices() {
+	choices ??= selects.map((select) => new Choices(select, {
+		allowHTML: false,
+		itemSelectText: '',
+		removeItemButton: true,
+		removeItemIconText: () => '×',
+		searchEnabled: true,
+		searchPlaceholderValue: 'Search options',
+		shouldSort: false
+	}));
+}
 
 function isMethodsSearch(url) {
 	return /\/methods\/search(?:\.[^/]+)?\/?$/.test(new URL(url, window.location.href).pathname);
 }
 
-function valuesFromURL(url, name) {
-	const params = new URL(url, window.location.href).searchParams;
+function filterValues(params, name) {
 	return [...params.getAll(name), ...params.getAll(name + '[]')]
 		.flatMap((value) => value.split(','))
 		.filter((value) => value !== '');
@@ -41,7 +45,8 @@ function syncFromURL(url) {
 	}
 
 	const params = new URL(url, window.location.href).searchParams;
-	const hasFilters = ['stage', 'classification'].some((name) => valuesFromURL(url, name).length > 0)
+	const valuesBySelect = ['stage', 'classification'].map((name) => filterValues(params, name));
+	const hasFilters = valuesBySelect.some((values) => values.length > 0)
 		|| ['little', 'jump'].some((name) => params.has(name) && params.get(name) !== '');
 	if (visible && hasFilters) {
 		filtersPanel.hidden = false;
@@ -51,10 +56,21 @@ function syncFromURL(url) {
 	}
 	syncing = true;
 	// Updating Choices.js can fire change events; do not treat URL restoration as user input.
-	choices[0].removeActiveItems();
-	choices[0].setChoiceByValue(valuesFromURL(url, 'stage'));
-	choices[1].removeActiveItems();
-	choices[1].setChoiceByValue(valuesFromURL(url, 'classification'));
+	if (!filtersPanel.hidden) {
+		initialiseChoices();
+	}
+	selects.forEach((select, index) => {
+		const values = valuesBySelect[index];
+		if (choices) {
+			choices[index].removeActiveItems();
+			choices[index].setChoiceByValue(values);
+		} else {
+			// Keep the native form in sync even before it is enhanced.
+			for (const option of select.options) {
+				option.selected = values.includes(option.value);
+			}
+		}
+	});
 	searchForm.querySelector('[name="little"]').checked = ['1', 'true', 'yes', 'on'].includes((params.get('little') || '').toLowerCase());
 	searchForm.querySelector('[name="jump"]').checked = ['1', 'true', 'yes', 'on'].includes((params.get('jump') || '').toLowerCase());
 	syncing = false;
@@ -68,9 +84,14 @@ function updateSearchHeight() {
 filtersToggle.addEventListener('click', function () {
 	filtersPanel.hidden = !filtersPanel.hidden;
 	filtersToggle.setAttribute('aria-expanded', String(!filtersPanel.hidden));
+	if (!filtersPanel.hidden) {
+		syncing = true;
+		initialiseChoices();
+		syncing = false;
+	}
 });
 
-for (const select of [stageSelect, classificationSelect]) {
+for (const select of selects) {
 	select.addEventListener('change', function () {
 		if (!syncing) {
 			searchForm.requestSubmit();
