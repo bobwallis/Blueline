@@ -44,7 +44,7 @@
 				<dt>Place&nbsp;Notation</dt>
 				<dd><abbr title="{{ method.notationExpanded }}">{{ method.notation }}</abbr></dd>
 				<dt>Lead&nbsp;Head</dt>
-				<dd>{{ (method.leadHead ~ (method.leadHeadCode? ' <small>(Code: ' ~ method.leadHeadCode ~ ')</small>' : ''))|raw }}</dd>
+				<dd>{{ method.leadHead }}{% if method.leadHeadCode %} <small>(Code: {{ method.leadHeadCode }})</small>{% endif %}</dd>
 {% if method.palindromic or method.doubleSym or method.rotational %}
 				<dt>Symmetry</dt>
 				<dd>{{ method.symmetryText }}</dd>
