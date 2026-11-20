@@ -21,6 +21,8 @@ var measureText = function (text, font) {
 	return width;
 };
 
+var paddingCanvas;
+
 /**
 	 * Compute x/y padding required to center a single character of the font in
 	 * a sizexsize box when drawing with textAlign=center and baseLine=middle.
@@ -38,22 +40,32 @@ var measureXAndYTextPadding = function (size, font, text) {
 	}
 	var padding = LocalStorage.getCache(`Offset.${font}${text}`);
 	if (padding === null) {
-		var canvas = new Canvas({
-			id: `metric${Math.floor((Math.random() * 100) + 1)}`,
-			width: size * 3,
-			height: size * 3,
-			scale: (typeof window.devicePixelRatio === 'number') ? Math.round(window.devicePixelRatio * 8) : 8
-		});
+		var scratchSize = size * 3,
+			scale = (typeof window.devicePixelRatio === 'number') ? Math.round(window.devicePixelRatio * 8) : 8,
+			reuse = paddingCanvas && paddingCanvas.width === scratchSize && paddingCanvas.scale === scale;
+		if (!reuse) {
+			paddingCanvas = new Canvas({
+				id: 'metric-padding',
+				width: scratchSize,
+				height: scratchSize,
+				willReadFrequently: true,
+				scale: scale
+			});
+		}
+		var canvas = paddingCanvas;
 		if (canvas !== false) {
 			try {
 				var context = canvas.context;
+				if (reuse) {
+					context.clearRect(0, 0, scratchSize, scratchSize);
+				}
 				context.font = font;
 				context.textAlign = 'center';
 				context.textBaseline = 'middle';
 				context.fillStyle = '#F00';
 				context.fillText(text, size * 1.5, size * 1.5);
 
-				var dim = size * 3 * canvas.scale,
+				var dim = scratchSize * canvas.scale,
 					imageData = context.getImageData(0, 0, dim, dim),
 					bottomOfText = false,
 					topOfText = false,
@@ -108,7 +120,6 @@ var measureXAndYTextPadding = function (size, font, text) {
 				padding = { x: 0, y: 0 };
 			}
 		}
-		canvas = null;
 	}
 	return padding;
 };
