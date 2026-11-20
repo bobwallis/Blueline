@@ -1,7 +1,7 @@
 import stylistic from '@stylistic/eslint-plugin';
 import globals from 'globals';
 
-export default [
+const configurations = [
 	{
 		ignores: ['js/lib/**'],
 	},
@@ -47,3 +47,20 @@ export default [
 		},
 	},
 ];
+
+configurations.push({
+	...configurations[1],
+	files: ['bin/image-server.mjs'],
+	languageOptions: {
+		ecmaVersion: 'latest',
+		sourceType: 'module',
+		globals: {
+			...globals.node,
+			document: 'readonly',
+			window: 'readonly',
+			getComputedStyle: 'readonly',
+		},
+	},
+});
+
+export default configurations;

@@ -10,12 +10,14 @@ use Blueline\Helpers\Search;
 use Blueline\Helpers\Stages;
 use Blueline\Helpers\URL;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\Cache;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -33,11 +35,16 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 class MethodsController extends AbstractController
 {
+    public function __construct(private readonly LoggerInterface $logger)
+    {
+    }
+
     private function proxyPngResponse(string $path, Request $request, HttpClientInterface $httpClient): Response
     {
         try {
             $imageResponse = $httpClient->request('GET', 'http://127.0.0.1:'.$this->getParameter('blueline.image_server_port'), [
                 'timeout' => 20,
+                'max_duration' => 20,
                 'query' => [
                     'path' => $path,
                     'scale' => (string) $request->query->get('scale'),
@@ -46,15 +53,23 @@ class MethodsController extends AbstractController
             ]);
 
             if (200 !== $imageResponse->getStatusCode()) {
-                throw new \RuntimeException('Image server returned a non-success status.');
+                $this->logger->warning('Image server rejected a render request.', ['status' => $imageResponse->getStatusCode()]);
+
+                return new Response('Image generation temporarily unavailable.', 503, [
+                    'Content-Type' => 'text/plain; charset=UTF-8',
+                    'Cache-Control' => 'no-store',
+                ]);
             }
 
             return new Response($imageResponse->getContent(false), 200, [
                 'Content-Type' => 'image/png',
             ]);
-        } catch (\Throwable) {
+        } catch (TransportExceptionInterface $exception) {
+            $this->logger->error('Image server connection failed.', ['exception' => $exception]);
+
             return new Response('Image generation temporarily unavailable.', 503, [
                 'Content-Type' => 'text/plain; charset=UTF-8',
+                'Cache-Control' => 'no-store',
             ]);
         }
     }

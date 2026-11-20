@@ -66,6 +66,12 @@ Review the available flags before updating:
 
 Provisioning asks for a local FrankenPHP HTTPS port and stores it in `.env.local` as `FRANKENPHP_PORT`. Without a Cloudflare Tunnel, `DEFAULT_URI` is set to `https://localhost:<FRANKENPHP_PORT>`. With a tunnel, its origin points to that local HTTPS endpoint and `DEFAULT_URI` is updated to the configured public hostname.
 
+## PHP, Caddy and renderer boundaries
+
+The renderer validates method paths, restricts requests to its local application origin and verifies HTTPS using its NSS CA store. Keep Chromium's sandbox enabled; investigate host restrictions before considering the risky `BROWSER_DISABLE_SANDBOX=1` override.
+
+One render runs at a time, with ten pending requests by default. Overload returns uncached `503`; disconnects cancel work. The 18-second deadline includes queueing and stays below PHP's 20-second limit. No automatic retries.
+
 ## Related documentation
 
 - [Development and installation](development-deployment.md)

@@ -76,7 +76,9 @@ tail -f var/log/frankenphp-dev.log
 tail -f var/log/image-server.log
 ```
 
-Method PNG requests are rendered by the local Puppeteer image server. The renderer opens the full method page in Chromium and takes a screenshot; requests are handled sequentially, Chromium is kept warm, and it restarts after 200 renders by default. See [architecture and workflows](architecture-and-workflows.md#png-rendering) for the architecture.
+Method PNG requests use the local Puppeteer image server; see [PNG rendering](architecture-and-workflows.md#png-rendering) for queue limits and browser lifecycle.
+
+The development launcher disables Chromium's sandbox (`BROWSER_DISABLE_SANDBOX=1`) for container compatibility; manual starts need no extra flag. Production remains sandboxed; see [production boundaries](production-deployment.md#php-caddy-and-renderer-boundaries).
 
 ## Frontend development
 
@@ -128,6 +130,8 @@ npm run lint:css
 npm run lint:svg
 npm run test:js
 ```
+
+Run suites separately with `npm run test:js:touch-generation` or `npm run test:js:image-server`; `npm run test:js` runs both.
 
 `npm run lint` includes the Markdown and internal-link checks. For JavaScript auto-fixing, run `npm run lint:js:fix`, then rerun `npm run lint:js`.
 
