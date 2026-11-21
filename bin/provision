@@ -333,6 +333,21 @@ if [ -n "$PATH_PREFIX" ] && [ "$NONINTERACTIVE" = false ]; then
 	STATIC_FILES_ROOT="$_static_files_root_choice"
 fi
 
+IMAGE_SERVER_MAX_PENDING="$(get_env_value IMAGE_SERVER_MAX_PENDING)"
+IMAGE_SERVER_MAX_PENDING="${IMAGE_SERVER_MAX_PENDING:-10}"
+IMAGE_SERVER_CPU_QUOTA="$(get_env_value IMAGE_SERVER_CPU_QUOTA)"
+IMAGE_SERVER_CPU_QUOTA="${IMAGE_SERVER_CPU_QUOTA:-80%}"
+if [ "$APP_ENV" = prod ] && [ "$NOSERVER_ARG" = false ]; then
+	if [ "$NONINTERACTIVE" = false ]; then
+		read -r -p "Renderer CPUQuota (percentage) [${IMAGE_SERVER_CPU_QUOTA}]: " _cpu_quota
+		IMAGE_SERVER_CPU_QUOTA="${_cpu_quota:-$IMAGE_SERVER_CPU_QUOTA}"
+	fi
+	if [[ ! "$IMAGE_SERVER_MAX_PENDING" =~ ^[0-9]{1,3}$ || ! "$IMAGE_SERVER_CPU_QUOTA" =~ ^[1-9][0-9]*%$ ]]; then
+		echo "ERROR: Configure IMAGE_SERVER_MAX_PENDING and IMAGE_SERVER_CPU_QUOTA (e.g. 80%)." >&2
+		exit 1
+	fi
+fi
+
 echo -e "\n\033[1mBlueline setup\033[0m"
 echo "  REPO_ROOT:             $REPO_ROOT"
 echo "  APP_ENV:               $APP_ENV"
@@ -342,6 +357,10 @@ echo "  NODATABASE:            $NODATABASE_ARG"
 echo "  NOSERVER:              $NOSERVER_ARG"
 echo "  FRANKENPHP_PORT:       $FRANKENPHP_PORT"
 echo "  IMAGESERVER_PORT:      $IMAGESERVER_PORT"
+if [ "$APP_ENV" = prod ] && [ "$NOSERVER_ARG" = false ]; then
+	echo "  IMAGE_SERVER_CPU_QUOTA:   $IMAGE_SERVER_CPU_QUOTA"
+	echo "  IMAGE_SERVER_MAX_PENDING: $IMAGE_SERVER_MAX_PENDING"
+fi
 if [ -n "$PATH_PREFIX" ]; then
 	echo "  PATH_PREFIX:           $PATH_PREFIX"
 else
@@ -793,6 +812,10 @@ upsert_env_value PATH_PREFIX "\"${PATH_PREFIX}\"" "$REPO_ROOT/.env.local"
 if [ -n "$PATH_PREFIX" ]; then
 	upsert_env_value STATIC_FILES_ROOT "\"${STATIC_FILES_ROOT}\"" "$REPO_ROOT/.env.local"
 fi
+if [ "$APP_ENV" = prod ]; then
+	upsert_env_value IMAGE_SERVER_MAX_PENDING "$IMAGE_SERVER_MAX_PENDING"
+	upsert_env_value IMAGE_SERVER_CPU_QUOTA "$IMAGE_SERVER_CPU_QUOTA"
+fi
 _tunnel_id_in_env="$(get_env_value CLOUDFLARE_TUNNEL_ID "$REPO_ROOT/.env.local")"
 if [ "$APP_ENV" = "dev" ] || { [ "$APP_ENV" = "prod" ] && [ -z "$_tunnel_id_in_env" ]; }; then
 	upsert_env_value DEFAULT_URI "\"${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT}${PATH_PREFIX}\"" "$REPO_ROOT/.env.local"
@@ -1131,6 +1154,7 @@ Requires=blueline.service
 Type=simple
 WorkingDirectory=${REPO_ROOT}
 Environment=IMAGESERVER_PORT=${IMAGESERVER_PORT}
+Environment=IMAGE_SERVER_MAX_PENDING=${IMAGE_SERVER_MAX_PENDING}
 Environment=FRANKENPHP_PORT=${FRANKENPHP_PORT}
 Environment=FRANKENPHP_SCHEME=${FRANKENPHP_SCHEME}
 Environment=PATH_PREFIX=${PATH_PREFIX}
@@ -1138,6 +1162,7 @@ Environment=APP_ENV=prod
 Environment=HOME=/var/lib/blueline-image
 ExecStart=/usr/bin/node ${REPO_ROOT}/bin/image-server.mjs
 Nice=15
+CPUQuota=${IMAGE_SERVER_CPU_QUOTA}
 CPUWeight=20
 IOWeight=20
 OOMScoreAdjust=500

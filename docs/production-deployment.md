@@ -99,6 +99,8 @@ The renderer validates method paths, restricts requests to its local application
 
 One render runs at a time, with ten pending requests by default. Overload returns uncached `503`; disconnects cancel work. The 18-second deadline includes queueing and stays below PHP's 20-second limit. No automatic retries.
 
+For production server setup, `IMAGE_SERVER_CPU_QUOTA` defaults to `80%` of one CPU; `IMAGE_SERVER_MAX_PENDING` defaults to 10 (0–999).
+
 ## Related documentation
 
 - [Development and installation](development-deployment.md)
