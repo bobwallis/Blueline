@@ -32,7 +32,7 @@ doctrine:
 when@test:
     doctrine:
         dbal:
-            # Just use the same database as the dev/prod environments for testing too
+            # Share the development database; entrypoint guards reject production.
             dbname_suffix: ''
 
 when@prod:

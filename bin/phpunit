@@ -1,4 +1,6 @@
 #!/usr/bin/env php
 <?php
 
+require dirname(__DIR__).'/vendor/autoload.php';
+\Blueline\Helpers\TestEnvironmentGuard::assertSafe(dirname(__DIR__));
 require dirname(__DIR__).'/vendor/phpunit/phpunit/phpunit';

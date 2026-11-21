@@ -66,6 +66,24 @@ Review the available flags before updating:
 
 Provisioning asks for a local FrankenPHP HTTPS port and stores it in `.env.local` as `FRANKENPHP_PORT`. Without a Cloudflare Tunnel, `DEFAULT_URI` is set to `https://localhost:<FRANKENPHP_PORT>`. With a tunnel, its origin points to that local HTTPS endpoint and `DEFAULT_URI` is updated to the configured public hostname.
 
+## PostgreSQL access
+
+PostgreSQL uses loopback TCP; provisioning creates SCRAM-SHA-256 passwords.
+
+| Identity | Access |
+| --- | --- |
+| `blueline_web` | Read application tables. |
+| `blueline` | Own application objects; update schemas, import data and run maintenance. |
+| PostgreSQL administrator | Local provisioning. |
+
+Application logins have no superuser, database/role creation, replication or RLS-bypass privileges.
+
+Runtime `DATABASE_URL` is in `.env.local`. Maintenance uses `.env.maintenance.local`: a Git-ignored, deployment-user-owned `0600` file containing `DATABASE_URL`. Imports load it explicitly, refresh runtime configuration and restart the managed web service.
+
+FrankenPHP (`blueline-web`) and the renderer (`blueline-image`) use separate service accounts. Runtime credentials are readable by the web account; maintenance credentials by the deployment user.
+
+Managed connections use `postgresql://ROLE:PASSWORD@localhost:5432/blueline?serverVersion=17&charset=utf8`. For custom connections, use `--nodatabase` and configure roles separately.
+
 ## PHP, Caddy and renderer boundaries
 
 The renderer validates method paths, restricts requests to its local application origin and verifies HTTPS using its NSS CA store. Keep Chromium's sandbox enabled; investigate host restrictions before considering the risky `BROWSER_DISABLE_SANDBOX=1` override.

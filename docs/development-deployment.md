@@ -95,6 +95,8 @@ The Dev Container includes the SQLTools and PostgreSQL driver extensions. The co
 
 The Doctrine `test` environment resolves to the same PostgreSQL database as `dev`. Tests can write to the database; for example, the method-similarity command test deletes and recalculates `methods_similar` rows. Only run the full suite when those effects are acceptable.
 
+Tests reject production checkouts (marked by `var/production-deployment`) and known production connections, including under `APP_ENV=test`.
+
 ## Testing and linting
 
 Use the full test pipeline only for complete validation:
@@ -111,6 +113,8 @@ Run targeted PHPUnit tests directly:
 ./bin/phpunit tests/Controller
 ./bin/phpunit --filter testActionName tests/Controller/ExampleTest.php
 ```
+
+`./bin/phpunit tests/Deployment` checks provisioning/grants in a private PostgreSQL cluster and credential permissions.
 
 PHP style checks use the Symfony ruleset:
 

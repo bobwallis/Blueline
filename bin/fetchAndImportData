@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Get script directory, and cd to the parent folder
 SOURCE="${BASH_SOURCE[0]}"
@@ -8,6 +9,7 @@ REPO_ROOT="$( cd "$d/.." && pwd )"
 cd "$REPO_ROOT"
 
 ENV_LOCAL_FILE="$REPO_ROOT/.env.local"
+. "$REPO_ROOT/bin/deployment-functions"
 
 usage() {
 cat << EOF
@@ -53,6 +55,12 @@ else
 		APP_ENV="dev"
 	fi
 fi
+case "$APP_ENV" in dev|test|prod) ;; *) echo "ERROR: Invalid application environment." >&2; exit 1 ;; esac
+export APP_ENV
+if [ "$APP_ENV" = test ]; then
+	php -r 'require "vendor/autoload.php"; \Blueline\Helpers\TestEnvironmentGuard::assertSafe(getcwd());'
+fi
+load_maintenance_connection
 
 if [ "$SKIP_PULL" -eq 0 ]; then
 	# Download external data
@@ -63,13 +71,13 @@ fi
 
 # Check database schema exists and is accessible, and create if not
 echo -e "\n\033[1mChecking database schema\033[0m"
-symfony console doctrine:database:create --if-not-exists
-symfony console dbal:run-sql "CREATE EXTENSION IF NOT EXISTS fuzzystrmatch" --no-interaction 2>/dev/null || true
+if [ "$APP_ENV" != prod ]; then
+	symfony console doctrine:database:create --if-not-exists
+fi
+symfony console dbal:run-sql "CREATE EXTENSION IF NOT EXISTS fuzzystrmatch" --no-interaction
 
-SCHEMA_VALIDATE_OUTPUT="$(symfony console doctrine:schema:validate 2>&1)" || true
-echo "$SCHEMA_VALIDATE_OUTPUT"
-
-if echo "$SCHEMA_VALIDATE_OUTPUT" | grep -q "The database schema is not in sync"; then
+check_database_schema
+if [ "$DATABASE_SCHEMA_OUT_OF_DATE" = true ]; then
 	echo -e "\n\033[1mDatabase schema is out of date\033[0m"
 	echo -e "\n\033[1mPending SQL updates\033[0m"
 	symfony console doctrine:schema:update --dump-sql
@@ -100,8 +108,16 @@ else
 	DATABASE_UPDATE_FILE="$REPO_ROOT/.env.${APP_ENV}.local"
 fi
 touch "$DATABASE_UPDATE_FILE"
-if grep -q '^DATABASE_UPDATE=' "$DATABASE_UPDATE_FILE"; then
-	sed -i -e"s/^DATABASE_UPDATE=.*/DATABASE_UPDATE=`date "+%s"`/" "$DATABASE_UPDATE_FILE"
-else
-	echo "DATABASE_UPDATE=`date "+%s"`" >> "$DATABASE_UPDATE_FILE"
+upsert_env_value DATABASE_UPDATE "$(date +%s)" "$DATABASE_UPDATE_FILE"
+if [ "$APP_ENV" = prod ]; then
+	unset DATABASE_URL
+	dump_runtime_environment
+	if id blueline-web >/dev/null 2>&1; then
+		sudo setfacl -m u:blueline-web:r "$DATABASE_UPDATE_FILE"
+	fi
+	if [ -d /run/systemd/system ] && [ "$(systemctl show blueline.service --property=WorkingDirectory --value)" = "$REPO_ROOT" ]; then
+		sudo systemctl restart blueline
+	else
+		echo "Production environment refreshed. Restart your manually managed web server to apply it."
+	fi
 fi

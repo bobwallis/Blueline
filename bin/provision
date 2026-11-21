@@ -12,6 +12,7 @@ REPO_ROOT="$( cd "$d/.." && pwd )"
 cd "$REPO_ROOT"
 
 ENV_LOCAL_FILE="$REPO_ROOT/.env.local"
+. "$REPO_ROOT/bin/deployment-functions"
 
 usage() {
 cat << EOF
@@ -93,35 +94,6 @@ for arg in "$@"; do
 	esac
 done
 
-# get_env_value KEY [FILE]
-# Reads the last occurrence of KEY from an env file and strips optional surrounding quotes.
-get_env_value() {
-	local key="$1"
-	local file="${2:-$ENV_LOCAL_FILE}"
-	if [ ! -f "$file" ]; then
-		return 0
-	fi
-	sed -nE "s/^[[:space:]]*${key}[[:space:]]*=[[:space:]]*//p" "$file" \
-		| tail -n 1 \
-		| sed -E 's/[[:space:]]*$//' \
-		| sed -E 's/^"(.*)"$/\1/; s/^\x27(.*)\x27$/\1/'
-}
-
-# upsert_env_value KEY VALUE [FILE]
-# Rewrites KEY in-place to avoid duplicates and appends it when absent.
-upsert_env_value() {
-	local key="$1"
-	local value="$2"
-	local file="${3:-$ENV_LOCAL_FILE}"
-	local tmp_file
-	tmp_file="$(mktemp)"
-
-	touch "$file"
-	grep -vE "^[[:space:]]*${key}[[:space:]]*=" "$file" > "$tmp_file" || true
-	printf '%s=%s\n' "$key" "$value" >> "$tmp_file"
-	mv "$tmp_file" "$file"
-}
-
 is_valid_port() {
 	local port="$1"
 	if ! [[ "$port" =~ ^[0-9]+$ ]]; then
@@ -200,6 +172,11 @@ else
 		fi
 	fi
 fi
+
+case "$APP_ENV" in
+	dev|prod) ;;
+	*) echo "ERROR: Provisioning requires APP_ENV=dev or APP_ENV=prod." >&2; exit 1 ;;
+esac
 
 FRANKENPHP_PORT="$(get_env_value FRANKENPHP_PORT)"
 if [ -z "$FRANKENPHP_PORT" ]; then
@@ -400,6 +377,14 @@ if [ "$NONINTERACTIVE" = false ]; then
 	fi
 fi
 
+if [ "$APP_ENV" = prod ] && [ "$NOSERVER_ARG" = false ] && sudo systemctl is-active --quiet blueline; then
+	echo "  Stopping managed application services for the credential/dependency rebuild..."
+	if sudo systemctl is-active --quiet blueline-image; then
+		sudo systemctl stop blueline-image
+	fi
+	sudo systemctl stop blueline
+fi
+
 # ##############################################################################
 # SECTION 1: OS check
 # ##############################################################################
@@ -446,7 +431,7 @@ sudo apt-get update -qq && sudo apt-get upgrade -q -y --no-install-recommends
 
 # Core tools
 sudo apt-get install -q -y --no-install-recommends \
-	apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less gpg lsb-release zsh brotli zstd zopfli tzdata chromium
+	apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less gpg lsb-release zsh brotli zstd zopfli tzdata chromium chromium-sandbox acl libnss3-tools
 
 # Node.js 24 LTS — add NodeSource apt source if not already present
 if [ ! -f /etc/apt/sources.list.d/nodesource.sources ]; then
@@ -593,6 +578,24 @@ if [ "$NODATABASE_ARG" = true ]; then
 	echo "  Skipping PostgreSQL setup (--nodatabase)."
 	echo "  Reminder: configure a reachable PostgreSQL server and credentials yourself."
 else
+	if [ "$APP_ENV" = prod ]; then
+		_configured_url="$(get_env_value DATABASE_URL)"
+		_production_url="$(get_env_value DATABASE_URL "$REPO_ROOT/.env.prod.local")"
+		_maintenance_file="$REPO_ROOT/.env.maintenance.local"
+		_maintenance_url="$(get_env_value DATABASE_URL "$_maintenance_file")"
+		if [ -n "$_configured_url" ] &&
+			! is_managed_database_url "$_configured_url" blueline &&
+			! is_managed_database_url "$_configured_url" blueline_web; then
+			echo "ERROR: The production connection is not a managed local database URL. Use --nodatabase for custom database management." >&2
+			exit 1
+		fi
+		if [ -n "$_production_url" ] && [ "$_production_url" != "$_configured_url" ] &&
+			[ "$_production_url" != "$_maintenance_url" ]; then
+			echo "ERROR: The production DATABASE_URL override conflicts with the configured runtime/maintenance connections. Review it before provisioning; no credentials were replaced." >&2
+			exit 1
+		fi
+	fi
+
 	# Install PostgreSQL 17 (Debian Trixie default — no extra apt source needed)
 	sudo apt-get install -y -q --no-install-recommends postgresql-17
 
@@ -610,19 +613,24 @@ else
 				exit 1
 			fi
 		fi
-		DB_PASS="blueline"
+		if [ "$APP_ENV" = dev ]; then
+			DB_PASS="blueline"
+		fi
 	fi
 
 	# Create role if it doesn't already exist
-	_role_exists="$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='blueline'" 2>/dev/null || true)"
+	_role_exists="$(sudo -u postgres psql --no-psqlrc --set=ON_ERROR_STOP=1 -tAc "SELECT 1 FROM pg_roles WHERE rolname='blueline'")"
 	if [ "$_role_exists" != "1" ]; then
 		if [ -z "$DB_PASS" ]; then
 			DB_PASS="$(openssl rand -hex 16)"
 		fi
-		sudo -u postgres psql -c "CREATE ROLE blueline LOGIN PASSWORD '${DB_PASS}';"
+		sudo -u postgres psql --no-psqlrc --set=ON_ERROR_STOP=1 <<SQL
+SET password_encryption = 'scram-sha-256';
+CREATE ROLE blueline LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD '${DB_PASS}';
+SQL
 		echo "  Created PostgreSQL role 'blueline'."
 	else
-		if [ "$IS_DOCKER" = true ]; then
+		if [ "$IS_DOCKER" = true ] && [ "$APP_ENV" = dev ]; then
 			sudo -u postgres psql -c "ALTER ROLE blueline WITH PASSWORD '${DB_PASS}';"
 			echo "  PostgreSQL role 'blueline' already exists — password reset to default dev value."
 		else
@@ -631,7 +639,7 @@ else
 	fi
 
 	# Create database if it doesn't already exist
-	_db_exists="$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='blueline'" 2>/dev/null || true)"
+	_db_exists="$(sudo -u postgres psql --no-psqlrc --set=ON_ERROR_STOP=1 -tAc "SELECT 1 FROM pg_database WHERE datname='blueline'")"
 	if [ "$_db_exists" != "1" ]; then
 		sudo -u postgres psql -c "CREATE DATABASE blueline OWNER blueline;"
 		echo "  Created PostgreSQL database 'blueline'."
@@ -669,6 +677,53 @@ PGCONF
 		echo "  PostgreSQL tuning applied and service reloaded."
 	else
 		echo "  PostgreSQL tuning config already present — skipping."
+	fi
+	if [ "$APP_ENV" = prod ]; then
+		_maintenance_file="$REPO_ROOT/.env.maintenance.local"
+		if [ ! -f "$_maintenance_file" ]; then
+			_maintenance_url="$(get_env_value DATABASE_URL)"
+			if [ -n "$DB_PASS" ]; then
+				_maintenance_url="postgresql://blueline:${DB_PASS}@localhost:5432/blueline?serverVersion=17&charset=utf8"
+			elif ! is_managed_database_url "$_maintenance_url" blueline; then
+				echo "ERROR: Existing production connection is not the managed local owner role. Configure an owner-only maintenance file or use --nodatabase; no credentials were replaced." >&2
+				exit 1
+			fi
+			if [[ "$_maintenance_url" == postgresql://blueline:blueline@* ]]; then
+				DB_PASS="$(openssl rand -hex 16)"
+				sudo -u postgres psql --no-psqlrc --set=ON_ERROR_STOP=1 <<SQL
+SET password_encryption = 'scram-sha-256';
+ALTER ROLE blueline PASSWORD '${DB_PASS}';
+SQL
+				_maintenance_url="postgresql://blueline:${DB_PASS}@localhost:5432/blueline?serverVersion=17&charset=utf8"
+			fi
+			# Only the newly-created final directory is private; shared parents are unchanged.
+			# shellcheck disable=SC2174
+			mkdir -p -m 0700 "$(dirname "$_maintenance_file")"
+			upsert_env_value DATABASE_URL "\"$_maintenance_url\"" "$_maintenance_file"
+		fi
+		load_maintenance_connection
+		if ! is_managed_database_url "$DATABASE_URL" blueline; then
+			echo "ERROR: The maintenance file does not select the managed local owner connection. Use --nodatabase for external/custom database management." >&2
+			exit 1
+		fi
+		unset DATABASE_URL
+		_runtime_url="$(get_env_value DATABASE_URL)"
+		if ! is_managed_database_url "$_runtime_url" blueline_web; then
+			_runtime_pass="$(openssl rand -hex 16)"
+			sudo -u postgres psql --no-psqlrc --set=ON_ERROR_STOP=1 <<SQL
+SET password_encryption = 'scram-sha-256';
+SELECT 'CREATE ROLE blueline_web LOGIN'
+WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'blueline_web') \gexec
+ALTER ROLE blueline_web PASSWORD '${_runtime_pass}';
+SQL
+			upsert_env_value DATABASE_URL "\"postgresql://blueline_web:${_runtime_pass}@localhost:5432/blueline?serverVersion=17&charset=utf8\""
+		fi
+		if [ -n "$(get_env_value DATABASE_URL "$REPO_ROOT/.env.prod.local")" ]; then
+			upsert_env_value DATABASE_URL "\"$(get_env_value DATABASE_URL)\"" "$REPO_ROOT/.env.prod.local"
+		fi
+		grant_runtime_access
+		mkdir -p "$REPO_ROOT/var"
+		touch "$REPO_ROOT/var/production-deployment"
 	fi
 fi
 
@@ -736,6 +791,16 @@ fi
 
 echo -e "\n\033[1mInstalling PHP dependencies\033[0m"
 cd "$REPO_ROOT"
+if [ "$APP_ENV" = prod ]; then
+	mkdir -p "$REPO_ROOT/var"
+	touch "$REPO_ROOT/var/production-deployment"
+	rm -f "$REPO_ROOT/.env.local.php"
+	if [ -d "$REPO_ROOT/var/cache/prod" ]; then
+		echo "  Removing generated production cache before dependency installation."
+		symfony php -r 'require "vendor/autoload.php"; (new Symfony\Component\Filesystem\Filesystem())->remove("var/cache/prod");'
+	fi
+fi
+export APP_ENV
 symfony composer install --optimize-autoloader --no-progress --no-interaction
 
 
@@ -765,14 +830,14 @@ else
 		echo "  Database is ready."
 	fi
 
-	# Create database if it doesn't exist, and run schema updates
-	symfony console doctrine:database:create --if-not-exists
-	symfony console dbal:run-sql "CREATE EXTENSION IF NOT EXISTS fuzzystrmatch" --no-interaction 2>/dev/null || true
+	load_maintenance_connection
+	if [ "$APP_ENV" != prod ]; then
+		symfony console doctrine:database:create --if-not-exists
+	fi
+	symfony console dbal:run-sql "CREATE EXTENSION IF NOT EXISTS fuzzystrmatch" --no-interaction
 
-	SCHEMA_VALIDATE_OUTPUT="$(symfony console doctrine:schema:validate 2>&1)" || true
-	echo "$SCHEMA_VALIDATE_OUTPUT"
-
-	if echo "$SCHEMA_VALIDATE_OUTPUT" | grep -q "The database schema is not in sync"; then
+	check_database_schema
+	if [ "$DATABASE_SCHEMA_OUT_OF_DATE" = true ]; then
 		echo -e "\n\033[1mDatabase schema is out of date\033[0m"
 		echo -e "\n\033[1mPending SQL updates\033[0m"
 		symfony console doctrine:schema:update --dump-sql
@@ -789,6 +854,10 @@ else
 				echo "  Skipping forced schema update."
 			fi
 		fi
+	fi
+	if [ "$APP_ENV" = prod ]; then
+		unset DATABASE_URL
+		grant_runtime_access
 	fi
 fi
 
@@ -933,9 +1002,36 @@ CADDYFILE
 	fi
 
 	if [ "$APP_ENV" = "prod" ]; then
-		# Build desired service unit content
-		_current_user="$(whoami)"
-		_current_group="$(id -gn)"
+		for _service_user in blueline-web blueline-image; do
+			if ! id "$_service_user" >/dev/null 2>&1; then
+				sudo useradd --system --user-group --home-dir "/var/lib/${_service_user}" --shell /usr/sbin/nologin "$_service_user"
+			fi
+			if [ "$(id -u "$_service_user")" -eq 0 ] || [ "$(id -u "$_service_user")" -eq "$(id -u)" ] ||
+				sudo -u "$_service_user" test -w "$REPO_ROOT/composer.json"; then
+				echo "ERROR: $_service_user must be distinct from deployment/root and unable to write application code." >&2
+				exit 1
+			fi
+		done
+		mkdir -p "$REPO_ROOT/var/cache" "$REPO_ROOT/var/log" "$REPO_ROOT/var/minify"
+		sudo setfacl -Rm "u:blueline-web:rwX,u:$(whoami):rwX" "$REPO_ROOT/var/cache" "$REPO_ROOT/var/log" "$REPO_ROOT/var/minify"
+		find "$REPO_ROOT/var/cache" "$REPO_ROOT/var/log" "$REPO_ROOT/var/minify" -type d -exec \
+			sudo setfacl -m "d:u:blueline-web:rwx,d:u:$(whoami):rwx" {} +
+		sudo setfacl -m u:blueline-web:r "$REPO_ROOT/.env.local"
+		if [ -f "$REPO_ROOT/.env.local.php" ]; then
+			sudo setfacl -m u:blueline-web:r "$REPO_ROOT/.env.local.php"
+		fi
+		if [ -f "$REPO_ROOT/.env.prod.local" ]; then
+			sudo setfacl -m u:blueline-web:r "$REPO_ROOT/.env.prod.local"
+		fi
+		if ! sudo -u blueline-web test -r "$REPO_ROOT/vendor/autoload.php"; then
+			echo "ERROR: The web identity cannot traverse/read this checkout. Use a readable deployment path (e.g. /srv/blueline); do not grant access to private home directories." >&2
+			exit 1
+		fi
+		if [ -n "$STATIC_FILES_ROOT" ] &&
+			{ ! sudo -u blueline-web test -r "$STATIC_FILES_ROOT" || ! sudo -u blueline-web test -x "$STATIC_FILES_ROOT"; }; then
+			echo "ERROR: The web identity cannot read/traverse the configured public static directory." >&2
+			exit 1
+		fi
 		_desired_unit="[Unit]
 Description=Blueline (FrankenPHP)
 After=network.target postgresql.service
@@ -944,8 +1040,24 @@ After=network.target postgresql.service
 Type=notify
 WorkingDirectory=${REPO_ROOT}
 ExecStart=/usr/bin/frankenphp run --config ${REPO_ROOT}/Caddyfile
-User=${_current_user}
-Group=${_current_group}
+User=blueline-web
+Group=blueline-web
+Environment=APP_ENV=prod
+Environment=APP_DEBUG=0
+Environment=HOME=/var/lib/blueline-web
+Environment=XDG_DATA_HOME=/var/lib/blueline-web
+Environment=XDG_CONFIG_HOME=/var/lib/blueline-web
+StateDirectory=blueline-web
+UMask=0007
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=${REPO_ROOT}/var/cache ${REPO_ROOT}/var/log ${REPO_ROOT}/var/minify
 Restart=on-failure
 RestartSec=5s
 
@@ -973,6 +1085,25 @@ WantedBy=multi-user.target"
 		fi
 		echo "  blueline.service enabled and started."
 
+		_origin_ca="/var/lib/blueline-web/caddy/pki/authorities/local/root.crt"
+		for _ in {1..30}; do
+			if sudo test -s "$_origin_ca"; then
+				break
+			fi
+			sleep 1
+		done
+		if ! sudo test -s "$_origin_ca"; then
+			echo "ERROR: Caddy did not generate its private CA certificate. Inspect blueline.service." >&2
+			exit 1
+		fi
+		sudo install -D -m 0644 "$_origin_ca" /etc/blueline/origin-ca.crt
+		sudo install -d -o blueline-image -g blueline-image -m 0700 /var/lib/blueline-image/.pki/nssdb
+		if ! sudo test -f /var/lib/blueline-image/.pki/nssdb/cert9.db; then
+			sudo -u blueline-image certutil -N --empty-password -d sql:/var/lib/blueline-image/.pki/nssdb
+		fi
+		sudo -u blueline-image certutil -A -n 'Blueline origin CA' -t 'C,,' \
+			-i /etc/blueline/origin-ca.crt -d sql:/var/lib/blueline-image/.pki/nssdb
+
 		_desired_image_unit="[Unit]
 Description=Blueline image server
 After=network.target blueline.service
@@ -985,13 +1116,25 @@ Environment=IMAGESERVER_PORT=${IMAGESERVER_PORT}
 Environment=FRANKENPHP_PORT=${FRANKENPHP_PORT}
 Environment=FRANKENPHP_SCHEME=${FRANKENPHP_SCHEME}
 Environment=PATH_PREFIX=${PATH_PREFIX}
+Environment=APP_ENV=prod
+Environment=HOME=/var/lib/blueline-image
 ExecStart=/usr/bin/node ${REPO_ROOT}/bin/image-server.mjs
 Nice=15
 CPUWeight=20
 IOWeight=20
 OOMScoreAdjust=500
-User=${_current_user}
-Group=${_current_group}
+User=blueline-image
+Group=blueline-image
+StateDirectory=blueline-image
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 Restart=on-failure
 RestartSec=5s
 
@@ -1158,9 +1301,9 @@ sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* || true
 
 # And finalise Symfony environment
 echo -e "\n\033[1mResetting dev environment\033[0m"
-symfony console cache:clear --env=test
-symfony console cache:clear --env=dev
 if [ "$APP_ENV" = "dev" ]; then
+	symfony console cache:clear --env=test
+	symfony console cache:clear --env=dev
 	symfony composer dump-autoload --classmap-authoritative
 fi
 
@@ -1168,11 +1311,14 @@ if [ "$APP_ENV" = "prod" ]; then
 	echo -e "\n\033[1mFinalising production environment\033[0m"
 	cd "$REPO_ROOT"
 	symfony console cache:clear --env=prod
-	symfony console cache:warm --env=prod
+	symfony console cache:warmup --env=prod
 	"$REPO_ROOT/bin/buildFrontendAssets" --env=prod
-	symfony composer dump-env prod
+	dump_runtime_environment
 	symfony composer dump-autoload --no-dev --classmap-authoritative
 	APP_ENV=prod symfony console error:dump -f var/cache/prod/error_pages/
+	if [ "$NOSERVER_ARG" = false ]; then
+		sudo systemctl restart blueline blueline-image
+	fi
 	echo "  Production finalisation complete."
 fi
 

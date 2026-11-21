@@ -1,0 +1,105 @@
+#!/bin/bash
+
+get_env_value() {
+	local key="$1" file="${2:-$ENV_LOCAL_FILE}"
+	[ -f "$file" ] || return 0
+	sed -nE "s/^[[:space:]]*${key}[[:space:]]*=[[:space:]]*//p" "$file" |
+		tail -n 1 | sed -E 's/[[:space:]]*$//; s/^"(.*)"$/\1/; s/^\x27(.*)\x27$/\1/'
+}
+
+upsert_env_value() {
+	local key="$1" value="$2" file="${3:-$ENV_LOCAL_FILE}" tmp_file
+	tmp_file="$(mktemp "${file}.XXXXXX")"
+	if [ -f "$file" ]; then
+		grep -vE "^[[:space:]]*${key}[[:space:]]*=" "$file" > "$tmp_file" || [ "$?" -eq 1 ]
+	fi
+	printf '%s=%s\n' "$key" "$value" >> "$tmp_file"
+	mv "$tmp_file" "$file"
+}
+
+is_managed_database_url() {
+	local url="$1" role="$2"
+	[[ "$url" =~ ^postgresql://${role}:[^@/?#]+@localhost:5432/blueline\?serverVersion=17\&charset=utf8$ ]]
+}
+
+load_maintenance_connection() {
+	[ "$APP_ENV" = prod ] || return 0
+	local file="$REPO_ROOT/.env.maintenance.local"
+	if [ ! -f "$file" ] || [ "$(stat -c %a "$file")" != 600 ] || [ ! -O "$file" ]; then
+		echo "ERROR: Production maintenance requires an owner-only (0600) connection file at $file." >&2
+		return 1
+	fi
+	DATABASE_URL="$(get_env_value DATABASE_URL "$file")"
+	if [ -z "$DATABASE_URL" ]; then
+		echo "ERROR: Maintenance DATABASE_URL is missing in $file." >&2
+		return 1
+	fi
+	export DATABASE_URL APP_ENV
+}
+
+dump_runtime_environment() {
+	local file="$REPO_ROOT/.env.local.php"
+	if [ -f "$file" ]; then
+		setfacl -b -m u::rw-,g::---,o::--- "$file"
+	fi
+	(umask 077; symfony composer dump-env prod)
+	setfacl -b -m u::rw-,g::---,o::--- "$file"
+	if id blueline-web >/dev/null 2>&1; then
+		sudo setfacl -m u:blueline-web:r "$file"
+	fi
+}
+
+check_database_schema() {
+	local output status=0
+	DATABASE_SCHEMA_OUT_OF_DATE=false
+	output="$(symfony console doctrine:schema:validate 2>&1)" || status=$?
+	printf '%s\n' "$output"
+	if [ "$status" -eq 0 ]; then
+		return 0
+	fi
+	if [ "$status" -eq 2 ] && grep -q 'The database schema is not in sync' <<< "$output"; then
+		DATABASE_SCHEMA_OUT_OF_DATE=true
+		return 0
+	fi
+	echo "ERROR: Database schema validation failed; maintenance has stopped." >&2
+	return "$status"
+}
+
+grant_runtime_access() {
+	sudo -u postgres psql --no-psqlrc --set=ON_ERROR_STOP=1 --dbname=blueline <<'SQL'
+BEGIN;
+ALTER ROLE blueline NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
+ALTER ROLE blueline_web NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM pg_auth_members WHERE member IN ('blueline_web'::regrole, 'blueline'::regrole)) THEN
+        RAISE EXCEPTION 'Application roles have unexpected memberships; review them before provisioning';
+    END IF;
+    IF EXISTS (SELECT 1 FROM pg_database WHERE datdba = 'blueline_web'::regrole)
+       OR EXISTS (SELECT 1 FROM pg_namespace WHERE nspowner = 'blueline_web'::regrole)
+       OR EXISTS (SELECT 1 FROM pg_class WHERE relowner = 'blueline_web'::regrole) THEN
+        RAISE EXCEPTION 'Runtime role owns database objects; review ownership before provisioning';
+    END IF;
+END $$;
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+GRANT USAGE, CREATE ON SCHEMA public TO blueline;
+REVOKE ALL ON DATABASE blueline FROM blueline_web;
+REVOKE ALL ON SCHEMA public FROM blueline_web;
+REVOKE ALL ON ALL TABLES IN SCHEMA public FROM blueline_web;
+REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM blueline_web;
+GRANT CONNECT ON DATABASE blueline TO blueline_web;
+GRANT USAGE ON SCHEMA public TO blueline_web;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO blueline_web;
+ALTER DEFAULT PRIVILEGES FOR ROLE blueline IN SCHEMA public GRANT SELECT ON TABLES TO blueline_web;
+DO $$ BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE n.nspname = 'public' AND c.relkind IN ('r', 'p', 'v', 'm', 'f')
+          AND (has_table_privilege('blueline_web', c.oid, 'INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER')
+               OR has_any_column_privilege('blueline_web', c.oid, 'INSERT, UPDATE, REFERENCES'))
+    ) THEN
+        RAISE EXCEPTION 'Runtime role still has write access through inherited/PUBLIC grants; review application ACLs';
+    END IF;
+END $$;
+COMMIT;
+SQL
+}

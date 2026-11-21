@@ -7,6 +7,8 @@ d="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 repo_root="$( cd "$d/.." && pwd )"
 cd "$repo_root"
 
+php -r 'require "vendor/autoload.php"; \Blueline\Helpers\TestEnvironmentGuard::assertSafe(getcwd());' || exit 1
+
 # Check test database exists and schema is accessible
 if ! symfony console dbal:run-sql "SELECT 1" --env=test > /dev/null 2>&1; then
     echo -e "\n\033[1mSetting up test database\033[0m"
