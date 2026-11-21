@@ -114,7 +114,7 @@ Run targeted PHPUnit tests directly:
 ./bin/phpunit --filter testActionName tests/Controller/ExampleTest.php
 ```
 
-`./bin/phpunit tests/Deployment` checks provisioning/grants in a private PostgreSQL cluster and credential permissions.
+`./bin/phpunit tests/Deployment` checks PostgreSQL grants in a private test cluster and credential permissions (requires PostgreSQL 17 tools).
 
 PHP style checks use the Symfony ruleset:
 

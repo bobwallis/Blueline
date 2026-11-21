@@ -7,47 +7,56 @@ use Symfony\Component\Process\Process;
 
 class ConfigurationTest extends TestCase
 {
-    public function testUpdateResetsLockfilesBeforeFastForwardPull(): void
+    public function testDatabasePreflightRejectsConflictsBeforeStoppingServices(): void
     {
-        $directory = sys_get_temp_dir().'/blueline-update-'.bin2hex(random_bytes(6));
+        $directory = sys_get_temp_dir().'/blueline-preflight-'.bin2hex(random_bytes(6));
         mkdir($directory, 0700);
         mkdir($directory.'/bin', 0700);
         try {
-            copy(dirname(__DIR__, 2).'/bin/update', $directory.'/bin/update');
-            chmod($directory.'/bin/update', 0700);
-            file_put_contents($directory.'/bin/git', <<<'BASH'
+            foreach (['provision', 'deployment-functions'] as $file) {
+                copy(dirname(__DIR__, 2).'/bin/'.$file, $directory.'/bin/'.$file);
+            }
+            file_put_contents($directory.'/bin/sudo', <<<'BASH'
 #!/bin/bash
-set -euo pipefail
 printf '%s\n' "$*" >> "$CALL_LOG"
-case "$*" in
-    'checkout -- package-lock.json'|'checkout -- composer.lock'|'checkout -- symfony.lock') exit 0 ;;
-    'pull --ff-only') exit "$PULL_STATUS" ;;
-    *) exit 99 ;;
-esac
+exit 91
 BASH);
-            file_put_contents($directory.'/bin/provision', <<<'BASH'
-#!/bin/bash
-printf 'provision\n' >> "$CALL_LOG"
-BASH);
-            chmod($directory.'/bin/git', 0700);
-            chmod($directory.'/bin/provision', 0700);
-            foreach ([0, 7] as $pullStatus) {
+            chmod($directory.'/bin/sudo', 0700);
+            $runtime = 'postgresql://blueline_web:runtime@localhost:5432/blueline?serverVersion=17&charset=utf8';
+            $maintenance = 'postgresql://blueline:owner@localhost:5432/blueline?serverVersion=17&charset=utf8';
+            $other = 'postgresql://blueline:other@localhost:5432/unrelated?serverVersion=17&charset=utf8';
+            foreach ([
+                [$runtime, '', false, true],
+                [$runtime, $runtime, false, true],
+                [$runtime, $maintenance, false, true],
+                [$runtime, $other, false, false],
+                [$other, '', false, false],
+                [$other, $other, true, true],
+            ] as [$local, $production, $skipDatabase, $accepted]) {
+                file_put_contents($directory.'/.env.local', "CLOUDFLARE_PUBLIC_HOSTNAME=example.com\nDATABASE_URL='$local'\n");
+                file_put_contents($directory.'/.env.maintenance.local', "DATABASE_URL='$maintenance'\n");
+                file_put_contents($directory.'/.env.prod.local', "DATABASE_URL='$production'\n");
                 file_put_contents($directory.'/calls', '');
-                $process = new Process([$directory.'/bin/update', '--env=dev', '--nodata'], null, [
+                $command = ['bash', $directory.'/bin/provision', '--env=prod', '--yes'];
+                if ($skipDatabase) {
+                    $command[] = '--nodatabase';
+                }
+                $process = new Process($command, $directory, [
                     'PATH' => $directory.'/bin:'.getenv('PATH'),
                     'CALL_LOG' => $directory.'/calls',
-                    'PULL_STATUS' => (string) $pullStatus,
                 ]);
                 $process->run();
-                $this->assertSame($pullStatus, $process->getExitCode(), $process->getErrorOutput());
-                $expected = "checkout -- package-lock.json\ncheckout -- composer.lock\ncheckout -- symfony.lock\npull --ff-only\n";
-                if (0 === $pullStatus) {
-                    $expected .= "provision\n";
+                if ($accepted) {
+                    $this->assertStringContainsString('Blueline setup', $process->getOutput(), $process->getErrorOutput());
+                } else {
+                    $this->assertFalse($process->isSuccessful());
+                    $this->assertStringContainsString('ERROR:', $process->getErrorOutput());
+                    $this->assertStringNotContainsString('Blueline setup', $process->getOutput());
+                    $this->assertSame('', file_get_contents($directory.'/calls'));
                 }
-                $this->assertSame($expected, file_get_contents($directory.'/calls'));
             }
         } finally {
-            foreach (['bin/update', 'bin/git', 'bin/provision', 'calls'] as $file) {
+            foreach (['bin/provision', 'bin/deployment-functions', 'bin/sudo', '.env.local', '.env.maintenance.local', '.env.prod.local', 'calls'] as $file) {
                 if (is_file($directory.'/'.$file)) {
                     unlink($directory.'/'.$file);
                 }
@@ -124,49 +133,6 @@ BASH, '--', dirname(__DIR__, 2).'/bin/deployment-functions', $directory]);
         } finally {
             if (is_file($directory.'/.env.local.php')) {
                 unlink($directory.'/.env.local.php');
-            }
-            rmdir($directory);
-        }
-    }
-
-    public function testMaintenanceCredentialsAreLoadedOnlyExplicitly(): void
-    {
-        $directory = sys_get_temp_dir().'/blueline-maintenance-'.bin2hex(random_bytes(6));
-        mkdir($directory, 0700);
-        $runtimeUrl = 'postgresql://blueline_web:runtime@localhost:5432/blueline';
-        $maintenanceUrl = 'postgresql://blueline:maintenance@localhost:5432/blueline';
-        try {
-            file_put_contents($directory.'/.env', "APP_ENV=prod\n");
-            file_put_contents($directory.'/.env.local', 'DATABASE_URL='.$runtimeUrl."\n");
-            file_put_contents($directory.'/.env.maintenance.local', 'DATABASE_URL='.$maintenanceUrl."\n");
-            chmod($directory.'/.env.maintenance.local', 0600);
-            $script = <<<'PHP'
-require $argv[1];
-(new \Symfony\Component\Dotenv\Dotenv())->loadEnv($argv[2], 'APP_ENV', 'prod');
-echo $_SERVER['DATABASE_URL'];
-PHP;
-            $autoload = dirname(__DIR__, 2).'/vendor/autoload.php';
-            $environment = [
-                'APP_ENV' => 'prod',
-                'DATABASE_URL' => false,
-                'SYMFONY_DOTENV_VARS' => false,
-                'BLUELINE_MAINTENANCE_FILE' => $directory.'/unused.env',
-                'REPO_ROOT' => $directory,
-                'ENV_LOCAL_FILE' => $directory.'/.env.local',
-            ];
-            $process = new Process(['php', '-r', $script, '--', $autoload, $directory.'/.env'], null, $environment);
-            $process->run();
-            $this->assertTrue($process->isSuccessful(), $process->getErrorOutput());
-            $this->assertSame($runtimeUrl, $process->getOutput());
-            $command = ['bash', '-c', 'set -euo pipefail; . "$1"; load_maintenance_connection; exec php -r "$2" -- "$3" "$4"',
-                '--', dirname(__DIR__, 2).'/bin/deployment-functions', $script, $autoload, $directory.'/.env'];
-            $process = new Process($command, null, $environment);
-            $process->run();
-            $this->assertTrue($process->isSuccessful(), $process->getErrorOutput());
-            $this->assertSame($maintenanceUrl, $process->getOutput());
-        } finally {
-            foreach (['.env', '.env.local', '.env.maintenance.local'] as $file) {
-                unlink($directory.'/'.$file);
             }
             rmdir($directory);
         }

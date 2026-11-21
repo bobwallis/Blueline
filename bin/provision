@@ -333,6 +333,24 @@ if [ -n "$PATH_PREFIX" ] && [ "$NONINTERACTIVE" = false ]; then
 	STATIC_FILES_ROOT="$_static_files_root_choice"
 fi
 
+if [ "$APP_ENV" = prod ] && [ "$NODATABASE_ARG" = false ]; then
+	_configured_url="$(get_env_value DATABASE_URL)"
+	_production_url="$(get_env_value DATABASE_URL "$REPO_ROOT/.env.prod.local")"
+	_maintenance_file="$REPO_ROOT/.env.maintenance.local"
+	_maintenance_url="$(get_env_value DATABASE_URL "$_maintenance_file")"
+	if [ -n "$_configured_url" ] &&
+		! is_managed_database_url "$_configured_url" blueline &&
+		! is_managed_database_url "$_configured_url" blueline_web; then
+		echo "ERROR: The production connection is not a managed local database URL. Use --nodatabase for custom database management." >&2
+		exit 1
+	fi
+	if [ -n "$_production_url" ] && [ "$_production_url" != "$_configured_url" ] &&
+		[ "$_production_url" != "$_maintenance_url" ]; then
+		echo "ERROR: The production DATABASE_URL override conflicts with the configured runtime/maintenance connections. Review it before provisioning; no credentials were replaced." >&2
+		exit 1
+	fi
+fi
+
 IMAGE_SERVER_MAX_PENDING="$(get_env_value IMAGE_SERVER_MAX_PENDING)"
 IMAGE_SERVER_MAX_PENDING="${IMAGE_SERVER_MAX_PENDING:-10}"
 IMAGE_SERVER_CPU_QUOTA="$(get_env_value IMAGE_SERVER_CPU_QUOTA)"
@@ -396,14 +414,6 @@ if [ "$NONINTERACTIVE" = false ]; then
 	fi
 fi
 
-if [ "$APP_ENV" = prod ] && [ "$NOSERVER_ARG" = false ] && sudo systemctl is-active --quiet blueline; then
-	echo "  Stopping managed application services for the credential/dependency rebuild..."
-	if sudo systemctl is-active --quiet blueline-image; then
-		sudo systemctl stop blueline-image
-	fi
-	sudo systemctl stop blueline
-fi
-
 # ##############################################################################
 # SECTION 1: OS check
 # ##############################################################################
@@ -438,6 +448,14 @@ if [ "$VERSION_NUM" -gt 13 ]; then
 fi
 
 echo "  OS: Debian $VERSION_ID (${VERSION_CODENAME:-}) — OK"
+
+if [ "$APP_ENV" = prod ] && [ "$NOSERVER_ARG" = false ] && sudo systemctl is-active --quiet blueline; then
+	echo "  Stopping managed application services for the credential/dependency rebuild..."
+	if sudo systemctl is-active --quiet blueline-image; then
+		sudo systemctl stop blueline-image
+	fi
+	sudo systemctl stop blueline
+fi
 
 
 # ##############################################################################
@@ -611,24 +629,6 @@ if [ "$NODATABASE_ARG" = true ]; then
 	echo "  Skipping PostgreSQL setup (--nodatabase)."
 	echo "  Reminder: configure a reachable PostgreSQL server and credentials yourself."
 else
-	if [ "$APP_ENV" = prod ]; then
-		_configured_url="$(get_env_value DATABASE_URL)"
-		_production_url="$(get_env_value DATABASE_URL "$REPO_ROOT/.env.prod.local")"
-		_maintenance_file="$REPO_ROOT/.env.maintenance.local"
-		_maintenance_url="$(get_env_value DATABASE_URL "$_maintenance_file")"
-		if [ -n "$_configured_url" ] &&
-			! is_managed_database_url "$_configured_url" blueline &&
-			! is_managed_database_url "$_configured_url" blueline_web; then
-			echo "ERROR: The production connection is not a managed local database URL. Use --nodatabase for custom database management." >&2
-			exit 1
-		fi
-		if [ -n "$_production_url" ] && [ "$_production_url" != "$_configured_url" ] &&
-			[ "$_production_url" != "$_maintenance_url" ]; then
-			echo "ERROR: The production DATABASE_URL override conflicts with the configured runtime/maintenance connections. Review it before provisioning; no credentials were replaced." >&2
-			exit 1
-		fi
-	fi
-
 	# Install PostgreSQL 17 (Debian Trixie default — no extra apt source needed)
 	sudo apt-get install -y -q --no-install-recommends postgresql-17
 
