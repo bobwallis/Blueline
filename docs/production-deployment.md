@@ -62,6 +62,8 @@ Review the available flags before updating:
 
 `./bin/update` pulls code, reruns provisioning and refreshes method data by default. It supports `--nopull`, `--nodata`, `--nodatabase`, `--nocloudflared`, `--noserver` and `--env=dev|prod`. The default pull step restores `package-lock.json`, `composer.lock` and `symfony.lock` before `git pull`; preserve any local changes to these files before running the updater.
 
+Production Composer installs exclude development packages.
+
 ## Ports and public URL
 
 Provisioning asks for a local FrankenPHP HTTPS port and stores it in `.env.local` as `FRANKENPHP_PORT`. Without a Cloudflare Tunnel, `DEFAULT_URI` is set to `https://localhost:<FRANKENPHP_PORT>`. With a tunnel, its origin points to that local HTTPS endpoint and `DEFAULT_URI` is updated to the configured public hostname.

@@ -36,6 +36,10 @@
 
 Follow the [development guide](development-deployment.md) for local setup, tests and data import. Follow the [production guide](production-deployment.md) for deployment and live operations.
 
+### Symfony services
+
+Symfony runs without sessions, Forms, Mailer, Messenger, Notifier or Doctrine Migrations. If functionality is added which uses these, then re-add.
+
 ### Frontend assets
 
 In development, edit files under `assets/` and refresh the browser; AssetMapper handles mapping and versioning without a manual build. Production compilation is part of provisioning; see [production deployment](production-deployment.md).

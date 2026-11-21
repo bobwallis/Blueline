@@ -791,7 +791,9 @@ fi
 
 echo -e "\n\033[1mInstalling PHP dependencies\033[0m"
 cd "$REPO_ROOT"
+_composer_args=(--optimize-autoloader --no-progress --no-interaction)
 if [ "$APP_ENV" = prod ]; then
+	_composer_args+=(--no-dev)
 	mkdir -p "$REPO_ROOT/var"
 	touch "$REPO_ROOT/var/production-deployment"
 	rm -f "$REPO_ROOT/.env.local.php"
@@ -801,7 +803,7 @@ if [ "$APP_ENV" = prod ]; then
 	fi
 fi
 export APP_ENV
-symfony composer install --optimize-autoloader --no-progress --no-interaction
+symfony composer install "${_composer_args[@]}"
 
 
 # ##############################################################################
