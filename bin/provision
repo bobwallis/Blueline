@@ -433,26 +433,29 @@ sudo apt-get update -qq && sudo apt-get upgrade -q -y --no-install-recommends
 sudo apt-get install -q -y --no-install-recommends \
 	apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less gpg lsb-release zsh brotli zstd zopfli tzdata chromium chromium-sandbox acl libnss3-tools
 
-# Node.js 24 LTS — add NodeSource apt source if not already present
-if [ ! -f /etc/apt/sources.list.d/nodesource.sources ]; then
-	echo "  Adding NodeSource apt source (Node.js 24)..."
-	curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
-fi
-sudo apt-get install -q -y nodejs
-
-# Symfony CLI — add Cloudsmith apt source if not already present
-if [ ! -f /etc/apt/sources.list.d/symfony-stable.list ]; then
-	echo "  Adding Symfony CLI apt source..."
-	curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | sudo -E bash -
-fi
-sudo apt-get install -q -y symfony-cli
+# Configure NodeSource's Node.js 24 APT repository with a verified signing key.
+install_repository_key https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
+	/usr/share/keyrings/nodesource.gpg 6F71F525282841EEDAF851B42F59B5F99B1BE0B4
+sudo tee /etc/apt/sources.list.d/nodesource.sources >/dev/null <<'EOF'
+Types: deb
+URIs: https://deb.nodesource.com/node_24.x
+Suites: nodistro
+Components: main
+Signed-By: /usr/share/keyrings/nodesource.gpg
+EOF
+# Configure Cloudsmith's Symfony CLI stable APT repository with a verified signing key.
+install_repository_key https://dl.cloudsmith.io/public/symfony/stable/gpg.key \
+	/usr/share/keyrings/symfony-stable.gpg 50E6CC074455E44423B0494C99CEF8A62216B73D
+echo 'deb [signed-by=/usr/share/keyrings/symfony-stable.gpg] https://dl.cloudsmith.io/public/symfony/stable/deb/debian any-version main' |
+	sudo tee /etc/apt/sources.list.d/symfony-stable.list >/dev/null
 
 # Cloudflared — add Cloudflare apt source if not already present
 _cloudflared_repo_added=false
 if [ ! -f /etc/apt/sources.list.d/cloudflared.list ]; then
 	echo "  Adding Cloudflare cloudflared apt source..."
 	sudo mkdir -p --mode=0755 /usr/share/keyrings
-	curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+	install_repository_key https://pkg.cloudflare.com/cloudflare-main.gpg \
+		/usr/share/keyrings/cloudflare-main.gpg CC94B39C77AE7342A68B89628A682D308D4E5E73,06C89DB3B80A8F4349697C76029E1444B7D9F50F
 	echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list >/dev/null
 	_cloudflared_repo_added=true
 fi
@@ -461,20 +464,27 @@ if [ "$_cloudflared_repo_added" = true ]; then
 fi
 sudo apt-get install -q -y cloudflared
 
-# FrankenPHP — install using install script.
-if ! command -v frankenphp > /dev/null 2>&1; then
-	echo "  Installing FrankenPHP via install script..."
-	curl -fsSL https://files.henderkes.com/install.sh | sudo sh -s 8.4
-	sudo apt-get install -q -y frankenphp
+# Use the packaged ZTS runtime, with a pinned repository signing identity.
+if [ "$APP_ENV" = prod ] && [ "$NOSERVER_ARG" = true ]; then
+	echo "  Skipping FrankenPHP package setup (--noserver)."
+elif ! command -v frankenphp > /dev/null 2>&1; then
+	install_repository_key https://pkg.henderkes.com/api/packages/84/debian/repository.key \
+		/usr/share/keyrings/static-php84.gpg 84C55642FCEBE5C81B8ECAF984A79E3970A7B254
+	echo 'deb [signed-by=/usr/share/keyrings/static-php84.gpg] https://pkg.henderkes.com/api/packages/84/debian php-zts main' |
+		sudo tee /etc/apt/sources.list.d/static-php84.list >/dev/null
 else
-	echo "  FrankenPHP already installed — skipping."
+	echo "  Using existing FrankenPHP package source; review its signing keys with apt-cache policy."
+fi
+sudo apt-get update -q
+sudo apt-get install -q -y nodejs symfony-cli
+if [ "$APP_ENV" = dev ] || [ "$NOSERVER_ARG" = false ]; then
+	sudo apt-get install -q -y frankenphp php-zts-cli php-zts-pdo php-zts-pdo-pgsql php-zts-mbstring
 fi
 
 # Postgres client, plus PHP 8.4 and extensions (Debian Trixie default — no extra apt source needed)
 sudo apt-get install -y -q --no-install-recommends \
 	postgresql-client-17 \
-	composer php8.4-cli php8.4-opcache php8.4-pgsql php8.4-intl php8.4-mbstring php8.4-xml php8.4-zip php8.4-curl \
-	php-zts-cli php-zts-intl php-zts-pdo php-zts-pdo-pgsql php-zts-pgsql php-zts-zip
+	composer php8.4-cli php8.4-opcache php8.4-pgsql php8.4-mbstring php8.4-xml php8.4-curl
 
 if [ "$APP_ENV" = "dev" ]; then
 	# Install some CLI tools used by VS Code
@@ -483,6 +493,10 @@ if [ "$APP_ENV" = "dev" ]; then
 fi
 
 echo "  System packages: done."
+symfony php "$REPO_ROOT/bin/check-php-platform" --imports
+if [ "$APP_ENV" = dev ] || [ "$NOSERVER_ARG" = false ]; then
+	frankenphp php-cli "$REPO_ROOT/bin/check-php-platform"
+fi
 
 
 # ##############################################################################
@@ -871,7 +885,9 @@ fi
 echo -e "\n\033[1mInstalling Node.js dependencies\033[0m"
 cd "$REPO_ROOT"
 npm install --loglevel=warn --no-progress --no-fund
-npm audit fix --loglevel=warn --no-progress --no-fund || true
+if ! npm audit fix --loglevel=warn --no-progress --no-fund; then
+	echo "WARNING: npm audit fix did not complete cleanly; review the output above for unresolved vulnerabilities or installation errors. Provisioning will continue." >&2
+fi
 
 
 # ##############################################################################
@@ -1297,9 +1313,7 @@ fi
 # SECTION 10: Finalisation
 # ##############################################################################
 # Clean up apt caches
-sudo apt-get autoremove -y -q
 sudo apt-get clean
-sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* || true
 
 # And finalise Symfony environment
 echo -e "\n\033[1mResetting dev environment\033[0m"

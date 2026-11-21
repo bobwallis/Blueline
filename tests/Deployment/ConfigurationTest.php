@@ -7,6 +7,56 @@ use Symfony\Component\Process\Process;
 
 class ConfigurationTest extends TestCase
 {
+    public function testUpdateResetsLockfilesBeforeFastForwardPull(): void
+    {
+        $directory = sys_get_temp_dir().'/blueline-update-'.bin2hex(random_bytes(6));
+        mkdir($directory, 0700);
+        mkdir($directory.'/bin', 0700);
+        try {
+            copy(dirname(__DIR__, 2).'/bin/update', $directory.'/bin/update');
+            chmod($directory.'/bin/update', 0700);
+            file_put_contents($directory.'/bin/git', <<<'BASH'
+#!/bin/bash
+set -euo pipefail
+printf '%s\n' "$*" >> "$CALL_LOG"
+case "$*" in
+    'checkout -- package-lock.json'|'checkout -- composer.lock'|'checkout -- symfony.lock') exit 0 ;;
+    'pull --ff-only') exit "$PULL_STATUS" ;;
+    *) exit 99 ;;
+esac
+BASH);
+            file_put_contents($directory.'/bin/provision', <<<'BASH'
+#!/bin/bash
+printf 'provision\n' >> "$CALL_LOG"
+BASH);
+            chmod($directory.'/bin/git', 0700);
+            chmod($directory.'/bin/provision', 0700);
+            foreach ([0, 7] as $pullStatus) {
+                file_put_contents($directory.'/calls', '');
+                $process = new Process([$directory.'/bin/update', '--env=dev', '--nodata'], null, [
+                    'PATH' => $directory.'/bin:'.getenv('PATH'),
+                    'CALL_LOG' => $directory.'/calls',
+                    'PULL_STATUS' => (string) $pullStatus,
+                ]);
+                $process->run();
+                $this->assertSame($pullStatus, $process->getExitCode(), $process->getErrorOutput());
+                $expected = "checkout -- package-lock.json\ncheckout -- composer.lock\ncheckout -- symfony.lock\npull --ff-only\n";
+                if (0 === $pullStatus) {
+                    $expected .= "provision\n";
+                }
+                $this->assertSame($expected, file_get_contents($directory.'/calls'));
+            }
+        } finally {
+            foreach (['bin/update', 'bin/git', 'bin/provision', 'calls'] as $file) {
+                if (is_file($directory.'/'.$file)) {
+                    unlink($directory.'/'.$file);
+                }
+            }
+            rmdir($directory.'/bin');
+            rmdir($directory);
+        }
+    }
+
     public function testSchemaValidationStopsOnUnexpectedErrors(): void
     {
         $process = new Process(['bash', '-c', <<<'BASH'

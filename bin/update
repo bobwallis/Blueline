@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Get script directory, and cd to repo root
 SOURCE="${BASH_SOURCE[0]}"
@@ -107,12 +108,11 @@ fi
 if [[ $NOPULL = false ]]
 	then
 	echo -e "\n\033[1mPulling latest version of Blueline\033[0m"
-	# Discard any local changes to lockfiles (which may be updated by setup script) before pulling, to avoid merge conflicts
+	# Discard lockfile changes made by deployment-time security fixes.
 	git checkout -- package-lock.json
 	git checkout -- composer.lock
 	git checkout -- symfony.lock
-	# Then pull latest code
-	git pull
+	git pull --ff-only
 	# Restart update script (to allow it to update itself)
 	_UPDATE_ARGS=(--nopull --env="$APP_ENV")
 	if [[ $NODATABASE_ARG = true ]]; then

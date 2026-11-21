@@ -103,3 +103,29 @@ END $$;
 COMMIT;
 SQL
 }
+
+install_repository_key() {
+	local url="$1" destination="$2" fingerprints="$3" key fingerprint
+	key="$(mktemp)"
+	if ! curl --fail --silent --show-error --location --proto '=https' "$url" -o "$key"; then
+		rm -f "$key"
+		return 1
+	fi
+	local found=false
+	while IFS= read -r fingerprint; do
+		if [[ ",$fingerprints," != *",$fingerprint,"* ]]; then
+			echo "ERROR: Unrecognised repository signing key from $url. Review key rotation before retrying." >&2
+			rm -f "$key"
+			return 1
+		fi
+		found=true
+	done < <(gpg --batch --show-keys --with-colons "$key" | awk -F: '$1 == "pub" { primary=1 } $1 == "fpr" && primary { print $10; primary=0 }')
+	if [ "$found" = false ]; then
+		echo "ERROR: No repository signing key found at $url." >&2
+		rm -f "$key"
+		return 1
+	fi
+	gpg --batch --yes --dearmor --output "${key}.gpg" "$key"
+	sudo install -D -m 0644 "${key}.gpg" "$destination"
+	rm -f "$key" "${key}.gpg"
+}

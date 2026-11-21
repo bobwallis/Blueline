@@ -60,9 +60,9 @@ Review the available flags before updating:
 ./bin/update --env=prod
 ```
 
-`./bin/update` pulls code, reruns provisioning and refreshes method data by default. It supports `--nopull`, `--nodata`, `--nodatabase`, `--nocloudflared`, `--noserver` and `--env=dev|prod`. The default pull step restores `package-lock.json`, `composer.lock` and `symfony.lock` before `git pull`; preserve any local changes to these files before running the updater.
+`./bin/update` discards local lockfile changes, pulls code with `--ff-only`, reruns provisioning and refreshes data. Use `--help` for skip flags and deployment options.
 
-Production Composer installs exclude development packages.
+Deployment installs Composer/npm dependencies, then applies compatible npm security fixes. Production Composer installs exclude development packages. Audit failures produce a warning without blocking deployment.
 
 ## Ports and public URL
 
@@ -87,6 +87,13 @@ FrankenPHP (`blueline-web`) and the renderer (`blueline-image`) use separate ser
 Managed connections use `postgresql://ROLE:PASSWORD@localhost:5432/blueline?serverVersion=17&charset=utf8`. For custom connections, use `--nodatabase` and configure roles separately.
 
 ## PHP, Caddy and renderer boundaries
+
+Verify CLI/import and ZTS platform requirements separately:
+
+```sh
+symfony php bin/check-php-platform --imports
+frankenphp php-cli bin/check-php-platform
+```
 
 The renderer validates method paths, restricts requests to its local application origin and verifies HTTPS using its NSS CA store. Keep Chromium's sandbox enabled; investigate host restrictions before considering the risky `BROWSER_DISABLE_SANDBOX=1` override.
 

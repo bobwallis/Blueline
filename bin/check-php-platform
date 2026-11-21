@@ -1,0 +1,12 @@
+<?php
+
+$extensions = ['ctype', 'iconv', 'mbstring', 'pdo_pgsql', 'xml', 'dom'];
+if (in_array('--imports', $argv, true)) {
+    $extensions[] = 'SimpleXML';
+}
+$missing = array_values(array_filter($extensions, static fn (string $extension): bool => !extension_loaded($extension)));
+if (PHP_VERSION_ID < 80400 || [] !== $missing) {
+    fwrite(STDERR, 'ERROR: PHP 8.4+ is required with these missing extensions: '.implode(', ', $missing).PHP_EOL);
+    exit(1);
+}
+echo 'PHP '.PHP_VERSION.' platform verified: '.implode(', ', $extensions).PHP_EOL;

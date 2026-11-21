@@ -32,7 +32,7 @@ If provisioning did not complete, rerun it from the repository root:
 `./bin/provision` is idempotent where possible. In development it:
 
 - Updates Debian packages and installs PHP, Composer, Symfony CLI, PostgreSQL, FrankenPHP, Chromium, locale and timezone packages.
-- Sets the locale and timezone to the UK, installs PHP and npm dependencies, configures PHP OPcache and tunes PostgreSQL for the expected workload.
+- Sets the locale and timezone to the UK, installs PHP/npm dependencies with compatible npm security fixes, configures PHP OPcache and tunes PostgreSQL for the application workload.
 - Generates `APP_SECRET` and writes `DATABASE_URL`, `APP_ENV=dev`, `FRANKENPHP_PORT`, `IMAGESERVER_PORT` and `DEFAULT_URI` to `.env.local`.
 - Generates a managed Caddyfile for local HTTPS and FrankenPHP worker mode.
 - Creates the database schema, installs PostgreSQL's `fuzzystrmatch` extension and clears caches.
@@ -56,7 +56,7 @@ For the combined maintenance workflow, inspect the available options and then ru
 ./bin/update
 ```
 
-`./bin/update` pulls application code, reruns provisioning and refreshes data by default. It restores the Composer and npm lockfiles before pulling, so do not run it with local changes to those files that you need to keep.
+`./bin/update` discards local lockfile changes, pulls code with `--ff-only`, reruns provisioning and refreshes data.
 
 ## Running the application
 
