@@ -34,7 +34,7 @@ RUN apt-get -y install --no-install-recommends \
         apt-utils jq locales sudo zip wget tree lsof procps dirmngr psmisc net-tools unzip curl nano less gpg lsb-release zsh brotli zstd zopfli tzdata \
         ripgrep silversearcher-ag shellcheck \
         composer php8.4-cli php8.4-opcache php8.4-pgsql php8.4-intl php8.4-mbstring php8.4-xml php8.4-zip php8.4-curl \
-        php-zts-cli php-zts-intl php-zts-pdo php-zts-pdo-pgsql php-zts-pgsql php-zts-zip \
+        php-zts-cli php-zts-embed php-zts-intl php-zts-pdo php-zts-pdo-pgsql php-zts-pgsql php-zts-zip \
         postgresql-17 postgresql-client-17 \
         chromium chromium-sandbox
 

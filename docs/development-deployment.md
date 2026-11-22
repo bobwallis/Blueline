@@ -34,7 +34,7 @@ If provisioning did not complete, rerun it from the repository root:
 - Updates Debian packages and installs PHP, Composer, Symfony CLI, PostgreSQL, FrankenPHP, Chromium, locale and timezone packages.
 - Sets the locale and timezone to the UK, installs PHP/npm dependencies with compatible npm security fixes, configures PHP OPcache and tunes PostgreSQL for the application workload.
 - Generates `APP_SECRET` and writes `DATABASE_URL`, `APP_ENV=dev`, `FRANKENPHP_PORT`, `IMAGESERVER_PORT` and `DEFAULT_URI` to `.env.local`.
-- Generates a managed Caddyfile for local HTTPS and FrankenPHP worker mode.
+- Generates a managed Caddyfile for loopback HTTP and FrankenPHP worker mode.
 - Creates the database schema, installs PostgreSQL's `fuzzystrmatch` extension and clears caches.
 
 Provisioning does not import method data.
@@ -114,7 +114,7 @@ Run targeted PHPUnit tests directly:
 ./bin/phpunit --filter testActionName tests/Controller/ExampleTest.php
 ```
 
-`./bin/phpunit tests/Deployment` checks PostgreSQL grants in a private test cluster and credential permissions (requires PostgreSQL 17 tools).
+`./bin/phpunit tests/Deployment` checks provisioning preflight, credential permissions and PostgreSQL grants in a private test cluster (requires PostgreSQL 17 tools).
 
 PHP style checks use the Symfony ruleset:
 

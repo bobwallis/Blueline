@@ -21,10 +21,10 @@ Usage: $0 [options]
 This script sets up or re-runs setup for Blueline. It is idempotent and safe to run multiple times.
 
 Options:
- --yes, -y       Non-interactive: answer yes to all prompts
+ --yes, -y       Non-interactive: use provisioning defaults
  --env=dev|prod  Set APP_ENV directly
+ --deployment=cloudflared|direct  Select ingress profile
  --nodatabase    Skip local PostgreSQL install and configuration
- --nocloudflared Skip cloudflared tunnel setup (prod only)
  --noserver      Skip FrankenPHP install and service setup (prod only)
  --help          Shows this message
 EOF
@@ -32,10 +32,9 @@ EOF
 
 NONINTERACTIVE=false
 ENV_ARG=""
+DEPLOYMENT_ARG=""
 NODATABASE_ARG=false
 NODATABASE_ARG_SET=false
-NOCLOUDFLARED_ARG=false
-NOCLOUDFLARED_ARG_SET=false
 NOSERVER_ARG=false
 NOSERVER_ARG_SET=false
 AFTER_DOUBLE_DASH=false
@@ -55,6 +54,9 @@ for arg in "$@"; do
 		--env=dev|--env=prod)
 			ENV_ARG="${arg#--env=}"
 			;;
+		--deployment=cloudflared|--deployment=direct)
+			DEPLOYMENT_ARG="${arg#--deployment=}"
+			;;
 		--env=*)
 			printf >&2 '%s: invalid value for --env (must be dev or prod): %s\n' "${0##*/}" "${arg#--env=}"
 			usage
@@ -63,10 +65,6 @@ for arg in "$@"; do
 		--nodatabase)
 			NODATABASE_ARG=true
 			NODATABASE_ARG_SET=true
-			;;
-		--nocloudflared)
-			NOCLOUDFLARED_ARG=true
-			NOCLOUDFLARED_ARG_SET=true
 			;;
 		--noserver)
 			NOSERVER_ARG=true
@@ -93,40 +91,6 @@ for arg in "$@"; do
 			;;
 	esac
 done
-
-is_valid_port() {
-	local port="$1"
-	if ! [[ "$port" =~ ^[0-9]+$ ]]; then
-		return 1
-	fi
-	if [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
-		return 1
-	fi
-	return 0
-}
-
-# is_valid_path_prefix PREFIX
-# Returns 0 when PREFIX is empty (domain root) or a valid absolute path without trailing slash.
-is_valid_path_prefix() {
-	local prefix="$1"
-	# Empty is valid (domain root)
-	if [ -z "$prefix" ]; then
-		return 0
-	fi
-	# Must start with /
-	if [[ "$prefix" != /* ]]; then
-		return 1
-	fi
-	# Must not end with /
-	if [[ "$prefix" == */ ]]; then
-		return 1
-	fi
-	# Must not contain query string or fragment
-	if [[ "$prefix" == *\?* ]] || [[ "$prefix" == *\#* ]]; then
-		return 1
-	fi
-	return 0
-}
 
 # Detect Docker for environment-specific behavior.
 IS_DOCKER=false
@@ -205,13 +169,8 @@ if [ "$NONINTERACTIVE" = false ]; then
 	done
 else
 	if ! is_valid_port "$FRANKENPHP_PORT"; then
-		if [ "$APP_ENV" = "dev" ]; then
-			echo "  WARNING: Invalid FRANKENPHP_PORT '$FRANKENPHP_PORT' found, defaulting to 8000." >&2
-			FRANKENPHP_PORT="8000"
-		else
-			echo "  WARNING: Invalid FRANKENPHP_PORT '$FRANKENPHP_PORT' found, defaulting to 8443." >&2
-			FRANKENPHP_PORT="8443"
-		fi
+		echo "ERROR: Invalid FRANKENPHP_PORT." >&2
+		exit 1
 	fi
 fi
 
@@ -232,8 +191,8 @@ if [ "$NONINTERACTIVE" = false ]; then
 	done
 else
 	if ! is_valid_port "$IMAGESERVER_PORT"; then
-		echo "  WARNING: Invalid IMAGESERVER_PORT '$IMAGESERVER_PORT' found, defaulting to 8001." >&2
-		IMAGESERVER_PORT="8001"
+		echo "ERROR: Invalid IMAGESERVER_PORT." >&2
+		exit 1
 	fi
 fi
 
@@ -286,7 +245,6 @@ resolve_skip_decision NODATABASE_ARG NODATABASE_ARG_SET "Skip PostgreSQL install
 
 if [ "$APP_ENV" = "prod" ]; then
 	resolve_skip_decision NOSERVER_ARG NOSERVER_ARG_SET "Skip FrankenPHP web server setup?"
-	resolve_skip_decision NOCLOUDFLARED_ARG NOCLOUDFLARED_ARG_SET "Skip cloudflared tunnel setup?"
 fi
 
 CLOUDFLARE_TUNNEL_NAME="$(get_env_value CLOUDFLARE_TUNNEL_NAME)"
@@ -295,9 +253,28 @@ if [ -z "$CLOUDFLARE_TUNNEL_NAME" ]; then
 fi
 
 CLOUDFLARE_PUBLIC_HOSTNAME="$(get_env_value CLOUDFLARE_PUBLIC_HOSTNAME)"
+DEPLOYMENT_MODE="${DEPLOYMENT_ARG:-$(get_env_value DEPLOYMENT_MODE)}"
+PUBLIC_HOSTNAME="${PUBLIC_HOSTNAME:-$(get_env_value PUBLIC_HOSTNAME)}"
+FRANKENPHP_HTTP_PORT="${FRANKENPHP_HTTP_PORT:-$(get_env_value FRANKENPHP_HTTP_PORT)}"
+FRANKENPHP_HTTP_PORT="${FRANKENPHP_HTTP_PORT:-8080}"
+FRANKENPHP_RENDER_PORT="$(get_env_value FRANKENPHP_RENDER_PORT)"
+FRANKENPHP_RENDER_PORT="${FRANKENPHP_RENDER_PORT:-9443}"
+if [ "$APP_ENV" = prod ]; then
+	if [ -z "$DEPLOYMENT_MODE" ] && [ -n "$CLOUDFLARE_PUBLIC_HOSTNAME" ]; then
+		DEPLOYMENT_MODE=cloudflared
+	fi
+	if [ -z "$DEPLOYMENT_MODE" ] && [ "$NONINTERACTIVE" = false ]; then
+		read -r -p "Ingress profile (cloudflared or direct) [cloudflared]: " DEPLOYMENT_MODE
+		DEPLOYMENT_MODE="${DEPLOYMENT_MODE:-cloudflared}"
+	fi
+	if [[ "$DEPLOYMENT_MODE" != cloudflared && "$DEPLOYMENT_MODE" != direct ]]; then
+		echo "ERROR: Choose --deployment=cloudflared or --deployment=direct." >&2
+		exit 1
+	fi
+fi
 
 _tunnel_id_in_env="$(get_env_value CLOUDFLARE_TUNNEL_ID "$REPO_ROOT/.env.local")"
-if [ "$APP_ENV" = "prod" ] && [ "$NOCLOUDFLARED_ARG" = false ] && [ "$NONINTERACTIVE" = false ]; then
+if [ "$APP_ENV" = "prod" ] && [ "$DEPLOYMENT_MODE" = cloudflared ] && [ "$NONINTERACTIVE" = false ]; then
 	while true; do
 		read -r -p "Cloudflared public domain only (e.g. blueline.example.com). Path is configurable in the next question; enter just the domain now [${CLOUDFLARE_PUBLIC_HOSTNAME}]: " _public_hostname_choice
 		_public_hostname_choice="${_public_hostname_choice:-$CLOUDFLARE_PUBLIC_HOSTNAME}"
@@ -333,6 +310,93 @@ if [ -n "$PATH_PREFIX" ] && [ "$NONINTERACTIVE" = false ]; then
 	STATIC_FILES_ROOT="$_static_files_root_choice"
 fi
 
+if [ "$APP_ENV" = prod ]; then
+	if [ "$DEPLOYMENT_MODE" = cloudflared ]; then
+		PUBLIC_HOSTNAME="${CLOUDFLARE_PUBLIC_HOSTNAME:-$PUBLIC_HOSTNAME}"
+	fi
+	if [ -z "$PUBLIC_HOSTNAME" ] && [ "$NONINTERACTIVE" = false ]; then
+		read -r -p "Public hostname (without scheme, port or path, e.g. example.com): " PUBLIC_HOSTNAME
+	fi
+	if ! [[ "$PUBLIC_HOSTNAME" =~ ^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$ ]] ||
+		[ "${#PUBLIC_HOSTNAME}" -gt 253 ]; then
+		echo "ERROR: A valid public DNS hostname is required." >&2
+		exit 1
+	fi
+	if [ "$DEPLOYMENT_MODE" = cloudflared ]; then
+		CLOUDFLARE_PUBLIC_HOSTNAME="$PUBLIC_HOSTNAME"
+		if [[ ! "$CLOUDFLARE_TUNNEL_NAME" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+			echo "ERROR: Tunnel names must contain only letters, digits, underscores or hyphens." >&2
+			exit 1
+		fi
+	fi
+fi
+if ! is_valid_path_prefix "$PATH_PREFIX" || ! is_valid_port "$FRANKENPHP_HTTP_PORT" || ! is_valid_port "$FRANKENPHP_RENDER_PORT"; then
+	echo "ERROR: Invalid path prefix or HTTP listener port." >&2
+	exit 1
+fi
+FRANKENPHP_PORT=$((10#$FRANKENPHP_PORT))
+IMAGESERVER_PORT=$((10#$IMAGESERVER_PORT))
+FRANKENPHP_HTTP_PORT=$((10#$FRANKENPHP_HTTP_PORT))
+FRANKENPHP_RENDER_PORT=$((10#$FRANKENPHP_RENDER_PORT))
+if [ "$FRANKENPHP_PORT" = "$IMAGESERVER_PORT" ] ||
+	{ [ "$APP_ENV" = prod ] && [ "$DEPLOYMENT_MODE" = direct ] &&
+		{ [ "$FRANKENPHP_HTTP_PORT" = "$FRANKENPHP_PORT" ] || [ "$FRANKENPHP_HTTP_PORT" = "$IMAGESERVER_PORT" ]; }; }; then
+	echo "ERROR: Application, public HTTP and image listener ports must be distinct." >&2
+	exit 1
+fi
+if [ "$APP_ENV" = prod ] && [ "$DEPLOYMENT_MODE" = direct ] &&
+	{ [ "$FRANKENPHP_RENDER_PORT" = "$FRANKENPHP_PORT" ] || [ "$FRANKENPHP_RENDER_PORT" = "$FRANKENPHP_HTTP_PORT" ] || [ "$FRANKENPHP_RENDER_PORT" = "$IMAGESERVER_PORT" ]; }; then
+	echo "ERROR: The private renderer TLS port must be distinct from public/image listener ports." >&2
+	exit 1
+fi
+if [[ ! "$REPO_ROOT" =~ ^/[a-zA-Z0-9_./-]+$ ]]; then
+	echo "ERROR: Use a safe checkout path and a deliberately public static root without escaping symlinks or private files." >&2
+	exit 1
+fi
+if [ -n "$STATIC_FILES_ROOT" ]; then
+	_static_root_error="ERROR: Use a safe checkout path and a deliberately public static root without escaping symlinks or private files."
+	if ! _static_root="$(realpath -e "$STATIC_FILES_ROOT")" || [ ! -d "$_static_root" ]; then
+		echo "$_static_root_error" >&2
+		exit 1
+	fi
+	_static_valid=true
+	case "$REPO_ROOT/" in "$_static_root/"*) _static_valid=false ;; esac
+	case "$HOME/" in "$_static_root/"*) _static_valid=false ;; esac
+	case "$_static_root/" in
+		"$REPO_ROOT/"*)
+			case "$_static_root/" in "$REPO_ROOT/public/"*) ;; *) _static_valid=false ;; esac
+			;;
+	esac
+	case "$_static_root/" in */.ssh/*|*/.gnupg/*) _static_valid=false ;; esac
+	if [ "$_static_valid" = false ] || [[ ! "$_static_root" =~ ^/[a-zA-Z0-9_./-]+$ ]]; then
+		echo "$_static_root_error" >&2
+		exit 1
+	fi
+	if ! _static_inventory="$(find "$_static_root" -name '.env*' -o -name '.git' -o -name '.ssh' -o -name '.gnupg' -o -name '*.key' -o -name '*.pem')" ||
+		[ -n "$_static_inventory" ]; then
+		echo "$_static_root_error" >&2
+		exit 1
+	fi
+	_static_links="$(mktemp)"
+	if ! find "$_static_root" -type l -print0 > "$_static_links"; then
+		rm -f "$_static_links"
+		echo "$_static_root_error" >&2
+		exit 1
+	fi
+	while IFS= read -r -d '' _static_link; do
+		if ! _static_target="$(realpath -e "$_static_link")"; then
+			_static_valid=false
+			break
+		fi
+		case "$_static_target" in "$_static_root/"*) ;; *) _static_valid=false; break ;; esac
+	done < "$_static_links"
+	rm -f "$_static_links"
+	if [ "$_static_valid" = false ]; then
+		echo "$_static_root_error" >&2
+		exit 1
+	fi
+	STATIC_FILES_ROOT="$_static_root"
+fi
 if [ "$APP_ENV" = prod ] && [ "$NODATABASE_ARG" = false ]; then
 	_configured_url="$(get_env_value DATABASE_URL)"
 	_production_url="$(get_env_value DATABASE_URL "$REPO_ROOT/.env.prod.local")"
@@ -394,16 +458,18 @@ else
 	echo "  STATIC_FILES_ROOT:     (not used without PATH_PREFIX)"
 fi
 if [ "$APP_ENV" = "prod" ]; then
-	echo "  NOCLOUDFLARED:         $NOCLOUDFLARED_ARG"
-	if [ "$NOCLOUDFLARED_ARG" = false ]; then
+	echo "  INGRESS_PROFILE:       $DEPLOYMENT_MODE"
+	if [ "$DEPLOYMENT_MODE" = cloudflared ]; then
 		echo "  CLOUDFLARE_TUNNEL_NAME: $CLOUDFLARE_TUNNEL_NAME"
 		echo "  CLOUDFLARE_DOMAIN:      $CLOUDFLARE_PUBLIC_HOSTNAME"
+		if [ -n "$_tunnel_id_in_env" ]; then
+			echo "  CLOUDFLARE_TUNNEL_ID:   $_tunnel_id_in_env (already configured)"
+		fi
+	else
+		echo "  PUBLIC_HOSTNAME:         $PUBLIC_HOSTNAME"
+		echo "  FRANKENPHP_HTTP_PORT:    $FRANKENPHP_HTTP_PORT"
+		echo "  FRANKENPHP_RENDER_PORT:  $FRANKENPHP_RENDER_PORT"
 	fi
-	if [ -n "$_tunnel_id_in_env" ]; then
-		echo "  CLOUDFLARE_TUNNEL_ID:   $_tunnel_id_in_env (already configured)"
-	fi
-else
-	echo "  NOCLOUDFLARED:         true (prod only option)"
 fi
 
 if [ "$NONINTERACTIVE" = false ]; then
@@ -487,19 +553,21 @@ echo 'deb [signed-by=/usr/share/keyrings/symfony-stable.gpg] https://dl.cloudsmi
 	sudo tee /etc/apt/sources.list.d/symfony-stable.list >/dev/null
 
 # Cloudflared — add Cloudflare apt source if not already present
-_cloudflared_repo_added=false
-if [ ! -f /etc/apt/sources.list.d/cloudflared.list ]; then
-	echo "  Adding Cloudflare cloudflared apt source..."
-	sudo mkdir -p --mode=0755 /usr/share/keyrings
-	install_repository_key https://pkg.cloudflare.com/cloudflare-main.gpg \
-		/usr/share/keyrings/cloudflare-main.gpg CC94B39C77AE7342A68B89628A682D308D4E5E73,06C89DB3B80A8F4349697C76029E1444B7D9F50F
-	echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list >/dev/null
-	_cloudflared_repo_added=true
+if [ "$APP_ENV" = prod ] && [ "$DEPLOYMENT_MODE" = cloudflared ]; then
+	_cloudflared_repo_added=false
+	if [ ! -f /etc/apt/sources.list.d/cloudflared.list ]; then
+		echo "  Adding Cloudflare cloudflared apt source..."
+		sudo mkdir -p --mode=0755 /usr/share/keyrings
+		install_repository_key https://pkg.cloudflare.com/cloudflare-main.gpg \
+			/usr/share/keyrings/cloudflare-main.gpg CC94B39C77AE7342A68B89628A682D308D4E5E73,06C89DB3B80A8F4349697C76029E1444B7D9F50F
+		echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list >/dev/null
+		_cloudflared_repo_added=true
+	fi
+	if [ "$_cloudflared_repo_added" = true ]; then
+		sudo apt-get update -q
+	fi
+	sudo apt-get install -q -y cloudflared
 fi
-if [ "$_cloudflared_repo_added" = true ]; then
-	sudo apt-get update -q
-fi
-sudo apt-get install -q -y cloudflared
 
 # Use the packaged ZTS runtime, with a pinned repository signing identity.
 if [ "$APP_ENV" = prod ] && [ "$NOSERVER_ARG" = true ]; then
@@ -515,7 +583,7 @@ fi
 sudo apt-get update -q
 sudo apt-get install -q -y nodejs symfony-cli
 if [ "$APP_ENV" = dev ] || [ "$NOSERVER_ARG" = false ]; then
-	sudo apt-get install -q -y frankenphp php-zts-cli php-zts-pdo php-zts-pdo-pgsql php-zts-mbstring
+	sudo apt-get install -q -y frankenphp php-zts-cli php-zts-embed php-zts-pdo php-zts-pdo-pgsql php-zts-mbstring
 fi
 
 # Postgres client, plus PHP 8.4 and extensions (Debian Trixie default — no extra apt source needed)
@@ -812,14 +880,23 @@ upsert_env_value PATH_PREFIX "\"${PATH_PREFIX}\"" "$REPO_ROOT/.env.local"
 if [ -n "$PATH_PREFIX" ]; then
 	upsert_env_value STATIC_FILES_ROOT "\"${STATIC_FILES_ROOT}\"" "$REPO_ROOT/.env.local"
 fi
+_tunnel_id_in_env="$(get_env_value CLOUDFLARE_TUNNEL_ID "$REPO_ROOT/.env.local")"
 if [ "$APP_ENV" = prod ]; then
+	mkdir -p "$REPO_ROOT/var"
+	touch "$REPO_ROOT/var/production-deployment"
+	upsert_env_value APP_DEBUG 0
+	upsert_env_value DEPLOYMENT_MODE "$DEPLOYMENT_MODE"
+	upsert_env_value PUBLIC_HOSTNAME "$PUBLIC_HOSTNAME"
+	upsert_env_value FRANKENPHP_HTTP_PORT "$FRANKENPHP_HTTP_PORT"
+	upsert_env_value FRANKENPHP_RENDER_PORT "$FRANKENPHP_RENDER_PORT"
 	upsert_env_value IMAGE_SERVER_MAX_PENDING "$IMAGE_SERVER_MAX_PENDING"
 	upsert_env_value IMAGE_SERVER_CPU_QUOTA "$IMAGE_SERVER_CPU_QUOTA"
-fi
-_tunnel_id_in_env="$(get_env_value CLOUDFLARE_TUNNEL_ID "$REPO_ROOT/.env.local")"
-if [ "$APP_ENV" = "dev" ] || { [ "$APP_ENV" = "prod" ] && [ -z "$_tunnel_id_in_env" ]; }; then
+	upsert_env_value DEFAULT_URI "\"https://${PUBLIC_HOSTNAME}${PATH_PREFIX}\""
+	rm -f "$REPO_ROOT/.env.local.php"
+elif [ "$APP_ENV" = dev ]; then
 	upsert_env_value DEFAULT_URI "\"${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT}${PATH_PREFIX}\"" "$REPO_ROOT/.env.local"
 fi
+export APP_ENV
 
 
 # ##############################################################################
@@ -831,15 +908,11 @@ cd "$REPO_ROOT"
 _composer_args=(--optimize-autoloader --no-progress --no-interaction)
 if [ "$APP_ENV" = prod ]; then
 	_composer_args+=(--no-dev)
-	mkdir -p "$REPO_ROOT/var"
-	touch "$REPO_ROOT/var/production-deployment"
-	rm -f "$REPO_ROOT/.env.local.php"
 	if [ -d "$REPO_ROOT/var/cache/prod" ]; then
 		echo "  Removing generated production cache before dependency installation."
 		symfony php -r 'require "vendor/autoload.php"; (new Symfony\Component\Filesystem\Filesystem())->remove("var/cache/prod");'
 	fi
 fi
-export APP_ENV
 symfony composer install "${_composer_args[@]}"
 
 
@@ -924,114 +997,131 @@ else
 	echo -e "\n\033[1mConfiguring FrankenPHP\033[0m"
 	echo "  FrankenPHP version: $(frankenphp version 2>/dev/null || frankenphp --version 2>/dev/null || echo 'version unknown')"
 
-	# Build a managed Caddyfile for both dev and prod.
-	_caddy_watch_block=""
-	if [ "$APP_ENV" = "dev" ]; then
-		_caddy_watch_block="
-			watch ${REPO_ROOT}/src/**/*.php
-			watch ${REPO_ROOT}/templates/**/*.twig
-			watch ${REPO_ROOT}/config/**/*.yaml
-			watch ${REPO_ROOT}/config/**/*.yml
-			watch ${REPO_ROOT}/.env*"
-	fi
-
-	_caddy_site_hosts="localhost:${FRANKENPHP_PORT}"
-	if [ -n "$CLOUDFLARE_PUBLIC_HOSTNAME" ]; then
-		_caddy_site_hosts="${_caddy_site_hosts}, ${CLOUDFLARE_PUBLIC_HOSTNAME}:${FRANKENPHP_PORT}"
-	fi
-	_caddy_site_label="${FRANKENPHP_SCHEME}://${_caddy_site_hosts}"
-	_caddy_tls_block=""
-	if [ "$FRANKENPHP_SCHEME" = "https" ]; then
-		_caddy_tls_block="
-	# Use an internal CA for origin TLS (cloudflared config sets noTLSVerify).
-	tls internal"
-	fi
-
-	if [ -z "$PATH_PREFIX" ]; then
-		_desired_caddyfile="$(cat << CADDYFILE
-# Managed by ./bin/provision
-{
-	frankenphp
-	order php_server before file_server
-}
-
-${_caddy_site_label} {${_caddy_tls_block}
-	# Always strip any client-supplied X-Forwarded-Prefix
-	request_header -X-Forwarded-Prefix
-	@_assets path /assets/*
-	@_service_worker path /service_worker.js
-	header @_assets Cache-Control "public, max-age=31536000, immutable"
-	header @_service_worker Cache-Control "no-cache, must-revalidate"
-	root * ${REPO_ROOT}/public
-	php_server {
-		worker {
-				file ${REPO_ROOT}/public/index.php${_caddy_watch_block}
-		}
-	}
-	header {
-		-Server
-		-X-Powered-By
-	}
-	encode zstd gzip
-}
-CADDYFILE
-		)"
-	else
-		if [ -n "$STATIC_FILES_ROOT" ]; then
-			_outside_prefix_block="
-	@_prefix_outside not path ${PATH_PREFIX}*
-	route @_prefix_outside {
-		root * ${STATIC_FILES_ROOT}
-		header Cache-Control \"public, max-age=3600, must-revalidate\"
-		file_server
-	}"
+	generate_caddyfile() {
+		local site bind tls watch="" options="" public_site=""
+		if [ "$APP_ENV" = dev ]; then
+			site="http://localhost:${FRANKENPHP_PORT}"
+			bind="bind 127.0.0.1 ::1"
+			tls=""
+			watch="watch ${REPO_ROOT}/src/**/*.php ${REPO_ROOT}/templates/**/*.twig ${REPO_ROOT}/config/**/*.yaml"
+		elif [ "$DEPLOYMENT_MODE" = cloudflared ]; then
+			site="https://localhost:${FRANKENPHP_PORT}, https://${PUBLIC_HOSTNAME}:${FRANKENPHP_PORT}"
+			bind="bind 127.0.0.1 ::1"
+			tls="tls internal"
+			options="auto_https disable_redirects"
 		else
-			_outside_prefix_block="
-	@_prefix_outside not path ${PATH_PREFIX}*
-	respond @_prefix_outside 404"
+			# The renderer remains local even when the public site is exposed.
+			site="https://localhost:${FRANKENPHP_RENDER_PORT}"
+			bind="bind 127.0.0.1 ::1"
+			tls="tls internal"
+			options="http_port ${FRANKENPHP_HTTP_PORT}
+	https_port ${FRANKENPHP_PORT}"
+			public_site="${PUBLIC_HOSTNAME} {
+	import blueline_app
+}"
 		fi
-
-		_desired_caddyfile="$(cat << CADDYFILE
+		cat <<EOF
 # Managed by ./bin/provision
 {
-	frankenphp
+	admin off
+	skip_install_trust
+	${options}
+	frankenphp {
+		worker {
+			file ${REPO_ROOT}/public/index.php
+			${watch}
+		}
+EOF
+		if [ "$APP_ENV" = prod ]; then
+			cat <<'EOF'
+		php_ini display_errors Off
+		php_ini display_startup_errors Off
+		php_ini log_errors On
+		php_ini error_log /dev/stderr
+		php_ini expose_php Off
+		php_ini allow_url_include Off
+		php_ini file_uploads Off
+		php_ini opcache.validate_timestamps 0
+EOF
+		fi
+		cat <<EOF
+	}
 	order php_server before file_server
 }
 
-${_caddy_site_label} {${_caddy_tls_block}
-	# Always strip any client-supplied X-Forwarded-Prefix (security hardening)
+(blueline_app) {
 	request_header -X-Forwarded-Prefix
+	request_header -X-Forwarded-Host
+	request_header -X-Forwarded-Proto
+	request_header -X-Forwarded-Port
 	header {
 		-Server
 		-X-Powered-By
+		X-Content-Type-Options nosniff
 	}
 	encode zstd gzip
-
-	# Redirect bare prefix to canonical trailing-slash form
-	@_prefix_bare path ${PATH_PREFIX}
-	redir @_prefix_bare ${PATH_PREFIX}/ 301
-
-	# Serve the app for all requests under the path prefix
-	@_prefix_app path ${PATH_PREFIX}/*
-	route @_prefix_app {
+EOF
+		if [ -n "$PATH_PREFIX" ]; then
+			cat <<EOF
+	@prefix_bare path ${PATH_PREFIX}
+	redir @prefix_bare ${PATH_PREFIX}/ 301
+	handle_path ${PATH_PREFIX}/* {
 		request_header X-Forwarded-Prefix ${PATH_PREFIX}
-		uri strip_prefix ${PATH_PREFIX}
-		@_assets path /assets/*
-		@_service_worker path /service_worker.js
-		header @_assets Cache-Control "public, max-age=31536000, immutable"
-		header @_service_worker Cache-Control "no-cache, must-revalidate"
-		root * ${REPO_ROOT}/public
-		php_server {
-			worker {
-					file ${REPO_ROOT}/public/index.php${_caddy_watch_block}
-			}
-		}
+		import blueline_php
 	}
-${_outside_prefix_block}
+	handle {
+EOF
+			if [ -n "${STATIC_FILES_ROOT:-}" ]; then
+				cat <<EOF
+		root * ${STATIC_FILES_ROOT}
+		header Cache-Control "public, max-age=3600, must-revalidate"
+		file_server {
+			hide .git .env .env.* *.php
+		}
+EOF
+			else
+				echo '		respond 404'
+			fi
+			echo '	}'
+		else
+			echo '	import blueline_php'
+		fi
+		cat <<EOF
 }
-CADDYFILE
-		)"
+
+(blueline_php) {
+	@other_php {
+		path *.php *.php/*
+		not path /index.php /index.php/*
+	}
+	respond @other_php 404
+	@assets path /assets/*
+	@service_worker path /service_worker.js
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+	header @service_worker Cache-Control "no-cache, must-revalidate"
+	root * ${REPO_ROOT}/public
+	php_server
+}
+
+${site} {
+	${bind}
+	${tls}
+	import blueline_app
+}
+
+${public_site}
+EOF
+	}
+
+	_desired_caddyfile="$(generate_caddyfile)"
+	_caddy_candidate="$(mktemp)"
+	printf '%s\n' "$_desired_caddyfile" > "$_caddy_candidate"
+	if ! frankenphp adapt --config "$_caddy_candidate" --adapter caddyfile >/dev/null; then
+		rm -f "$_caddy_candidate"
+		echo "ERROR: Generated Caddy configuration is invalid." >&2
+		exit 1
 	fi
+	rm -f "$_caddy_candidate"
 
 	if [ ! -f "$REPO_ROOT/Caddyfile" ] || ! diff -q <(echo "$_desired_caddyfile") "$REPO_ROOT/Caddyfile" > /dev/null 2>&1; then
 		echo "$_desired_caddyfile" > "$REPO_ROOT/Caddyfile"
@@ -1142,9 +1232,18 @@ WantedBy=multi-user.target"
 		if ! sudo test -f /var/lib/blueline-image/.pki/nssdb/cert9.db; then
 			sudo -u blueline-image certutil -N --empty-password -d sql:/var/lib/blueline-image/.pki/nssdb
 		fi
+		_renderer_certificates="$(sudo -u blueline-image certutil -L -d sql:/var/lib/blueline-image/.pki/nssdb)"
+		if grep -Eq '^Blueline origin CA[[:space:]]+[A-Za-z,]+[[:space:]]*$' <<< "$_renderer_certificates"; then
+			sudo -u blueline-image certutil -D -n 'Blueline origin CA' \
+				-d sql:/var/lib/blueline-image/.pki/nssdb
+		fi
 		sudo -u blueline-image certutil -A -n 'Blueline origin CA' -t 'C,,' \
 			-i /etc/blueline/origin-ca.crt -d sql:/var/lib/blueline-image/.pki/nssdb
 
+		_renderer_port="$FRANKENPHP_PORT"
+		if [ "$DEPLOYMENT_MODE" = direct ]; then
+			_renderer_port="$FRANKENPHP_RENDER_PORT"
+		fi
 		_desired_image_unit="[Unit]
 Description=Blueline image server
 After=network.target blueline.service
@@ -1154,15 +1253,14 @@ Requires=blueline.service
 Type=simple
 WorkingDirectory=${REPO_ROOT}
 Environment=IMAGESERVER_PORT=${IMAGESERVER_PORT}
-Environment=IMAGE_SERVER_MAX_PENDING=${IMAGE_SERVER_MAX_PENDING}
-Environment=FRANKENPHP_PORT=${FRANKENPHP_PORT}
+Environment=FRANKENPHP_PORT=${_renderer_port}
 Environment=FRANKENPHP_SCHEME=${FRANKENPHP_SCHEME}
 Environment=PATH_PREFIX=${PATH_PREFIX}
 Environment=APP_ENV=prod
 Environment=HOME=/var/lib/blueline-image
+Environment=IMAGE_SERVER_MAX_PENDING=${IMAGE_SERVER_MAX_PENDING}
 ExecStart=/usr/bin/node ${REPO_ROOT}/bin/image-server.mjs
 Nice=15
-CPUQuota=${IMAGE_SERVER_CPU_QUOTA}
 CPUWeight=20
 IOWeight=20
 OOMScoreAdjust=500
@@ -1178,6 +1276,7 @@ ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CPUQuota=${IMAGE_SERVER_CPU_QUOTA}
 Restart=on-failure
 RestartSec=5s
 
@@ -1213,14 +1312,8 @@ fi
 # SECTION 9: Cloudflared tunnel
 # ##############################################################################
 
-if [ "$APP_ENV" = "prod" ] && [ "$NOCLOUDFLARED_ARG" = true ]; then
-	echo -e "\n\033[1mSkipping cloudflared setup (--nocloudflared).\033[0m"
-	echo "  Reminder: install/configure cloudflared and your public ingress/tunnel manually."
-elif [ "$APP_ENV" = "prod" ]; then
-	if [ "$NOCLOUDFLARED_ARG" = false ] && [ "$NONINTERACTIVE" = true ] && [ -z "$CLOUDFLARE_TUNNEL_NAME" -o -z "$CLOUDFLARE_PUBLIC_HOSTNAME" ]; then
-		echo -e "\n\033[1mSkipping cloudflared tunnel setup (non-interactive mode).\033[0m"
-		echo "  Set CLOUDFLARE_TUNNEL_NAME and CLOUDFLARE_PUBLIC_HOSTNAME in .env.local, or re-run interactively."
-	elif [ "$NOCLOUDFLARED_ARG" = false ]; then
+if [ "$APP_ENV" = "prod" ]; then
+	if [ "$DEPLOYMENT_MODE" = cloudflared ]; then
 		echo -e "\n\033[1mConfiguring Cloudflared tunnel\033[0m"
 		echo "  This will ensure tunnel routing and config are up to date."
 		echo
@@ -1237,7 +1330,11 @@ elif [ "$APP_ENV" = "prod" ]; then
 		fi
 
 		# Resolve tunnel by name; create it when absent.
-		_existing_tunnel_id="$(cloudflared tunnel list 2>/dev/null | awk -v tunnel_name="$CLOUDFLARE_TUNNEL_NAME" 'NR>1 && $2==tunnel_name {print $1; exit}')"
+		_tunnel_list="$(cloudflared tunnel list)" || {
+			echo "ERROR: Failed to list Cloudflare tunnels." >&2
+			exit 1
+		}
+		_existing_tunnel_id="$(awk -v tunnel_name="$CLOUDFLARE_TUNNEL_NAME" 'NR>1 && $2==tunnel_name {print $1; exit}' <<< "$_tunnel_list")"
 		if [ -n "$_existing_tunnel_id" ]; then
 			TUNNEL_ID="$_existing_tunnel_id"
 			echo "  Using existing tunnel '$CLOUDFLARE_TUNNEL_NAME' (ID: $TUNNEL_ID)."
@@ -1254,6 +1351,10 @@ elif [ "$APP_ENV" = "prod" ]; then
 				exit 1
 			fi
 			echo "  Tunnel ID: $TUNNEL_ID"
+		fi
+		if [[ ! "$TUNNEL_ID" =~ ^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$ ]]; then
+			echo "ERROR: Cloudflared returned an invalid tunnel ID." >&2
+			exit 1
 		fi
 
 		if [ -z "$CLOUDFLARE_PUBLIC_HOSTNAME" ]; then
@@ -1281,15 +1382,14 @@ ingress:
   - hostname: ${CLOUDFLARE_PUBLIC_HOSTNAME}
     service: https://localhost:${FRANKENPHP_PORT}
     originRequest:
-      noTLSVerify: true
+      caPool: /etc/blueline/origin-ca.crt
+      originServerName: localhost
       http2Origin: true
   - service: http_status:404
 CFCONFIG
 )"
-		_cf_config_changed=false
 		if [ ! -f "$_cf_config_file" ] || ! diff -q <(echo "$_desired_cf_config") "$_cf_config_file" > /dev/null 2>&1; then
 			echo "$_desired_cf_config" > "$_cf_config_file"
-			_cf_config_changed=true
 			echo "  cloudflared config written to $_cf_config_file."
 		else
 			echo "  cloudflared config already up to date — skipping write."
@@ -1297,13 +1397,34 @@ CFCONFIG
 
 		# Install service only if missing, then ensure it is enabled/running.
 		if ! sudo systemctl list-unit-files cloudflared.service --no-legend 2>/dev/null | grep -q '^cloudflared\.service'; then
-			sudo cloudflared --config "$_cf_config_file" service install
+			sudo cloudflared --config "$_cf_config_file" service install --no-update-service
 			echo "  cloudflared service installed."
 		fi
-		sudo systemctl enable --now cloudflared
-		if [ "$_cf_config_changed" = true ]; then
-			echo "  Restarting cloudflared.service to apply config changes..."
+		_cf_exec_start="$(sudo systemctl show cloudflared.service --property=ExecStart --value)"
+		_cf_service_config=""
+		if [[ "$_cf_exec_start" =~ --config(=|[[:space:]])([^[:space:]\;\}]+) ]]; then
+			_cf_service_config="${BASH_REMATCH[2]}"
+		fi
+		if [ "$_cf_service_config" != "$_cf_config_file" ] && [ "$_cf_service_config" != /etc/cloudflared/config.yml ]; then
+			echo "ERROR: The existing cloudflared unit uses an unmanaged configuration. Review its unit/configuration before provisioning." >&2
+			exit 1
+		fi
+		if [ "$_cf_service_config" != "$_cf_config_file" ]; then
+			if sudo test -f "$_cf_service_config" &&
+				! sudo grep -Eq "^tunnel:[[:space:]]*${TUNNEL_ID}[[:space:]]*$" "$_cf_service_config"; then
+				echo "ERROR: The active cloudflared configuration belongs to another tunnel; no service configuration was replaced." >&2
+				exit 1
+			fi
+			if ! sudo cmp -s "$_cf_config_file" "$_cf_service_config"; then
+				sudo install -D -m 0644 "$_cf_config_file" "$_cf_service_config"
+			fi
+		fi
+		sudo systemctl enable cloudflared
+		if sudo systemctl is-active --quiet cloudflared; then
+			echo "  Restarting cloudflared.service to apply configuration and CA trust..."
 			sudo systemctl restart cloudflared
+		else
+			sudo systemctl start cloudflared
 		fi
 		echo "  cloudflared service enabled and started."
 
@@ -1379,17 +1500,13 @@ fi
 
 if [ "$APP_ENV" = "prod" ]; then
 	echo "    - Rebuild frontend assets: ./bin/buildFrontendAssets --env=prod"
-	if [ "$NODATABASE_ARG" = true ] || [ "$NOSERVER_ARG" = true ] || [ "$NOCLOUDFLARED_ARG" = true ]; then
+	if [ "$NODATABASE_ARG" = true ] || [ "$NOSERVER_ARG" = true ]; then
 		echo "  Production manual checks:"
 		if [ "$NODATABASE_ARG" = true ]; then
 			echo "    - Ensure a PostgreSQL database is available and DATABASE_URL is correct."
 		fi
 		if [ "$NOSERVER_ARG" = true ]; then
 			echo "    - Ensure a production web server is configured and reachable."
-		fi
-		if [ "$NOCLOUDFLARED_ARG" = true ]; then
-			echo "    - If you want to, configure a Cloudflare tunnel for public access."
-			echo "    - Local endpoint remains:  ${FRANKENPHP_SCHEME}://localhost:${FRANKENPHP_PORT}"
 		fi
 	fi
 fi

@@ -66,6 +66,158 @@ BASH);
         }
     }
 
+    public function testIngressProfileSelection(): void
+    {
+        $directory = sys_get_temp_dir().'/blueline-ingress-'.bin2hex(random_bytes(6));
+        mkdir($directory, 0700);
+        mkdir($directory.'/bin', 0700);
+        try {
+            foreach (['provision', 'deployment-functions', 'update'] as $script) {
+                copy(dirname(__DIR__, 2).'/bin/'.$script, $directory.'/bin/'.$script);
+            }
+            file_put_contents($directory.'/bin/sudo', "#!/bin/bash\nexit 91\n");
+            chmod($directory.'/bin/sudo', 0700);
+            foreach ([
+                ['direct', 'cloudflared'],
+                ['cloudflared', 'direct'],
+                ['cloudflared', null],
+                ['direct', null],
+            ] as [$saved, $selected]) {
+                file_put_contents($directory.'/.env.local', "PUBLIC_HOSTNAME=blueline.example.com\nFRANKENPHP_PORT=8443\nDEPLOYMENT_MODE=".$saved."\n");
+                $command = ['bash', $directory.'/bin/provision', '--env=prod', '--yes', '--nodatabase', '--noserver'];
+                if (null !== $selected) {
+                    $command[] = '--deployment='.$selected;
+                }
+                $process = new Process($command, $directory, ['PATH' => $directory.'/bin:'.getenv('PATH')]);
+                $process->run();
+                $this->assertStringContainsString('INGRESS_PROFILE:       '.($selected ?? $saved), $process->getOutput());
+            }
+            foreach (['provision', 'update'] as $script) {
+                foreach (['--nocloudflared', '--deployment=tunnel'] as $option) {
+                    $process = new Process(['bash', $directory.'/bin/'.$script, $option]);
+                    $process->run();
+                    $this->assertFalse($process->isSuccessful());
+                    $this->assertStringContainsString($option, $process->getErrorOutput());
+                }
+            }
+            $process = new Process(['bash', $directory.'/bin/provision', '--print-caddyfile']);
+            $process->run();
+            $this->assertFalse($process->isSuccessful());
+            $this->assertStringContainsString('--print-caddyfile', $process->getErrorOutput());
+        } finally {
+            foreach (['bin/provision', 'bin/deployment-functions', 'bin/update', 'bin/sudo', '.env.local'] as $file) {
+                if (is_file($directory.'/'.$file)) {
+                    unlink($directory.'/'.$file);
+                }
+            }
+            rmdir($directory.'/bin');
+            rmdir($directory);
+        }
+    }
+
+    public function testUnsafeHostPrefixAndStaticRootAreRejected(): void
+    {
+        $process = new Process(['bash', '-c', <<<'BASH'
+set -euo pipefail
+. "$1"
+! is_valid_path_prefix '/blueline/../private'
+! is_valid_path_prefix '/blueline"'
+! is_valid_port 99999999999999999999999999999
+is_managed_database_url 'postgresql://blueline:password@localhost:5432/blueline?serverVersion=17&charset=utf8' blueline
+! is_managed_database_url 'postgresql://blueline:password@localhost:5432/blueline?serverVersion=17&charset=utf8&dbname=unrelated' blueline
+! is_managed_database_url 'postgresql://blueline:password@example.com:5432/blueline?serverVersion=17&charset=utf8' blueline
+BASH, '--', dirname(__DIR__, 2).'/bin/deployment-functions']);
+        $process->run();
+        $this->assertTrue($process->isSuccessful(), $process->getErrorOutput());
+
+        $directory = sys_get_temp_dir().'/blueline-provision-'.bin2hex(random_bytes(6));
+        mkdir($directory, 0700);
+        foreach (['bin', 'config', 'public', 'var'] as $child) {
+            mkdir($directory.'/'.$child, 0700);
+        }
+        try {
+            copy(dirname(__DIR__, 2).'/bin/provision', $directory.'/bin/provision');
+            copy(dirname(__DIR__, 2).'/bin/deployment-functions', $directory.'/bin/deployment-functions');
+            file_put_contents($directory.'/bin/sudo', "#!/bin/bash\nexit 91\n");
+            chmod($directory.'/bin/sudo', 0700);
+            $environment = ['PATH' => $directory.'/bin:'.getenv('PATH')];
+            file_put_contents($directory.'/.env.local', "PUBLIC_HOSTNAME='example.com {'\n");
+            $process = new Process(['bash', $directory.'/bin/provision', '--env=prod', '--deployment=direct', '--yes', '--nodatabase', '--noserver'], $directory, $environment);
+            $process->run();
+            $this->assertFalse($process->isSuccessful());
+            $this->assertStringContainsString('valid public DNS hostname', $process->getErrorOutput());
+            foreach ([$directory, $directory.'/config', $directory.'/var'] as $root) {
+                file_put_contents($directory.'/.env.local', 'STATIC_FILES_ROOT='.$root."\n");
+                $process = new Process(['bash', $directory.'/bin/provision', '--env=dev', '--yes'], $directory, $environment);
+                $process->run();
+                $this->assertFalse($process->isSuccessful());
+                $this->assertStringContainsString('public static root', $process->getErrorOutput());
+            }
+            file_put_contents($directory.'/.env.local', 'STATIC_FILES_ROOT='.$directory."/public\n");
+            $process = new Process(['bash', $directory.'/bin/provision', '--env=dev', '--yes'], $directory, $environment);
+            $process->run();
+            $this->assertStringContainsString('Blueline setup', $process->getOutput(), $process->getErrorOutput());
+            file_put_contents($directory.'/config/example.txt', 'private fixture');
+            symlink($directory.'/config/example.txt', $directory.'/public/escape');
+            $process->run();
+            $this->assertFalse($process->isSuccessful());
+            $this->assertStringContainsString('public static root', $process->getErrorOutput());
+        } finally {
+            foreach (['public/escape', 'config/example.txt', '.env.local', 'bin/provision', 'bin/deployment-functions', 'bin/sudo'] as $file) {
+                if (is_file($directory.'/'.$file) || is_link($directory.'/'.$file)) {
+                    unlink($directory.'/'.$file);
+                }
+            }
+            foreach (['bin', 'config', 'public', 'var'] as $child) {
+                rmdir($directory.'/'.$child);
+            }
+            rmdir($directory);
+        }
+    }
+
+    public function testMaintenanceCredentialsAreLoadedOnlyExplicitly(): void
+    {
+        $directory = sys_get_temp_dir().'/blueline-maintenance-'.bin2hex(random_bytes(6));
+        mkdir($directory, 0700);
+        $runtimeUrl = 'postgresql://blueline_web:runtime@localhost:5432/blueline';
+        $maintenanceUrl = 'postgresql://blueline:maintenance@localhost:5432/blueline';
+        try {
+            file_put_contents($directory.'/.env', "APP_ENV=prod\n");
+            file_put_contents($directory.'/.env.local', 'DATABASE_URL='.$runtimeUrl."\n");
+            file_put_contents($directory.'/.env.maintenance.local', 'DATABASE_URL='.$maintenanceUrl."\n");
+            chmod($directory.'/.env.maintenance.local', 0600);
+            $script = <<<'PHP'
+require $argv[1];
+(new \Symfony\Component\Dotenv\Dotenv())->loadEnv($argv[2], 'APP_ENV', 'prod');
+echo $_SERVER['DATABASE_URL'];
+PHP;
+            $autoload = dirname(__DIR__, 2).'/vendor/autoload.php';
+            $environment = [
+                'APP_ENV' => 'prod',
+                'DATABASE_URL' => false,
+                'SYMFONY_DOTENV_VARS' => false,
+                'BLUELINE_MAINTENANCE_FILE' => $directory.'/unused.env',
+                'REPO_ROOT' => $directory,
+                'ENV_LOCAL_FILE' => $directory.'/.env.local',
+            ];
+            $process = new Process(['php', '-r', $script, '--', $autoload, $directory.'/.env'], null, $environment);
+            $process->run();
+            $this->assertTrue($process->isSuccessful(), $process->getErrorOutput());
+            $this->assertSame($runtimeUrl, $process->getOutput());
+            $command = ['bash', '-c', 'set -euo pipefail; . "$1"; load_maintenance_connection; exec php -r "$2" -- "$3" "$4"',
+                '--', dirname(__DIR__, 2).'/bin/deployment-functions', $script, $autoload, $directory.'/.env'];
+            $process = new Process($command, null, $environment);
+            $process->run();
+            $this->assertTrue($process->isSuccessful(), $process->getErrorOutput());
+            $this->assertSame($maintenanceUrl, $process->getOutput());
+        } finally {
+            foreach (['.env', '.env.local', '.env.maintenance.local'] as $file) {
+                unlink($directory.'/'.$file);
+            }
+            rmdir($directory);
+        }
+    }
+
     public function testSchemaValidationStopsOnUnexpectedErrors(): void
     {
         $process = new Process(['bash', '-c', <<<'BASH'

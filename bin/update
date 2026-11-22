@@ -22,18 +22,18 @@ Options:
  --nopull         Prevents the pulling of new application code.
  --nodata         Prevents the update of method data
  --nodatabase     Skip local PostgreSQL setup
- --nocloudflared  Skip cloudflared setup (prod only)
  --noserver       Skip FrankenPHP/server setup (prod only)
  --env=dev|prod   Set APP_ENV directly
+ --deployment=cloudflared|direct  Select ingress profile
  --help           Shows this message
 EOF
 }
 NODATA_ARG=false
 NOPULL=false
 NODATABASE_ARG=false
-NOCLOUDFLARED_ARG=false
 NOSERVER_ARG=false
 ENV_ARG=""
+DEPLOYMENT_ARG=""
 AFTER_DOUBLE_DASH=false
 for arg in "$@"; do
 	if [ "$AFTER_DOUBLE_DASH" = true ]; then
@@ -55,14 +55,14 @@ for arg in "$@"; do
 		--nodatabase)
 			NODATABASE_ARG=true
 			;;
-		--nocloudflared)
-			NOCLOUDFLARED_ARG=true
-			;;
 		--noserver)
 			NOSERVER_ARG=true
 			;;
 		--env=dev|--env=prod)
 			ENV_ARG="${arg#--env=}"
+			;;
+		--deployment=cloudflared|--deployment=direct)
+			DEPLOYMENT_ARG="${arg#--deployment=}"
 			;;
 		--env=*)
 			printf >&2 '%s: invalid value for --env (must be dev or prod): %s\n' "${0##*/}" "${arg#--env=}"
@@ -115,11 +115,11 @@ if [[ $NOPULL = false ]]
 	git pull --ff-only
 	# Restart update script (to allow it to update itself)
 	_UPDATE_ARGS=(--nopull --env="$APP_ENV")
+	if [ -n "$DEPLOYMENT_ARG" ]; then
+		_UPDATE_ARGS+=("--deployment=$DEPLOYMENT_ARG")
+	fi
 	if [[ $NODATABASE_ARG = true ]]; then
 		_UPDATE_ARGS+=(--nodatabase)
-	fi
-	if [[ $NOCLOUDFLARED_ARG = true ]]; then
-		_UPDATE_ARGS+=(--nocloudflared)
 	fi
 	if [[ $NOSERVER_ARG = true ]]; then
 		_UPDATE_ARGS+=(--noserver)
@@ -133,11 +133,11 @@ fi
 
 # Run setup (idempotent — safe to re-run; handles vendors, assets, schema, services)
 _PROVISION_ARGS=(--env="$APP_ENV")
+if [ -n "$DEPLOYMENT_ARG" ]; then
+	_PROVISION_ARGS+=("--deployment=$DEPLOYMENT_ARG")
+fi
 if [[ $NODATABASE_ARG = true ]]; then
 	_PROVISION_ARGS+=(--nodatabase)
-fi
-if [[ $NOCLOUDFLARED_ARG = true ]]; then
-	_PROVISION_ARGS+=(--nocloudflared)
 fi
 if [[ $NOSERVER_ARG = true ]]; then
 	_PROVISION_ARGS+=(--noserver)

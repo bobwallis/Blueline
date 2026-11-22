@@ -17,6 +17,14 @@ upsert_env_value() {
 	mv "$tmp_file" "$file"
 }
 
+is_valid_port() {
+	[[ "$1" =~ ^[0-9]{1,5}$ ]] && (( 10#$1 >= 1 && 10#$1 <= 65535 ))
+}
+
+is_valid_path_prefix() {
+	[ -z "$1" ] || { [[ "$1" =~ ^(/[a-zA-Z0-9_~.-]+)+$ ]] && [[ "$1/" != */../* && "$1/" != */./* ]]; }
+}
+
 is_managed_database_url() {
 	local url="$1" role="$2"
 	[[ "$url" =~ ^postgresql://${role}:[^@/?#]+@localhost:5432/blueline\?serverVersion=17\&charset=utf8$ ]]
