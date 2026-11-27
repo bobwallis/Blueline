@@ -1,10 +1,15 @@
 import LocalStorage from '../helpers/LocalStorage.js';
+import URLHelper from '../helpers/URL.js';
 
 /**
  * Let users star favourite methods (stored in localStorage) and list them on the methods pages.
  */
 
 const storageKey = 'starred_methods';
+
+function methodURL (url) {
+	return `${URLHelper.baseURL}methods/view/${encodeURIComponent(url)}`;
+}
 
 /**
  * Read the starred list.
@@ -87,7 +92,7 @@ function renderStarredLists () {
 			const li = document.createElement('li');
 			li.classList.toggle('starred', !el.hasAttribute('data-plain'));
 			const a = document.createElement('a');
-			a.href = `/methods/view/${encodeURIComponent(m.url)}`;
+			a.href = methodURL(m.url);
 			a.textContent = m.title;
 			li.appendChild(a);
 			ul.appendChild(li);
@@ -103,10 +108,10 @@ function renderStarredLists () {
  * @returns {void}
  */
 function markStarredListItems () {
-	const starredUrls = new Set(getStarred().map((m) => `/methods/view/${encodeURIComponent(m.url)}`));
+	const starredUrls = new Set(getStarred().map((m) => methodURL(m.url)));
 	document.querySelectorAll('.method-list li, section.search li').forEach(function (li) {
 		const a = li.querySelector('a');
-		li.classList.toggle('starred', !!a && !li.closest('[data-plain]') && starredUrls.has(a.getAttribute('href')));
+		li.classList.toggle('starred', !!a && !li.closest('[data-plain]') && starredUrls.has(a.href));
 	});
 }
 
